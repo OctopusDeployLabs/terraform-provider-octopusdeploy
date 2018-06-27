@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/MattHodge/go-octopusdeploy"
   packages = ["octopusdeploy"]
-  revision = "16556bddc483bfc87b7c24574b0348358468ad22"
+  revision = "6d181ea6f699664bfae58df6755a81cf7e8e3020"
 
 [[projects]]
   name = "github.com/agext/levenshtein"
@@ -65,8 +65,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "aff39e8473db578a1cec9ac2f829a56813c1d631"
-  version = "v1.14.14"
+  revision = "07ab5fdce76c9a9a0ba520a1bcaa95fbc6bdeb03"
+  version = "v1.14.15"
 
 [[projects]]
   branch = "master"
@@ -337,7 +337,6 @@
   version = "v0.5.4"
 
 [[projects]]
-  branch = "master"
   name = "github.com/zclconf/go-cty"
   packages = [
     "cty",
@@ -348,7 +347,7 @@
     "cty/json",
     "cty/set"
   ]
-  revision = "c96d660229f9ad0a16eb5869819ea51e1ed49896"
+  revision = "49fa5e03c418f95f78684c91e155af06aa901a32"
 
 [[projects]]
   name = "golang.org/x/crypto"
