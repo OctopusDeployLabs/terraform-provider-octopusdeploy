@@ -1,0 +1,28 @@
+version: 1.0.{build}
+
+image: Visual Studio 2017
+build: off
+clone_folder: c:\gopath\src\github.com\MattHodge\terraform-provider-octopusdeploy
+services:
+  - mssql2017
+
+environment:
+  GOPATH: c:\gopath
+  TEST_OCTOPUS_USERNAME: Administrator
+  TEST_OCTOPUS_PASSWORD: Password1! # This password is for the Octopus Deploy server spun up in Appveyor.
+
+install:
+  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+  - go version
+
+before_test:
+  # Octopus install needs to occur here as mssql doesn't start before the install step
+  - ps: >-
+      . ".\integration\appveyor_scripts\functions\Install-OctopusDeployInAppveyor.ps1" ;
+      . ".\integration\appveyor_scripts\functions\Start-ProcessAdvanced.ps1" ;
+      Install-OctopusDeployInAppveyor -OctopusAdministartorUser $env:TEST_OCTOPUS_USERNAME -OctopusAdministartorPassword $env:TEST_OCTOPUS_PASSWORD
+  - ps: Invoke-Expression ".\integration\appveyor_scripts\start_go_integration_tests.ps1"
+
+# Uncomment to debug the build
+# on_finish:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
