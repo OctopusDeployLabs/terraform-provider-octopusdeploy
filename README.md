@@ -3,6 +3,14 @@ A Terraform provider for [Octopus Deploy](https://octopus.com).
 
 > :warning: This provider is in heavy development. It is not production ready yet.
 
+# Go Dependencies
+* Dependencies are managed using [dep](https://golang.github.io/dep/docs/new-project.html)
+
+```bash
+# Vendor new modules
+dep ensure
+```
+
 # Example
 
 ```hcl
