@@ -1,0 +1,2 @@
+# Force checkout line endings in Unix format - https://help.github.com/articles/dealing-with-line-endings/
+* text eol=lf

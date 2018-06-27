@@ -15,7 +15,7 @@ dep ensure
 
 # Example
 
-```json
+```hcl
 # main.tf
 
 provider "octopusdeploy" {
@@ -29,5 +29,4 @@ resource "octopusdeploy_project" "test_project" {
   projectgroupid = "ProjectGroups-1"
   description    = "An example description"
 }
-
 ```
