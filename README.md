@@ -1,17 +1,9 @@
 # terraform-provider-octopusdeploy
-A Terraform provider for [Octopus Deploy].
+A Terraform provider for [Octopus Deploy](https://octopus.com).
 
 [![Build status](https://ci.appveyor.com/api/projects/status/5t5gbqjyl8hpou52?svg=true)](https://ci.appveyor.com/project/MattHodge/go-octopusdeploy)
 
 > :warning: This provider is in heavy development. It is not production ready yet.
-
-# Go Dependencies
-* Dependencies are managed using [dep](https://golang.github.io/dep/docs/new-project.html)
-
-```bash
-# Vendor new modules
-dep ensure
-```
 
 # Example
 
