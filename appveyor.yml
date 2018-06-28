@@ -24,5 +24,5 @@ before_test:
   - ps: Invoke-Expression ".\integration\appveyor_scripts\start_go_integration_tests.ps1"
 
 # Uncomment to debug the build
-# on_finish:
-#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
