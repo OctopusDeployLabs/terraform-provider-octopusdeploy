@@ -15,3 +15,9 @@
 .atom/
 .idea/
 .vscode/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+

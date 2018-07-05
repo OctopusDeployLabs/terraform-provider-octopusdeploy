@@ -1,6 +1,6 @@
 package octopusdeploy
 
-type VersioningStrategyResource struct {
+type VersioningStrategy struct {
 	DonorPackageStepID string `json:"DonorPackageStepId"`
 	Template           string `json:"Template"`
 }

@@ -1,6 +1,6 @@
 package octopusdeploy
 
-type AutoDeployReleaseOverrideResource struct {
+type AutoDeployReleaseOverride struct {
 
 	// environment Id
 	// Read Only: true

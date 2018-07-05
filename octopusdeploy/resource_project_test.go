@@ -26,9 +26,9 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "lifecycleid", lifeCycleID),
+						terraformNamePrefix, "lifecycle_id", lifeCycleID),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "projectgroupid", projectGroupID),
+						terraformNamePrefix, "project_group_id", projectGroupID),
 				),
 			},
 		},
@@ -54,9 +54,9 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "lifecycleid", lifeCycleID),
+						terraformNamePrefix, "lifecycle_id", lifeCycleID),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "projectgroupid", projectGroupID),
+						terraformNamePrefix, "project_group_id", projectGroupID),
 				),
 			},
 			// create update it with a description
@@ -67,9 +67,9 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "lifecycleid", lifeCycleID),
+						terraformNamePrefix, "lifecycle_id", lifeCycleID),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "projectgroupid", projectGroupID),
+						terraformNamePrefix, "project_group_id", projectGroupID),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "description", description),
 				),
@@ -82,9 +82,9 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "lifecycleid", lifeCycleID),
+						terraformNamePrefix, "lifecycle_id", lifeCycleID),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "projectgroupid", projectGroupID),
+						terraformNamePrefix, "project_group_id", projectGroupID),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "description", ""),
 				),
@@ -97,8 +97,8 @@ func testAccProjectBasic(name, lifeCycleID, projectGroupID string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_project" "foo" {
 			name           = "%s"
-			lifecycleid    = "%s"
-			projectgroupid = "%s"
+			lifecycle_id    = "%s"
+			project_group_id = "%s"
 		  }
 		`,
 		name, lifeCycleID, projectGroupID,
@@ -108,8 +108,8 @@ func testAccProjectWithDescription(name, lifeCycleID, projectGroupID, descriptio
 	return fmt.Sprintf(`
 		resource "octopusdeploy_project" "foo" {
 			name           = "%s"
-			lifecycleid    = "%s"
-			projectgroupid = "%s"
+			lifecycle_id    = "%s"
+			project_group_id = "%s"
 			description    = "%s"
 		  }
 		`,
@@ -138,7 +138,7 @@ func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 
 func destroyHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Projects.Get(r.Primary.ID); err != nil {
+		if _, err := client.Project.Get(r.Primary.ID); err != nil {
 			if err == octopusdeploy.ErrItemNotFound {
 				continue
 			}
@@ -151,7 +151,7 @@ func destroyHelper(s *terraform.State, client *octopusdeploy.Client) error {
 
 func existsHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Projects.Get(r.Primary.ID); err != nil {
+		if _, err := client.Project.Get(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving project %s", err)
 		}
 	}

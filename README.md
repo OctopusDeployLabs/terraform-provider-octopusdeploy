@@ -13,6 +13,14 @@ A Terraform provider for [Octopus Deploy](https://octopus.com).
 dep ensure
 ```
 
+# Provider Resources
+
+Resource Name | Description
+--- | ---
+`octopusdeploy_project` | Create an Octopus Deploy project
+`octopusdeploy_project_group` | Create an Octopus Deploy project group
+
+
 # Example
 
 ```hcl
@@ -23,10 +31,16 @@ provider "octopusdeploy" {
   apikey  = "API-XXXXXXXXXXXXX"
 }
 
-resource "octopusdeploy_project" "test_project" {
-  name           = "My Octopus Deploy Project"
-  lifecycleid    = "Lifecycles-1"
-  projectgroupid = "ProjectGroups-1"
-  description    = "An example description"
+resource "octopusdeploy_project_group" "test_projectgroup" {
+  description = "The Best Team"
+  name        = "Team #1"
 }
+
+resource "octopusdeploy_project" "test_project" {
+  description      = "An example description"
+  lifecycle_id     = "Lifecycles-1"
+  name             = "My Octopus Deploy Project"
+  project_group_id = "${octopusdeploy_project_group.test_projectgroup.id}"
+}
+
 ```

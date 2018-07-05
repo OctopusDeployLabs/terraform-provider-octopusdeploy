@@ -10,7 +10,8 @@ import (
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"octopusdeploy_project": resourceProject(),
+			"octopusdeploy_project":       resourceProject(),
+			"octopusdeploy_project_group": resourceProjectGroup(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": &schema.Schema{
