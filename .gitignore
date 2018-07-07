@@ -20,4 +20,5 @@
 .terraform/
 *.tfstate
 *.tfstate.backup
-
+crash.log
+tflog.txt
