@@ -34,6 +34,32 @@ type DeploymentProcess struct {
 	Version        *int32           `json:"Version"`
 }
 
+type DeploymentStep struct {
+	ID                 string             `json:"Id"`
+	Name               string             `json:"Name"`
+	PackageRequirement string             `json:"PackageRequirement,omitempty"`                                         // may need its own model / enum
+	Properties         map[string]string  `json:"Properties"`                                                           // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
+	Condition          string             `json:"Condition,omitempty" validate:"oneof=Success Failure Always Variable"` // variable option adds a Property "Octopus.Action.ConditionVariableExpression"
+	StartTrigger       string             `json:"StartTrigger,omitempty" validate:"oneof=StartAfterPrevious StartWithPrevious"`
+	Actions            []DeploymentAction `json:"Actions"`
+}
+
+type DeploymentAction struct {
+	ID                            string            `json:"Id"`
+	Name                          string            `json:"Name"`
+	ActionType                    string            `json:"ActionType"`
+	IsDisabled                    bool              `json:"IsDisabled"`
+	CanBeUsedForProjectVersioning bool              `json:"CanBeUsedForProjectVersioning"`
+	Environments                  []string          `json:"Environments"`
+	ExcludedEnvironments          []string          `json:"ExcludedEnvironments"`
+	Channels                      []string          `json:"Channels"`
+	TenantTags                    []string          `json:"TenantTags"`
+	Properties                    map[string]string `json:"Properties"`     // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
+	LastModifiedOn                string            `json:"LastModifiedOn"` // datetime
+	LastModifiedBy                string            `json:"LastModifiedBy"`
+	Links                         Links             `json:"Links"` // may be wrong
+}
+
 func (d *DeploymentProcess) Validate() error {
 	validate := validator.New()
 

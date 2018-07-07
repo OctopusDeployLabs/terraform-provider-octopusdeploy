@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/MattHodge/go-octopusdeploy"
   packages = ["octopusdeploy"]
-  revision = "d616bd3184641b6d4e57564ba110389b0e1ed2ef"
+  revision = "8e10f18cfbde78689c2f6e93edac15a5950f1999"
 
 [[projects]]
   name = "github.com/agext/levenshtein"
@@ -65,8 +65,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "e4f914808a9655ef3220bb0082002239cc7f3561"
-  version = "v1.14.19"
+  revision = "16cb9f62f8a8b7af4f38725567f5ce762e1d562b"
+  version = "v1.14.21"
 
 [[projects]]
   branch = "master"
@@ -389,7 +389,7 @@
     "cty/json",
     "cty/set"
   ]
-  revision = "c96d660229f9ad0a16eb5869819ea51e1ed49896"
+  revision = "3ccef1ae92b0ac73b92d86f274f0ff781e2d9b3b"
 
 [[projects]]
   branch = "master"
@@ -421,13 +421,13 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "ed29d75add3d7c4bf7ca65aac0c6df3d1420216f"
+  revision = "32a936f46389aa10549d60bd7833e54b01685d09"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "151529c776cdc58ddbe7963ba9af779f3577b419"
+  revision = "3c6ecd8f22c6f40fbeec94c000a069d7d87c7624"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -454,7 +454,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "ff3583edef7de132f219f0efc00e097cabcc0ec0"
+  revision = "8b2cc369ab52e0003a878865c9372afdd6ca5c5a"
 
 [[projects]]
   name = "google.golang.org/grpc"
