@@ -45,6 +45,7 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 	const serviceName = "Epic Service"
 	const executablePath = `bin\\MyService.exe` // needs 4 slashes to appear in the TF config as a double slash
 	const stepName = "Deploying Epic Service"
+	const packageName = "MyPackage"
 	targetRoles := []string{"Lab1", "Lab2"}
 	projectIDRegex, _ := regexp.Compile("Projects\\-")
 	deploymentProcessIDRegex, _ := regexp.Compile("deploymentprocess\\-Projects\\-.*")
@@ -55,7 +56,7 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWithDeploymentStepWindowsService(projectName, lifeCycleID, projectGroupID, serviceName, executablePath, stepName, targetRoles),
+				Config: testAccWithDeploymentStepWindowsService(projectName, lifeCycleID, projectGroupID, serviceName, executablePath, stepName, packageName, targetRoles),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestMatchResourceAttr(
@@ -240,9 +241,9 @@ resource "octopusdeploy_project" "foo" {
 
 	deployment_step_windows_service {
 		executable_path          = "C:\\MyService\\my_service.exe"
+		package                  = "MyPackage"
 		service_name             = "My First Service"
 		step_name                = "Deploy My First Service"
-		package                  = "MyPackage"
 
 		target_roles = [
 		  "Role1",
@@ -251,15 +252,15 @@ resource "octopusdeploy_project" "foo" {
 	}
 
 	deployment_step_windows_service {
-		executable_path          = "C:\\MyService\\my_service2.exe"
-		service_name             = "My Second Service"
-		step_name                = "Deploy My Second Service"
-		step_start_trigger       = "startwithprevious"
-		service_account          = "NewServiceAccount"
-		service_start_mode       = "demand"
 		configuration_transforms = false
 		configuration_variables  = false
+		executable_path          = "C:\\MyService\\my_service2.exe"
 		package                  = "MyServicePackage"
+		service_account          = "NewServiceAccount"
+		service_name             = "My Second Service"
+		service_start_mode       = "demand"
+		step_name                = "Deploy My Second Service"
+		step_start_trigger       = "startwithprevious"
 
 		target_roles = [
 		  "Role3",
@@ -267,15 +268,15 @@ resource "octopusdeploy_project" "foo" {
 	}
 
 	deployment_step_iis_website {
-		step_name                      = "Deploy Website"
-		website_name                   = "Awesome Website"
-		application_pool_name          = "MyAppPool"
-		application_pool_framework     = "v2.0"
-		step_condition                 = "failure"
-		basic_authentication           = true
 		anonymous_authentication       = true
+		application_pool_framework     = "v2.0"
+		application_pool_name          = "MyAppPool"
+		basic_authentication           = true
 		json_file_variable_replacement = "appsettings.json,Config\\*.json"
 		package                        = "MyWebsitePackage"
+		step_condition                 = "failure"
+		step_name                      = "Deploy Website"
+		website_name                   = "Awesome Website"
 
 		target_roles = [
 		  "MyRole1",
@@ -313,17 +314,18 @@ resource "octopusdeploy_project" "foo" {
 }
 `
 
-func testAccWithDeploymentStepWindowsService(name, lifeCycleID, projectGroupID, serviceName, executablePath, stepName string, targetRoles []string) string {
+func testAccWithDeploymentStepWindowsService(name, lifeCycleID, projectGroupID, serviceName, executablePath, stepName, packageName string, targetRoles []string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_project" "foo" {
-			name           = "%s"
-			lifecycle_id    = "%s"
+			name             = "%s"
+			lifecycle_id     = "%s"
 			project_group_id = "%s"
 
 			deployment_step_windows_service {
-				executable_path          = "%s"
-				service_name             = "%s"
-				step_name                = "%s"
+				executable_path = "%s"
+				service_name    = "%s"
+				step_name       = "%s"
+				package         = "%s"
 
 				target_roles = [
 				  "%s",
@@ -331,7 +333,7 @@ func testAccWithDeploymentStepWindowsService(name, lifeCycleID, projectGroupID, 
 			}
 		}
 		`,
-		name, lifeCycleID, projectGroupID, executablePath, serviceName, stepName, strings.Join(targetRoles, "\",\""),
+		name, lifeCycleID, projectGroupID, executablePath, serviceName, stepName, packageName, strings.Join(targetRoles, "\",\""),
 	)
 }
 
