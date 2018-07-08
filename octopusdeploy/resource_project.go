@@ -59,12 +59,34 @@ func resourceProject() *schema.Resource {
 			},
 			"deployment_step_windows_service": getDeploymentStepWindowsServiceSchema(),
 			"deployment_step_iis_website":     getDeploymentStepIISWebsiteSchema(),
+			"deployment_step_inline_script":   getDeploymentStepInlineScriptSchema(),
+			"deployment_step_package_script":  getDeploymentStepPackageScriptSchema(),
 		},
 	}
 }
 
-// addStandardDeploymentStepSchema adds the common schema for Octopus Deploy Steps
-func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resource {
+// addFeedAndPackageDeploymentStepSchema adds schemas related packages and feeds
+func addFeedAndPackageDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resource {
+	schemaResource := schemaToAddToo.(*schema.Resource)
+
+	schemaResource.Schema["feed_id"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "The ID of the feed a package will be found in.",
+		Optional:    true,
+		Default:     "feeds-builtin",
+	}
+
+	schemaResource.Schema["package"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "ID / Name of the package to be deployed.",
+		Required:    true,
+	}
+
+	return schemaResource
+}
+
+// addConfigurationTransformDeploymentStepSchema adds schemas related to modifying configuration files
+func addConfigurationTransformDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resource {
 	schemaResource := schemaToAddToo.(*schema.Resource)
 
 	schemaResource.Schema["configuration_transforms"] = &schema.Schema{
@@ -79,12 +101,18 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resourc
 		Default:  true,
 	}
 
-	schemaResource.Schema["feed_id"] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-		Default:  "feeds-builtin",
+	schemaResource.Schema["json_file_variable_replacement"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "A comma-separated list of file names to replace settings in, relative to the package contents.",
 	}
 
+	return schemaResource
+}
+
+// addStandardDeploymentStepSchema adds the common schema for Octopus Deploy Steps
+func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resource {
+	schemaResource := schemaToAddToo.(*schema.Resource)
 	schemaResource.Schema["step_condition"] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
@@ -120,15 +148,10 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resourc
 		},
 	}
 
-	schemaResource.Schema["json_file_variable_replacement"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "A comma-separated list of file names to replace settings in, relative to the package contents.",
-	}
-
 	return schemaResource
 }
 
+// addIISApplicationPoolSchema adds schema for Octopus Deploy Steps needing IIS AppPool configuration
 func addIISApplicationPoolSchema(schemaToAddToo interface{}) *schema.Resource {
 	schemaResource := schemaToAddToo.(*schema.Resource)
 
@@ -166,9 +189,66 @@ func addIISApplicationPoolSchema(schemaToAddToo interface{}) *schema.Resource {
 	return schemaResource
 }
 
+func getDeploymentStepInlineScriptSchema() *schema.Schema {
+	schemaToReturn := &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"script_type": {
+					Type:        schema.TypeString,
+					Description: "The scripting language.",
+					Required:    true,
+					ValidateFunc: validateValueFunc([]string{
+						"PowerShell",
+						"CSharp",
+						"Bash",
+						"FSharp",
+					}),
+				},
+				"script_body": {
+					Type:        schema.TypeString,
+					Description: "The script body.",
+					Required:    true,
+				},
+			},
+		},
+	}
+
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem)
+
+	return schemaToReturn
+}
+
+func getDeploymentStepPackageScriptSchema() *schema.Schema {
+	schemaToReturn := &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"script_file_name": {
+					Type:        schema.TypeString,
+					Description: "The script file name in the package.",
+					Required:    true,
+				},
+				"script_parameters": {
+					Type:        schema.TypeString,
+					Description: "Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS.",
+					Optional:    true,
+				},
+			},
+		},
+	}
+
+	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem)
+
+	return schemaToReturn
+}
+
 // getDeploymentStepIISWebsiteSchema returns schema for an IIS deployment step
 func getDeploymentStepIISWebsiteSchema() *schema.Schema {
-	schmeaToReturn := &schema.Schema{
+	schemaToReturn := &schema.Schema{
 		Type:     schema.TypeList,
 		Optional: true,
 		Elem: &schema.Resource{
@@ -200,15 +280,17 @@ func getDeploymentStepIISWebsiteSchema() *schema.Schema {
 		},
 	}
 
-	schmeaToReturn.Elem = addStandardDeploymentStepSchema(schmeaToReturn.Elem)
-	schmeaToReturn.Elem = addIISApplicationPoolSchema(schmeaToReturn.Elem)
+	schemaToReturn.Elem = addConfigurationTransformDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addIISApplicationPoolSchema(schemaToReturn.Elem)
 
-	return schmeaToReturn
+	return schemaToReturn
 }
 
 // getDeploymentStepWindowsServiceSchema returns schema for a Windows Service deployment step
 func getDeploymentStepWindowsServiceSchema() *schema.Schema {
-	schmeaToReturn := &schema.Schema{
+	schemaToReturn := &schema.Schema{
 		Type:     schema.TypeList,
 		Optional: true,
 		Elem: &schema.Resource{
@@ -241,9 +323,11 @@ func getDeploymentStepWindowsServiceSchema() *schema.Schema {
 		},
 	}
 
-	schmeaToReturn.Elem = addStandardDeploymentStepSchema(schmeaToReturn.Elem)
+	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addConfigurationTransformDeploymentStepSchema(schemaToReturn.Elem)
 
-	return schmeaToReturn
+	return schemaToReturn
 }
 
 func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusdeploy.DeploymentProcess) *octopusdeploy.DeploymentProcess {
@@ -260,6 +344,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			executablePath := localStep["executable_path"].(string)
 			feedID := localStep["feed_id"].(string)
 			jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+			packageID := localStep["package"].(string)
 			serviceAccount := localStep["service_account"].(string)
 			serviceName := localStep["service_name"].(string)
 			serviceStartMode := localStep["service_start_mode"].(string)
@@ -284,7 +369,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 							"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": strconv.FormatBool(configurationVariables),
 							"Octopus.Action.EnabledFeatures":                                            "Octopus.Features.WindowsService,Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
 							"Octopus.Action.Package.FeedId":                                             feedID,
-							"Octopus.Action.Package.PackageId":                                          "a", // to fix
+							"Octopus.Action.Package.PackageId":                                          packageID,
 							"Octopus.Action.Package.DownloadOnTentacle":                                 "False",
 							"Octopus.Action.WindowsService.ServiceName":                                 serviceName,
 							"Octopus.Action.WindowsService.ExecutablePath":                              executablePath,
@@ -331,6 +416,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			configurationVariables := localStep["configuration_variables"].(bool)
 			feedID := localStep["feed_id"].(string)
 			jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+			packageID := localStep["package"].(string)
 			stepCondition := localStep["step_condition"].(string)
 			stepName := localStep["step_name"].(string)
 			stepStartTrigger := localStep["step_start_trigger"].(string)
@@ -365,7 +451,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 							"Octopus.Action.IISWebSite.WebRootType":                                     "packageRoot",
 							"Octopus.Action.IISWebSite.StartApplicationPool":                            "True",
 							"Octopus.Action.IISWebSite.StartWebSite":                                    "True",
-							"Octopus.Action.Package.PackageId":                                          "a", // to fix
+							"Octopus.Action.Package.PackageId":                                          packageID,
 							"Octopus.Action.IISWebSite.WebSiteName":                                     websiteName,
 							"Octopus.Action.IISWebSite.ApplicationPoolName":                             applicationPoolName,
 						},
@@ -378,6 +464,106 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
 
 				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
+			}
+
+			if targetRolesInterface, ok := localStep["target_roles"]; ok {
+				var targetRoleSlice []string
+
+				targetRoles := targetRolesInterface.([]interface{})
+
+				for _, role := range targetRoles {
+					targetRoleSlice = append(targetRoleSlice, role.(string))
+				}
+
+				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+			}
+
+			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
+		}
+	}
+
+	if v, ok := d.GetOk("deployment_step_inline_script"); ok {
+		steps := v.([]interface{})
+		for _, raw := range steps {
+
+			localStep := raw.(map[string]interface{})
+
+			scriptType := localStep["script_type"].(string)
+			scriptBody := localStep["script_body"].(string)
+			stepCondition := localStep["step_condition"].(string)
+			stepName := localStep["step_name"].(string)
+			stepStartTrigger := localStep["step_start_trigger"].(string)
+
+			deploymentStep := &octopusdeploy.DeploymentStep{
+				Name:               stepName,
+				PackageRequirement: "LetOctopusDecide",
+				Condition:          stepCondition,
+				StartTrigger:       stepStartTrigger,
+				Actions: []octopusdeploy.DeploymentAction{
+					{
+						Name:       stepName,
+						ActionType: "Octopus.Script",
+						Properties: map[string]string{
+							"Octopus.Action.RunOnServer":                "false",
+							"Octopus.Action.Script.ScriptSource":        "Inline",
+							"Octopus.Action.Package.DownloadOnTentacle": "False",
+							"Octopus.Action.Script.ScriptBody":          scriptBody,
+							"Octopus.Action.Script.Syntax":              scriptType,
+						},
+					},
+				},
+			}
+
+			if targetRolesInterface, ok := localStep["target_roles"]; ok {
+				var targetRoleSlice []string
+
+				targetRoles := targetRolesInterface.([]interface{})
+
+				for _, role := range targetRoles {
+					targetRoleSlice = append(targetRoleSlice, role.(string))
+				}
+
+				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+			}
+
+			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
+		}
+	}
+
+	if v, ok := d.GetOk("deployment_step_package_script"); ok {
+		steps := v.([]interface{})
+		for _, raw := range steps {
+
+			localStep := raw.(map[string]interface{})
+
+			scriptFileName := localStep["script_file_name"].(string)
+			scriptParameters := localStep["script_parameters"].(string)
+			feedID := localStep["feed_id"].(string)
+			packageID := localStep["package"].(string)
+			stepCondition := localStep["step_condition"].(string)
+			stepName := localStep["step_name"].(string)
+			stepStartTrigger := localStep["step_start_trigger"].(string)
+
+			deploymentStep := &octopusdeploy.DeploymentStep{
+				Name:               stepName,
+				PackageRequirement: "LetOctopusDecide",
+				Condition:          stepCondition,
+				StartTrigger:       stepStartTrigger,
+				Actions: []octopusdeploy.DeploymentAction{
+					{
+						Name:       stepName,
+						ActionType: "Octopus.Script",
+						Properties: map[string]string{
+							"Octopus.Action.RunOnServer":                "false",
+							"Octopus.Action.Script.ScriptSource":        "Package",
+							"Octopus.Action.Package.DownloadOnTentacle": "False",
+							"Octopus.Action.Package.FeedId":             feedID,
+							"Octopus.Action.Package.PackageId":          packageID,
+							"Octopus.Action.Script.ScriptFileName":      scriptFileName,
+							"Octopus.Action.Script.ScriptParameters":    scriptParameters,
+						},
+					},
+				},
 			}
 
 			if targetRolesInterface, ok := localStep["target_roles"]; ok {

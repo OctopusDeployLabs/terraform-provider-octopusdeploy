@@ -90,6 +90,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	const lifeCycleID = "Lifecycles-1"
 	const projectGroupID = "ProjectGroups-1"
 	const description = "I am a new description"
+	inlineScriptRegex, _ := regexp.Compile(".*Get\\-Process.*")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -163,6 +164,34 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "deployment_step_iis_website.0.anonymous_authentication", "true"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step_iis_website.0.json_file_variable_replacement", "appsettings.json,Config\\*.json"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_inline_script.0.step_name", "Run Cleanup Script"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_inline_script.0.target_roles.0", "MyRole1"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_inline_script.0.target_roles.1", "MyRole2"),
+					resource.TestMatchResourceAttr(
+						terraformNamePrefix, "deployment_step_inline_script.0.script_body", inlineScriptRegex),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_inline_script.0.script_type", "PowerShell"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_inline_script.0.step_condition", "success"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_package_script.0.feed_id", "feeds-builtin"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_package_script.0.package", "cleanup.yolo"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_package_script.0.script_file_name", "bin\\cleanup.ps1"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_package_script.0.script_parameters", "-Force"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_package_script.0.step_name", "Run Verify From Package Script"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_package_script.0.step_condition", "success"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_package_script.0.target_roles.0", "MyRole1"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_package_script.0.target_roles.1", "MyRole2"),
 				),
 			},
 			// update again by remove its description
@@ -213,6 +242,7 @@ resource "octopusdeploy_project" "foo" {
 		executable_path          = "C:\\MyService\\my_service.exe"
 		service_name             = "My First Service"
 		step_name                = "Deploy My First Service"
+		package                  = "MyPackage"
 
 		target_roles = [
 		  "Role1",
@@ -229,7 +259,7 @@ resource "octopusdeploy_project" "foo" {
 		service_start_mode       = "demand"
 		configuration_transforms = false
 		configuration_variables  = false
-
+		package                  = "MyServicePackage"
 
 		target_roles = [
 		  "Role3",
@@ -245,11 +275,41 @@ resource "octopusdeploy_project" "foo" {
 		basic_authentication           = true
 		anonymous_authentication       = true
 		json_file_variable_replacement = "appsettings.json,Config\\*.json"
+		package                        = "MyWebsitePackage"
 
 		target_roles = [
 		  "MyRole1",
 		]
 	}
+
+	deployment_step_inline_script {
+		step_name   = "Run Cleanup Script"
+		script_type = "PowerShell"
+
+		script_body = <<EOF
+	$x = Get-Process
+	foreach ($p in $x) {
+		Write-Output $p.Name
+	}
+	EOF
+
+		target_roles = [
+		  "MyRole1",
+		  "MyRole2",
+		]
+	}
+
+	deployment_step_package_script {
+		step_name         = "Run Verify From Package Script"
+		package           = "cleanup.yolo"
+		script_file_name  = "bin\\cleanup.ps1"
+		script_parameters = "-Force"
+
+		target_roles = [
+		  "MyRole1",
+		  "MyRole2",
+		]
+	  }
 }
 `
 
