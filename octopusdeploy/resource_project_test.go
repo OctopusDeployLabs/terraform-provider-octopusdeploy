@@ -260,7 +260,7 @@ resource "octopusdeploy_project" "foo" {
 		service_name             = "My Second Service"
 		service_start_mode       = "demand"
 		step_name                = "Deploy My Second Service"
-		step_start_trigger       = "startwithprevious"
+		step_start_trigger       = "StartWithPrevious"
 
 		target_roles = [
 		  "Role3",

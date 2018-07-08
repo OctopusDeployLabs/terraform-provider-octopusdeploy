@@ -91,12 +91,14 @@ func addConfigurationTransformDeploymentStepSchema(schemaToAddToo interface{}) *
 
 	schemaResource.Schema["configuration_transforms"] = &schema.Schema{
 		Type:     schema.TypeBool,
+		Description: "Enables XML configuration transformations.",
 		Optional: true,
 		Default:  true,
 	}
 
 	schemaResource.Schema["configuration_variables"] = &schema.Schema{
 		Type:     schema.TypeBool,
+		Description: "Enables replacing appSettings and connectionString entries in any .config file.",
 		Optional: true,
 		Default:  true,
 	}
@@ -115,6 +117,7 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resourc
 	schemaResource := schemaToAddToo.(*schema.Resource)
 	schemaResource.Schema["step_condition"] = &schema.Schema{
 		Type:     schema.TypeString,
+		Description: "Limit when this step will run by setting this condition.",
 		Optional: true,
 		ValidateFunc: validateValueFunc([]string{
 			"success",
@@ -127,6 +130,7 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resourc
 
 	schemaResource.Schema["step_name"] = &schema.Schema{
 		Type:     schema.TypeString,
+		Description: "The name of the deployment step.",
 		Required: true,
 	}
 
@@ -134,9 +138,10 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resourc
 		Type:     schema.TypeString,
 		Optional: true,
 		Default:  "StartAfterPrevious",
+		Description: "Control whether the step waits for the previous step to complete, or runs parallel with it.",
 		ValidateFunc: validateValueFunc([]string{
-			"startafterprevious",
-			"startwithprevious",
+			"StartAfterPrevious",
+			"StartWithPrevious",
 		}),
 	}
 
@@ -182,7 +187,6 @@ func addIISApplicationPoolSchema(schemaToAddToo interface{}) *schema.Resource {
 			"LocalService",
 			"LocalSystem",
 			"NetworkService",
-			"SpecificUser",
 		}),
 	}
 
@@ -197,7 +201,7 @@ func getDeploymentStepInlineScriptSchema() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"script_type": {
 					Type:        schema.TypeString,
-					Description: "The scripting language.",
+					Description: "The scripting language of the deployment step.",
 					Required:    true,
 					ValidateFunc: validateValueFunc([]string{
 						"PowerShell",
@@ -267,7 +271,7 @@ func getDeploymentStepIISWebsiteSchema() *schema.Schema {
 				},
 				"website_name": {
 					Type:        schema.TypeString,
-					Description: "Create or update an IIS Web Site",
+					Description: "The name of the Website to be created",
 					Required:    true,
 				},
 				"windows_authentication": {
