@@ -13,3 +13,11 @@ test: fmt
 
 testacc:
 	TF_ACC=1 go test $(TEST) -v -timeout 120m
+
+tf_build: fmt build
+	terraform init
+	terraform plan
+	terraform apply -auto-approve
+
+tf_destroy:
+	terraform destroy -auto-approve

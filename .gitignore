@@ -16,6 +16,9 @@
 .idea/
 .vscode/
 
+# Go Debugging
+OFF/
+
 # Terraform
 .terraform/
 *.tfstate
