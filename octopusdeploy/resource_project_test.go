@@ -108,7 +108,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "project_group_id", projectGroupID),
 				),
 			},
-			// create update it with a description
+			// create update it with a description + build steps
 			{
 				Config: testAccWithMultipleDeploymentStepWindowsService,
 				Check: resource.ComposeTestCheckFunc(
@@ -145,6 +145,24 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "deployment_step_windows_service.1.configuration_transforms", "false"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step_windows_service.1.configuration_variables", "false"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.step_name", "Deploy Website"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.target_roles.0", "MyRole1"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.website_name", "Awesome Website"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.application_pool_name", "MyAppPool"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.application_pool_framework", "v2.0"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.step_condition", "failure"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.basic_authentication", "true"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.anonymous_authentication", "true"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.json_file_variable_replacement", "appsettings.json,Config\\*.json"),
 				),
 			},
 			// update again by remove its description
@@ -164,6 +182,8 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "deployment_step_windows_service.0.step_name"),
 					resource.TestCheckNoResourceAttr(
 						terraformNamePrefix, "deployment_step_windows_service.1.step_name"),
+					resource.TestCheckNoResourceAttr(
+						terraformNamePrefix, "deployment_step_iis_website.0.step_name"),
 				),
 			},
 		},
@@ -213,6 +233,21 @@ resource "octopusdeploy_project" "foo" {
 
 		target_roles = [
 		  "Role3",
+		]
+	}
+
+	deployment_step_iis_website {
+		step_name                      = "Deploy Website"
+		website_name                   = "Awesome Website"
+		application_pool_name          = "MyAppPool"
+		application_pool_framework     = "v2.0"
+		step_condition                 = "failure"
+		basic_authentication           = true
+		anonymous_authentication       = true
+		json_file_variable_replacement = "appsettings.json,Config\\*.json"
+
+		target_roles = [
+		  "MyRole1",
 		]
 	}
 }
