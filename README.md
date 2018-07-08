@@ -177,7 +177,7 @@ EOF
 
 Which creates the following:
 
-![Octopus Deploy Multiple Deployment Steps](docs/images/project_multiple_deployment_steps.jpg)
+![Octopus Deploy Multiple Deployment Steps](https://i.imgur.com/yWRFjrU.png)
 
 ### Argument Reference
 The following agrements define the project:
