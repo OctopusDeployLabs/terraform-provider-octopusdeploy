@@ -21,3 +21,6 @@ tf_build: fmt build
 
 tf_destroy:
 	terraform destroy -auto-approve
+
+tf_apply:
+	terraform apply -auto-approve
