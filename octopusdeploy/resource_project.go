@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"fmt"
 	"log"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -59,7 +58,7 @@ func resourceProject() *schema.Resource {
 				}),
 			},
 			"deployment_step_windows_service": &schema.Schema{
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -117,10 +116,6 @@ func resourceProject() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"step_order": {
-							Type:     schema.TypeInt,
-							Required: true,
-						},
 						"step_start_trigger": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -145,11 +140,10 @@ func resourceProject() *schema.Resource {
 }
 
 func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusdeploy.DeploymentProcess) *octopusdeploy.DeploymentProcess {
-	deploymentSteps := make(map[int]octopusdeploy.DeploymentStep) // holds all the created DeploymentSteps
-	deploymentProcess.Steps = nil                                 // empty the steps
+	deploymentProcess.Steps = nil // empty the steps
 
 	if v, ok := d.GetOk("deployment_step_windows_service"); ok {
-		steps := v.(*schema.Set).List()
+		steps := v.([]interface{})
 		for _, raw := range steps {
 
 			localStep := raw.(map[string]interface{})
@@ -164,8 +158,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			stepName := localStep["step_name"].(string)
 			stepCondition := localStep["step_condition"].(string)
 			stepStartTrigger := localStep["step_start_trigger"].(string)
-			stepOrder := localStep["step_order"].(int)
-			log.Printf("stepOrder: %d", stepOrder)
 
 			deploymentStep := &octopusdeploy.DeploymentStep{
 				Name:               stepName,
@@ -204,22 +196,8 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
 			}
 
-			deploymentSteps[stepOrder] = *deploymentStep
+			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 		}
-	}
-
-	sortedSteps := []int{}
-
-	// grab all of the step orders
-	for stepOrder := range deploymentSteps {
-		sortedSteps = append(sortedSteps, stepOrder)
-	}
-
-	sort.Ints(sortedSteps)
-
-	// go through the ordered steps and add them to the deployment process in the right order
-	for _, k := range sortedSteps {
-		deploymentProcess.Steps = append(deploymentProcess.Steps, deploymentSteps[k])
 	}
 
 	return deploymentProcess
