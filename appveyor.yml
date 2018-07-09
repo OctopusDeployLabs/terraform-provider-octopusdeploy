@@ -26,7 +26,7 @@ before_test:
 
 after_test:
   # Build Binaries
-  - ps: Invoke-Expression .\build.ps1 -BuildVersion {version}
+  - ps: .\build.ps1 -BuildVersion {version}
 
 deploy:
   release: terraform-provider-octopusdeploy-v{version}
