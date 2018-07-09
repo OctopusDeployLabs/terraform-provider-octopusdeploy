@@ -26,10 +26,10 @@ before_test:
 
 after_test:
   # Build Binaries
-  - ps: .\build.ps1 -BuildVersion {version}
+  - ps: .\build.ps1 -BuildVersion $(appveyor_build_version)
 
 deploy:
-  release: terraform-provider-octopusdeploy-v{version}
+  release: terraform-provider-octopusdeploy-v$(appveyor_build_version)
   description: 'Realse of terraform-provider-octopusdeploy'
   provider: GitHub
   auth_token:
