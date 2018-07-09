@@ -1,4 +1,5 @@
-version: 1.0.{build}
+version: 0.0.1-alpha.{build}
+skip_tags: true
 
 image: Visual Studio 2017
 build: off
@@ -25,7 +26,19 @@ before_test:
 
 after_test:
   # Build Binaries
-  - ps: Invoke-Expression build.ps1
+  - ps: Invoke-Expression .\build.ps1 -BuildVersion {version}
+
+deploy:
+  release: terraform-provider-octopusdeploy-v{version}
+  description: 'Realse of terraform-provider-octopusdeploy'
+  provider: GitHub
+  auth_token:
+    secure: QaEHKLv6eipcnuoao5ppCTb14AIkBAAO3TJR13JYpt9VaDifFCe1DiC6YGIkJXjV
+  artifact: \build\*.zip
+  draft: false
+  prerelease: true
+  on:
+    branch: master                 # release from master branch only
 
 # Uncomment to debug the build
 on_finish:
