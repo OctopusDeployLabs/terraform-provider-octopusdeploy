@@ -23,6 +23,10 @@ before_test:
       Install-OctopusDeployInAppveyor -OctopusAdministartorUser $env:TEST_OCTOPUS_USERNAME -OctopusAdministartorPassword $env:TEST_OCTOPUS_PASSWORD
   - ps: Invoke-Expression ".\integration\appveyor_scripts\start_go_integration_tests.ps1"
 
-# # Uncomment to debug the build
-# on_finish:
-#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+after_test:
+  # Build Binaries
+  - ps: Invoke-Expression build.ps1
+
+# Uncomment to debug the build
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
