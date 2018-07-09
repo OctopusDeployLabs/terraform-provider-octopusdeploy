@@ -26,7 +26,7 @@ before_test:
 
 after_test:
   # Build Binaries
-  - ps: .\build.ps1 -BuildVersion $(appveyor_build_version)
+  - ps: .\build.ps1 -BuildVersion $env:APPVEYOR_BUILD_VERSION
 
 deploy:
   release: terraform-provider-octopusdeploy-v$(appveyor_build_version)
