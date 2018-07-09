@@ -9,6 +9,7 @@ A Terraform provider for [Octopus Deploy](https://octopus.com).
 <!-- TOC -->
 
 - [Go Dependencies](#go-dependencies)
+- [Downloading & Installing](#downloading--installing)
 - [Configure the Provider](#configure-the-provider)
 - [Provider Resources](#provider-resources)
     - [Project Groups](#project-groups)
@@ -34,6 +35,14 @@ A Terraform provider for [Octopus Deploy](https://octopus.com).
 # Vendor new modules
 dep ensure
 ```
+
+# Downloading & Installing
+
+As this provider is still under development, you will need to manually download it.
+
+There are compiled binaries for most platforms in [Releases](https://github.com/MattHodge/terraform-provider-octopusdeploy/releases).
+
+To use it, extract the binary for your platform into the same folder as your `.tf` file(s) will be located, then run `terraform init`.
 
 # Configure the Provider
 
