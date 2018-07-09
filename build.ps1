@@ -6,6 +6,10 @@ Param
     $BuildVersion
 )
 
+if ($env:APPVEYOR_REPO_BRANCH -ne "master") {
+	return "Not building artifacts as this is not the master branch"
+}
+
 
 . ".\integration\appveyor_scripts\functions\Start-ProcessAdvanced.ps1"
 
@@ -53,7 +57,7 @@ foreach ($binary in $binaries){
 
     Compress-Archive -Path . -DestinationPath "terraform-provider-octopusdeploy-$($buildName)-$($BuildVersion).zip"
 
-    Move-Item "terraform-provider-octopusdeploy-$($buildName)-$($BuildVersion).zip" ..
+    Get-ChildItem -Path *.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
 
     Pop-Location
 }
