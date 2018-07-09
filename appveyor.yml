@@ -1,5 +1,9 @@
 version: 0.0.1-alpha.{build}
 skip_tags: true
+skip_commits:
+  files:
+    - '**/*.md' # skip documentation
+    - '**/.tf' # skip terraform
 
 image: Visual Studio 2017
 build: off
