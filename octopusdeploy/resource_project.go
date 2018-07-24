@@ -90,17 +90,17 @@ func addConfigurationTransformDeploymentStepSchema(schemaToAddToo interface{}) *
 	schemaResource := schemaToAddToo.(*schema.Resource)
 
 	schemaResource.Schema["configuration_transforms"] = &schema.Schema{
-		Type:     schema.TypeBool,
+		Type:        schema.TypeBool,
 		Description: "Enables XML configuration transformations.",
-		Optional: true,
-		Default:  true,
+		Optional:    true,
+		Default:     true,
 	}
 
 	schemaResource.Schema["configuration_variables"] = &schema.Schema{
-		Type:     schema.TypeBool,
+		Type:        schema.TypeBool,
 		Description: "Enables replacing appSettings and connectionString entries in any .config file.",
-		Optional: true,
-		Default:  true,
+		Optional:    true,
+		Default:     true,
 	}
 
 	schemaResource.Schema["json_file_variable_replacement"] = &schema.Schema{
@@ -116,9 +116,9 @@ func addConfigurationTransformDeploymentStepSchema(schemaToAddToo interface{}) *
 func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resource {
 	schemaResource := schemaToAddToo.(*schema.Resource)
 	schemaResource.Schema["step_condition"] = &schema.Schema{
-		Type:     schema.TypeString,
+		Type:        schema.TypeString,
 		Description: "Limit when this step will run by setting this condition.",
-		Optional: true,
+		Optional:    true,
 		ValidateFunc: validateValueFunc([]string{
 			"success",
 			"failure",
@@ -129,15 +129,15 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resourc
 	}
 
 	schemaResource.Schema["step_name"] = &schema.Schema{
-		Type:     schema.TypeString,
+		Type:        schema.TypeString,
 		Description: "The name of the deployment step.",
-		Required: true,
+		Required:    true,
 	}
 
 	schemaResource.Schema["step_start_trigger"] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-		Default:  "StartAfterPrevious",
+		Type:        schema.TypeString,
+		Optional:    true,
+		Default:     "StartAfterPrevious",
 		Description: "Control whether the step waits for the previous step to complete, or runs parallel with it.",
 		ValidateFunc: validateValueFunc([]string{
 			"StartAfterPrevious",
