@@ -8,6 +8,18 @@ resource "octopusdeploy_project_group" "finance" {
   name        = "Finance"
 }
 
+resource "octopusdeploy_project_deployment_target_trigger" "auto_deploy_trigger" {
+  name             = "Auto Deploy"
+  project_id       = "${octopusdeploy_project.billing_service.id}"
+  event_groups     = ["Machine"]
+  event_categories = ["MachineCleanupFailed"]
+  should_redeploy  = true
+
+  roles = [
+    "Billing-Batch-Processor",
+  ]
+}
+
 resource "octopusdeploy_project" "billing_service" {
   description           = "Billing Frontend and Backend"
   lifecycle_id          = "Lifecycles-1"

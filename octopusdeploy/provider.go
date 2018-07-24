@@ -1,17 +1,19 @@
 package octopusdeploy
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"log"
 )
 
 //Provider is the plugin entry point
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"octopusdeploy_project":       resourceProject(),
-			"octopusdeploy_project_group": resourceProjectGroup(),
+			"octopusdeploy_project":                           resourceProject(),
+			"octopusdeploy_project_group":                     resourceProjectGroup(),
+			"octopusdeploy_project_deployment_target_trigger": resourceProjectDeploymentTargetTrigger(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": &schema.Schema{

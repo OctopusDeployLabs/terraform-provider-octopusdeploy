@@ -24,3 +24,36 @@ func validateValueFunc(values []string) schema.SchemaValidateFunc {
 		return
 	}
 }
+
+// validateStringInSlice checks if a string is in the given slice
+func validateStringInSlice(str string, list []string) bool {
+	for _, v := range list {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
+}
+
+func validateAllSliceItemsInSlice(givenSlice, validationSlice []string) (string, bool) {
+	for _, v := range givenSlice {
+		if !validateStringInSlice(v, validationSlice) {
+			return v, false
+		}
+	}
+
+	return "", true
+}
+
+func getSliceFromTerraformTypeList(inputTypeList interface{}) []string {
+	var newSlice []string
+
+	terraformList := inputTypeList.([]interface{})
+
+	for _, item := range terraformList {
+		newSlice = append(newSlice, item.(string))
+	}
+
+	return newSlice
+}
