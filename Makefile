@@ -24,3 +24,6 @@ tf_destroy:
 
 tf_apply:
 	terraform apply -auto-approve
+
+tf_plan:
+	terraform plan
