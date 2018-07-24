@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/dghubble/sling"
 	"gopkg.in/go-playground/validator.v9"
@@ -72,64 +71,50 @@ func (d *DeploymentProcess) Validate() error {
 	return nil
 }
 
-func (d *DeploymentProcessService) Get(deploymentProcessID string) (*DeploymentProcess, error) {
-	var deploymentProcess DeploymentProcess
-	octopusDeployError := new(APIError)
+func (s *DeploymentProcessService) Get(deploymentProcessID string) (*DeploymentProcess, error) {
 	path := fmt.Sprintf("deploymentprocesses/%s", deploymentProcessID)
+	resp, err := apiGet(s.sling, new(DeploymentProcess), path)
 
-	resp, err := d.sling.New().Get(path).Receive(&deploymentProcess, &octopusDeployError)
-
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return nil, apiErrorCheck
+	if err != nil {
+		return nil, err
 	}
 
-	return &deploymentProcess, err
+	return resp.(*DeploymentProcess), nil
 }
 
-func (d *DeploymentProcessService) GetAll() (*[]DeploymentProcess, error) {
-	var listOfDeploymentProcess []DeploymentProcess
-	path := fmt.Sprintf("deploymentprocesses")
+func (s *DeploymentProcessService) GetAll() (*[]DeploymentProcess, error) {
+	var dp []DeploymentProcess
 
-	for {
-		var deploymentProcesses DeploymentProcesses
-		octopusDeployError := new(APIError)
+	path := "deploymentprocesses"
 
-		resp, err := d.sling.New().Get(path).Receive(&deploymentProcesses, &octopusDeployError)
+	loadNextPage := true
 
-		apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
+	for loadNextPage {
+		resp, err := apiGet(s.sling, new(DeploymentProcesses), path)
 
-		if apiErrorCheck != nil {
-			return nil, apiErrorCheck
+		if err != nil {
+			return nil, err
 		}
 
-		for _, deploymentProcess := range deploymentProcesses.Items {
-			listOfDeploymentProcess = append(listOfDeploymentProcess, deploymentProcess)
+		r := resp.(*DeploymentProcesses)
+
+		for _, item := range r.Items {
+			dp = append(dp, item)
 		}
 
-		if deploymentProcesses.PagedResults.Links.PageNext != "" {
-			path = deploymentProcesses.PagedResults.Links.PageNext
-		} else {
-			break
-		}
+		path, loadNextPage = LoadNextPage(r.PagedResults)
 	}
 
-	return &listOfDeploymentProcess, nil // no more pages to go through
+	return &dp, nil
 }
 
 func (s *DeploymentProcessService) Update(deploymentProcess *DeploymentProcess) (*DeploymentProcess, error) {
-	var updated DeploymentProcess
-	octopusDeployError := new(APIError)
 	path := fmt.Sprintf("deploymentprocesses/%s", deploymentProcess.ID)
+	resp, err := apiUpdate(s.sling, deploymentProcess, new(DeploymentProcess), path)
 
-	resp, err := s.sling.New().Put(path).BodyJSON(deploymentProcess).Receive(&updated, &octopusDeployError)
-
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return nil, apiErrorCheck
+	if err != nil {
+		return nil, err
 	}
 
-	return &updated, nil
+	return resp.(*DeploymentProcess), nil
 }

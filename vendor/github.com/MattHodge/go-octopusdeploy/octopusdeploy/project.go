@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/dghubble/sling"
 	"gopkg.in/go-playground/validator.v9"
@@ -75,49 +74,40 @@ func NewProject(name, lifeCycleID, projectGroupID string) *Project {
 }
 
 func (s *ProjectService) Get(projectid string) (*Project, error) {
-	var project Project
-	octopusDeployError := new(APIError)
 	path := fmt.Sprintf("projects/%s", projectid)
+	resp, err := apiGet(s.sling, new(Project), path)
 
-	resp, err := s.sling.New().Get(path).Receive(&project, &octopusDeployError)
-
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return nil, apiErrorCheck
+	if err != nil {
+		return nil, err
 	}
 
-	return &project, nil
+	return resp.(*Project), nil
 }
 
 func (s *ProjectService) GetAll() (*[]Project, error) {
-	var listOfProjects []Project
-	path := fmt.Sprintf("projects")
+	var p []Project
 
-	for {
-		var projects Projects
-		octopusDeployError := new(APIError)
+	path := "projects"
 
-		resp, err := s.sling.New().Get(path).Receive(&projects, &octopusDeployError)
+	loadNextPage := true
 
-		apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
+	for loadNextPage {
+		resp, err := apiGet(s.sling, new(Projects), path)
 
-		if apiErrorCheck != nil {
-			return nil, apiErrorCheck
+		if err != nil {
+			return nil, err
 		}
 
-		for _, project := range projects.Items {
-			listOfProjects = append(listOfProjects, project)
+		r := resp.(*Projects)
+
+		for _, item := range r.Items {
+			p = append(p, item)
 		}
 
-		if projects.PagedResults.Links.PageNext != "" {
-			path = projects.PagedResults.Links.PageNext
-		} else {
-			break
-		}
+		path, loadNextPage = LoadNextPage(r.PagedResults)
 	}
 
-	return &listOfProjects, nil // no more pages to go through
+	return &p, nil
 }
 
 func (s *ProjectService) GetByName(projectName string) (*Project, error) {
@@ -125,7 +115,7 @@ func (s *ProjectService) GetByName(projectName string) (*Project, error) {
 	projects, err := s.GetAll()
 
 	if err != nil {
-		return &foundProject, err
+		return nil, err
 	}
 
 	for _, project := range *projects {
@@ -138,59 +128,33 @@ func (s *ProjectService) GetByName(projectName string) (*Project, error) {
 }
 
 func (s *ProjectService) Add(project *Project) (*Project, error) {
-	err := project.Validate()
+	resp, err := apiAdd(s.sling, project, new(Project), "projects")
 
 	if err != nil {
 		return nil, err
 	}
 
-	var created Project
-	octopusDeployError := new(APIError)
-	path := "projects"
-
-	resp, err := s.sling.New().Post(path).BodyJSON(project).Receive(&created, &octopusDeployError)
-
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusCreated, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return nil, apiErrorCheck
-	}
-
-	return &created, nil
+	return resp.(*Project), nil
 }
 
 func (s *ProjectService) Delete(projectid string) error {
-	octopusDeployError := new(APIError)
 	path := fmt.Sprintf("projects/%s", projectid)
-	resp, err := s.sling.New().Delete(path).Receive(nil, &octopusDeployError)
+	err := apiDelete(s.sling, path)
 
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return apiErrorCheck
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (s *ProjectService) Update(project *Project) (*Project, error) {
-	err := project.Validate()
+	path := fmt.Sprintf("projects/%s", project.ID)
+	resp, err := apiUpdate(s.sling, project, new(Project), path)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var updated Project
-	octopusDeployError := new(APIError)
-	path := fmt.Sprintf("projects/%s", project.ID)
-
-	resp, err := s.sling.New().Put(path).BodyJSON(project).Receive(&updated, &octopusDeployError)
-
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return nil, apiErrorCheck
-	}
-
-	return &updated, nil
+	return resp.(*Project), nil
 }

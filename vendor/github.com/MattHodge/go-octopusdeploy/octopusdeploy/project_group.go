@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/dghubble/sling"
 	"gopkg.in/go-playground/validator.v9"
@@ -52,105 +51,71 @@ func NewProjectGroup(name string) *ProjectGroup {
 	}
 }
 
-func (p *ProjectGroupService) Get(projectGroupID string) (*ProjectGroup, error) {
-	var projectGroup ProjectGroup
-	octopusDeployError := new(APIError)
+func (s *ProjectGroupService) Get(projectGroupID string) (*ProjectGroup, error) {
 	path := fmt.Sprintf("projectgroups/%s", projectGroupID)
-
-	resp, err := p.sling.New().Get(path).Receive(&projectGroup, &octopusDeployError)
-
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return nil, apiErrorCheck
-	}
-
-	return &projectGroup, err
-}
-
-func (p *ProjectGroupService) GetAll() (*[]ProjectGroup, error) {
-	var listOfProjectGroups []ProjectGroup
-	path := fmt.Sprintf("projectgroups")
-
-	for {
-		var projectGroups ProjectGroups
-		octopusDeployError := new(APIError)
-
-		resp, err := p.sling.New().Get(path).Receive(&projectGroups, &octopusDeployError)
-
-		apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-		if apiErrorCheck != nil {
-			return nil, apiErrorCheck
-		}
-
-		for _, projectGroup := range projectGroups.Items {
-			listOfProjectGroups = append(listOfProjectGroups, projectGroup)
-		}
-
-		if projectGroups.PagedResults.Links.PageNext != "" {
-			path = projectGroups.PagedResults.Links.PageNext
-		} else {
-			break
-		}
-	}
-
-	return &listOfProjectGroups, nil // no more pages to go through
-}
-
-func (p *ProjectGroupService) Add(projectGroup *ProjectGroup) (*ProjectGroup, error) {
-	err := projectGroup.Validate()
+	resp, err := apiGet(s.sling, new(ProjectGroup), path)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var created ProjectGroup
-	octopusDeployError := new(APIError)
-	path := "projectgroups"
-	resp, err := p.sling.New().Post(path).BodyJSON(projectGroup).Receive(&created, &octopusDeployError)
-
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusCreated, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return nil, apiErrorCheck
-	}
-
-	return &created, nil
+	return resp.(*ProjectGroup), nil
 }
 
-func (p *ProjectGroupService) Delete(projectGroupID string) error {
-	octopusDeployError := new(APIError)
+func (s *ProjectGroupService) GetAll() (*[]ProjectGroup, error) {
+	var pg []ProjectGroup
+
+	path := "projectgroups"
+
+	loadNextPage := true
+
+	for loadNextPage {
+		resp, err := apiGet(s.sling, new(ProjectGroups), path)
+
+		if err != nil {
+			return nil, err
+		}
+
+		r := resp.(*ProjectGroups)
+
+		for _, item := range r.Items {
+			pg = append(pg, item)
+		}
+
+		path, loadNextPage = LoadNextPage(r.PagedResults)
+	}
+
+	return &pg, nil
+}
+
+func (s *ProjectGroupService) Add(projectGroup *ProjectGroup) (*ProjectGroup, error) {
+	resp, err := apiAdd(s.sling, projectGroup, new(ProjectGroup), "projectgroups")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*ProjectGroup), nil
+}
+
+func (s *ProjectGroupService) Delete(projectGroupID string) error {
 	path := fmt.Sprintf("projectgroups/%s", projectGroupID)
-	resp, err := p.sling.New().Delete(path).Receive(nil, &octopusDeployError)
+	err := apiDelete(s.sling, path)
 
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return apiErrorCheck
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (p *ProjectGroupService) Update(projectGroup *ProjectGroup) (*ProjectGroup, error) {
-	err := projectGroup.Validate()
+func (s *ProjectGroupService) Update(projectGroup *ProjectGroup) (*ProjectGroup, error) {
+	path := fmt.Sprintf("projectgroups/%s", projectGroup.ID)
+	resp, err := apiUpdate(s.sling, projectGroup, new(ProjectGroup), path)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var updated ProjectGroup
-	octopusDeployError := new(APIError)
-	path := fmt.Sprintf("projectgroups/%s", projectGroup.ID)
-
-	resp, err := p.sling.New().Put(path).BodyJSON(projectGroup).Receive(&updated, &octopusDeployError)
-
-	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
-
-	if apiErrorCheck != nil {
-		return nil, apiErrorCheck
-	}
-
-	return &updated, nil
+	return resp.(*ProjectGroup), nil
 }
