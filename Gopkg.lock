@@ -256,6 +256,7 @@
     "config/module",
     "dag",
     "flatmap",
+    "helper/acctest",
     "helper/config",
     "helper/hashcode",
     "helper/hilmapstructure",
@@ -399,12 +400,19 @@
     "bcrypt",
     "blowfish",
     "cast5",
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "internal/subtle",
     "openpgp",
     "openpgp/armor",
     "openpgp/elgamal",
     "openpgp/errors",
     "openpgp/packet",
-    "openpgp/s2k"
+    "openpgp/s2k",
+    "poly1305",
+    "ssh"
   ]
   revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
 
@@ -500,6 +508,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d1eea581d0070e0dcf2432995b8487b0a59097a9c0bbf2c83278da8b5345f536"
+  inputs-digest = "17c3c6c002dfd9a0d872e857bf2a30a344b0db76b2b5d5814106467b60a1060b"
   solver-name = "gps-cdcl"
   solver-version = 1

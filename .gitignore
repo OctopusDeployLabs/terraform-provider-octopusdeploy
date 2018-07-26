@@ -25,3 +25,8 @@ OFF/
 *.tfstate.backup
 crash.log
 tflog.txt
+
+# TF Binaries
+terraform-provider-octopusdeploy
+terraform-provider-octopusdeploy.exe
+main.tf
