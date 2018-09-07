@@ -27,6 +27,10 @@ Based on the [go-octopusdeploy](https://github.com/MattHodge/go-octopusdeploy) O
                 - [Feed and Packages](#feed-and-packages)
                 - [IIS Application Pool](#iis-application-pool)
         - [Attributes Reference](#attributes-reference-1)
+    - [Environment](#environment)
+        - [Example Usage](#example-usage-2)
+        - [Argument Reference](#argument-reference-2)
+        - [Attributes reference](#attributes-reference)
 
 <!-- /TOC -->
 
@@ -69,6 +73,14 @@ Basic usage:
 resource "octopusdeploy_project_group" "finance" {
   description = "Financial Applications"
   name        = "Finance"
+}
+```
+
+Data usage:
+
+```hcl
+data "octopusdeploy_project" "finance" {
+    name = "Finance"
 }
 ```
 
@@ -191,7 +203,7 @@ Which creates the following:
 ![Octopus Deploy Multiple Deployment Steps](https://i.imgur.com/yWRFjrU.png)
 
 ### Argument Reference
-The following agrements define the project:
+The following arguments define the project:
 * `name` - (Required) Name of the project group.
 * `description` - (Optional) Description of the project group.
 * `lifecycle_id` - (Required) The ID of the lifecycle the project will use.
@@ -254,4 +266,41 @@ The following arguments are shared amongst the `deployment_step` resources.
 
 ### Attributes Reference
 * `deployment_process_id` - The ID of the projects deployment process.
+
+## Environment
+
+[Environments](https://octopus.com/docs/infrastructure/environments) are a way of defining different configurations for Octopus Deploy.
+
+### Example Usage
+
+Basic usage:
+
+```hcl
+resource "octopusdeploy_environment" "staging" {
+    name = "Staging"
+    description = "Staging environment"
+    useguidedfailure = false
+}
+```
+
+Data usage:
+
+```hcl
+data "octopusdeploy_environment" "staging" {
+    name = "Staging"
+}
+```
+
+### Argument Reference
+
+* `name` - (Required) Name of the environment
+* `description` - (Optional) Description of the environment
+* `useguidedfailure` - (Optional) Use guided failures for this environment (defaults to `false`)
+
+### Attributes reference
+
+* `id` - ID of the environment
+* `name` - Name of the environment
+* `description` - Description of the environment
+* `useguidedfailure` - Use guided failures for this environment
 

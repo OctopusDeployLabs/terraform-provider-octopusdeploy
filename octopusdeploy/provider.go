@@ -10,10 +10,15 @@ import (
 //Provider is the plugin entry point
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
+		DataSourcesMap: map[string]*schema.Resource{
+			"octopusdeploy_project":     dataProject(),
+			"octopusdeploy_environment": dataEnvironment(),
+		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_project":                           resourceProject(),
 			"octopusdeploy_project_group":                     resourceProjectGroup(),
 			"octopusdeploy_project_deployment_target_trigger": resourceProjectDeploymentTargetTrigger(),
+			"octopusdeploy_environment":                       resourceEnvironment(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": &schema.Schema{
