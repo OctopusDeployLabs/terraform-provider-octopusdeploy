@@ -17,6 +17,7 @@ type Client struct {
 	ProjectGroup      *ProjectGroupService
 	Project           *ProjectService
 	ProjectTrigger    *ProjectTriggerService
+	Environment       *EnvironmentService
 }
 
 // NewClient returns a new Client.
@@ -31,6 +32,7 @@ func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Clien
 		ProjectGroup:      NewProjectGroupService(base.New()),
 		Project:           NewProjectService(base.New()),
 		ProjectTrigger:    NewProjectTriggerService(base.New()),
+		Environment:       NewEnvironmentService(base.New()),
 	}
 }
 
