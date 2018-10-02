@@ -18,6 +18,7 @@ type Client struct {
 	Project           *ProjectService
 	ProjectTrigger    *ProjectTriggerService
 	Environment       *EnvironmentService
+	Variable          *VariableService
 }
 
 // NewClient returns a new Client.
@@ -33,6 +34,7 @@ func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Clien
 		Project:           NewProjectService(base.New()),
 		ProjectTrigger:    NewProjectTriggerService(base.New()),
 		Environment:       NewEnvironmentService(base.New()),
+		Variable:          NewVariableService(base.New()),
 	}
 }
 
@@ -111,7 +113,6 @@ func apiAdd(sling *sling.Sling, inputStruct, returnStruct interface{}, path stri
 // Generic OctopusDeploy API Add Function.
 func apiUpdate(sling *sling.Sling, inputStruct, returnStruct interface{}, path string) (interface{}, error) {
 	octopusDeployError := new(APIError)
-
 	resp, err := sling.New().Put(path).BodyJSON(inputStruct).Receive(returnStruct, &octopusDeployError)
 
 	apiErrorCheck := APIErrorChecker(path, resp, http.StatusOK, err, octopusDeployError)
