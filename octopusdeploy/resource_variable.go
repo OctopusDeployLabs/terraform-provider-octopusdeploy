@@ -34,9 +34,8 @@ func resourceVariable() *schema.Resource {
 				}),
 			},
 			"value": &schema.Schema{
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"description": &schema.Schema{
 				Type:     schema.TypeString,
