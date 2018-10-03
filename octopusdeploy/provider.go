@@ -13,12 +13,14 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_project":     dataProject(),
 			"octopusdeploy_environment": dataEnvironment(),
+			"octopusdeploy_variable":    dataVariable(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_project":                           resourceProject(),
 			"octopusdeploy_project_group":                     resourceProjectGroup(),
 			"octopusdeploy_project_deployment_target_trigger": resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_environment":                       resourceEnvironment(),
+			"octopusdeploy_variable":                          resourceVariable(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": &schema.Schema{
