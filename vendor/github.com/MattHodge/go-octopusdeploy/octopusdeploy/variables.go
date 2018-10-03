@@ -27,15 +27,15 @@ type Variables struct {
 }
 
 type Variable struct {
-	ID          string                `json:"Id"`
-	Name        string                `json:"Name"`
-	Value       string                `json:"Value"`
-	Description string                `json:"Description"`
-	Scope       *VariableScope        `json:"Scope,omitempty"`
-	IsEditable  bool                  `json:"IsEditable"`
-	Prompt      VariablePromptOptions `json:"Prompt"`
-	Type        string                `json:"Type"`
-	IsSensitive bool                  `json:"IsSensitive"`
+	ID          string                 `json:"Id"`
+	Name        string                 `json:"Name"`
+	Value       string                 `json:"Value"`
+	Description string                 `json:"Description"`
+	Scope       *VariableScope         `json:"Scope,omitempty"`
+	IsEditable  bool                   `json:"IsEditable"`
+	Prompt      *VariablePromptOptions `json:"Prompt"`
+	Type        string                 `json:"Type"`
+	IsSensitive bool                   `json:"IsSensitive"`
 }
 
 type VariableScope struct {
