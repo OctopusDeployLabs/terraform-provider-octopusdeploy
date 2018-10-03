@@ -31,6 +31,10 @@ Based on the [go-octopusdeploy](https://github.com/MattHodge/go-octopusdeploy) O
         - [Example Usage](#example-usage-2)
         - [Argument Reference](#argument-reference-2)
         - [Attributes reference](#attributes-reference)
+    - [Variables](#variables)
+        - [Example Usage](#example-usage-3)
+        - [Argument Reference](#argument-reference-3)
+        - [Attributes reference](#attributes-reference-1)
 
 <!-- /TOC -->
 
@@ -304,3 +308,94 @@ data "octopusdeploy_environment" "staging" {
 * `description` - Description of the environment
 * `useguidedfailure` - Use guided failures for this environment
 
+## Variables
+
+[Variables](https://octopus.com/docs/deployment-process/variables) are values that change based on the
+scope of the deployments (e.g. changing SQL Connection Strings between production and staging deployments).
+
+### Example Usage
+
+Basic usage:
+
+```hcl
+data "octopusdeploy_project" "finance" {
+    name = "Finance"
+}
+
+resource "octopusdeploy_variable" "connection_string" {
+  project_id = "${data.octopusdeploy_project.finance.id}"
+  name       = "SQLConnectionString"
+  type       = "String"
+  value      = "Server=myServerAddress;Database=myDataBase;Trusted_Connection=True;"
+}
+```
+
+More complex example (with environments and prompts)
+
+```hcl
+data "octopusdeploy_project" "finance" {
+    name = "Finance"
+}
+
+data "octopusdeploy_environment" "staging" {
+    name = "Staging"
+}
+
+resource "octopusdeploy_variable" "connection_string" {
+  project_id = "${data.octopusdeploy_project.finance.id}"
+  name       = "SQLConnectionString"
+  type       = "String"
+  value      = "Server=myServerAddress;Database=myDataBase;Trusted_Connection=True;"
+
+  scope {
+    environments = ["${data.octopusdeploy_environment.staging.id}"]
+  }
+
+  prompt{
+    label    = "SQL Server Connection String"
+    required = false
+  }
+}
+```
+
+Data usage (with scope):
+
+```hcl
+data "octopusdeploy_project" "finance" {
+    name = "Finance"
+}
+
+data "octopusdeploy_environment" "staging" {
+    name = "Staging"
+}
+
+data "octopusdeploy_variable" "connection_string" {
+  project_id = "${data.octopusdeploy_project.finance.id}"
+  name       = "SQLConnectionString"
+  scope {
+    environments = ["${data.octopusdeploy_environment.staging.id}"]
+  }
+}
+```
+
+### Argument Reference
+
+* `project_id` (Required) ID of the Project to assign the variable against.
+* `name` - (Required) Name of the variable
+* `type` - (Required) Type of the variable. Must be one of `String`, `Certificate` or `AmazonWebServicesAccount` (`Sensitive` is not currently supported)
+* `value` - (Required) The value of the variable
+* `description` - (Optional) Description of the variable
+* `scope` - (Optional) The scope to apply to this variable. Contains a list of arrays. All are optional:
+    * (Optional) `environments`, `machines`, `actions`, `roles`, `channels`, `tenant_tags`
+* `prompt` - (Optional) Prompt for value when a build is run
+    * `label` - (Optional) The label for the prompt
+    * `description` - (Optional) The description for the prompt
+    * `required`- (Optional) Whether or not the value is required
+
+### Attributes reference
+
+* `id` - ID of the variable
+* `name` - Name of the variable
+* `type` - Type of the variable
+* `value` - Value of the variable
+* `description` - Description of the variable
