@@ -10,18 +10,22 @@ import (
 )
 
 func TestAccOctopusDeployVariableBasic(t *testing.T) {
-	const tfVarPrefix = "octopusdeploy_variable.foo"
-	const tfVarProjectID = "Projects-1"
+	const tfVarPrefix = "octopusdeploy_variable.foovar"
 	const tfVarName = "tf-var-1"
 	const tfVarDesc = "Terraform testing module variable"
 	const tfVarValue = "abcd-123456"
+
+	const projectName = "Funky Monkey Var Test"
+	const lifeCycleID = "Lifecycles-1"
+	const projectGroupID = "ProjectGroups-1"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testOctopusDeployVariableDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testVariableBasic(tfVarProjectID, tfVarName, tfVarDesc, tfVarValue),
+				Config: testVariableBasic(projectName, lifeCycleID, projectGroupID, tfVarName, tfVarDesc, tfVarValue),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployVariableExists(tfVarPrefix),
 					resource.TestCheckResourceAttr(
@@ -36,18 +40,26 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 	})
 }
 
-func testVariableBasic(projectID, name, description, value string) string {
-	return fmt.Sprintf(`
-		resource "octopusdeploy_variable" "foo" {
-			project_id  = "%s"
+func testVariableBasic(projectName, projectLifecycleID, projectGroupID, name, description, value string) string {
+	config := fmt.Sprintf(`
+		resource "octopusdeploy_project" "foo" {
+			name           = "%s"
+			lifecycle_id    = "%s"
+			project_group_id = "%s"
+		}
+
+		resource "octopusdeploy_variable" "foovar" {
+			project_id  = "${octopusdeploy_project.foo.id}"
 			name        = "%s"
 			description = "%s"
 			type        = "String"
 			value       = "%s"
 		}
 		`,
-		projectID, name, description, value,
+		projectName, projectLifecycleID, projectGroupID, name, description, value,
 	)
+	fmt.Println(config)
+	return config
 }
 
 func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
@@ -58,11 +70,13 @@ func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
 }
 
 func existsVarHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.Variable.GetByID(r.Primary.Attributes["project_id"], r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving variable %s", err)
-		}
+	projID := s.RootModule().Resources["octopusdeploy_project.foo"].Primary.ID
+	varID := s.RootModule().Resources["octopusdeploy_variable.foovar"].Primary.ID
+
+	if _, err := client.Variable.GetByID(projID, varID); err != nil {
+		return fmt.Errorf("Received an error retrieving variable %s", err)
 	}
+
 	return nil
 }
 
@@ -72,14 +86,14 @@ func testOctopusDeployVariableDestroy(s *terraform.State) error {
 }
 
 func destroyVarHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.Variable.DeleteSingle(r.Primary.Attributes["project_id"], r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
-				continue
-			}
-			return fmt.Errorf("Received an error retrieving variable %s", err)
+	projID := s.RootModule().Resources["octopusdeploy_project.foo"].Primary.ID
+	varID := s.RootModule().Resources["octopusdeploy_variable.foovar"].Primary.ID
+
+	if _, err := client.Variable.DeleteSingle(projID, varID); err != nil {
+		if err == octopusdeploy.ErrItemNotFound {
+			return nil
 		}
-		return fmt.Errorf("Variable still exists")
+		return fmt.Errorf("Received an error retrieving variable %s", err)
 	}
-	return nil
+	return fmt.Errorf("Variable still exists")
 }

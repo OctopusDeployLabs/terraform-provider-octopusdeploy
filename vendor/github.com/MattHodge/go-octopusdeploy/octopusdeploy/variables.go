@@ -181,7 +181,7 @@ func (s *VariableService) UpdateSingle(projectid string, variable *Variable) (*V
 	}
 
 	if !found {
-		return nil, fmt.Errorf("Variable with ID %s was not found in variable set %s for updating", variable.ID, projectid)
+		return nil, ErrItemNotFound
 	}
 
 	return s.Update(projectid, variables)
@@ -204,7 +204,7 @@ func (s *VariableService) DeleteSingle(projectid string, variableID string) (*Va
 	}
 
 	if !found {
-		return nil, fmt.Errorf("Variable with ID %s was not found in variable set %s for removal", variableID, projectid)
+		return nil, ErrItemNotFound
 	}
 
 	return s.Update(projectid, variables)
