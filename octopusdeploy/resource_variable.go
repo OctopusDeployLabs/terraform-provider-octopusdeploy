@@ -78,9 +78,6 @@ func resourceVariable() *schema.Resource {
 }
 
 func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
-	octoMutex.Lock("atom-variable")
-	defer octoMutex.Unlock("atom-variable")
-
 	client := m.(*octopusdeploy.Client)
 
 	variableID := d.Id()
