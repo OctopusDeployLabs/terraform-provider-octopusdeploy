@@ -244,3 +244,5 @@ func validateVariable(d *schema.ResourceData) error {
 
 	return nil
 }
+
+//Noop to get GitHub to re-run unit tests
