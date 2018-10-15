@@ -11,9 +11,10 @@ import (
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
-			"octopusdeploy_project":     dataProject(),
-			"octopusdeploy_environment": dataEnvironment(),
-			"octopusdeploy_variable":    dataVariable(),
+			"octopusdeploy_project":       dataProject(),
+			"octopusdeploy_environment":   dataEnvironment(),
+			"octopusdeploy_variable":      dataVariable(),
+			"octopusdeploy_machinepolicy": dataMachinePolicy(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_project":                           resourceProject(),
