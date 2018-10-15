@@ -53,7 +53,7 @@ func dataMachine() *schema.Resource {
 				Computed: true,
 			},
 
-			"environmentids": &schema.Schema{
+			"environments": &schema.Schema{
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -72,7 +72,7 @@ func dataMachine() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"machinepolicyid": &schema.Schema{
+			"machinepolicy": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -137,11 +137,11 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 			d.Set("endpoint_tentacleversiondetails_version", m.Endpoint.TentacleVersionDetails.Version)
 			d.Set("endpoint_thumbprint", m.Endpoint.Thumbprint)
 			d.Set("endpoint_uri", m.Endpoint.URI)
-			d.Set("environmentids", m.EnvironmentIDs)
+			d.Set("environments", m.EnvironmentIDs)
 			d.Set("haslatestcalamari", m.HasLatestCalamari)
 			d.Set("isdisabled", m.IsDisabled)
 			d.Set("isinprocess", m.IsInProcess)
-			d.Set("machinepolicyid", m.MachinePolicyID)
+			d.Set("machinepolicy", m.MachinePolicyID)
 			d.Set("roles", m.Roles)
 			d.Set("status", m.Status)
 			d.Set("statussummary", m.StatusSummary)
