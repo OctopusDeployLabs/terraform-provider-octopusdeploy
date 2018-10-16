@@ -308,3 +308,5 @@ func (s *VariableService) MatchesScope(variableScope, definedScope *VariableScop
 
 	return matched, &matchedScopes, nil
 }
+
+//Noop to get GitHub to re-run unit tests
