@@ -113,7 +113,7 @@ func addConfigurationTransformDeploymentStepSchema(schemaToAddToo interface{}) *
 }
 
 // addStandardDeploymentStepSchema adds the common schema for Octopus Deploy Steps
-func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resource {
+func addStandardDeploymentStepSchema(schemaToAddToo interface{}, requireRole bool) *schema.Resource {
 	schemaResource := schemaToAddToo.(*schema.Resource)
 	schemaResource.Schema["step_condition"] = &schema.Schema{
 		Type:        schema.TypeString,
@@ -147,7 +147,8 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resourc
 
 	schemaResource.Schema["target_roles"] = &schema.Schema{
 		Type:     schema.TypeList,
-		Required: true,
+		Required: requireRole,
+		Optional: !requireRole,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -215,11 +216,17 @@ func getDeploymentStepInlineScriptSchema() *schema.Schema {
 					Description: "The script body.",
 					Required:    true,
 				},
+				"run_on_server": {
+					Type:        schema.TypeBool,
+					Description: "Whether the script runs on the server (true) or target (false)",
+					Optional:    true,
+					Default:     false,
+				},
 			},
 		},
 	}
 
-	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
 
 	return schemaToReturn
 }
@@ -240,12 +247,18 @@ func getDeploymentStepPackageScriptSchema() *schema.Schema {
 					Description: "Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS.",
 					Optional:    true,
 				},
+				"run_on_server": {
+					Type:        schema.TypeBool,
+					Description: "Whether the script runs on the server (true) or target (false)",
+					Optional:    true,
+					Default:     false,
+				},
 			},
 		},
 	}
 
 	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
-	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
 
 	return schemaToReturn
 }
@@ -285,7 +298,7 @@ func getDeploymentStepIISWebsiteSchema() *schema.Schema {
 	}
 
 	schemaToReturn.Elem = addConfigurationTransformDeploymentStepSchema(schemaToReturn.Elem)
-	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, true)
 	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
 	schemaToReturn.Elem = addIISApplicationPoolSchema(schemaToReturn.Elem)
 
@@ -328,7 +341,7 @@ func getDeploymentStepWindowsServiceSchema() *schema.Schema {
 	}
 
 	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
-	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, true)
 	schemaToReturn.Elem = addConfigurationTransformDeploymentStepSchema(schemaToReturn.Elem)
 
 	return schemaToReturn
@@ -494,6 +507,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 			scriptType := localStep["script_type"].(string)
 			scriptBody := localStep["script_body"].(string)
+			runOnServer := localStep["run_on_server"].(bool)
 			stepCondition := localStep["step_condition"].(string)
 			stepName := localStep["step_name"].(string)
 			stepStartTrigger := localStep["step_start_trigger"].(string)
@@ -508,7 +522,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Name:       stepName,
 						ActionType: "Octopus.Script",
 						Properties: map[string]string{
-							"Octopus.Action.RunOnServer":                "false",
+							"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
 							"Octopus.Action.Script.ScriptSource":        "Inline",
 							"Octopus.Action.Package.DownloadOnTentacle": "False",
 							"Octopus.Action.Script.ScriptBody":          scriptBody,
@@ -547,6 +561,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			stepCondition := localStep["step_condition"].(string)
 			stepName := localStep["step_name"].(string)
 			stepStartTrigger := localStep["step_start_trigger"].(string)
+			runOnServer := localStep["run_on_server"].(bool)
 
 			deploymentStep := &octopusdeploy.DeploymentStep{
 				Name:               stepName,
@@ -558,7 +573,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Name:       stepName,
 						ActionType: "Octopus.Script",
 						Properties: map[string]string{
-							"Octopus.Action.RunOnServer":                "false",
+							"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
 							"Octopus.Action.Script.ScriptSource":        "Package",
 							"Octopus.Action.Package.DownloadOnTentacle": "False",
 							"Octopus.Action.Package.FeedId":             feedID,
