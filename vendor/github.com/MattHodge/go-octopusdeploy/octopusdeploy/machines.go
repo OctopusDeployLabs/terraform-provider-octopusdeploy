@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/dghubble/sling"
 )
@@ -81,43 +80,20 @@ func NewMachine(Name string, Disabled bool, EnvironmentIDs []string, Roles []str
 // sending to Octopus Deploy. Used when adding or updating machines.
 func ValidateMachineValues(Machine *Machine) error {
 	if Machine.Endpoint != nil {
-		if Machine.Endpoint.URI != Machine.URI {
-			return fmt.Errorf("URI and Endpoint.URI must match. They are currently %s and %s", Machine.URI, Machine.Endpoint.URI)
-		}
-		if Machine.Endpoint.Thumbprint != Machine.Thumbprint {
-			return fmt.Errorf("Thumbprint and Endpoint.Thumbprint must match. They are currently %s and %s", Machine.Thumbprint, Machine.Endpoint.Thumbprint)
+		matchingPropertiesErr := ValidateMultipleProperties([]error{
+			ValidatePropertiesMatch(Machine.Endpoint.Thumbprint, "Machine.Endpoint.Thumbprint", Machine.Thumbprint, "Machine.Thumbprint"),
+			ValidatePropertiesMatch(Machine.Endpoint.URI, "Machine.Endpoint.URI", Machine.URI, "Machine.URI"),
+		})
+
+		if matchingPropertiesErr != nil {
+			return matchingPropertiesErr
 		}
 	}
 
-	// Check TenantedDeploymentParticipation
-	ValidTenantedDeploymentModes := []string{
-		"Untenanted", "TenantedOrUntenanted", "Tenanted",
-	}
-	var TenantedDeploymentParticipationOK bool
-	for _, a := range ValidTenantedDeploymentModes {
-		if a == Machine.TenantedDeploymentParticipation {
-			TenantedDeploymentParticipationOK = true
-		}
-	}
-	if !TenantedDeploymentParticipationOK {
-		return fmt.Errorf("TenantedDeploymentParticipation must be one of \"%v\"", strings.Join(ValidTenantedDeploymentModes, ","))
-	}
-
-	// Check Status
-	Statuses := []string{
-		"Online", "Offline", "Unknown", "NeedsUpgrade", "CalamariNeedsUpgrade", "Disabled",
-	}
-	var StatusOK bool
-	for _, a := range Statuses {
-		if a == Machine.Status {
-			StatusOK = true
-		}
-	}
-	if !StatusOK {
-		return fmt.Errorf("Status must be one of \"%v\"", strings.Join(Statuses, ","))
-	}
-
-	return nil
+	return ValidateMultipleProperties([]error{
+		ValidatePropertyValues("Machine.Status", Machine.Status, ValidMachineStatuses),
+		ValidatePropertyValues("Machine.TenantedDeploymentParticipation", Machine.TenantedDeploymentParticipation, ValidTenantedDeploymentModes),
+	})
 }
 
 // Get returns a single machine with a given MachineID
