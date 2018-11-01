@@ -26,6 +26,10 @@
 
 
 [[constraint]]
+  branch = "all"
+  name = "github.com/pawelpabich/terraform-provider-octopusdeploy"
+
+[[constraint]]
   branch = "master"
   name = "github.com/MattHodge/go-octopusdeploy"
 
