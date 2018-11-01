@@ -21,6 +21,7 @@ type Client struct {
 	Variable          *VariableService
 	MachinePolicy     *MachinePolicyService
 	Machine           *MachineService
+	Lifecycle         *LifecycleService
 }
 
 // NewClient returns a new Client.
@@ -39,6 +40,7 @@ func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Clien
 		Variable:          NewVariableService(base.New()),
 		MachinePolicy:     NewMachinePolicyService(base.New()),
 		Machine:           NewMachineService(base.New()),
+		Lifecycle:         NewLifecycleService(base.New()),
 	}
 }
 

@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:297cc79acfdbd53709c1b41b2831f163c0a72a650a85e92c07c829a8100b5586"
+  digest = "1:4cd8c67076bf4631efe0e6aa78dc44bc1e9af61f74199c2612da671cec9a1b4a"
   name = "github.com/MattHodge/go-octopusdeploy"
   packages = ["octopusdeploy"]
   pruneopts = "UT"
-  revision = "0e0c9701dd62e516a05990299055a882af879c9d"
+  revision = "e351e50852b0b1c5952bfcc4b6296d0463caeb08"
 
 [[projects]]
   digest = "1:dc2ba13235a4c8f80a40599575a3f10acb4736cb372f1a68b88333c06564471d"
