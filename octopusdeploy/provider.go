@@ -16,6 +16,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_variable":      dataVariable(),
 			"octopusdeploy_machinepolicy": dataMachinePolicy(),
 			"octopusdeploy_machine":       dataMachine(),
+			"octopusdeploy_library_variable_set": dataLibraryVariableSet(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_project":                           resourceProject(),
@@ -24,6 +25,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_environment":                       resourceEnvironment(),
 			"octopusdeploy_variable":                          resourceVariable(),
 			"octopusdeploy_machine":                           resourceMachine(),
+			"octopusdeploy_library_variable_set":              resourceLibraryVariableSet(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": &schema.Schema{
