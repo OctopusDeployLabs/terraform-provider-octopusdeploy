@@ -16,6 +16,14 @@ func dataEnvironment() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"use_guided_failure": &schema.Schema{
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -37,7 +45,7 @@ func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 	d.SetId(env.ID)
 	d.Set("name", env.Name)
 	d.Set("description", env.Description)
-	d.Set("useguidedfailure", env.UseGuidedFailure)
+	d.Set("use_guided_failure", env.UseGuidedFailure)
 
 	return nil
 }
