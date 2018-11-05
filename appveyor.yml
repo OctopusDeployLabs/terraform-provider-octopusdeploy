@@ -31,6 +31,7 @@ before_test:
 after_test:
   # Build Binaries
   - ps: .\build.ps1 -BuildVersion $env:APPVEYOR_BUILD_VERSION
+  - ps: Get-ChildItem .\*.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
 
 deploy:
   release: terraform-provider-octopusdeploy-v$(appveyor_build_version)
