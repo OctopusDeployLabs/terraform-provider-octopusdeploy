@@ -61,6 +61,7 @@ func resourceProject() *schema.Resource {
 			"deployment_step_iis_website":     getDeploymentStepIISWebsiteSchema(),
 			"deployment_step_inline_script":   getDeploymentStepInlineScriptSchema(),
 			"deployment_step_package_script":  getDeploymentStepPackageScriptSchema(),
+			"deployment_step_apply_terraform":  getDeploymentStepApplyTerraformSchema(),
 		},
 	}
 }
@@ -245,6 +246,33 @@ func getDeploymentStepPackageScriptSchema() *schema.Schema {
 				"script_parameters": {
 					Type:        schema.TypeString,
 					Description: "Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS.",
+					Optional:    true,
+				},
+				"run_on_server": {
+					Type:        schema.TypeBool,
+					Description: "Whether the script runs on the server (true) or target (false)",
+					Optional:    true,
+					Default:     false,
+				},
+			},
+		},
+	}
+
+	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
+
+	return schemaToReturn
+}
+
+func getDeploymentStepApplyTerraformSchema() *schema.Schema {
+	schemaToReturn := &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"additional_init_params": {
+					Type:        schema.TypeString,
+					Description: "Additional parameters passed to the init command.",
 					Optional:    true,
 				},
 				"run_on_server": {
@@ -580,6 +608,62 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 							"Octopus.Action.Package.PackageId":          packageID,
 							"Octopus.Action.Script.ScriptFileName":      scriptFileName,
 							"Octopus.Action.Script.ScriptParameters":    scriptParameters,
+						},
+					},
+				},
+			}
+
+			if targetRolesInterface, ok := localStep["target_roles"]; ok {
+				var targetRoleSlice []string
+
+				targetRoles := targetRolesInterface.([]interface{})
+
+				for _, role := range targetRoles {
+					targetRoleSlice = append(targetRoleSlice, role.(string))
+				}
+
+				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+			}
+
+			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
+		}
+	}
+
+	if v, ok := d.GetOk("deployment_step_apply_terraform"); ok {
+		steps := v.([]interface{})
+		for _, raw := range steps {
+
+			localStep := raw.(map[string]interface{})
+
+			feedID := localStep["feed_id"].(string)
+			packageID := localStep["package"].(string)
+			stepCondition := localStep["step_condition"].(string)
+			stepName := localStep["step_name"].(string)
+			stepStartTrigger := localStep["step_start_trigger"].(string)
+			runOnServer := localStep["run_on_server"].(bool)
+			additionalInitParams := localStep["additional_init_params"].(string)
+
+			deploymentStep := &octopusdeploy.DeploymentStep{
+				Name:               stepName,
+				PackageRequirement: "LetOctopusDecide",
+				Condition:          stepCondition,
+				StartTrigger:       stepStartTrigger,
+				Actions: []octopusdeploy.DeploymentAction{
+					{
+						Name:       stepName,
+						ActionType: "Octopus.TerraformApply",
+						Properties: map[string]string{
+							"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
+							"Octopus.Action.Script.ScriptSource":        "Package",
+							"Octopus.Action.Package.DownloadOnTentacle": "False",
+							"Octopus.Action.Package.FeedId":             feedID,
+							"Octopus.Action.Package.PackageId":          packageID,
+							"Octopus.Action.Aws.AssumeRole": 			 "False",
+							"Octopus.Action.AwsAccount.UseInstanceRole":  "False",
+							"Octopus.Action.Terraform.AdditionalInitParams": additionalInitParams,
+							"Octopus.Action.Terraform.AllowPluginDownloads": "True",
+							"Octopus.Action.Terraform.ManagedAccount": "None",
+
 						},
 					},
 				},
