@@ -13,14 +13,16 @@ import (
 type Client struct {
 	sling *sling.Sling
 	// Octopus Deploy API Services
-	DeploymentProcess *DeploymentProcessService
-	ProjectGroup      *ProjectGroupService
-	Project           *ProjectService
-	ProjectTrigger    *ProjectTriggerService
-	Environment       *EnvironmentService
-	Variable          *VariableService
-	MachinePolicy     *MachinePolicyService
-	Machine           *MachineService
+	DeploymentProcess  *DeploymentProcessService
+	ProjectGroup       *ProjectGroupService
+	Project            *ProjectService
+	ProjectTrigger     *ProjectTriggerService
+	Environment        *EnvironmentService
+	Variable           *VariableService
+	MachinePolicy      *MachinePolicyService
+	Machine            *MachineService
+	Lifecycle          *LifecycleService
+	LibraryVariableSet *LibraryVariableSetService
 }
 
 // NewClient returns a new Client.
@@ -30,15 +32,17 @@ func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Clien
 	fmt.Println(baseURLWithAPI)
 	base := sling.New().Client(httpClient).Base(baseURLWithAPI).Set("X-Octopus-ApiKey", octopusAPIKey)
 	return &Client{
-		sling:             base,
-		DeploymentProcess: NewDeploymentProcessService(base.New()),
-		ProjectGroup:      NewProjectGroupService(base.New()),
-		Project:           NewProjectService(base.New()),
-		ProjectTrigger:    NewProjectTriggerService(base.New()),
-		Environment:       NewEnvironmentService(base.New()),
-		Variable:          NewVariableService(base.New()),
-		MachinePolicy:     NewMachinePolicyService(base.New()),
-		Machine:           NewMachineService(base.New()),
+		sling:              base,
+		DeploymentProcess:  NewDeploymentProcessService(base.New()),
+		ProjectGroup:       NewProjectGroupService(base.New()),
+		Project:            NewProjectService(base.New()),
+		ProjectTrigger:     NewProjectTriggerService(base.New()),
+		Environment:        NewEnvironmentService(base.New()),
+		Variable:           NewVariableService(base.New()),
+		MachinePolicy:      NewMachinePolicyService(base.New()),
+		Machine:            NewMachineService(base.New()),
+		Lifecycle:          NewLifecycleService(base.New()),
+		LibraryVariableSet: NewLibraryVariableSetService(base.New()),
 	}
 }
 
