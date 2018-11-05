@@ -28,7 +28,7 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						envPrefix, "description", envDesc),
 					resource.TestCheckResourceAttr(
-						envPrefix, "useguidedfailure", envGuided),
+						envPrefix, "use_guided_failure", envGuided),
 				),
 			},
 		},
@@ -40,7 +40,7 @@ func testEnvironmenttBasic(name, description, useguided string) string {
 		resource "octopusdeploy_environment" "foo" {
 			name           = "%s"
 			description    = "%s"
-			useguidedfailure = "%s"
+			use_guided_failure = "%s"
 		}
 		`,
 		name, description, useguided,

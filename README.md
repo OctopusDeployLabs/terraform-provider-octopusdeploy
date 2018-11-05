@@ -13,7 +13,9 @@ Based on the [go-octopusdeploy](https://github.com/MattHodge/go-octopusdeploy) O
 - [Go Dependencies](#go-dependencies)
 - [Downloading & Installing](#downloading--installing)
 - [Configure the Provider](#configure-the-provider)
+- [Data Sources](#data-sources)
 - [Provider Resources](#provider-resources)
+- [Provider Resources (To Be Moved To /docs)](#provider-resources-to-be-moved-to-docs)
     - [Project Groups](#project-groups)
         - [Example Usage](#example-usage)
         - [Argument Reference](#argument-reference)
@@ -27,20 +29,16 @@ Based on the [go-octopusdeploy](https://github.com/MattHodge/go-octopusdeploy) O
                 - [Feed and Packages](#feed-and-packages)
                 - [IIS Application Pool](#iis-application-pool)
         - [Attributes Reference](#attributes-reference-1)
-    - [Environment](#environment)
+    - [Variables](#variables)
         - [Example Usage](#example-usage-2)
         - [Argument Reference](#argument-reference-2)
         - [Attributes reference](#attributes-reference)
-    - [Variables](#variables)
+    - [Machine Policies](#machine-policies)
         - [Example Usage](#example-usage-3)
         - [Argument Reference](#argument-reference-3)
-        - [Attributes reference](#attributes-reference-1)
-    - [Machine Policies](#machine-policies)
-        - [Example Usage](#example-usage-4)
-        - [Argument Reference](#argument-reference-4)
         - [Attributes Reference](#attributes-reference-2)
     - [Machines (Deployment Targets)](#machines-deployment-targets)
-        - [Example Usage](#example-usage-5)
+        - [Example Usage](#example-usage-4)
         - [Resource Argument Reference](#resource-argument-reference)
         - [Resource Attribute Reference](#resource-attribute-reference)
         - [Data Argument Reference](#data-argument-reference)
@@ -75,7 +73,16 @@ provider "octopusdeploy" {
 }
 ```
 
+# Data Sources
+
+* [octopusdeploy_environment](docs/provider/data_sources/environment.md)
+
 # Provider Resources
+
+* [octopusdeploy_environment](docs/provider/resources/environment.md)
+
+
+# Provider Resources (To Be Moved To /docs)
 ## Project Groups
 
 [Project groups](https://octopus.com/docs/deployment-process/projects#project-group) are a way of organizing your projects.
@@ -280,43 +287,6 @@ The following arguments are shared amongst the `deployment_step` resources.
 
 ### Attributes Reference
 * `deployment_process_id` - The ID of the projects deployment process.
-
-## Environment
-
-[Environments](https://octopus.com/docs/infrastructure/environments) are a way of defining different configurations for Octopus Deploy.
-
-### Example Usage
-
-Basic usage:
-
-```hcl
-resource "octopusdeploy_environment" "staging" {
-    name = "Staging"
-    description = "Staging environment"
-    useguidedfailure = false
-}
-```
-
-Data usage:
-
-```hcl
-data "octopusdeploy_environment" "staging" {
-    name = "Staging"
-}
-```
-
-### Argument Reference
-
-* `name` - (Required) Name of the environment
-* `description` - (Optional) Description of the environment
-* `useguidedfailure` - (Optional) Use guided failures for this environment (defaults to `false`)
-
-### Attributes reference
-
-* `id` - ID of the environment
-* `name` - Name of the environment
-* `description` - Description of the environment
-* `useguidedfailure` - Use guided failures for this environment
 
 ## Variables
 

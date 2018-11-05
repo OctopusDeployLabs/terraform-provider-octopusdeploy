@@ -35,11 +35,11 @@ func testMachineBasic(machineName string) string {
 	data "octopusdeploy_machinepolicy" "default" {
 		name = "Default Machine Policy"
 	}
-	  
+
 	resource "octopusdeploy_environment" "tf_test_env" {
 		name           = "OctopusTestMachineBasic"
 		description    = "Environment for testing Octopus Machines"
-		useguidedfailure = "false"
+		use_guided_failure = "false"
 	}
 
 	resource "octopusdeploy_machine" "foomac" {
@@ -49,7 +49,7 @@ func testMachineBasic(machineName string) string {
 		machinepolicy                   = "${data.octopusdeploy_machinepolicy.default.id}"
 		roles                           = ["Prod"]
 		tenanteddeploymentparticipation = "Untenanted"
-	  
+
 		endpoint {
 		  communicationstyle = "None"
 		  thumbprint         = ""
