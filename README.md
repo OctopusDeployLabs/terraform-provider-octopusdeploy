@@ -75,12 +75,13 @@ provider "octopusdeploy" {
 
 # Data Sources
 
-* [octopusdeploy_environment](docs/provider/data_sources/environment.md)
+- [octopusdeploy_environment](docs/provider/data_sources/environment.md)
+- [octopusdeploy_lifecycle](docs/provider/data_sources/lifecycle.md)
 
 # Provider Resources
 
-* [octopusdeploy_environment](docs/provider/resources/environment.md)
-
+- [octopusdeploy_environment](docs/provider/resources/environment.md)
+- [octopusdeploy_lifecycle](docs/provider/resources/lifecycle.md)
 
 # Provider Resources (To Be Moved To /docs)
 ## Project Groups
