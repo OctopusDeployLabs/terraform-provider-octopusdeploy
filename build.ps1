@@ -6,10 +6,6 @@ Param
     $BuildVersion
 )
 
-if ($env:APPVEYOR_REPO_BRANCH -ne "master") {
-	return "Not building artifacts as this is not the master branch"
-}
-
 
 . ".\integration\appveyor_scripts\functions\Start-ProcessAdvanced.ps1"
 
