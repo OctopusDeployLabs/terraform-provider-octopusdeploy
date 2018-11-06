@@ -18,6 +18,8 @@ The following arguments are supported:
 
 ## Attributes Reference
 
+* `id` - ID of the environment.
+
 * `description` - A description of the environment.
 
 * `use_guided_failure` - Whether guided failure mode is enabled or not.
