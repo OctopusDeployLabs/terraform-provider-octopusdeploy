@@ -23,6 +23,22 @@ func resourceLibraryVariableSet() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"templates": getTemplatesSchema(),
+		},
+	}
+}
+
+func getTemplatesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"name": &schema.Schema{
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
 		},
 	}
 }
@@ -52,8 +68,29 @@ func buildLibraryVariableSetResource(d *schema.ResourceData) *octopusdeploy.Libr
 		libraryVariableSet.Description = attr.(string)
 	}
 
+	if attr, ok := d.GetOk("templates"); ok {
+		tfTemplates := attr.([]interface {})
+
+		for _, tfTemplate := range tfTemplates {
+			template := buildTemplateResource(tfTemplate.(map[string]interface{}))
+			libraryVariableSet.Templates = append(libraryVariableSet.Templates, template)
+		}
+	}
+
 	return libraryVariableSet
 }
+
+func buildTemplateResource(tfTemplate map[string]interface{}) octopusdeploy.ActionTemplateParameter {
+	template := octopusdeploy.ActionTemplateParameter{
+		Name: tfTemplate["name"].(string),
+		DisplaySettings: map[string]string{
+			"Octopus.ControlType": "SingleLineText",
+		},
+	}
+
+	return template;
+}
+
 
 func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
