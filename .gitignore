@@ -30,3 +30,6 @@ tflog.txt
 terraform-provider-octopusdeploy
 terraform-provider-octopusdeploy.exe
 main.tf
+
+node_modules/
+.env

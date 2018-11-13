@@ -23,7 +23,7 @@ func resourceEnvironment() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"useguidedfailure": &schema.Schema{
+			"use_guided_failure": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -49,7 +49,7 @@ func resourceEnvironmentRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("name", env.Name)
 	d.Set("description", env.Description)
-	d.Set("useguidedfailure", env.UseGuidedFailure)
+	d.Set("use_guided_failure", env.UseGuidedFailure)
 
 	return nil
 }
@@ -65,7 +65,7 @@ func buildEnvironmentResource(d *schema.ResourceData) *octopusdeploy.Environment
 		envDesc = envDescInterface.(string)
 	}
 
-	envGuidedInterface, ok := d.GetOk("useguidedfailure")
+	envGuidedInterface, ok := d.GetOk("use_guided_failure")
 	if ok {
 		envGuided = envGuidedInterface.(bool)
 	}

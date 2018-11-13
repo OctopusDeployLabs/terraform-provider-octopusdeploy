@@ -57,6 +57,34 @@ func resourceProject() *schema.Resource {
 					"None",
 				}),
 			},
+			"tenanted_deployment_mode": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "Untenanted",
+				ValidateFunc: validateValueFunc([]string{
+					"Untenanted",
+					"TenantedOrUntenanted",
+					"Tenanted",
+				}),
+			},
+			"included_library_variable_sets": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"discrete_channel_release": &schema.Schema{
+				Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default: false,
+			},
+			"skip_package_steps_that_are_already_installed": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default: false,
+			},
 			"deployment_step_windows_service": getDeploymentStepWindowsServiceSchema(),
 			"deployment_step_iis_website":     getDeploymentStepIISWebsiteSchema(),
 			"deployment_step_inline_script":   getDeploymentStepInlineScriptSchema(),
@@ -705,6 +733,22 @@ func buildProjectResource(d *schema.ResourceData) *octopusdeploy.Project {
 
 	if attr, ok := d.GetOk("skip_machine_behavior"); ok {
 		project.ProjectConnectivityPolicy.SkipMachineBehavior = attr.(string)
+	}
+
+	if attr, ok := d.GetOk("tenanted_deployment_mode"); ok {
+		project.TenantedDeploymentMode = attr.(string)
+	}
+
+	if attr, ok := d.GetOk("included_library_variable_sets"); ok {
+		project.IncludedLibraryVariableSetIds = getSliceFromTerraformTypeList(attr)
+	}
+
+	if attr, ok := d.GetOk("discrete_channel_release"); ok {
+		project.DiscreteChannelRelease = attr.(bool)
+	}
+
+	if attr, ok := d.GetOk("skip_package_steps_that_are_already_installed"); ok {
+		project.DefaultToSkipIfAlreadyInstalled = attr.(bool)
 	}
 
 	return project
