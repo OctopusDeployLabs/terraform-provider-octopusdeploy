@@ -47,7 +47,7 @@ func testAccDeploymentProcessBasic() string {
 			step {
 				name = "Test"
 				target_roles = ["A", "B"]
-				package_requirement = "BeforePackageAcquisition"
+				package_requirement = "AfterPackageAcquisition"
 				condition = "Variable"
 				condition_expression = "#{run}"
 				start_trigger = "StartWithPrevious"
@@ -61,9 +61,9 @@ func testAccDeploymentProcessBasic() string {
 					required = true
 					worker_pool_id = "WorkerPools-1"
 					environments = ["Environments-1"]
-					excluded_environments = ["Environments-2"]
-					channels = ["Channels-1"]
-					tenant_tags = ["tag/tag"]
+					//excluded_environments = ["Environments-2"]
+					//channels = ["Channels-1"]
+					//tenant_tags = ["tag/tag"]
 					
 					primary_package {
 						package_id = "MyPackage"
@@ -86,9 +86,15 @@ func testAccDeploymentProcessBasic() string {
 					}
 
 					property {
-						key = "Octopus.Action.RunOnServer"
-						value = "true"
+						key = "Octopus.Action.Script.ScriptFileName"
+						value = "Run.ps132"
 					}
+
+					property {
+						key = "Octopus.Action.Script.ScriptSource"
+						value = "Package"
+					}
+
 				}
 			}
 		}
