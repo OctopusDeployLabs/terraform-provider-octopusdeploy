@@ -49,6 +49,7 @@ func getPackageSchema() *schema.Schema {
 		Type:        schema.TypeString,
 		Description: "Whether to extract the package during deployment",
 		Optional:    true,
+		Default:     "true",
 	}
 	return s
 }

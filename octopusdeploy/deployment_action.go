@@ -3,11 +3,12 @@ package octopusdeploy
 import (
 	"github.com/MattHodge/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform/helper/schema"
+	"strconv"
 )
 
 func getDeploymentActionSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeSet,
+		Type:     schema.TypeList,
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -20,6 +21,12 @@ func getDeploymentActionSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "The type of action",
 					Required:    true,
+				},
+				"run_on_server": {
+					Type:        schema.TypeBool,
+					Description: "Whether this step is disabled",
+					Optional:    true,
+					Default: 	 false,
 				},
 				"disabled": {
 					Type:        schema.TypeBool,
@@ -92,6 +99,11 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 		Properties:           map[string]string{},
 	}
 
+	runOnServer := tfAction["run_on_server"]
+	if runOnServer != nil {
+		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
+	}
+
 	workerPoolId := tfAction["worker_pool_id"]
 	if workerPoolId != nil {
 		action.WorkerPoolId = workerPoolId.(string)
@@ -99,8 +111,10 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 
 	if primaryPackage, ok := tfAction["primary_package"]; ok {
 		tfPrimaryPackage := primaryPackage.(*schema.Set).List()
-		primaryPackage := buildPackageReferenceResource(tfPrimaryPackage[0].(map[string]interface{}))
-		action.Packages = append(action.Packages, primaryPackage)
+		if(len(tfPrimaryPackage) > 0) {
+			primaryPackage := buildPackageReferenceResource(tfPrimaryPackage[0].(map[string]interface{}))
+			action.Packages = append(action.Packages, primaryPackage)
+		}
 	}
 
 	if tfPkgs, ok := tfAction["package"]; ok {

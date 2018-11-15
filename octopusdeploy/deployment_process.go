@@ -60,9 +60,9 @@ func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.Deplo
 	}
 
 	if attr, ok := d.GetOk("step"); ok {
-		tfSteps := attr.(*schema.Set)
+		tfSteps := attr.([]interface {})
 
-		for _, tfStep := range tfSteps.List() {
+		for _, tfStep := range tfSteps {
 			step := buildDeploymentStepResource(tfStep.(map[string]interface{}))
 			deploymentProcess.Steps = append(deploymentProcess.Steps, step)
 		}

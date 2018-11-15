@@ -97,6 +97,22 @@ func testAccDeploymentProcessBasic() string {
 
 				}
 			}
+
+ step {
+        name = "Step2"
+        start_trigger = "StartWithPrevious"
+
+        action {
+            name = "Step2"
+            action_type = "Octopus.Script"
+            run_on_server = true
+
+            property {
+                key = "Octopus.Action.Script.ScriptBody"
+                value = "Write-Host 'hi'"
+            }
+        }
+    }
 		}
 		`
 }
