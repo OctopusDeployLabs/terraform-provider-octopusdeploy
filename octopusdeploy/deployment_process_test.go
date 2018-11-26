@@ -141,7 +141,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 			return err
 		}
 
-		expectedNumberOfSteps := 1
+		expectedNumberOfSteps := 2
 		numberOfSteps := len(process.Steps)
 		if numberOfSteps != expectedNumberOfSteps {
 			return fmt.Errorf("Deployment process has %d steps instead of the expected %d", numberOfSteps, expectedNumberOfSteps)
