@@ -24,7 +24,7 @@ func getDeploymentActionSchema() *schema.Schema {
 				},
 				"run_on_server": {
 					Type:        schema.TypeBool,
-					Description: "Whether this step is disabled",
+					Description: "Whether this step runs on a worker or on the target",
 					Optional:    true,
 					Default: 	 false,
 				},
