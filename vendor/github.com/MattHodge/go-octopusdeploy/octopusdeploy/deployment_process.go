@@ -29,35 +29,76 @@ type DeploymentProcess struct {
 	LastSnapshotID string           `json:"LastSnapshotId,omitempty"`
 	Links          Links            `json:"Links,omitempty"`
 	ProjectID      string           `json:"ProjectId,omitempty"`
-	Steps          []DeploymentStep `json:"Steps"`
-	Version        *int32           `json:"Version"`
+	Steps          []DeploymentStep `json:"Steps,omitempty"`
+	Version        int32            `json:"Version"`
 }
 
 type DeploymentStep struct {
-	ID                 string             `json:"Id"`
-	Name               string             `json:"Name"`
-	PackageRequirement string             `json:"PackageRequirement,omitempty"`                                         // may need its own model / enum
-	Properties         map[string]string  `json:"Properties"`                                                           // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
-	Condition          string             `json:"Condition,omitempty" validate:"oneof=Success Failure Always Variable"` // variable option adds a Property "Octopus.Action.ConditionVariableExpression"
-	StartTrigger       string             `json:"StartTrigger,omitempty" validate:"oneof=StartAfterPrevious StartWithPrevious"`
-	Actions            []DeploymentAction `json:"Actions"`
+	ID                 string                           `json:"Id,omitempty"`
+	Name               string                           `json:"Name"`
+	PackageRequirement DeploymentStepPackageRequirement `json:"PackageRequirement,omitempty"`                                         // may need its own model / enum
+	Properties         map[string]string                `json:"Properties"`                                                           // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
+	Condition          DeploymentStepCondition          `json:"Condition,omitempty" validate:"oneof=Success Failure Always Variable"` // variable option adds a Property "Octopus.Action.ConditionVariableExpression"
+	StartTrigger       DeploymentStepStartTrigger       `json:"StartTrigger,omitempty" validate:"oneof=StartAfterPrevious StartWithPrevious"`
+	Actions            []DeploymentAction               `json:"Actions,omitempty"`
 }
 
 type DeploymentAction struct {
-	ID                            string            `json:"Id"`
-	Name                          string            `json:"Name"`
-	ActionType                    string            `json:"ActionType"`
-	IsDisabled                    bool              `json:"IsDisabled"`
-	CanBeUsedForProjectVersioning bool              `json:"CanBeUsedForProjectVersioning"`
-	Environments                  []string          `json:"Environments"`
-	ExcludedEnvironments          []string          `json:"ExcludedEnvironments"`
-	Channels                      []string          `json:"Channels"`
-	TenantTags                    []string          `json:"TenantTags"`
-	Properties                    map[string]string `json:"Properties"`     // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
-	LastModifiedOn                string            `json:"LastModifiedOn"` // datetime
-	LastModifiedBy                string            `json:"LastModifiedBy"`
-	Links                         Links             `json:"Links"` // may be wrong
+	ID                            string             `json:"Id,omitempty"`
+	Name                          string             `json:"Name"`
+	ActionType                    string             `json:"ActionType"`
+	IsDisabled                    bool               `json:"IsDisabled"`
+	IsRequired                    bool               `json:"IsRequired"`
+	WorkerPoolId                  string             `json:"WorkerPoolId,omitempty"`
+	CanBeUsedForProjectVersioning bool               `json:"CanBeUsedForProjectVersioning"`
+	Environments                  []string           `json:"Environments,omitempty"`
+	ExcludedEnvironments          []string           `json:"ExcludedEnvironments,omitempty"`
+	Channels                      []string           `json:"Channels,omitempty"`
+	TenantTags                    []string           `json:"TenantTags,omitempty"`
+	Properties                    map[string]string  `json:"Properties"` // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
+	Packages                      []PackageReference `json:"Packages,omitempty"`
 }
+
+
+type DeploymentStepPackageRequirement string
+
+const (
+	DeploymentStepPackageRequirement_LetOctopusDecide = DeploymentStepPackageRequirement("LetOctopusDecide")
+	DeploymentStepPackageRequirement_BeforePackageAcquisition = DeploymentStepPackageRequirement("BeforePackageAcquisition")
+	DeploymentStepPackageRequirement_AfterPackageAcquisition = DeploymentStepPackageRequirement("AfterPackageAcquisition")
+)
+
+type DeploymentStepCondition string
+
+const (
+	DeploymentStepCondition_Success = DeploymentStepCondition("Success")
+	DeploymentStepCondition_Failure = DeploymentStepCondition("Failure")
+	DeploymentStepCondition_Always = DeploymentStepCondition("Always")
+	DeploymentStepCondition_Variable = DeploymentStepCondition("Variable")
+)
+
+type DeploymentStepStartTrigger string
+
+const (
+	DeploymentStepStartTrigger_StartAfterPrevious = DeploymentStepStartTrigger("StartAfterPrevious")
+	DeploymentStepStartTrigger_StartWithPrevious = DeploymentStepStartTrigger("StartWithPrevious")
+)
+
+type PackageReference struct {
+	ID                  string            `json:"Id,omitempty"`
+	Name                string            `json:"Name,omitempty"`
+	PackageId           string            `json:"PackageId,omitempty"`
+	FeedId              string            `json:"FeedId"`
+	AcquisitionLocation string            `json:"AcquisitionLocation"` // This can be an expression
+	Properties          map[string]string `json:"Properties"`
+}
+
+const (
+	PackageAcquisitionLocation_Server = "Server"
+	PackageAcquisitionLocation_ExecutionTarget = "ExecutionTarget"
+	PackageAcquisitionLocation_NotAcquired = "NotAcquired"
+)
+
 
 func (d *DeploymentProcess) Validate() error {
 	validate := validator.New()

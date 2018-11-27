@@ -340,7 +340,7 @@ func testAccWithDeploymentStepWindowsService(name, lifeCycleID, projectGroupID, 
 func testAccCheckOctopusDeployProjectDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-	if err := destroyHelper(s, client); err != nil {
+	if err := destroyProjectHelper(s, client); err != nil {
 		return err
 	}
 	return nil
@@ -356,7 +356,7 @@ func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func destroyHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if _, err := client.Project.Get(r.Primary.ID); err != nil {
 			if err == octopusdeploy.ErrItemNotFound {

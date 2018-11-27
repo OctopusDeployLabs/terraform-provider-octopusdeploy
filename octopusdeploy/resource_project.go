@@ -393,15 +393,15 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			serviceAccount := localStep["service_account"].(string)
 			serviceName := localStep["service_name"].(string)
 			serviceStartMode := localStep["service_start_mode"].(string)
-			stepCondition := localStep["step_condition"].(string)
+			stepCondition :=localStep["step_condition"].(string)
 			stepName := localStep["step_name"].(string)
 			stepStartTrigger := localStep["step_start_trigger"].(string)
 
 			deploymentStep := &octopusdeploy.DeploymentStep{
 				Name:               stepName,
 				PackageRequirement: "LetOctopusDecide",
-				Condition:          stepCondition,
-				StartTrigger:       stepStartTrigger,
+				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 				Actions: []octopusdeploy.DeploymentAction{
 					{
 						Name:       stepName,
@@ -471,8 +471,8 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			deploymentStep := &octopusdeploy.DeploymentStep{
 				Name:               stepName,
 				PackageRequirement: "LetOctopusDecide",
-				Condition:          stepCondition,
-				StartTrigger:       stepStartTrigger,
+				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 				Actions: []octopusdeploy.DeploymentAction{
 					{
 						Name:       stepName,
@@ -543,8 +543,8 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			deploymentStep := &octopusdeploy.DeploymentStep{
 				Name:               stepName,
 				PackageRequirement: "LetOctopusDecide",
-				Condition:          stepCondition,
-				StartTrigger:       stepStartTrigger,
+				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 				Actions: []octopusdeploy.DeploymentAction{
 					{
 						Name:       stepName,
@@ -594,8 +594,8 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			deploymentStep := &octopusdeploy.DeploymentStep{
 				Name:               stepName,
 				PackageRequirement: "LetOctopusDecide",
-				Condition:          stepCondition,
-				StartTrigger:       stepStartTrigger,
+				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 				Actions: []octopusdeploy.DeploymentAction{
 					{
 						Name:       stepName,

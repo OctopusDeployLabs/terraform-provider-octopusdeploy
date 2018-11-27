@@ -28,6 +28,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_machine":                           resourceMachine(),
 			"octopusdeploy_library_variable_set":              resourceLibraryVariableSet(),
 			"octopusdeploy_lifecycle":                         resourceLifecycle(),
+			"octopusdeploy_deployment_process":                resourceDeploymentProcess(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": &schema.Schema{
