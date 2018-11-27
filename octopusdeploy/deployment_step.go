@@ -71,6 +71,7 @@ func getDeploymentStepSchema() *schema.Schema {
 				},
 				"action": getDeploymentActionSchema(),
 				"manual_intervention_action": getManualInterventionActionSchema(),
+				"apply_terraform_action": getApplyTerraformActionSchema(),
 				"deploy_package_action": getDeploymentActionSchema(),
 				"deploy_windows_service_action": getDeploymentActionSchema(),
 			},
@@ -112,6 +113,13 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.De
 	if attr, ok := tfStep["manual_intervention_action"]; ok {
 		for _, tfAction := range attr.([]interface {}) {
 			action := buildManualInterventionActionResource(tfAction.(map[string]interface{}))
+			step.Actions = append(step.Actions, action)
+		}
+	}
+
+	if attr, ok := tfStep["apply_terraform_action"]; ok {
+		for _, tfAction := range attr.([]interface {}) {
+			action := buildApplyTerraformActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}

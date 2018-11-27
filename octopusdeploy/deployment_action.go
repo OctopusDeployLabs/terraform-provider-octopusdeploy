@@ -9,11 +9,7 @@ import (
 func getDeploymentActionSchema() *schema.Schema {
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element);
-	element.Schema["action_type"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "The type of action",
-		Required:    true,
-	}
+	addActionTypeSchema(element)
 	addWorkerPoolSchema(element)
 	addPackagesSchema(element)
 
@@ -94,6 +90,14 @@ func addExecutionLocationSchema(element *schema.Resource) {
 	}
 }
 
+func addActionTypeSchema(element *schema.Resource) {
+	element.Schema["action_type"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "The type of action",
+		Required:    true,
+	}
+}
+
 func addWorkerPoolSchema(element *schema.Resource) {
 	element.Schema["worker_pool_id"] = &schema.Schema{
 		Type:        schema.TypeString,
@@ -106,7 +110,6 @@ func addWorkerPoolSchema(element *schema.Resource) {
 func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	action := octopusdeploy.DeploymentAction{
 		Name:                 tfAction["name"].(string),
-		ActionType:           tfAction["action_type"].(string),
 		IsDisabled:           tfAction["disabled"].(bool),
 		IsRequired:           tfAction["required"].(bool),
 		Environments:         getSliceFromTerraformTypeList(tfAction["environments"]),
@@ -114,6 +117,11 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 		Channels:             getSliceFromTerraformTypeList(tfAction["channels"]),
 		TenantTags:           getSliceFromTerraformTypeList(tfAction["tenant_tags"]),
 		Properties:           map[string]string{},
+	}
+
+	actionType := tfAction["action_type"]
+	if actionType != nil {
+		action.ActionType = actionType.(string)
 	}
 
 	// Even though not all actions have these properties, we'll keep them here.
