@@ -15,7 +15,7 @@ func getDeploymentActionSchema() *schema.Schema {
 		Required:    true,
 	}
 	addWorkerPoolSchema(element)
-	addPackagesSchema(element)
+	addPackagesSchema(element, false)
 
 	return actionSchema;
 }

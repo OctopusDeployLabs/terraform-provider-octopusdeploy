@@ -71,8 +71,8 @@ func getDeploymentStepSchema() *schema.Schema {
 				},
 				"action": getDeploymentActionSchema(),
 				"manual_intervention_action": getManualInterventionActionSchema(),
-				"deploy_package_action": getDeploymentActionSchema(),
-				"deploy_windows_service_action": getDeploymentActionSchema(),
+				"deploy_package_action": getDeployPackageAction(),
+				"deploy_windows_service_action": getDeployWindowsServiceActionSchema(),
 			},
 		},
 	}

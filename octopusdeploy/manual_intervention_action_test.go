@@ -26,35 +26,13 @@ func TestAccOctopusDeployManualInterventionAction(t *testing.T) {
 }
 
 func testAccManualInterventionAction() string {
-	return `
-		resource "octopusdeploy_lifecycle" "test" {
-			name = "Test Lifecycle"
+	return testAccBuildTestActionTerraform(`
+		manual_intervention_action {
+			name = "Test"
+			instructions = "Approve Me"
+			responsible_teams = "A Team"
 		}
-
-		resource "octopusdeploy_project_group" "test" {
-			name = "Test Group"
-		}
-
-		resource "octopusdeploy_project" "test" {
-			name             = "Test Project"
-			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
-			project_group_id = "${octopusdeploy_project_group.test.id}"
-		}
-
-		resource "octopusdeploy_deployment_process" "test" {
-			project_id = "${octopusdeploy_project.test.id}"
-
-			step {
-				name = "Test"
-
-				manual_intervention_action {
-					name = "Test"
-					instructions = "Approve Me"
-					responsible_teams = "A Team"
-				}
-			}
-		}
-		`
+	`)
 }
 
 func testAccCheckManualInterventionAction() resource.TestCheckFunc {
