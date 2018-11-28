@@ -113,6 +113,23 @@ func testAccDeploymentProcessBasic() string {
             }
         }
     }
+
+ step {
+        name = "Apply Terraform"
+
+        apply_terraform_action {
+            name = "Apply Terraform"
+            run_on_server = true
+			
+			primary_package {
+				package_id = "MyPackage"
+				feed_id = "feeds-builtin"
+			}
+			
+			additional_init_params = "Init params"
+        }
+    }
+
 		}
 		`
 }
@@ -141,7 +158,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 			return err
 		}
 
-		expectedNumberOfSteps := 2
+		expectedNumberOfSteps := 3
 		numberOfSteps := len(process.Steps)
 		if numberOfSteps != expectedNumberOfSteps {
 			return fmt.Errorf("Deployment process has %d steps instead of the expected %d", numberOfSteps, expectedNumberOfSteps)
