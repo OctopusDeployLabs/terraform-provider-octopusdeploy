@@ -98,21 +98,21 @@ func testAccDeploymentProcessBasic() string {
 				}
 			}
 
- step {
-        name = "Step2"
-        start_trigger = "StartWithPrevious"
-
-        action {
-            name = "Step2"
-            action_type = "Octopus.Script"
-            run_on_server = true
-
-            property {
-                key = "Octopus.Action.Script.ScriptBody"
-                value = "Write-Host 'hi'"
-            }
-        }
-    }
+ 			step {
+ 			       name = "Step2"
+ 			       start_trigger = "StartWithPrevious"
+			
+ 			       action {
+ 			           name = "Step2"
+ 			           action_type = "Octopus.Script"
+ 			           run_on_server = true
+			
+ 			           property {
+ 			               key = "Octopus.Action.Script.ScriptBody"
+ 			               value = "Write-Host 'hi'"
+ 			           }
+ 			       }
+			} 
 		}
 		`
 }
@@ -141,7 +141,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 			return err
 		}
 
-		expectedNumberOfSteps := 1
+		expectedNumberOfSteps := 2
 		numberOfSteps := len(process.Steps)
 		if numberOfSteps != expectedNumberOfSteps {
 			return fmt.Errorf("Deployment process has %d steps instead of the expected %d", numberOfSteps, expectedNumberOfSteps)

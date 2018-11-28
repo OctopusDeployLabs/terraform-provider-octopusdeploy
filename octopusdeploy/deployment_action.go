@@ -106,7 +106,6 @@ func addWorkerPoolSchema(element *schema.Resource) {
 func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	action := octopusdeploy.DeploymentAction{
 		Name:                 tfAction["name"].(string),
-		ActionType:           tfAction["action_type"].(string),
 		IsDisabled:           tfAction["disabled"].(bool),
 		IsRequired:           tfAction["required"].(bool),
 		Environments:         getSliceFromTerraformTypeList(tfAction["environments"]),
@@ -114,6 +113,11 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 		Channels:             getSliceFromTerraformTypeList(tfAction["channels"]),
 		TenantTags:           getSliceFromTerraformTypeList(tfAction["tenant_tags"]),
 		Properties:           map[string]string{},
+	}
+
+	actionType := tfAction["action_type"]
+	if actionType != nil {
+		action.ActionType = actionType.(string)
 	}
 
 	// Even though not all actions have these properties, we'll keep them here.
