@@ -9,8 +9,7 @@ func getApplyTerraformActionSchema()  *schema.Schema {
 
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
-	//addActionTypeSchema(element)
-	addPrimaryPackageSchema(element)
+	addPrimaryPackageSchema(element, false)
 
 	element.Schema["additional_init_params"] = &schema.Schema{
 		Type:        schema.TypeString,
