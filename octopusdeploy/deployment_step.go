@@ -74,6 +74,7 @@ func getDeploymentStepSchema() *schema.Schema {
 				"apply_terraform_action": getApplyTerraformActionSchema(),
 				"deploy_package_action": getDeployPackageAction(),
 				"deploy_windows_service_action": getDeployWindowsServiceActionSchema(),
+				"run_script_action": getRunScripActionSchema(),
 			},
 		},
 	}
@@ -134,6 +135,13 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.De
 	if attr, ok := tfStep["deploy_windows_service_action"]; ok {
 		for _, tfAction := range attr.([]interface {}) {
 			action := buildDeployWindowsServiceActionResource(tfAction.(map[string]interface{}))
+			step.Actions = append(step.Actions, action)
+		}
+	}
+
+	if attr, ok := tfStep["run_script_action"]; ok {
+		for _, tfAction := range attr.([]interface {}) {
+			action := buildRunScriptActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
