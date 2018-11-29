@@ -11,7 +11,7 @@ func getDeploymentActionSchema() *schema.Schema {
 	addExecutionLocationSchema(element);
 	addActionTypeSchema(element)
 	addWorkerPoolSchema(element)
-	addPackagesSchema(element)
+	addPackagesSchema(element, false)
 
 	return actionSchema;
 }

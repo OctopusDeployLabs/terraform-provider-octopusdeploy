@@ -7,7 +7,7 @@ import (
 
 func getDeployPackageAction() *schema.Schema {
 	actionSchema, element := getCommonDeploymentActionSchema()
-	addPrimaryPackageSchema(element)
+	addPrimaryPackageSchema(element, true)
 	//addCustomInstallationDirectoryFeature(element)
 	//addIisWebSiteAndApplicationPoolFeature(element)
 	addWindowsServiceFeature(element)
@@ -22,7 +22,8 @@ func getDeployPackageAction() *schema.Schema {
 }
 
 func buildDeployPackageActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	resource := buildDeploymentActionResource(tfAction)
-	// TODO
-	return resource
+	action := buildDeploymentActionResource(tfAction)
+	action.ActionType = "Octopus.TentaclePackage"
+	addWindowsServiceFeatureToActionResource(tfAction, action)
+	return action
 }

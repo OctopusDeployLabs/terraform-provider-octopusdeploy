@@ -5,14 +5,14 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func addPrimaryPackageSchema(element *schema.Resource)  {
-	element.Schema["primary_package"] = getPrimaryPackageSchema();
+func addPrimaryPackageSchema(element *schema.Resource, required bool)  {
+	element.Schema["primary_package"] = getPackageSchema(required);
 }
 
-func addPackagesSchema(element *schema.Resource)  {
-	addPrimaryPackageSchema(element)
+func addPackagesSchema(element *schema.Resource, primaryIsRequired bool)  {
+	addPrimaryPackageSchema(element, primaryIsRequired)
 
-	element.Schema["package"] = getPrimaryPackageSchema();
+	element.Schema["package"] = getPackageSchema(false);
 
 	packageElementSchema := element.Schema["package"].Elem.(*schema.Resource).Schema
 	packageElementSchema["name"] = &schema.Schema{
@@ -28,11 +28,12 @@ func addPackagesSchema(element *schema.Resource)  {
 	}
 }
 
-func getPrimaryPackageSchema() *schema.Schema {
+func getPackageSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Description: "The primary package for the action",
 		Type:        schema.TypeSet,
-		Optional:    true,
+		Required:    required,
+		Optional:    !required,
 		MaxItems:	 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{

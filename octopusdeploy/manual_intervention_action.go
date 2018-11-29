@@ -25,6 +25,13 @@ func getManualInterventionActionSchema()  *schema.Schema {
 
 func buildManualInterventionActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
-	// TODO
+	resource.ActionType = "Octopus.Manual"
+	resource.Properties["Octopus.Action.Manual.Instructions"] = tfAction["instructions"].(string);
+
+	responsibleTeams := tfAction["responsible_teams"]
+	if responsibleTeams != nil {
+		resource.Properties["Octopus.Action.Manual.ResponsibleTeamIds"] = responsibleTeams.(string)
+	}
+
 	return resource
 }

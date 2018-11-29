@@ -134,6 +134,35 @@ func testAccDeploymentProcessBasic() string {
 		`
 }
 
+func testAccBuildTestActionTerraform(action string) string {
+	return fmt.Sprintf( `
+		resource "octopusdeploy_lifecycle" "test" {
+			name = "Test Lifecycle"
+		}
+
+		resource "octopusdeploy_project_group" "test" {
+			name = "Test Group"
+		}
+
+		resource "octopusdeploy_project" "test" {
+			name             = "Test Project"
+			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
+			project_group_id = "${octopusdeploy_project_group.test.id}"
+		}
+
+		resource "octopusdeploy_deployment_process" "test" {
+			project_id = "${octopusdeploy_project.test.id}"
+
+			step {
+				name = "Test"
+				target_roles = ["WebServer"]
+
+				%s
+			}
+		}
+		`, action)
+}
+
 func testAccCheckOctopusDeployDeploymentProcessDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 
