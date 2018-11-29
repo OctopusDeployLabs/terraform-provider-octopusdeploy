@@ -42,7 +42,7 @@ func TestAccOctopusDeployWindowsServiceFeature(t *testing.T) {
 }
 
 func testAccDeployWindowsServiceAction() string {
-	return testAccBuildTestActionTerraform(`
+	return testAccBuildTestAction(`
 		deploy_windows_service_action {
 			name = "Test"
 
@@ -65,7 +65,7 @@ func testAccDeployWindowsServiceAction() string {
 }
 
 func testAccWindowsServiceFeature() string {
-	return testAccBuildTestActionTerraform(`
+	return testAccBuildTestAction(`
 		deploy_package_action {
 			name = "Test"
 

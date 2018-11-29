@@ -9,33 +9,39 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccOctopusDeployManualInterventionAction(t *testing.T) {
+func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccManualInterventionAction(),
+				Config: testAccApplyTerraformAction(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckManualInterventionAction(),
+					testAccCheckApplyTerraformAction(),
 				),
 			},
 		},
 	})
 }
 
-func testAccManualInterventionAction() string {
+func testAccApplyTerraformAction() string {
 	return testAccBuildTestAction(`
-		manual_intervention_action {
-			name = "Test"
-			instructions = "Approve Me"
-			responsible_teams = "A Team"
-		}
+		apply_terraform_action {
+            name = "Apply Terraform"
+            run_on_server = true
+			
+			primary_package {
+				package_id = "MyPackage"
+				feed_id = "feeds-builtin"
+			}
+			
+			additional_init_params = "Init params"
+        }
 	`)
 }
 
-func testAccCheckManualInterventionAction() resource.TestCheckFunc {
+func testAccCheckApplyTerraformAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
@@ -46,18 +52,13 @@ func testAccCheckManualInterventionAction() resource.TestCheckFunc {
 
 		action := process.Steps[0].Actions[0]
 
-		if action.ActionType != "Octopus.Manual" {
+		if action.ActionType != "Octopus.TerraformApply" {
 			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
 		}
 
-		if action.Properties["Octopus.Action.Manual.Instructions"] != "Approve Me" {
-			return fmt.Errorf("Instructions is incorrect: %s", action.Properties["Octopus.Action.Manual.Instructions"])
+		if action.Properties["Octopus.Action.Terraform.AdditionalInitParams"] != "Init params" {
+			return fmt.Errorf("AdditionalInitParams is incorrect: %s", action.Properties["Octopus.Action.Terraform.AdditionalInitParams"])
 		}
-
-		if action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"] != "A Team" {
-			return fmt.Errorf("ResponsibleTeamIds is incorrect: %s", action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"])
-		}
-
 
 		return nil;
 	}
