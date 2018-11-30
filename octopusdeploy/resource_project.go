@@ -320,9 +320,9 @@ func getDeploymentStepApplyTerraformSchema() *schema.Schema {
 					Type:        schema.TypeList,
 					Optional:    true,
 					Elem: &schema.Schema {
-						Type: schema.TypeString
-					}
-				}
+						Type: schema.TypeString,
+					},
+				},
 			},
 		},
 	}
