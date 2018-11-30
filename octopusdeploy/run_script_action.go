@@ -29,7 +29,6 @@ func addScriptFromPackageSchema(element *schema.Resource) {
 		Optional:    true,
 	}
 
-
 	element.Schema["script_parameters"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS",
@@ -38,18 +37,11 @@ func addScriptFromPackageSchema(element *schema.Resource) {
 }
 
 func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-
-}
-
-
-func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 
 	resource.ActionType = "Octopus.Script"
 
-	resource.Properties["Octopus.Action.Script.ScriptFileName"] = tfAction["script_file_name"].(string)
-	resource.Properties["Octopus.Action.Script.ScriptParameters"] = tfAction["script_parameters"].(string)
-	resource.Properties["Octopus.Action.Script.ScriptSource"] = "Package"
+	resource.Properties = merge(resource.Properties, buildRunScriptFromPackageActionResource(tfAction))
 
 	variableSubstitutionInFiles := tfAction["variable_substitution_in_files"].(string)
 
@@ -61,4 +53,15 @@ func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy
 	}
 
 	return resource
+}
+
+func buildRunScriptFromPackageActionResource(tfAction map[string]interface{})  map[string]string {
+
+	properties := make(map[string]string)
+
+	properties["Octopus.Action.Script.ScriptFileName"] = tfAction["script_file_name"].(string)
+	properties["Octopus.Action.Script.ScriptParameters"] = tfAction["script_parameters"].(string)
+	properties["Octopus.Action.Script.ScriptSource"] = "Package"
+
+	return properties
 }

@@ -30,7 +30,17 @@ func buildRunKubectlScriptActionResource(tfAction map[string]interface{}) octopu
 	return resource
 }
 func merge(map1 map[string]string, map2 map[string]string) map[string]string {
+	result := make(map[string]string)
 
+	for k, v := range map1 {
+		result[k] = v
+	}
+
+	for k, v := range map2 {
+		result[k] = v
+	}
+
+	return result
 }
 func buildScriptFromPackageProperties(tfAction map[string]interface{}) map[string]string {
 	properties := make(map[string]string)
