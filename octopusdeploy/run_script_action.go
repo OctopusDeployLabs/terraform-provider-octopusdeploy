@@ -5,11 +5,23 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func getRunScripActionSchema()  *schema.Schema {
+func getRunScriptActionSchema()  *schema.Schema {
 
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
 	addPrimaryPackageSchema(element, false)
+	addScriptFromPackageSchema(element)
+
+	element.Schema["variable_substitution_in_files"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",
+	}
+
+	return actionSchema;
+}
+
+func addScriptFromPackageSchema(element *schema.Resource) {
 
 	element.Schema["script_file_name"] = &schema.Schema{
 		Type:        schema.TypeString,
@@ -22,14 +34,6 @@ func getRunScripActionSchema()  *schema.Schema {
 		Description: "Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS",
 		Optional:    true,
 	}
-
-	element.Schema["variable_substitution_in_files"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",
-	}
-
-	return actionSchema;
 }
 
 func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
@@ -37,9 +41,7 @@ func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy
 
 	resource.ActionType = "Octopus.Script"
 
-	resource.Properties["Octopus.Action.Script.ScriptFileName"] = tfAction["script_file_name"].(string)
-	resource.Properties["Octopus.Action.Script.ScriptParameters"] = tfAction["script_parameters"].(string)
-	resource.Properties["Octopus.Action.Script.ScriptSource"] = "Package"
+	resource.Properties = merge(resource.Properties, buildRunScriptFromPackageActionResource(tfAction))
 
 	variableSubstitutionInFiles := tfAction["variable_substitution_in_files"].(string)
 
@@ -51,4 +53,15 @@ func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy
 	}
 
 	return resource
+}
+
+func buildRunScriptFromPackageActionResource(tfAction map[string]interface{})  map[string]string {
+
+	properties := make(map[string]string)
+
+	properties["Octopus.Action.Script.ScriptFileName"] = tfAction["script_file_name"].(string)
+	properties["Octopus.Action.Script.ScriptParameters"] = tfAction["script_parameters"].(string)
+	properties["Octopus.Action.Script.ScriptSource"] = "Package"
+
+	return properties
 }
