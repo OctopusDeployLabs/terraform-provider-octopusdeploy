@@ -316,6 +316,13 @@ func getDeploymentStepApplyTerraformSchema() *schema.Schema {
 					Optional:    true,
 					Default:     false,
 				},
+				"terraform_file_variable_replacement": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					Elem: &schema.Schema {
+						Type: schema.TypeString,
+					},
+				},
 			},
 		},
 	}
@@ -758,6 +765,18 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 				}
 
 				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+			}
+
+			if targetFilesInterface, ok := localStep["terraform_file_variable_replacement"]; ok {
+				var targetFilesSlice []string
+
+				targetFiles := targetFilesInterface.([]interface{})
+
+				for _, file := range targetFiles {
+					targetFilesSlice = append(targetFilesSlice, file.(string))
+				}
+
+				deploymentStep.Properties = map[string]string{"Octopus.Action.Terraform.FileSubstitution": strings.Join(targetFilesSlice, "\n")}
 			}
 
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
