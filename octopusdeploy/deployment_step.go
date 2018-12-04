@@ -70,6 +70,9 @@ func getDeploymentStepSchema() *schema.Schema {
 					Optional:    true,
 				},
 				"action": getDeploymentActionSchema(),
+				"manual_intervention_action": getManualInterventionActionSchema(),
+				"deploy_package_action": getDeployPackageAction(),
+				"deploy_windows_service_action": getDeployWindowsServiceActionSchema(),
 			},
 		},
 	}
@@ -102,6 +105,27 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.De
 	if attr, ok := tfStep["action"]; ok {
 		for _, tfAction := range attr.([]interface {}) {
 			action := buildDeploymentActionResource(tfAction.(map[string]interface{}))
+			step.Actions = append(step.Actions, action)
+		}
+	}
+
+	if attr, ok := tfStep["manual_intervention_action"]; ok {
+		for _, tfAction := range attr.([]interface {}) {
+			action := buildManualInterventionActionResource(tfAction.(map[string]interface{}))
+			step.Actions = append(step.Actions, action)
+		}
+	}
+
+	if attr, ok := tfStep["deploy_package_action"]; ok {
+		for _, tfAction := range attr.([]interface {}) {
+			action := buildDeployPackageActionResource(tfAction.(map[string]interface{}))
+			step.Actions = append(step.Actions, action)
+		}
+	}
+
+	if attr, ok := tfStep["deploy_windows_service_action"]; ok {
+		for _, tfAction := range attr.([]interface {}) {
+			action := buildDeployWindowsServiceActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}

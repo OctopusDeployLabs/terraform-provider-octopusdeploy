@@ -7,81 +7,98 @@ import (
 )
 
 func getDeploymentActionSchema() *schema.Schema {
-	return &schema.Schema{
+	actionSchema, element := getCommonDeploymentActionSchema()
+	addExecutionLocationSchema(element);
+	element.Schema["action_type"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "The type of action",
+		Required:    true,
+	}
+	addWorkerPoolSchema(element)
+	addPackagesSchema(element, false)
+
+	return actionSchema;
+}
+
+func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
+	element := &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:        schema.TypeString,
+				Description: "The name of the action",
+				Required:    true,
+			},
+			"disabled": {
+				Type:        schema.TypeBool,
+				Description: "Whether this step is disabled",
+				Optional:    true,
+				Default:     false,
+			},
+			"required": {
+				Type:        schema.TypeBool,
+				Description: "Whether this step is required and cannot be skipped",
+				Optional:    true,
+				Default:     false,
+			},
+			"environments": {
+				Description: "The environments that this step will run in",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"excluded_environments": {
+				Description: "The environments that this step will be skipped in",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"channels": {
+				Description: "The channels that this step applies to",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"tenant_tags": {
+				Description: "The tags for the tenants that this step applies to",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"property": getPropertySchema(),
+		},
+	}
+
+	actionSchema := &schema.Schema{
 		Type:     schema.TypeList,
 		Optional: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"name": {
-					Type:        schema.TypeString,
-					Description: "The name of the action",
-					Required:    true,
-				},
-				"action_type": {
-					Type:        schema.TypeString,
-					Description: "The type of action",
-					Required:    true,
-				},
-				"run_on_server": {
-					Type:        schema.TypeBool,
-					Description: "Whether this step runs on a worker or on the target",
-					Optional:    true,
-					Default: 	 false,
-				},
-				"disabled": {
-					Type:        schema.TypeBool,
-					Description: "Whether this step is disabled",
-					Optional:    true,
-					Default: 	 false,
-				},
-				"required": {
-					Type:        schema.TypeBool,
-					Description: "Whether this step is required and cannot be skipped",
-					Optional:    true,
-					Default: 	 false,
-				},
-				"worker_pool_id": {
-					Type:        schema.TypeString,
-					Description: "Which worker pool to run on",
-					Optional:    true,
-				},
-				"environments": &schema.Schema{
-					Description: "The environments that this step will run in",
-					Type:        schema.TypeList,
-					Optional:    true,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-				"excluded_environments": &schema.Schema{
-					Description: "The environments that this still will be skipped in",
-					Type:        schema.TypeList,
-					Optional:    true,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-				"channels": &schema.Schema{
-					Description: "The channels that this step applies to",
-					Type:        schema.TypeList,
-					Optional:    true,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-				"tenant_tags": &schema.Schema{
-					Description: "The tags for the tenants that this step applies to",
-					Type:        schema.TypeList,
-					Optional:    true,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-				"property": getPropertySchema(),
-				"primary_package": getPrimaryPackageSchema(),
-				"package": getPackageSchema(),
-			},
-		},
+		Elem:     element,
+	}
+
+	return actionSchema, element
+}
+
+func addExecutionLocationSchema(element *schema.Resource) {
+	element.Schema["run_on_server"] = &schema.Schema{
+		Type:        schema.TypeBool,
+		Description: "Whether this step runs on a worker or on the target",
+		Optional:    true,
+		Default:     false,
+	}
+}
+
+func addWorkerPoolSchema(element *schema.Resource) {
+	element.Schema["worker_pool_id"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "Which worker pool to run on",
+		Optional:    true,
 	}
 }
 
@@ -89,7 +106,6 @@ func getDeploymentActionSchema() *schema.Schema {
 func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	action := octopusdeploy.DeploymentAction{
 		Name:                 tfAction["name"].(string),
-		ActionType:           tfAction["action_type"].(string),
 		IsDisabled:           tfAction["disabled"].(bool),
 		IsRequired:           tfAction["required"].(bool),
 		Environments:         getSliceFromTerraformTypeList(tfAction["environments"]),
@@ -99,6 +115,13 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 		Properties:           map[string]string{},
 	}
 
+	actionType := tfAction["action_type"]
+	if actionType != nil {
+		action.ActionType = actionType.(string)
+	}
+
+	// Even though not all actions have these properties, we'll keep them here.
+	// They will just be ignored if the action doesn't have it
 	runOnServer := tfAction["run_on_server"]
 	if runOnServer != nil {
 		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))

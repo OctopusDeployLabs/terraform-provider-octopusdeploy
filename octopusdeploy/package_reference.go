@@ -5,12 +5,35 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+func addPrimaryPackageSchema(element *schema.Resource, required bool)  {
+	element.Schema["primary_package"] = getPackageSchema(required);
+}
 
-func getPrimaryPackageSchema() *schema.Schema {
+func addPackagesSchema(element *schema.Resource, primaryIsRequired bool)  {
+	addPrimaryPackageSchema(element, primaryIsRequired)
+
+	element.Schema["package"] = getPackageSchema(false);
+
+	packageElementSchema := element.Schema["package"].Elem.(*schema.Resource).Schema
+	packageElementSchema["name"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "The name of the package",
+		Required:    true,
+	}
+	packageElementSchema["extract_during_deployment"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "Whether to extract the package during deployment",
+		Optional:    true,
+		Default:     "true",
+	}
+}
+
+func getPackageSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Description: "The primary package for the action",
 		Type:        schema.TypeSet,
-		Optional:    true,
+		Required:    required,
+		Optional:    !required,
 		MaxItems:	 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -37,22 +60,6 @@ func getPrimaryPackageSchema() *schema.Schema {
 	}
 }
 
-func getPackageSchema() *schema.Schema {
-	s := getPrimaryPackageSchema();
-	elementSchema := s.Elem.(*schema.Resource).Schema
-	elementSchema["name"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "The name of the package",
-		Required:    true,
-	}
-	elementSchema["extract_during_deployment"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "Whether to extract the package during deployment",
-		Optional:    true,
-		Default:     "true",
-	}
-	return s
-}
 
 func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
 	pkg := octopusdeploy.PackageReference{

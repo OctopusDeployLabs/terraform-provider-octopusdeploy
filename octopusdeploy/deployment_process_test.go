@@ -98,23 +98,52 @@ func testAccDeploymentProcessBasic() string {
 				}
 			}
 
- step {
-        name = "Step2"
-        start_trigger = "StartWithPrevious"
-
-        action {
-            name = "Step2"
-            action_type = "Octopus.Script"
-            run_on_server = true
-
-            property {
-                key = "Octopus.Action.Script.ScriptBody"
-                value = "Write-Host 'hi'"
-            }
-        }
-    }
+ 			step {
+ 			       name = "Step2"
+ 			       start_trigger = "StartWithPrevious"
+			
+ 			       action {
+ 			           name = "Step2"
+ 			           action_type = "Octopus.Script"
+ 			           run_on_server = true
+			
+ 			           property {
+ 			               key = "Octopus.Action.Script.ScriptBody"
+ 			               value = "Write-Host 'hi'"
+ 			           }
+ 			       }
+			} 
 		}
 		`
+}
+
+func testAccBuildTestActionTerraform(action string) string {
+	return fmt.Sprintf( `
+		resource "octopusdeploy_lifecycle" "test" {
+			name = "Test Lifecycle"
+		}
+
+		resource "octopusdeploy_project_group" "test" {
+			name = "Test Group"
+		}
+
+		resource "octopusdeploy_project" "test" {
+			name             = "Test Project"
+			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
+			project_group_id = "${octopusdeploy_project_group.test.id}"
+		}
+
+		resource "octopusdeploy_deployment_process" "test" {
+			project_id = "${octopusdeploy_project.test.id}"
+
+			step {
+				name = "Test"
+				target_roles = ["WebServer"]
+
+				%s
+			}
+		}
+		`, action)
 }
 
 func testAccCheckOctopusDeployDeploymentProcessDestroy(s *terraform.State) error {
