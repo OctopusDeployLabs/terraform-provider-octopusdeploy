@@ -13,6 +13,9 @@ func resourceEnvironment() *schema.Resource {
 		Read:   resourceEnvironmentRead,
 		Update: resourceEnvironmentUpdate,
 		Delete: resourceEnvironmentDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{

@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/MattHodge/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -13,6 +14,9 @@ func resourceVariable() *schema.Resource {
 		Read:   resourceVariableRead,
 		Update: resourceVariableUpdate,
 		Delete: resourceVariableDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceVariableImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"project_id": &schema.Schema{
@@ -75,6 +79,18 @@ func resourceVariable() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceVariableImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importStrings := strings.Split(d.Id(), ":")
+	if len(importStrings) != 2 {
+		return nil, fmt.Errorf("octopusdeploy_variable import must be in the form of ProjectID:VariableID (e.g. Projects-62:0906031f-68ba-4a15-afaa-657c1564e07b")
+	}
+
+	d.Set("project_id", importStrings[0])
+	d.SetId(importStrings[1])
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
