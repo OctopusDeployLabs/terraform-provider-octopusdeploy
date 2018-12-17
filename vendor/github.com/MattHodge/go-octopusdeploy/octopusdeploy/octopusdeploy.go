@@ -18,6 +18,7 @@ type Client struct {
 	Project            *ProjectService
 	ProjectTrigger     *ProjectTriggerService
 	Environment        *EnvironmentService
+	Feed			   *FeedService
 	Variable           *VariableService
 	MachinePolicy      *MachinePolicyService
 	Machine            *MachineService
@@ -38,6 +39,7 @@ func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Clien
 		Project:            NewProjectService(base.New()),
 		ProjectTrigger:     NewProjectTriggerService(base.New()),
 		Environment:        NewEnvironmentService(base.New()),
+		Feed:        		NewFeedService(base.New()),
 		Variable:           NewVariableService(base.New()),
 		MachinePolicy:      NewMachinePolicyService(base.New()),
 		Machine:            NewMachineService(base.New()),
