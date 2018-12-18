@@ -31,6 +31,7 @@ func resourceVariable() *schema.Resource {
 					//"Sensitive",
 					"Certificate",
 					"AmazonWebServicesAccount",
+					"AzureAccount",
 				}),
 			},
 			"value": &schema.Schema{
