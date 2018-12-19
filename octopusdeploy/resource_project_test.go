@@ -16,13 +16,14 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
 	const projectGroupID = "ProjectGroups-1"
+	const allowDeploymentsToNoTargets = "true"
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID),
+				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID, allowDeploymentsToNoTargets),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
@@ -31,6 +32,8 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 						terraformNamePrefix, "lifecycle_id", lifeCycleID),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "project_group_id", projectGroupID),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "allow_deployments_to_no_targets", allowDeploymentsToNoTargets),
 				),
 			},
 		},
@@ -91,6 +94,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	const lifeCycleID = "Lifecycles-1"
 	const projectGroupID = "ProjectGroups-1"
 	const description = "I am a new description"
+	const allowDeploymentsToNoTargets = "true"
 	inlineScriptRegex, _ := regexp.Compile(".*Get\\-Process.*")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -99,7 +103,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// create project with no description
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID),
+				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID, allowDeploymentsToNoTargets),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
@@ -197,7 +201,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 			},
 			// update again by remove its description
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID),
+				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID, allowDeploymentsToNoTargets),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
@@ -220,15 +224,16 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	})
 }
 
-func testAccProjectBasic(name, lifeCycleID, projectGroupID string) string {
+func testAccProjectBasic(name, lifeCycleID, projectGroupID string, allowDeploymentsToNoTargets string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_project" "foo" {
 			name           = "%s"
 			lifecycle_id    = "%s"
 			project_group_id = "%s"
+			allow_deployments_to_no_targets = "%s"
 		}
 		`,
-		name, lifeCycleID, projectGroupID,
+		name, lifeCycleID, projectGroupID, allowDeploymentsToNoTargets,
 	)
 }
 

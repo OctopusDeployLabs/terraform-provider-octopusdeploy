@@ -57,6 +57,11 @@ func resourceProject() *schema.Resource {
 					"None",
 				}),
 			},
+			"allow_deployments_to_no_targets": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"tenanted_deployment_mode": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -805,6 +810,10 @@ func buildProjectResource(d *schema.ResourceData) *octopusdeploy.Project {
 		project.ProjectConnectivityPolicy.SkipMachineBehavior = attr.(string)
 	}
 
+	if attr, ok := d.GetOk("allow_deployments_to_no_targets"); ok {
+		project.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets = attr.(bool)
+	}
+
 	if attr, ok := d.GetOk("tenanted_deployment_mode"); ok {
 		project.TenantedDeploymentMode = attr.(string)
 	}
@@ -893,6 +902,7 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("project_group_id", project.ProjectGroupID)
 	d.Set("default_failure_mode", project.DefaultGuidedFailureMode)
 	d.Set("skip_machine_behavior", project.ProjectConnectivityPolicy.SkipMachineBehavior)
+	d.Set("allow_deployments_to_no_targets", project.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets)
 
 	return nil
 }
