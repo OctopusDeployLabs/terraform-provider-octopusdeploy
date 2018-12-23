@@ -15,22 +15,21 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 	const terraformNamePrefix = "octopusdeploy_project.foo"
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
-	const projectGroupID = "ProjectGroups-1"
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID),
+				Config: testAccProjectBasic(projectName, lifeCycleID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "lifecycle_id", lifeCycleID),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "project_group_id", projectGroupID),
+					resource.TestCheckResourceAttrSet(
+						terraformNamePrefix, "project_group_id"),
 				),
 			},
 		},
@@ -41,7 +40,6 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 	const terraformNamePrefix = "octopusdeploy_project.foo"
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
-	const projectGroupID = "ProjectGroups-1"
 	const serviceName = "Epic Service"
 	const executablePath = `bin\\MyService.exe` // needs 4 slashes to appear in the TF config as a double slash
 	const stepName = "Deploying Epic Service"
@@ -56,7 +54,7 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWithDeploymentStepWindowsService(projectName, lifeCycleID, projectGroupID, serviceName, executablePath, stepName, packageName, targetRoles),
+				Config: testAccWithDeploymentStepWindowsService(projectName, lifeCycleID, serviceName, executablePath, stepName, packageName, targetRoles),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestMatchResourceAttr(
@@ -65,8 +63,8 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "lifecycle_id", lifeCycleID),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "project_group_id", projectGroupID),
+					resource.TestCheckResourceAttrSet(
+						terraformNamePrefix, "project_group_id"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step_windows_service.0.service_name", serviceName),
 					resource.TestCheckResourceAttr(
@@ -89,7 +87,6 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	const terraformNamePrefix = "octopusdeploy_project.foo"
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
-	const projectGroupID = "ProjectGroups-1"
 	const description = "I am a new description"
 	inlineScriptRegex, _ := regexp.Compile(".*Get\\-Process.*")
 	resource.Test(t, resource.TestCase{
@@ -99,15 +96,15 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// create project with no description
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID),
+				Config: testAccProjectBasic(projectName, lifeCycleID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "lifecycle_id", lifeCycleID),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "project_group_id", projectGroupID),
+					resource.TestCheckResourceAttrSet(
+						terraformNamePrefix, "project_group_id"),
 				),
 			},
 			// create update it with a description + build steps
@@ -119,8 +116,8 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "name", "Project Name"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "lifecycle_id", "Lifecycles-1"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "project_group_id", "ProjectGroups-1"),
+					resource.TestCheckResourceAttrSet(
+						terraformNamePrefix, "project_group_id"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "description", "My Awesome Description"),
 					resource.TestCheckResourceAttr(
@@ -197,15 +194,15 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 			},
 			// update again by remove its description
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID),
+				Config: testAccProjectBasic(projectName, lifeCycleID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "lifecycle_id", lifeCycleID),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "project_group_id", projectGroupID),
+					resource.TestCheckResourceAttrSet(
+						terraformNamePrefix, "project_group_id"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "description", ""),
 					resource.TestCheckNoResourceAttr(
@@ -220,23 +217,31 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	})
 }
 
-func testAccProjectBasic(name, lifeCycleID, projectGroupID string) string {
+func testAccProjectBasic(name, lifeCycleID string) string {
 	return fmt.Sprintf(`
+		resource "octopusdeploy_project_group" "foo" {
+			name = "Integration Test Project Group"
+		}
+
 		resource "octopusdeploy_project" "foo" {
 			name           = "%s"
 			lifecycle_id    = "%s"
-			project_group_id = "%s"
+			project_group_id = "${octopusdeploy_project_group.foo.id}"
 		}
 		`,
-		name, lifeCycleID, projectGroupID,
+		name, lifeCycleID,
 	)
 }
 
 const testAccWithMultipleDeploymentStepWindowsService = `
+resource "octopusdeploy_project_group" "foo" {
+	name = "Integration Test Project Group"
+}
+
 resource "octopusdeploy_project" "foo" {
 	name             = "Project Name"
 	lifecycle_id     = "Lifecycles-1"
-	project_group_id = "ProjectGroups-1"
+	project_group_id = "${octopusdeploy_project_group.foo.id}"
 	description      = "My Awesome Description"
 
 	deployment_step_windows_service {
@@ -314,12 +319,16 @@ resource "octopusdeploy_project" "foo" {
 }
 `
 
-func testAccWithDeploymentStepWindowsService(name, lifeCycleID, projectGroupID, serviceName, executablePath, stepName, packageName string, targetRoles []string) string {
+func testAccWithDeploymentStepWindowsService(name, lifeCycleID, serviceName, executablePath, stepName, packageName string, targetRoles []string) string {
 	return fmt.Sprintf(`
+		resource "octopusdeploy_project_group" "foo" {
+			name = "Integration Test Project Group"
+		}
+
 		resource "octopusdeploy_project" "foo" {
 			name             = "%s"
 			lifecycle_id     = "%s"
-			project_group_id = "%s"
+			project_group_id = "${octopusdeploy_project_group.foo.id}"
 
 			deployment_step_windows_service {
 				executable_path = "%s"
@@ -333,7 +342,7 @@ func testAccWithDeploymentStepWindowsService(name, lifeCycleID, projectGroupID, 
 			}
 		}
 		`,
-		name, lifeCycleID, projectGroupID, executablePath, serviceName, stepName, packageName, strings.Join(targetRoles, "\",\""),
+		name, lifeCycleID, executablePath, serviceName, stepName, packageName, strings.Join(targetRoles, "\",\""),
 	)
 }
 
@@ -349,10 +358,7 @@ func testAccCheckOctopusDeployProjectDestroy(s *terraform.State) error {
 func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		if err := existsHelper(s, client); err != nil {
-			return err
-		}
-		return nil
+		return existsHelper(s, client)
 	}
 }
 
@@ -371,8 +377,10 @@ func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) erro
 
 func existsHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Project.Get(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving project %s", err)
+		if r.Type == "octopus_deploy_project" {
+			if _, err := client.Project.Get(r.Primary.ID); err != nil {
+				return fmt.Errorf("Received an error retrieving project with ID %s: %s", r.Primary.ID, err)
+			}
 		}
 	}
 	return nil
