@@ -15,8 +15,10 @@ environment:
   GOPATH: c:\gopath
   TEST_OCTOPUS_USERNAME: Administrator
   TEST_OCTOPUS_PASSWORD: Password1! # This password is for the Octopus Deploy server spun up in Appveyor.
+  GO111MODULE: on # Enable Go Module Support
 
 install:
+  - ps: choco install golang --version 1.11.4
   - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - go version
 
