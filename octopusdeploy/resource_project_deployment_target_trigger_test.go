@@ -80,10 +80,14 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 
 func testAccProjectDeploymentTargetTriggerResource(t *testing.T, triggerName, projectName string) string {
 	return fmt.Sprintf(`
+		resource "octopusdeploy_project_group" "foo" {
+			name = "Integration Test Project Group"
+		}
+
 		resource "octopusdeploy_project" "foo" {
 			lifecycle_id          = "Lifecycles-1"
 			name                  = "%s"
-			project_group_id      = "ProjectGroups-1"
+			project_group_id      = "${octopusdeploy_project_group.foo.id}"
 	  	}
 
 		resource "octopusdeploy_project_deployment_target_trigger" "foo" {
@@ -104,10 +108,14 @@ func testAccProjectDeploymentTargetTriggerResource(t *testing.T, triggerName, pr
 
 func testAccProjectDeploymentTargetTriggerResourceUpdated(t *testing.T, triggerName, projectName string) string {
 	return fmt.Sprintf(`
+		resource "octopusdeploy_project_group" "foo" {
+			name = "Integration Test Project Group"
+		}
+
 		resource "octopusdeploy_project" "foo" {
 			lifecycle_id          = "Lifecycles-1"
 			name                  = "%s"
-			project_group_id      = "ProjectGroups-1"
+			project_group_id      = "${octopusdeploy_project_group.foo.id}"
 	  	}
 
 		resource "octopusdeploy_project_deployment_target_trigger" "foo" {

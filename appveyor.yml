@@ -8,27 +8,23 @@ skip_commits:
 image: Visual Studio 2017
 build: off
 clone_folder: c:\gopath\src\github.com\MattHodge\terraform-provider-octopusdeploy
-services:
-  - mssql2017
 
 environment:
   GOPATH: c:\gopath
-  TEST_OCTOPUS_USERNAME: Administrator
-  TEST_OCTOPUS_PASSWORD: Password1! # This password is for the Octopus Deploy server spun up in Appveyor.
   GO111MODULE: on # Enable Go Module Support
+  # Settings for Octopus Deploy cloud for integration testing
+  OCTOPUS_URL:
+    secure: jP+YI6rOk5iO1YYgTczw5GA5i2QrBHcfhxw9dRd0zUo=
+  OCTOPUS_APIKEY:
+    secure: rhHMBdDw0HiZtu1w5XmrNHXB8G37o827aHx0E+ufhSY=
 
 install:
-  - ps: choco install golang --version 1.11.4
+  - ps: choco install golang --version 1.11.4 --no-progress --confirm
   - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - go version
 
 before_test:
-  # Octopus install needs to occur here as mssql doesn't start before the install step
-  - ps: >-
-      . ".\integration\appveyor_scripts\functions\Install-OctopusDeployInAppveyor.ps1" ;
-      . ".\integration\appveyor_scripts\functions\Start-ProcessAdvanced.ps1" ;
-      Install-OctopusDeployInAppveyor -OctopusAdministartorUser $env:TEST_OCTOPUS_USERNAME -OctopusAdministartorPassword $env:TEST_OCTOPUS_PASSWORD
-  - ps: Invoke-Expression ".\integration\appveyor_scripts\start_go_integration_tests.ps1"
+  - ps:  Invoke-Expression ".\integration\appveyor_scripts\start_integration_tests.ps1"
 
 after_test:
   # Build Binaries
@@ -44,7 +40,8 @@ deploy:
   draft: false
   prerelease: true
   on:
-    branch: master                 # release from master branch only
+    # release from master branch only
+    branch: master
 
 # # Uncomment to debug the build
 # on_finish:

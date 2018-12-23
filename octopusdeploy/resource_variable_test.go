@@ -14,10 +14,8 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 	const tfVarName = "tf-var-1"
 	const tfVarDesc = "Terraform testing module variable"
 	const tfVarValue = "abcd-123456"
-
 	const projectName = "Funky Monkey Var Test"
 	const lifeCycleID = "Lifecycles-1"
-	const projectGroupID = "ProjectGroups-1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -25,7 +23,7 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 		CheckDestroy: testOctopusDeployVariableDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testVariableBasic(projectName, lifeCycleID, projectGroupID, tfVarName, tfVarDesc, tfVarValue),
+				Config: testVariableBasic(projectName, lifeCycleID, tfVarName, tfVarDesc, tfVarValue),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployVariableExists(tfVarPrefix),
 					resource.TestCheckResourceAttr(
@@ -40,12 +38,16 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 	})
 }
 
-func testVariableBasic(projectName, projectLifecycleID, projectGroupID, name, description, value string) string {
+func testVariableBasic(projectName, projectLifecycleID, name, description, value string) string {
 	config := fmt.Sprintf(`
+		resource "octopusdeploy_project_group" "foo" {
+			name = "Integration Test Project Group"
+		}
+
 		resource "octopusdeploy_project" "foo" {
 			name           = "%s"
 			lifecycle_id    = "%s"
-			project_group_id = "%s"
+			project_group_id = "${octopusdeploy_project_group.foo.id}"
 		}
 
 		resource "octopusdeploy_variable" "foovar" {
@@ -56,7 +58,7 @@ func testVariableBasic(projectName, projectLifecycleID, projectGroupID, name, de
 			value       = "%s"
 		}
 		`,
-		projectName, projectLifecycleID, projectGroupID, name, description, value,
+		projectName, projectLifecycleID, name, description, value,
 	)
 	fmt.Println(config)
 	return config
