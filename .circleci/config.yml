@@ -12,7 +12,6 @@ executors:
       # OCTOPUS_APIKEY: Specified In UI
       # OCTOPUS_URL: Specified In UI
       GO111MODULE: "on" # Enable Go Modules
-      TF_ACC: 1 # Enable Terraform Acceptance Tests
 
 jobs:
 
