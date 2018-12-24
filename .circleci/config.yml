@@ -1,10 +1,72 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  go-container:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.11.4
+
     working_directory: /go/src/github.com/MattHodge/terraform-provider-octopusdeploy
+
+    environment:
+      # GITHUB_TOKEN: Specified In UI
+      # OCTOPUS_APIKEY: Specified In UI
+      # OCTOPUS_URL: Specified In UI
+      GO111MODULE: "on" # Enable Go Modules
+      TF_ACC: 1 # Enable Terraform Acceptance Tests
+
+jobs:
+
+  test:
+    executor: go-container
+
     steps:
       - checkout
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
+      - run: ci-scripts/pull_request.sh
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+
+  build:
+    executor: go-container
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run: ci-scripts/build.sh
+      - store_artifacts:
+          path: artifacts/
+
+  publish-github-release:
+    docker:
+      - image: cibuilds/github:0.12
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            . ci-scripts/helpers/get_release_version.sh
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete v${RELEASE_VERSION} ./artifacts/
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - master
+      - publish-github-release:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master

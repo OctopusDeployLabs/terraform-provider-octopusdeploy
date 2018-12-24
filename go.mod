@@ -41,7 +41,9 @@ require (
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mitchellh/go-testing-interface v1.0.0
 	github.com/mitchellh/go-wordwrap v1.0.0
+	github.com/mitchellh/gox v0.4.0 // indirect
 	github.com/mitchellh/hashstructure v1.0.0
+	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/mitchellh/reflectwalk v1.0.0
 	github.com/oklog/run v1.0.0
