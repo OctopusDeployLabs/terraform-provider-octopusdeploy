@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func getManualInterventionActionSchema()  *schema.Schema {
+func getManualInterventionActionSchema() *schema.Schema {
 	actionSchema, element := getCommonDeploymentActionSchema()
 
 	element.Schema["instructions"] = &schema.Schema{
@@ -20,13 +20,13 @@ func getManualInterventionActionSchema()  *schema.Schema {
 		Optional:    true,
 	}
 
-	return actionSchema;
+	return actionSchema
 }
 
 func buildManualInterventionActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 	resource.ActionType = "Octopus.Manual"
-	resource.Properties["Octopus.Action.Manual.Instructions"] = tfAction["instructions"].(string);
+	resource.Properties["Octopus.Action.Manual.Instructions"] = tfAction["instructions"].(string)
 
 	responsibleTeams := tfAction["responsible_teams"]
 	if responsibleTeams != nil {

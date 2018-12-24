@@ -39,7 +39,7 @@ func testAccCheckManualInterventionAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-		process, err := getDeploymentProcess(s, client);
+		process, err := getDeploymentProcess(s, client)
 		if err != nil {
 			return err
 		}
@@ -58,7 +58,6 @@ func testAccCheckManualInterventionAction() resource.TestCheckFunc {
 			return fmt.Errorf("ResponsibleTeamIds is incorrect: %s", action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"])
 		}
 
-
-		return nil;
+		return nil
 	}
 }

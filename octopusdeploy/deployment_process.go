@@ -24,8 +24,6 @@ func resourceDeploymentProcess() *schema.Resource {
 	}
 }
 
-
-
 func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
@@ -55,12 +53,12 @@ func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) erro
 }
 
 func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.DeploymentProcess {
-	deploymentProcess := &octopusdeploy.DeploymentProcess {
+	deploymentProcess := &octopusdeploy.DeploymentProcess{
 		ProjectID: d.Get("project_id").(string),
 	}
 
 	if attr, ok := d.GetOk("step"); ok {
-		tfSteps := attr.([]interface {})
+		tfSteps := attr.([]interface{})
 
 		for _, tfStep := range tfSteps {
 			step := buildDeploymentStepResource(tfStep.(map[string]interface{}))
@@ -70,7 +68,6 @@ func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.Deplo
 
 	return deploymentProcess
 }
-
 
 func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
@@ -93,7 +90,6 @@ func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-
 func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) error {
 	deploymentProcess := buildDeploymentProcessResource(d)
 	deploymentProcess.ID = d.Id() // set deploymentProcess struct ID so octopus knows which deploymentProcess to update
@@ -106,9 +102,9 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	deploymentProcess.Version = current.Version
-		deploymentProcess, err = client.DeploymentProcess.Update(deploymentProcess)
+	deploymentProcess, err = client.DeploymentProcess.Update(deploymentProcess)
 
-		if err != nil {
+	if err != nil {
 		return fmt.Errorf("error updating deployment process id %s: %s", d.Id(), err.Error())
 	}
 
@@ -119,14 +115,14 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 
 func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
-	current, err := client.DeploymentProcess.Get(d.Id());
+	current, err := client.DeploymentProcess.Get(d.Id())
 
 	if err != nil {
 		return fmt.Errorf("error getting deployment process with id %s: %s", d.Id(), err.Error())
 	}
 
 	deploymentProcess := &octopusdeploy.DeploymentProcess{
-		ID: d.Id(),
+		ID:      d.Id(),
 		Version: current.Version,
 	}
 

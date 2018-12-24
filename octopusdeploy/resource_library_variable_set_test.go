@@ -73,7 +73,6 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	})
 }
 
-
 func testAccLibraryVariableSetBasic(name string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_library_variable_set" "foo" {
@@ -93,7 +92,6 @@ func testAccLibraryVariableSetWithDescription(name, description string) string {
 		name, description,
 	)
 }
-
 
 func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)

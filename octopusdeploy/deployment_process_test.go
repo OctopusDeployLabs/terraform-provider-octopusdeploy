@@ -118,7 +118,7 @@ func testAccDeploymentProcessBasic() string {
 }
 
 func testAccBuildTestActionTerraform(action string) string {
-	return fmt.Sprintf( `
+	return fmt.Sprintf(`
 		resource "octopusdeploy_lifecycle" "test" {
 			name = "Test Lifecycle"
 		}
@@ -165,7 +165,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-		process, err := getDeploymentProcess(s, client);
+		process, err := getDeploymentProcess(s, client)
 		if err != nil {
 			return err
 		}
@@ -180,15 +180,14 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 			return fmt.Errorf("The RunOnServer property has not been set to true on the deployment process")
 		}
 
-		return nil;
+		return nil
 	}
 }
-
 
 func getDeploymentProcess(s *terraform.State, client *octopusdeploy.Client) (*octopusdeploy.DeploymentProcess, error) {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_deployment_process" {
-			return client.DeploymentProcess.Get(r.Primary.ID);
+			return client.DeploymentProcess.Get(r.Primary.ID)
 		}
 	}
 	return nil, fmt.Errorf("No deployment process found in the terraform resources")

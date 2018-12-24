@@ -79,7 +79,6 @@ func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error
 	return nil
 }
 
-
 func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) error {
 	libraryVariableSet := buildLibraryVariableSetResource(d)
 	libraryVariableSet.ID = d.Id() // set libraryVariableSet struct ID so octopus knows which libraryVariableSet to update

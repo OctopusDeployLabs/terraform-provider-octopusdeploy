@@ -93,7 +93,6 @@ func TestAccOctopusDeployLifecycleComplex(t *testing.T) {
 	})
 }
 
-
 func testAccLifecycleBasic(name string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_lifecycle" "foo" {
@@ -188,7 +187,7 @@ func testAccCheckOctopusDeployLifecyclePhaseCount(name string, expected int) res
 			return err
 		}
 
-		if(len(lifecycle.Phases) != expected) {
+		if len(lifecycle.Phases) != expected {
 			return fmt.Errorf("Lifecycle has %d phases instead of the expected %d", len(lifecycle.Phases), expected)
 		}
 

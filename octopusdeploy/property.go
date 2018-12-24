@@ -4,9 +4,9 @@ import "github.com/hashicorp/terraform/helper/schema"
 
 func getPropertySchema() *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeSet,
-		Optional:    true,
-		Elem:  &schema.Resource{
+		Type:     schema.TypeSet,
+		Optional: true,
+		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"key": {
 					Type:        schema.TypeString,
@@ -23,13 +23,13 @@ func getPropertySchema() *schema.Schema {
 	}
 }
 
-func buildPropertiesMap(tfProperties interface {}) map[string]string {
-	properties := map[string]string{};
+func buildPropertiesMap(tfProperties interface{}) map[string]string {
+	properties := map[string]string{}
 	if tfProperties != nil {
 		for _, tfProp := range tfProperties.(*schema.Set).List() {
-			m := tfProp.(map[string]interface {})
+			m := tfProp.(map[string]interface{})
 			properties[m["key"].(string)] = m["value"].(string)
 		}
 	}
-	return properties;
+	return properties
 }

@@ -64,9 +64,9 @@ func getSliceFromTerraformTypeList(inputTypeList interface{}) []string {
 }
 
 func getStringOrEmpty(tfAttr interface{}) string {
-	if(tfAttr == nil) {
-		return "";
+	if tfAttr == nil {
+		return ""
 	}
-	return tfAttr.(string);
+	return tfAttr.(string)
 
 }

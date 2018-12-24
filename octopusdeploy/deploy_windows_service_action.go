@@ -62,7 +62,7 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 		Type:        schema.TypeString,
 		Description: "Which built-in account will the service run under. Can be LocalSystem, NT Authority\\NetworkService, NT Authority\\LocalService, _CUSTOM or an expression",
 		Optional:    true,
-		Default: 	 "LocalSystem",
+		Default:     "LocalSystem",
 	}
 	element.Schema["custom_account_name"] = &schema.Schema{
 		Type:        schema.TypeString,
@@ -78,7 +78,7 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 		Type:        schema.TypeString,
 		Description: "When will the service start. Can be auto, delayed-auto, manual, unchanged or an expression",
 		Optional:    true,
-		Default: 	"auto",
+		Default:     "auto",
 	}
 	element.Schema["dependencies"] = &schema.Schema{
 		Type:        schema.TypeString,
@@ -87,7 +87,6 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 	}
 }
 
-
 func buildDeployWindowsServiceActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 	resource.ActionType = "Octopus.WindowsService"
@@ -95,11 +94,10 @@ func buildDeployWindowsServiceActionResource(tfAction map[string]interface{}) oc
 	return resource
 }
 
-
 func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
 	if windowsServiceList, ok := tfAction["windows_service"]; ok {
 		tfWindowsService := windowsServiceList.(*schema.Set).List()
-		if(len(tfWindowsService) > 0) {
+		if len(tfWindowsService) > 0 {
 			addWindowsServiceToActionResource(tfWindowsService[0].(map[string]interface{}), action)
 		}
 	}

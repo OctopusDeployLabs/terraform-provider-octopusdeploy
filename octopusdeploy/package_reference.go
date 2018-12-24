@@ -5,14 +5,14 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func addPrimaryPackageSchema(element *schema.Resource, required bool)  {
-	element.Schema["primary_package"] = getPackageSchema(required);
+func addPrimaryPackageSchema(element *schema.Resource, required bool) {
+	element.Schema["primary_package"] = getPackageSchema(required)
 }
 
-func addPackagesSchema(element *schema.Resource, primaryIsRequired bool)  {
+func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 	addPrimaryPackageSchema(element, primaryIsRequired)
 
-	element.Schema["package"] = getPackageSchema(false);
+	element.Schema["package"] = getPackageSchema(false)
 
 	packageElementSchema := element.Schema["package"].Elem.(*schema.Resource).Schema
 	packageElementSchema["name"] = &schema.Schema{
@@ -34,7 +34,7 @@ func getPackageSchema(required bool) *schema.Schema {
 		Type:        schema.TypeSet,
 		Required:    required,
 		Optional:    !required,
-		MaxItems:	 1,
+		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"package_id": {
@@ -45,7 +45,7 @@ func getPackageSchema(required bool) *schema.Schema {
 				"feed_id": {
 					Type:        schema.TypeString,
 					Description: "The feed to retrieve the package from",
-					Default: 	"feeds-builtin",
+					Default:     "feeds-builtin",
 					Optional:    true,
 				},
 				"acquisition_location": {
@@ -59,7 +59,6 @@ func getPackageSchema(required bool) *schema.Schema {
 		},
 	}
 }
-
 
 func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
 	pkg := octopusdeploy.PackageReference{
@@ -75,6 +74,5 @@ func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.P
 		pkg.Properties["Extract"] = extract.(string)
 	}
 
-	return pkg;
+	return pkg
 }
-

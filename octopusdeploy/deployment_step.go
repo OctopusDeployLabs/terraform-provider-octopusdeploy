@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-
 func getDeploymentStepSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
@@ -69,9 +68,9 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "The maximum number of targets to deploy to simultaneously",
 					Optional:    true,
 				},
-				"action": getDeploymentActionSchema(),
-				"manual_intervention_action": getManualInterventionActionSchema(),
-				"deploy_package_action": getDeployPackageAction(),
+				"action":                        getDeploymentActionSchema(),
+				"manual_intervention_action":    getManualInterventionActionSchema(),
+				"deploy_package_action":         getDeployPackageAction(),
 				"deploy_windows_service_action": getDeployWindowsServiceActionSchema(),
 			},
 		},
@@ -80,14 +79,14 @@ func getDeploymentStepSchema() *schema.Schema {
 
 func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.DeploymentStep {
 	step := octopusdeploy.DeploymentStep{
-		Name: tfStep["name"].(string),
+		Name:               tfStep["name"].(string),
 		PackageRequirement: octopusdeploy.DeploymentStepPackageRequirement(tfStep["package_requirement"].(string)),
-		Condition: octopusdeploy.DeploymentStepCondition(tfStep["condition"].(string)),
-		StartTrigger: octopusdeploy.DeploymentStepStartTrigger(tfStep["start_trigger"].(string)),
-		Properties: map[string]string{},
+		Condition:          octopusdeploy.DeploymentStepCondition(tfStep["condition"].(string)),
+		StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(tfStep["start_trigger"].(string)),
+		Properties:         map[string]string{},
 	}
 
-	targetRoles := tfStep["target_roles"];
+	targetRoles := tfStep["target_roles"]
 	if targetRoles != nil {
 		step.Properties["Octopus.Action.TargetRoles"] = strings.Join(getSliceFromTerraformTypeList(targetRoles), ",")
 	}
@@ -103,33 +102,32 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.De
 	}
 
 	if attr, ok := tfStep["action"]; ok {
-		for _, tfAction := range attr.([]interface {}) {
+		for _, tfAction := range attr.([]interface{}) {
 			action := buildDeploymentActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if attr, ok := tfStep["manual_intervention_action"]; ok {
-		for _, tfAction := range attr.([]interface {}) {
+		for _, tfAction := range attr.([]interface{}) {
 			action := buildManualInterventionActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if attr, ok := tfStep["deploy_package_action"]; ok {
-		for _, tfAction := range attr.([]interface {}) {
+		for _, tfAction := range attr.([]interface{}) {
 			action := buildDeployPackageActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if attr, ok := tfStep["deploy_windows_service_action"]; ok {
-		for _, tfAction := range attr.([]interface {}) {
+		for _, tfAction := range attr.([]interface{}) {
 			action := buildDeployWindowsServiceActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	return step;
+	return step
 }
-
