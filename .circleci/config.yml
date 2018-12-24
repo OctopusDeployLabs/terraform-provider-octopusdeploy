@@ -43,6 +43,7 @@ jobs:
     docker:
       - image: cibuilds/github:0.12
     steps:
+      - checkout
       - attach_workspace:
           at: ./artifacts
       - run:
