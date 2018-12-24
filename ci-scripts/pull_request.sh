@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
-# Download Modules
+# Download modules first otherwise linting has errors
 go mod download
 
 # Lint
