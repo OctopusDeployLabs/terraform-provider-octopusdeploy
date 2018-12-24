@@ -12,7 +12,7 @@ func dataLibraryVariableSet() *schema.Resource {
 		Read: dataLibraryVariableSetReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema {
+			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},

@@ -41,12 +41,12 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
 	const serviceName = "Epic Service"
-	const executablePath = `bin\\MyService.exe` // needs 4 slashes to appear in the TF config as a double slash
+	const executablePath = `bin\\MyService.exe`
 	const stepName = "Deploying Epic Service"
 	const packageName = "MyPackage"
 	targetRoles := []string{"Lab1", "Lab2"}
-	projectIDRegex, _ := regexp.Compile("Projects\\-")
-	deploymentProcessIDRegex, _ := regexp.Compile("deploymentprocess\\-Projects\\-.*")
+	projectIDRegex := regexp.MustCompile(`Projects\-`)
+	deploymentProcessIDRegex := regexp.MustCompile(`deploymentprocess\-Projects\-.*`)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -87,8 +87,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	const terraformNamePrefix = "octopusdeploy_project.foo"
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
-	const description = "I am a new description"
-	inlineScriptRegex, _ := regexp.Compile(".*Get\\-Process.*")
+	inlineScriptRegex := regexp.MustCompile(`.*Get\-Process.*`)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,

@@ -93,7 +93,7 @@ func testAccCheckDeployWindowsServiceActionOrFeature(expectedActionType string) 
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-		process, err := getDeploymentProcess(s, client);
+		process, err := getDeploymentProcess(s, client)
 		if err != nil {
 			return err
 		}
@@ -104,7 +104,7 @@ func testAccCheckDeployWindowsServiceActionOrFeature(expectedActionType string) 
 			return fmt.Errorf("Action type is incorrect: %s, expected: %s", action.ActionType, expectedActionType)
 		}
 
-		if(len(action.Packages) == 0) {
+		if len(action.Packages) == 0 {
 			return fmt.Errorf("No package")
 		}
 
@@ -152,6 +152,6 @@ func testAccCheckDeployWindowsServiceActionOrFeature(expectedActionType string) 
 			return fmt.Errorf("Dependencies is incorrect: %s", action.Properties["Octopus.Action.WindowsService.Dependencies"])
 		}
 
-		return nil;
+		return nil
 	}
 }

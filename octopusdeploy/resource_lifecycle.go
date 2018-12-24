@@ -23,9 +23,9 @@ func resourceLifecycle() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"release_retention_policy": getRetentionPeriodSchema(),
+			"release_retention_policy":  getRetentionPeriodSchema(),
 			"tentacle_retention_policy": getRetentionPeriodSchema(),
-			"phase": getPhasesSchema(),
+			"phase":                     getPhasesSchema(),
 		},
 	}
 }
@@ -40,18 +40,18 @@ func getRetentionPeriodSchema() *schema.Schema {
 				"unit": {
 					Type:        schema.TypeString,
 					Description: "The unit of quantity_to_keep.",
-					Optional: true,
-					Default: (string) (octopusdeploy.RetentionUnit_Days),
+					Optional:    true,
+					Default:     (string)(octopusdeploy.RetentionUnit_Days),
 					ValidateFunc: validateValueFunc([]string{
-						(string) (octopusdeploy.RetentionUnit_Days),
-						(string) (octopusdeploy.RetentionUnit_Items),
+						(string)(octopusdeploy.RetentionUnit_Days),
+						(string)(octopusdeploy.RetentionUnit_Items),
 					}),
 				},
 				"quantity_to_keep": {
 					Type:        schema.TypeInt,
 					Description: "The number of days/releases to keep. If 0 all are kept.",
-					Default: 0,
-					Optional: true,
+					Default:     0,
+					Optional:    true,
 				},
 			},
 		},
@@ -70,15 +70,15 @@ func getPhasesSchema() *schema.Schema {
 				},
 				"minimum_environments_before_promotion": &schema.Schema{
 					Description: "The number of units required before a release can enter the next phase. If 0, all environments are required.",
-					Type:     schema.TypeInt,
-					Optional: true,
-					Default: 0,
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Default:     0,
 				},
 				"is_optional_phase": &schema.Schema{
 					Description: "If false a release must be deployed to this phase before it can be deployed to the next phase.",
-					Type:     schema.TypeBool,
-					Optional: true,
-					Default: false,
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Default:     false,
 				},
 				"automatic_deployment_targets": &schema.Schema{
 					Description: "Environment Ids in this phase that a release is automatically deployed to when it is eligible for this phase",
@@ -139,14 +139,13 @@ func buildLifecycleResource(d *schema.ResourceData) *octopusdeploy.Lifecycle {
 	}
 
 	if attr, ok := d.GetOk("phase"); ok {
-		tfPhases := attr.([]interface {})
+		tfPhases := attr.([]interface{})
 
 		for _, tfPhase := range tfPhases {
 			phase := buildPhaseResource(tfPhase.(map[string]interface{}))
 			lifecycle.Phases = append(lifecycle.Phases, phase)
 		}
 	}
-
 
 	return lifecycle
 }
@@ -168,14 +167,13 @@ func getRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.Reten
 	return nil
 }
 
-
 func buildPhaseResource(tfPhase map[string]interface{}) octopusdeploy.Phase {
 	phase := octopusdeploy.Phase{
-		Name: tfPhase["name"].(string),
+		Name:                               tfPhase["name"].(string),
 		MinimumEnvironmentsBeforePromotion: int32(tfPhase["minimum_environments_before_promotion"].(int)),
-		IsOptionalPhase: tfPhase["is_optional_phase"].(bool),
-		AutomaticDeploymentTargets: getSliceFromTerraformTypeList(tfPhase["automatic_deployment_targets"]),
-		OptionalDeploymentTargets: getSliceFromTerraformTypeList(tfPhase["optional_deployment_targets"]),
+		IsOptionalPhase:                    tfPhase["is_optional_phase"].(bool),
+		AutomaticDeploymentTargets:         getSliceFromTerraformTypeList(tfPhase["automatic_deployment_targets"]),
+		OptionalDeploymentTargets:          getSliceFromTerraformTypeList(tfPhase["optional_deployment_targets"]),
 	}
 
 	if phase.AutomaticDeploymentTargets == nil {
@@ -185,7 +183,7 @@ func buildPhaseResource(tfPhase map[string]interface{}) octopusdeploy.Phase {
 		phase.OptionalDeploymentTargets = []string{}
 	}
 
-	return phase;
+	return phase
 }
 
 func resourceLifecycleRead(d *schema.ResourceData, m interface{}) error {
@@ -210,7 +208,6 @@ func resourceLifecycleRead(d *schema.ResourceData, m interface{}) error {
 
 	return nil
 }
-
 
 func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
 	lifecycle := buildLifecycleResource(d)

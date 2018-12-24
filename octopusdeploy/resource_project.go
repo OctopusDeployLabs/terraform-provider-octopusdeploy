@@ -76,14 +76,14 @@ func resourceProject() *schema.Resource {
 			},
 			"discrete_channel_release": &schema.Schema{
 				Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default: false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
 			},
 			"skip_package_steps_that_are_already_installed": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default: false,
+				Default:  false,
 			},
 			"deployment_step_windows_service": getDeploymentStepWindowsServiceSchema(),
 			"deployment_step_iis_website":     getDeploymentStepIISWebsiteSchema(),
@@ -393,7 +393,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			serviceAccount := localStep["service_account"].(string)
 			serviceName := localStep["service_name"].(string)
 			serviceStartMode := localStep["service_start_mode"].(string)
-			stepCondition :=localStep["step_condition"].(string)
+			stepCondition := localStep["step_condition"].(string)
 			stepName := localStep["step_name"].(string)
 			stepStartTrigger := localStep["step_start_trigger"].(string)
 

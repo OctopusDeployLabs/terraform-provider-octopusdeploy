@@ -8,7 +8,7 @@ import (
 
 func getDeploymentActionSchema() *schema.Schema {
 	actionSchema, element := getCommonDeploymentActionSchema()
-	addExecutionLocationSchema(element);
+	addExecutionLocationSchema(element)
 	element.Schema["action_type"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "The type of action",
@@ -17,7 +17,7 @@ func getDeploymentActionSchema() *schema.Schema {
 	addWorkerPoolSchema(element)
 	addPackagesSchema(element, false)
 
-	return actionSchema;
+	return actionSchema
 }
 
 func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
@@ -102,7 +102,6 @@ func addWorkerPoolSchema(element *schema.Resource) {
 	}
 }
 
-
 func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	action := octopusdeploy.DeploymentAction{
 		Name:                 tfAction["name"].(string),
@@ -127,14 +126,14 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
 	}
 
-	workerPoolId := tfAction["worker_pool_id"]
-	if workerPoolId != nil {
-		action.WorkerPoolId = workerPoolId.(string)
+	workerPoolID := tfAction["worker_pool_id"]
+	if workerPoolID != nil {
+		action.WorkerPoolId = workerPoolID.(string)
 	}
 
 	if primaryPackage, ok := tfAction["primary_package"]; ok {
 		tfPrimaryPackage := primaryPackage.(*schema.Set).List()
-		if(len(tfPrimaryPackage) > 0) {
+		if len(tfPrimaryPackage) > 0 {
 			primaryPackage := buildPackageReferenceResource(tfPrimaryPackage[0].(map[string]interface{}))
 			action.Packages = append(action.Packages, primaryPackage)
 		}
@@ -148,12 +147,11 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 	}
 
 	if tfProps, ok := tfAction["property"]; ok {
-		for _, tfProp := range  tfProps.(*schema.Set).List() {
+		for _, tfProp := range tfProps.(*schema.Set).List() {
 			tfPropi := tfProp.(map[string]interface{})
 			action.Properties[tfPropi["key"].(string)] = tfPropi["value"].(string)
 		}
 	}
 
-	return action;
+	return action
 }
-
