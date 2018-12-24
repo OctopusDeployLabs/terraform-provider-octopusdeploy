@@ -1,0 +1,9 @@
+linters:
+  enable:
+    - golint
+    - gosec
+    - unconvert
+    - gocritic
+  disable:
+    - errcheck
+      # Prevent this error: Error return value of `d.Set` is not checked (errcheck)
