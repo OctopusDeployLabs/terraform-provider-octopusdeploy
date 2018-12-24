@@ -43,6 +43,7 @@ func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(env.ID)
+
 	d.Set("name", env.Name)
 	d.Set("description", env.Description)
 	d.Set("use_guided_failure", env.UseGuidedFailure)

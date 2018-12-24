@@ -126,9 +126,9 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
 	}
 
-	workerPoolId := tfAction["worker_pool_id"]
-	if workerPoolId != nil {
-		action.WorkerPoolId = workerPoolId.(string)
+	workerPoolID := tfAction["worker_pool_id"]
+	if workerPoolID != nil {
+		action.WorkerPoolId = workerPoolID.(string)
 	}
 
 	if primaryPackage, ok := tfAction["primary_package"]; ok {

@@ -125,18 +125,15 @@ func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 	var varDesc string
 	var varSensitive bool
 
-	varDescInterface, ok := d.GetOk("description")
-	if ok {
+	if varDescInterface, ok := d.GetOk("description"); ok {
 		varDesc = varDescInterface.(string)
 	}
 
-	varSensitiveInterface, ok := d.GetOk("is_sensitive")
-	if ok {
+	if varSensitiveInterface, ok := d.GetOk("is_sensitive"); ok {
 		varSensitive = varSensitiveInterface.(bool)
 	}
 
 	varScopeInterface := tfVariableScopetoODVariableScope(d)
-	varSensitive = varSensitiveInterface.(bool)
 
 	newVar := octopusdeploy.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
 
