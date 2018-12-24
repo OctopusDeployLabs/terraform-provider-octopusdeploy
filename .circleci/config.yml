@@ -36,8 +36,10 @@ jobs:
           keys:
             - go-mod-v1-{{ checksum "go.sum" }}
       - run: ci-scripts/build.sh
-      - store_artifacts:
-          path: artifacts/
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - artifacts
 
   publish-github-release:
     docker:
@@ -46,6 +48,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: ./artifacts
+      - store_artifacts:
+          path: artifacts/
       - run:
           name: "Publish Release on GitHub"
           command: |
