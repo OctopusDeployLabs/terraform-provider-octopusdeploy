@@ -9,8 +9,8 @@ func getRunScriptActionSchema()  *schema.Schema {
 
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
-	addPrimaryPackageSchema(element, false)
 	addScriptFromPackageSchema(element)
+	addPackagesSchema(element, false)
 
 	element.Schema["variable_substitution_in_files"] = &schema.Schema{
 		Type:        schema.TypeString,
