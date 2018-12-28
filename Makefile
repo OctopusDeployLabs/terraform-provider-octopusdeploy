@@ -14,6 +14,9 @@ test: fmt
 testacc:
 	TF_ACC=1 go test $(TEST) -v -timeout 120m
 
+testaccnocache:
+	TF_ACC=1 go test $(TEST) -v -timeout 120m -count=1
+
 tf_build: fmt build
 	terraform init
 	terraform plan
