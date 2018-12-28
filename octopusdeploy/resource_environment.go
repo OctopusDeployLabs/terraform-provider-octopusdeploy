@@ -18,15 +18,15 @@ func resourceEnvironment() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"use_guided_failure": &schema.Schema{
+			"use_guided_failure": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,

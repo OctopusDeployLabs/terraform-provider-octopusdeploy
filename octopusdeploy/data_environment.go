@@ -12,15 +12,15 @@ func dataEnvironment() *schema.Resource {
 		Read: dataEnvironmentReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"use_guided_failure": &schema.Schema{
+			"use_guided_failure": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},

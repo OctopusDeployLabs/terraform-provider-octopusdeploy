@@ -31,13 +31,13 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_deployment_process":                resourceDeploymentProcess(),
 		},
 		Schema: map[string]*schema.Schema{
-			"address": &schema.Schema{
+			"address": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_URL", nil),
 				Description: "The URL of the Octopus Deploy server",
 			},
-			"apikey": &schema.Schema{
+			"apikey": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),

@@ -13,27 +13,27 @@ func dataProject() *schema.Resource {
 		Read: dataProjectReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"lifecycle_id": &schema.Schema{
+			"lifecycle_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"project_group_id": &schema.Schema{
+			"project_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"default_failure_mode": &schema.Schema{
+			"default_failure_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"skip_machine_behavior": &schema.Schema{
+			"skip_machine_behavior": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},

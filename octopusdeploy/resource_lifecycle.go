@@ -15,11 +15,11 @@ func resourceLifecycle() *schema.Resource {
 		Delete: resourceLifecycleDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -64,23 +64,23 @@ func getPhasesSchema() *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"name": &schema.Schema{
+				"name": {
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"minimum_environments_before_promotion": &schema.Schema{
+				"minimum_environments_before_promotion": {
 					Description: "The number of units required before a release can enter the next phase. If 0, all environments are required.",
 					Type:        schema.TypeInt,
 					Optional:    true,
 					Default:     0,
 				},
-				"is_optional_phase": &schema.Schema{
+				"is_optional_phase": {
 					Description: "If false a release must be deployed to this phase before it can be deployed to the next phase.",
 					Type:        schema.TypeBool,
 					Optional:    true,
 					Default:     false,
 				},
-				"automatic_deployment_targets": &schema.Schema{
+				"automatic_deployment_targets": {
 					Description: "Environment Ids in this phase that a release is automatically deployed to when it is eligible for this phase",
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -88,7 +88,7 @@ func getPhasesSchema() *schema.Schema {
 						Type: schema.TypeString,
 					},
 				},
-				"optional_deployment_targets": &schema.Schema{
+				"optional_deployment_targets": {
 					Description: "Environment Ids in this phase that a release can be deployed to, but is not automatically deployed to",
 					Type:        schema.TypeList,
 					Optional:    true,

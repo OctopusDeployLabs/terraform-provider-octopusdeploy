@@ -12,97 +12,97 @@ func dataMachine() *schema.Resource {
 		Read: dataMachineReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"endpoint_communicationstyle": &schema.Schema{
+			"endpoint_communicationstyle": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoint_id": &schema.Schema{
+			"endpoint_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoint_proxyid": &schema.Schema{
+			"endpoint_proxyid": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoint_thumbprint": &schema.Schema{
+			"endpoint_thumbprint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoint_uri": &schema.Schema{
+			"endpoint_uri": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoint_tentacleversiondetails_upgradelocked": &schema.Schema{
+			"endpoint_tentacleversiondetails_upgradelocked": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoint_tentacleversiondetails_upgraderequired": &schema.Schema{
+			"endpoint_tentacleversiondetails_upgraderequired": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoint_tentacleversiondetails_upgradesuggested": &schema.Schema{
+			"endpoint_tentacleversiondetails_upgradesuggested": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoint_tentacleversiondetails_version": &schema.Schema{
+			"endpoint_tentacleversiondetails_version": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"environments": &schema.Schema{
+			"environments": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Computed: true,
 			},
-			"haslatestcalamari": &schema.Schema{
+			"haslatestcalamari": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"isdisabled": &schema.Schema{
+			"isdisabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"isinprocess": &schema.Schema{
+			"isinprocess": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"machinepolicy": &schema.Schema{
+			"machinepolicy": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"roles": &schema.Schema{
+			"roles": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Computed: true,
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"statussummary": &schema.Schema{
+			"statussummary": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tenanteddeploymentparticipation": &schema.Schema{
+			"tenanteddeploymentparticipation": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tenantids": &schema.Schema{
+			"tenantids": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Computed: true,
 			},
-			"tenanttags": &schema.Schema{
+			"tenanttags": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

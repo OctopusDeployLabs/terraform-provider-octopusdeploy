@@ -19,15 +19,15 @@ func resourceVariable() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validateValueFunc([]string{
@@ -37,16 +37,16 @@ func resourceVariable() *schema.Resource {
 					"AmazonWebServicesAccount",
 				}),
 			},
-			"value": &schema.Schema{
+			"value": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"scope": schemaVariableScope,
-			"is_sensitive": &schema.Schema{
+			"is_sensitive": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ValidateFunc: func(v interface{}, k string) (we []string, errors []error) {
@@ -56,21 +56,21 @@ func resourceVariable() *schema.Resource {
 					return nil, errors
 				},
 			},
-			"prompt": &schema.Schema{
+			"prompt": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": &schema.Schema{
+						"label": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"description": &schema.Schema{
+						"description": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"required": &schema.Schema{
+						"required": {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},

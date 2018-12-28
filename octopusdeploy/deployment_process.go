@@ -15,7 +15,7 @@ func resourceDeploymentProcess() *schema.Resource {
 		Delete: resourceDeploymentProcessDelete,
 
 		Schema: map[string]*schema.Schema{
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},

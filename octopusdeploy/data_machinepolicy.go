@@ -12,15 +12,15 @@ func dataMachinePolicy() *schema.Resource {
 		Read: dataMachinePolicyReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"isdefault": &schema.Schema{
+			"isdefault": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},

@@ -18,18 +18,18 @@ func resourceMachine() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"endpoint": &schema.Schema{
+			"endpoint": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				MinItems: 1,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"communicationstyle": &schema.Schema{
+						"communicationstyle": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: validateValueFunc([]string{
@@ -44,45 +44,45 @@ func resourceMachine() *schema.Resource {
 							}),
 						},
 
-						"proxyid": &schema.Schema{
+						"proxyid": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"thumbprint": &schema.Schema{
+						"thumbprint": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"uri": &schema.Schema{
+						"uri": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
 					},
 				},
 			},
-			"environments": &schema.Schema{
+			"environments": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Required: true,
 			},
-			"haslatestcalamari": &schema.Schema{
+			"haslatestcalamari": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"isdisabled": &schema.Schema{
+			"isdisabled": {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
-			"isinprocess": &schema.Schema{
+			"isinprocess": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"machinepolicy": &schema.Schema{
+			"machinepolicy": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"roles": &schema.Schema{
+			"roles": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type:     schema.TypeString,
@@ -90,15 +90,15 @@ func resourceMachine() *schema.Resource {
 				},
 				Required: true,
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"statussummary": &schema.Schema{
+			"statussummary": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tenanteddeploymentparticipation": &schema.Schema{
+			"tenanteddeploymentparticipation": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validateValueFunc([]string{
@@ -107,14 +107,14 @@ func resourceMachine() *schema.Resource {
 					"Tenanted",
 				}),
 			},
-			"tenantids": &schema.Schema{
+			"tenantids": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Optional: true,
 			},
-			"tenanttags": &schema.Schema{
+			"tenanttags": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

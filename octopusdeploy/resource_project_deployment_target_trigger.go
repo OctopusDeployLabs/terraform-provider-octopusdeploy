@@ -16,23 +16,23 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 		Delete: resourceProjectDeploymentTargetTriggerDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The name of the trigger.",
 			},
-			"project_id": &schema.Schema{
+			"project_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The project_id of the Project to attach the trigger to.",
 			},
-			"should_redeploy": &schema.Schema{
+			"should_redeploy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 				Description: "Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.",
 			},
-			"event_groups": &schema.Schema{
+			"event_groups": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -40,7 +40,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event group filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			"event_categories": &schema.Schema{
+			"event_categories": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -48,7 +48,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event category filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			"roles": &schema.Schema{
+			"roles": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -56,7 +56,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event role filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			"environment_ids": &schema.Schema{
+			"environment_ids": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
