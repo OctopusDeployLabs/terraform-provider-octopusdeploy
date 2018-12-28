@@ -5,7 +5,10 @@ default: build test
 fmt:
 	go fmt ./octopusdeploy/...
 
-build: fmt
+simplify:
+	gofmt -s -w ./octopusdeploy
+
+build: fmt simplify
 	go build
 
 test: fmt
