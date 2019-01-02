@@ -9,8 +9,8 @@ func getRunRunKubectlScriptSchema()  *schema.Schema {
 
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
-	addPrimaryPackageSchema(element, false)
 	addScriptFromPackageSchema(element)
+	addPackagesSchema(element, false)
 
 	return actionSchema;
 }
