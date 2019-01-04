@@ -7,6 +7,8 @@ import (
 
 func addPrimaryPackageSchema(element *schema.Resource, required bool)  {
 	element.Schema["primary_package"] = getPackageSchema(required);
+
+	element.Schema["primary_package"].MaxItems = 1;
 }
 
 func addPackagesSchema(element *schema.Resource, primaryIsRequired bool)  {
@@ -15,11 +17,13 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool)  {
 	element.Schema["package"] = getPackageSchema(false);
 
 	packageElementSchema := element.Schema["package"].Elem.(*schema.Resource).Schema
+
 	packageElementSchema["name"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "The name of the package",
 		Required:    true,
 	}
+
 	packageElementSchema["extract_during_deployment"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "Whether to extract the package during deployment",
@@ -34,7 +38,6 @@ func getPackageSchema(required bool) *schema.Schema {
 		Type:        schema.TypeSet,
 		Required:    required,
 		Optional:    !required,
-		MaxItems:	 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"package_id": {
