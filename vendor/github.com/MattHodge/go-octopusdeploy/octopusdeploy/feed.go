@@ -46,13 +46,11 @@ func (t *Feed) Validate() error {
 	return nil
 }
 
-func NewFeed(name, feedType string, feedUri string, feedUsername string, feedPassword string) *Feed {
+func NewFeed(name, feedType string, feedUri string) *Feed {
 	return &Feed{
 		Name:             name,
 		FeedType:      	  feedType,
 		FeedUri:      	  feedUri,
-		Username:         feedUsername,
-		Password:         feedPassword,
 	}
 }
 

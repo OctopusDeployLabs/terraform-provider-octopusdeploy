@@ -44,11 +44,11 @@ func resourceFeed() *schema.Resource {
 			},
 			"feed_username": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
 			},
 			"feed_password": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: false,
+				Optional: true,
 			},
 		},
 	}
@@ -127,10 +127,12 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 		feedPassword = feedPasswordInterface.(string)
 	}
 
-	var feed = octopusdeploy.NewFeed(feedName, feedType, feedUri, feedUsername, feedPassword)
+	var feed = octopusdeploy.NewFeed(feedName, feedType, feedUri)
 	feed.EnhancedMode = enhancedMode
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
+	feed.Username = feedUsername
+	feed.Password = feedPassword
 
 	return feed;
 }
