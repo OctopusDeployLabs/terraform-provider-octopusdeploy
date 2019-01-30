@@ -31,7 +31,7 @@ type Feed struct {
 	FeedUri  						string `json:"FeedUri"`
 	EnhancedMode   					bool `json:"EnhancedMode"`
 	Username                        string `json:"Username"`
-	Password                        string `json:"Password"`
+	Password                        SensitiveValue `json:"Password"`
 }
 
 func (t *Feed) Validate() error {

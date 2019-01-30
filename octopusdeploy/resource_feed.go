@@ -132,7 +132,9 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
 	feed.Username = feedUsername
-	feed.Password = feedPassword
+	feed.Password = octopusdeploy.SensitiveValue{
+		NewValue: feedPassword,
+	}
 
 	return feed;
 }
