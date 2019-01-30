@@ -30,6 +30,8 @@ type Feed struct {
 	DownloadRetryBackoffSeconds  	int `json:"DownloadRetryBackoffSeconds"`
 	FeedUri  						string `json:"FeedUri"`
 	EnhancedMode   					bool `json:"EnhancedMode"`
+	Username                        string `json:"Username"`
+	Password                        string `json:"Password"`
 }
 
 func (t *Feed) Validate() error {
