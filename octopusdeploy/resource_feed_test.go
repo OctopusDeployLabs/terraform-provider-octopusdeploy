@@ -34,9 +34,9 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						feedPrefix, "feed_uri", feedUri),
 					resource.TestCheckResourceAttr(
-						feedPrefix, "feed_username", feedUsername),
+						feedPrefix, "username", feedUsername),
 					resource.TestCheckResourceAttr(
-						feedPrefix, "feed_password", feedPassword),
+						feedPrefix, "password", feedPassword),
 					resource.TestCheckResourceAttr(
 						feedPrefix, "enhanced_mode", enhancedMode),
 				),
@@ -51,8 +51,8 @@ func testFeedtBasic(name, feedType, feedUri string, feedUsername string, feedPas
 			name          = "%s"
 			feed_type     = "%s"
 			feed_uri      = "%s"
-			feed_username = "%s"
-			feed_password = "%s"
+			username = "%s"
+			password = "%s"
 			enhanced_mode = "%s"
 		}
 		`,

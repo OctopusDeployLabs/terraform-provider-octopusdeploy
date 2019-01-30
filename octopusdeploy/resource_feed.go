@@ -42,11 +42,11 @@ func resourceFeed() *schema.Resource {
 				Optional: true,
 				Default:  10,
 			},
-			"feed_username": &schema.Schema{
+			"username": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"feed_password": &schema.Schema{
+			"password": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -75,8 +75,8 @@ func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("enhanced_mode", feed.EnhancedMode)
 	d.Set("download_attempts", feed.DownloadAttempts)
 	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
-	d.Set("feed_username", feed.Username)
-	d.Set("feed_password", feed.Password)
+	d.Set("username", feed.Username)
+	d.Set("password", feed.Password)
 
 	return nil
 }
@@ -117,12 +117,12 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 		downloadRetryBackoffSeconds = downloadRetryBackoffSecondsInterface.(int)
 	}
 
-	feedUsernameInterface, ok := d.GetOk("feed_username")
+	feedUsernameInterface, ok := d.GetOk("username")
 	if ok {
 		feedUsername = feedUsernameInterface.(string)
 	}
 
-	feedPasswordInterface, ok := d.GetOk("feed_password")
+	feedPasswordInterface, ok := d.GetOk("password")
 	if ok {
 		feedPassword = feedPasswordInterface.(string)
 	}
