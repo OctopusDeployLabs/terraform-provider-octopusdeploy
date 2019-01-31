@@ -42,6 +42,14 @@ func resourceFeed() *schema.Resource {
 				Optional: true,
 				Default:  10,
 			},
+			"username": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"password": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -67,6 +75,8 @@ func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("enhanced_mode", feed.EnhancedMode)
 	d.Set("download_attempts", feed.DownloadAttempts)
 	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
+	d.Set("username", feed.Username)
+	d.Set("password", feed.Password)
 
 	return nil
 }
@@ -79,6 +89,8 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 	var enhancedMode bool
 	var downloadAttempts int
 	var downloadRetryBackoffSeconds int
+	var feedUsername string
+	var feedPassword string
 
 	feedTypeInterface, ok := d.GetOk("feed_type")
 	if ok {
@@ -105,10 +117,24 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 		downloadRetryBackoffSeconds = downloadRetryBackoffSecondsInterface.(int)
 	}
 
+	feedUsernameInterface, ok := d.GetOk("username")
+	if ok {
+		feedUsername = feedUsernameInterface.(string)
+	}
+
+	feedPasswordInterface, ok := d.GetOk("password")
+	if ok {
+		feedPassword = feedPasswordInterface.(string)
+	}
+
 	var feed = octopusdeploy.NewFeed(feedName, feedType, feedUri)
 	feed.EnhancedMode = enhancedMode
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
+	feed.Username = feedUsername
+	feed.Password = octopusdeploy.SensitiveValue{
+		NewValue: feedPassword,
+	}
 
 	return feed;
 }
