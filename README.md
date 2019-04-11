@@ -2,9 +2,7 @@
 
 A Terraform provider for [Octopus Deploy](https://octopus.com).
 
-It is based on the [go-octopusdeploy](https://github.com/MattHodge/go-octopusdeploy) Octopus Deploy client SDK.
-
-[![CircleCI](https://circleci.com/gh/MattHodge/terraform-provider-octopusdeploy/tree/master.svg?style=svg)](https://circleci.com/gh/MattHodge/terraform-provider-octopusdeploy/tree/master)
+It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopusdeploy) Octopus Deploy client SDK.
 
 > :warning: This provider is in heavy development. There may be breaking changes.
 
