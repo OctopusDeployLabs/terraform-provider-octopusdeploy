@@ -10,7 +10,7 @@ It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopu
 
 As this provider is still under development, you will need to manually download it.
 
-There are compiled binaries for most platforms in [Releases](https://github.com/MattHodge/terraform-provider-octopusdeploy/releases).
+There are compiled binaries for most platforms in [Releases](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/releases).
 
 To use it, extract the binary for your platform into the same folder as your `.tf` file(s) will be located, then run `terraform init`.
 
