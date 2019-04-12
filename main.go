@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hashicorp/terraform/plugin"
 
-	"github.com/MattHodge/terraform-provider-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy"
 )
 
 func main() {

@@ -2,9 +2,7 @@
 
 A Terraform provider for [Octopus Deploy](https://octopus.com).
 
-It is based on the [go-octopusdeploy](https://github.com/MattHodge/go-octopusdeploy) Octopus Deploy client SDK.
-
-[![CircleCI](https://circleci.com/gh/MattHodge/terraform-provider-octopusdeploy/tree/master.svg?style=svg)](https://circleci.com/gh/MattHodge/terraform-provider-octopusdeploy/tree/master)
+It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopusdeploy) Octopus Deploy client SDK.
 
 > :warning: This provider is in heavy development. There may be breaking changes.
 
@@ -12,7 +10,7 @@ It is based on the [go-octopusdeploy](https://github.com/MattHodge/go-octopusdep
 
 As this provider is still under development, you will need to manually download it.
 
-There are compiled binaries for most platforms in [Releases](https://github.com/MattHodge/terraform-provider-octopusdeploy/releases).
+There are compiled binaries for most platforms in [Releases](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/releases).
 
 To use it, extract the binary for your platform into the same folder as your `.tf` file(s) will be located, then run `terraform init`.
 
