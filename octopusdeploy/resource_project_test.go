@@ -23,7 +23,7 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID),
+				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID, allowDeploymentsToNoTargets),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
@@ -59,7 +59,7 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWithDeploymentStepWindowsService(projectName, lifeCycleID, serviceName, executablePath, stepName, packageName, targetRoles),
+				Config: testAccWithDeploymentStepWindowsService(projectName, lifeCycleID, projectGroupID, serviceName, executablePath, stepName, packageName, targetRoles),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestMatchResourceAttr(
@@ -95,7 +95,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	const projectGroupID = "ProjectGroups-1"
 	const description = "I am a new description"
 	const allowDeploymentsToNoTargets = "true"
-	inlineScriptRegex, _ := regexp.MustCompile(".*Get\\-Process.*")
+	inlineScriptRegex := regexp.MustCompile(".*Get\\-Process.*")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -103,7 +103,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// create project with no description
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID),
+				Config: testAccProjectBasic(projectName, lifeCycleID, projectGroupID, allowDeploymentsToNoTargets),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
@@ -327,16 +327,12 @@ resource "octopusdeploy_project" "foo" {
 }
 `
 
-func testAccWithDeploymentStepWindowsService(name, lifeCycleID, serviceName, executablePath, stepName, packageName string, targetRoles []string) string {
+func testAccWithDeploymentStepWindowsService(name, lifeCycleID, projectGroupID, serviceName, executablePath, stepName, packageName string, targetRoles []string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
-			name = "Integration Test Project Group"
-		}
-
 		resource "octopusdeploy_project" "foo" {
 			name             = "%s"
 			lifecycle_id     = "%s"
-			project_group_id = "${octopusdeploy_project_group.foo.id}"
+			project_group_id = "%s"
 
 			deployment_step_windows_service {
 				executable_path = "%s"
