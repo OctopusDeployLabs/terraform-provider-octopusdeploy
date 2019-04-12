@@ -5,14 +5,14 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func getRunRunKubectlScriptSchema()  *schema.Schema {
+func getRunRunKubectlScriptSchema() *schema.Schema {
 
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
 	addScriptFromPackageSchema(element)
 	addPackagesSchema(element, false)
 
-	return actionSchema;
+	return actionSchema
 }
 
 func buildRunKubectlScriptActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
@@ -44,5 +44,5 @@ func buildScriptFromPackageProperties(tfAction map[string]interface{}) map[strin
 	properties["Octopus.Action.Script.ScriptParameters"] = tfAction["script_parameters"].(string)
 	properties["Octopus.Action.Script.ScriptSource"] = "Package"
 
-	return properties;
+	return properties
 }

@@ -131,7 +131,7 @@ func testAccDeploymentProcessBasic() string {
 }
 
 func testAccBuildTestActionTerraform(action string) string {
-	return fmt.Sprintf( `
+	return fmt.Sprintf(`
 		resource "octopusdeploy_lifecycle" "test" {
 			name = "Test Lifecycle"
 		}

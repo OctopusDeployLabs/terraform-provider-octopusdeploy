@@ -55,7 +55,6 @@ func resourceAccount() *schema.Resource {
 					"Tenanted",
 				}),
 			},
-
 		},
 	}
 }
@@ -147,7 +146,7 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 	account.TenantTags = tenantTags
 	account.TenantedDeploymentParticipation = tenantedDeploymentParticipation
 
-	return account;
+	return account
 }
 
 func resourceAccountCreate(d *schema.ResourceData, m interface{}) error {

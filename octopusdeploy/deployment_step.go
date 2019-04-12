@@ -68,14 +68,14 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "The maximum number of targets to deploy to simultaneously",
 					Optional:    true,
 				},
-				"action":                        getDeploymentActionSchema(),
-				"manual_intervention_action":    getManualInterventionActionSchema(),
-				"apply_terraform_action":        getApplyTerraformActionSchema(),
-				"deploy_package_action":         getDeployPackageAction(),
-				"deploy_windows_service_action": getDeployWindowsServiceActionSchema(),
-				"run_script_action":             getRunScriptActionSchema(),
-				"run_kubectl_script_action":     getRunRunKubectlScriptSchema(),
-				"deploy_kubernetes_secret_action":      getDeployKubernetesSecretActionSchema(),
+				"action":                          getDeploymentActionSchema(),
+				"manual_intervention_action":      getManualInterventionActionSchema(),
+				"apply_terraform_action":          getApplyTerraformActionSchema(),
+				"deploy_package_action":           getDeployPackageAction(),
+				"deploy_windows_service_action":   getDeployWindowsServiceActionSchema(),
+				"run_script_action":               getRunScriptActionSchema(),
+				"run_kubectl_script_action":       getRunRunKubectlScriptSchema(),
+				"deploy_kubernetes_secret_action": getDeployKubernetesSecretActionSchema(),
 			},
 		},
 	}
@@ -120,7 +120,7 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.De
 	}
 
 	if attr, ok := tfStep["apply_terraform_action"]; ok {
-		for _, tfAction := range attr.([]interface {}) {
+		for _, tfAction := range attr.([]interface{}) {
 			action := buildApplyTerraformActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
@@ -141,25 +141,25 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.De
 	}
 
 	if attr, ok := tfStep["run_script_action"]; ok {
-		for _, tfAction := range attr.([]interface {}) {
+		for _, tfAction := range attr.([]interface{}) {
 			action := buildRunScriptActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if attr, ok := tfStep["run_kubectl_script_action"]; ok {
-		for _, tfAction := range attr.([]interface {}) {
+		for _, tfAction := range attr.([]interface{}) {
 			action := buildRunKubectlScriptActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if attr, ok := tfStep["deploy_kubernetes_secret_action"]; ok {
-		for _, tfAction := range attr.([]interface {}) {
+		for _, tfAction := range attr.([]interface{}) {
 			action := buildDeployKubernetesSecretActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	return step;
+	return step
 }

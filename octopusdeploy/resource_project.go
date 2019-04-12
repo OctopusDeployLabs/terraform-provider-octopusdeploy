@@ -94,7 +94,7 @@ func resourceProject() *schema.Resource {
 			"deployment_step_iis_website":     getDeploymentStepIISWebsiteSchema(),
 			"deployment_step_inline_script":   getDeploymentStepInlineScriptSchema(),
 			"deployment_step_package_script":  getDeploymentStepPackageScriptSchema(),
-			"deployment_step_apply_terraform":  getDeploymentStepApplyTerraformSchema(),
+			"deployment_step_apply_terraform": getDeploymentStepApplyTerraformSchema(),
 		},
 	}
 }
@@ -322,9 +322,9 @@ func getDeploymentStepApplyTerraformSchema() *schema.Schema {
 					Default:     false,
 				},
 				"terraform_file_variable_replacement": {
-					Type:        schema.TypeList,
-					Optional:    true,
-					Elem: &schema.Schema {
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem: &schema.Schema{
 						Type: schema.TypeString,
 					},
 				},
@@ -744,17 +744,16 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Name:       stepName,
 						ActionType: "Octopus.TerraformApply",
 						Properties: map[string]string{
-							"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
-							"Octopus.Action.Script.ScriptSource":        "Package",
-							"Octopus.Action.Package.DownloadOnTentacle": "False",
-							"Octopus.Action.Package.FeedId":             feedID,
-							"Octopus.Action.Package.PackageId":          packageID,
-							"Octopus.Action.Aws.AssumeRole": 			 "False",
-							"Octopus.Action.AwsAccount.UseInstanceRole":  "False",
+							"Octopus.Action.RunOnServer":                    strconv.FormatBool(runOnServer),
+							"Octopus.Action.Script.ScriptSource":            "Package",
+							"Octopus.Action.Package.DownloadOnTentacle":     "False",
+							"Octopus.Action.Package.FeedId":                 feedID,
+							"Octopus.Action.Package.PackageId":              packageID,
+							"Octopus.Action.Aws.AssumeRole":                 "False",
+							"Octopus.Action.AwsAccount.UseInstanceRole":     "False",
 							"Octopus.Action.Terraform.AdditionalInitParams": additionalInitParams,
 							"Octopus.Action.Terraform.AllowPluginDownloads": "True",
-							"Octopus.Action.Terraform.ManagedAccount": "None",
-
+							"Octopus.Action.Terraform.ManagedAccount":       "None",
 						},
 					},
 				},

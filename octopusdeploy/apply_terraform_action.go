@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func getApplyTerraformActionSchema()  *schema.Schema {
+func getApplyTerraformActionSchema() *schema.Schema {
 
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
@@ -17,7 +17,7 @@ func getApplyTerraformActionSchema()  *schema.Schema {
 		Optional:    true,
 	}
 
-	return actionSchema;
+	return actionSchema
 }
 
 func buildApplyTerraformActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {

@@ -46,7 +46,7 @@ func testAccCheckRunKubectlScriptAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-		process, err := getDeploymentProcess(s, client);
+		process, err := getDeploymentProcess(s, client)
 		if err != nil {
 			return err
 		}
@@ -65,6 +65,6 @@ func testAccCheckRunKubectlScriptAction() resource.TestCheckFunc {
 			return fmt.Errorf("ScriptSource is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptParameters"])
 		}
 
-		return nil;
+		return nil
 	}
 }

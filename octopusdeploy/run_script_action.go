@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func getRunScriptActionSchema()  *schema.Schema {
+func getRunScriptActionSchema() *schema.Schema {
 
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
@@ -18,7 +18,7 @@ func getRunScriptActionSchema()  *schema.Schema {
 		Description: "A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",
 	}
 
-	return actionSchema;
+	return actionSchema
 }
 
 func addScriptFromPackageSchema(element *schema.Resource) {
@@ -55,7 +55,7 @@ func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy
 	return resource
 }
 
-func buildRunScriptFromPackageActionResource(tfAction map[string]interface{})  map[string]string {
+func buildRunScriptFromPackageActionResource(tfAction map[string]interface{}) map[string]string {
 
 	properties := make(map[string]string)
 

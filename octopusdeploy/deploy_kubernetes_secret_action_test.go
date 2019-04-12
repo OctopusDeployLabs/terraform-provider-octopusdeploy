@@ -49,7 +49,7 @@ func testAccCheckDeployKuberentesSecretAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-		process, err := getDeploymentProcess(s, client);
+		process, err := getDeploymentProcess(s, client)
 		if err != nil {
 			return err
 		}
@@ -68,6 +68,6 @@ func testAccCheckDeployKuberentesSecretAction() resource.TestCheckFunc {
 			return fmt.Errorf("SecretName is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretName"])
 		}
 
-		return nil;
+		return nil
 	}
 }

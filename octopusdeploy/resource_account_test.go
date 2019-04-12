@@ -19,7 +19,7 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 	const clientSecret = "18eb006b-c3c8-4a72-93cd-fe4b293f82e4"
 	const tagSetName = "TagSet"
 	const tagName = "Tag"
-	var tenantTags = fmt.Sprintf("%s/%s", tagSetName, tagName,)
+	var tenantTags = fmt.Sprintf("%s/%s", tagSetName, tagName)
 	const tenantedDeploymentParticipation = "TenantedOrUntenanted"
 
 	resource.Test(t, resource.TestCase{
@@ -41,7 +41,7 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 						accountPrefix, "tenant_id", tenantId),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "subscription_id", subscriptionId),
-						resource.TestCheckResourceAttr(
+					resource.TestCheckResourceAttr(
 						accountPrefix, "client_secret", clientSecret),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "tenant_tags.0", tenantTags),
@@ -53,7 +53,7 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 	})
 }
 
-func testAccountBasic(tagSetName string, tagName string, accountName string, accountType, clientId string,  tenantId string, subscriptionId string, clientSecret string, tenantedDeploymentParticipation string) string {
+func testAccountBasic(tagSetName string, tagName string, accountName string, accountType, clientId string, tenantId string, subscriptionId string, clientSecret string, tenantedDeploymentParticipation string) string {
 	return fmt.Sprintf(`
 		
 		resource "octopusdeploy_tag_set" "testtagset" {
@@ -92,9 +92,9 @@ func existsaccountHelper(s *terraform.State, client *octopusdeploy.Client) error
 
 	accountId := s.RootModule().Resources["octopusdeploy_account.foo"].Primary.ID
 
-		if _, err := client.Account.Get(accountId); err != nil {
-			return fmt.Errorf("Received an error retrieving account %s", err)
-		}
+	if _, err := client.Account.Get(accountId); err != nil {
+		return fmt.Errorf("Received an error retrieving account %s", err)
+	}
 
 	return nil
 }
@@ -103,7 +103,6 @@ func testOctopusDeployAccountDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	return destroyaccountHelper(s, client)
 }
-
 
 func destroyaccountHelper(s *terraform.State, client *octopusdeploy.Client) error {
 

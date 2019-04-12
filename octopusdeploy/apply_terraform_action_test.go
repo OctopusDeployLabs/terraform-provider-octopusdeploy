@@ -45,7 +45,7 @@ func testAccCheckApplyTerraformAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-		process, err := getDeploymentProcess(s, client);
+		process, err := getDeploymentProcess(s, client)
 		if err != nil {
 			return err
 		}
@@ -60,6 +60,6 @@ func testAccCheckApplyTerraformAction() resource.TestCheckFunc {
 			return fmt.Errorf("AdditionalInitParams is incorrect: %s", action.Properties["Octopus.Action.Terraform.AdditionalInitParams"])
 		}
 
-		return nil;
+		return nil
 	}
 }

@@ -8,7 +8,7 @@ import (
 
 func getDeploymentActionSchema() *schema.Schema {
 	actionSchema, element := getCommonDeploymentActionSchema()
-	addExecutionLocationSchema(element);
+	addExecutionLocationSchema(element)
 	addActionTypeSchema(element)
 	addExecutionLocationSchema(element)
 	element.Schema["action_type"] = &schema.Schema{

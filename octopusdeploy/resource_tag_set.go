@@ -61,7 +61,6 @@ func resourceTagSetRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("name", tagSet.Name)
 
-
 	return nil
 }
 
@@ -71,7 +70,7 @@ func buildTagSetResource(d *schema.ResourceData) *octopusdeploy.TagSet {
 	var tagSet = octopusdeploy.NewTagSet(tagSetName)
 
 	if attr, ok := d.GetOk("tag"); ok {
-		tfTags := attr.([]interface {})
+		tfTags := attr.([]interface{})
 
 		for _, tfTag := range tfTags {
 			tag := buildTagResource(tfTag.(map[string]interface{}))
@@ -79,18 +78,17 @@ func buildTagSetResource(d *schema.ResourceData) *octopusdeploy.TagSet {
 		}
 	}
 
-	return tagSet;
+	return tagSet
 }
 
 func buildTagResource(tfTag map[string]interface{}) octopusdeploy.Tag {
 	tag := octopusdeploy.Tag{
-		Name:               tfTag["name"].(string),
-		Color:              tfTag["color"].(string),
+		Name:  tfTag["name"].(string),
+		Color: tfTag["color"].(string),
 	}
 
-	return tag;
+	return tag
 }
-
 
 func resourceTagSetCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)

@@ -136,7 +136,7 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 		NewValue: feedPassword,
 	}
 
-	return feed;
+	return feed
 }
 
 func resourceFeedCreate(d *schema.ResourceData, m interface{}) error {

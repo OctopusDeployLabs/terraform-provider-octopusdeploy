@@ -69,7 +69,7 @@ func buildLibraryVariableSetResource(d *schema.ResourceData) *octopusdeploy.Libr
 	}
 
 	if attr, ok := d.GetOk("templates"); ok {
-		tfTemplates := attr.([]interface {})
+		tfTemplates := attr.([]interface{})
 
 		for _, tfTemplate := range tfTemplates {
 			template := buildTemplateResource(tfTemplate.(map[string]interface{}))
@@ -88,9 +88,8 @@ func buildTemplateResource(tfTemplate map[string]interface{}) octopusdeploy.Acti
 		},
 	}
 
-	return template;
+	return template
 }
-
 
 func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)

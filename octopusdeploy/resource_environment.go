@@ -86,9 +86,9 @@ func buildEnvironmentResource(d *schema.ResourceData) *octopusdeploy.Environment
 	}
 
 	var environment = octopusdeploy.NewEnvironment(envName, envDesc, envGuided)
-	environment.AllowDynamicInfrastructure = envDynamic;
+	environment.AllowDynamicInfrastructure = envDynamic
 
-	return environment;
+	return environment
 }
 
 func resourceEnvironmentCreate(d *schema.ResourceData, m interface{}) error {

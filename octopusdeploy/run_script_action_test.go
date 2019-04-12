@@ -47,7 +47,7 @@ func testAccCheckRunScriptAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-		process, err := getDeploymentProcess(s, client);
+		process, err := getDeploymentProcess(s, client)
 		if err != nil {
 			return err
 		}
@@ -70,6 +70,6 @@ func testAccCheckRunScriptAction() resource.TestCheckFunc {
 			return fmt.Errorf("TargetFiles is incorrect: %s", action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"])
 		}
 
-		return nil;
+		return nil
 	}
 }
