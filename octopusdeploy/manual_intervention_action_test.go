@@ -26,7 +26,7 @@ func TestAccOctopusDeployManualInterventionAction(t *testing.T) {
 }
 
 func testAccManualInterventionAction() string {
-	return testAccBuildTestActionTerraform(`
+	return testAccBuildTestAction(`
 		manual_intervention_action {
 			name = "Test"
 			instructions = "Approve Me"

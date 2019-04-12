@@ -29,6 +29,7 @@ type LibraryVariableSet struct {
 	Description   string                 `json:"Description,omitempty"`
 	VariableSetId string                 `json:"VariableSetId,omitempty"`
 	ContentType   VariableSetContentType `json:"ContentType" validate:"required"`
+	Templates     []ActionTemplateParameter `json:"Templates,omitempty"`
 }
 
 type VariableSetContentType string

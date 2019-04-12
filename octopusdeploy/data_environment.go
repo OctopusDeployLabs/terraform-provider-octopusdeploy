@@ -24,6 +24,10 @@ func dataEnvironment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"allow_dynamic_infrastructure": &schema.Schema{
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -47,6 +51,7 @@ func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 	d.Set("name", env.Name)
 	d.Set("description", env.Description)
 	d.Set("use_guided_failure", env.UseGuidedFailure)
+	d.Set("allow_dynamic_infrastructure", env.AllowDynamicInfrastructure)
 
 	return nil
 }
