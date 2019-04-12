@@ -15,38 +15,38 @@ func resourceAccount() *schema.Resource {
 		Delete: resourceAccountDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"account_type": &schema.Schema{
+			"account_type": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"client_id": &schema.Schema{
+			"client_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"subscription_id": &schema.Schema{
+			"subscription_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"client_secret": &schema.Schema{
+			"client_secret": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"tenant_tags": &schema.Schema{
+			"tenant_tags": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"tenanted_deployment_participation": &schema.Schema{
+			"tenanted_deployment_participation": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validateValueFunc([]string{

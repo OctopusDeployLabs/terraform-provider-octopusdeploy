@@ -24,7 +24,7 @@ func dataEnvironment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"allow_dynamic_infrastructure": &schema.Schema{
+			"allow_dynamic_infrastructure": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},

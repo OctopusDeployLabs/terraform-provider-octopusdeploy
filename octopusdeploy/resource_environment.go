@@ -31,7 +31,7 @@ func resourceEnvironment() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"allow_dynamic_infrastructure": &schema.Schema{
+			"allow_dynamic_infrastructure": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,

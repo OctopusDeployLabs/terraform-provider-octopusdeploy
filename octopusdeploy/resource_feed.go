@@ -15,38 +15,38 @@ func resourceFeed() *schema.Resource {
 		Delete: resourceFeedDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"feed_type": &schema.Schema{
+			"feed_type": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"feed_uri": &schema.Schema{
+			"feed_uri": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"enhanced_mode": &schema.Schema{
+			"enhanced_mode": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"download_attempts": &schema.Schema{
+			"download_attempts": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  5,
 			},
-			"download_retry_backoff_seconds": &schema.Schema{
+			"download_retry_backoff_seconds": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  10,
 			},
-			"username": &schema.Schema{
+			"username": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},

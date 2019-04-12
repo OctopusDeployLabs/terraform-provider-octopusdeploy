@@ -18,27 +18,27 @@ func resourceProject() *schema.Resource {
 		Delete: resourceProjectDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"deployment_process_id": &schema.Schema{
+			"deployment_process_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"lifecycle_id": &schema.Schema{
+			"lifecycle_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"project_group_id": &schema.Schema{
+			"project_group_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"default_failure_mode": &schema.Schema{
+			"default_failure_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "EnvironmentDefault",
@@ -48,7 +48,7 @@ func resourceProject() *schema.Resource {
 					"On",
 				}),
 			},
-			"skip_machine_behavior": &schema.Schema{
+			"skip_machine_behavior": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "None",
@@ -57,12 +57,12 @@ func resourceProject() *schema.Resource {
 					"None",
 				}),
 			},
-			"allow_deployments_to_no_targets": &schema.Schema{
+			"allow_deployments_to_no_targets": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"tenanted_deployment_mode": &schema.Schema{
+			"tenanted_deployment_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "Untenanted",
@@ -72,14 +72,14 @@ func resourceProject() *schema.Resource {
 					"Tenanted",
 				}),
 			},
-			"included_library_variable_sets": &schema.Schema{
+			"included_library_variable_sets": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"discrete_channel_release": &schema.Schema{
+			"discrete_channel_release": {
 				Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
 				Type:        schema.TypeBool,
 				Optional:    true,
