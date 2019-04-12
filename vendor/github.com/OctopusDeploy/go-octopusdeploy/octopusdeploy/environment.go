@@ -28,7 +28,6 @@ type Environment struct {
 	Description      string `json:"Description"`
 	SortOrder        int    `json:"SortOrder"`
 	UseGuidedFailure bool   `json:"UseGuidedFailure"`
-	AllowDynamicInfrastructure bool `json:"AllowDynamicInfrastructure"`
 }
 
 func (t *Environment) Validate() error {

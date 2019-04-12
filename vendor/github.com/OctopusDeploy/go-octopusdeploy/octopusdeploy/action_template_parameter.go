@@ -3,7 +3,7 @@ package octopusdeploy
 type ActionTemplateParameter struct {
 
 	// default value
-	DefaultValue PropertyValue `json:"DefaultValue,omitempty"`
+	DefaultValue map[string]PropertyValue `json:"DefaultValue,omitempty"`
 
 	// display settings
 	DisplaySettings map[string]string `json:"DisplaySettings,omitempty"`
