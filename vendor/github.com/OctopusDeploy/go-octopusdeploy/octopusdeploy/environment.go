@@ -23,11 +23,12 @@ type Environments struct {
 }
 
 type Environment struct {
-	ID               string `json:"Id"`
-	Name             string `json:"Name"`
-	Description      string `json:"Description"`
-	SortOrder        int    `json:"SortOrder"`
-	UseGuidedFailure bool   `json:"UseGuidedFailure"`
+	ID                         string `json:"Id"`
+	Name                       string `json:"Name"`
+	Description                string `json:"Description"`
+	SortOrder                  int    `json:"SortOrder"`
+	UseGuidedFailure           bool   `json:"UseGuidedFailure"`
+	AllowDynamicInfrastructure bool   `json:"AllowDynamicInfrastructure"`
 }
 
 func (t *Environment) Validate() error {

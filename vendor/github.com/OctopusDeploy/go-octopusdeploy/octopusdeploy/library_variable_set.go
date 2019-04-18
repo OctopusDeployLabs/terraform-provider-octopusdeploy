@@ -24,20 +24,20 @@ type LibraryVariableSets struct {
 }
 
 type LibraryVariableSet struct {
-	ID            string                 `json:"Id,omitempty"`
-	Name          string                 `json:"Name" validate:"required"`
-	Description   string                 `json:"Description,omitempty"`
-	VariableSetId string                 `json:"VariableSetId,omitempty"`
-	ContentType   VariableSetContentType `json:"ContentType" validate:"required"`
+	ID            string                    `json:"Id,omitempty"`
+	Name          string                    `json:"Name" validate:"required"`
+	Description   string                    `json:"Description,omitempty"`
+	VariableSetId string                    `json:"VariableSetId,omitempty"`
+	ContentType   VariableSetContentType    `json:"ContentType" validate:"required"`
+	Templates     []ActionTemplateParameter `json:"Templates,omitempty"`
 }
 
 type VariableSetContentType string
 
 const (
-	VariableSetContentType_Variables = VariableSetContentType("Variables")
+	VariableSetContentType_Variables    = VariableSetContentType("Variables")
 	VariableSetContentType_ScriptModule = VariableSetContentType("ScriptModule")
 )
-
 
 func NewLibraryVariableSet(name string) *LibraryVariableSet {
 	return &LibraryVariableSet{
@@ -68,7 +68,7 @@ func (s *LibraryVariableSetService) Get(libraryVariableSetID string) (*LibraryVa
 
 // GetAll returns all libraryVariableSets in Octopus Deploy
 func (s *LibraryVariableSetService) GetAll() (*[]LibraryVariableSet, error) {
-	return s.get("");
+	return s.get("")
 }
 
 func (s *LibraryVariableSetService) get(query string) (*[]LibraryVariableSet, error) {
