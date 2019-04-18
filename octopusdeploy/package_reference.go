@@ -7,6 +7,7 @@ import (
 
 func addPrimaryPackageSchema(element *schema.Resource, required bool) {
 	element.Schema["primary_package"] = getPackageSchema(required)
+	element.Schema["primary_package"].MaxItems = 1
 }
 
 func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
@@ -36,7 +37,6 @@ func getPackageSchema(required bool) *schema.Schema {
 		Type:        schema.TypeSet,
 		Required:    required,
 		Optional:    !required,
-		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"package_id": {
