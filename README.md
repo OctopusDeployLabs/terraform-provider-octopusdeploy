@@ -8,11 +8,20 @@ It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopu
 
 ## Downloading & Installing
 
-As this provider is still under development, you will need to manually download it.
+To use this provider you'll need to compile the appropriate binary for your system, place it in the same folder as your `.tf` file(s), then run `terraform init`.
 
-There are compiled binaries for most platforms in [Releases](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/releases).
+The simplest way to compile a new binary is by using the official [Go Docker Image](https://hub.docker.com/_/golang).
+This will enable you to easily produce a binary for [any platform and architecture supported by Go](https://golang.org/doc/install/source#environment).
 
-To use it, extract the binary for your platform into the same folder as your `.tf` file(s) will be located, then run `terraform init`.
+For example, a 32-bit Windows binary (.exe) is produced with the following command:
+
+```sh
+docker run --rm -v "$PWD":/app -w /app -e GOOS=windows -e GOARCH=386 golang go build -v
+```
+
+The resulting binary is saved to your `$PWD` as `terraform-provider-octopusdeploy.exe`.
+
+_Note:_ The above command assumes you're running in Bash. If you're using PowerShell, replace `"$PWD"` with `` `"${PWD}`"``. And if you're running plain ol' cmd, use `"%cd%"`.
 
 ## Configure the Provider
 
