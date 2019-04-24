@@ -9,6 +9,8 @@ import (
 func getDeploymentActionSchema() *schema.Schema {
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
+	addActionTypeSchema(element)
+	addExecutionLocationSchema(element)
 	element.Schema["action_type"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "The type of action",
@@ -91,6 +93,14 @@ func addExecutionLocationSchema(element *schema.Resource) {
 		Description: "Whether this step runs on a worker or on the target",
 		Optional:    true,
 		Default:     false,
+	}
+}
+
+func addActionTypeSchema(element *schema.Resource) {
+	element.Schema["action_type"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "The type of action",
+		Required:    true,
 	}
 }
 

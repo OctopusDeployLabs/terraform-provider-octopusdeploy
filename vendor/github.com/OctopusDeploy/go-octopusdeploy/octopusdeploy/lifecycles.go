@@ -35,7 +35,7 @@ type Lifecycle struct {
 type RetentionUnit string
 
 const (
-	RetentionUnit_Days = RetentionUnit("Days")
+	RetentionUnit_Days  = RetentionUnit("Days")
 	RetentionUnit_Items = RetentionUnit("Items")
 )
 
@@ -46,26 +46,25 @@ type RetentionPeriod struct {
 }
 
 type Phase struct {
-	ID                                 string          `json:"Id,omitempty"`
-	Name                               string          `json:"Name" validate:"required"`
-	MinimumEnvironmentsBeforePromotion int32           `json:"MinimumEnvironmentsBeforePromotion"`
-	IsOptionalPhase                    bool            `json:"IsOptionalPhase"`
+	ID                                 string           `json:"Id,omitempty"`
+	Name                               string           `json:"Name" validate:"required"`
+	MinimumEnvironmentsBeforePromotion int32            `json:"MinimumEnvironmentsBeforePromotion"`
+	IsOptionalPhase                    bool             `json:"IsOptionalPhase"`
 	ReleaseRetentionPolicy             *RetentionPeriod `json:"ReleaseRetentionPolicy"`
 	TentacleRetentionPolicy            *RetentionPeriod `json:"TentacleRetentionPolicy"`
-	AutomaticDeploymentTargets         []string        `json:"AutomaticDeploymentTargets"`
-	OptionalDeploymentTargets          []string        `json:"OptionalDeploymentTargets"`
+	AutomaticDeploymentTargets         []string         `json:"AutomaticDeploymentTargets"`
+	OptionalDeploymentTargets          []string         `json:"OptionalDeploymentTargets"`
 }
-
 
 func NewLifecycle(name string) *Lifecycle {
 	return &Lifecycle{
 		Name:   name,
 		Phases: []Phase{},
-		TentacleRetentionPolicy:RetentionPeriod{
-			Unit:RetentionUnit_Days,
+		TentacleRetentionPolicy: RetentionPeriod{
+			Unit: RetentionUnit_Days,
 		},
-		ReleaseRetentionPolicy:RetentionPeriod{
-			Unit:RetentionUnit_Days,
+		ReleaseRetentionPolicy: RetentionPeriod{
+			Unit: RetentionUnit_Days,
 		},
 	}
 }
@@ -108,7 +107,7 @@ func (s *LifecycleService) Get(LifecycleID string) (*Lifecycle, error) {
 
 // GetAll returns all lifecycles in Octopus Deploy
 func (s *LifecycleService) GetAll() (*[]Lifecycle, error) {
-	return s.get("");
+	return s.get("")
 }
 
 func (s *LifecycleService) get(query string) (*[]Lifecycle, error) {

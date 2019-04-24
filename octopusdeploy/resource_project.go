@@ -57,6 +57,11 @@ func resourceProject() *schema.Resource {
 					"None",
 				}),
 			},
+			"allow_deployments_to_no_targets": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"tenanted_deployment_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -89,6 +94,7 @@ func resourceProject() *schema.Resource {
 			"deployment_step_iis_website":     getDeploymentStepIISWebsiteSchema(),
 			"deployment_step_inline_script":   getDeploymentStepInlineScriptSchema(),
 			"deployment_step_package_script":  getDeploymentStepPackageScriptSchema(),
+			"deployment_step_apply_terraform": getDeploymentStepApplyTerraformSchema(),
 		},
 	}
 }
@@ -135,6 +141,12 @@ func addConfigurationTransformDeploymentStepSchema(schemaToAddToo interface{}) *
 		Type:        schema.TypeString,
 		Optional:    true,
 		Description: "A comma-separated list of file names to replace settings in, relative to the package contents.",
+	}
+
+	schemaResource.Schema["variable_substitution_in_files"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",
 	}
 
 	return schemaResource
@@ -285,6 +297,41 @@ func getDeploymentStepPackageScriptSchema() *schema.Schema {
 		},
 	}
 
+	schemaToReturn.Elem = addConfigurationTransformDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
+
+	return schemaToReturn
+}
+
+func getDeploymentStepApplyTerraformSchema() *schema.Schema {
+	schemaToReturn := &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"additional_init_params": {
+					Type:        schema.TypeString,
+					Description: "Additional parameters passed to the init command.",
+					Optional:    true,
+				},
+				"run_on_server": {
+					Type:        schema.TypeBool,
+					Description: "Whether the script runs on the server (true) or target (false)",
+					Optional:    true,
+					Default:     false,
+				},
+				"terraform_file_variable_replacement": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	}
+
 	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
 	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
 
@@ -389,6 +436,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			executablePath := localStep["executable_path"].(string)
 			feedID := localStep["feed_id"].(string)
 			jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+			variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
 			packageID := localStep["package"].(string)
 			serviceAccount := localStep["service_account"].(string)
 			serviceName := localStep["service_name"].(string)
@@ -430,6 +478,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
 			}
 
+			if variableSubstitutionInFiles != "" {
+				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
+				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
+
+				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
+			}
+
 			if targetRolesInterface, ok := localStep["target_roles"]; ok {
 				var targetRoleSlice []string
 
@@ -461,6 +516,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			configurationVariables := localStep["configuration_variables"].(bool)
 			feedID := localStep["feed_id"].(string)
 			jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+			variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
 			packageID := localStep["package"].(string)
 			stepCondition := localStep["step_condition"].(string)
 			stepName := localStep["step_name"].(string)
@@ -509,6 +565,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
 
 				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
+			}
+
+			if variableSubstitutionInFiles != "" {
+				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
+				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
+
+				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
 			}
 
 			if targetRolesInterface, ok := localStep["target_roles"]; ok {
@@ -586,6 +649,10 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 			scriptParameters := localStep["script_parameters"].(string)
 			feedID := localStep["feed_id"].(string)
 			packageID := localStep["package"].(string)
+			jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+			variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
+			configurationTransforms := localStep["configuration_transforms"].(bool)
+			configurationVariables := localStep["configuration_variables"].(bool)
 			stepCondition := localStep["step_condition"].(string)
 			stepName := localStep["step_name"].(string)
 			stepStartTrigger := localStep["step_start_trigger"].(string)
@@ -613,6 +680,30 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 				},
 			}
 
+			if jsonFileVariableReplacement != "" {
+				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"] = jsonFileVariableReplacement
+				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
+
+				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
+			}
+
+			if variableSubstitutionInFiles != "" {
+				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
+				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
+
+				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
+			}
+
+			if configurationTransforms {
+				deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"] = strconv.FormatBool(configurationTransforms)
+				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationTransforms"
+			}
+
+			if configurationVariables {
+				deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = strconv.FormatBool(configurationVariables)
+				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationVariables"
+			}
+
 			if targetRolesInterface, ok := localStep["target_roles"]; ok {
 				var targetRoleSlice []string
 
@@ -623,6 +714,73 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 				}
 
 				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+			}
+
+			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
+		}
+	}
+
+	if v, ok := d.GetOk("deployment_step_apply_terraform"); ok {
+		steps := v.([]interface{})
+		for _, raw := range steps {
+
+			localStep := raw.(map[string]interface{})
+
+			feedID := localStep["feed_id"].(string)
+			packageID := localStep["package"].(string)
+			stepCondition := localStep["step_condition"].(string)
+			stepName := localStep["step_name"].(string)
+			stepStartTrigger := localStep["step_start_trigger"].(string)
+			runOnServer := localStep["run_on_server"].(bool)
+			additionalInitParams := localStep["additional_init_params"].(string)
+
+			deploymentStep := &octopusdeploy.DeploymentStep{
+				Name:               stepName,
+				PackageRequirement: "LetOctopusDecide",
+				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+				Actions: []octopusdeploy.DeploymentAction{
+					{
+						Name:       stepName,
+						ActionType: "Octopus.TerraformApply",
+						Properties: map[string]string{
+							"Octopus.Action.RunOnServer":                    strconv.FormatBool(runOnServer),
+							"Octopus.Action.Script.ScriptSource":            "Package",
+							"Octopus.Action.Package.DownloadOnTentacle":     "False",
+							"Octopus.Action.Package.FeedId":                 feedID,
+							"Octopus.Action.Package.PackageId":              packageID,
+							"Octopus.Action.Aws.AssumeRole":                 "False",
+							"Octopus.Action.AwsAccount.UseInstanceRole":     "False",
+							"Octopus.Action.Terraform.AdditionalInitParams": additionalInitParams,
+							"Octopus.Action.Terraform.AllowPluginDownloads": "True",
+							"Octopus.Action.Terraform.ManagedAccount":       "None",
+						},
+					},
+				},
+			}
+
+			if targetRolesInterface, ok := localStep["target_roles"]; ok {
+				var targetRoleSlice []string
+
+				targetRoles := targetRolesInterface.([]interface{})
+
+				for _, role := range targetRoles {
+					targetRoleSlice = append(targetRoleSlice, role.(string))
+				}
+
+				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+			}
+
+			if targetFilesInterface, ok := localStep["terraform_file_variable_replacement"]; ok {
+				var targetFilesSlice []string
+
+				targetFiles := targetFilesInterface.([]interface{})
+
+				for _, file := range targetFiles {
+					targetFilesSlice = append(targetFilesSlice, file.(string))
+				}
+
+				deploymentStep.Properties = map[string]string{"Octopus.Action.Terraform.FileSubstitution": strings.Join(targetFilesSlice, "\n")}
 			}
 
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
@@ -649,6 +807,10 @@ func buildProjectResource(d *schema.ResourceData) *octopusdeploy.Project {
 
 	if attr, ok := d.GetOk("skip_machine_behavior"); ok {
 		project.ProjectConnectivityPolicy.SkipMachineBehavior = attr.(string)
+	}
+
+	if attr, ok := d.GetOk("allow_deployments_to_no_targets"); ok {
+		project.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets = attr.(bool)
 	}
 
 	if attr, ok := d.GetOk("tenanted_deployment_mode"); ok {
@@ -739,6 +901,7 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("project_group_id", project.ProjectGroupID)
 	d.Set("default_failure_mode", project.DefaultGuidedFailureMode)
 	d.Set("skip_machine_behavior", project.ProjectConnectivityPolicy.SkipMachineBehavior)
+	d.Set("allow_deployments_to_no_targets", project.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets)
 
 	return nil
 }

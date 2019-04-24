@@ -59,21 +59,20 @@ type DeploymentAction struct {
 	Packages                      []PackageReference `json:"Packages,omitempty"`
 }
 
-
 type DeploymentStepPackageRequirement string
 
 const (
-	DeploymentStepPackageRequirement_LetOctopusDecide = DeploymentStepPackageRequirement("LetOctopusDecide")
+	DeploymentStepPackageRequirement_LetOctopusDecide         = DeploymentStepPackageRequirement("LetOctopusDecide")
 	DeploymentStepPackageRequirement_BeforePackageAcquisition = DeploymentStepPackageRequirement("BeforePackageAcquisition")
-	DeploymentStepPackageRequirement_AfterPackageAcquisition = DeploymentStepPackageRequirement("AfterPackageAcquisition")
+	DeploymentStepPackageRequirement_AfterPackageAcquisition  = DeploymentStepPackageRequirement("AfterPackageAcquisition")
 )
 
 type DeploymentStepCondition string
 
 const (
-	DeploymentStepCondition_Success = DeploymentStepCondition("Success")
-	DeploymentStepCondition_Failure = DeploymentStepCondition("Failure")
-	DeploymentStepCondition_Always = DeploymentStepCondition("Always")
+	DeploymentStepCondition_Success  = DeploymentStepCondition("Success")
+	DeploymentStepCondition_Failure  = DeploymentStepCondition("Failure")
+	DeploymentStepCondition_Always   = DeploymentStepCondition("Always")
 	DeploymentStepCondition_Variable = DeploymentStepCondition("Variable")
 )
 
@@ -81,7 +80,7 @@ type DeploymentStepStartTrigger string
 
 const (
 	DeploymentStepStartTrigger_StartAfterPrevious = DeploymentStepStartTrigger("StartAfterPrevious")
-	DeploymentStepStartTrigger_StartWithPrevious = DeploymentStepStartTrigger("StartWithPrevious")
+	DeploymentStepStartTrigger_StartWithPrevious  = DeploymentStepStartTrigger("StartWithPrevious")
 )
 
 type PackageReference struct {
@@ -94,11 +93,10 @@ type PackageReference struct {
 }
 
 const (
-	PackageAcquisitionLocation_Server = "Server"
+	PackageAcquisitionLocation_Server          = "Server"
 	PackageAcquisitionLocation_ExecutionTarget = "ExecutionTarget"
-	PackageAcquisitionLocation_NotAcquired = "NotAcquired"
+	PackageAcquisitionLocation_NotAcquired     = "NotAcquired"
 )
-
 
 func (d *DeploymentProcess) Validate() error {
 	validate := validator.New()

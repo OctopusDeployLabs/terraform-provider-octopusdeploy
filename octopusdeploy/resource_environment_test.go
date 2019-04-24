@@ -14,13 +14,15 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 	const envName = "Testing one two three"
 	const envDesc = "Terraform testing module environment"
 	const envGuided = "false"
+	const envDynamic = "false"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testOctopusDeployEnvironmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testEnvironmenttBasic(envName, envDesc, envGuided),
+				Config: testEnvironmenttBasic(envName, envDesc, envGuided, envDynamic),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployEnvironmentExists(envPrefix),
 					resource.TestCheckResourceAttr(
@@ -29,21 +31,24 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 						envPrefix, "description", envDesc),
 					resource.TestCheckResourceAttr(
 						envPrefix, "use_guided_failure", envGuided),
+					resource.TestCheckResourceAttr(
+						envPrefix, "allow_dynamic_infrastructure", envDynamic),
 				),
 			},
 		},
 	})
 }
 
-func testEnvironmenttBasic(name, description, useguided string) string {
+func testEnvironmenttBasic(name, description, useguided string, dynamic string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_environment" "foo" {
 			name           = "%s"
 			description    = "%s"
 			use_guided_failure = "%s"
+			allow_dynamic_infrastructure = "%s"
 		}
 		`,
-		name, description, useguided,
+		name, description, useguided, dynamic,
 	)
 }
 

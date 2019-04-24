@@ -31,6 +31,11 @@ func resourceEnvironment() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"allow_dynamic_infrastructure": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -53,6 +58,7 @@ func resourceEnvironmentRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("name", env.Name)
 	d.Set("description", env.Description)
 	d.Set("use_guided_failure", env.UseGuidedFailure)
+	d.Set("allow_dynamic_infrastructure", env.AllowDynamicInfrastructure)
 
 	return nil
 }
@@ -62,6 +68,7 @@ func buildEnvironmentResource(d *schema.ResourceData) *octopusdeploy.Environment
 
 	var envDesc string
 	var envGuided bool
+	var envDynamic bool
 
 	envDescInterface, ok := d.GetOk("description")
 	if ok {
@@ -73,7 +80,15 @@ func buildEnvironmentResource(d *schema.ResourceData) *octopusdeploy.Environment
 		envGuided = envGuidedInterface.(bool)
 	}
 
-	return octopusdeploy.NewEnvironment(envName, envDesc, envGuided)
+	allowDynamicInfrastructureInterface, ok := d.GetOk("allow_dynamic_infrastructure")
+	if ok {
+		envDynamic = allowDynamicInfrastructureInterface.(bool)
+	}
+
+	var environment = octopusdeploy.NewEnvironment(envName, envDesc, envGuided)
+	environment.AllowDynamicInfrastructure = envDynamic
+
+	return environment
 }
 
 func resourceEnvironmentCreate(d *schema.ResourceData, m interface{}) error {

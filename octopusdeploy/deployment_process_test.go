@@ -85,6 +85,19 @@ func testAccDeploymentProcessBasic() string {
 
 					}
 
+					package {
+						name = "ThePackage2"
+						package_id = "MyPackage2"
+						feed_id = "feeds-builtin"
+						acquisition_location = "NotAcquired"
+						extract_during_deployment = true
+
+						property {
+							key = "WhatIsThis"
+							value = "Dunno"
+						}
+					}
+
 					property {
 						key = "Octopus.Action.Script.ScriptFileName"
 						value = "Run.ps132"
@@ -117,7 +130,7 @@ func testAccDeploymentProcessBasic() string {
 		`
 }
 
-func testAccBuildTestActionTerraform(action string) string {
+func testAccBuildTestAction(action string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_lifecycle" "test" {
 			name = "Test Lifecycle"
