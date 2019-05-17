@@ -32,6 +32,7 @@ terraform-provider-octopusdeploy.exe
 main.tf
 build/
 artifacts/
+.release/
 
 node_modules/
 .env
