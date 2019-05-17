@@ -70,3 +70,16 @@ func getStringOrEmpty(tfAttr interface{}) string {
 	return tfAttr.(string)
 
 }
+
+func getTenantedDeploymentSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		Default:  "Untenanted",
+		ValidateFunc: validateValueFunc([]string{
+			"Untenanted",
+			"TenantedOrUntenanted",
+			"Tenanted",
+		}),
+	}
+}

@@ -62,16 +62,7 @@ func resourceProject() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"tenanted_deployment_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Untenanted",
-				ValidateFunc: validateValueFunc([]string{
-					"Untenanted",
-					"TenantedOrUntenanted",
-					"Tenanted",
-				}),
-			},
+			"tenanted_deployment_mode": getTenantedDeploymentSchema(),
 			"included_library_variable_sets": {
 				Type:     schema.TypeList,
 				Optional: true,
