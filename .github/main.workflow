@@ -9,7 +9,7 @@ action "release-tag" {
 }
 
 action "build" {
-  uses = "sosedoff/actions/golang-build@master"
+  uses = "./actions/builder"
   env = {
     GO111MODULE = "on"
   }
