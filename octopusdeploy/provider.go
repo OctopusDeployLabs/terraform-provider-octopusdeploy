@@ -46,6 +46,12 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),
 				Description: "The API to use with the Octopus Deploy server.",
 			},
+			"space": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_SPACE", ""),
+				Description: "The name of the Space in Octopus Deploy server",
+			},
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -56,10 +62,11 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
 		Address: d.Get("address").(string),
 		APIKey:  d.Get("apikey").(string),
+		Space:   d.Get("space").(string),
 	}
 
 	log.Println("[INFO] Initializing Octopus Deploy client")
-	client := config.Client()
+	client, err := config.Client()
 
-	return client, nil
+	return client, err
 }
