@@ -38,11 +38,6 @@ type Variable struct {
 	IsSensitive bool                   `json:"IsSensitive"`
 }
 
-type SensitiveValue struct {
-	HasValue bool   `json:"HasValue"`
-	NewValue string `json:"NewValue"`
-}
-
 type VariableScope struct {
 	Project     []string `json:"Project,omitempty"`
 	Environment []string `json:"Environment,omitempty"`
