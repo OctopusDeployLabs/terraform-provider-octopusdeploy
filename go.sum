@@ -4,6 +4,8 @@ github.com/OctopusDeploy/go-octopusdeploy v1.0.0 h1:JweXaa6zTIv8NOpLDLomzceVGV+v
 github.com/OctopusDeploy/go-octopusdeploy v1.0.0/go.mod h1:WyBvcyhFPMULbZwFFWOmt6/irqrfZ/WqCy7ufa8/CGE=
 github.com/OctopusDeploy/go-octopusdeploy v1.1.0 h1:zVnapVTe8MDhiqEszKLlZuXVrf7fvy96d8IwgWQwPOE=
 github.com/OctopusDeploy/go-octopusdeploy v1.1.0/go.mod h1:WyBvcyhFPMULbZwFFWOmt6/irqrfZ/WqCy7ufa8/CGE=
+github.com/OctopusDeploy/go-octopusdeploy v1.2.0 h1:EeWEaiHuEAOxNGEHskNpmGiAXf9hZYH/E1sksGO962A=
+github.com/OctopusDeploy/go-octopusdeploy v1.2.0/go.mod h1:WyBvcyhFPMULbZwFFWOmt6/irqrfZ/WqCy7ufa8/CGE=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/apparentlymart/go-cidr v1.0.0 h1:lGDvXx8Lv9QHjrAVP7jyzleG4F9+FkRhJcEsDFxeb8w=
