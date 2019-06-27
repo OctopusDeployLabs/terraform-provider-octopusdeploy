@@ -94,10 +94,6 @@ func (e APIError) Error() string {
 
 // APIErrorChecker is a generic error handler for the OctopusDeploy API.
 func APIErrorChecker(urlPath string, resp *http.Response, wantedResponseCode int, slingError error, octopusDeployError *APIError) error {
-	if octopusDeployError.ErrorMessage != `` {
-		return fmt.Errorf("octopus deploy api returned an error on endpoint %s - %s", urlPath, octopusDeployError.ErrorMessage)
-	}
-
 	if octopusDeployError.Errors != nil {
 		return fmt.Errorf("octopus deploy api returned an error on endpoint %s - %s", urlPath, octopusDeployError.Errors)
 	}
