@@ -27,11 +27,13 @@ func resourceCertificate() *schema.Resource {
 				Type: schema.TypeString,
 				Required: true,
 				Sensitive: true,
+				ForceNew: true,
 			},
 			"password":         {
 				Type: schema.TypeString,
 				Optional: true,
 				Sensitive: true,
+				ForceNew: true,
 			},
 			"environment_ids": {
 				Type:     schema.TypeList,
