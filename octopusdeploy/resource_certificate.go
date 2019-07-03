@@ -24,16 +24,14 @@ func resourceCertificate() *schema.Resource {
 				Optional: true,
 			},
 			"certificate_data": {
-				Type: schema.TypeString,
-				Required: true,
+				Type:      schema.TypeString,
+				Required:  true,
 				Sensitive: true,
-				ForceNew: true,
 			},
-			"password":         {
-				Type: schema.TypeString,
-				Optional: true,
+			"password": {
+				Type:      schema.TypeString,
+				Optional:  true,
 				Sensitive: true,
-				ForceNew: true,
 			},
 			"environment_ids": {
 				Type:     schema.TypeList,
