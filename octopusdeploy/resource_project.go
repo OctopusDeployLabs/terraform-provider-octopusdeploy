@@ -93,6 +93,8 @@ func resourceProject() *schema.Resource {
 			"deployment_step_windows_service": getDeploymentStepWindowsServiceSchema(),
 			"deployment_step_iis_website":     getDeploymentStepIISWebsiteSchema(),
 			"deployment_step_inline_script":   getDeploymentStepInlineScriptSchema(),
+			"deployment_step_kubernetes_helm": getDeploymentStepKubernetesHelmSchema(),
+			"deployment_step_kubernetes_yaml": getDeploymentStepKubernetesYamlSchema(),
 			"deployment_step_package_script":  getDeploymentStepPackageScriptSchema(),
 			"deployment_step_apply_terraform": getDeploymentStepApplyTerraformSchema(),
 		},
@@ -254,6 +256,83 @@ func getDeploymentStepInlineScriptSchema() *schema.Schema {
 				"script_body": {
 					Type:        schema.TypeString,
 					Description: "The script body.",
+					Required:    true,
+				},
+				"run_on_server": {
+					Type:        schema.TypeBool,
+					Description: "Whether the script runs on the server (true) or target (false)",
+					Optional:    true,
+					Default:     false,
+				},
+			},
+		},
+	}
+
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
+
+	return schemaToReturn
+}
+
+func getDeploymentStepKubernetesHelmSchema() *schema.Schema {
+	schemaToReturn := &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"reset_values": {
+					Type:        schema.TypeBool,
+					Description: "Whether the Helm install can reset values.",
+					Optional:    true,
+					Default:     true,
+				},
+				"release_name": {
+					Type:        schema.TypeString,
+					Description: "The release name of the Helm chart.",
+					Required:    true,
+				},
+				"namespace": {
+					Type:        schema.TypeString,
+					Description: "The namespace for the Helm chart.",
+					Required:    true,
+				},
+				"yaml_values": {
+					Type:        schema.TypeString,
+					Description: "The YAML values to pass to the Helm chart.",
+					Required:    true,
+				},
+				"tiller_namespace": {
+					Type:        schema.TypeString,
+					Description: "The tiller namespace for the Helm chart.",
+					Required:    true,
+				},
+				"package_id": {
+					Type:        schema.TypeString,
+					Description: "The Package ID of the Helm chart.",
+					Required:    true,
+				},
+				"feed_id": {
+					Type:        schema.TypeString,
+					Description: "The Feed ID of the Helm chart.",
+					Required:    true,
+				},
+			},
+		},
+	}
+
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
+
+	return schemaToReturn
+}
+
+func getDeploymentStepKubernetesYamlSchema() *schema.Schema {
+	schemaToReturn := &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"yaml_values": {
+					Type:        schema.TypeString,
+					Description: "The YAML values to pass to the Helm chart.",
 					Required:    true,
 				},
 				"run_on_server": {
@@ -618,6 +697,108 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 							"Octopus.Action.Package.DownloadOnTentacle": "False",
 							"Octopus.Action.Script.ScriptBody":          scriptBody,
 							"Octopus.Action.Script.Syntax":              scriptType,
+						},
+					},
+				},
+			}
+
+			if targetRolesInterface, ok := localStep["target_roles"]; ok {
+				var targetRoleSlice []string
+
+				targetRoles := targetRolesInterface.([]interface{})
+
+				for _, role := range targetRoles {
+					targetRoleSlice = append(targetRoleSlice, role.(string))
+				}
+
+				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+			}
+
+			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
+		}
+	}
+
+	if v, ok := d.GetOk("deployment_step_kubernetes_helm"); ok {
+		steps := v.([]interface{})
+		for _, raw := range steps {
+
+			localStep := raw.(map[string]interface{})
+
+			resetValues := localStep["reset_values"].(bool)
+			releaseName := localStep["release_name"].(string)
+			namespace := localStep["namespace"].(string)
+			yamlValues := localStep["yaml_values"].(string)
+			tillerNamespace := localStep["tiller_namespace"].(string)
+			feedID := localStep["feed_id"].(string)
+			packageID := localStep["package_id"].(string)
+			stepCondition := localStep["step_condition"].(string)
+			stepName := localStep["step_name"].(string)
+			stepStartTrigger := localStep["step_start_trigger"].(string)
+
+			deploymentStep := &octopusdeploy.DeploymentStep{
+				Name:               stepName,
+				PackageRequirement: "LetOctopusDecide",
+				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+				Actions: []octopusdeploy.DeploymentAction{
+					{
+						Name:       stepName,
+						ActionType: "Octopus.HelmChartUpgrade",
+						Properties: map[string]string{
+							"Octopus.Action.Helm.ResetValues":           strconv.FormatBool(resetValues),
+							"Octopus.Action.Helm.ReleaseName":           releaseName,
+							"Octopus.Action.Helm.Namespace":             namespace,
+							"Octopus.Action.Helm.YamlValues":            yamlValues,
+							"Octopus.Action.Helm.TillerNamespace":       tillerNamespace,
+							"Octopus.Action.Package.FeedId":             feedID,
+							"Octopus.Action.Package.PackageId":          packageID,
+							"Octopus.Action.Package.DownloadOnTentacle": "False",
+						},
+					},
+				},
+			}
+
+			if targetRolesInterface, ok := localStep["target_roles"]; ok {
+				var targetRoleSlice []string
+
+				targetRoles := targetRolesInterface.([]interface{})
+
+				for _, role := range targetRoles {
+					targetRoleSlice = append(targetRoleSlice, role.(string))
+				}
+
+				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+			}
+
+			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
+		}
+	}
+
+	if v, ok := d.GetOk("deployment_step_kubernetes_yaml"); ok {
+		steps := v.([]interface{})
+		for _, raw := range steps {
+
+			localStep := raw.(map[string]interface{})
+
+			yamlValues := localStep["yaml_values"].(string)
+			runOnServer := localStep["run_on_server"].(bool)
+			stepCondition := localStep["step_condition"].(string)
+			stepName := localStep["step_name"].(string)
+			stepStartTrigger := localStep["step_start_trigger"].(string)
+
+			deploymentStep := &octopusdeploy.DeploymentStep{
+				Name:               stepName,
+				PackageRequirement: "LetOctopusDecide",
+				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+				Actions: []octopusdeploy.DeploymentAction{
+					{
+						Name:       stepName,
+						ActionType: "Octopus.KubernetesDeployRawYaml",
+						Properties: map[string]string{
+							"Octopus.Action.RunOnServer":                             strconv.FormatBool(runOnServer),
+							"Octopus.Action.Script.ScriptSource":                     "Inline",
+							"Octopus.Action.KubernetesContainers.CustomResourceYaml": yamlValues,
 						},
 					},
 				},
