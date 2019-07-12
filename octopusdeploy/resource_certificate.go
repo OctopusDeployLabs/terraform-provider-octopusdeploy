@@ -173,7 +173,7 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 
 	client := m.(*octopusdeploy.Client)
 
-	updatedCertificate, err := client.Certificate.Update(certificate)
+	updatedCertificate, err := client.Certificate.Replace(certificate)
 
 	if err != nil {
 		return fmt.Errorf("error updating certificate id %s: %s", d.Id(), err.Error())
