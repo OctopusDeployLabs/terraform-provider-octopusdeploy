@@ -17,7 +17,6 @@ func resourceVariable() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceVariableImport,
 		},
-
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:     schema.TypeString,
@@ -32,7 +31,7 @@ func resourceVariable() *schema.Resource {
 				Required: true,
 				ValidateFunc: validateValueFunc([]string{
 					"String",
-					//"Sensitive",
+					"Sensitive",
 					"Certificate",
 					"AmazonWebServicesAccount",
 					"AzureAccount",
@@ -49,12 +48,11 @@ func resourceVariable() *schema.Resource {
 			"scope": schemaVariableScope,
 			"is_sensitive": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (we []string, errors []error) {
+				Optional: true, ValidateFunc: func(v interface{}, k string) (we []string, errors []error) {
 					if v.(bool) {
-						errors = append(errors, fmt.Errorf("is_sensitive is not supported at this point in time. See https://octopusdeploy.uservoice.com/forums/170787-general/suggestions/35616472"))
+						we = append(we, "sensitive value will be shown in plain text in Terraform state and logs")
 					}
-					return nil, errors
+					return we, errors
 				},
 			},
 			"prompt": {
@@ -99,6 +97,8 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 
 	variableID := d.Id()
 	projectID := d.Get("project_id").(string)
+	isSensitive := d.Get("is_sensitive").(bool)
+	stateVal := d.Get("value").(string)
 	tfVar, err := client.Variable.GetByID(projectID, variableID)
 
 	if err == octopusdeploy.ErrItemNotFound || tfVar == nil {
@@ -112,7 +112,11 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("name", tfVar.Name)
 	d.Set("type", tfVar.Type)
-	d.Set("value", tfVar.Value)
+	if isSensitive {
+		d.Set("value", stateVal)
+	} else {
+		d.Set("value", tfVar.Value)
+	}
 	d.Set("description", tfVar.Description)
 
 	return nil
@@ -258,5 +262,3 @@ func validateVariable(d *schema.ResourceData) error {
 
 	return nil
 }
-
-//Noop to get GitHub to re-run unit tests
