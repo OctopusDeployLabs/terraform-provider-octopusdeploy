@@ -14,6 +14,7 @@ type Client struct {
 	sling *sling.Sling
 	// Octopus Deploy API Services
 	Account            *AccountService
+	Certificate        *CertificateService
 	DeploymentProcess  *DeploymentProcessService
 	ProjectGroup       *ProjectGroupService
 	Project            *ProjectService
@@ -39,6 +40,7 @@ func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Clien
 	return &Client{
 		sling:              base,
 		Account:            NewAccountService(base.New()),
+		Certificate:        NewCertificateService(base.New()),
 		DeploymentProcess:  NewDeploymentProcessService(base.New()),
 		ProjectGroup:       NewProjectGroupService(base.New()),
 		Project:            NewProjectService(base.New()),
@@ -64,6 +66,7 @@ func ForSpace(httpClient *http.Client, octopusURL, octopusAPIKey string, space *
 	return &Client{
 		sling:              base,
 		Account:            NewAccountService(base.New()),
+		Certificate:        NewCertificateService(base.New()),
 		DeploymentProcess:  NewDeploymentProcessService(base.New()),
 		ProjectGroup:       NewProjectGroupService(base.New()),
 		Project:            NewProjectService(base.New()),
