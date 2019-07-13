@@ -117,7 +117,7 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
 	machineName := d.Get("name").(string)
-	machines, err := client.Machine.GetAll()
+	machine, err := client.Machine.GetByName(machineName)
 	if err == octopusdeploy.ErrItemNotFound {
 		return nil
 	}
@@ -125,34 +125,29 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error reading machine with name %s: %s", machineName, err.Error())
 	}
 
-	for _, m := range *machines {
-		if m.Name == machineName {
-			d.SetId(m.ID)
-			d.Set("endpoint_communicationstyle", m.Endpoint.CommunicationStyle)
-			d.Set("endpoint_id", m.Endpoint.ID)
-			d.Set("endpoint_proxyid", m.Endpoint.ProxyID)
-			d.Set("endpoint_tentacleversiondetails_upgradelocked", m.Endpoint.TentacleVersionDetails.UpgradeLocked)
-			d.Set("endpoint_tentacleversiondetails_upgraderequired", m.Endpoint.TentacleVersionDetails.UpgradeRequired)
-			d.Set("endpoint_tentacleversiondetails_upgradesuggested", m.Endpoint.TentacleVersionDetails.UpgradeSuggested)
-			d.Set("endpoint_tentacleversiondetails_version", m.Endpoint.TentacleVersionDetails.Version)
-			d.Set("endpoint_thumbprint", m.Endpoint.Thumbprint)
-			d.Set("endpoint_uri", m.Endpoint.URI)
-			d.Set("environments", m.EnvironmentIDs)
-			d.Set("haslatestcalamari", m.HasLatestCalamari)
-			d.Set("isdisabled", m.IsDisabled)
-			d.Set("isinprocess", m.IsInProcess)
-			d.Set("machinepolicy", m.MachinePolicyID)
-			d.Set("roles", m.Roles)
-			d.Set("status", m.Status)
-			d.Set("statussummary", m.StatusSummary)
-			d.Set("tenanteddeploymentparticipation", m.TenantedDeploymentParticipation)
-			d.Set("tenantids", m.TenantIDs)
-			d.Set("tenanttags", m.TenantTags)
-			//d.Set("thumbprint", m.Thumbprint)
-			//d.Set("uri", m.URI)
-
-		}
-	}
+	d.SetId(machine.ID)
+	d.Set("endpoint_communicationstyle", machine.Endpoint.CommunicationStyle)
+	d.Set("endpoint_id", machine.Endpoint.ID)
+	d.Set("endpoint_proxyid", machine.Endpoint.ProxyID)
+	d.Set("endpoint_tentacleversiondetails_upgradelocked", machine.Endpoint.TentacleVersionDetails.UpgradeLocked)
+	d.Set("endpoint_tentacleversiondetails_upgraderequired", machine.Endpoint.TentacleVersionDetails.UpgradeRequired)
+	d.Set("endpoint_tentacleversiondetails_upgradesuggested", machine.Endpoint.TentacleVersionDetails.UpgradeSuggested)
+	d.Set("endpoint_tentacleversiondetails_version", machine.Endpoint.TentacleVersionDetails.Version)
+	d.Set("endpoint_thumbprint", machine.Endpoint.Thumbprint)
+	d.Set("endpoint_uri", machine.Endpoint.URI)
+	d.Set("environments", machine.EnvironmentIDs)
+	d.Set("haslatestcalamari", machine.HasLatestCalamari)
+	d.Set("isdisabled", machine.IsDisabled)
+	d.Set("isinprocess", machine.IsInProcess)
+	d.Set("machinepolicy", machine.MachinePolicyID)
+	d.Set("roles", machine.Roles)
+	d.Set("status", machine.Status)
+	d.Set("statussummary", machine.StatusSummary)
+	d.Set("tenanteddeploymentparticipation", machine.TenantedDeploymentParticipation)
+	d.Set("tenantids", machine.TenantIDs)
+	d.Set("tenanttags", machine.TenantTags)
+	//d.Set("thumbprint", machine.Thumbprint)
+	//d.Set("uri", machine.URI)
 
 	return nil
 }

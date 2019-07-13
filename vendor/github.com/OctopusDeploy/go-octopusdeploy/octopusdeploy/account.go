@@ -24,6 +24,7 @@ type Accounts struct {
 
 type Account struct {
 	ID                              string         `json:"Id"`
+	EnvironmentIDs                  []string       `json:"EnvironmentIds"`
 	Name                            string         `json:"Name"`
 	AccountType                     string         `json:"AccountType"`
 	SubscriptionNumber              string         `json:"SubscriptionNumber"`
@@ -32,6 +33,7 @@ type Account struct {
 	Password                        SensitiveValue `json:"Password"`
 	TenantTags                      []string       `json:"TenantTags,omitempty"`
 	TenantedDeploymentParticipation string         `json:"TenantedDeploymentParticipation"`
+	Token                           SensitiveValue `json:"Token,omitempty"`
 }
 
 func (t *Account) Validate() error {

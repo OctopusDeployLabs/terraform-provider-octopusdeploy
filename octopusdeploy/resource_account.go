@@ -19,25 +19,32 @@ func resourceAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"environments": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+			},
 			"account_type": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			"client_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"tenant_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"subscription_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"client_secret": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"tenant_tags": {
 				Type:     schema.TypeList,
@@ -48,12 +55,16 @@ func resourceAccount() *schema.Resource {
 			},
 			"tenanted_deployment_participation": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ValidateFunc: validateValueFunc([]string{
 					"Untenanted",
 					"TenantedOrUntenanted",
 					"Tenanted",
 				}),
+			},
+			"token": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}
@@ -75,6 +86,7 @@ func resourceAccountRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", account.Name)
+	d.Set("environments", account.EnvironmentIDs)
 	d.Set("account_type", account.AccountType)
 	d.Set("client_id", account.ClientId)
 	d.Set("tenant_id", account.TenantId)
@@ -82,6 +94,7 @@ func resourceAccountRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("client_secret", account.Password)
 	d.Set("tenant_tags", account.TenantTags)
 	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation)
+	d.Set("token", account.Token)
 
 	return nil
 }
@@ -89,6 +102,7 @@ func resourceAccountRead(d *schema.ResourceData, m interface{}) error {
 func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 	accountName := d.Get("name").(string)
 
+	var environments []string
 	var accountType string
 	var clientId string
 	var tenantId string
@@ -96,6 +110,12 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 	var clientSecret string
 	var tenantTags []string
 	var tenantedDeploymentParticipation string
+	var token string
+
+	environmentsInterface, ok := d.GetOk("environments")
+	if ok {
+		environments = getSliceFromTerraformTypeList(environmentsInterface)
+	}
 
 	accountTypeInterface, ok := d.GetOk("account_type")
 	if ok {
@@ -136,7 +156,13 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 		tenantTags = []string{}
 	}
 
+	tokenInterface, ok := d.GetOk("token")
+	if ok {
+		token = tokenInterface.(string)
+	}
+
 	var account = octopusdeploy.NewAccount(accountName, accountType)
+	account.EnvironmentIDs = environments
 	account.ClientId = clientId
 	account.TenantId = tenantId
 	account.Password = octopusdeploy.SensitiveValue{
@@ -145,6 +171,9 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 	account.SubscriptionNumber = subscriptionId
 	account.TenantTags = tenantTags
 	account.TenantedDeploymentParticipation = tenantedDeploymentParticipation
+	account.Token = octopusdeploy.SensitiveValue{
+		NewValue: token,
+	}
 
 	return account
 }

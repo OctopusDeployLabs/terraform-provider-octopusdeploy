@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -41,6 +42,7 @@ func resourceMachine() *schema.Resource {
 								"AzureWebApp",
 								"Ftp",
 								"AzureCloudService",
+								"Kubernetes"
 							}),
 						},
 
@@ -55,6 +57,52 @@ func resourceMachine() *schema.Resource {
 						"uri": {
 							Type:     schema.TypeString,
 							Required: true,
+						},
+						"clustercertificate": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"clusterurl": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"namespace": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"skiptlsverification": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"defaultworkerpoolid": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"authentication": {
+							Type:     schema.TypeSet,
+							MaxItems: 1,
+							MinItems: 0,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"accountid": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"clientcertificate": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"authenticationtype": {
+										Type:     schema.TypeString,
+										Optional: true,
+										ValidateFunc: validateValueFunc([]string{
+											"KubernetesCertificate",
+											"KubernetesStandard",
+										}),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -209,10 +257,29 @@ func buildMachineResource(d *schema.ResourceData) *octopusdeploy.Machine {
 	}
 
 	tfMachine.Endpoint = &octopusdeploy.MachineEndpoint{
-		URI:                tfSchemaList["uri"].(string),
-		Thumbprint:         tfSchemaList["thumbprint"].(string),
-		CommunicationStyle: tfSchemaList["communicationstyle"].(string),
-		ProxyID:            proxyid,
+		URI:                 tfSchemaList["uri"].(string),
+		Thumbprint:          tfSchemaList["thumbprint"].(string),
+		CommunicationStyle:  tfSchemaList["communicationstyle"].(string),
+		ProxyID:             proxyid,
+		ClusterCertificate:  tfSchemaList["clustercertificate"].(string),
+		ClusterURL:          tfSchemaList["clusterurl"].(string),
+		SkipTLSVerification: strconv.FormatBool(tfSchemaList["skiptlsverification"].(bool)),
+		DefaultWorkerPoolID: tfSchemaList["defaultworkerpoolid"].(string),
+	}
+
+	tfAuthenticationSchemaSetInterface, ok := tfSchemaList["authentication"]
+	if ok {
+		tfAuthenticationSchemaSet := tfAuthenticationSchemaSetInterface.(*schema.Set)
+		if len(tfAuthenticationSchemaSet.List()) == 1 {
+			//Get the first element in the list, which is a map of the interfaces
+			tfAuthenticationSchemaList := tfAuthenticationSchemaSet.List()[0].(map[string]interface{})
+
+			tfMachine.Endpoint.Authentication = &octopusdeploy.MachineEndpointAuthentication{
+				AccountID:          tfAuthenticationSchemaList["accountid"].(string),
+				ClientCertificate:  tfAuthenticationSchemaList["clientcertificate"].(string),
+				AuthenticationType: tfAuthenticationSchemaList["authenticationtype"].(string),
+			}
+		}
 	}
 
 	return tfMachine
