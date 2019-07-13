@@ -42,15 +42,27 @@ type Machine struct {
 	LastModifiedBy                  *string          `json:"LastModifiedBy,omitempty"`
 }
 
+type MachineEndpointAuthentication struct {
+	AccountID          string `json:"AccountId"`
+	ClientCertificate  string `json:"ClientCertificate"`
+	AuthenticationType string `json:"AuthenticationType"`
+}
+
 type MachineEndpoint struct {
-	ID                     string                        `json:"Id"`
-	CommunicationStyle     string                        `json:"CommunicationStyle"`
-	ProxyID                *string                       `json:"ProxyId"`
-	Thumbprint             string                        `json:"Thumbprint"`
-	TentacleVersionDetails MachineTentacleVersionDetails `json:"TentacleVersionDetails"`
-	LastModifiedOn         *string                       `json:"LastModifiedOn,omitempty"`
-	LastModifiedBy         *string                       `json:"LastModifiedBy,omitempty"`
-	URI                    string                        `json:"Uri"` //This is not in the spec doc, but it shows up and needs to be kept in sync
+	ID                     string                         `json:"Id"`
+	CommunicationStyle     string                         `json:"CommunicationStyle"`
+	ProxyID                *string                        `json:"ProxyId"`
+	Thumbprint             string                         `json:"Thumbprint"`
+	TentacleVersionDetails MachineTentacleVersionDetails  `json:"TentacleVersionDetails"`
+	LastModifiedOn         *string                        `json:"LastModifiedOn,omitempty"`
+	LastModifiedBy         *string                        `json:"LastModifiedBy,omitempty"`
+	URI                    string                         `json:"Uri"`                 // This is not in the spec doc, but it shows up and needs to be kept in sync
+	ClusterCertificate     string                         `json:"ClusterCertificate"`  // Kubernetes (not in spec doc)
+	ClusterURL             string                         `json:"ClusterUrl"`          // Kubernetes (not in spec doc)
+	Namespace              string                         `json:"Namespace"`           // Kubernetes (not in spec doc)
+	SkipTLSVerification    string                         `json:"SkipTlsVerification"` // Kubernetes (not in spec doc)
+	DefaultWorkerPoolID    string                         `json:"DefaultWorkerPoolId"`
+	Authentication         *MachineEndpointAuthentication `json:"Authentication"`
 }
 
 type MachineTentacleVersionDetails struct {
@@ -128,6 +140,24 @@ func (s *MachineService) GetAll() (*[]Machine, error) {
 		path, loadNextPage = LoadNextPage(r.PagedResults)
 	}
 	return &p, nil
+}
+
+// GetByName gets an existing machine by its name in Octopus Deploy
+func (s *MachineService) GetByName(machineName string) (*Machine, error) {
+	var found Machine
+	machines, err := s.GetAll()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, machine := range *machines {
+		if machine.Name == machineName {
+			return &machine, nil
+		}
+	}
+
+	return &found, fmt.Errorf("no machine found with name %s", machineName)
 }
 
 // Add creates a new machine in Octopus Deploy

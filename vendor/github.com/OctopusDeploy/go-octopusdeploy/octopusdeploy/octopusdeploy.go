@@ -29,6 +29,7 @@ type Client struct {
 	Interruption       *InterruptionsService
 	TagSet             *TagSetService
 	Space              *SpaceService
+	Channel			   *ChannelService
 }
 
 // NewClient returns a new Client.
@@ -55,6 +56,7 @@ func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Clien
 		Interruption:       NewInterruptionService(base.New()),
 		TagSet:             NewTagSetService(base.New()),
 		Space:              NewSpaceService(base.New()),
+		Channel:            NewChannelService(base.New()),
 	}
 }
 
@@ -79,6 +81,7 @@ func ForSpace(httpClient *http.Client, octopusURL, octopusAPIKey string, space *
 		Lifecycle:          NewLifecycleService(base.New()),
 		LibraryVariableSet: NewLibraryVariableSetService(base.New()),
 		TagSet:             NewTagSetService(base.New()),
+		Channel:            NewChannelService(base.New()),
 	}
 }
 
