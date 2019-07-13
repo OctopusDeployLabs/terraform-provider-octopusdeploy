@@ -158,3 +158,14 @@ func (s *CertificateService) Update(certificate *Certificate) (*Certificate, err
 
 	return resp.(*Certificate), nil
 }
+
+func (s *CertificateService) Replace(certificate *Certificate) (*Certificate, error) {
+	path := fmt.Sprintf("certificates/%s/replace", certificate.ID)
+	resp, err := apiPost(s.sling, certificate, new(Certificate), path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*Certificate), nil
+}
