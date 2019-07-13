@@ -42,7 +42,7 @@ func resourceMachine() *schema.Resource {
 								"AzureWebApp",
 								"Ftp",
 								"AzureCloudService",
-								"Kubernetes"
+								"Kubernetes",
 							}),
 						},
 
