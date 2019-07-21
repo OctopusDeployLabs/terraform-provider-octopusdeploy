@@ -27,6 +27,35 @@ func resourceChannel() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"lifecycle_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"is_default": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"rules": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"version_range": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"tag": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"actions": &schema.Schema{
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -48,22 +77,48 @@ func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
 
 func buildChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
 
-	ch := &octopusdeploy.Channel{
+	channel := &octopusdeploy.Channel{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		ProjectID:   d.Get("project_id").(string),
-		Rules: []octopusdeploy.ChannelRule{
-			{
-				Actions: []string{
-					"deploy a package",
-				},
-				VersionRange: "1.0",
-			},
-		},
+		LifecycleID: d.Get("lifecycle_id").(string),
+		IsDefault:   d.Get("is_default").(bool),
 	}
 
-	return ch
+	if attr, ok := d.GetOk("rules"); ok {
+		tfRules := attr.([]interface{})
+
+		for _, tfrule := range tfRules {
+			rule := buildRulesResource(tfrule.(map[string]interface{}))
+			channel.Rules = append(channel.Rules, rule)
+		}
+	}
+
+	return channel
 }
+
+func buildRulesResource(tfRule map[string]interface{}) octopusdeploy.ChannelRule {
+	rule := octopusdeploy.ChannelRule{
+		VersionRange:	tfRule["version_range"].(string),
+		Tag: 			tfRule["tag"].(string),
+		Actions:        getSliceFromTerraformTypeList(tfRule["actions"]),
+	}
+
+	return rule
+}
+
+func flattenRules(in []octopusdeploy.ChannelRule) []map[string]interface{} {
+	var out = make([]map[string]interface{}, len(in), len(in))
+	for i, v := range in {
+	  m := make(map[string] interface{})
+	  m["version_range"] = v.VersionRange
+	  m["tag"] = v.Tag
+	  m["actions"] = v.Actions
+  
+	  out[i] = m
+	}
+	return out
+  }
 
 func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
@@ -83,13 +138,9 @@ func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("name", channel.Name)
 	d.Set("project_id", channel.ProjectID)
 	d.Set("description", channel.Description)
-	/*d.Set("account_type", account.AccountType)
-	d.Set("client_id", account.ClientId)
-	d.Set("tenant_id", account.TenantId)
-	d.Set("subscription_id", account.SubscriptionNumber)
-	d.Set("client_secret", account.Password)
-	d.Set("tenant_tags", account.TenantTags)
-	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation)*/
+	d.Set("lifecycle_id", channel.LifecycleID)
+	d.Set("is_default", channel.IsDefault)
+	d.Set("rules", flattenRules(channel.Rules))
 
 	return nil
 }
@@ -111,6 +162,7 @@ func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceChannelDelete(d *schema.ResourceData, m interface{}) error {
+	//TODO if channel is default, its not allow to delete
 	client := m.(*octopusdeploy.Client)
 
 	channelID := d.Id()
