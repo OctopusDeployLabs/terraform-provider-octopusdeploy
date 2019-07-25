@@ -67,7 +67,7 @@ func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
 	channel, err := client.Channel.Add(newChannel)
 
 	if err != nil {
-		return fmt.Errorf("error creating account %s: %s", newChannel.Name, err.Error())
+		return fmt.Errorf("error creating channel %s: %s", newChannel.Name, err.Error())
 	}
 
 	d.SetId(channel.ID)
@@ -99,9 +99,9 @@ func buildChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
 
 func buildRulesResource(tfRule map[string]interface{}) octopusdeploy.ChannelRule {
 	rule := octopusdeploy.ChannelRule{
-		VersionRange:	tfRule["version_range"].(string),
-		Tag: 			tfRule["tag"].(string),
-		Actions:        getSliceFromTerraformTypeList(tfRule["actions"]),
+		VersionRange: tfRule["version_range"].(string),
+		Tag:          tfRule["tag"].(string),
+		Actions:      getSliceFromTerraformTypeList(tfRule["actions"]),
 	}
 
 	return rule
@@ -110,15 +110,15 @@ func buildRulesResource(tfRule map[string]interface{}) octopusdeploy.ChannelRule
 func flattenRules(in []octopusdeploy.ChannelRule) []map[string]interface{} {
 	var out = make([]map[string]interface{}, len(in), len(in))
 	for i, v := range in {
-	  m := make(map[string] interface{})
-	  m["version_range"] = v.VersionRange
-	  m["tag"] = v.Tag
-	  m["actions"] = v.Actions
-  
-	  out[i] = m
+		m := make(map[string]interface{})
+		m["version_range"] = v.VersionRange
+		m["tag"] = v.Tag
+		m["actions"] = v.Actions
+
+		out[i] = m
 	}
 	return out
-  }
+}
 
 func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
@@ -162,7 +162,6 @@ func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceChannelDelete(d *schema.ResourceData, m interface{}) error {
-	//TODO if channel is default, its not allow to delete
 	client := m.(*octopusdeploy.Client)
 
 	channelID := d.Id()
