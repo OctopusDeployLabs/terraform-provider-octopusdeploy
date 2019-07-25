@@ -76,7 +76,6 @@ func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func buildChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
-
 	channel := &octopusdeploy.Channel{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
@@ -100,9 +99,9 @@ func buildChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
 func buildRulesResource(tfRule map[string]interface{}) octopusdeploy.ChannelRule {
 	rule := octopusdeploy.ChannelRule{
 		VersionRange: tfRule["version_range"].(string),
+		VersionRange: tfRule["version_range"].(string),
 		Tag:          tfRule["tag"].(string),
 		Actions:      getSliceFromTerraformTypeList(tfRule["actions"]),
-	}
 
 	return rule
 }
@@ -111,15 +110,15 @@ func flattenRules(in []octopusdeploy.ChannelRule) []map[string]interface{} {
 	var out = make([]map[string]interface{}, len(in), len(in))
 	for i, v := range in {
 		m := make(map[string]interface{})
+		m := make(map[string]interface{})
 		m["version_range"] = v.VersionRange
 		m["tag"] = v.Tag
 		m["actions"] = v.Actions
 
 		out[i] = m
-	}
 	return out
 }
-
+}
 func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
