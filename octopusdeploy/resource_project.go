@@ -81,13 +81,21 @@ func resourceProject() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"deployment_step_windows_service": getDeploymentStepWindowsServiceSchema(),
-			"deployment_step_iis_website":     getDeploymentStepIISWebsiteSchema(),
-			"deployment_step_inline_script":   getDeploymentStepInlineScriptSchema(),
-			"deployment_step_kubernetes_helm": getDeploymentStepKubernetesHelmSchema(),
-			"deployment_step_kubernetes_yaml": getDeploymentStepKubernetesYamlSchema(),
-			"deployment_step_package_script":  getDeploymentStepPackageScriptSchema(),
-			"deployment_step_apply_terraform": getDeploymentStepApplyTerraformSchema(),
+			"deployment_step": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"windows_service": getDeploymentStepWindowsServiceSchema(),
+						"iis_website":     getDeploymentStepIISWebsiteSchema(),
+						"inline_script":   getDeploymentStepInlineScriptSchema(),
+						"kubernetes_helm": getDeploymentStepKubernetesHelmSchema(),
+						"kubernetes_yaml": getDeploymentStepKubernetesYamlSchema(),
+						"package_script":  getDeploymentStepPackageScriptSchema(),
+						"apply_terraform": getDeploymentStepApplyTerraformSchema(),
+					},
+				},
+			},
 		},
 	}
 }
@@ -495,467 +503,475 @@ func getDeploymentStepWindowsServiceSchema() *schema.Schema {
 func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusdeploy.DeploymentProcess) *octopusdeploy.DeploymentProcess {
 	deploymentProcess.Steps = nil // empty the steps
 
-	if v, ok := d.GetOk("deployment_step_windows_service"); ok {
-		steps := v.([]interface{})
-		for _, raw := range steps {
+	if rawDeploymentSteps, ok := d.GetOk("deployment_step"); ok {
+		deploymentSteps := rawDeploymentSteps.([]interface{})
 
-			localStep := raw.(map[string]interface{})
+		for _, rawDeploymentStep := range deploymentSteps {
+			deploymentStep := rawDeploymentStep.(map[string]interface{})
 
-			configurationTransforms := localStep["configuration_transforms"].(bool)
-			configurationVariables := localStep["configuration_variables"].(bool)
-			executablePath := localStep["executable_path"].(string)
-			feedID := localStep["feed_id"].(string)
-			jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
-			variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
-			packageID := localStep["package"].(string)
-			serviceAccount := localStep["service_account"].(string)
-			serviceName := localStep["service_name"].(string)
-			serviceStartMode := localStep["service_start_mode"].(string)
-			stepCondition := localStep["step_condition"].(string)
-			stepName := localStep["step_name"].(string)
-			stepStartTrigger := localStep["step_start_trigger"].(string)
+			if v, ok := deploymentStep["windows_service"]; ok {
+				steps := v.([]interface{})
+				for _, raw := range steps {
 
-			deploymentStep := &octopusdeploy.DeploymentStep{
-				Name:               stepName,
-				PackageRequirement: "LetOctopusDecide",
-				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
-				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
-				Actions: []octopusdeploy.DeploymentAction{
-					{
-						Name:       stepName,
-						ActionType: "Octopus.WindowsService",
-						Properties: map[string]string{
-							"Octopus.Action.WindowsService.CreateOrUpdateService":                       "True",
-							"Octopus.Action.WindowsService.ServiceAccount":                              serviceAccount,
-							"Octopus.Action.WindowsService.StartMode":                                   serviceStartMode,
-							"Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles":   strconv.FormatBool(configurationTransforms),
-							"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": strconv.FormatBool(configurationVariables),
-							"Octopus.Action.EnabledFeatures":                                            "Octopus.Features.WindowsService,Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
-							"Octopus.Action.Package.FeedId":                                             feedID,
-							"Octopus.Action.Package.PackageId":                                          packageID,
-							"Octopus.Action.Package.DownloadOnTentacle":                                 "False",
-							"Octopus.Action.WindowsService.ServiceName":                                 serviceName,
-							"Octopus.Action.WindowsService.ExecutablePath":                              executablePath,
+					localStep := raw.(map[string]interface{})
+
+					configurationTransforms := localStep["configuration_transforms"].(bool)
+					configurationVariables := localStep["configuration_variables"].(bool)
+					executablePath := localStep["executable_path"].(string)
+					feedID := localStep["feed_id"].(string)
+					jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+					variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
+					packageID := localStep["package"].(string)
+					serviceAccount := localStep["service_account"].(string)
+					serviceName := localStep["service_name"].(string)
+					serviceStartMode := localStep["service_start_mode"].(string)
+					stepCondition := localStep["step_condition"].(string)
+					stepName := localStep["step_name"].(string)
+					stepStartTrigger := localStep["step_start_trigger"].(string)
+
+					deploymentStep := &octopusdeploy.DeploymentStep{
+						Name:               stepName,
+						PackageRequirement: "LetOctopusDecide",
+						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+						Actions: []octopusdeploy.DeploymentAction{
+							{
+								Name:       stepName,
+								ActionType: "Octopus.WindowsService",
+								Properties: map[string]string{
+									"Octopus.Action.WindowsService.CreateOrUpdateService":                       "True",
+									"Octopus.Action.WindowsService.ServiceAccount":                              serviceAccount,
+									"Octopus.Action.WindowsService.StartMode":                                   serviceStartMode,
+									"Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles":   strconv.FormatBool(configurationTransforms),
+									"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": strconv.FormatBool(configurationVariables),
+									"Octopus.Action.EnabledFeatures":                                            "Octopus.Features.WindowsService,Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
+									"Octopus.Action.Package.FeedId":                                             feedID,
+									"Octopus.Action.Package.PackageId":                                          packageID,
+									"Octopus.Action.Package.DownloadOnTentacle":                                 "False",
+									"Octopus.Action.WindowsService.ServiceName":                                 serviceName,
+									"Octopus.Action.WindowsService.ExecutablePath":                              executablePath,
+								},
+							},
 						},
-					},
-				},
-			}
+					}
 
-			if jsonFileVariableReplacement != "" {
-				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"] = jsonFileVariableReplacement
-				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
+					if jsonFileVariableReplacement != "" {
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"] = jsonFileVariableReplacement
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
 
-				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
-			}
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
+					}
 
-			if variableSubstitutionInFiles != "" {
-				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
-				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
+					if variableSubstitutionInFiles != "" {
+						deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
+						deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
 
-				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
-			}
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
+					}
 
-			if targetRolesInterface, ok := localStep["target_roles"]; ok {
-				var targetRoleSlice []string
+					if targetRolesInterface, ok := localStep["target_roles"]; ok {
+						var targetRoleSlice []string
 
-				targetRoles := targetRolesInterface.([]interface{})
+						targetRoles := targetRolesInterface.([]interface{})
 
-				for _, role := range targetRoles {
-					targetRoleSlice = append(targetRoleSlice, role.(string))
+						for _, role := range targetRoles {
+							targetRoleSlice = append(targetRoleSlice, role.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+					}
+
+					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 				}
-
-				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
 			}
 
-			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
-		}
-	}
+			if v, ok := deploymentStep["iis_website"]; ok {
+				steps := v.([]interface{})
+				for _, raw := range steps {
 
-	if v, ok := d.GetOk("deployment_step_iis_website"); ok {
-		steps := v.([]interface{})
-		for _, raw := range steps {
+					localStep := raw.(map[string]interface{})
 
-			localStep := raw.(map[string]interface{})
+					anonymousAuthentication := localStep["anonymous_authentication"].(bool)
+					applicationPoolFramework := localStep["application_pool_framework"].(string)
+					applicationPoolIdentity := localStep["application_pool_identity"].(string)
+					applicationPoolName := localStep["application_pool_name"].(string)
+					basicAuthentication := localStep["basic_authentication"].(bool)
+					configurationTransforms := localStep["configuration_transforms"].(bool)
+					configurationVariables := localStep["configuration_variables"].(bool)
+					feedID := localStep["feed_id"].(string)
+					jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+					variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
+					packageID := localStep["package"].(string)
+					stepCondition := localStep["step_condition"].(string)
+					stepName := localStep["step_name"].(string)
+					stepStartTrigger := localStep["step_start_trigger"].(string)
+					websiteName := localStep["website_name"].(string)
+					windowsAuthentication := localStep["windows_authentication"].(bool)
 
-			anonymousAuthentication := localStep["anonymous_authentication"].(bool)
-			applicationPoolFramework := localStep["application_pool_framework"].(string)
-			applicationPoolIdentity := localStep["application_pool_identity"].(string)
-			applicationPoolName := localStep["application_pool_name"].(string)
-			basicAuthentication := localStep["basic_authentication"].(bool)
-			configurationTransforms := localStep["configuration_transforms"].(bool)
-			configurationVariables := localStep["configuration_variables"].(bool)
-			feedID := localStep["feed_id"].(string)
-			jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
-			variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
-			packageID := localStep["package"].(string)
-			stepCondition := localStep["step_condition"].(string)
-			stepName := localStep["step_name"].(string)
-			stepStartTrigger := localStep["step_start_trigger"].(string)
-			websiteName := localStep["website_name"].(string)
-			windowsAuthentication := localStep["windows_authentication"].(bool)
-
-			deploymentStep := &octopusdeploy.DeploymentStep{
-				Name:               stepName,
-				PackageRequirement: "LetOctopusDecide",
-				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
-				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
-				Actions: []octopusdeploy.DeploymentAction{
-					{
-						Name:       stepName,
-						ActionType: "Octopus.IIS",
-						Properties: map[string]string{
-							"Octopus.Action.IISWebSite.DeploymentType":                                  "webSite",
-							"Octopus.Action.IISWebSite.CreateOrUpdateWebSite":                           "True",
-							"Octopus.Action.IISWebSite.Bindings":                                        "[{\"protocol\":\"http\",\"port\":\"80\",\"host\":\"\",\"thumbprint\":null,\"certificateVariable\":null,\"requireSni\":false,\"enabled\":true}]",
-							"Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion":                 applicationPoolFramework,
-							"Octopus.Action.IISWebSite.ApplicationPoolIdentityType":                     applicationPoolIdentity,
-							"Octopus.Action.IISWebSite.EnableAnonymousAuthentication":                   strconv.FormatBool(anonymousAuthentication),
-							"Octopus.Action.IISWebSite.EnableBasicAuthentication":                       strconv.FormatBool(basicAuthentication),
-							"Octopus.Action.IISWebSite.EnableWindowsAuthentication":                     strconv.FormatBool(windowsAuthentication),
-							"Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion":  applicationPoolFramework,
-							"Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType":      applicationPoolIdentity,
-							"Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles":   strconv.FormatBool(configurationTransforms),
-							"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": strconv.FormatBool(configurationVariables),
-							"Octopus.Action.EnabledFeatures":                                            "Octopus.Features.IISWebSite,Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
-							"Octopus.Action.Package.FeedId":                                             feedID,
-							"Octopus.Action.Package.DownloadOnTentacle":                                 "False",
-							"Octopus.Action.IISWebSite.WebRootType":                                     "packageRoot",
-							"Octopus.Action.IISWebSite.StartApplicationPool":                            "True",
-							"Octopus.Action.IISWebSite.StartWebSite":                                    "True",
-							"Octopus.Action.Package.PackageId":                                          packageID,
-							"Octopus.Action.IISWebSite.WebSiteName":                                     websiteName,
-							"Octopus.Action.IISWebSite.ApplicationPoolName":                             applicationPoolName,
+					deploymentStep := &octopusdeploy.DeploymentStep{
+						Name:               stepName,
+						PackageRequirement: "LetOctopusDecide",
+						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+						Actions: []octopusdeploy.DeploymentAction{
+							{
+								Name:       stepName,
+								ActionType: "Octopus.IIS",
+								Properties: map[string]string{
+									"Octopus.Action.IISWebSite.DeploymentType":                                  "webSite",
+									"Octopus.Action.IISWebSite.CreateOrUpdateWebSite":                           "True",
+									"Octopus.Action.IISWebSite.Bindings":                                        "[{\"protocol\":\"http\",\"port\":\"80\",\"host\":\"\",\"thumbprint\":null,\"certificateVariable\":null,\"requireSni\":false,\"enabled\":true}]",
+									"Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion":                 applicationPoolFramework,
+									"Octopus.Action.IISWebSite.ApplicationPoolIdentityType":                     applicationPoolIdentity,
+									"Octopus.Action.IISWebSite.EnableAnonymousAuthentication":                   strconv.FormatBool(anonymousAuthentication),
+									"Octopus.Action.IISWebSite.EnableBasicAuthentication":                       strconv.FormatBool(basicAuthentication),
+									"Octopus.Action.IISWebSite.EnableWindowsAuthentication":                     strconv.FormatBool(windowsAuthentication),
+									"Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion":  applicationPoolFramework,
+									"Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType":      applicationPoolIdentity,
+									"Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles":   strconv.FormatBool(configurationTransforms),
+									"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": strconv.FormatBool(configurationVariables),
+									"Octopus.Action.EnabledFeatures":                                            "Octopus.Features.IISWebSite,Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
+									"Octopus.Action.Package.FeedId":                                             feedID,
+									"Octopus.Action.Package.DownloadOnTentacle":                                 "False",
+									"Octopus.Action.IISWebSite.WebRootType":                                     "packageRoot",
+									"Octopus.Action.IISWebSite.StartApplicationPool":                            "True",
+									"Octopus.Action.IISWebSite.StartWebSite":                                    "True",
+									"Octopus.Action.Package.PackageId":                                          packageID,
+									"Octopus.Action.IISWebSite.WebSiteName":                                     websiteName,
+									"Octopus.Action.IISWebSite.ApplicationPoolName":                             applicationPoolName,
+								},
+							},
 						},
-					},
-				},
-			}
+					}
 
-			if jsonFileVariableReplacement != "" {
-				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"] = jsonFileVariableReplacement
-				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
+					if jsonFileVariableReplacement != "" {
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"] = jsonFileVariableReplacement
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
 
-				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
-			}
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
+					}
 
-			if variableSubstitutionInFiles != "" {
-				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
-				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
+					if variableSubstitutionInFiles != "" {
+						deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
+						deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
 
-				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
-			}
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
+					}
 
-			if targetRolesInterface, ok := localStep["target_roles"]; ok {
-				var targetRoleSlice []string
+					if targetRolesInterface, ok := localStep["target_roles"]; ok {
+						var targetRoleSlice []string
 
-				targetRoles := targetRolesInterface.([]interface{})
+						targetRoles := targetRolesInterface.([]interface{})
 
-				for _, role := range targetRoles {
-					targetRoleSlice = append(targetRoleSlice, role.(string))
+						for _, role := range targetRoles {
+							targetRoleSlice = append(targetRoleSlice, role.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+					}
+
+					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 				}
-
-				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
 			}
 
-			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
-		}
-	}
+			if v, ok := deploymentStep["inline_script"]; ok {
+				steps := v.([]interface{})
+				for _, raw := range steps {
 
-	if v, ok := d.GetOk("deployment_step_inline_script"); ok {
-		steps := v.([]interface{})
-		for _, raw := range steps {
+					localStep := raw.(map[string]interface{})
 
-			localStep := raw.(map[string]interface{})
+					scriptType := localStep["script_type"].(string)
+					scriptBody := localStep["script_body"].(string)
+					runOnServer := localStep["run_on_server"].(bool)
+					stepCondition := localStep["step_condition"].(string)
+					stepName := localStep["step_name"].(string)
+					stepStartTrigger := localStep["step_start_trigger"].(string)
 
-			scriptType := localStep["script_type"].(string)
-			scriptBody := localStep["script_body"].(string)
-			runOnServer := localStep["run_on_server"].(bool)
-			stepCondition := localStep["step_condition"].(string)
-			stepName := localStep["step_name"].(string)
-			stepStartTrigger := localStep["step_start_trigger"].(string)
-
-			deploymentStep := &octopusdeploy.DeploymentStep{
-				Name:               stepName,
-				PackageRequirement: "LetOctopusDecide",
-				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
-				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
-				Actions: []octopusdeploy.DeploymentAction{
-					{
-						Name:       stepName,
-						ActionType: "Octopus.Script",
-						Properties: map[string]string{
-							"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
-							"Octopus.Action.Script.ScriptSource":        "Inline",
-							"Octopus.Action.Package.DownloadOnTentacle": "False",
-							"Octopus.Action.Script.ScriptBody":          scriptBody,
-							"Octopus.Action.Script.Syntax":              scriptType,
+					deploymentStep := &octopusdeploy.DeploymentStep{
+						Name:               stepName,
+						PackageRequirement: "LetOctopusDecide",
+						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+						Actions: []octopusdeploy.DeploymentAction{
+							{
+								Name:       stepName,
+								ActionType: "Octopus.Script",
+								Properties: map[string]string{
+									"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
+									"Octopus.Action.Script.ScriptSource":        "Inline",
+									"Octopus.Action.Package.DownloadOnTentacle": "False",
+									"Octopus.Action.Script.ScriptBody":          scriptBody,
+									"Octopus.Action.Script.Syntax":              scriptType,
+								},
+							},
 						},
-					},
-				},
-			}
+					}
 
-			if targetRolesInterface, ok := localStep["target_roles"]; ok {
-				var targetRoleSlice []string
+					if targetRolesInterface, ok := localStep["target_roles"]; ok {
+						var targetRoleSlice []string
 
-				targetRoles := targetRolesInterface.([]interface{})
+						targetRoles := targetRolesInterface.([]interface{})
 
-				for _, role := range targetRoles {
-					targetRoleSlice = append(targetRoleSlice, role.(string))
+						for _, role := range targetRoles {
+							targetRoleSlice = append(targetRoleSlice, role.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+					}
+
+					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 				}
-
-				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
 			}
 
-			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
-		}
-	}
+			if v, ok := deploymentStep["kubernetes_helm"]; ok {
+				steps := v.([]interface{})
+				for _, raw := range steps {
 
-	if v, ok := d.GetOk("deployment_step_kubernetes_helm"); ok {
-		steps := v.([]interface{})
-		for _, raw := range steps {
+					localStep := raw.(map[string]interface{})
 
-			localStep := raw.(map[string]interface{})
+					resetValues := localStep["reset_values"].(bool)
+					releaseName := localStep["release_name"].(string)
+					namespace := localStep["namespace"].(string)
+					yamlValues := localStep["yaml_values"].(string)
+					tillerNamespace := localStep["tiller_namespace"].(string)
+					feedID := localStep["feed_id"].(string)
+					packageID := localStep["package_id"].(string)
+					stepCondition := localStep["step_condition"].(string)
+					stepName := localStep["step_name"].(string)
+					stepStartTrigger := localStep["step_start_trigger"].(string)
 
-			resetValues := localStep["reset_values"].(bool)
-			releaseName := localStep["release_name"].(string)
-			namespace := localStep["namespace"].(string)
-			yamlValues := localStep["yaml_values"].(string)
-			tillerNamespace := localStep["tiller_namespace"].(string)
-			feedID := localStep["feed_id"].(string)
-			packageID := localStep["package_id"].(string)
-			stepCondition := localStep["step_condition"].(string)
-			stepName := localStep["step_name"].(string)
-			stepStartTrigger := localStep["step_start_trigger"].(string)
-
-			deploymentStep := &octopusdeploy.DeploymentStep{
-				Name:               stepName,
-				PackageRequirement: "LetOctopusDecide",
-				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
-				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
-				Actions: []octopusdeploy.DeploymentAction{
-					{
-						Name:       stepName,
-						ActionType: "Octopus.HelmChartUpgrade",
-						Properties: map[string]string{
-							"Octopus.Action.Helm.ResetValues":           strconv.FormatBool(resetValues),
-							"Octopus.Action.Helm.ReleaseName":           releaseName,
-							"Octopus.Action.Helm.Namespace":             namespace,
-							"Octopus.Action.Helm.YamlValues":            yamlValues,
-							"Octopus.Action.Helm.TillerNamespace":       tillerNamespace,
-							"Octopus.Action.Package.FeedId":             feedID,
-							"Octopus.Action.Package.PackageId":          packageID,
-							"Octopus.Action.Package.DownloadOnTentacle": "False",
+					deploymentStep := &octopusdeploy.DeploymentStep{
+						Name:               stepName,
+						PackageRequirement: "LetOctopusDecide",
+						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+						Actions: []octopusdeploy.DeploymentAction{
+							{
+								Name:       stepName,
+								ActionType: "Octopus.HelmChartUpgrade",
+								Properties: map[string]string{
+									"Octopus.Action.Helm.ResetValues":           strconv.FormatBool(resetValues),
+									"Octopus.Action.Helm.ReleaseName":           releaseName,
+									"Octopus.Action.Helm.Namespace":             namespace,
+									"Octopus.Action.Helm.YamlValues":            yamlValues,
+									"Octopus.Action.Helm.TillerNamespace":       tillerNamespace,
+									"Octopus.Action.Package.FeedId":             feedID,
+									"Octopus.Action.Package.PackageId":          packageID,
+									"Octopus.Action.Package.DownloadOnTentacle": "False",
+								},
+							},
 						},
-					},
-				},
-			}
+					}
 
-			if targetRolesInterface, ok := localStep["target_roles"]; ok {
-				var targetRoleSlice []string
+					if targetRolesInterface, ok := localStep["target_roles"]; ok {
+						var targetRoleSlice []string
 
-				targetRoles := targetRolesInterface.([]interface{})
+						targetRoles := targetRolesInterface.([]interface{})
 
-				for _, role := range targetRoles {
-					targetRoleSlice = append(targetRoleSlice, role.(string))
+						for _, role := range targetRoles {
+							targetRoleSlice = append(targetRoleSlice, role.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+					}
+
+					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 				}
-
-				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
 			}
 
-			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
-		}
-	}
+			if v, ok := deploymentStep["kubernetes_yaml"]; ok {
+				steps := v.([]interface{})
+				for _, raw := range steps {
 
-	if v, ok := d.GetOk("deployment_step_kubernetes_yaml"); ok {
-		steps := v.([]interface{})
-		for _, raw := range steps {
+					localStep := raw.(map[string]interface{})
 
-			localStep := raw.(map[string]interface{})
+					yamlValues := localStep["yaml_values"].(string)
+					runOnServer := localStep["run_on_server"].(bool)
+					stepCondition := localStep["step_condition"].(string)
+					stepName := localStep["step_name"].(string)
+					stepStartTrigger := localStep["step_start_trigger"].(string)
 
-			yamlValues := localStep["yaml_values"].(string)
-			runOnServer := localStep["run_on_server"].(bool)
-			stepCondition := localStep["step_condition"].(string)
-			stepName := localStep["step_name"].(string)
-			stepStartTrigger := localStep["step_start_trigger"].(string)
-
-			deploymentStep := &octopusdeploy.DeploymentStep{
-				Name:               stepName,
-				PackageRequirement: "LetOctopusDecide",
-				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
-				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
-				Actions: []octopusdeploy.DeploymentAction{
-					{
-						Name:       stepName,
-						ActionType: "Octopus.KubernetesDeployRawYaml",
-						Properties: map[string]string{
-							"Octopus.Action.RunOnServer":                             strconv.FormatBool(runOnServer),
-							"Octopus.Action.Script.ScriptSource":                     "Inline",
-							"Octopus.Action.KubernetesContainers.CustomResourceYaml": yamlValues,
+					deploymentStep := &octopusdeploy.DeploymentStep{
+						Name:               stepName,
+						PackageRequirement: "LetOctopusDecide",
+						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+						Actions: []octopusdeploy.DeploymentAction{
+							{
+								Name:       stepName,
+								ActionType: "Octopus.KubernetesDeployRawYaml",
+								Properties: map[string]string{
+									"Octopus.Action.RunOnServer":                             strconv.FormatBool(runOnServer),
+									"Octopus.Action.Script.ScriptSource":                     "Inline",
+									"Octopus.Action.KubernetesContainers.CustomResourceYaml": yamlValues,
+								},
+							},
 						},
-					},
-				},
-			}
+					}
 
-			if targetRolesInterface, ok := localStep["target_roles"]; ok {
-				var targetRoleSlice []string
+					if targetRolesInterface, ok := localStep["target_roles"]; ok {
+						var targetRoleSlice []string
 
-				targetRoles := targetRolesInterface.([]interface{})
+						targetRoles := targetRolesInterface.([]interface{})
 
-				for _, role := range targetRoles {
-					targetRoleSlice = append(targetRoleSlice, role.(string))
+						for _, role := range targetRoles {
+							targetRoleSlice = append(targetRoleSlice, role.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+					}
+
+					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 				}
-
-				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
 			}
 
-			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
-		}
-	}
+			if v, ok := deploymentStep["package_script"]; ok {
+				steps := v.([]interface{})
+				for _, raw := range steps {
 
-	if v, ok := d.GetOk("deployment_step_package_script"); ok {
-		steps := v.([]interface{})
-		for _, raw := range steps {
+					localStep := raw.(map[string]interface{})
 
-			localStep := raw.(map[string]interface{})
+					scriptFileName := localStep["script_file_name"].(string)
+					scriptParameters := localStep["script_parameters"].(string)
+					feedID := localStep["feed_id"].(string)
+					packageID := localStep["package"].(string)
+					jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+					variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
+					configurationTransforms := localStep["configuration_transforms"].(bool)
+					configurationVariables := localStep["configuration_variables"].(bool)
+					stepCondition := localStep["step_condition"].(string)
+					stepName := localStep["step_name"].(string)
+					stepStartTrigger := localStep["step_start_trigger"].(string)
+					runOnServer := localStep["run_on_server"].(bool)
 
-			scriptFileName := localStep["script_file_name"].(string)
-			scriptParameters := localStep["script_parameters"].(string)
-			feedID := localStep["feed_id"].(string)
-			packageID := localStep["package"].(string)
-			jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
-			variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
-			configurationTransforms := localStep["configuration_transforms"].(bool)
-			configurationVariables := localStep["configuration_variables"].(bool)
-			stepCondition := localStep["step_condition"].(string)
-			stepName := localStep["step_name"].(string)
-			stepStartTrigger := localStep["step_start_trigger"].(string)
-			runOnServer := localStep["run_on_server"].(bool)
-
-			deploymentStep := &octopusdeploy.DeploymentStep{
-				Name:               stepName,
-				PackageRequirement: "LetOctopusDecide",
-				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
-				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
-				Actions: []octopusdeploy.DeploymentAction{
-					{
-						Name:       stepName,
-						ActionType: "Octopus.Script",
-						Properties: map[string]string{
-							"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
-							"Octopus.Action.Script.ScriptSource":        "Package",
-							"Octopus.Action.Package.DownloadOnTentacle": "False",
-							"Octopus.Action.Package.FeedId":             feedID,
-							"Octopus.Action.Package.PackageId":          packageID,
-							"Octopus.Action.Script.ScriptFileName":      scriptFileName,
-							"Octopus.Action.Script.ScriptParameters":    scriptParameters,
+					deploymentStep := &octopusdeploy.DeploymentStep{
+						Name:               stepName,
+						PackageRequirement: "LetOctopusDecide",
+						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+						Actions: []octopusdeploy.DeploymentAction{
+							{
+								Name:       stepName,
+								ActionType: "Octopus.Script",
+								Properties: map[string]string{
+									"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
+									"Octopus.Action.Script.ScriptSource":        "Package",
+									"Octopus.Action.Package.DownloadOnTentacle": "False",
+									"Octopus.Action.Package.FeedId":             feedID,
+									"Octopus.Action.Package.PackageId":          packageID,
+									"Octopus.Action.Script.ScriptFileName":      scriptFileName,
+									"Octopus.Action.Script.ScriptParameters":    scriptParameters,
+								},
+							},
 						},
-					},
-				},
-			}
+					}
 
-			if jsonFileVariableReplacement != "" {
-				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"] = jsonFileVariableReplacement
-				deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
+					if jsonFileVariableReplacement != "" {
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"] = jsonFileVariableReplacement
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
 
-				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
-			}
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
+					}
 
-			if variableSubstitutionInFiles != "" {
-				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
-				deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
+					if variableSubstitutionInFiles != "" {
+						deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
+						deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
 
-				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
-			}
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
+					}
 
-			if configurationTransforms {
-				deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"] = strconv.FormatBool(configurationTransforms)
-				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationTransforms"
-			}
+					if configurationTransforms {
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"] = strconv.FormatBool(configurationTransforms)
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationTransforms"
+					}
 
-			if configurationVariables {
-				deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = strconv.FormatBool(configurationVariables)
-				deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationVariables"
-			}
+					if configurationVariables {
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = strconv.FormatBool(configurationVariables)
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationVariables"
+					}
 
-			if targetRolesInterface, ok := localStep["target_roles"]; ok {
-				var targetRoleSlice []string
+					if targetRolesInterface, ok := localStep["target_roles"]; ok {
+						var targetRoleSlice []string
 
-				targetRoles := targetRolesInterface.([]interface{})
+						targetRoles := targetRolesInterface.([]interface{})
 
-				for _, role := range targetRoles {
-					targetRoleSlice = append(targetRoleSlice, role.(string))
+						for _, role := range targetRoles {
+							targetRoleSlice = append(targetRoleSlice, role.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+					}
+
+					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 				}
-
-				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
 			}
 
-			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
-		}
-	}
+			if v, ok := deploymentStep["apply_terraform"]; ok {
+				steps := v.([]interface{})
+				for _, raw := range steps {
 
-	if v, ok := d.GetOk("deployment_step_apply_terraform"); ok {
-		steps := v.([]interface{})
-		for _, raw := range steps {
+					localStep := raw.(map[string]interface{})
 
-			localStep := raw.(map[string]interface{})
+					feedID := localStep["feed_id"].(string)
+					packageID := localStep["package"].(string)
+					stepCondition := localStep["step_condition"].(string)
+					stepName := localStep["step_name"].(string)
+					stepStartTrigger := localStep["step_start_trigger"].(string)
+					runOnServer := localStep["run_on_server"].(bool)
+					additionalInitParams := localStep["additional_init_params"].(string)
 
-			feedID := localStep["feed_id"].(string)
-			packageID := localStep["package"].(string)
-			stepCondition := localStep["step_condition"].(string)
-			stepName := localStep["step_name"].(string)
-			stepStartTrigger := localStep["step_start_trigger"].(string)
-			runOnServer := localStep["run_on_server"].(bool)
-			additionalInitParams := localStep["additional_init_params"].(string)
-
-			deploymentStep := &octopusdeploy.DeploymentStep{
-				Name:               stepName,
-				PackageRequirement: "LetOctopusDecide",
-				Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
-				StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
-				Actions: []octopusdeploy.DeploymentAction{
-					{
-						Name:       stepName,
-						ActionType: "Octopus.TerraformApply",
-						Properties: map[string]string{
-							"Octopus.Action.RunOnServer":                    strconv.FormatBool(runOnServer),
-							"Octopus.Action.Script.ScriptSource":            "Package",
-							"Octopus.Action.Package.DownloadOnTentacle":     "False",
-							"Octopus.Action.Package.FeedId":                 feedID,
-							"Octopus.Action.Package.PackageId":              packageID,
-							"Octopus.Action.Aws.AssumeRole":                 "False",
-							"Octopus.Action.AwsAccount.UseInstanceRole":     "False",
-							"Octopus.Action.Terraform.AdditionalInitParams": additionalInitParams,
-							"Octopus.Action.Terraform.AllowPluginDownloads": "True",
-							"Octopus.Action.Terraform.ManagedAccount":       "None",
+					deploymentStep := &octopusdeploy.DeploymentStep{
+						Name:               stepName,
+						PackageRequirement: "LetOctopusDecide",
+						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+						Actions: []octopusdeploy.DeploymentAction{
+							{
+								Name:       stepName,
+								ActionType: "Octopus.TerraformApply",
+								Properties: map[string]string{
+									"Octopus.Action.RunOnServer":                    strconv.FormatBool(runOnServer),
+									"Octopus.Action.Script.ScriptSource":            "Package",
+									"Octopus.Action.Package.DownloadOnTentacle":     "False",
+									"Octopus.Action.Package.FeedId":                 feedID,
+									"Octopus.Action.Package.PackageId":              packageID,
+									"Octopus.Action.Aws.AssumeRole":                 "False",
+									"Octopus.Action.AwsAccount.UseInstanceRole":     "False",
+									"Octopus.Action.Terraform.AdditionalInitParams": additionalInitParams,
+									"Octopus.Action.Terraform.AllowPluginDownloads": "True",
+									"Octopus.Action.Terraform.ManagedAccount":       "None",
+								},
+							},
 						},
-					},
-				},
-			}
+					}
 
-			if targetRolesInterface, ok := localStep["target_roles"]; ok {
-				var targetRoleSlice []string
+					if targetRolesInterface, ok := localStep["target_roles"]; ok {
+						var targetRoleSlice []string
 
-				targetRoles := targetRolesInterface.([]interface{})
+						targetRoles := targetRolesInterface.([]interface{})
 
-				for _, role := range targetRoles {
-					targetRoleSlice = append(targetRoleSlice, role.(string))
+						for _, role := range targetRoles {
+							targetRoleSlice = append(targetRoleSlice, role.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+					}
+
+					if targetFilesInterface, ok := localStep["terraform_file_variable_replacement"]; ok {
+						var targetFilesSlice []string
+
+						targetFiles := targetFilesInterface.([]interface{})
+
+						for _, file := range targetFiles {
+							targetFilesSlice = append(targetFilesSlice, file.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.Terraform.FileSubstitution": strings.Join(targetFilesSlice, "\n")}
+					}
+
+					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 				}
-
-				deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
 			}
-
-			if targetFilesInterface, ok := localStep["terraform_file_variable_replacement"]; ok {
-				var targetFilesSlice []string
-
-				targetFiles := targetFilesInterface.([]interface{})
-
-				for _, file := range targetFiles {
-					targetFilesSlice = append(targetFilesSlice, file.(string))
-				}
-
-				deploymentStep.Properties = map[string]string{"Octopus.Action.Terraform.FileSubstitution": strings.Join(targetFilesSlice, "\n")}
-			}
-
-			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 		}
 	}
 
