@@ -86,9 +86,9 @@ func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.0.version_range", versionRange),
+						terraformNamePrefix, "rule.0.version_range", versionRange),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.0.actions.0", actionName),
+						terraformNamePrefix, "rule.0.actions.0", actionName),
 				),
 			},
 		},
@@ -119,9 +119,9 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.0.version_range", versionRange),
+						terraformNamePrefix, "rule.0.version_range", versionRange),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.0.actions.0", actionName),
+						terraformNamePrefix, "rule.0.actions.0", actionName),
 				),
 			},
 			{ // create updated channel with new values
@@ -133,9 +133,9 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "description", updatedChannelDescription),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.0.version_range", updatedVersionRange),
+						terraformNamePrefix, "rule.0.version_range", updatedVersionRange),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.0.actions.0", updatedActionName),
+						terraformNamePrefix, "rule.0.actions.0", updatedActionName),
 				),
 			},
 		},
@@ -164,13 +164,13 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.0.version_range", versionRange1),
+						terraformNamePrefix, "rule.0.version_range", versionRange1),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.0.actions.0", actionName1),
+						terraformNamePrefix, "rule.0.actions.0", actionName1),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.1.version_range", versionRange2),
+						terraformNamePrefix, "rule.1.version_range", versionRange2),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "rules.1.actions.0", actionName2),
+						terraformNamePrefix, "rule.1.actions.0", actionName2),
 				),
 			},
 		},
@@ -188,7 +188,7 @@ func testAccChannelBasic(name, description string) string {
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
-			allow_deployments_to_no_targets = "True"
+			allow_deployments_to_no_targets = true
 		}
 		
 		resource "octopusdeploy_channel" "ch" {
@@ -212,7 +212,7 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
-			allow_deployments_to_no_targets = "True"
+			allow_deployments_to_no_targets = true
 		}
 
 		resource "octopusdeploy_deployment_process" "deploy_step_template" {
@@ -241,12 +241,10 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
-			rules			= [
-				{
-					version_range 	= "%s"
-					actions 		= ["%s"] 
-				}
-			]
+			rule	{
+				version_range 	= "%s"
+				actions 		= ["%s"] 
+			}
 			depends_on = ["octopusdeploy_deployment_process.deploy_step_template"]
 		}
 		`,
@@ -265,7 +263,7 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
-			allow_deployments_to_no_targets = "True"
+			allow_deployments_to_no_targets = true
 		}
 
 		resource "octopusdeploy_deployment_process" "deploy_step_template" {
@@ -286,7 +284,9 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 						key 	= "Octopus.Action.Package.PackageId"
 						value 	= "#{PackageName}"
 					}
-				},
+
+				}
+				
 				action {
 					name 		= "%s"
 					action_type = "Octopus.TentaclePackage"
@@ -300,6 +300,7 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 						key 	= "Octopus.Action.Package.PackageId"
 						value 	= "#{PackageName}"
 					}
+
 				}
 			}
 		}
@@ -308,16 +309,16 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
-			rules			= [
-				{
-					version_range 	= "%s"
-					actions 		= ["%s"] 
-				},
-				{
-					version_range 	= "%s"
-					actions 		= ["%s"] 
-				}
-			]
+			rule {
+				version_range 	= "%s"
+				actions 		= ["%s"] 
+			}
+			
+			rule {
+				version_range 	= "%s"
+				actions 		= ["%s"] 
+			}
+
 			depends_on = ["octopusdeploy_deployment_process.deploy_step_template"]
 		}
 		`,

@@ -35,7 +35,7 @@ func resourceChannel() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"rules": &schema.Schema{
+			"rule": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
@@ -84,7 +84,7 @@ func buildChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
 		IsDefault:   d.Get("is_default").(bool),
 	}
 
-	if attr, ok := d.GetOk("rules"); ok {
+	if attr, ok := d.GetOk("rule"); ok {
 		tfRules := attr.([]interface{})
 
 		for _, tfrule := range tfRules {
@@ -116,7 +116,7 @@ func flattenRules(in []octopusdeploy.ChannelRule) []map[string]interface{} {
 
 		flattened[i] = m
 	}
-	
+
 	return flattened
 }
 
@@ -140,7 +140,7 @@ func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", channel.Description)
 	d.Set("lifecycle_id", channel.LifecycleID)
 	d.Set("is_default", channel.IsDefault)
-	d.Set("rules", flattenRules(channel.Rules))
+	d.Set("rule", flattenRules(channel.Rules))
 
 	return nil
 }
