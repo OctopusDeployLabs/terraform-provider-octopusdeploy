@@ -33,6 +33,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_deployment_process":                resourceDeploymentProcess(),
 			"octopusdeploy_tag_set":                           resourceTagSet(),
 			"octopusdeploy_certificate":                       resourceCertificate(),
+			"octopusdeploy_channel":                           resourceChannel(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
