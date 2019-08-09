@@ -15,10 +15,10 @@ test: fmt
 	go test -v -timeout 30s ./...
 
 testacc:
-	TF_ACC=1 go test $(TEST) -v -timeout 120m
+	TF_ACC=1 go test $(TEST) $(TESTARGS) -v -timeout 120m
 
 testaccnocache:
-	TF_ACC=1 go test $(TEST) -v -timeout 120m -count=1
+	TF_ACC=1 go test $(TEST) $(TESTARGS) -v -timeout 120m -count=1
 
 tf_build: fmt build
 	terraform init
