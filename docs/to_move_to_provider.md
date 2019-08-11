@@ -253,6 +253,23 @@ resource "octopusdeploy_variable" "connection_string" {
 }
 ```
 
+Example with sensitive value
+
+```hcl
+data "octopusdeploy_project" "finance" {
+    name = "Finance"
+}
+
+resource "octopusdeploy_variable" "top_secret" {
+  project_id       = "${data.octopusdeploy_project.finance.id}"
+  name             = "Top Secret Thing"
+  type             = "Sensitive"
+  is_sensitive     = true
+  sensitive_value  = "Server=myServerAddress;Database=myDataBase;Trusted_Connection=True;"
+  pgp_key          = "keybase:octopus_user"
+}
+```
+
 Data usage (with scope):
 
 ```hcl
@@ -277,8 +294,11 @@ data "octopusdeploy_variable" "connection_string" {
 
 * `project_id` (Required) ID of the Project to assign the variable against.
 * `name` - (Required) Name of the variable
-* `type` - (Required) Type of the variable. Must be one of `String`, `Certificate` or `AmazonWebServicesAccount` (`Sensitive` is not currently supported)
-* `value` - (Required) The value of the variable
+* `type` - (Required) Type of the variable. Must be one of `String`, `Certificate`, `Sensitive` or `AmazonWebServicesAccount`
+* `value` - (Optional) The value of the variable. One of `value` or `sensitive_value` must be set.
+* `sensitive_value` - (Optional) The sensitive value of the variable. One of `value` or `sensitive_value` must be set. ~> NOTE: Octopus Deploy server does not return values for Sensitive variables. This means that if the value is changed on the Octopus server Terraform will not be able to detect the drift from your defined configuration.
+* `is_sensitive` - (Optional, Default `false`) Whether the variable contains a sensitive value. If this is `true` then `type` must be set to `Sensitive`. 
+* `pgp_key` - (Optional) Either a base-64 encoded PGP public key, or a keybase username in the form `keybase:some_person_that_exists`
 * `description` - (Optional) Description of the variable
 * `scope` - (Optional) The scope to apply to this variable. Contains a list of arrays. All are optional:
     * (Optional) `environments`, `machines`, `actions`, `roles`, `channels`, `tenant_tags`
@@ -294,6 +314,8 @@ data "octopusdeploy_variable" "connection_string" {
 * `type` - Type of the variable
 * `value` - Value of the variable
 * `description` - Description of the variable
+* `key_fingerprint` - The fingerprint of the PGP key used to encrypt the secret
+* `encrypted_value` - The encrypted value of the secret. ~> NOTE: The encrypted secret may be decrypted using the command line, for example: `terraform output encrypted_value | base64 --decode | keybase pgp decrypt`
 
 ## Machine Policies
 
