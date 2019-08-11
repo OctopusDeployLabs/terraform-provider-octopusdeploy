@@ -35,20 +35,20 @@ func resourceChannel() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"rule": &schema.Schema{
+			"rule": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"version_range": &schema.Schema{
+						"version_range": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"tag": &schema.Schema{
+						"tag": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"actions": &schema.Schema{
+						"actions": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
