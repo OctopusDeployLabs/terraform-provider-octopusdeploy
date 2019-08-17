@@ -1,0 +1,20 @@
+name: Publish binaries on release
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+jobs:
+  release-tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: build
+      uses: ./actions/builder
+      env:
+        GO111MODULE: "on"
+    - name: publish
+      uses: docker://moonswitch/github-upload-release:master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
