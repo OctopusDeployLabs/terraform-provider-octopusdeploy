@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform/helper/encryption"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -38,8 +39,15 @@ func resourceVariable() *schema.Resource {
 				}),
 			},
 			"value": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"sensitive_value"},
+			},
+			"sensitive_value": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"value"},
+				Sensitive:     true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -48,12 +56,8 @@ func resourceVariable() *schema.Resource {
 			"scope": schemaVariableScope,
 			"is_sensitive": {
 				Type:     schema.TypeBool,
-				Optional: true, ValidateFunc: func(v interface{}, k string) (we []string, errors []error) {
-					if v.(bool) {
-						we = append(we, "sensitive value will be shown in plain text in Terraform state and logs")
-					}
-					return we, errors
-				},
+				Optional: true,
+				Default:  false,
 			},
 			"prompt": {
 				Type:     schema.TypeSet,
@@ -75,6 +79,19 @@ func resourceVariable() *schema.Resource {
 						},
 					},
 				},
+			},
+			"pgp_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"key_fingerprint": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"encrypted_value": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -98,7 +115,6 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 	variableID := d.Id()
 	projectID := d.Get("project_id").(string)
 	isSensitive := d.Get("is_sensitive").(bool)
-	stateVal := d.Get("value").(string)
 	tfVar, err := client.Variable.GetByID(projectID, variableID)
 
 	if err == octopusdeploy.ErrItemNotFound || tfVar == nil {
@@ -113,7 +129,7 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("name", tfVar.Name)
 	d.Set("type", tfVar.Type)
 	if isSensitive {
-		d.Set("value", stateVal)
+		d.Set("value", nil)
 	} else {
 		d.Set("value", tfVar.Value)
 	}
@@ -125,9 +141,8 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 	varName := d.Get("name").(string)
 	varType := d.Get("type").(string)
-	varValue := d.Get("value").(string)
 
-	var varDesc string
+	var varDesc, varValue string
 	var varSensitive bool
 
 	if varDescInterface, ok := d.GetOk("description"); ok {
@@ -136,6 +151,12 @@ func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 
 	if varSensitiveInterface, ok := d.GetOk("is_sensitive"); ok {
 		varSensitive = varSensitiveInterface.(bool)
+	}
+
+	if varSensitive {
+		varValue = d.Get("sensitive_value").(string)
+	} else {
+		varValue = d.Get("value").(string)
 	}
 
 	varScopeInterface := tfVariableScopetoODVariableScope(d)
@@ -159,6 +180,32 @@ func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 	return newVar
 }
 
+func encryptSensitiveValue(d *schema.ResourceData, ov *octopusdeploy.Variable) (isEncrypted bool, keyFingerprint, encryptedValue string, err error) {
+	if isSensitive := d.Get("is_sensitive").(bool); !isSensitive {
+		return isEncrypted, keyFingerprint, encryptedValue, nil
+	}
+
+	if v, ok := d.GetOk("pgp_key"); ok {
+		pgpKey := strings.TrimSpace(v.(string))
+
+		encryptionKey, err := encryption.RetrieveGPGKey(pgpKey)
+		if err != nil {
+			return isEncrypted, keyFingerprint, encryptedValue, fmt.Errorf("error retrieving PGP Key during Sensitive Variable (%s) creation: %s", ov.Name, err)
+		}
+
+		keyFingerprint, encryptedValue, err = encryption.EncryptValue(encryptionKey, ov.Value, "Sensitive Value")
+		if err != nil {
+			return isEncrypted, keyFingerprint, encryptedValue, fmt.Errorf("error encrypting value during Sensitive Variable (%s) creation: %s", ov.Name, err)
+		}
+		isEncrypted = true
+
+	} else {
+		return isEncrypted, keyFingerprint, encryptedValue, nil
+	}
+
+	return isEncrypted, keyFingerprint, encryptedValue, nil
+}
+
 func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 	octoMutex.Lock("atom-variable")
 	defer octoMutex.Unlock("atom-variable")
@@ -176,6 +223,11 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error creating variable %s: %s", newVariable.Name, err.Error())
 	}
 
+	isEncrypted, fingerprint, encryptedValue, err := encryptSensitiveValue(d, newVariable)
+	if err != nil {
+		return fmt.Errorf("Error encrypting sensitive value: %s", err)
+	}
+
 	for _, v := range tfVar.Variables {
 		if v.Name == newVariable.Name && v.Type == newVariable.Type && (v.IsSensitive || v.Value == newVariable.Value) && v.Description == newVariable.Description && v.IsSensitive == newVariable.IsSensitive {
 			scopeMatches, _, err := client.Variable.MatchesScope(v.Scope, newVariable.Scope)
@@ -184,6 +236,10 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 			}
 			if scopeMatches {
 				d.SetId(v.ID)
+				if isEncrypted {
+					d.Set("key_fingerprint", fingerprint)
+					d.Set("encrypted_value", encryptedValue)
+				}
 				return nil
 			}
 		}
@@ -207,9 +263,13 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 	projID := d.Get("project_id").(string)
 
 	updatedVars, err := client.Variable.UpdateSingle(projID, tfVar)
-
 	if err != nil {
 		return fmt.Errorf("error updating variable id %s: %s", d.Id(), err.Error())
+	}
+
+	isEncrypted, fingerprint, encryptedValue, err := encryptSensitiveValue(d, tfVar)
+	if err != nil {
+		return fmt.Errorf("Error encrypting sensitive value: %s", err)
 	}
 
 	for _, v := range updatedVars.Variables {
@@ -217,6 +277,10 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 			scopeMatches, _, _ := client.Variable.MatchesScope(v.Scope, tfVar.Scope)
 			if scopeMatches {
 				d.SetId(v.ID)
+				if isEncrypted {
+					d.Set("key_fingerprint", fingerprint)
+					d.Set("encrypted_value", encryptedValue)
+				}
 				return nil
 			}
 		}
