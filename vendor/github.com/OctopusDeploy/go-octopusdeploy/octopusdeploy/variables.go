@@ -249,15 +249,12 @@ func (s *VariableService) MatchesScope(variableScope, definedScope *VariableScop
 	if len(definedScope.Tenant) > 0 {
 		return false, nil, fmt.Errorf("Tenant is not a supported scope for variable matching")
 	}
-	if len(definedScope.TenantTag) > 0 {
-		return false, nil, fmt.Errorf("TenantTag is not a supported scope for variable matching")
-	}
 	if len(definedScope.User) > 0 {
 		return false, nil, fmt.Errorf("User is not a supported scope for variable matching")
 	}
 
 	//If there is no scope to filter on return all the results
-	if len(definedScope.Environment) > 0 && len(definedScope.Role) > 0 && len(definedScope.Machine) > 0 && len(definedScope.Action) > 0 && len(definedScope.Channel) > 0 {
+	if len(definedScope.Environment) > 0 && len(definedScope.Role) > 0 && len(definedScope.Machine) > 0 && len(definedScope.Action) > 0 && len(definedScope.Channel) > 0 && len(definedScope.TenantTag) > 0 {
 		return true, &matchedScopes, nil
 	}
 
@@ -306,7 +303,14 @@ func (s *VariableService) MatchesScope(variableScope, definedScope *VariableScop
 		}
 	}
 
+	for _, c1 := range definedScope.TenantTag {
+		for _, c2 := range variableScope.TenantTag {
+			if c1 == c2 {
+				matched = true
+				matchedScopes.TenantTag = append(matchedScopes.TenantTag, c1)
+			}
+		}
+	}
+
 	return matched, &matchedScopes, nil
 }
-
-//Noop to get GitHub to re-run unit tests

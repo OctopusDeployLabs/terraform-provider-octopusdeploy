@@ -29,7 +29,7 @@ type Client struct {
 	Interruption       *InterruptionsService
 	TagSet             *TagSetService
 	Space              *SpaceService
-	Channel			   *ChannelService
+	Channel            *ChannelService
 }
 
 // NewClient returns a new Client.
