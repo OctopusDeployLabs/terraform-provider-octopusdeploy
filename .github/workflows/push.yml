@@ -1,8 +1,6 @@
 name: Publish binaries on release
 on:
-  push:
-    branches:
-    - master
+  create:
     tags:
     - v*
 jobs:
