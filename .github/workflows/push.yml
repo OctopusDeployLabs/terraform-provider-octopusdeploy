@@ -1,6 +1,6 @@
 name: Publish binaries on release
 on:
-  create:
+  push:
     tags:
     - v*
 jobs:
