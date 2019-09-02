@@ -1,4 +1,9 @@
-# octopusdeploy_environment
+---
+layout: "octopusdeploy"
+page_title: "Octopus Deploy: environment"
+---
+
+# Data Source: octopusdeploy_environment
 
 Use this data source to retrieve information about an Octopus Deploy [environment](https://octopus.com/docs/infrastructure/environments).
 
