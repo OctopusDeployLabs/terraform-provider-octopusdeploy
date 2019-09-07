@@ -1,4 +1,9 @@
-# octopusdeploy_project
+---
+layout: "octopusdeploy"
+page_title: "Octopus Deploy: project"
+---
+
+# Data Source: octopusdeploy_project
 
 Use this data source to retrieve information about an Octopus Deploy project.
 

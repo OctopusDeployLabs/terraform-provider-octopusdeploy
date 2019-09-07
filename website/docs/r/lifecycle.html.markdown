@@ -1,4 +1,9 @@
-# octopusdeploy_lifecycle
+---
+layout: "octopusdeploy"
+page_title: "Octopus Deploy: lifecycle"
+---
+
+# Resource: octopusdeploy_lifecycle
 
 Use this resource allows the creation of Octopus Deploy [lifecycles](https://octopus.com/docs/deployment-process/lifecycles).
 

@@ -1,4 +1,9 @@
-# octopusdeploy_environment
+---
+layout: "octopusdeploy"
+page_title: "Octopus Deploy: environment"
+---
+
+# Resource: octopusdeploy_environment
 
 Use this resource allows the creation of Octopus Deploy [environment](https://octopus.com/docs/infrastructure/environments).
 
