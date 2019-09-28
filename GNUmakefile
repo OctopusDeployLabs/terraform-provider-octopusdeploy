@@ -6,7 +6,7 @@ WEBSITE_REPO=github.com/hashicorp/terraform-website
 default: build
 
 build: fmtcheck
-	go install
+	go build
 
 test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=4

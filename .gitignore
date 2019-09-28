@@ -33,6 +33,7 @@ main.tf
 build/
 artifacts/
 .release/
+*.tfplan
 
 node_modules/
 .env
