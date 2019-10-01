@@ -23,6 +23,6 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-* `id` - ID of the environment.
+* `id` - ID of the lifecycle.
 
 * `description` - A description of the lifecycle.
