@@ -19,6 +19,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_library_variable_set": dataLibraryVariableSet(),
 			"octopusdeploy_lifecycle":            dataLifecycle(),
 			"octopusdeploy_feed":                 dataFeed(),
+			"octopusdeploy_account":              dataAccount(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_project":                           resourceProject(),
