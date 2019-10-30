@@ -3,8 +3,10 @@ package octopusdeploy
 import (
 	"fmt"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform/helper/mutexkv"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
 )
 
 // Octopus can get itself into some race conditions, so this mutex can be used to ensure
@@ -82,4 +84,26 @@ func getTenantedDeploymentSchema() *schema.Schema {
 			"Tenanted",
 		}),
 	}
+}
+
+func destroyFeedHelper(s *terraform.State, client *octopusdeploy.Client) error {
+	for _, r := range s.RootModule().Resources {
+		if _, err := client.Feed.Get(r.Primary.ID); err != nil {
+			if err == octopusdeploy.ErrItemNotFound {
+				continue
+			}
+			return fmt.Errorf("Received an error retrieving feed %s", err)
+		}
+		return fmt.Errorf("Feed still exists")
+	}
+	return nil
+}
+
+func feedExistsHelper(s *terraform.State, client *octopusdeploy.Client) error {
+	for _, r := range s.RootModule().Resources {
+		if _, err := client.Feed.Get(r.Primary.ID); err != nil {
+			return fmt.Errorf("Received an error retrieving feed %s", err)
+		}
+	}
+	return nil
 }
