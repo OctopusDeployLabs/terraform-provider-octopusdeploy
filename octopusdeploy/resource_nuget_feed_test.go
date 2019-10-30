@@ -20,7 +20,7 @@ func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployFeedDestroy,
+		CheckDestroy: testOctopusDeployNugetFeedDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testNugetFeedBasic(feedName, feedUri, feedUsername, feedPassword, enhancedMode),
