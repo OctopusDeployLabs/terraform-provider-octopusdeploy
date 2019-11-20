@@ -48,8 +48,9 @@ func resourceFeed() *schema.Resource {
 				Optional: true,
 			},
 			"password": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 		},
 	}
