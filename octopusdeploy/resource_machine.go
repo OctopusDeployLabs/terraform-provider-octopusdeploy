@@ -263,6 +263,7 @@ func buildMachineResource(d *schema.ResourceData) *octopusdeploy.Machine {
 		ProxyID:             proxyid,
 		ClusterCertificate:  tfSchemaList["clustercertificate"].(string),
 		ClusterURL:          tfSchemaList["clusterurl"].(string),
+		Namespace:           tfSchemaList["namespace"].(string),
 		SkipTLSVerification: strconv.FormatBool(tfSchemaList["skiptlsverification"].(bool)),
 		DefaultWorkerPoolID: tfSchemaList["defaultworkerpoolid"].(string),
 	}
