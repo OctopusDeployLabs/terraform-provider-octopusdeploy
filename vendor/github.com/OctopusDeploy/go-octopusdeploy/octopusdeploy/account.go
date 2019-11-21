@@ -23,17 +23,26 @@ type Accounts struct {
 }
 
 type Account struct {
-	ID                              string         `json:"Id"`
-	EnvironmentIDs                  []string       `json:"EnvironmentIds"`
-	Name                            string         `json:"Name"`
-	AccountType                     string         `json:"AccountType"`
-	SubscriptionNumber              string         `json:"SubscriptionNumber"`
-	ClientId                        string         `json:"ClientId"`
-	TenantId                        string         `json:"TenantId"`
-	Password                        SensitiveValue `json:"Password"`
-	TenantTags                      []string       `json:"TenantTags,omitempty"`
-	TenantedDeploymentParticipation string         `json:"TenantedDeploymentParticipation"`
-	Token                           SensitiveValue `json:"Token,omitempty"`
+	// Common Account fields
+
+	ID                              string                 `json:"Id"`
+	AccountType                     AccountType            `json:"AccountType"`
+	Description                     string                 `json:"Description,omitempty"`
+	EnvironmentIDs                  []string               `json:"EnvironmentIds,omitempty"`
+	Name                            string                 `json:"Name" validate:"required"`
+	TenantedDeploymentParticipation TenantedDeploymentMode `json:"TenantedDeploymentParticipation"`
+	TenantTags                      []string               `json:"TenantTags,omitempty"`
+	Token                           SensitiveValue         `json:"Token,omitempty"`
+
+	// Azure Service Principal fields
+
+	AzureEnvironment                  string         `json:"AzureEnvironment,omitempty"`
+	ActiveDirectoryEndpointBaseURI    string         `json:"ActiveDirectoryEndpointBaseUri,omitempty"`
+	ClientID                          string         `json:"ClientId,omitempty"`
+	Password                          SensitiveValue `json:"Password,omitempty"`
+	ResourceManagementEndpointBaseURI string         `json:"ResourceManagementEndpointBaseUri,omitempty"`
+	SubscriptionNumber                string         `json:"SubscriptionNumber,omitempty"`
+	TenantID                          string         `json:"TenantId,omitempty"`
 }
 
 func (t *Account) Validate() error {
@@ -42,13 +51,36 @@ func (t *Account) Validate() error {
 	err := validate.Struct(t)
 
 	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Printf(`%s failed validation. Validation type: %s Field type: %s`, err.Namespace(), err.Tag(), err.Type())
+			fmt.Println()
+		}
 		return err
 	}
 
-	return nil
+	switch t.AccountType {
+	case AzureServicePrincipal:
+		return validateAzureServicePrincipalAccount(t)
+	default:
+		return nil
+	}
 }
 
-func NewAccount(name, accountType string) *Account {
+func validateAzureServicePrincipalAccount(acc *Account) error {
+	validations := []error{
+		ValidateRequiredPropertyValue("ClientID", acc.ClientID),
+		ValidateRequiredPropertyValue("TenantID", acc.TenantID),
+		ValidateRequiredPropertyValue("SubscriptionNumber", acc.SubscriptionNumber),
+	}
+
+	if acc.Password.HasValue {
+		validations = append(validations, ValidateRequiredPropertyValue("Password", acc.Password.NewValue))
+	}
+
+	return ValidateMultipleProperties(validations)
+}
+
+func NewAccount(name string, accountType AccountType) *Account {
 	return &Account{
 		Name:        name,
 		AccountType: accountType,

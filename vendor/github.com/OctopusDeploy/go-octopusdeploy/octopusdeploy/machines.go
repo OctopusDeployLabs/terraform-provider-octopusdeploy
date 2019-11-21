@@ -22,24 +22,24 @@ type Machines struct {
 }
 
 type Machine struct {
-	ID                              string           `json:"Id"`
-	Name                            string           `json:"Name"`
-	Thumbprint                      string           `json:"Thumbprint"`
-	URI                             string           `json:"Uri"`
-	IsDisabled                      bool             `json:"IsDisabled"`
-	EnvironmentIDs                  []string         `json:"EnvironmentIds"`
-	Roles                           []string         `json:"Roles"`
-	MachinePolicyID                 string           `json:"MachinePolicyId"`
-	TenantedDeploymentParticipation string           `json:"TenantedDeploymentParticipation"`
-	TenantIDs                       []string         `json:"TenantIDs"`
-	TenantTags                      []string         `json:"TenantTags"`
-	Status                          string           `json:"Status"`
-	HasLatestCalamari               bool             `json:"HasLatestCalamari"`
-	StatusSummary                   string           `json:"StatusSummary"`
-	IsInProcess                     bool             `json:"IsInProcess"`
-	Endpoint                        *MachineEndpoint `json:"Endpoint,omitempty"`
-	LastModifiedOn                  *string          `json:"LastModifiedOn,omitempty"`
-	LastModifiedBy                  *string          `json:"LastModifiedBy,omitempty"`
+	ID                              string                 `json:"Id"`
+	Name                            string                 `json:"Name"`
+	Thumbprint                      string                 `json:"Thumbprint"`
+	URI                             string                 `json:"Uri"`
+	IsDisabled                      bool                   `json:"IsDisabled"`
+	EnvironmentIDs                  []string               `json:"EnvironmentIds"`
+	Roles                           []string               `json:"Roles"`
+	MachinePolicyID                 string                 `json:"MachinePolicyId"`
+	TenantedDeploymentParticipation TenantedDeploymentMode `json:"TenantedDeploymentParticipation"`
+	TenantIDs                       []string               `json:"TenantIDs"`
+	TenantTags                      []string               `json:"TenantTags"`
+	Status                          string                 `json:"Status"`
+	HasLatestCalamari               bool                   `json:"HasLatestCalamari"`
+	StatusSummary                   string                 `json:"StatusSummary"`
+	IsInProcess                     bool                   `json:"IsInProcess"`
+	Endpoint                        *MachineEndpoint       `json:"Endpoint,omitempty"`
+	LastModifiedOn                  *string                `json:"LastModifiedOn,omitempty"`
+	LastModifiedBy                  *string                `json:"LastModifiedBy,omitempty"`
 }
 
 type MachineEndpointAuthentication struct {
@@ -72,7 +72,7 @@ type MachineTentacleVersionDetails struct {
 	UpgradeRequired  bool   `json:"UpgradeRequired"`
 }
 
-func NewMachine(Name string, Disabled bool, EnvironmentIDs []string, Roles []string, MachinePolicyId string, TenantedDeploymentParticipation string, TenantIDs, TenantTags []string) *Machine {
+func NewMachine(Name string, Disabled bool, EnvironmentIDs []string, Roles []string, MachinePolicyId string, TenantedDeploymentParticipation TenantedDeploymentMode, TenantIDs, TenantTags []string) *Machine {
 	return &Machine{
 		Name:                            Name,
 		IsDisabled:                      Disabled,
@@ -104,7 +104,7 @@ func ValidateMachineValues(Machine *Machine) error {
 
 	return ValidateMultipleProperties([]error{
 		ValidatePropertyValues("Machine.Status", Machine.Status, ValidMachineStatuses),
-		ValidatePropertyValues("Machine.TenantedDeploymentParticipation", Machine.TenantedDeploymentParticipation, ValidTenantedDeploymentModes),
+		ValidatePropertyValues("Machine.TenantedDeploymentParticipation", Machine.TenantedDeploymentParticipation.String(), TenantedDeploymentModeNames()),
 	})
 }
 

@@ -212,7 +212,7 @@ func buildMachineResource(d *schema.ResourceData) *octopusdeploy.Machine {
 	mEnvironments := getSliceFromTerraformTypeList(d.Get("environments"))
 	mRoles := getSliceFromTerraformTypeList(d.Get("roles"))
 	mDisabled := d.Get("isdisabled").(bool)
-	mTenantedDeploymentParticipation := d.Get("tenanteddeploymentparticipation").(string)
+	mTenantedDeploymentParticipation, _ := octopusdeploy.ParseTenantedDeploymentMode(d.Get("tenanteddeploymentparticipation").(string))
 	mTenantIDs := getSliceFromTerraformTypeList(d.Get("tenantids"))
 	mTenantTags := getSliceFromTerraformTypeList(d.Get("tenanttags"))
 

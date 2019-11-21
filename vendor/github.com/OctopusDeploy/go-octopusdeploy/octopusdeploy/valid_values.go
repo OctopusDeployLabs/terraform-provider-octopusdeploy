@@ -12,11 +12,6 @@ var ValidProjectConnectivityPolicySkipMachineBehaviors = []string{
 	"SkipUnavailableMachines", "None",
 }
 
-// ValidTenantedDeploymentModes provides options for tenanted deployment modes
-var ValidTenantedDeploymentModes = []string{
-	"Untenanted", "TenantedOrUntenanted", "Tenanted",
-}
-
 // ValidMachineStatuses provides options for valid machine status
 var ValidMachineStatuses = []string{
 	"Online", "Offline", "Unknown", "NeedsUpgrade", "CalamariNeedsUpgrade", "Disabled",

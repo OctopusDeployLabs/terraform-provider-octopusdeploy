@@ -1002,7 +1002,7 @@ func buildProjectResource(d *schema.ResourceData) *octopusdeploy.Project {
 	}
 
 	if attr, ok := d.GetOk("tenanted_deployment_mode"); ok {
-		project.TenantedDeploymentMode = attr.(string)
+		project.TenantedDeploymentMode, _ = octopusdeploy.ParseTenantedDeploymentMode(attr.(string))
 	}
 
 	if attr, ok := d.GetOk("included_library_variable_sets"); ok {

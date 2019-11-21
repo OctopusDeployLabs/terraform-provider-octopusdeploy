@@ -145,7 +145,7 @@ func buildCertificateResource(d *schema.ResourceData) *octopusdeploy.Certificate
 	var certificate = octopusdeploy.NewCertificate(certificateName, octopusdeploy.SensitiveValue{NewValue: certificateData}, octopusdeploy.SensitiveValue{NewValue: password})
 	certificate.Notes = notes
 	certificate.EnvironmentIds = environmentIds
-	certificate.TenantedDeploymentParticipation = tenantedDeploymentParticipation
+	certificate.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(tenantedDeploymentParticipation)
 	certificate.TenantIds = tenantIds
 	certificate.TenantTags = tenantTags
 

@@ -36,7 +36,6 @@ type Client struct {
 func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Client {
 	baseURLWithAPI := strings.TrimRight(octopusURL, "/")
 	baseURLWithAPI = fmt.Sprintf("%s/api/", baseURLWithAPI)
-	fmt.Println(baseURLWithAPI)
 	base := sling.New().Client(httpClient).Base(baseURLWithAPI).Set("X-Octopus-ApiKey", octopusAPIKey)
 	return &Client{
 		sling:              base,
@@ -63,7 +62,6 @@ func NewClient(httpClient *http.Client, octopusURL, octopusAPIKey string) *Clien
 func ForSpace(httpClient *http.Client, octopusURL, octopusAPIKey string, space *Space) *Client {
 	baseURLWithAPI := strings.TrimRight(octopusURL, "/")
 	baseURLWithAPI = fmt.Sprintf("%s/api/%s/", baseURLWithAPI, space.ID)
-	fmt.Println(baseURLWithAPI)
 	base := sling.New().Client(httpClient).Base(baseURLWithAPI).Set("X-Octopus-ApiKey", octopusAPIKey)
 	return &Client{
 		sling:              base,
