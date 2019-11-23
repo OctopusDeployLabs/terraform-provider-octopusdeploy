@@ -37,6 +37,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_certificate":                       resourceCertificate(),
 			"octopusdeploy_channel":                           resourceChannel(),
 			"octopusdeploy_nuget_feed":                        resourceNugetFeed(),
+			"octopusdeploy_azure_service_principal":           resourceAzureServicePrincipal(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
