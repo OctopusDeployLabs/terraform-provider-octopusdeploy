@@ -172,6 +172,22 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.3.iis_website.0.json_file_variable_replacement", "appsettings.json,Config\\*.json"),
 					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.binding.0.protocol", "https"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.binding.0.ip", "127.0.0.1"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.binding.0.port", "443"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.binding.0.host", "test.site.com"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.binding.0.thumbprint", "random_value"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.binding.0.cert_var", "cert_var_name"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.binding.0.require_sni", "true"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.binding.0.enabled", "false"),
+					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.4.package_script.0.feed_id", "feeds-builtin"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.4.package_script.0.package", "cleanup.yolo"),
@@ -318,6 +334,17 @@ resource "octopusdeploy_project" "foo" {
 			target_roles = [
 				"MyRole1",
 			]
+
+			binding {
+				protocol = "https"
+				ip = "127.0.0.1"
+				port = "443"
+				host = "test.site.com"
+				thumbprint = "random_value"
+				cert_var = "cert_var_name"
+				require_sni = true
+				enable = false
+			}				
 		}
 	}
 

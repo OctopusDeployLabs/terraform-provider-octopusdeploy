@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -463,6 +464,66 @@ func getDeploymentStepIISWebsiteSchema() *schema.Schema {
 					Description: "Whether IIS should allow integrated Windows authentication with a 401 challenge.",
 					Default:     true,
 				},
+				"binding": &schema.Schema{
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"protocol": {
+								Type:        schema.TypeString,
+								Description: "Protocol to bind to",
+								Optional:    true,
+								Default:     "https",
+								ValidateFunc: validateValueFunc([]string{
+									"http",
+									"https",
+								}),
+							},
+							"ip": {
+								Type:        schema.TypeString,
+								Description: "IP Address to bind to",
+								Optional:    true,
+								Default:     "*",
+							},
+							"port": {
+								Type:        schema.TypeInt,
+								Description: "Port to bind to",
+								Optional:    true,
+								Default:     "*",
+							},
+							"host": {
+								Type:        schema.TypeString,
+								Description: "Host Name to bind to",
+								Optional:    true,
+								Default:     "",
+							},
+							"enable": {
+								Type:        schema.TypeBool,
+								Optional:    true,
+								Description: "Enable the binding",
+								Default:     true,
+							},
+							"thumbprint": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								Description: "Thumbprint for the SSL Binding",
+								Default:     "",
+							},
+							"cert_var": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								Description: "Certicate Variable Name for the SSL Binding",
+								Default:     "",
+							},
+							"require_sni": {
+								Type:        schema.TypeBool,
+								Optional:    true,
+								Description: "Require Service Name Identification for the SSL binding",
+								Default:     false,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -625,6 +686,53 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					websiteName := localStep["website_name"].(string)
 					windowsAuthentication := localStep["windows_authentication"].(bool)
 
+					/* Generate Bindings Array */
+					type bindingsStruct struct {
+						protocol            string `json: "protocol"`
+						ipAddress           string `json: "ipAddress"`
+						port                int    `json: "port"`
+						host                string `json: "host"`
+						thumbprint          string `json: "thumbprint"`
+						certificateVariable string `json: "certificateVariable"`
+						requireSni          bool   `json: "requireSni"`
+						enabled             bool   `json: "enabled"`
+					}
+
+					bindingsArray := []bindingsStruct{}
+
+					if rawBindings, ok := d.GetOk("binding"); ok {
+						bindings := rawBindings.([]interface{})
+
+						for _, rawBinding := range bindings {
+							binding := rawBinding.(map[string]interface{})
+
+							bindingsArray = append(bindingsArray, bindingsStruct{
+								binding["protocol"].(string),
+								binding["ip"].(string),
+								binding["port"].(int),
+								binding["host"].(string),
+								binding["thumbprint"].(string),
+								binding["cert_var"].(string),
+								binding["require_sni"].(bool),
+								binding["enable"].(bool),
+							})
+						}
+					} else {
+						/* Add Default HTTP 80 binding */
+						bindingsArray = append(bindingsArray, bindingsStruct{
+							"http",
+							"*",
+							80,
+							"",
+							"",
+							"",
+							false,
+							true,
+						})
+					}
+
+					bindingsBytes, _ := json.Marshal(bindingsArray)
+
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
 						PackageRequirement: "LetOctopusDecide",
@@ -637,8 +745,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 								Properties: map[string]string{
 									"Octopus.Action.IISWebSite.DeploymentType":                                  "webSite",
 									"Octopus.Action.IISWebSite.CreateOrUpdateWebSite":                           "True",
-									"Octopus.Action.IISWebSite.Bindings":                                        "[{\"protocol\":\"http\",\"port\":\"80\",\"host\":\"\",\"thumbprint\":null,\"certificateVariable\":null,\"requireSni\":false,\"enabled\":true}]",
-									"Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion":                 applicationPoolFramework,
+									"Octopus.Action.IISWebSite.Bindings":                                        string(bindingsBytes),
 									"Octopus.Action.IISWebSite.ApplicationPoolIdentityType":                     applicationPoolIdentity,
 									"Octopus.Action.IISWebSite.EnableAnonymousAuthentication":                   strconv.FormatBool(anonymousAuthentication),
 									"Octopus.Action.IISWebSite.EnableBasicAuthentication":                       strconv.FormatBool(basicAuthentication),
