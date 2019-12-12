@@ -1014,9 +1014,8 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								ActionType: "Octopus.Script",
+								ActionType: "Octopus.TentaclePackage",
 								Properties: map[string]string{
-									"Octopus.Action.RunOnServer":                "False",
 									"Octopus.Action.Package.DownloadOnTentacle": "False",
 									"Octopus.Action.Package.FeedId":             feedID,
 									"Octopus.Action.Package.PackageId":          packageID,
