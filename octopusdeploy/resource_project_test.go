@@ -187,6 +187,18 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "deployment_step.4.package_script.0.target_roles.0", "MyRole1"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.4.package_script.0.target_roles.1", "MyRole2"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.5.deploy_package.0.feed_id", "feeds-builtin"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.5.deploy_package.0.package", "cleanup.yolo"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.5.deploy_package.0.step_name", "Run Verify Deploy Package"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.5.deploy_package.0.step_condition", "success"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.5.deploy_package.0.target_roles.0", "MyRole1"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.5.deploy_package.0.target_roles.1", "MyRole2"),
 				),
 			},
 			// update again by remove its description
@@ -315,6 +327,18 @@ resource "octopusdeploy_project" "foo" {
 			package           = "cleanup.yolo"
 			script_file_name  = "bin\\cleanup.ps1"
 			script_parameters = "-Force"
+
+			target_roles = [
+			"MyRole1",
+			"MyRole2",
+			]
+		}
+	}
+
+	deployment_step {
+		deploy_package {
+			step_name         = "Run Verify Deploy Package"
+			package           = "cleanup.yolo"
 
 			target_roles = [
 			"MyRole1",

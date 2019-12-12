@@ -94,6 +94,16 @@ EOF
       "Billing-API-Europe",
     ]
   }
+
+  deployment_step_deploy_package {
+    step_name         = "Verify API Deployment"
+    package           = "Billing.API"
+
+    target_roles = [
+      "Billing-API-Asia",
+      "Billing-API-Europe",
+    ]
+  }
 }
 ```
 

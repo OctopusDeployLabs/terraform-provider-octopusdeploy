@@ -93,6 +93,7 @@ func resourceProject() *schema.Resource {
 						"kubernetes_yaml": getDeploymentStepKubernetesYamlSchema(),
 						"package_script":  getDeploymentStepPackageScriptSchema(),
 						"apply_terraform": getDeploymentStepApplyTerraformSchema(),
+						"deploy_package":  getDeploymentStepDeployPackageSchema(),
 					},
 				},
 			},
@@ -410,6 +411,22 @@ func getDeploymentStepApplyTerraformSchema() *schema.Schema {
 		},
 	}
 
+	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
+	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
+
+	return schemaToReturn
+}
+
+func getDeploymentStepDeployPackageSchema() *schema.Schema {
+	schemaToReturn := &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{},
+		},
+	}
+
+	schemaToReturn.Elem = addConfigurationTransformDeploymentStepSchema(schemaToReturn.Elem)
 	schemaToReturn.Elem = addFeedAndPackageDeploymentStepSchema(schemaToReturn.Elem)
 	schemaToReturn.Elem = addStandardDeploymentStepSchema(schemaToReturn.Elem, false)
 
@@ -972,6 +989,82 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 				}
 			}
+
+			if v, ok := deploymentStep["deploy_package"]; ok {
+				steps := v.([]interface{})
+				for _, raw := range steps {
+
+					localStep := raw.(map[string]interface{})
+
+					feedID := localStep["feed_id"].(string)
+					packageID := localStep["package"].(string)
+					jsonFileVariableReplacement := localStep["json_file_variable_replacement"].(string)
+					variableSubstitutionInFiles := localStep["variable_substitution_in_files"].(string)
+					configurationTransforms := localStep["configuration_transforms"].(bool)
+					configurationVariables := localStep["configuration_variables"].(bool)
+					stepCondition := localStep["step_condition"].(string)
+					stepName := localStep["step_name"].(string)
+					stepStartTrigger := localStep["step_start_trigger"].(string)
+
+					deploymentStep := &octopusdeploy.DeploymentStep{
+						Name:               stepName,
+						PackageRequirement: "LetOctopusDecide",
+						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
+						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+						Actions: []octopusdeploy.DeploymentAction{
+							{
+								Name:       stepName,
+								ActionType: "Octopus.Script",
+								Properties: map[string]string{
+									"Octopus.Action.RunOnServer":                "False",
+									"Octopus.Action.Package.DownloadOnTentacle": "False",
+									"Octopus.Action.Package.FeedId":             feedID,
+									"Octopus.Action.Package.PackageId":          packageID,
+								},
+							},
+						},
+					}
+
+					if jsonFileVariableReplacement != "" {
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"] = jsonFileVariableReplacement
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesEnabled"] = "True"
+
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.JsonConfigurationVariables"
+					}
+
+					if variableSubstitutionInFiles != "" {
+						deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
+						deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
+
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
+					}
+
+					if configurationTransforms {
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"] = strconv.FormatBool(configurationTransforms)
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationTransforms"
+					}
+
+					if configurationVariables {
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = strconv.FormatBool(configurationVariables)
+						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationVariables"
+					}
+
+					if targetRolesInterface, ok := localStep["target_roles"]; ok {
+						var targetRoleSlice []string
+
+						targetRoles := targetRolesInterface.([]interface{})
+
+						for _, role := range targetRoles {
+							targetRoleSlice = append(targetRoleSlice, role.(string))
+						}
+
+						deploymentStep.Properties = map[string]string{"Octopus.Action.TargetRoles": strings.Join(targetRoleSlice, ",")}
+					}
+
+					deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
+				}
+			}
+
 		}
 	}
 
