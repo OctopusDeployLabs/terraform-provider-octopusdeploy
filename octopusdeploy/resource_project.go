@@ -715,7 +715,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					bindingsArray := []bindingsStruct{}
 
-					if rawBindings, ok := d.GetOk("binding"); ok {
+					if rawBindings, ok := localStep["binding"]; ok {
 						bindings := rawBindings.([]interface{})
 
 						for _, rawBinding := range bindings {
