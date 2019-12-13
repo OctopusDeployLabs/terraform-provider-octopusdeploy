@@ -69,6 +69,8 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.0.step_name", stepName),
 					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.0.windows_service.0.required", "false"),
+					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.0.target_roles.0", targetRoles[0]),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.0.target_roles.1", targetRoles[1]),
@@ -122,6 +124,8 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.0.step_name", "Deploy My First Service"),
 					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.0.windows_service.0.required", "false"),
+					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.0.target_roles.0", "Role1"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.0.target_roles.1", "Role2"),
@@ -131,6 +135,8 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "deployment_step.1.windows_service.1.service_name", "My Second Service"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.1.windows_service.1.step_name", "Deploy My Second Service"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.1.windows_service.1.required", "false"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.1.windows_service.1.target_roles.0", "Role3"),
 					resource.TestCheckNoResourceAttr(
@@ -144,6 +150,8 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.2.inline_script.0.step_name", "Run Cleanup Script"),
 					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.2.inline_script.0.required", "false"),
+					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.2.inline_script.0.target_roles.0", "MyRole1"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.2.inline_script.0.target_roles.1", "MyRole2"),
@@ -155,6 +163,8 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "deployment_step.2.inline_script.0.step_condition", "success"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.3.iis_website.0.step_name", "Deploy Website"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.3.iis_website.0.required", "true"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.3.iis_website.0.target_roles.0", "MyRole1"),
 					resource.TestCheckResourceAttr(
@@ -198,6 +208,8 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.4.package_script.0.step_name", "Run Verify From Package Script"),
 					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.4.package_script.0.required", "false"),
+					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.4.package_script.0.step_condition", "success"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.4.package_script.0.target_roles.0", "MyRole1"),
@@ -209,6 +221,8 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "deployment_step.5.deploy_package.0.package", "cleanup.yolo"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.5.deploy_package.0.step_name", "Run Verify Deploy Package"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.5.deploy_package.0.required", "false"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "deployment_step.5.deploy_package.0.step_condition", "success"),
 					resource.TestCheckResourceAttr(
@@ -230,10 +244,16 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 						terraformNamePrefix, "description", ""),
 					resource.TestCheckNoResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.0.step_name"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.0.windows_service.0.required", "false"),
 					resource.TestCheckNoResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.1.step_name"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.0.windows_service.1.required", "false"),
 					resource.TestCheckNoResourceAttr(
 						terraformNamePrefix, "deployment_step.0.iis_website.0.step_name"),
+					resource.TestCheckResourceAttr(
+						terraformNamePrefix, "deployment_step.0.iis_website.0.required", "false"),
 				),
 			},
 		},
@@ -329,6 +349,7 @@ resource "octopusdeploy_project" "foo" {
 			package                        = "MyWebsitePackage"
 			step_condition                 = "failure"
 			step_name                      = "Deploy Website"
+			required												 = true
 			website_name                   = "Awesome Website"
 
 			target_roles = [

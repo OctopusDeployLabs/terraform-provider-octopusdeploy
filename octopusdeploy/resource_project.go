@@ -177,6 +177,12 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}, requireRole boo
 		Required:    true,
 	}
 
+	schemaResource.Schema["required"] = &schema.Schema{
+		Type:     schema.TypeBool,
+		Optional: true,
+		Default:  false,
+	}
+
 	schemaResource.Schema["step_start_trigger"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
@@ -605,10 +611,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					serviceStartMode := localStep["service_start_mode"].(string)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
+					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
+						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
@@ -682,6 +690,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					packageID := localStep["package"].(string)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
+					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 					websiteName := localStep["website_name"].(string)
 					windowsAuthentication := localStep["windows_authentication"].(bool)
@@ -735,6 +744,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
+						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
@@ -809,10 +819,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					runOnServer := localStep["run_on_server"].(bool)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
+					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
+						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
@@ -862,10 +874,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					packageID := localStep["package_id"].(string)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
+					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
+						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
@@ -913,10 +927,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					runOnServer := localStep["run_on_server"].(bool)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
+					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
+						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
@@ -965,11 +981,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					configurationVariables := localStep["configuration_variables"].(bool)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
+					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 					runOnServer := localStep["run_on_server"].(bool)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
+						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
@@ -1040,18 +1058,21 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					packageID := localStep["package"].(string)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
+					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 					runOnServer := localStep["run_on_server"].(bool)
 					additionalInitParams := localStep["additional_init_params"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
+						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
+								IsRequired: required,
 								ActionType: "Octopus.TerraformApply",
 								Properties: map[string]string{
 									"Octopus.Action.RunOnServer":                    strconv.FormatBool(runOnServer),
@@ -1111,10 +1132,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					configurationVariables := localStep["configuration_variables"].(bool)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
+					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
+						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
