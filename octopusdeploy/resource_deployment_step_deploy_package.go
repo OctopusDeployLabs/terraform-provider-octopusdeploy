@@ -145,7 +145,7 @@ func buildDeploymentProcessStep(d *schema.ResourceData) *octopusdeploy.Deploymen
 	}
 
 	/* Add Target Roles */
-	if targetRolesInterface, ok := d.GetOk("step_start_trigger"); ok {
+	if targetRolesInterface, ok := d.GetOk("target_roles"); ok {
 		var targetRoleSlice []string
 
 		targetRolesArray := targetRolesInterface.([]interface{})
