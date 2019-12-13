@@ -747,10 +747,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					}
 
 					bindingsBytes, _ := json.Marshal(bindingsArray)
-
 					bindingsString := strings.ReplaceAll(string(bindingsBytes), "\"", "\\\"")
 
-					log.Fatalf("bindings: %s", bindingsString)
+					log.Printf("bindingsString: %s", bindingsString)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
