@@ -616,13 +616,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
-						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
+								IsRequired: required,
 								ActionType: "Octopus.WindowsService",
 								Properties: map[string]string{
 									"Octopus.Action.WindowsService.CreateOrUpdateService":                       "True",
@@ -744,13 +744,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
-						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
+								IsRequired: required,
 								ActionType: "Octopus.IIS",
 								Properties: map[string]string{
 									"Octopus.Action.IISWebSite.DeploymentType":                                  "webSite",
@@ -824,13 +824,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
-						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
+								IsRequired: required,
 								ActionType: "Octopus.Script",
 								Properties: map[string]string{
 									"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
@@ -879,13 +879,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
-						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
+								IsRequired: required,
 								ActionType: "Octopus.HelmChartUpgrade",
 								Properties: map[string]string{
 									"Octopus.Action.Helm.ResetValues":           strconv.FormatBool(resetValues),
@@ -932,13 +932,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
-						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
+								IsRequired: required,
 								ActionType: "Octopus.KubernetesDeployRawYaml",
 								Properties: map[string]string{
 									"Octopus.Action.RunOnServer":                             strconv.FormatBool(runOnServer),
@@ -987,13 +987,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
-						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
+								IsRequired: required,
 								ActionType: "Octopus.Script",
 								Properties: map[string]string{
 									"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
@@ -1065,7 +1065,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
-						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
@@ -1137,13 +1136,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
-						IsRequired:         required,
 						PackageRequirement: "LetOctopusDecide",
 						Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 						StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
+								IsRequired: required,
 								ActionType: "Octopus.TentaclePackage",
 								Properties: map[string]string{
 									"Octopus.Action.Package.DownloadOnTentacle": "False",

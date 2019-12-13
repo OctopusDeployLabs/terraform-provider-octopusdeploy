@@ -36,6 +36,7 @@ type DeploymentProcess struct {
 type DeploymentStep struct {
 	ID                 string                           `json:"Id,omitempty"`
 	Name               string                           `json:"Name"`
+	IsRequired				 bool															`json:"IsRequired"`
 	PackageRequirement DeploymentStepPackageRequirement `json:"PackageRequirement,omitempty"`                                         // may need its own model / enum
 	Properties         map[string]string                `json:"Properties"`                                                           // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
 	Condition          DeploymentStepCondition          `json:"Condition,omitempty" validate:"oneof=Success Failure Always Variable"` // variable option adds a Property "Octopus.Action.ConditionVariableExpression"
