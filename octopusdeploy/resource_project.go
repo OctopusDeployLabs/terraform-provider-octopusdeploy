@@ -505,7 +505,7 @@ func getDeploymentStepIISWebsiteSchema() *schema.Schema {
 								Default:     "*",
 							},
 							"port": {
-								Type:        schema.TypeInt,
+								Type:        schema.TypeString,
 								Description: "Port to bind to",
 								Optional:    true,
 								Default:     "*",
