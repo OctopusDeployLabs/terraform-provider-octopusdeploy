@@ -375,16 +375,8 @@ func resourceDeploymentStep_CreateBasicStep(d *schema.ResourceData, actionType s
 	}
 
 	/* Add Target Roles */
-	if targetRolesInterface, ok := d.GetOk("target_roles"); ok {
-		var targetRoleSlice []string
-
-		targetRolesArray := targetRolesInterface.([]interface{})
-
-		for _, role := range targetRolesArray {
-			targetRoleSlice = append(targetRoleSlice, role.(string))
-		}
-
-		deploymentStep.Properties["Octopus.Action.TargetRoles"] = strings.Join(targetRoleSlice, ",")
+	if targetRoles, ok := d.GetOk("target_roles"); ok {
+		deploymentStep.Properties["Octopus.Action.TargetRoles"] = strings.Join(getSliceFromTerraformTypeList(targetRoles), ",")
 	}
 
 	/* Return */
@@ -393,7 +385,7 @@ func resourceDeploymentStep_CreateBasicStep(d *schema.ResourceData, actionType s
 
 func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep) {
 	/* Package Properties */
-	deploymentStep.Actions[0].Properties["Octopus.Action.Package.DownloadOnTentacle"] = "False";
+	deploymentStep.Actions[0].Properties["Octopus.Action.Package.DownloadOnTentacle"] = "False"
 	deploymentStep.Actions[0].Properties["Octopus.Action.Package.FeedId"] = d.Get("feed_id").(string)
 	deploymentStep.Actions[0].Properties["Octopus.Action.Package.PackageId"] = d.Get("package").(string)
 
@@ -428,4 +420,28 @@ func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploym
 /* --------------------------------------- */
 func resourceDeploymentStep_SetBasicSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
 	d.Set("step_name", deploymentStep.Name)
+	d.Set("step_condition", deploymentStep.Condition)
+	d.Set("required", deploymentStep.Actions[0].IsRequired)
+	d.Set("step_start_trigger", deploymentStep.StartTrigger)
+	d.Set("target_roles", strings.Split(deploymentStep.Properties["Octopus.Action.TargetRoles"], ","))
+
+	if runOnServer, ok := deploymentStep.Properties["Octopus.Action.RunOnServer"]; ok {
+		d.Set("run_on_server", runOnServer)
+	}
+}
+
+func resourceDeploymentStep_SetPackageSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
+	d.Set("feed_id", deploymentStep.Actions[0].Properties["Octopus.Action.Package.FeedId"])
+	d.Set("package", deploymentStep.Actions[0].Properties["Octopus.Action.Package.PackageId"])
+
+	if jsonFileVariableReplacement, ok := deploymentStep.Actions[0].Properties["Octopus.Action.Package.JsonConfigurationVariablesTargets"]; ok {
+		d.Set("json_file_variable_replacement", jsonFileVariableReplacement)
+	}
+
+	if variableSubstitutionInFiles, ok := deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
+		d.Set("variable_substitution_in_files", variableSubstitutionInFiles)
+	}
+
+	d.Set("configuration_transforms", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"]))
+	d.Set("configuration_variables", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"]))
 }

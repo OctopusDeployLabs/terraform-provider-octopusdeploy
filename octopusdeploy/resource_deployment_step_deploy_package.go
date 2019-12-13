@@ -36,6 +36,7 @@ func buildDeployPackageDeploymentStep(d *schema.ResourceData) *octopusdeploy.Dep
 
 func setDeployPackageSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
 	resourceDeploymentStep_SetBasicSchema(d, deploymentStep);
+	resourceDeploymentStep_SetPackageSchema(d, deploymentStep);
 }
 
 func resourceDeploymentStepDeployPackageCreate(d *schema.ResourceData, m interface{}) error {
