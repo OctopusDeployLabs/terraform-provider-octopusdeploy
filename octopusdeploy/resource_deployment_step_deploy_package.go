@@ -154,7 +154,7 @@ func buildDeploymentProcessStep(d *schema.ResourceData) *octopusdeploy.Deploymen
 			targetRoleSlice = append(targetRoleSlice, role.(string))
 		}
 
-		deploymentStep.Actions[0].Properties["Octopus.Action.Package.FeedId"] = strings.Join(targetRoleSlice, ",")
+		deploymentStep.Properties["Octopus.Action.TargetRoles"] = strings.Join(targetRoleSlice, ",")
 	}
 
 	/* Package/Feed Properties */
