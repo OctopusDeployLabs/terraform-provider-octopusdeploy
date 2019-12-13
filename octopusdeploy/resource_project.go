@@ -755,7 +755,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 								Properties: map[string]string{
 									"Octopus.Action.IISWebSite.DeploymentType":                                  "webSite",
 									"Octopus.Action.IISWebSite.CreateOrUpdateWebSite":                           "True",
-									"Octopus.Action.IISWebSite.Bindings":                                        string(bindingsBytes),
+									"Octopus.Action.IISWebSite.Bindings":                                        strings.ReplaceAll(string(bindingsBytes), "\"", "\\\""),
 									"Octopus.Action.IISWebSite.ApplicationPoolIdentityType":                     applicationPoolIdentity,
 									"Octopus.Action.IISWebSite.EnableAnonymousAuthentication":                   strconv.FormatBool(anonymousAuthentication),
 									"Octopus.Action.IISWebSite.EnableBasicAuthentication":                       strconv.FormatBool(basicAuthentication),
