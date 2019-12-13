@@ -108,6 +108,13 @@ func formatBool(boolValue bool) string {
 	return "False"
 }
 
+func formatStrPtr(strValue string) *string {
+	if strValue == "" {
+		return nil
+	}
+	return &strValue
+}
+
 // addFeedAndPackageDeploymentStepSchema adds schemas related packages and feeds
 func addFeedAndPackageDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resource {
 	schemaResource := schemaToAddToo.(*schema.Resource)
@@ -703,14 +710,14 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					/* Generate Bindings Array */
 					type bindingsStruct struct {
-						Protocol            string `json:"protocol"`
-						IpAddress           string `json:"ipAddress"`
-						Port                int    `json:"port"`
-						Host                string `json:"host"`
-						Thumbprint          string `json:"thumbprint"`
-						CertificateVariable string `json:"certificateVariable"`
-						RequireSni          bool   `json:"requireSni"`
-						Enabled             bool   `json:"enabled"`
+						Protocol            *string `json:"protocol"`
+						IpAddress           *string `json:"ipAddress"`
+						Port                *string `json:"port"`
+						Host                *string `json:"host"`
+						Thumbprint          *string `json:"thumbprint"`
+						CertificateVariable *string `json:"certificateVariable"`
+						RequireSni          bool    `json:"requireSni"`
+						Enabled             bool    `json:"enabled"`
 					}
 
 					bindingsArray := []bindingsStruct{}
@@ -722,12 +729,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 							binding := rawBinding.(map[string]interface{})
 
 							bindingsArray = append(bindingsArray, bindingsStruct{
-								binding["protocol"].(string),
-								binding["ip"].(string),
-								binding["port"].(int),
-								binding["host"].(string),
-								binding["thumbprint"].(string),
-								binding["cert_var"].(string),
+								formatStrPtr(binding["protocol"].(string)),
+								formatStrPtr(binding["ip"].(string)),
+								formatStrPtr(binding["port"].(string)),
+								formatStrPtr(binding["host"].(string)),
+								formatStrPtr(binding["thumbprint"].(string)),
+								formatStrPtr(binding["cert_var"].(string)),
 								binding["require_sni"].(bool),
 								binding["enable"].(bool),
 							})
@@ -738,12 +745,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 						/* Add Default HTTP 80 binding */
 						bindingsArray = append(bindingsArray, bindingsStruct{
-							"http",
-							"*",
-							80,
-							"",
-							"",
-							"",
+							formatStrPtr("http"),
+							formatStrPtr("*"),
+							formatStrPtr("80"),
+							formatStrPtr(""),
+							formatStrPtr(""),
+							formatStrPtr(""),
 							false,
 							true,
 						})
