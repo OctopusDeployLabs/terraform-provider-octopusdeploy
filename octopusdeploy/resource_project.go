@@ -748,6 +748,10 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					bindingsBytes, _ := json.Marshal(bindingsArray)
 
+					bindingsString := strings.ReplaceAll(string(bindingsBytes), "\"", "\\\"")
+
+					log.Fatalf("bindings: %s", bindingsString)
+
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
 						PackageRequirement: "LetOctopusDecide",
@@ -761,7 +765,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 								Properties: map[string]string{
 									"Octopus.Action.IISWebSite.DeploymentType":                                  "webSite",
 									"Octopus.Action.IISWebSite.CreateOrUpdateWebSite":                           "True",
-									"Octopus.Action.IISWebSite.Bindings":                                        strings.ReplaceAll(string(bindingsBytes), "\"", "\\\""),
+									"Octopus.Action.IISWebSite.Bindings":                                        bindingsString,
 									"Octopus.Action.IISWebSite.ApplicationPoolIdentityType":                     applicationPoolIdentity,
 									"Octopus.Action.IISWebSite.EnableAnonymousAuthentication":                   formatBool(anonymousAuthentication),
 									"Octopus.Action.IISWebSite.EnableBasicAuthentication":                       formatBool(basicAuthentication),
