@@ -733,6 +733,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 							})
 						}
 					} else {
+						log.Printf("rawBindings: %+v", rawBindings)
+						log.Printf("getBindingsOk: %t", ok)
+
 						/* Add Default HTTP 80 binding */
 						bindingsArray = append(bindingsArray, bindingsStruct{
 							"http",
@@ -745,6 +748,8 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 							true,
 						})
 					}
+
+					log.Printf("bindingsArray: %+v", bindingsArray)
 
 					bindingsBytes, _ := json.Marshal(bindingsArray)
 					bindingsString := strings.ReplaceAll(string(bindingsBytes), "\"", "\\\"")
