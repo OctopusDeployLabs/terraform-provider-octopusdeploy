@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -71,7 +72,7 @@ func resourceDeploymentStepDeployPackage() *schema.Resource {
 
 			"target_roles": {
 				Type:     schema.TypeList,
-				Required:	true,
+				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -190,7 +191,7 @@ func buildDeploymentProcessStep(d *schema.ResourceData) *octopusdeploy.Deploymen
 }
 
 func setSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
-	d.Set("Name", deploymentStep.Name);
+	d.Set("Name", deploymentStep.Name)
 }
 
 func resourceDeploymentStepDeployPackageCreate(d *schema.ResourceData, m interface{}) error {
@@ -201,46 +202,50 @@ func resourceDeploymentStepDeployPackageCreate(d *schema.ResourceData, m interfa
 	afterStepId := d.Get("after_step_id").(string)
 
 	/* Find Deployment Process */
+	log.Print("Loading Project Information ...")
 	project, err := client.Project.Get(projectId)
+
+	log.Printf("Loading Deployment Process '%s' ...", project.DeploymentProcessID)
 	deploymentProcess, err := client.DeploymentProcess.Get(project.DeploymentProcessID)
 
 	/* Create Deployment Process Step */
-	newDeploymentStep := buildDeploymentProcessStep(d);
+	newDeploymentStep := buildDeploymentProcessStep(d)
 
 	/* Add Step Appropiately into Deployment Steps */
-	orgDeploymentSteps := deploymentProcess.Steps;
-	
+	orgDeploymentSteps := deploymentProcess.Steps
+
 	deploymentProcess.Steps = nil // empty the steps
-	newStepAddedIndex :=  -1;	
+	newStepAddedIndex := -1
 	for stepIndex, orgDeploymentStep := range orgDeploymentSteps {
-		if (newStepAddedIndex == -1 && orgDeploymentStep.ID == beforeStepId) {
+		if newStepAddedIndex == -1 && orgDeploymentStep.ID == beforeStepId {
 			newStepAddedIndex = stepIndex
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
 
 		deploymentProcess.Steps = append(deploymentProcess.Steps, orgDeploymentStep)
 
-		if (newStepAddedIndex == -1 && orgDeploymentStep.ID == afterStepId) {
+		if newStepAddedIndex == -1 && orgDeploymentStep.ID == afterStepId {
 			newStepAddedIndex = stepIndex + 1
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
 	}
 
-	if (newStepAddedIndex == -1) {
+	if newStepAddedIndex == -1 {
 		newStepAddedIndex = len(deploymentProcess.Steps)
 		deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 	}
 
 	// Update Deployment Process with new Step
+	log.Printf("Updating Deployment Process '%s' ...", project.DeploymentProcessID)
 	updateDeploymentProcess, err := client.DeploymentProcess.Update(deploymentProcess)
 
 	if err != nil {
 		return fmt.Errorf("error updating deployment process for project: %s", err.Error())
 	}
 
-	/* Set Ids */	
+	/* Set Ids */
 	d.Set("deployment_process_id", updateDeploymentProcess.ID)
-	d.SetId(updateDeploymentProcess.Steps[newStepAddedIndex].ID);
+	d.SetId(updateDeploymentProcess.Steps[newStepAddedIndex].ID)
 
 	/* Return */
 	return nil
@@ -254,7 +259,8 @@ func resourceDeploymentStepDeployPackageRead(d *schema.ResourceData, m interface
 	processId := d.Get("deployment_process_id").(string)
 
 	/* Load Step Information */
-	deploymentProcess, err := client.DeploymentProcess.Get(processId);
+	log.Printf("Loading Deployment Process '%s' ...", processId)
+	deploymentProcess, err := client.DeploymentProcess.Get(processId)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -267,7 +273,7 @@ func resourceDeploymentStepDeployPackageRead(d *schema.ResourceData, m interface
 
 	var deploymentStep *octopusdeploy.DeploymentStep
 	for _, findDeploymentStep := range deploymentProcess.Steps {
-		if (findDeploymentStep.ID == stepId) {
+		if findDeploymentStep.ID == stepId {
 			deploymentStep = &findDeploymentStep
 			break
 		}
@@ -279,7 +285,7 @@ func resourceDeploymentStepDeployPackageRead(d *schema.ResourceData, m interface
 	}
 
 	/* Set Schema */
-	setSchema(d, *deploymentStep);
+	setSchema(d, *deploymentStep)
 
 	return nil
 }
@@ -294,7 +300,8 @@ func resourceDeploymentStepDeployPackageUpdate(d *schema.ResourceData, m interfa
 	afterStepId := d.Get("after_step_id").(string)
 
 	/* Load Deployment Process */
-	deploymentProcess, err := client.DeploymentProcess.Get(processId);
+	log.Printf("Loading Deployment Process '%s' ...", processId)
+	deploymentProcess, err := client.DeploymentProcess.Get(processId)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -310,32 +317,33 @@ func resourceDeploymentStepDeployPackageUpdate(d *schema.ResourceData, m interfa
 	newDeploymentStep.ID = stepId
 
 	/* Update Step */
-	orgDeploymentSteps := deploymentProcess.Steps;
+	orgDeploymentSteps := deploymentProcess.Steps
 	deploymentProcess.Steps = nil // empty the steps
 
-	newStepAddedIndex :=  -1;	
+	newStepAddedIndex := -1
 	for stepIndex, orgDeploymentStep := range orgDeploymentSteps {
-		if (newStepAddedIndex == -1 && orgDeploymentStep.ID == beforeStepId) {
+		if newStepAddedIndex == -1 && orgDeploymentStep.ID == beforeStepId {
 			newStepAddedIndex = stepIndex
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
 
-		if (orgDeploymentStep.ID != stepId) {
+		if orgDeploymentStep.ID != stepId {
 			deploymentProcess.Steps = append(deploymentProcess.Steps, orgDeploymentStep)
 		}
 
-		if (newStepAddedIndex == -1 && orgDeploymentStep.ID == afterStepId) {
+		if newStepAddedIndex == -1 && orgDeploymentStep.ID == afterStepId {
 			newStepAddedIndex = stepIndex + 1
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
 	}
 
-	if (newStepAddedIndex == -1) {
+	if newStepAddedIndex == -1 {
 		newStepAddedIndex = len(deploymentProcess.Steps)
 		deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 	}
 
 	// Update Deployment Process with Step Removed
+	log.Printf("Updating Deployment Process '%s' ...", processId)
 	if _, err := client.DeploymentProcess.Update(deploymentProcess); err != nil {
 		return fmt.Errorf("error updating deployment process for project: %s", err.Error())
 	}
@@ -351,7 +359,8 @@ func resourceDeploymentStepDeployPackageDelete(d *schema.ResourceData, m interfa
 	processId := d.Get("deployment_process_id").(string)
 
 	/* Load Deployment Process */
-	deploymentProcess, err := client.DeploymentProcess.Get(processId);
+	log.Printf("Loading Deployment Process '%s' ...", processId)
+	deploymentProcess, err := client.DeploymentProcess.Get(processId)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -363,16 +372,17 @@ func resourceDeploymentStepDeployPackageDelete(d *schema.ResourceData, m interfa
 	}
 
 	/* Remove Step */
-	orgDeploymentSteps := deploymentProcess.Steps;
+	orgDeploymentSteps := deploymentProcess.Steps
 	deploymentProcess.Steps = nil // empty the steps
 
 	for _, orgDeploymentStep := range orgDeploymentSteps {
-		if (orgDeploymentStep.ID != stepId) {
+		if orgDeploymentStep.ID != stepId {
 			deploymentProcess.Steps = append(deploymentProcess.Steps, orgDeploymentStep)
 		}
 	}
 
 	// Update Deployment Process with Step Removed
+	log.Printf("Updating Deployment Process '%s' ...", processId)
 	if _, err := client.DeploymentProcess.Update(deploymentProcess); err != nil {
 		return fmt.Errorf("error updating deployment process for project: %s", err.Error())
 	}
