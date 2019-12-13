@@ -703,14 +703,14 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 
 					/* Generate Bindings Array */
 					type bindingsStruct struct {
-						protocol            string `json: "protocol"`
-						ipAddress           string `json: "ipAddress"`
-						port                int    `json: "port"`
-						host                string `json: "host"`
-						thumbprint          string `json: "thumbprint"`
-						certificateVariable string `json: "certificateVariable"`
-						requireSni          bool   `json: "requireSni"`
-						enabled             bool   `json: "enabled"`
+						Protocol            string `json:"protocol"`
+						IpAddress           string `json:"ipAddress"`
+						Port                int    `json:"port"`
+						Host                string `json:"host"`
+						Thumbprint          string `json:"thumbprint"`
+						CertificateVariable string `json:"certificateVariable"`
+						RequireSni          bool   `json:"requireSni"`
+						Enabled             bool   `json:"enabled"`
 					}
 
 					bindingsArray := []bindingsStruct{}
