@@ -132,6 +132,7 @@ func buildDeploymentProcessStep(d *schema.ResourceData) *octopusdeploy.Deploymen
 		PackageRequirement: "LetOctopusDecide",
 		Condition:          octopusdeploy.DeploymentStepCondition(stepCondition),
 		StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(stepStartTrigger),
+		Properties:         map[string]string{},
 		Actions: []octopusdeploy.DeploymentAction{
 			{
 				Name:       stepName,
