@@ -197,7 +197,7 @@ func buildDeploymentProcessStep(d *schema.ResourceData) *octopusdeploy.Deploymen
 }
 
 func setSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
-	d.Set("Name", deploymentStep.Name)
+	d.Set("step_name", deploymentStep.Name)
 }
 
 func resourceDeploymentStepDeployPackageCreate(d *schema.ResourceData, m interface{}) error {
