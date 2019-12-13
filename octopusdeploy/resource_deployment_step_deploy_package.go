@@ -89,23 +89,6 @@ func resourceDeploymentStepDeployPackage() *schema.Resource {
 				Required:    true,
 			},
 
-			"script_file_name": {
-				Type:        schema.TypeString,
-				Description: "The script file name in the package.",
-				Required:    true,
-			},
-			"script_parameters": {
-				Type:        schema.TypeString,
-				Description: "Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS.",
-				Optional:    true,
-			},
-			"run_on_server": {
-				Type:        schema.TypeBool,
-				Description: "Whether the script runs on the server (true) or target (false)",
-				Optional:    true,
-				Default:     false,
-			},
-
 			"configuration_transforms": {
 				Type:        schema.TypeBool,
 				Description: "Enables XML configuration transformations.",
