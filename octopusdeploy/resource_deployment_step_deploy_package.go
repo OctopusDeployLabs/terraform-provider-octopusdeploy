@@ -202,11 +202,19 @@ func resourceDeploymentStepDeployPackageCreate(d *schema.ResourceData, m interfa
 	afterStepId := d.Get("after_step_id").(string)
 
 	/* Find Deployment Process */
-	log.Print("Loading Project Information ...")
+	log.Printf("Loading Project Information '%s' ...", projectId)
 	project, err := client.Project.Get(projectId)
+
+	if err != nil {
+		return fmt.Errorf("error loading project '%s': %s", projectId, err.Error())
+	}
 
 	log.Printf("Loading Deployment Process '%s' ...", project.DeploymentProcessID)
 	deploymentProcess, err := client.DeploymentProcess.Get(project.DeploymentProcessID)
+
+	if err != nil {
+		return fmt.Errorf("error reading deployment process '%s': %s", project.DeploymentProcessID, err.Error())
+	}
 
 	/* Create Deployment Process Step */
 	newDeploymentStep := buildDeploymentProcessStep(d)
@@ -268,7 +276,7 @@ func resourceDeploymentStepDeployPackageRead(d *schema.ResourceData, m interface
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading deployment process id %s: %s", processId, err.Error())
+		return fmt.Errorf("error reading deployment process '%s': %s", processId, err.Error())
 	}
 
 	var deploymentStep *octopusdeploy.DeploymentStep
