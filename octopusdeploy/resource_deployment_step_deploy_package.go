@@ -22,6 +22,11 @@ func resourceDeploymentStepDeployPackage() *schema.Resource {
 				Required: true,
 			},
 
+			"deployment_process_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"before_step_id": {
 				Type:        schema.TypeString,
 				Description: "Define Step this should preceed, else will be added to the end at time of creation",
