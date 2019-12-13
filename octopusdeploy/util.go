@@ -107,3 +107,18 @@ func feedExistsHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	}
 	return nil
 }
+
+func formatBool(boolValue bool) string {
+	if boolValue {
+		return "True"
+	}
+	return "False"
+}
+
+func formatStrPtr(strValue string) *string {
+	if strValue == "" {
+		return nil
+	}
+	return &strValue
+}
+

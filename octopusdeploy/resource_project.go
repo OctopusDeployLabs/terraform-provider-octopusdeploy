@@ -101,20 +101,6 @@ func resourceProject() *schema.Resource {
 	}
 }
 
-func formatBool(boolValue bool) string {
-	if boolValue {
-		return "True"
-	}
-	return "False"
-}
-
-func formatStrPtr(strValue string) *string {
-	if strValue == "" {
-		return nil
-	}
-	return &strValue
-}
-
 // addFeedAndPackageDeploymentStepSchema adds schemas related packages and feeds
 func addFeedAndPackageDeploymentStepSchema(schemaToAddToo interface{}) *schema.Resource {
 	schemaResource := schemaToAddToo.(*schema.Resource)

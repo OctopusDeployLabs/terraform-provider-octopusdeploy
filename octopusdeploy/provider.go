@@ -25,6 +25,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_project":                           resourceProject(),
 			"octopusdeploy_project_group":                     resourceProjectGroup(),
 			"octopusdeploy_project_deployment_target_trigger": resourceProjectDeploymentTargetTrigger(),
+			"octopusdeploy_deployment_step_deploy_package":    resourceDeploymentStepDeployPackage(),
 			"octopusdeploy_environment":                       resourceEnvironment(),
 			"octopusdeploy_account":                           resourceAccount(),
 			"octopusdeploy_feed":                              resourceFeed(),
