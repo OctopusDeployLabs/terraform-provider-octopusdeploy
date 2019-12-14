@@ -132,6 +132,90 @@ func resourceDeploymentStep_AddPackageSchema(schemaRes *schema.Resource) {
 		Optional:    true,
 		Description: "A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",
 	}
+
+	schemaRes.Schema["pre_deploy_script"] = &schema.Schema{
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		MinItems:    1,
+		Description: "Custom Pre-deployment Script",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"type": {
+					Type:        schema.TypeString,
+					Description: "The scripting language of the pre-deployment script",
+					Required:    true,
+					ValidateFunc: validateValueFunc([]string{
+						"PowerShell",
+						"CSharp",
+						"Bash",
+						"FSharp",
+					}),
+				},
+				"body": {
+					Type:        schema.TypeString,
+					Description: "The script body.",
+					Required:    true,
+				},
+			},
+		},
+	}
+
+	schemaRes.Schema["deploy_script"] = &schema.Schema{
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		MinItems:    1,
+		Description: "Custom Deployment Script",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"type": {
+					Type:        schema.TypeString,
+					Description: "The scripting language of the deployment script",
+					Required:    true,
+					ValidateFunc: validateValueFunc([]string{
+						"PowerShell",
+						"CSharp",
+						"Bash",
+						"FSharp",
+					}),
+				},
+				"body": {
+					Type:        schema.TypeString,
+					Description: "The script body.",
+					Required:    true,
+				},
+			},
+		},
+	}
+
+	schemaRes.Schema["post_deploy_script"] = &schema.Schema{
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		MinItems:    1,
+		Description: "Custom Post-deployment Script",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"type": {
+					Type:        schema.TypeString,
+					Description: "The scripting language of the post-deployment script",
+					Required:    true,
+					ValidateFunc: validateValueFunc([]string{
+						"PowerShell",
+						"CSharp",
+						"Bash",
+						"FSharp",
+					}),
+				},
+				"body": {
+					Type:        schema.TypeString,
+					Description: "The script body.",
+					Required:    true,
+				},
+			},
+		},
+	}
 }
 
 func resourceDeploymentStep_AddIisAppPoolSchema(schemaRes *schema.Resource) {
@@ -465,6 +549,59 @@ func resourceDeploymentStep_CreateBasicStep(d *schema.ResourceData, actionType s
 	return deploymentStep
 }
 
+func resourceDeploymentStep_AddPackageProperties_DeployScript(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep, scriptType string) {
+	/* Setup per Script Type */
+	var scriptProp string
+	var scriptName string
+	switch scriptType {
+	case "pre":
+		scriptProp = "pre_deploy_script"
+		scriptName = "PreDeploy"
+		break
+	case "deploy":
+		scriptProp = "deploy_script"
+		scriptName = "Deploy"
+		break
+	case "post":
+		scriptProp = "post_deploy_script"
+		scriptName = "PostDeploy"
+		break
+	}
+
+	/* Check for Script Property */
+	if rawScript, ok := d.GetOk(scriptProp); ok {
+		scriptSet := rawScript.(*schema.Set)
+		if len(scriptSet.List()) == 0 {
+			return
+		}
+
+		script := scriptSet.List()[0].(map[string]interface{})
+
+		/* Set name extension per type */
+		switch script["type"].(string) {
+		case "PowerShell":
+			scriptName += ".ps1"
+			break
+		case "CSharp":
+			scriptName += ".csx"
+			break
+		case "Bash":
+			scriptName += ".sh"
+			break
+		case "FSharp":
+			scriptName += ".fsx"
+			break
+		}
+
+		/* Add action properties */
+		deploymentStep.Actions[0].Properties[fmt.Sprintf("Octopus.Action.CustomScripts.%s", scriptName)] = script["body"].(string)
+
+		if !strings.Contains(deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"], "Octopus.Features.CustomScripts") {
+			deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.CustomScripts"
+		}
+	}
+}
+
 func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep) {
 	/* Package Properties */
 	deploymentStep.Actions[0].Properties["Octopus.Action.Package.DownloadOnTentacle"] = "False"
@@ -495,9 +632,20 @@ func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploym
 		deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = formatBool(configurationVariables)
 		deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationVariables"
 	}
+
+	resourceDeploymentStep_AddPackageProperties_DeployScript(d, deploymentStep, "pre")
+	resourceDeploymentStep_AddPackageProperties_DeployScript(d, deploymentStep, "deploy")
+	resourceDeploymentStep_AddPackageProperties_DeployScript(d, deploymentStep, "post")
 }
 
-func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep) {
+func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep, iisType string) {
+	var propPrefix string
+	if iisType == "IISWebSite" {
+		propPrefix = "Octopus.Action.IISWebSite"
+	} else {
+		propPrefix = fmt.Sprintf("Octopus.Action.IISWebSite.%s", iisType)
+	}
+
 	if rawAppPool, ok := d.GetOk("application_pool"); ok {
 		appPoolSet := rawAppPool.(*schema.Set)
 		if len(appPoolSet.List()) == 0 {
@@ -506,19 +654,19 @@ func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, depl
 
 		appPool := appPoolSet.List()[0].(map[string]interface{})
 
-		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"] = appPool["name"].(string)
-		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion"] = appPool["framework"].(string)
-		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolIdentityType"] = appPool["identity"].(string)
+		deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolName", propPrefix)] = appPool["name"].(string)
+		deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolFrameworkVersion", propPrefix)] = appPool["framework"].(string)
+		deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolIdentityType", propPrefix)] = appPool["identity"].(string)
 
 		if appPoolUser, ok := appPool["username"]; ok {
-			deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolUsername"] = appPoolUser.(string)
+			deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolUsername", propPrefix)] = appPoolUser.(string)
 		}
 
 		if appPoolPassword, ok := appPool["password"]; ok {
-			deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolPassword"] = appPoolPassword.(string)
+			deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolPassword", propPrefix)] = appPoolPassword.(string)
 		}
 
-		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"] = formatBool(appPool["start"].(bool))
+		deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.StartApplicationPool", propPrefix)] = formatBool(appPool["start"].(bool))
 	}
 }
 
@@ -539,6 +687,48 @@ func resourceDeploymentStep_SetBasicSchema(d *schema.ResourceData, deploymentSte
 
 	if runOnServer, ok := deploymentStep.Properties["Octopus.Action.RunOnServer"]; ok {
 		d.Set("run_on_server", runOnServer)
+	}
+}
+
+func resourceDeploymentStep_SetPackageSchema_DeployScript(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep, scriptType string) {
+	/* Setup per Script Type */
+	var scriptProp string
+	var scriptNameStart string
+	switch scriptType {
+	case "pre":
+		scriptProp = "pre_deploy_script"
+		scriptNameStart = "PreDeploy"
+		break
+	case "deploy":
+		scriptProp = "deploy_script"
+		scriptNameStart = "Deploy"
+		break
+	case "post":
+		scriptProp = "post_deploy_script"
+		scriptNameStart = "PostDeploy"
+		break
+	}
+
+	/* Determine Script Type and Body */
+	script := make(map[string]interface{})
+
+	if scriptValue, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("Octopus.Action.CustomScripts.%s.ps1", scriptNameStart)]; ok {
+		script["type"] = "PowerShell"
+		script["body"] = scriptValue
+	} else if scriptValue, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("Octopus.Action.CustomScripts.%s.sh", scriptNameStart)]; ok {
+		script["type"] = "CSharp"
+		script["body"] = scriptValue
+	} else if scriptValue, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("Octopus.Action.CustomScripts.%s.csx", scriptNameStart)]; ok {
+		script["type"] = "Bash"
+		script["body"] = scriptValue
+	} else if scriptValue, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("Octopus.Action.CustomScripts.%s.fsx", scriptNameStart)]; ok {
+		script["type"] = "FSharp"
+		script["body"] = scriptValue
+	}
+
+	/* IUf Script Type set, then set property */
+	if _, ok := script["type"]; ok {
+		d.Set(scriptProp, []interface{}{script})
 	}
 }
 
@@ -565,28 +755,39 @@ func resourceDeploymentStep_SetPackageSchema(d *schema.ResourceData, deploymentS
 			d.Set("configuration_variables", configurationVariables)
 		}
 	}
+
+	resourceDeploymentStep_SetPackageSchema_DeployScript(d, deploymentStep, "pre")
+	resourceDeploymentStep_SetPackageSchema_DeployScript(d, deploymentStep, "deploy")
+	resourceDeploymentStep_SetPackageSchema_DeployScript(d, deploymentStep, "post")
 }
 
-func resourceDeploymentStep_SetIisAppPoolSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
+func resourceDeploymentStep_SetIisAppPoolSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep, iisType string) {
+	var propPrefix string
+	if iisType == "IISWebSite" {
+		propPrefix = "Octopus.Action.IISWebSite"
+	} else {
+		propPrefix = fmt.Sprintf("Octopus.Action.IISWebSite.%s", iisType)
+	}
+
 	appPool := make(map[string]interface{})
 
-	if appPoolName, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"]; ok {
+	if appPoolName, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolName", propPrefix)]; ok {
 		appPool["name"] = appPoolName
 	}
 
-	if appPoolFramework, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion"]; ok {
+	if appPoolFramework, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolFrameworkVersion", propPrefix)]; ok {
 		appPool["framework"] = appPoolFramework
 	}
 
-	if appPoolIdentity, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolIdentityType"]; ok {
+	if appPoolIdentity, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolIdentityType", propPrefix)]; ok {
 		appPool["identity"] = appPoolIdentity
 	}
 
-	if appPoolUsername, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolUsername"]; ok {
+	if appPoolUsername, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolUsername", propPrefix)]; ok {
 		appPool["username"] = appPoolUsername
 	}
 
-	if appPoolPassword, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolPassword"]; ok {
+	if appPoolPassword, ok := deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolPassword", propPrefix)]; ok {
 		appPool["password"] = appPoolPassword
 	}
 

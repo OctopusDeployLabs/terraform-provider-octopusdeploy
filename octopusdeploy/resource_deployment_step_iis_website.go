@@ -27,9 +27,14 @@ func resourceDeploymentStepIisWebsite() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"web_root_type": {
+			"path_type": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"relative_path": {
+				Type:        schema.TypeString,
+				Description: "Relative Path to package Root for the physical Path",
+				Optional:    true,
 			},
 			"start_web_site": {
 				Type:        schema.TypeBool,
@@ -130,7 +135,6 @@ func resourceDeploymentStepIisWebsite() *schema.Resource {
 func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.DeploymentStep {
 	/* Set Computed Values */
 	d.Set("deployment_type", "webSite")
-	d.Set("web_root_type", "packageRoot")
 
 	/* Create Basic Deployment Step */
 	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.IIS")
@@ -140,14 +144,22 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 
 	/* Add Shared Properties */
 	resourceDeploymentStep_AddPackageProperties(d, deploymentStep)
-	resourceDeploymentStep_AddIisAppPoolProperties(d, deploymentStep)
+	resourceDeploymentStep_AddIisAppPoolProperties(d, deploymentStep, "IISWebSite")
 
 	/* Add Web Site Properties */
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"] = d.Get("deployment_type").(string)
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.CreateOrUpdateWebSite"] = "True"
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.VirtualDirectory.CreateOrUpdate"] = "False"
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.CreateOrUpdate"] = "False"
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebRootType"] = d.Get("web_root_type").(string)
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.VirtualDirectory.CreateOrUpdate"] = "False"
+
+	if relativePath, ok := d.GetOk("relative_path"); ok {
+		d.Set("path_type", "relativeToPackageRoot")
+		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.PhysicalPath"] = relativePath.(string)
+	} else {
+		d.Set("path_type", "packageRoot")
+	}
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebRootType"] = d.Get("path_type").(string)
+
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartWebSite"] = formatBool(d.Get("start_web_site").(bool))
 
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebSiteName"] = d.Get("website_name").(string)
@@ -219,11 +231,18 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 func setIisWebsiteSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
 	resourceDeploymentStep_SetBasicSchema(d, deploymentStep)
 	resourceDeploymentStep_SetPackageSchema(d, deploymentStep)
-	resourceDeploymentStep_SetIisAppPoolSchema(d, deploymentStep)
+	resourceDeploymentStep_SetIisAppPoolSchema(d, deploymentStep, "IISWebSite")
 
 	/* Get Web Site Properties */
 	d.Set("deployment_type", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"])
-	d.Set("web_root_type", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebRootType"])
+
+	if pathType, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebRootType"]; ok {
+		d.Set("path_type", pathType)
+	}
+
+	if relativePath, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.PhysicalPath"]; ok {
+		d.Set("relative_path", relativePath)
+	}
 
 	if startWebSiteString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartWebSite"]; ok {
 		if startWebSite, err := strconv.ParseBool(startWebSiteString); err == nil {
@@ -231,7 +250,9 @@ func setIisWebsiteSchema(d *schema.ResourceData, deploymentStep octopusdeploy.De
 		}
 	}
 
-	d.Set("website_name", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebSiteName"])
+	if websiteName, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebSiteName"]; ok {
+		d.Set("website_name", websiteName)
+	}
 
 	if anonymousAuthenticationString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.EnableAnonymousAuthentication"]; ok {
 		if anonymousAuthentication, err := strconv.ParseBool(anonymousAuthenticationString); err == nil {
