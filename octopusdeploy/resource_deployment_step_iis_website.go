@@ -207,7 +207,7 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 
 	log.Printf("bindingsString: %s", bindingsString)
 
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.Bindings"] = bindingsString
+	// deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.Bindings"] = bindingsString
 
 	/* Return Deployment Step */
 	return deploymentStep
