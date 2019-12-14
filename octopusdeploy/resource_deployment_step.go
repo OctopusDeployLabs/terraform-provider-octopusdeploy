@@ -277,7 +277,9 @@ func resourceDeploymentStepRead(d *schema.ResourceData, m interface{}, setSchema
 	}
 
 	d.Set("first_step", firstStep)
-	d.Set("after_step_id", prevDeploymentStep.ID)
+	if prevDeploymentStep != nil {
+		d.Set("after_step_id", prevDeploymentStep.ID)
+	}
 
 	if deploymentStep == nil {
 		d.SetId("")
