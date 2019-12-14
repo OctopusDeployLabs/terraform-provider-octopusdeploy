@@ -620,7 +620,7 @@ func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploym
 	}
 
 	if variableSubstitutionInFiles, ok := d.GetOk("variable_substitution_in_files"); ok {
-		deploymentStep.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = strings.Join(getSliceFromTerraformTypeList(variableSubstitutionInFiles), "\n")
+		deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = strings.Join(getSliceFromTerraformTypeList(variableSubstitutionInFiles), "\n")
 		deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
 
 		deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
@@ -669,7 +669,7 @@ func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, depl
 			deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.ApplicationPoolPassword", propPrefix)] = appPoolPassword.(string)
 		}
 
-		deploymentStep.Actions[0].Properties[fmt.Sprintf("%s.StartApplicationPool", propPrefix)] = formatBool(appPool["start"].(bool))
+		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"] = formatBool(appPool["start"].(bool))
 	}
 }
 
