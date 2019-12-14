@@ -333,6 +333,7 @@ func resourceDeploymentStepUpdate(d *schema.ResourceData, m interface{}, buildDe
 
 	// Update Deployment Process with Step Removed
 	log.Printf("Updating Deployment Process '%s' ...", processId)
+	log.Printf("%+v", deploymentProcess)
 	if _, err := client.DeploymentProcess.Update(deploymentProcess); err != nil {
 		return fmt.Errorf("error updating deployment process for project: %s", err.Error())
 	}
