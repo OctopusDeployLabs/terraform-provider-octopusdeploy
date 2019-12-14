@@ -26,10 +26,11 @@ func resourceDeploymentStep_AddDefaultSchema(schemaRes *schema.Resource, target_
 		Computed: true,
 	}
 
-	schemaRes.Schema["before_step_id"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "Define Step this should preceed, else will be added to the end at time of creation",
+	schemaRes.Schema["first_step"] = &schema.Schema{
+		Type:        schema.TypeBool,
+		Description: "Define as the first step",
 		Optional:    true,
+		Default:     false,
 	}
 
 	schemaRes.Schema["after_step_id"] = &schema.Schema{
@@ -179,7 +180,7 @@ func resourceDeploymentStepCreate(d *schema.ResourceData, m interface{}, buildDe
 	client := m.(*octopusdeploy.Client)
 
 	projectId := d.Get("project_id").(string)
-	beforeStepId := d.Get("before_step_id").(string)
+	firstStep := d.Get("first_step").(bool)
 	afterStepId := d.Get("after_step_id").(string)
 
 	/* Find Deployment Process */
@@ -206,7 +207,7 @@ func resourceDeploymentStepCreate(d *schema.ResourceData, m interface{}, buildDe
 	deploymentProcess.Steps = nil // empty the steps
 	newStepAddedIndex := -1
 	for stepIndex, orgDeploymentStep := range orgDeploymentSteps {
-		if newStepAddedIndex == -1 && orgDeploymentStep.ID == beforeStepId {
+		if firstStep && stepIndex == 0 {
 			newStepAddedIndex = stepIndex
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
@@ -261,12 +262,22 @@ func resourceDeploymentStepRead(d *schema.ResourceData, m interface{}, setSchema
 	}
 
 	var deploymentStep *octopusdeploy.DeploymentStep
-	for _, findDeploymentStep := range deploymentProcess.Steps {
+	var prevDeploymentStep *octopusdeploy.DeploymentStep
+	firstStep := false
+	for stepIndex, findDeploymentStep := range deploymentProcess.Steps {
 		if findDeploymentStep.ID == stepId {
 			deploymentStep = &findDeploymentStep
+			if stepIndex == 0 {
+				firstStep = true
+			}
 			break
 		}
+
+		prevDeploymentStep = deploymentStep
 	}
+
+	d.Set("first_step", firstStep)
+	d.Set("after_step_id", prevDeploymentStep.ID)
 
 	if deploymentStep == nil {
 		d.SetId("")
@@ -285,7 +296,7 @@ func resourceDeploymentStepUpdate(d *schema.ResourceData, m interface{}, buildDe
 	/* Get Id's */
 	stepId := d.Id()
 	processId := d.Get("deployment_process_id").(string)
-	beforeStepId := d.Get("before_step_id").(string)
+	firstStep := d.Get("first_step").(bool)
 	afterStepId := d.Get("after_step_id").(string)
 
 	/* Load Deployment Process */
@@ -311,7 +322,7 @@ func resourceDeploymentStepUpdate(d *schema.ResourceData, m interface{}, buildDe
 
 	newStepAddedIndex := -1
 	for stepIndex, orgDeploymentStep := range orgDeploymentSteps {
-		if newStepAddedIndex == -1 && orgDeploymentStep.ID == beforeStepId {
+		if firstStep && stepIndex == 0 {
 			newStepAddedIndex = stepIndex
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
