@@ -227,7 +227,9 @@ func resourceDeploymentStepCreate(d *schema.ResourceData, m interface{}, buildDe
 
 	// Update Deployment Process with new Step
 	log.Printf("Updating Deployment Process '%s' ...", project.DeploymentProcessID)
-	log.Printf("%+v", deploymentProcess)
+	for _, deploymentStep := range deploymentProcess.Steps {
+		log.Printf("STEP - %s: %+v", deploymentStep.Name, deploymentStep)
+	}
 	updateDeploymentProcess, err := client.DeploymentProcess.Update(deploymentProcess)
 
 	if err != nil {
@@ -347,7 +349,9 @@ func resourceDeploymentStepUpdate(d *schema.ResourceData, m interface{}, buildDe
 
 	// Update Deployment Process with Step Removed
 	log.Printf("Updating Deployment Process '%s' ...", processId)
-	log.Printf("%+v", deploymentProcess)
+	for _, deploymentStep := range deploymentProcess.Steps {
+		log.Printf("STEP - %s: %+v", deploymentStep.Name, deploymentStep)
+	}
 	if _, err := client.DeploymentProcess.Update(deploymentProcess); err != nil {
 		return fmt.Errorf("error updating deployment process for project: %s", err.Error())
 	}
@@ -387,7 +391,9 @@ func resourceDeploymentStepDelete(d *schema.ResourceData, m interface{}) error {
 
 	// Update Deployment Process with Step Removed
 	log.Printf("Updating Deployment Process '%s' ...", processId)
-	log.Printf("%+v", deploymentProcess)
+	for _, deploymentStep := range deploymentProcess.Steps {
+		log.Printf("STEP - %s: %+v", deploymentStep.Name, deploymentStep)
+	}
 	if _, err := client.DeploymentProcess.Update(deploymentProcess); err != nil {
 		return fmt.Errorf("error updating deployment process for project: %s", err.Error())
 	}
@@ -472,8 +478,8 @@ func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploym
 }
 
 func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep) {
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion"] = d.Get("application_pool_framework").(string)
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType"] = d.Get("application_pool_identity").(string)
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion"] = d.Get("application_pool_framework").(string)
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolIdentityType"] = d.Get("application_pool_identity").(string)
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"] = d.Get("application_pool_name").(string)
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"] = formatBool(d.Get("start_app_pool").(bool))
 }

@@ -31,10 +31,6 @@ func resourceDeploymentStepIisWebsite() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"create_or_update": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
 			"start_web_site": {
 				Type:        schema.TypeBool,
 				Description: "Start Web Site",
@@ -135,7 +131,6 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 	/* Set Computed Values */
 	d.Set("deployment_type", "webSite")
 	d.Set("web_root_type", "packageRoot")
-	d.Set("create_or_update", true)
 
 	/* Create Basic Deployment Step */
 	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.IIS")
@@ -146,8 +141,10 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 
 	/* Add Web Site Properties */
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"] = d.Get("deployment_type").(string)
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.CreateOrUpdateWebSite"] = "True"
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.VirtualDirectory.CreateOrUpdate"] = "False"
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.CreateOrUpdate"] = "False"
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebRootType"] = d.Get("web_root_type").(string)
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.CreateOrUpdateWebSite"] = formatBool(d.Get("create_or_update").(bool))
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartWebSite"] = formatBool(d.Get("start_web_site").(bool))
 
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebSiteName"] = d.Get("website_name").(string)
@@ -224,12 +221,6 @@ func setIisWebsiteSchema(d *schema.ResourceData, deploymentStep octopusdeploy.De
 	/* Get Web Site Properties */
 	d.Set("deployment_type", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"])
 	d.Set("web_root_type", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebRootType"])
-
-	if createOrUpdateString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.CreateOrUpdateWebSite"]; ok {
-		if createOrUpdate, err := strconv.ParseBool(createOrUpdateString); err == nil {
-			d.Set("create_or_update", createOrUpdate)
-		}
-	}
 
 	if startWebSiteString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartWebSite"]; ok {
 		if startWebSite, err := strconv.ParseBool(startWebSiteString); err == nil {
