@@ -168,7 +168,7 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 
 	bindingsArray := []bindingsStruct{}
 
-	if rawBindings, ok := d["binding"]; ok {
+	if rawBindings, ok := d.GetOk("binding"); ok {
 		bindings := rawBindings.([]interface{})
 
 		for _, rawBinding := range bindings {
