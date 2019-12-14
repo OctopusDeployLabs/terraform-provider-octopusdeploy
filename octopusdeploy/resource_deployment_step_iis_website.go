@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"encoding/json"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -223,13 +224,38 @@ func setIisWebsiteSchema(d *schema.ResourceData, deploymentStep octopusdeploy.De
 	/* Get Web Site Properties */
 	d.Set("deployment_type", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"])
 	d.Set("web_root_type", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebRootType"])
-	d.Set("create_or_update", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.CreateOrUpdateWebSite"]))
-	d.Set("start_web_site", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartWebSite"]))
+
+	if createOrUpdateString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.CreateOrUpdateWebSite"]; ok {
+		if createOrUpdate, err := strconv.ParseBool(createOrUpdateString); err == nil {
+			d.Set("create_or_update", createOrUpdate)
+		}
+	}
+
+	if startWebSiteString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartWebSite"]; ok {
+		if startWebSite, err := strconv.ParseBool(startWebSiteString); err == nil {
+			d.Set("start_web_site", startWebSite)
+		}
+	}
 
 	d.Set("website_name", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebSiteName"])
-	d.Set("anonymous_authentication", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.EnableAnonymousAuthentication"]))
-	d.Set("basic_authentication", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.EnableBasicAuthentication"]))
-	d.Set("windows_authentication", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.EnableWindowsAuthentication"]))
+
+	if anonymousAuthenticationString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.EnableAnonymousAuthentication"]; ok {
+		if anonymousAuthentication, err := strconv.ParseBool(anonymousAuthenticationString); err == nil {
+			d.Set("anonymous_authentication", anonymousAuthentication)
+		}
+	}
+
+	if basicAuthenticationString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.EnableBasicAuthentication"]; ok {
+		if basicAuthentication, err := strconv.ParseBool(basicAuthenticationString); err == nil {
+			d.Set("basic_authentication", basicAuthentication)
+		}
+	}
+
+	if windowsAuthenticationString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.EnableWindowsAuthentication"]; ok {
+		if windowsAuthentication, err := strconv.ParseBool(windowsAuthenticationString); err == nil {
+			d.Set("windows_authentication", windowsAuthentication)
+		}
+	}
 
 	/* TODO: Expand Bindings */
 	// deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.Bindings"]

@@ -471,8 +471,10 @@ func resourceDeploymentStep_SetBasicSchema(d *schema.ResourceData, deploymentSte
 	d.Set("required", deploymentStep.Actions[0].IsRequired)
 	d.Set("step_start_trigger", deploymentStep.StartTrigger)
 
-	if deploymentStep.Properties["Octopus.Action.TargetRoles"] != "" {
-		d.Set("target_roles", strings.Split(deploymentStep.Properties["Octopus.Action.TargetRoles"], ","))
+	if targetRoles, ok := deploymentStep.Properties["Octopus.Action.TargetRoles"]; ok {
+		if targetRoles != "" {
+			d.Set("target_roles", strings.Split(deploymentStep.Properties["Octopus.Action.TargetRoles"], ","))
+		}
 	}
 
 	if runOnServer, ok := deploymentStep.Properties["Octopus.Action.RunOnServer"]; ok {
@@ -492,13 +494,27 @@ func resourceDeploymentStep_SetPackageSchema(d *schema.ResourceData, deploymentS
 		d.Set("variable_substitution_in_files", variableSubstitutionInFiles)
 	}
 
-	d.Set("configuration_transforms", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"]))
-	d.Set("configuration_variables", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"]))
+	if configurationTransformsString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"]; ok {
+		if configurationTransforms, err := strconv.ParseBool(configurationTransformsString); err == nil {
+			d.Set("configuration_transforms", configurationTransforms)
+		}
+	}
+
+	if configurationVariablesString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"]; ok {
+		if configurationVariables, err := strconv.ParseBool(configurationVariablesString); err == nil {
+			d.Set("configuration_variables", configurationVariables)
+		}
+	}
 }
 
 func resourceDeploymentStep_SetIisAppPoolSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
 	d.Set("application_pool_framework", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion"])
 	d.Set("application_pool_identity", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType"])
 	d.Set("application_pool_name", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"])
-	d.Set("start_app_pool", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"]))
+
+	if startAppPoolString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"]; ok {
+		if startAppPool, err := strconv.ParseBool(startAppPoolString); err == nil {
+			d.Set("start_app_pool", startAppPool)
+		}
+	}
 }
