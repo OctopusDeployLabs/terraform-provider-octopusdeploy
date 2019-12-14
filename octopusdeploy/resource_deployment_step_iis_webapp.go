@@ -64,6 +64,7 @@ func buildIisWebappDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploym
 
 	/* Add Web Site Properties */
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"] = d.Get("deployment_type").(string)
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartWebSite"] = "true"
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.CreateOrUpdateWebSite"] = "False"
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.CreateOrUpdate"] = "True"
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.VirtualDirectory.CreateOrUpdate"] = "False"
@@ -74,6 +75,7 @@ func buildIisWebappDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploym
 	} else {
 		d.Set("path_type", "packageRoot")
 	}
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebRootType"] = d.Get("path_type").(string)
 	deploymentStep.Actions[0].Properties["Octopus.Action.WebApplication.WebRootType"] = d.Get("path_type").(string)
 
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.WebSiteName"] = d.Get("website_name").(string)
