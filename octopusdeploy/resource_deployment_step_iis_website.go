@@ -31,11 +31,11 @@ func resourceDeploymentStepIisWebsite() *schema.Resource {
 				Computed: true,
 			},
 			"create_or_update": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"start_web_site": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Description: "Start Web Site",
 				Optional:    true,
 				Default:     true,

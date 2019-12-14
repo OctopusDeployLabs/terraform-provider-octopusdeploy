@@ -165,7 +165,7 @@ func resourceDeploymentStep_AddIisAppPoolSchema(schemaRes *schema.Resource) {
 	}
 
 	schemaRes.Schema["start_app_pool"] = &schema.Schema{
-		Type:        schema.TypeString,
+		Type:        schema.TypeBool,
 		Description: "Start Application Pool",
 		Optional:    true,
 		Default:     true,
@@ -470,7 +470,10 @@ func resourceDeploymentStep_SetBasicSchema(d *schema.ResourceData, deploymentSte
 	d.Set("step_condition", strings.ToLower(string(deploymentStep.Condition)))
 	d.Set("required", deploymentStep.Actions[0].IsRequired)
 	d.Set("step_start_trigger", deploymentStep.StartTrigger)
-	d.Set("target_roles", strings.Split(deploymentStep.Properties["Octopus.Action.TargetRoles"], ","))
+
+	if deploymentStep.Properties["Octopus.Action.TargetRoles"] != "" {
+		d.Set("target_roles", strings.Split(deploymentStep.Properties["Octopus.Action.TargetRoles"], ","))
+	}
 
 	if runOnServer, ok := deploymentStep.Properties["Octopus.Action.RunOnServer"]; ok {
 		d.Set("run_on_server", runOnServer)
