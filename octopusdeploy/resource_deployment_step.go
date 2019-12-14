@@ -466,7 +466,7 @@ func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, depl
 /* --------------------------------------- */
 func resourceDeploymentStep_SetBasicSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
 	d.Set("step_name", deploymentStep.Name)
-	d.Set("step_condition", deploymentStep.Condition)
+	d.Set("step_condition", strings.ToLower(string(deploymentStep.Condition)))
 	d.Set("required", deploymentStep.Actions[0].IsRequired)
 	d.Set("step_start_trigger", deploymentStep.StartTrigger)
 	d.Set("target_roles", strings.Split(deploymentStep.Properties["Octopus.Action.TargetRoles"], ","))
