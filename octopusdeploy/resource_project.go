@@ -1,9 +1,9 @@
 package octopusdeploy
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -174,12 +174,6 @@ func addStandardDeploymentStepSchema(schemaToAddToo interface{}, requireRole boo
 		Type:        schema.TypeString,
 		Description: "The name of the deployment step.",
 		Required:    true,
-	}
-
-	schemaResource.Schema["required"] = &schema.Schema{
-		Type:     schema.TypeBool,
-		Optional: true,
-		Default:  false,
 	}
 
 	schemaResource.Schema["step_start_trigger"] = &schema.Schema{
@@ -469,66 +463,6 @@ func getDeploymentStepIISWebsiteSchema() *schema.Schema {
 					Description: "Whether IIS should allow integrated Windows authentication with a 401 challenge.",
 					Default:     true,
 				},
-				"binding": &schema.Schema{
-					Type:     schema.TypeList,
-					Optional: true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"protocol": {
-								Type:        schema.TypeString,
-								Description: "Protocol to bind to",
-								Optional:    true,
-								Default:     "https",
-								ValidateFunc: validateValueFunc([]string{
-									"http",
-									"https",
-								}),
-							},
-							"ip": {
-								Type:        schema.TypeString,
-								Description: "IP Address to bind to",
-								Optional:    true,
-								Default:     "*",
-							},
-							"port": {
-								Type:        schema.TypeString,
-								Description: "Port to bind to",
-								Optional:    true,
-								Default:     "*",
-							},
-							"host": {
-								Type:        schema.TypeString,
-								Description: "Host Name to bind to",
-								Optional:    true,
-								Default:     "",
-							},
-							"enable": {
-								Type:        schema.TypeBool,
-								Optional:    true,
-								Description: "Enable the binding",
-								Default:     true,
-							},
-							"thumbprint": {
-								Type:        schema.TypeString,
-								Optional:    true,
-								Description: "Thumbprint for the SSL Binding",
-								Default:     "",
-							},
-							"cert_var": {
-								Type:        schema.TypeString,
-								Optional:    true,
-								Description: "Certicate Variable Name for the SSL Binding",
-								Default:     "",
-							},
-							"require_sni": {
-								Type:        schema.TypeBool,
-								Optional:    true,
-								Description: "Require Service Name Identification for the SSL binding",
-								Default:     false,
-							},
-						},
-					},
-				},
 			},
 		},
 	}
@@ -610,7 +544,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					serviceStartMode := localStep["service_start_mode"].(string)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
-					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
@@ -621,14 +554,13 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								IsRequired: required,
 								ActionType: "Octopus.WindowsService",
 								Properties: map[string]string{
 									"Octopus.Action.WindowsService.CreateOrUpdateService":                       "True",
 									"Octopus.Action.WindowsService.ServiceAccount":                              serviceAccount,
 									"Octopus.Action.WindowsService.StartMode":                                   serviceStartMode,
-									"Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles":   formatBool(configurationTransforms),
-									"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": formatBool(configurationVariables),
+									"Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles":   strconv.FormatBool(configurationTransforms),
+									"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": strconv.FormatBool(configurationVariables),
 									"Octopus.Action.EnabledFeatures":                                            "Octopus.Features.WindowsService,Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
 									"Octopus.Action.Package.FeedId":                                             feedID,
 									"Octopus.Action.Package.PackageId":                                          packageID,
@@ -689,65 +621,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					packageID := localStep["package"].(string)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
-					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 					websiteName := localStep["website_name"].(string)
 					windowsAuthentication := localStep["windows_authentication"].(bool)
-
-					/* Generate Bindings Array */
-					type bindingsStruct struct {
-						Protocol            *string `json:"protocol"`
-						IpAddress           *string `json:"ipAddress"`
-						Port                *string `json:"port"`
-						Host                *string `json:"host"`
-						Thumbprint          *string `json:"thumbprint"`
-						CertificateVariable *string `json:"certificateVariable"`
-						RequireSni          bool    `json:"requireSni"`
-						Enabled             bool    `json:"enabled"`
-					}
-
-					bindingsArray := []bindingsStruct{}
-
-					if rawBindings, ok := localStep["binding"]; ok {
-						bindings := rawBindings.([]interface{})
-
-						for _, rawBinding := range bindings {
-							binding := rawBinding.(map[string]interface{})
-
-							bindingsArray = append(bindingsArray, bindingsStruct{
-								formatStrPtr(binding["protocol"].(string)),
-								formatStrPtr(binding["ip"].(string)),
-								formatStrPtr(binding["port"].(string)),
-								formatStrPtr(binding["host"].(string)),
-								formatStrPtr(binding["thumbprint"].(string)),
-								formatStrPtr(binding["cert_var"].(string)),
-								binding["require_sni"].(bool),
-								binding["enable"].(bool),
-							})
-						}
-					} else {
-						log.Printf("rawBindings: %+v", rawBindings)
-						log.Printf("getBindingsOk: %t", ok)
-
-						/* Add Default HTTP 80 binding */
-						bindingsArray = append(bindingsArray, bindingsStruct{
-							formatStrPtr("http"),
-							formatStrPtr("*"),
-							formatStrPtr("80"),
-							formatStrPtr(""),
-							formatStrPtr(""),
-							formatStrPtr(""),
-							false,
-							true,
-						})
-					}
-
-					log.Printf("bindingsArray: %+v", bindingsArray)
-
-					bindingsBytes, _ := json.Marshal(bindingsArray)
-					bindingsString := strings.ReplaceAll(string(bindingsBytes), "\"", "\\\"")
-
-					log.Printf("bindingsString: %s", bindingsString)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
 						Name:               stepName,
@@ -757,20 +633,20 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								IsRequired: required,
 								ActionType: "Octopus.IIS",
 								Properties: map[string]string{
 									"Octopus.Action.IISWebSite.DeploymentType":                                  "webSite",
 									"Octopus.Action.IISWebSite.CreateOrUpdateWebSite":                           "True",
-									"Octopus.Action.IISWebSite.Bindings":                                        bindingsString,
+									"Octopus.Action.IISWebSite.Bindings":                                        "[{\"protocol\":\"http\",\"port\":\"80\",\"host\":\"\",\"thumbprint\":null,\"certificateVariable\":null,\"requireSni\":false,\"enabled\":true}]",
+									"Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion":                 applicationPoolFramework,
 									"Octopus.Action.IISWebSite.ApplicationPoolIdentityType":                     applicationPoolIdentity,
-									"Octopus.Action.IISWebSite.EnableAnonymousAuthentication":                   formatBool(anonymousAuthentication),
-									"Octopus.Action.IISWebSite.EnableBasicAuthentication":                       formatBool(basicAuthentication),
-									"Octopus.Action.IISWebSite.EnableWindowsAuthentication":                     formatBool(windowsAuthentication),
+									"Octopus.Action.IISWebSite.EnableAnonymousAuthentication":                   strconv.FormatBool(anonymousAuthentication),
+									"Octopus.Action.IISWebSite.EnableBasicAuthentication":                       strconv.FormatBool(basicAuthentication),
+									"Octopus.Action.IISWebSite.EnableWindowsAuthentication":                     strconv.FormatBool(windowsAuthentication),
 									"Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion":  applicationPoolFramework,
 									"Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType":      applicationPoolIdentity,
-									"Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles":   formatBool(configurationTransforms),
-									"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": formatBool(configurationVariables),
+									"Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles":   strconv.FormatBool(configurationTransforms),
+									"Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings": strconv.FormatBool(configurationVariables),
 									"Octopus.Action.EnabledFeatures":                                            "Octopus.Features.IISWebSite,Octopus.Features.ConfigurationTransforms,Octopus.Features.ConfigurationVariables",
 									"Octopus.Action.Package.FeedId":                                             feedID,
 									"Octopus.Action.Package.DownloadOnTentacle":                                 "False",
@@ -826,7 +702,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					runOnServer := localStep["run_on_server"].(bool)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
-					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
@@ -837,10 +712,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								IsRequired: required,
 								ActionType: "Octopus.Script",
 								Properties: map[string]string{
-									"Octopus.Action.RunOnServer":                formatBool(runOnServer),
+									"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
 									"Octopus.Action.Script.ScriptSource":        "Inline",
 									"Octopus.Action.Package.DownloadOnTentacle": "False",
 									"Octopus.Action.Script.ScriptBody":          scriptBody,
@@ -881,7 +755,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					packageID := localStep["package_id"].(string)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
-					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
@@ -892,10 +765,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								IsRequired: required,
 								ActionType: "Octopus.HelmChartUpgrade",
 								Properties: map[string]string{
-									"Octopus.Action.Helm.ResetValues":           formatBool(resetValues),
+									"Octopus.Action.Helm.ResetValues":           strconv.FormatBool(resetValues),
 									"Octopus.Action.Helm.ReleaseName":           releaseName,
 									"Octopus.Action.Helm.Namespace":             namespace,
 									"Octopus.Action.Helm.YamlValues":            yamlValues,
@@ -934,7 +806,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					runOnServer := localStep["run_on_server"].(bool)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
-					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
@@ -945,10 +816,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								IsRequired: required,
 								ActionType: "Octopus.KubernetesDeployRawYaml",
 								Properties: map[string]string{
-									"Octopus.Action.RunOnServer":                             formatBool(runOnServer),
+									"Octopus.Action.RunOnServer":                             strconv.FormatBool(runOnServer),
 									"Octopus.Action.Script.ScriptSource":                     "Inline",
 									"Octopus.Action.KubernetesContainers.CustomResourceYaml": yamlValues,
 								},
@@ -988,7 +858,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					configurationVariables := localStep["configuration_variables"].(bool)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
-					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 					runOnServer := localStep["run_on_server"].(bool)
 
@@ -1000,10 +869,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								IsRequired: required,
 								ActionType: "Octopus.Script",
 								Properties: map[string]string{
-									"Octopus.Action.RunOnServer":                formatBool(runOnServer),
+									"Octopus.Action.RunOnServer":                strconv.FormatBool(runOnServer),
 									"Octopus.Action.Script.ScriptSource":        "Package",
 									"Octopus.Action.Package.DownloadOnTentacle": "False",
 									"Octopus.Action.Package.FeedId":             feedID,
@@ -1030,12 +898,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					}
 
 					if configurationTransforms {
-						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"] = formatBool(configurationTransforms)
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"] = strconv.FormatBool(configurationTransforms)
 						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationTransforms"
 					}
 
 					if configurationVariables {
-						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = formatBool(configurationVariables)
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = strconv.FormatBool(configurationVariables)
 						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationVariables"
 					}
 
@@ -1065,7 +933,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					packageID := localStep["package"].(string)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
-					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 					runOnServer := localStep["run_on_server"].(bool)
 					additionalInitParams := localStep["additional_init_params"].(string)
@@ -1078,10 +945,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								IsRequired: required,
 								ActionType: "Octopus.TerraformApply",
 								Properties: map[string]string{
-									"Octopus.Action.RunOnServer":                    formatBool(runOnServer),
+									"Octopus.Action.RunOnServer":                    strconv.FormatBool(runOnServer),
 									"Octopus.Action.Script.ScriptSource":            "Package",
 									"Octopus.Action.Package.DownloadOnTentacle":     "False",
 									"Octopus.Action.Package.FeedId":                 feedID,
@@ -1138,7 +1004,6 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					configurationVariables := localStep["configuration_variables"].(bool)
 					stepCondition := localStep["step_condition"].(string)
 					stepName := localStep["step_name"].(string)
-					required := localStep["required"].(bool)
 					stepStartTrigger := localStep["step_start_trigger"].(string)
 
 					deploymentStep := &octopusdeploy.DeploymentStep{
@@ -1149,9 +1014,9 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 						Actions: []octopusdeploy.DeploymentAction{
 							{
 								Name:       stepName,
-								IsRequired: required,
-								ActionType: "Octopus.TentaclePackage",
+								ActionType: "Octopus.Script",
 								Properties: map[string]string{
+									"Octopus.Action.RunOnServer":                "False",
 									"Octopus.Action.Package.DownloadOnTentacle": "False",
 									"Octopus.Action.Package.FeedId":             feedID,
 									"Octopus.Action.Package.PackageId":          packageID,
@@ -1175,12 +1040,12 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					}
 
 					if configurationTransforms {
-						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"] = formatBool(configurationTransforms)
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"] = strconv.FormatBool(configurationTransforms)
 						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationTransforms"
 					}
 
 					if configurationVariables {
-						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = formatBool(configurationVariables)
+						deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"] = strconv.FormatBool(configurationVariables)
 						deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationVariables"
 					}
 
