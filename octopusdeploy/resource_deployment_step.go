@@ -410,7 +410,7 @@ func resourceDeploymentStep_CreateBasicStep(d *schema.ResourceData, actionType s
 
 	/* Add Run On Server */
 	if runOnServer, ok := d.GetOk("run_on_server"); ok {
-		deploymentStep.Properties["Octopus.Action.RunOnServer"] = formatBool(runOnServer.(bool))
+		deploymentStep.Actions[0].Properties["Octopus.Action.RunOnServer"] = formatBool(runOnServer.(bool))
 	}
 
 	/* Add Target Roles */
