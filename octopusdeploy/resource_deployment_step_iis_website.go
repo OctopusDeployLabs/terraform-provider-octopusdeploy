@@ -135,6 +135,9 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 	/* Create Basic Deployment Step */
 	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.IIS")
 
+	/* Enable IIS Web Site Feature */
+	deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] = "Octopus.Features.IISWebSite"
+
 	/* Add Shared Properties */
 	resourceDeploymentStep_AddPackageProperties(d, deploymentStep)
 	resourceDeploymentStep_AddIisAppPoolProperties(d, deploymentStep)
