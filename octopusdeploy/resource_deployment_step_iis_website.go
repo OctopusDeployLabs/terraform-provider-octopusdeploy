@@ -138,7 +138,7 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 	d.Set("create_or_update", true)
 
 	/* Create Basic Deployment Step */
-	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.TentaclePackage")
+	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.IIS")
 
 	/* Add Shared Properties */
 	resourceDeploymentStep_AddPackageProperties(d, deploymentStep)
