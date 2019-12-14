@@ -247,13 +247,13 @@ func resourceDeploymentStep_AddIisAppPoolSchema(schemaRes *schema.Resource) {
 					Optional:    true,
 					Description: "Which account will the application pool run under.",
 					Default:     "ApplicationPoolIdentity",
-					ValidateFunc: validateValueFunc([]string{
-						"ApplicationPoolIdentity",
-						"LocalService",
-						"LocalSystem",
-						"NetworkService",
-						"SpecificUser",
-					}),
+					// ValidateFunc: validateValueFunc([]string{
+					// 	"ApplicationPoolIdentity",
+					// 	"LocalService",
+					// 	"LocalSystem",
+					// 	"NetworkService",
+					// 	"SpecificUser",
+					// }),
 				},
 				"username": {
 					Type:        schema.TypeString,
