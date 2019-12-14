@@ -132,6 +132,45 @@ func resourceDeploymentStep_AddPackageSchema(schemaRes *schema.Resource) {
 	}
 }
 
+func resourceDeploymentStep_AddIisAppPoolSchema(schemaRes *schema.Resource) {
+	schemaRes.Schema["application_pool_name"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "Name of the application pool in IIS to create or reconfigure.",
+		Required:    true,
+	}
+
+	schemaRes.Schema["application_pool_framework"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "The version of the .NET common language runtime that this application pool will use. Choose v2.0 for applications built against .NET 2.0, 3.0 or 3.5. Choose v4.0 for .NET 4.0 or 4.5.",
+		Default:     "v4.0",
+		Optional:    true,
+		ValidateFunc: validateValueFunc([]string{
+			"v2.0",
+			"v4.0",
+		}),
+	}
+
+	schemaRes.Schema["application_pool_identity"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "Which built-in account will the application pool run under.",
+		Default:     "ApplicationPoolIdentity",
+		ValidateFunc: validateValueFunc([]string{
+			"ApplicationPoolIdentity",
+			"LocalService",
+			"LocalSystem",
+			"NetworkService",
+		}),
+	}
+
+	schemaRes.Schema["start_app_pool"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "Start Application Pool",
+		Optional:    true,
+		Default:     true,
+	}
+}
+
 /* --------------------------------------- */
 /* Universal Create, Read, Update, Delete */
 /* --------------------------------------- */
@@ -415,6 +454,13 @@ func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploym
 	}
 }
 
+func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep) {
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion"] = d.Get("application_pool_framework").(string)
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType"] = d.Get("application_pool_identity").(string)
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"] = d.Get("application_pool_name").(string)
+	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"] = formatBool(d.Get("start_app_pool").(bool))
+}
+
 /* --------------------------------------- */
 /* Shared Set Schema Functions */
 /* --------------------------------------- */
@@ -444,4 +490,11 @@ func resourceDeploymentStep_SetPackageSchema(d *schema.ResourceData, deploymentS
 
 	d.Set("configuration_transforms", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"]))
 	d.Set("configuration_variables", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyUpdateAppSettingsAndConnectionStrings"]))
+}
+
+func resourceDeploymentStep_SetIisAppPoolSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
+	d.Set("application_pool_framework", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion"])
+	d.Set("application_pool_identity", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType"])
+	d.Set("application_pool_name", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"])
+	d.Set("start_app_pool", toBool(deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"]))
 }
