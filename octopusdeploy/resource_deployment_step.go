@@ -135,41 +135,61 @@ func resourceDeploymentStep_AddPackageSchema(schemaRes *schema.Resource) {
 }
 
 func resourceDeploymentStep_AddIisAppPoolSchema(schemaRes *schema.Resource) {
-	schemaRes.Schema["application_pool_name"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "Name of the application pool in IIS to create or reconfigure.",
+	schemaRes.Schema["application_pool"] = &schema.Schema{
+		Type:        schema.TypeSet,
+		MaxItems:    1,
+		MinItems:    1,
+		Description: "Application Pool Settings",
 		Required:    true,
-	}
-
-	schemaRes.Schema["application_pool_framework"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "The version of the .NET common language runtime that this application pool will use. Choose v2.0 for applications built against .NET 2.0, 3.0 or 3.5. Choose v4.0 for .NET 4.0 or 4.5.",
-		Default:     "v4.0",
-		Optional:    true,
-		ValidateFunc: validateValueFunc([]string{
-			"v2.0",
-			"v4.0",
-		}),
-	}
-
-	schemaRes.Schema["application_pool_identity"] = &schema.Schema{
-		Type:        schema.TypeString,
-		Optional:    true,
-		Description: "Which built-in account will the application pool run under.",
-		Default:     "ApplicationPoolIdentity",
-		ValidateFunc: validateValueFunc([]string{
-			"ApplicationPoolIdentity",
-			"LocalService",
-			"LocalSystem",
-			"NetworkService",
-		}),
-	}
-
-	schemaRes.Schema["start_app_pool"] = &schema.Schema{
-		Type:        schema.TypeBool,
-		Description: "Start Application Pool",
-		Optional:    true,
-		Default:     true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"name": {
+					Type:        schema.TypeString,
+					Description: "Name of the application pool in IIS to create or reconfigure.",
+					Required:    true,
+				},
+				"framework": {
+					Type:        schema.TypeString,
+					Description: "The version of the .NET common language runtime that this application pool will use. Choose v2.0 for applications built against .NET 2.0, 3.0 or 3.5. Choose v4.0 for .NET 4.0 or 4.5.",
+					Default:     "v4.0",
+					Optional:    true,
+					ValidateFunc: validateValueFunc([]string{
+						"v2.0",
+						"v4.0",
+					}),
+				},
+				"identity": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Which account will the application pool run under.",
+					Default:     "ApplicationPoolIdentity",
+					ValidateFunc: validateValueFunc([]string{
+						"ApplicationPoolIdentity",
+						"LocalService",
+						"LocalSystem",
+						"NetworkService",
+						"SpecificUser",
+					}),
+				},
+				"username": {
+					Type:        schema.TypeString,
+					Description: "Application Pool Identity Username",
+					Optional:    true,
+				},
+				"password": {
+					Type:        schema.TypeString,
+					Description: "Application Pool Identity Password",
+					Optional:    true,
+					Sensitive:   true,
+				},
+				"start": {
+					Type:        schema.TypeBool,
+					Description: "Start Application Pool",
+					Optional:    true,
+					Default:     true,
+				},
+			},
+		},
 	}
 }
 
@@ -478,10 +498,28 @@ func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploym
 }
 
 func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep) {
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion"] = d.Get("application_pool_framework").(string)
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolIdentityType"] = d.Get("application_pool_identity").(string)
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"] = d.Get("application_pool_name").(string)
-	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"] = formatBool(d.Get("start_app_pool").(bool))
+	if rawAppPool, ok := d.GetOk("application_pool"); ok {
+		appPoolSet := rawAppPool.(*schema.Set)
+		if len(appPoolSet.List()) == 0 {
+			return
+		}
+
+		appPool := appPoolSet.List()[0].(map[string]interface{})
+
+		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"] = appPool["name"].(string)
+		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion"] = appPool["framework"].(string)
+		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolIdentityType"] = appPool["identity"].(string)
+
+		if appPoolUser, ok := appPool["username"]; ok {
+			deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolUsername"] = appPoolUser.(string)
+		}
+
+		if appPoolPassword, ok := appPool["password"]; ok {
+			deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolPassword"] = appPoolPassword.(string)
+		}
+
+		deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"] = formatBool(appPool["start"].(bool))
+	}
 }
 
 /* --------------------------------------- */
@@ -530,13 +568,33 @@ func resourceDeploymentStep_SetPackageSchema(d *schema.ResourceData, deploymentS
 }
 
 func resourceDeploymentStep_SetIisAppPoolSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
-	d.Set("application_pool_framework", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolFrameworkVersion"])
-	d.Set("application_pool_identity", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.WebApplication.ApplicationPoolIdentityType"])
-	d.Set("application_pool_name", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"])
+	appPool := make(map[string]interface{})
+
+	if appPoolName, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolName"]; ok {
+		appPool["name"] = appPoolName
+	}
+
+	if appPoolFramework, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolFrameworkVersion"]; ok {
+		appPool["framework"] = appPoolFramework
+	}
+
+	if appPoolIdentity, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolIdentityType"]; ok {
+		appPool["identity"] = appPoolIdentity
+	}
+
+	if appPoolUsername, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolUsername"]; ok {
+		appPool["username"] = appPoolUsername
+	}
+
+	if appPoolPassword, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.ApplicationPoolPassword"]; ok {
+		appPool["password"] = appPoolPassword
+	}
 
 	if startAppPoolString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.StartApplicationPool"]; ok {
 		if startAppPool, err := strconv.ParseBool(startAppPoolString); err == nil {
-			d.Set("start_app_pool", startAppPool)
+			appPool["password"] = startAppPool
 		}
 	}
+
+	d.Set("application_pool", []interface{}{appPool})
 }
