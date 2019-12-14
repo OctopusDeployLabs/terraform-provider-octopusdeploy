@@ -128,9 +128,12 @@ func resourceDeploymentStep_AddPackageSchema(schemaRes *schema.Resource) {
 	}
 
 	schemaRes.Schema["variable_substitution_in_files"] = &schema.Schema{
-		Type:        schema.TypeString,
+		Type:        schema.TypeList,
 		Optional:    true,
-		Description: "A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",
+		Description: "Array of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
 	}
 
 	schemaRes.Schema["pre_deploy_script"] = &schema.Schema{
@@ -617,7 +620,7 @@ func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploym
 	}
 
 	if variableSubstitutionInFiles, ok := d.GetOk("variable_substitution_in_files"); ok {
-		deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles.(string)
+		deploymentStep.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = strings.Join(getSliceFromTerraformTypeList(variableSubstitutionInFiles), "\n")
 		deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
 
 		deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
@@ -681,7 +684,7 @@ func resourceDeploymentStep_SetBasicSchema(d *schema.ResourceData, deploymentSte
 
 	if targetRoles, ok := deploymentStep.Properties["Octopus.Action.TargetRoles"]; ok {
 		if targetRoles != "" {
-			d.Set("target_roles", strings.Split(deploymentStep.Properties["Octopus.Action.TargetRoles"], ","))
+			d.Set("target_roles", strings.Split(targetRoles, ","))
 		}
 	}
 
@@ -741,7 +744,9 @@ func resourceDeploymentStep_SetPackageSchema(d *schema.ResourceData, deploymentS
 	}
 
 	if variableSubstitutionInFiles, ok := deploymentStep.Actions[0].Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
-		d.Set("variable_substitution_in_files", variableSubstitutionInFiles)
+		if variableSubstitutionInFiles != "" {
+			d.Set("variable_substitution_in_files", strings.Split(variableSubstitutionInFiles, "\n"))
+		}
 	}
 
 	if configurationTransformsString, ok := deploymentStep.Actions[0].Properties["Octopus.Action.Package.AutomaticallyRunConfigurationTransformationFiles"]; ok {
