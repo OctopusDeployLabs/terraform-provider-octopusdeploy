@@ -26,6 +26,11 @@ func resourceDeploymentStep_AddDefaultSchema(schemaRes *schema.Resource, target_
 		Computed: true,
 	}
 
+	schemaRes.Schema["enabled_features"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Computed: true,
+	}
+
 	schemaRes.Schema["first_step"] = &schema.Schema{
 		Type:        schema.TypeBool,
 		Description: "Define as the first step",
@@ -344,8 +349,9 @@ func resourceDeploymentStepCreate(d *schema.ResourceData, m interface{}, buildDe
 	}
 
 	/* Set Ids */
-	d.Set("deployment_process_id", updateDeploymentProcess.ID)
 	d.SetId(updateDeploymentProcess.Steps[newStepAddedIndex].ID)
+	d.Set("deployment_process_id", updateDeploymentProcess.ID)
+	d.Set("enabled_features", updateDeploymentProcess.Steps[newStepAddedIndex].Actions[0].Properties["Octopus.Action.EnabledFeatures"])
 
 	/* Return */
 	return nil
@@ -386,15 +392,17 @@ func resourceDeploymentStepRead(d *schema.ResourceData, m interface{}, setSchema
 		prevDeploymentStep = deploymentStep
 	}
 
+	if deploymentStep == nil {
+		d.SetId("")
+		return nil
+	}
+
 	d.Set("first_step", firstStep)
 	if prevDeploymentStep != nil {
 		d.Set("after_step_id", prevDeploymentStep.ID)
 	}
 
-	if deploymentStep == nil {
-		d.SetId("")
-		return nil
-	}
+	d.Set("enabled_features", deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"])
 
 	/* Set Schema */
 	setSchemaFunc(d, *deploymentStep)
