@@ -98,7 +98,3 @@ resource "octopusdeploy_environment" "Env3" {
 
 * [octopusdeploy_environment](docs/provider/resources/environment.md)
 * [octopusdeploy_lifecycle](docs/provider/resources/lifecycle.md)
-
-## Provider Resources (To Be Moved To /docs)
-
-* All other resource documentation is currently [here](docs/to_move_to_provider.md).
