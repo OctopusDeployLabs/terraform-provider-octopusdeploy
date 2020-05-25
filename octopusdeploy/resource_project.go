@@ -304,6 +304,11 @@ func getDeploymentStepKubernetesHelmSchema() *schema.Schema {
 					Description: "The tiller namespace for the Helm chart.",
 					Required:    true,
 				},
+				"client_version": {
+					Type:        schema.TypeString,
+					Description: "The version of the Helm client.",
+					Required:    true,
+				},
 				"package_id": {
 					Type:        schema.TypeString,
 					Description: "The Package ID of the Helm chart.",
@@ -733,6 +738,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 					releaseName := localStep["release_name"].(string)
 					namespace := localStep["namespace"].(string)
 					yamlValues := localStep["yaml_values"].(string)
+					clientVersion := localStep["client_version"].(string)
 					tillerNamespace := localStep["tiller_namespace"].(string)
 					feedID := localStep["feed_id"].(string)
 					packageID := localStep["package_id"].(string)
@@ -754,6 +760,7 @@ func buildDeploymentProcess(d *schema.ResourceData, deploymentProcess *octopusde
 									"Octopus.Action.Helm.ReleaseName":           releaseName,
 									"Octopus.Action.Helm.Namespace":             namespace,
 									"Octopus.Action.Helm.YamlValues":            yamlValues,
+									"Octopus.Action.Helm.ClientVersion":         clientVersion,
 									"Octopus.Action.Helm.TillerNamespace":       tillerNamespace,
 									"Octopus.Action.Package.FeedId":             feedID,
 									"Octopus.Action.Package.PackageId":          packageID,
