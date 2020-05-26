@@ -3,7 +3,7 @@ services:
   octopus:
     ports:
       - "8080:8080"
-      - "11943:10943"
+      - "10943:10943"
     environment:
       ADMIN_USERNAME: admin
       ADMIN_EMAIL: octopusguides@gmail.com

@@ -41,7 +41,7 @@ function Connect-ToOctopus() {
         $LoginObj = New-Object Octopus.Client.Model.LoginCommand
         $LoginObj.Username = $username
         $LoginObj.Password = $password
-        Invoke-ScriptBlockWithRetries { $repository.Users.SignIn($LoginObj) } | Out-Null
+        Invoke-ScriptBlockWithRetries { $repository.Users.SignIn($LoginObj) } -FailureMessage "Failed to log into Octopus." | Out-Null
         return $repository
     } catch {
         Get-CompleteExceptionMessage $_

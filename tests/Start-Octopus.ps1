@@ -1,6 +1,6 @@
 pushd tests
 
-docker-compose up --detach --always-recreate-deps --force-recreate
+docker-compose up --detach
 
 $start = Get-Date
 do {
