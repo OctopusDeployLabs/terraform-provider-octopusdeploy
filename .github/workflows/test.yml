@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build the plugin
-        run: ls -la
+        run: pwd; ls -la
         shell: bash
       - name: Build the plugin
         run: ./ci-scripts/build.sh
