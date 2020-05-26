@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
+      - name: Start the Octopus container
+        run: ./tests/Start-Octopus.ps1
+
       - name: Install dependencies
         run: ./tests/install-dependencies.sh
         shell: bash
@@ -21,9 +24,6 @@ jobs:
 
       - name: Install modules
         run: ./tests/Initialise-Modules.ps1
-
-      - name: Start the Octopus container
-        run: ./tests/Start-Octopus.ps1
 
       - name: Generate an API key
         run: ./tests/Create-ApiKey.ps1
