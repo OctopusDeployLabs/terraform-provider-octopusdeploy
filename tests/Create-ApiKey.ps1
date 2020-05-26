@@ -3,7 +3,7 @@
 Wait-ForOctopus
 
 #Creating a connection
-$repository = Connect-ToOctopus http://localhost:8080
+$repository = Connect-ToOctopus "http://localhost:8080"
 
 #Creating login object
 $LoginObj = New-Object Octopus.Client.Model.LoginCommand

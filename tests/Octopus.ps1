@@ -5,6 +5,7 @@ function Wait-ForOctopus() {
     do {
         Write-Host "Waiting for Octopus"
 
+        # show the status of the containers
         $containers = & docker container ls
         Write-Host $containers
 
@@ -62,7 +63,7 @@ function Connect-ToOctopus() {
         $LoginObj = New-Object Octopus.Client.Model.LoginCommand
         $LoginObj.Username = $username
         $LoginObj.Password = $password
-        Invoke-ScriptBlockWithRetries { $repository.Users.SignIn($LoginObj) } -FailureMessage "Failed to log into Octopus" | Out-Null
+        Invoke-ScriptBlockWithRetries { $repository.Users.SignIn($LoginObj) } -FailureMessage "Failed to log into Octopus at $url" | Out-Null
         return $repository
     } catch {
         Write-Error (Get-CompleteExceptionMessage $_)
