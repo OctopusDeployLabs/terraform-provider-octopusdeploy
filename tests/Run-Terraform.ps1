@@ -2,7 +2,7 @@ param (
     [string]$operatingSystem = "linux_amd64"
 )
 
-Write-Host "finding plugin for $operatingSystem"
+Write-Host "Finding plugin for $operatingSystem"
 
 Write-Host "The contents of the build directory:"
 Write-Host (ls build)
