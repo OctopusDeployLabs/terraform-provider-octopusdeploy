@@ -1,16 +1,52 @@
+function Get-CompleteExceptionMessage() {
+    param (
+        [System.Management.Automation.ErrorRecord]$Exception,
+        [int]$limit = -1
+    )
+
+    $msg = ""
+
+    if ($null -ne $Exception) {
+        try {
+            $e = $Exception.Exception
+            $msg = $e.Message
+            while ($e.InnerException) {
+                $e = $e.InnerException
+                $msg += "`n" + $e.Message
+            }
+
+        } catch {
+            # Ignore
+        }
+    }
+
+    if ($limit -gt 0) {
+        $msg = $msg.SubString(0, [math]::min($limit,$msg.Length))
+    }
+
+    return $msg
+}
+
+
 function Connect-ToOctopus() {
     param (
         [string]$url,
         [string]$username = "admin",
         [string]$password = "Password01!"
     )
-    $endpoint = New-Object Octopus.Client.OctopusServerEndpoint $url
-    $repository = New-Object Octopus.Client.OctopusRepository $endpoint
-    $LoginObj = New-Object Octopus.Client.Model.LoginCommand
-    $LoginObj.Username = $username
-    $LoginObj.Password = $password
-    Invoke-ScriptBlockWithRetries {$repository.Users.SignIn($LoginObj)} | Out-Null
-    return $repository
+    try
+    {
+        $endpoint = New-Object Octopus.Client.OctopusServerEndpoint $url
+        $repository = New-Object Octopus.Client.OctopusRepository $endpoint
+        $LoginObj = New-Object Octopus.Client.Model.LoginCommand
+        $LoginObj.Username = $username
+        $LoginObj.Password = $password
+        Invoke-ScriptBlockWithRetries { $repository.Users.SignIn($LoginObj) } | Out-Null
+        return $repository
+    } catch {
+        Get-CompleteExceptionMessage $_
+        throw $_
+    }
 }
 
 function Invoke-CommandWithRetries
