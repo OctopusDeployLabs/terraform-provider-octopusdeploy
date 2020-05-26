@@ -23,7 +23,7 @@ jobs:
       - name: Start the Octopus container
         run: ./tests/Start-Octopus.ps1
 
-      - name: Generate an AIP key
+      - name: Generate an API key
         run: ./tests/Create-ApiKey.ps1
 
       - name: Run Terraform

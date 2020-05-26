@@ -1,6 +1,6 @@
 pushd tests
 
-docker-compose up --detach --quiet-pull --always-recreate-deps --force-recreate
+docker-compose up --detach --always-recreate-deps --force-recreate
 
 $start = Get-Date
 do {
@@ -13,6 +13,6 @@ do {
         break;
     }
 
-} until (Test-NetConnection -ComputerName localhost -Port 8080 -InformationLevel Quiet)
+} until (Test-Connection -IPv4 -ComputerName localhost -TCPPort 8080 -Quiet)
 
 popd
