@@ -1,8 +1,13 @@
+Import-Module -Name PowershellOctopusClient
+
 function Wait-ForOctopus() {
     $start = Get-Date
     do {
         Write-Host "Waiting for Octopus"
-        docker container ls
+
+        $containers = & docker container ls
+        Write-Host $containers
+
         sleep 5
         $now = Get-Date
         $wait = New-Timespan -Start $start -End $now

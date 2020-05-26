@@ -1,6 +1,6 @@
 . $PSScriptRoot\Octopus.ps1
 
-Import-Module -Name PowershellOctopusClient
+Wait-ForOctopus
 
 #Creating a connection
 $repository = Connect-ToOctopus http://localhost:8080
