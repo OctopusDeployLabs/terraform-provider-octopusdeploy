@@ -41,7 +41,7 @@ function Connect-ToOctopus() {
         $LoginObj = New-Object Octopus.Client.Model.LoginCommand
         $LoginObj.Username = $username
         $LoginObj.Password = $password
-        Invoke-ScriptBlockWithRetries { $repository.Users.SignIn($LoginObj) } -FailureMessage "Failed to log into Octopus." | Out-Null
+        Invoke-ScriptBlockWithRetries { $repository.Users.SignIn($LoginObj) } -FailureMessage "Failed to log into Octopus" | Out-Null
         return $repository
     } catch {
         Get-CompleteExceptionMessage $_
@@ -140,13 +140,13 @@ function Invoke-ScriptBlockWithRetries {
             catch {
                 if ($Attempt -gt $RetryCount) {
                     if (-not [string]::IsNullOrEmpty($FailureMessage)) {
-                        Write-Host "$FailureMessage! Error was $($_.exception.Message). Total retry attempts: $RetryCount"
+                        Write-Host "$FailureMessage! Error was $(Get-CompleteExceptionMessage $_). Total retry attempts: $RetryCount"
                     }
                     throw $_.exception
                 }
                 else {
                     if (-not [string]::IsNullOrEmpty($FailureMessage)) {
-                        Write-Host "[$Attempt/$RetryCount] $FailureMessage. Error was $($_.exception.Message). Retrying in $TimeoutInSecs seconds..."
+                        Write-Host "[$Attempt/$RetryCount] $FailureMessage. Error was $(Get-CompleteExceptionMessage $_). Retrying in $TimeoutInSecs seconds..."
                     }
                     Start-Sleep -Seconds $TimeoutInSecs
                     $Attempt = $Attempt + 1
