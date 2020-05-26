@@ -44,7 +44,7 @@ function Connect-ToOctopus() {
         Invoke-ScriptBlockWithRetries { $repository.Users.SignIn($LoginObj) } -FailureMessage "Failed to log into Octopus" | Out-Null
         return $repository
     } catch {
-        Write-Error Get-CompleteExceptionMessage $_
+        Write-Error (Get-CompleteExceptionMessage $_)
         throw $_
     }
 }
