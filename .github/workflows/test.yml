@@ -9,6 +9,7 @@ jobs:
     steps:
       - name: Build the plugin
         run: ./ci-scripts/build.sh
+        shell: bash
       - name: Install modules
         run: ./tests/Initialise-Modules.ps1
       - name: Start the Octopus container
