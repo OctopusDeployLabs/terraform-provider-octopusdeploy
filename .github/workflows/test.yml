@@ -1,4 +1,4 @@
-name: Publish binaries on release
+name: Run integration tests against Octopus in a Docker container
 on: push
 defaults:
   run:
