@@ -9,6 +9,9 @@ function Wait-ForOctopus() {
         $containers = & docker container ls
         Write-Host $containers
 
+        $logs = & docker logs tests_octopus_1
+        Write-Host $logs
+
         sleep 5
         $now = Get-Date
         $wait = New-Timespan -Start $start -End $now
