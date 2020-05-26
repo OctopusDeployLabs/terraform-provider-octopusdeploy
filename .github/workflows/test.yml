@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build the plugin
+        run: ls -la
+        shell: bash
+      - name: Build the plugin
         run: ./ci-scripts/build.sh
         shell: bash
       - name: Install modules
