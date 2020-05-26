@@ -87,13 +87,13 @@ func resourceAccountRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("name", account.Name)
 	d.Set("environments", account.EnvironmentIDs)
-	d.Set("account_type", account.AccountType)
-	d.Set("client_id", account.ClientId)
-	d.Set("tenant_id", account.TenantId)
+	d.Set("account_type", account.AccountType.String())
+	d.Set("client_id", account.ClientID)
+	d.Set("tenant_id", account.TenantID)
 	d.Set("subscription_id", account.SubscriptionNumber)
 	d.Set("client_secret", account.Password)
 	d.Set("tenant_tags", account.TenantTags)
-	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation)
+	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
 	d.Set("token", account.Token)
 
 	return nil
@@ -161,16 +161,17 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 		token = tokenInterface.(string)
 	}
 
-	var account = octopusdeploy.NewAccount(accountName, accountType)
+	accountTypeEnum, _ := octopusdeploy.ParseAccountType(accountType)
+	var account = octopusdeploy.NewAccount(accountName, accountTypeEnum)
 	account.EnvironmentIDs = environments
-	account.ClientId = clientID
-	account.TenantId = tenantID
+	account.ClientID = clientID
+	account.TenantID = tenantID
 	account.Password = octopusdeploy.SensitiveValue{
 		NewValue: clientSecret,
 	}
 	account.SubscriptionNumber = subscriptionID
 	account.TenantTags = tenantTags
-	account.TenantedDeploymentParticipation = tenantedDeploymentParticipation
+	account.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(tenantedDeploymentParticipation)
 	account.Token = octopusdeploy.SensitiveValue{
 		NewValue: token,
 	}

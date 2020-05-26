@@ -23,34 +23,34 @@ type Certificates struct {
 }
 
 type Certificate struct {
-	ID                              string         `json:"Id,omitempty"`
-	Name                            string         `json:"Name,omitempty"`
-	Notes                           string         `json:"Notes,omitempty"`
-	CertificateData                 SensitiveValue `json:"CertificateData,omitempty"`
-	Password                        SensitiveValue `json:"Password,omitempty"`
-	EnvironmentIds                  []string       `json:"EnvironmentIds,omitempty"`
-	TenantedDeploymentParticipation string         `json:"TenantedDeploymentParticipation,omitempty"`
-	TenantIds                       []string       `json:"TenantIds,omitempty,omitempty"`
-	TenantTags                      []string       `json:"TenantTags,omitempty,omitempty"`
-	CertificateDataFormat           string         `json:"CertificateDataFormat,omitempty"`
-	Archived                        string         `json:"Archived,omitempty"`
-	ReplacedBy                      string         `json:"ReplacedBy,omitempty"`
-	SubjectDistinguishedName        string         `json:"SubjectDistinguishedName,omitempty"`
-	SubjectCommonName               string         `json:"SubjectCommonName,omitempty"`
-	SubjectOrganization             string         `json:"SubjectOrganization,omitempty"`
-	IssuerDistinguishedName         string         `json:"IssuerDistinguishedName,omitempty"`
-	IssuerCommonName                string         `json:"IssuerCommonName,omitempty"`
-	IssuerOrganization              string         `json:"IssuerOrganization,omitempty"`
-	SelfSigned                      bool           `json:"SelfSigned,omitempty"`
-	Thumbprint                      string         `json:"Thumbprint,omitempty"`
-	NotAfter                        string         `json:"NotAfter,omitempty"`
-	NotBefore                       string         `json:"NotBefore,omitempty"`
-	IsExpired                       bool           `json:"IsExpired,omitempty"`
-	HasPrivateKey                   bool           `json:"HasPrivateKey,omitempty"`
-	Version                         int            `json:"Version,omitempty"`
-	SerialNumber                    string         `json:"SerialNumber,omitempty"`
-	SignatureAlgorithmName          string         `json:"SignatureAlgorithmName,omitempty"`
-	SubjectAlternativeNames         []string       `json:"SubjectAlternativeNames,omitempty"`
+	ID                              string                 `json:"Id,omitempty"`
+	Name                            string                 `json:"Name,omitempty"`
+	Notes                           string                 `json:"Notes,omitempty"`
+	CertificateData                 SensitiveValue         `json:"CertificateData,omitempty"`
+	Password                        SensitiveValue         `json:"Password,omitempty"`
+	EnvironmentIds                  []string               `json:"EnvironmentIds,omitempty"`
+	TenantedDeploymentParticipation TenantedDeploymentMode `json:"TenantedDeploymentParticipation,omitempty"`
+	TenantIds                       []string               `json:"TenantIds,omitempty,omitempty"`
+	TenantTags                      []string               `json:"TenantTags,omitempty,omitempty"`
+	CertificateDataFormat           string                 `json:"CertificateDataFormat,omitempty"`
+	Archived                        string                 `json:"Archived,omitempty"`
+	ReplacedBy                      string                 `json:"ReplacedBy,omitempty"`
+	SubjectDistinguishedName        string                 `json:"SubjectDistinguishedName,omitempty"`
+	SubjectCommonName               string                 `json:"SubjectCommonName,omitempty"`
+	SubjectOrganization             string                 `json:"SubjectOrganization,omitempty"`
+	IssuerDistinguishedName         string                 `json:"IssuerDistinguishedName,omitempty"`
+	IssuerCommonName                string                 `json:"IssuerCommonName,omitempty"`
+	IssuerOrganization              string                 `json:"IssuerOrganization,omitempty"`
+	SelfSigned                      bool                   `json:"SelfSigned,omitempty"`
+	Thumbprint                      string                 `json:"Thumbprint,omitempty"`
+	NotAfter                        string                 `json:"NotAfter,omitempty"`
+	NotBefore                       string                 `json:"NotBefore,omitempty"`
+	IsExpired                       bool                   `json:"IsExpired,omitempty"`
+	HasPrivateKey                   bool                   `json:"HasPrivateKey,omitempty"`
+	Version                         int                    `json:"Version,omitempty"`
+	SerialNumber                    string                 `json:"SerialNumber,omitempty"`
+	SignatureAlgorithmName          string                 `json:"SignatureAlgorithmName,omitempty"`
+	SubjectAlternativeNames         []string               `json:"SubjectAlternativeNames,omitempty"`
 }
 
 func (t *Certificate) Validate() error {

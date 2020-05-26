@@ -39,7 +39,7 @@ type Project struct {
 	ReleaseCreationStrategy         ReleaseCreationStrategy     `json:"ReleaseCreationStrategy"`
 	Slug                            string                      `json:"Slug"`
 	Templates                       []ActionTemplateParameter   `json:"Templates,omitempty"`
-	TenantedDeploymentMode          string                      `json:"TenantedDeploymentMode,omitempty"`
+	TenantedDeploymentMode          TenantedDeploymentMode      `json:"TenantedDeploymentMode,omitempty"`
 	VariableSetID                   string                      `json:"VariableSetId"`
 	VersioningStrategy              VersioningStrategy          `json:"VersioningStrategy"`
 }
