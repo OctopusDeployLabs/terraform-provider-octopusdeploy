@@ -5,6 +5,7 @@ defaults:
     shell: pwsh
 jobs:
   test:
+    runs-on: ubuntu-latest
     steps:
       - name: Build the plugin
         run: ./ci-scripts/build.sh
