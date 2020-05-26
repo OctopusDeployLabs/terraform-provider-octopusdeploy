@@ -12,7 +12,7 @@ services:
       DB_CONNECTION_STRING: Server=host.docker.internal,7777;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
       CONNSTRING: Server=host.docker.internal,7777;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
       MASTER_KEY: 6EdU6IWsCtMEwk0kPKflQQ==
-    image: octopusdeploy/octopusdeploy:2020.2.7
+    image: octopusdeploy/octopusdeploy:${OCTOPUS_VERSION}
     depends_on:
       - mssql
   mssql:

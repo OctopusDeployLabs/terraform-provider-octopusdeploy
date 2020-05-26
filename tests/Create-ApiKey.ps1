@@ -1,8 +1,9 @@
+. $PSScriptRoot\Octopus.ps1
+
 Import-Module -Name PowershellOctopusClient
 
 #Creating a connection
-$endpoint = new-object Octopus.Client.OctopusServerEndpoint "http://localhost:8080"
-$repository = new-object Octopus.Client.OctopusRepository $endpoint
+$repository = Connect-ToOctopus http://localhost:8080
 
 #Creating login object
 $LoginObj = New-Object Octopus.Client.Model.LoginCommand

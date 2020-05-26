@@ -5,6 +5,8 @@ defaults:
     shell: pwsh
 jobs:
   test:
+    env:
+      OCTOPUS_VERSION: "2020.2.7"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
