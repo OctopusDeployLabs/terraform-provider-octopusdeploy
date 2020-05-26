@@ -4,9 +4,6 @@ param (
 
 Write-Host "Finding plugin for $operatingSystem"
 
-Write-Host "The contents of the build directory:"
-Write-Host (Get-Childitem build)
-
 $dir = Get-Childitem build | ? {$_.Name -like "*$operatingSystem*"} | Select -First 1
 Write-Host "Plugin dir is set to $($dir.Name)"
 
