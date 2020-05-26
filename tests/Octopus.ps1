@@ -6,12 +6,12 @@ function Wait-ForOctopus() {
         Write-Host "Waiting for Octopus"
 
         # show the status of the containers
-        $containers = & docker container ls
-        Write-Host $containers
+        #$containers = & docker container ls
+        #Write-Host $containers
 
         # Get the logs of the octopus container
-        $logs = & docker logs tests_octopus_1
-        Write-Host $logs
+        #$logs = & docker logs tests_octopus_1
+        #Write-Host $logs
 
         sleep 5
         $now = Get-Date
