@@ -37,9 +37,7 @@ func TestAccOctopusDeployAzureServicePrinciaplBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						accountPrefix, "tenant_id", tenantID),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "subscription_id", subscriptionID),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "key", key),
+						accountPrefix, "subscription_number", subscriptionID),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "tenant_tags.0", tenantTags),
 					resource.TestCheckResourceAttr(
@@ -52,7 +50,7 @@ func TestAccOctopusDeployAzureServicePrinciaplBasic(t *testing.T) {
 
 func testAzureServicePrincipalBasic(tagSetName string, tagName string, accountName string, clientID string, tenantID string, subscriptionID string, clientSecret string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`
-		
+
 		resource "octopusdeploy_tag_set" "testtagset" {
 			name = "%s"
 
