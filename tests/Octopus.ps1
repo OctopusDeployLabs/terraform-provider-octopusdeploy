@@ -1,3 +1,4 @@
+Install-Module -Name PowershellOctopusClient -Force
 Import-Module -Name PowershellOctopusClient
 
 function Wait-ForOctopus() {

@@ -2,7 +2,7 @@ name: Run integration tests against Octopus in a Docker container
 on: push
 defaults:
   run:
-    shell: pwsh
+    shell: bash
 jobs:
   test:
     env:
@@ -12,23 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: Install modules
-        run: ./tests/Initialise-Modules.ps1
-
       - name: Start the Octopus container
-        run: ./tests/Start-Octopus.ps1
-
-      - name: Install dependencies
-        run: ./tests/install-dependencies.sh
-        shell: bash
-
-      - name: Build the plugin
-        run: ./ci-scripts/build.sh
-        shell: bash
+        run: ./tests/start-octopus.sh
 
       - name: Generate an API key
         run: ./tests/Create-ApiKey.ps1
+        shell: pwsh
 
       - name: Run the tests
-        run: ./ci-scripts/pull_request
-        shell: bash
+        run: ./ci-scripts/pull_request.sh
