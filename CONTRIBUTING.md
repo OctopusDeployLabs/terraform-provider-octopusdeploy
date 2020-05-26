@@ -6,16 +6,18 @@ Dependencies are managed using [Go 1.11 Modules](https://github.com/golang/go/wi
 
 ## Local Integration Tests
 
-To make development easier, run a local Octopus Deploy server on your machine. You can `vagrant up` [this image](https://github.com/MattHodge/VagrantBoxes/tree/master/OctopusDeployServer) to get a fully working Octopus Deploy Server.
+To make development easier, run a local Octopus Deploy server on your machine. The Docker Compose file at
+`tests/docker-compose.yml` will create a test environment. Set the `OCTOPUS_VERSION` environment variable to a valid
+`octopusdeploy/octopusdeploy` [image tag](https://hub.docker.com/r/octopusdeploy/octopusdeploy).
 
-When it comes up, login on [http://localhost:8081](http://localhost:8081) with username `Administrator` and password `OctoVagrant!`.
+When it comes up, login on [http://localhost:8080](http://localhost:8080) with username `admin` and password `Password01!`.
 
 To get an API to use for local development, go to **Administrator | Profile | My API Keys** and click **New API Key**.
 
 Set the two following environment variables:
 
 ```bash
-export OCTOPUS_URL=http://localhost:8081/
+export OCTOPUS_URL=http://localhost:8080/
 export OCTOPUS_APIKEY=API-YOUR-API-KEY
 ```
 

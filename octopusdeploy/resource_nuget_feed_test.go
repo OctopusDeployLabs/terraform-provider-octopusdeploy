@@ -12,7 +12,7 @@ import (
 func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 	const feedPrefix = "octopusdeploy_nuget_feed.foo"
 	const feedName = "Testing Nuget one two three"
-	const feedUri = "http://test.com"
+	const feedURI = "http://test.com"
 	const enhancedMode = "true"
 	const feedUsername = "username"
 	const feedPassword = "password"
@@ -23,13 +23,13 @@ func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 		CheckDestroy: testOctopusDeployNugetFeedDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testNugetFeedBasic(feedName, feedUri, feedUsername, feedPassword, enhancedMode),
+				Config: testNugetFeedBasic(feedName, feedURI, feedUsername, feedPassword, enhancedMode),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployNugetFeedExists(feedPrefix),
 					resource.TestCheckResourceAttr(
 						feedPrefix, "name", feedName),
 					resource.TestCheckResourceAttr(
-						feedPrefix, "feed_uri", feedUri),
+						feedPrefix, "feed_uri", feedURI),
 					resource.TestCheckResourceAttr(
 						feedPrefix, "username", feedUsername),
 					resource.TestCheckResourceAttr(
@@ -42,7 +42,7 @@ func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 	})
 }
 
-func testNugetFeedBasic(name, feedUri string, feedUsername string, feedPassword string, enhancedMode string) string {
+func testNugetFeedBasic(name, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_nuget_feed" "foo" {
 			name          = "%s"
@@ -52,7 +52,7 @@ func testNugetFeedBasic(name, feedUri string, feedUsername string, feedPassword 
 			enhanced_mode = "%s"
 		}
 		`,
-		name, feedUri, feedUsername, feedPassword, enhancedMode,
+		name, feedURI, feedUsername, feedPassword, enhancedMode,
 	)
 }
 

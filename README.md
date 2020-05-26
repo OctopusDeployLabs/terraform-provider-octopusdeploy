@@ -4,7 +4,7 @@ A Terraform provider for [Octopus Deploy](https://octopus.com).
 
 It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopusdeploy) Octopus Deploy client SDK.
 
-> :warning: This provider is in heavy development. There may be breaking changes.
+> :warning: This is a community project under development. Please raise a GitHub issue for any problems or feature requests.
 
 ## Downloading & Installing
 
@@ -98,7 +98,3 @@ resource "octopusdeploy_environment" "Env3" {
 
 * [octopusdeploy_environment](docs/provider/resources/environment.md)
 * [octopusdeploy_lifecycle](docs/provider/resources/lifecycle.md)
-
-## Provider Resources (To Be Moved To /docs)
-
-* All other resource documentation is currently [here](docs/to_move_to_provider.md).

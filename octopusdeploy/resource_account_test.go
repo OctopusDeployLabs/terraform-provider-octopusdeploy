@@ -13,9 +13,10 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 	const accountPrefix = "octopusdeploy_account.foo"
 	const accountName = "Testing one two three"
 	const accountType = "AzureServicePrincipal"
-	const clientId = "18eb006b-c3c8-4a72-93cd-fe4b293f82e1"
-	const tenantId = "18eb006b-c3c8-4a72-93cd-fe4b293f82e2"
-	const subscriptionId = "18eb006b-c3c8-4a72-93cd-fe4b293f82e3"
+	const clientID = "18eb006b-c3c8-4a72-93cd-fe4b293f82e1"
+	const tenantID = "18eb006b-c3c8-4a72-93cd-fe4b293f82e2"
+	const subscriptionID = "18eb006b-c3c8-4a72-93cd-fe4b293f82e3"
+	//nolint:gosec
 	const clientSecret = "18eb006b-c3c8-4a72-93cd-fe4b293f82e4"
 	const tagSetName = "TagSet"
 	const tagName = "Tag"
@@ -28,7 +29,7 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 		CheckDestroy: testOctopusDeployAccountDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccountBasic(tagSetName, tagName, accountName, accountType, clientId, tenantId, subscriptionId, clientSecret, tenantedDeploymentParticipation),
+				Config: testAccountBasic(tagSetName, tagName, accountName, accountType, clientID, tenantID, subscriptionID, clientSecret, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployAccountExists(accountPrefix),
 					resource.TestCheckResourceAttr(
@@ -36,11 +37,11 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						accountPrefix, "account_type", accountType),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "client_id", clientId),
+						accountPrefix, "client_id", clientID),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "tenant_id", tenantId),
+						accountPrefix, "tenant_id", tenantID),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "subscription_id", subscriptionId),
+						accountPrefix, "subscription_id", subscriptionID),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "client_secret", clientSecret),
 					resource.TestCheckResourceAttr(
@@ -53,9 +54,9 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 	})
 }
 
-func testAccountBasic(tagSetName string, tagName string, accountName string, accountType, clientId string, tenantId string, subscriptionId string, clientSecret string, tenantedDeploymentParticipation string) string {
+func testAccountBasic(tagSetName string, tagName string, accountName string, accountType, clientID string, tenantID string, subscriptionID string, clientSecret string, tenantedDeploymentParticipation string) string {
 	return fmt.Sprintf(`
-		
+
 		resource "octopusdeploy_tag_set" "testtagset" {
 			name = "%s"
 
@@ -77,7 +78,7 @@ func testAccountBasic(tagSetName string, tagName string, accountName string, acc
 			tenanted_deployment_participation = "%s"
 		}
 		`,
-		tagSetName, tagName, accountName, accountType, clientId, tenantId, subscriptionId, clientSecret, tagName, tenantedDeploymentParticipation,
+		tagSetName, tagName, accountName, accountType, clientID, tenantID, subscriptionID, clientSecret, tagName, tenantedDeploymentParticipation,
 	)
 }
 
@@ -90,9 +91,9 @@ func testOctopusDeployAccountExists(n string) resource.TestCheckFunc {
 
 func existsaccountHelper(s *terraform.State, client *octopusdeploy.Client) error {
 
-	accountId := s.RootModule().Resources["octopusdeploy_account.foo"].Primary.ID
+	accountID := s.RootModule().Resources["octopusdeploy_account.foo"].Primary.ID
 
-	if _, err := client.Account.Get(accountId); err != nil {
+	if _, err := client.Account.Get(accountID); err != nil {
 		return fmt.Errorf("Received an error retrieving account %s", err)
 	}
 
@@ -106,9 +107,9 @@ func testOctopusDeployAccountDestroy(s *terraform.State) error {
 
 func destroyaccountHelper(s *terraform.State, client *octopusdeploy.Client) error {
 
-	accountId := s.RootModule().Resources["octopusdeploy_account.foo"].Primary.ID
+	accountID := s.RootModule().Resources["octopusdeploy_account.foo"].Primary.ID
 
-	if _, err := client.Account.Get(accountId); err != nil {
+	if _, err := client.Account.Get(accountID); err != nil {
 		if err == octopusdeploy.ErrItemNotFound {
 			return nil
 		}

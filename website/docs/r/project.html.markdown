@@ -41,60 +41,63 @@ resource "octopusdeploy_project" "billing_service" {
   project_group_id      = "${octopusdeploy_project_group.finance.id}"
   skip_machine_behavior = "SkipUnavailableMachines"
 
-  deployment_step_windows_service {
-    executable_path                = "batch_processor\\batch_processor_service.exe"
-    service_name                   = "Billing Batch Processor"
-    step_name                      = "Deploy Billing Batch Processor Windows Service"
-    step_condition                 = "failure"
-    package                        = "Billing.BatchProcessor"
-    json_file_variable_replacement = "appsettings.json"
+  deployment_step {
+    windows_service {
+      executable_path                = "batch_processor\\batch_processor_service.exe"
+      service_name                   = "Billing Batch Processor"
+      step_name                      = "Deploy Billing Batch Processor Windows Service"
+      step_condition                 = "failure"
+      package                        = "Billing.BatchProcessor"
+      json_file_variable_replacement = "appsettings.json"
 
-    target_roles = [
-      "Billing-Batch-Processor",
-    ]
-  }
+      target_roles = [
+        "Billing-Batch-Processor",
+      ]
+    }
 
-  deployment_step_inline_script {
-    step_name   = "Cleanup Temporary Files"
-    script_type = "PowerShell"
+    inline_script {
+      step_name   = "Cleanup Temporary Files"
+      script_type = "PowerShell"
 
-    script_body = <<EOF
-$oldFiles = Get-ChildItem -Path 'C:\billing_archived_jobs'
-Remove-Item $oldFiles -Force -Recurse
-EOF
+      script_body = <<EOF
+            $oldFiles = Get-ChildItem -Path 'C:\billing_archived_jobs'
+            Remove-Item $oldFiles -Force -Recurse
+            EOF
 
-    target_roles = [
-      "Billing-Batch-Processor",
-    ]
-  }
+      target_roles = [
+        "Billing-Batch-Processor",
+      ]
+    }
 
-  deployment_step_iis_website {
-    step_name                  = "Deploy Billing API"
-    website_name               = "Billing API"
-    application_pool_name      = "Billing"
-    application_pool_framework = "v2.0"
-    basic_authentication       = true
-    windows_authentication     = false
-    package                    = "Billing.API"
+    iis_website {
+      step_name                  = "Deploy Billing API"
+      website_name               = "Billing API"
+      application_pool_name      = "Billing"
+      application_pool_framework = "v2.0"
+      basic_authentication       = true
+      windows_authentication     = false
+      package                    = "Billing.API"
 
-    target_roles = [
-      "Billing-API-Asia",
-      "Billing-API-Europe",
-    ]
-  }
+      target_roles = [
+        "Billing-API-Asia",
+        "Billing-API-Europe",
+      ]
+    }
 
-  deployment_step_package_script {
-    step_name         = "Verify API Deployment"
-    package           = "Billing.API"
-    script_file_name  = "scripts\\verify_deployment.ps1"
-    script_parameters = "-Verbose"
+    package_script {
+      step_name         = "Verify API Deployment"
+      package           = "Billing.API"
+      script_file_name  = "scripts\\verify_deployment.ps1"
+      script_parameters = "-Verbose"
 
-    target_roles = [
-      "Billing-API-Asia",
-      "Billing-API-Europe",
-    ]
+      target_roles = [
+        "Billing-API-Asia",
+        "Billing-API-Europe",
+      ]
+    }
   }
 }
+
 ```
 
 Which creates the following:
@@ -111,12 +114,13 @@ The following arguments define the project:
 * `project_group_id` - (Required) The ID of the project group the project will be in.
 * `default_failure_mode` - (Optional - Default is `EnvironmentDefault`) [Guided failure mode](https://octopus.com/docs/deployment-process/releases/guided-failures) tells Octopus that if something goes wrong during the deployment, instead of failing immediately, Octopus should ask for a human to intervene. Allowed values `EnvironmentDefault`, `Off`, `On`.
 * `skip_machine_behavior` - (Optional - Default is `None`) Choose to skip or not skip deployment targets if they are unavailable during a deployment. Allowed values `SkipUnavailableMachines`, `None`.
-* `deployment_step_windows_service` - (Optional) Creates a Windows Service deployment step. Can be specified multiple times in a project. Each block supports the fields documented below.
-* `deployment_step_iis_website` - (Optional) Creates an IIS deployment step. Can be specified multiple times in a project. Each block supports the fields documented below.
-* `deployment_step_inline_script` - (Optional) Creates inline script deployment step. Can be specified multiple times in a project. Each block supports the fields documented below.
-* `deployment_step_package_script` - (Optional) Creates package script deployment step. Can be specified multiple times in a project. Each block supports the fields documented below.
+* `deployment_step` - (Optional) Defines the process deployment step(s).
+* `windows_service` - (Optional) Creates a Windows Service deployment step. Can be specified multiple times in a project. Each block supports the fields documented below.
+* `iis_website` - (Optional) Creates an IIS deployment step. Can be specified multiple times in a project. Each block supports the fields documented below.
+* `inline_script` - (Optional) Creates inline script deployment step. Can be specified multiple times in a project. Each block supports the fields documented below.
+* `package_script` - (Optional) Creates package script deployment step. Can be specified multiple times in a project. Each block supports the fields documented below.
 
-The `deployment_step_windows_service` block supports:
+The `windows_service` block supports:
 
 * `executable_path` - (Required) Path to the executable for the service
 * `service_account` - (Optional - Default is `LocalSystem`) The account to run the service under
@@ -126,7 +130,7 @@ The `deployment_step_windows_service` block supports:
 * The arguments in the [Feed and Packages](#Feed-and-Packages) section
 * The arguments in the [Configuration and Transformation](#Configuration-and-Transformation) section
 
-The `deployment_step_iis_website` block supports:
+The `iis_website` block supports:
 
 * `anonymous_authentication` - (Optional - Default is `false`) Whether IIS should allow anonymous authentication.
 * `basic_authentication` - (Optional - Default is `false`) Whether IIS should allow basic authentication with a 401 challenge.
@@ -137,13 +141,13 @@ The `deployment_step_iis_website` block supports:
 * The arguments in the [Configuration and Transformation](#Configuration-and-Transformation) section.
 * The arguments in the [IIS Application Pool](#IIS-Application-Pool) section.
 
-The `deployment_step_inline_script` block supports:
+The `inline_script` block supports:
 
 * `script_type` - (Required) The scripting language of the deployment step. Allowed values `PowerShell`, `CSharp`, `Bash`, `FSharp`.
 * `script_body` - (Required) The script body. Multi-line strings are [supported by Terraform](https://www.terraform.io/docs/configuration/variables.html#strings).
 * The arguments in the [Common Across All Deployment Steps](#Common-Across-All-Deployment-Steps) section.
 
-The `deployment_step_package_script` block supports:
+The `package_script` block supports:
 
 * `script_file_name` - (Required) The script file name in the package.
 * `script_parameters` - (Optional) Parameters expected by the script.
@@ -179,4 +183,5 @@ The following arguments are shared amongst the `deployment_step` resources.
 * `application_pool_identity` - (Optional - Default is `ApplicationPoolIdentity`) Which built-in account will the application pool run under.
 
 ### Attributes Reference
+
 * `deployment_process_id` - The ID of the projects deployment process.

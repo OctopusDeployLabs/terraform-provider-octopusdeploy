@@ -82,6 +82,7 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 	})
 }
 
+//nolint:govet
 func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	return
 
@@ -89,7 +90,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
 	const allowDeploymentsToNoTargets = "true"
-	inlineScriptRegex := regexp.MustCompile(".*Get\\-Process.*")
+	inlineScriptRegex := regexp.MustCompile(`.*Get\-Process.*`)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,

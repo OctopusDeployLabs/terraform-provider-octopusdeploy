@@ -1,0 +1,23 @@
+name: Run integration tests against Octopus in a Docker container
+on: push
+defaults:
+  run:
+    shell: bash
+jobs:
+  test:
+    env:
+      OCTOPUS_VERSION: "2020.2.7"
+      OCTOPUS_URL: "http://localhost:8080"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Start the Octopus container
+        run: ./tests/start-octopus.sh
+
+      - name: Generate an API key
+        run: ./tests/Create-ApiKey.ps1
+        shell: pwsh
+
+      - name: Run the tests
+        run: ./ci-scripts/pull_request.sh

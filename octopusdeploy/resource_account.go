@@ -104,9 +104,9 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 
 	var environments []string
 	var accountType string
-	var clientId string
-	var tenantId string
-	var subscriptionId string
+	var clientID string
+	var tenantID string
+	var subscriptionID string
 	var clientSecret string
 	var tenantTags []string
 	var tenantedDeploymentParticipation string
@@ -122,19 +122,19 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 		accountType = accountTypeInterface.(string)
 	}
 
-	clientIdInterface, ok := d.GetOk("client_id")
+	clientIDInterface, ok := d.GetOk("client_id")
 	if ok {
-		clientId = clientIdInterface.(string)
+		clientID = clientIDInterface.(string)
 	}
 
-	tenantIdInterface, ok := d.GetOk("tenant_id")
+	tenantIDInterface, ok := d.GetOk("tenant_id")
 	if ok {
-		tenantId = tenantIdInterface.(string)
+		tenantID = tenantIDInterface.(string)
 	}
 
-	subscriptionIdInterface, ok := d.GetOk("subscription_id")
+	subscriptionIDInterface, ok := d.GetOk("subscription_id")
 	if ok {
-		subscriptionId = subscriptionIdInterface.(string)
+		subscriptionID = subscriptionIDInterface.(string)
 	}
 
 	clientSecretInterface, ok := d.GetOk("client_secret")
@@ -164,12 +164,12 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 	accountTypeEnum, _ := octopusdeploy.ParseAccountType(accountType)
 	var account = octopusdeploy.NewAccount(accountName, accountTypeEnum)
 	account.EnvironmentIDs = environments
-	account.ClientID = clientId
-	account.TenantID = tenantId
+	account.ClientID = clientID
+	account.TenantID = tenantID
 	account.Password = octopusdeploy.SensitiveValue{
 		NewValue: clientSecret,
 	}
-	account.SubscriptionNumber = subscriptionId
+	account.SubscriptionNumber = subscriptionID
 	account.TenantTags = tenantTags
 	account.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(tenantedDeploymentParticipation)
 	account.Token = octopusdeploy.SensitiveValue{
@@ -213,12 +213,12 @@ func resourceAccountUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceAccountDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	accountId := d.Id()
+	accountID := d.Id()
 
-	err := client.Account.Delete(accountId)
+	err := client.Account.Delete(accountID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting account id %s: %s", accountId, err.Error())
+		return fmt.Errorf("error deleting account id %s: %s", accountID, err.Error())
 	}
 
 	d.SetId("")

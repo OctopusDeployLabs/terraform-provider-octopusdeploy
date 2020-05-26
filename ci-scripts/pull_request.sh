@@ -8,11 +8,11 @@ go mod download
 
 ## When in CI, install linter and run from a special path
 if [ -n "${CI}" ]; then
-    curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.12.4
+    curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.27.0
 
-    ./bin/golangci-lint run
+    ./bin/golangci-lint run --timeout 2m0s
 else
-    golangci-lint run
+    golangci-lint run --timeout 2m0s
 fi
 
 # Test

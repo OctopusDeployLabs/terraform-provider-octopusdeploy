@@ -107,7 +107,7 @@ func buildRulesResource(tfRule map[string]interface{}) octopusdeploy.ChannelRule
 }
 
 func flattenRules(in []octopusdeploy.ChannelRule) []map[string]interface{} {
-	var flattened = make([]map[string]interface{}, len(in), len(in))
+	var flattened = make([]map[string]interface{}, len(in))
 	for i, v := range in {
 		m := make(map[string]interface{})
 		m["version_range"] = v.VersionRange

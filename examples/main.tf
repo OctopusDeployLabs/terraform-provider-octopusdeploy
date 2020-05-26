@@ -27,57 +27,59 @@ resource "octopusdeploy_project" "billing_service" {
   project_group_id      = "${octopusdeploy_project_group.finance.id}"
   skip_machine_behavior = "SkipUnavailableMachines"
 
-  deployment_step_windows_service {
-    executable_path                = "batch_processor\\batch_processor_service.exe"
-    service_name                   = "Billing Batch Processor"
-    step_name                      = "Deploy Billing Batch Processor Windows Service"
-    step_condition                 = "failure"
-    package                        = "Billing.BatchProcessor"
-    json_file_variable_replacement = "appsettings.json"
+  deployment_step {
+    windows_service {
+      executable_path                = "batch_processor\\batch_processor_service.exe"
+      service_name                   = "Billing Batch Processor"
+      step_name                      = "Deploy Billing Batch Processor Windows Service"
+      step_condition                 = "failure"
+      package                        = "Billing.BatchProcessor"
+      json_file_variable_replacement = "appsettings.json"
 
-    target_roles = [
-      "Billing-Batch-Processor",
-    ]
-  }
+      target_roles = [
+        "Billing-Batch-Processor",
+      ]
+    }
 
-  deployment_step_inline_script {
-    step_name   = "Cleanup Temporary Files"
-    script_type = "PowerShell"
+    inline_script {
+      step_name   = "Cleanup Temporary Files"
+      script_type = "PowerShell"
 
-    script_body = <<EOF
+      script_body = <<EOF
 $oldFiles = Get-ChildItem -Path 'C:\billing_archived_jobs'
 Remove-Item $oldFiles -Force -Recurse
 EOF
 
-    target_roles = [
-      "Billing-Batch-Processor",
-    ]
-  }
+      target_roles = [
+        "Billing-Batch-Processor",
+      ]
+    }
 
-  deployment_step_iis_website {
-    step_name                  = "Deploy Billing API"
-    website_name               = "Billing API"
-    application_pool_name      = "Billing"
-    application_pool_framework = "v2.0"
-    basic_authentication       = true
-    windows_authentication     = false
-    package                    = "Billing.API"
+    iis_website {
+      step_name                  = "Deploy Billing API"
+      website_name               = "Billing API"
+      application_pool_name      = "Billing"
+      application_pool_framework = "v2.0"
+      basic_authentication       = true
+      windows_authentication     = false
+      package                    = "Billing.API"
 
-    target_roles = [
-      "Billing-API-Asia",
-      "Billing-API-Europe",
-    ]
-  }
+      target_roles = [
+        "Billing-API-Asia",
+        "Billing-API-Europe",
+      ]
+    }
 
-  deployment_step_package_script {
-    step_name         = "Verify API Deployment"
-    package           = "Billing.API"
-    script_file_name  = "scripts\\verify_deployment.ps1"
-    script_parameters = "-Verbose"
+    package_script {
+      step_name         = "Verify API Deployment"
+      package           = "Billing.API"
+      script_file_name  = "scripts\\verify_deployment.ps1"
+      script_parameters = "-Verbose"
 
-    target_roles = [
-      "Billing-API-Asia",
-      "Billing-API-Europe",
-    ]
+      target_roles = [
+        "Billing-API-Asia",
+        "Billing-API-Europe",
+      ]
+    }
   }
 }

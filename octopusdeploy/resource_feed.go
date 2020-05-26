@@ -48,8 +48,9 @@ func resourceFeed() *schema.Resource {
 				Optional: true,
 			},
 			"password": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 		},
 	}
@@ -58,8 +59,8 @@ func resourceFeed() *schema.Resource {
 func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	feedId := d.Id()
-	feed, err := client.Feed.Get(feedId)
+	feedID := d.Id()
+	feed, err := client.Feed.Get(feedID)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -67,7 +68,7 @@ func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading feed %s: %s", feedId, err.Error())
+		return fmt.Errorf("error reading feed %s: %s", feedID, err.Error())
 	}
 
 	d.Set("name", feed.Name)
@@ -86,7 +87,7 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 	feedName := d.Get("name").(string)
 
 	var feedType string
-	var feedUri string
+	var feedURI string
 	var enhancedMode bool
 	var downloadAttempts int
 	var downloadRetryBackoffSeconds int
@@ -98,9 +99,9 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 		feedType = feedTypeInterface.(string)
 	}
 
-	feedUriInterface, ok := d.GetOk("feed_uri")
+	feedURIInterface, ok := d.GetOk("feed_uri")
 	if ok {
-		feedUri = feedUriInterface.(string)
+		feedURI = feedURIInterface.(string)
 	}
 
 	enhancedModeInterface, ok := d.GetOk("enhanced_mode")
@@ -128,7 +129,7 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 		feedPassword = feedPasswordInterface.(string)
 	}
 
-	var feed = octopusdeploy.NewFeed(feedName, feedType, feedUri)
+	var feed = octopusdeploy.NewFeed(feedName, feedType, feedURI)
 	feed.EnhancedMode = enhancedMode
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
@@ -174,12 +175,12 @@ func resourceFeedUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceFeedDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	feedId := d.Id()
+	feedID := d.Id()
 
-	err := client.Feed.Delete(feedId)
+	err := client.Feed.Delete(feedID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting feed id %s: %s", feedId, err.Error())
+		return fmt.Errorf("error deleting feed id %s: %s", feedID, err.Error())
 	}
 
 	d.SetId("")
