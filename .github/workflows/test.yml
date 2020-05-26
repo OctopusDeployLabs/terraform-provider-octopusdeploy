@@ -1,0 +1,36 @@
+name: Run integration tests against Octopus in a Docker container
+on: push
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  test:
+    env:
+      OCTOPUS_VERSION: "2020.2.7"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Install modules
+        run: ./tests/Initialise-Modules.ps1
+
+      - name: Start the Octopus container
+        run: ./tests/Start-Octopus.ps1
+
+      - name: Install dependencies
+        run: ./tests/install-dependencies.sh
+        shell: bash
+
+      - name: Build the plugin
+        run: ./ci-scripts/build.sh
+        shell: bash
+
+      - name: Generate an API key
+        run: ./tests/Create-ApiKey.ps1
+
+      - name: Run Terraform
+        run: ./tests/Run-Terraform.ps1
+
+      - name: Run Tests
+        run: ./tests/Run-Tests.ps1
+
