@@ -9,6 +9,7 @@ function Wait-ForOctopus() {
         $containers = & docker container ls
         Write-Host $containers
 
+        # Get the logs of the octopus container
         $logs = & docker logs tests_octopus_1
         Write-Host $logs
 
