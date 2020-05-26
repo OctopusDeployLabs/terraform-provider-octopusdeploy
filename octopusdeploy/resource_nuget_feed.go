@@ -54,8 +54,8 @@ func resourceNugetFeed() *schema.Resource {
 func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	feedId := d.Id()
-	feed, err := client.Feed.Get(feedId)
+	feedID := d.Id()
+	feed, err := client.Feed.Get(feedID)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -63,7 +63,7 @@ func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading feed %s: %s", feedId, err.Error())
+		return fmt.Errorf("error reading feed %s: %s", feedID, err.Error())
 	}
 
 	d.Set("name", feed.Name)
@@ -80,16 +80,16 @@ func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 func buildNugetFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 	feedName := d.Get("name").(string)
 
-	var feedUri string
+	var feedURI string
 	var enhancedMode bool
 	var downloadAttempts int
 	var downloadRetryBackoffSeconds int
 	var feedUsername string
 	var feedPassword string
 
-	feedUriInterface, ok := d.GetOk("feed_uri")
+	feedURIInterface, ok := d.GetOk("feed_uri")
 	if ok {
-		feedUri = feedUriInterface.(string)
+		feedURI = feedURIInterface.(string)
 	}
 
 	enhancedModeInterface, ok := d.GetOk("enhanced_mode")
@@ -117,7 +117,7 @@ func buildNugetFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 		feedPassword = feedPasswordInterface.(string)
 	}
 
-	feed := octopusdeploy.NewFeed(feedName, "NuGet", feedUri)
+	feed := octopusdeploy.NewFeed(feedName, "NuGet", feedURI)
 	feed.EnhancedMode = enhancedMode
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
@@ -163,12 +163,12 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceNugetFeedDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	feedId := d.Id()
+	feedID := d.Id()
 
-	err := client.Feed.Delete(feedId)
+	err := client.Feed.Delete(feedID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting nuget feed id %s: %s", feedId, err.Error())
+		return fmt.Errorf("error deleting nuget feed id %s: %s", feedID, err.Error())
 	}
 
 	d.SetId("")

@@ -47,8 +47,8 @@ func getTagSchema() *schema.Schema {
 func resourceTagSetRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	tagSetId := d.Id()
-	tagSet, err := client.TagSet.Get(tagSetId)
+	tagSetID := d.Id()
+	tagSet, err := client.TagSet.Get(tagSetID)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -56,7 +56,7 @@ func resourceTagSetRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading tagSet %s: %s", tagSetId, err.Error())
+		return fmt.Errorf("error reading tagSet %s: %s", tagSetID, err.Error())
 	}
 
 	d.Set("name", tagSet.Name)
@@ -124,12 +124,12 @@ func resourceTagSetUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceTagSetDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	tagSetId := d.Id()
+	tagSetID := d.Id()
 
-	err := client.TagSet.Delete(tagSetId)
+	err := client.TagSet.Delete(tagSetID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting tagSet id %s: %s", tagSetId, err.Error())
+		return fmt.Errorf("error deleting tagSet id %s: %s", tagSetID, err.Error())
 	}
 
 	d.SetId("")

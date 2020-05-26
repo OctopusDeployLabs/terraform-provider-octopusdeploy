@@ -62,8 +62,8 @@ func resourceCertificate() *schema.Resource {
 func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	certificateId := d.Id()
-	certificate, err := client.Certificate.Get(certificateId)
+	certificateID := d.Id()
+	certificate, err := client.Certificate.Get(certificateID)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -71,7 +71,7 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading certificate %s: %s", certificateId, err.Error())
+		return fmt.Errorf("error reading certificate %s: %s", certificateID, err.Error())
 	}
 
 	d.Set("name", certificate.Name)
@@ -186,12 +186,12 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	certificateId := d.Id()
+	certificateID := d.Id()
 
-	err := client.Certificate.Delete(certificateId)
+	err := client.Certificate.Delete(certificateID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting certificate id %s: %s", certificateId, err.Error())
+		return fmt.Errorf("error deleting certificate id %s: %s", certificateID, err.Error())
 	}
 
 	d.SetId("")

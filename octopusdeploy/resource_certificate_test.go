@@ -47,7 +47,7 @@ func TestAccOctopusDeployCertificateBasic(t *testing.T) {
 
 func testCertificateBasic(tagSetName string, tagName string, environmentName string, certName string, notes string, certificateData string, tenantedDeploymentParticipation string) string {
 	return fmt.Sprintf(`
-		
+
 		resource "octopusdeploy_tag_set" "testtagset" {
 			name = "%s"
 
@@ -83,9 +83,9 @@ func testOctopusDeployCertificateExists(n string) resource.TestCheckFunc {
 
 func existscertHelper(s *terraform.State, client *octopusdeploy.Client) error {
 
-	certId := s.RootModule().Resources["octopusdeploy_certificate.foo"].Primary.ID
+	certID := s.RootModule().Resources["octopusdeploy_certificate.foo"].Primary.ID
 
-	if _, err := client.Certificate.Get(certId); err != nil {
+	if _, err := client.Certificate.Get(certID); err != nil {
 		return fmt.Errorf("Received an error retrieving certificate %s", err)
 	}
 
@@ -99,9 +99,9 @@ func testOctopusDeployCertificateDestroy(s *terraform.State) error {
 
 func destroycertHelper(s *terraform.State, client *octopusdeploy.Client) error {
 
-	certId := s.RootModule().Resources["octopusdeploy_certificate.foo"].Primary.ID
+	certID := s.RootModule().Resources["octopusdeploy_certificate.foo"].Primary.ID
 
-	if _, err := client.Certificate.Get(certId); err != nil {
+	if _, err := client.Certificate.Get(certID); err != nil {
 		if err == octopusdeploy.ErrItemNotFound {
 			return nil
 		}
