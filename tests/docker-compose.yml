@@ -13,6 +13,8 @@ services:
       CONNSTRING: Server=host.docker.internal,7777;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
       MASTER_KEY: 6EdU6IWsCtMEwk0kPKflQQ==
     image: octopusdeploy/octopusdeploy:${OCTOPUS_VERSION}
+    labels:
+      autoheal: true
     depends_on:
       - mssql
   mssql:
@@ -23,3 +25,7 @@ services:
       SA_PASSWORD: Password01!
       MSSQL_PID: Express
     image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+  autoheal:
+    image: willfarrell/autoheal:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
