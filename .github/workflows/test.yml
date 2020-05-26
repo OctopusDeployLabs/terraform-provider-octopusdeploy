@@ -7,20 +7,24 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Build the plugin
-        run: pwd; ls -la
-        shell: bash
+      - uses: actions/checkout@v1
+
       - name: Build the plugin
         run: ./ci-scripts/build.sh
         shell: bash
+
       - name: Install modules
         run: ./tests/Initialise-Modules.ps1
+
       - name: Start the Octopus container
         run: ./tests/Start-Octopus.ps1
+
       - name: Generate an AIP key
         run: ./tests/Create-ApiKey.ps1
+
       - name: Run Terraform
         run: ./tests/Run-Terraform.ps1
+
       - name: Run Tests
         run: ./tests/Run-Tests.ps1
 
