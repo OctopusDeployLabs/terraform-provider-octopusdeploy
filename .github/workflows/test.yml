@@ -29,7 +29,7 @@ jobs:
         run: ./tests/Create-ApiKey.ps1
 
       - name: Run Terraform
-        run: ./tests/Run-Terraform.ps1 linux_amd64
+        run: ./tests/Run-Terraform.ps1
 
       - name: Run Tests
         run: ./tests/Run-Tests.ps1
