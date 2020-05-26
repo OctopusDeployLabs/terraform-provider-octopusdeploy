@@ -5,9 +5,9 @@ param (
 Write-Host "Finding plugin for $operatingSystem"
 
 Write-Host "The contents of the build directory:"
-Write-Host (ls build)
+Write-Host (Get-Childitem build)
 
-$dir = ls build | ? {$_.Name -like "*$operatingSystem*"} | Select -First 1
+$dir = Get-Childitem build | ? {$_.Name -like "*$operatingSystem*"} | Select -First 1
 Write-Host "Plugin dir is set to $($dir.Name)"
 
 terraform init -plugin-dir "./build/$($dir.Name)" tests
