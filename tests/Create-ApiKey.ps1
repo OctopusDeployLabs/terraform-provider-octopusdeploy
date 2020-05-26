@@ -22,9 +22,4 @@ $ApiObj = $repository.Users.CreateApiKey($UserObj, "Terraform tests")
 #Save the API key so we can use it later
 Set-Content -Path tests\octopus_api.txt -Value $ApiObj.ApiKey
 
-Set-Content -Path tests\provider.tf -Value @"
-provider "octopusdeploy" {
-    address = "http://localhost:8080"
-    apikey  = "$($ApiObj.ApiKey)"
-}
-"@
+Write-Host "::set-env name=OCTOPUS_APIKEY::$($ApiObj.ApiKey)"

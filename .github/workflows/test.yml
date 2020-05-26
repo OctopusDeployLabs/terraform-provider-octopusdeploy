@@ -7,6 +7,7 @@ jobs:
   test:
     env:
       OCTOPUS_VERSION: "2020.2.7"
+      OCTOPUS_URL: "http://localhost:8080"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -28,9 +29,6 @@ jobs:
       - name: Generate an API key
         run: ./tests/Create-ApiKey.ps1
 
-      - name: Run Terraform
-        run: ./tests/Run-Terraform.ps1
-
-      - name: Run Tests
-        run: ./tests/Run-Tests.ps1
-
+      - name: Run the tests
+        run: ./ci-scripts/pull_request
+        shell: bash
