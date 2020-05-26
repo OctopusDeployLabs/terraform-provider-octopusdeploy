@@ -2,7 +2,7 @@
 
 Describe 'Terraform Provider' {
     It 'must create a project group called Test' {
-        docker container ls
+        Wait-ForOctopus
         $repository = Connect-ToOctopus http://localhost:8080
         $entity = Invoke-ScriptBlockWithRetries {$repository.ProjectGroups.FindByName("Test")}
         $entity | Should -Not -Be $null
