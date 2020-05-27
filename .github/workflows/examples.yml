@@ -23,4 +23,4 @@ jobs:
         run: ./ci-scripts/build.sh
 
       - name: Implement the examples
-        run: ./tests/run-terraform.sh
+        run: ./tests/run-terraform.sh linux_amd64
