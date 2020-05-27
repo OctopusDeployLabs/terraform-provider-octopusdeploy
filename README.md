@@ -6,6 +6,11 @@ It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopu
 
 > :warning: This is a community project under development. Please raise a GitHub issue for any problems or feature requests.
 
+## Testing
+
+A GitHub action has been added to this project which initializes an instance of Octopus Deploy and runs the tests
+against it. These same tests can be run in a forked repository.
+
 ## Downloading & Installing
 
 As this provider is still under development, you will need to manually download it.

@@ -1,5 +1,13 @@
 # Contributing
 
+## Testing and Linting
+
+The GitHub action in the workflow file `.github/test.yml` creates an Octopus instance and then runs linting and tests
+against it. A PR will only be accepted if it doesn't break any existing passing tests, if all linting rules also pass,
+and if the new feature has additional tests.
+
+GitHub actions are available in forked repos, but must be manually enabled.
+
 ## Go Dependencies
 
 Dependencies are managed using [Go 1.11 Modules](https://github.com/golang/go/wiki/Modules)
