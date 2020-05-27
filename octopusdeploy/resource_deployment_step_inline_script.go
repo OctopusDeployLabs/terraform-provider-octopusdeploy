@@ -37,7 +37,7 @@ func resourceDeploymentStepInlineScript() *schema.Resource {
 	}
 
 	/* Add Shared Schema's */
-	resourceDeploymentStep_AddDefaultSchema(schemaRes, false)
+	resourceDeploymentStepAddDefaultSchema(schemaRes, false)
 
 	/* Return Schema */
 	return schemaRes
@@ -48,7 +48,7 @@ func buildInlineScriptDeploymentStep(d *schema.ResourceData) *octopusdeploy.Depl
 	d.Set("script_source", "Inline")
 
 	/* Create Basic Deployment Step */
-	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.Script")
+	deploymentStep := resourceDeploymentStepCreateBasicStep(d, "Octopus.Script")
 
 	/* Add Script Properties */
 	deploymentStep.Actions[0].Properties["Octopus.Action.Script.ScriptSource"] = d.Get("script_source").(string)
@@ -60,7 +60,7 @@ func buildInlineScriptDeploymentStep(d *schema.ResourceData) *octopusdeploy.Depl
 }
 
 func setInlineScriptSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
-	resourceDeploymentStep_SetBasicSchema(d, deploymentStep)
+	resourceDeploymentStepSetBasicSchema(d, deploymentStep)
 
 	/* Get Script Properties */
 	d.Set("script_source", deploymentStep.Actions[0].Properties["Octopus.Action.Script.ScriptSource"])

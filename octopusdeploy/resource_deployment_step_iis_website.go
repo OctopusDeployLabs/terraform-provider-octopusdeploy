@@ -124,9 +124,9 @@ func resourceDeploymentStepIisWebsite() *schema.Resource {
 	}
 
 	/* Add Shared Schema's */
-	resourceDeploymentStep_AddDefaultSchema(schemaRes, true)
-	resourceDeploymentStep_AddPackageSchema(schemaRes)
-	resourceDeploymentStep_AddIisAppPoolSchema(schemaRes)
+	resourceDeploymentStepAddDefaultSchema(schemaRes, true)
+	resourceDeploymentStepAddPackageSchema(schemaRes)
+	resourceDeploymentStepAddIisAppPoolSchema(schemaRes)
 
 	/* Return Schema */
 	return schemaRes
@@ -137,14 +137,14 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 	d.Set("deployment_type", "webSite")
 
 	/* Create Basic Deployment Step */
-	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.IIS")
+	deploymentStep := resourceDeploymentStepCreateBasicStep(d, "Octopus.IIS")
 
 	/* Enable IIS Web Site Feature */
 	deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] = "Octopus.Features.IISWebSite"
 
 	/* Add Shared Properties */
-	resourceDeploymentStep_AddPackageProperties(d, deploymentStep)
-	resourceDeploymentStep_AddIisAppPoolProperties(d, deploymentStep, "IISWebSite")
+	resourceDeploymentStepAddPackageProperties(d, deploymentStep)
+	resourceDeploymentStepAddIisAppPoolProperties(d, deploymentStep, "IISWebSite")
 
 	/* Add Web Site Properties */
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"] = d.Get("deployment_type").(string)
@@ -170,7 +170,7 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 	/* Flatten Bindings */
 	type bindingsStruct struct {
 		Protocol            *string `json:"protocol"`
-		IpAddress           *string `json:"ipAddress"`
+		IPAddress           *string `json:"ipAddress"`
 		Port                *string `json:"port"`
 		Host                *string `json:"host"`
 		Thumbprint          *string `json:"thumbprint"`
@@ -229,9 +229,9 @@ func buildIisWebsiteDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploy
 }
 
 func setIisWebsiteSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
-	resourceDeploymentStep_SetBasicSchema(d, deploymentStep)
-	resourceDeploymentStep_SetPackageSchema(d, deploymentStep)
-	resourceDeploymentStep_SetIisAppPoolSchema(d, deploymentStep, "IISWebSite")
+	resourceDeploymentStepSetBasicSchema(d, deploymentStep)
+	resourceDeploymentStepSetPackageSchema(d, deploymentStep)
+	resourceDeploymentStepSetIisAppPoolSchema(d, deploymentStep, "IISWebSite")
 
 	/* Get Web Site Properties */
 	d.Set("deployment_type", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"])

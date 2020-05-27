@@ -13,7 +13,7 @@ import (
 /* --------------------------------------- */
 /* Shared Schema  Setups */
 /* --------------------------------------- */
-func resourceDeploymentStep_AddDefaultSchema(schemaRes *schema.Resource, target_roles_required bool) {
+func resourceDeploymentStepAddDefaultSchema(schemaRes *schema.Resource, targetRolesRequired bool) {
 
 	schemaRes.Schema["project_id"] = &schema.Schema{
 		Type:     schema.TypeString,
@@ -82,14 +82,14 @@ func resourceDeploymentStep_AddDefaultSchema(schemaRes *schema.Resource, target_
 
 	schemaRes.Schema["target_roles"] = &schema.Schema{
 		Type:     schema.TypeList,
-		Required: target_roles_required,
-		Optional: !target_roles_required,
+		Required: targetRolesRequired,
+		Optional: !targetRolesRequired,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
 	}
 
-	if !target_roles_required {
+	if !targetRolesRequired {
 		schemaRes.Schema["run_on_server"] = &schema.Schema{
 			Type:        schema.TypeBool,
 			Description: "Whether the script runs on the server (true) or target (false)",
@@ -99,7 +99,7 @@ func resourceDeploymentStep_AddDefaultSchema(schemaRes *schema.Resource, target_
 	}
 }
 
-func resourceDeploymentStep_AddPackageSchema(schemaRes *schema.Resource) {
+func resourceDeploymentStepAddPackageSchema(schemaRes *schema.Resource) {
 	schemaRes.Schema["feed_id"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "The ID of the feed a package will be found in.",
@@ -226,7 +226,7 @@ func resourceDeploymentStep_AddPackageSchema(schemaRes *schema.Resource) {
 	}
 }
 
-func resourceDeploymentStep_AddIisAppPoolSchema(schemaRes *schema.Resource) {
+func resourceDeploymentStepAddIisAppPoolSchema(schemaRes *schema.Resource) {
 	schemaRes.Schema["application_pool"] = &schema.Schema{
 		Type:        schema.TypeSet,
 		MaxItems:    1,
@@ -291,16 +291,16 @@ func resourceDeploymentStep_AddIisAppPoolSchema(schemaRes *schema.Resource) {
 func resourceDeploymentStepCreate(d *schema.ResourceData, m interface{}, buildDeploymentProcessStepFunc func(d *schema.ResourceData) *octopusdeploy.DeploymentStep) error {
 	client := m.(*octopusdeploy.Client)
 
-	projectId := d.Get("project_id").(string)
+	projectID := d.Get("project_id").(string)
 	firstStep := d.Get("first_step").(bool)
-	afterStepId := d.Get("after_step_id").(string)
+	afterStepID := d.Get("after_step_id").(string)
 
 	/* Find Deployment Process */
-	log.Printf("Loading Project Information '%s' ...", projectId)
-	project, err := client.Project.Get(projectId)
+	log.Printf("Loading Project Information '%s' ...", projectID)
+	project, err := client.Project.Get(projectID)
 
 	if err != nil {
-		return fmt.Errorf("error loading project '%s': %s", projectId, err.Error())
+		return fmt.Errorf("error loading project '%s': %s", projectID, err.Error())
 	}
 
 	log.Printf("Loading Deployment Process '%s' ...", project.DeploymentProcessID)
@@ -326,7 +326,7 @@ func resourceDeploymentStepCreate(d *schema.ResourceData, m interface{}, buildDe
 
 		deploymentProcess.Steps = append(deploymentProcess.Steps, orgDeploymentStep)
 
-		if newStepAddedIndex == -1 && orgDeploymentStep.ID == afterStepId {
+		if newStepAddedIndex == -1 && orgDeploymentStep.ID == afterStepID {
 			newStepAddedIndex = stepIndex + 1
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
@@ -361,12 +361,12 @@ func resourceDeploymentStepRead(d *schema.ResourceData, m interface{}, setSchema
 	client := m.(*octopusdeploy.Client)
 
 	/* Get Id's */
-	stepId := d.Id()
-	processId := d.Get("deployment_process_id").(string)
+	stepID := d.Id()
+	processID := d.Get("deployment_process_id").(string)
 
 	/* Load Step Information */
-	log.Printf("Loading Deployment Process '%s' ...", processId)
-	deploymentProcess, err := client.DeploymentProcess.Get(processId)
+	log.Printf("Loading Deployment Process '%s' ...", processID)
+	deploymentProcess, err := client.DeploymentProcess.Get(processID)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -374,14 +374,15 @@ func resourceDeploymentStepRead(d *schema.ResourceData, m interface{}, setSchema
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading deployment process '%s': %s", processId, err.Error())
+		return fmt.Errorf("error reading deployment process '%s': %s", processID, err.Error())
 	}
 
 	var deploymentStep *octopusdeploy.DeploymentStep
 	var prevDeploymentStep *octopusdeploy.DeploymentStep
 	firstStep := false
 	for stepIndex, findDeploymentStep := range deploymentProcess.Steps {
-		if findDeploymentStep.ID == stepId {
+		if findDeploymentStep.ID == stepID {
+			//nolint:gosec
 			deploymentStep = &findDeploymentStep
 			if stepIndex == 0 {
 				firstStep = true
@@ -414,14 +415,14 @@ func resourceDeploymentStepUpdate(d *schema.ResourceData, m interface{}, buildDe
 	client := m.(*octopusdeploy.Client)
 
 	/* Get Id's */
-	stepId := d.Id()
-	processId := d.Get("deployment_process_id").(string)
+	stepID := d.Id()
+	processID := d.Get("deployment_process_id").(string)
 	firstStep := d.Get("first_step").(bool)
-	afterStepId := d.Get("after_step_id").(string)
+	afterStepID := d.Get("after_step_id").(string)
 
 	/* Load Deployment Process */
-	log.Printf("Loading Deployment Process '%s' ...", processId)
-	deploymentProcess, err := client.DeploymentProcess.Get(processId)
+	log.Printf("Loading Deployment Process '%s' ...", processID)
+	deploymentProcess, err := client.DeploymentProcess.Get(processID)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -429,12 +430,12 @@ func resourceDeploymentStepUpdate(d *schema.ResourceData, m interface{}, buildDe
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading deployment process id %s: %s", processId, err.Error())
+		return fmt.Errorf("error reading deployment process id %s: %s", processID, err.Error())
 	}
 
 	/* Create Deployment Process Step */
 	newDeploymentStep := buildDeploymentProcessStepFunc(d)
-	newDeploymentStep.ID = stepId
+	newDeploymentStep.ID = stepID
 
 	/* Update Step */
 	orgDeploymentSteps := deploymentProcess.Steps
@@ -447,23 +448,22 @@ func resourceDeploymentStepUpdate(d *schema.ResourceData, m interface{}, buildDe
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
 
-		if orgDeploymentStep.ID != stepId {
+		if orgDeploymentStep.ID != stepID {
 			deploymentProcess.Steps = append(deploymentProcess.Steps, orgDeploymentStep)
 		}
 
-		if newStepAddedIndex == -1 && orgDeploymentStep.ID == afterStepId {
+		if newStepAddedIndex == -1 && orgDeploymentStep.ID == afterStepID {
 			newStepAddedIndex = stepIndex + 1
 			deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 		}
 	}
 
 	if newStepAddedIndex == -1 {
-		newStepAddedIndex = len(deploymentProcess.Steps)
 		deploymentProcess.Steps = append(deploymentProcess.Steps, *newDeploymentStep)
 	}
 
 	// Update Deployment Process with Step Removed
-	log.Printf("Updating Deployment Process '%s' ...", processId)
+	log.Printf("Updating Deployment Process '%s' ...", processID)
 	for _, deploymentStep := range deploymentProcess.Steps {
 		log.Printf("STEP - %s: %+v", deploymentStep.Name, deploymentStep)
 	}
@@ -478,12 +478,12 @@ func resourceDeploymentStepDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
 	/* Get Id's */
-	stepId := d.Id()
-	processId := d.Get("deployment_process_id").(string)
+	stepID := d.Id()
+	processID := d.Get("deployment_process_id").(string)
 
 	/* Load Deployment Process */
-	log.Printf("Loading Deployment Process '%s' ...", processId)
-	deploymentProcess, err := client.DeploymentProcess.Get(processId)
+	log.Printf("Loading Deployment Process '%s' ...", processID)
+	deploymentProcess, err := client.DeploymentProcess.Get(processID)
 
 	if err == octopusdeploy.ErrItemNotFound {
 		d.SetId("")
@@ -491,7 +491,7 @@ func resourceDeploymentStepDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading deployment process id %s: %s", processId, err.Error())
+		return fmt.Errorf("error reading deployment process id %s: %s", processID, err.Error())
 	}
 
 	/* Remove Step */
@@ -499,13 +499,13 @@ func resourceDeploymentStepDelete(d *schema.ResourceData, m interface{}) error {
 	deploymentProcess.Steps = nil // empty the steps
 
 	for _, orgDeploymentStep := range orgDeploymentSteps {
-		if orgDeploymentStep.ID != stepId {
+		if orgDeploymentStep.ID != stepID {
 			deploymentProcess.Steps = append(deploymentProcess.Steps, orgDeploymentStep)
 		}
 	}
 
 	// Update Deployment Process with Step Removed
-	log.Printf("Updating Deployment Process '%s' ...", processId)
+	log.Printf("Updating Deployment Process '%s' ...", processID)
 	for _, deploymentStep := range deploymentProcess.Steps {
 		log.Printf("STEP - %s: %+v", deploymentStep.Name, deploymentStep)
 	}
@@ -522,7 +522,7 @@ func resourceDeploymentStepDelete(d *schema.ResourceData, m interface{}) error {
 /* --------------------------------------- */
 /* Shared Create Step Functions */
 /* --------------------------------------- */
-func resourceDeploymentStep_CreateBasicStep(d *schema.ResourceData, actionType string) *octopusdeploy.DeploymentStep {
+func resourceDeploymentStepCreateBasicStep(d *schema.ResourceData, actionType string) *octopusdeploy.DeploymentStep {
 	/* Get Basic Step Properties */
 	stepName := d.Get("step_name").(string)
 	stepCondition := d.Get("step_condition").(string)
@@ -560,7 +560,7 @@ func resourceDeploymentStep_CreateBasicStep(d *schema.ResourceData, actionType s
 	return deploymentStep
 }
 
-func resourceDeploymentStep_AddPackageProperties_DeployScript(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep, scriptType string) {
+func resourceDeploymentStepAddPackagePropertiesDeployScript(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep, scriptType string) {
 	/* Setup per Script Type */
 	var scriptProp string
 	var scriptName string
@@ -568,15 +568,12 @@ func resourceDeploymentStep_AddPackageProperties_DeployScript(d *schema.Resource
 	case "pre":
 		scriptProp = "pre_deploy_script"
 		scriptName = "PreDeploy"
-		break
 	case "deploy":
 		scriptProp = "deploy_script"
 		scriptName = "Deploy"
-		break
 	case "post":
 		scriptProp = "post_deploy_script"
 		scriptName = "PostDeploy"
-		break
 	}
 
 	/* Check for Script Property */
@@ -592,16 +589,12 @@ func resourceDeploymentStep_AddPackageProperties_DeployScript(d *schema.Resource
 		switch script["type"].(string) {
 		case "PowerShell":
 			scriptName += ".ps1"
-			break
 		case "CSharp":
 			scriptName += ".csx"
-			break
 		case "Bash":
 			scriptName += ".sh"
-			break
 		case "FSharp":
 			scriptName += ".fsx"
-			break
 		}
 
 		/* Add action properties */
@@ -613,7 +606,7 @@ func resourceDeploymentStep_AddPackageProperties_DeployScript(d *schema.Resource
 	}
 }
 
-func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep) {
+func resourceDeploymentStepAddPackageProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep) {
 	/* Package Properties */
 	deploymentStep.Actions[0].Properties["Octopus.Action.Package.DownloadOnTentacle"] = "False"
 	deploymentStep.Actions[0].Properties["Octopus.Action.Package.FeedId"] = d.Get("feed_id").(string)
@@ -644,12 +637,12 @@ func resourceDeploymentStep_AddPackageProperties(d *schema.ResourceData, deploym
 		deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.ConfigurationVariables"
 	}
 
-	resourceDeploymentStep_AddPackageProperties_DeployScript(d, deploymentStep, "pre")
-	resourceDeploymentStep_AddPackageProperties_DeployScript(d, deploymentStep, "deploy")
-	resourceDeploymentStep_AddPackageProperties_DeployScript(d, deploymentStep, "post")
+	resourceDeploymentStepAddPackagePropertiesDeployScript(d, deploymentStep, "pre")
+	resourceDeploymentStepAddPackagePropertiesDeployScript(d, deploymentStep, "deploy")
+	resourceDeploymentStepAddPackagePropertiesDeployScript(d, deploymentStep, "post")
 }
 
-func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep, iisType string) {
+func resourceDeploymentStepAddIisAppPoolProperties(d *schema.ResourceData, deploymentStep *octopusdeploy.DeploymentStep, iisType string) {
 	var propPrefix string
 	if iisType == "IISWebSite" {
 		propPrefix = "Octopus.Action.IISWebSite"
@@ -684,7 +677,7 @@ func resourceDeploymentStep_AddIisAppPoolProperties(d *schema.ResourceData, depl
 /* --------------------------------------- */
 /* Shared Set Schema Functions */
 /* --------------------------------------- */
-func resourceDeploymentStep_SetBasicSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
+func resourceDeploymentStepSetBasicSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
 	d.Set("step_name", deploymentStep.Name)
 	d.Set("step_condition", strings.ToLower(string(deploymentStep.Condition)))
 	d.Set("required", deploymentStep.Actions[0].IsRequired)
@@ -701,7 +694,7 @@ func resourceDeploymentStep_SetBasicSchema(d *schema.ResourceData, deploymentSte
 	}
 }
 
-func resourceDeploymentStep_SetPackageSchema_DeployScript(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep, scriptType string) {
+func resourceDeploymentStepSetPackageSchemaDeployScript(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep, scriptType string) {
 	/* Setup per Script Type */
 	var scriptProp string
 	var scriptNameStart string
@@ -709,15 +702,12 @@ func resourceDeploymentStep_SetPackageSchema_DeployScript(d *schema.ResourceData
 	case "pre":
 		scriptProp = "pre_deploy_script"
 		scriptNameStart = "PreDeploy"
-		break
 	case "deploy":
 		scriptProp = "deploy_script"
 		scriptNameStart = "Deploy"
-		break
 	case "post":
 		scriptProp = "post_deploy_script"
 		scriptNameStart = "PostDeploy"
-		break
 	}
 
 	/* Determine Script Type and Body */
@@ -743,7 +733,7 @@ func resourceDeploymentStep_SetPackageSchema_DeployScript(d *schema.ResourceData
 	}
 }
 
-func resourceDeploymentStep_SetPackageSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
+func resourceDeploymentStepSetPackageSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
 	d.Set("feed_id", deploymentStep.Actions[0].Properties["Octopus.Action.Package.FeedId"])
 	d.Set("package", deploymentStep.Actions[0].Properties["Octopus.Action.Package.PackageId"])
 
@@ -769,12 +759,12 @@ func resourceDeploymentStep_SetPackageSchema(d *schema.ResourceData, deploymentS
 		}
 	}
 
-	resourceDeploymentStep_SetPackageSchema_DeployScript(d, deploymentStep, "pre")
-	resourceDeploymentStep_SetPackageSchema_DeployScript(d, deploymentStep, "deploy")
-	resourceDeploymentStep_SetPackageSchema_DeployScript(d, deploymentStep, "post")
+	resourceDeploymentStepSetPackageSchemaDeployScript(d, deploymentStep, "pre")
+	resourceDeploymentStepSetPackageSchemaDeployScript(d, deploymentStep, "deploy")
+	resourceDeploymentStepSetPackageSchemaDeployScript(d, deploymentStep, "post")
 }
 
-func resourceDeploymentStep_SetIisAppPoolSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep, iisType string) {
+func resourceDeploymentStepSetIisAppPoolSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep, iisType string) {
 	var propPrefix string
 	if iisType == "IISWebSite" {
 		propPrefix = "Octopus.Action.IISWebSite"

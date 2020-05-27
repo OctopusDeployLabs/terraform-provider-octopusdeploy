@@ -40,9 +40,9 @@ func resourceDeploymentStepIisWebapp() *schema.Resource {
 	}
 
 	/* Add Shared Schema's */
-	resourceDeploymentStep_AddDefaultSchema(schemaRes, true)
-	resourceDeploymentStep_AddPackageSchema(schemaRes)
-	resourceDeploymentStep_AddIisAppPoolSchema(schemaRes)
+	resourceDeploymentStepAddDefaultSchema(schemaRes, true)
+	resourceDeploymentStepAddPackageSchema(schemaRes)
+	resourceDeploymentStepAddIisAppPoolSchema(schemaRes)
 
 	/* Return Schema */
 	return schemaRes
@@ -53,14 +53,14 @@ func buildIisWebappDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploym
 	d.Set("deployment_type", "webApplication")
 
 	/* Create Basic Deployment Step */
-	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.IIS")
+	deploymentStep := resourceDeploymentStepCreateBasicStep(d, "Octopus.IIS")
 
 	/* Enable IIS Web Site Features */
 	deploymentStep.Actions[0].Properties["Octopus.Action.EnabledFeatures"] = "Octopus.Features.IISWebSite"
 
 	/* Add Shared Properties */
-	resourceDeploymentStep_AddPackageProperties(d, deploymentStep)
-	resourceDeploymentStep_AddIisAppPoolProperties(d, deploymentStep, "WebApplication")
+	resourceDeploymentStepAddPackageProperties(d, deploymentStep)
+	resourceDeploymentStepAddIisAppPoolProperties(d, deploymentStep, "WebApplication")
 
 	/* Add Web Site Properties */
 	deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"] = d.Get("deployment_type").(string)
@@ -86,9 +86,9 @@ func buildIisWebappDeploymentStep(d *schema.ResourceData) *octopusdeploy.Deploym
 }
 
 func setIisWebappSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
-	resourceDeploymentStep_SetBasicSchema(d, deploymentStep)
-	resourceDeploymentStep_SetPackageSchema(d, deploymentStep)
-	resourceDeploymentStep_SetIisAppPoolSchema(d, deploymentStep, "WebApplication")
+	resourceDeploymentStepSetBasicSchema(d, deploymentStep)
+	resourceDeploymentStepSetPackageSchema(d, deploymentStep)
+	resourceDeploymentStepSetIisAppPoolSchema(d, deploymentStep, "WebApplication")
 
 	/* Get Web Site Properties */
 	d.Set("deployment_type", deploymentStep.Actions[0].Properties["Octopus.Action.IISWebSite.DeploymentType"])

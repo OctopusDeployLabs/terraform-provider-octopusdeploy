@@ -16,8 +16,8 @@ func resourceDeploymentStepDeployPackage() *schema.Resource {
 	}
 
 	/* Add Shared Schema's */
-	resourceDeploymentStep_AddDefaultSchema(schemaRes, true)
-	resourceDeploymentStep_AddPackageSchema(schemaRes)
+	resourceDeploymentStepAddDefaultSchema(schemaRes, true)
+	resourceDeploymentStepAddPackageSchema(schemaRes)
 
 	/* Return Schema */
 	return schemaRes
@@ -25,18 +25,18 @@ func resourceDeploymentStepDeployPackage() *schema.Resource {
 
 func buildDeployPackageDeploymentStep(d *schema.ResourceData) *octopusdeploy.DeploymentStep {
 	/* Create Basic Deployment Step */
-	deploymentStep := resourceDeploymentStep_CreateBasicStep(d, "Octopus.TentaclePackage")	
+	deploymentStep := resourceDeploymentStepCreateBasicStep(d, "Octopus.TentaclePackage")
 
 	/* Add Shared Properties */
-	resourceDeploymentStep_AddPackageProperties(d, deploymentStep)
+	resourceDeploymentStepAddPackageProperties(d, deploymentStep)
 
 	/* Return Deployment Step */
 	return deploymentStep
 }
 
 func setDeployPackageSchema(d *schema.ResourceData, deploymentStep octopusdeploy.DeploymentStep) {
-	resourceDeploymentStep_SetBasicSchema(d, deploymentStep);
-	resourceDeploymentStep_SetPackageSchema(d, deploymentStep);
+	resourceDeploymentStepSetBasicSchema(d, deploymentStep)
+	resourceDeploymentStepSetPackageSchema(d, deploymentStep)
 }
 
 func resourceDeploymentStepDeployPackageCreate(d *schema.ResourceData, m interface{}) error {
