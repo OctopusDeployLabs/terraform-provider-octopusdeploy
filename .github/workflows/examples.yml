@@ -19,6 +19,9 @@ jobs:
         run: ./tests/Create-ApiKey.ps1
         shell: pwsh
 
+      - name: Install gox
+        run: sudo apt-get install -y gox
+
       - name: Build the plugin
         run: ./ci-scripts/build.sh
 
