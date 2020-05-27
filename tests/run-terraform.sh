@@ -1,8 +1,8 @@
 DEFAULTARCH=linux_amd64
 DEFAULTHOST=http://localhost:8080
 
-ARCH=${1:-DEFAULTARCH}
-HOST=${2:-DEFAULTHOST}
+ARCH=${1:-$DEFAULTARCH}
+HOST=${2:-$DEFAULTHOST}
 
 echo "Finding plugin for ${ARCH}"
 
