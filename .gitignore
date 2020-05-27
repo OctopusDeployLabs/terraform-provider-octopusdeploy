@@ -38,5 +38,4 @@ artifacts/
 node_modules/
 .env
 
-tests/octopus_api.txt
-tests/provider.tf
+examples/provider.tf
