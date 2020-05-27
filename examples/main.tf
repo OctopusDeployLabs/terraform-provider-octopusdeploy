@@ -1,7 +1,7 @@
-provider "octopusdeploy" {
+/*provider "octopusdeploy" {
   address = "http://localhost:8081/"
   apikey  = "API-XXXXXXXXXXXXXXXXXXXX"
-}
+}*/
 
 resource "octopusdeploy_project_group" "finance" {
   description = "Financial Applications"
