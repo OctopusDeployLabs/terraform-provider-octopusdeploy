@@ -13,6 +13,7 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_project":              dataProject(),
 			"octopusdeploy_environment":          dataEnvironment(),
+			"octopusdeploy_user":                 dataNewUser(),
 			"octopusdeploy_variable":             dataVariable(),
 			"octopusdeploy_machinepolicy":        dataMachinePolicy(),
 			"octopusdeploy_machine":              dataMachine(),
@@ -26,6 +27,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_project_group":                     resourceProjectGroup(),
 			"octopusdeploy_project_deployment_target_trigger": resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_environment":                       resourceEnvironment(),
+			"octopusdeploy_user":                              resourceNewUser(),
 			"octopusdeploy_account":                           resourceAccount(),
 			"octopusdeploy_feed":                              resourceFeed(),
 			"octopusdeploy_variable":                          resourceVariable(),
