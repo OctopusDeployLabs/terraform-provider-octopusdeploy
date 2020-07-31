@@ -33,19 +33,7 @@ func buildUserResource(d *schema.ResourceData) *octopusdeploy.User {
 	envUserName := d.Get("UserName").(string)
 	envDisplayName := d.Get("DisplayName").(string)
 
-	var envDesc string
-	var envGuided bool
 	var envDynamic bool
-
-	envDescInterface, ok := d.GetOk("description")
-	if ok {
-		envDesc = envDescInterface.(string)
-	}
-
-	envGuidedInterface, ok := d.GetOk("use_guided_failure")
-	if ok {
-		envGuided = envGuidedInterface.(bool)
-	}
 
 	allowDynamicInfrastructureInterface, ok := d.GetOk("allow_dynamic_infrastructure")
 	if ok {
