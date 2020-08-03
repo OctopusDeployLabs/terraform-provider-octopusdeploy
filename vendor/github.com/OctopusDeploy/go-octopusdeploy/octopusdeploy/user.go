@@ -27,8 +27,6 @@ type User struct {
 	UserName                   string `json:"UserName"`
 	DisplayName                string `json:"DisplayName"`
 	SortOrder                  int    `json:"SortOrder"`
-	UseGuidedFailure           bool   `json:"UseGuidedFailure"`
-	AllowDynamicInfrastructure bool   `json:"AllowDynamicInfrastructure"`
 }
 
 func (t *User) Validate() error {
@@ -47,7 +45,6 @@ func NewUser(UserName, DisplayName string, useguidedfailure bool) *User {
 	return &User{
 		UserName:             UserName,
 		DisplayName:          DisplayName,
-		UseGuidedFailure: useguidedfailure,
 	}
 }
 
