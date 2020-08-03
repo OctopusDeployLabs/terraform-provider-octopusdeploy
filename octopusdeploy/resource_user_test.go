@@ -39,7 +39,7 @@ func TestAccOctopusDeployUserBasic(t *testing.T) {
 	})
 }
 
-func testUsertBasic(UserName, DisplayName, useguided string, dynamic string) string {
+func testUsertBasic(UserName, DisplayName string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_User" "foo" {
 			UserName           = "%s"

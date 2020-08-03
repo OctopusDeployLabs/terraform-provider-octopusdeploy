@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceNewUserTrigger() *schema.Resource {
+func resourceUserTrigger() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNewUserCreate,
 		//Read:   resourceNewUserTriggerRead,
