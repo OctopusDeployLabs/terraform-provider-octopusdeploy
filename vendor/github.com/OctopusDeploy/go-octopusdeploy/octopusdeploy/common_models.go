@@ -18,20 +18,3 @@ type Links struct {
 	PageLast    string `json:"Page.Last"`
 	PageNext    string `json:"Page.Next"`
 }
-
-type User struct {
-	ID                  string `json:"Id"`
-	Username            string `json:"Username"`
-	DisplayName         string `json:"DisplayName"`
-	IsActive            bool   `json:"IsActive"`
-	IsService           bool   `json:"IsService"`
-	EmailAddress        string `json:"EmailAddress"`
-	CanPasswordBeEdited bool   `json:"CanPasswordBeEdited"`
-	IsRequestor         bool   `json:"IsRequestor"`
-	Links               struct {
-		Self        string `json:"Self"`
-		Permissions string `json:"Permissions"`
-		APIKeys     string `json:"ApiKeys"`
-		Avatar      string `json:"Avatar"`
-	} `json:"Links"`
-}
