@@ -39,7 +39,6 @@ type User struct {
 	} `json:"Links"`
 }
 
-
 func (t *User) Validate() error {
 	validate := validator.New()
 
@@ -54,8 +53,8 @@ func (t *User) Validate() error {
 
 func NewUser(Username, DisplayName string) *User {
 	return &User{
-		Username:             Username,
-		DisplayName:          DisplayName,
+		Username:    Username,
+		DisplayName: DisplayName,
 	}
 }
 
@@ -134,9 +133,9 @@ func (s *UserService) Delete(Userid string) error {
 	return nil
 }
 
-func (s *UserService) Update(User *User) (*User, error) {
-	path := fmt.Sprintf("Users/%s", User.ID)
-	resp, err := apiUpdate(s.sling, User, new(User), path)
+func (s *UserService) Update(user *User) (*User, error) {
+	path := fmt.Sprintf("Users/%s", user.ID)
+	resp, err := apiUpdate(s.sling, user, new(user), path)
 
 	if err != nil {
 		return nil, err
