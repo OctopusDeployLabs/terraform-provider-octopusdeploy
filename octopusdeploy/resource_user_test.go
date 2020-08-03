@@ -11,10 +11,8 @@ import (
 
 func TestAccOctopusDeployUserBasic(t *testing.T) {
 	const envPrefix = "octopusdeploy_User.foo"
-	const envName = "Testing one two three"
-	const envDesc = "Terraform testing module User"
-	const envGuided = "false"
-	const envDynamic = "false"
+	const envUserName = "Testing one two three"
+	const envDisplayName = "Terraform testing module User"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -22,17 +20,13 @@ func TestAccOctopusDeployUserBasic(t *testing.T) {
 		CheckDestroy: testOctopusDeployUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testUsertBasic(envName, envDesc, envGuided, envDynamic),
+				Config: testUsertBasic(envUserName, envDisplayName),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployUserExists(envPrefix),
 					resource.TestCheckResourceAttr(
-						envPrefix, "UserName", envName),
+						envPrefix, "UserName", envUserName),
 					resource.TestCheckResourceAttr(
 						envPrefix, "DisplayName", envDisplayName),
-					resource.TestCheckResourceAttr(
-						envPrefix, "use_guided_failure", envGuided),
-					resource.TestCheckResourceAttr(
-						envPrefix, "allow_dynamic_infrastructure", envDynamic),
 				),
 			},
 		},
