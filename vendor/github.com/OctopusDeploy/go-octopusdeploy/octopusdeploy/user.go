@@ -41,15 +41,15 @@ func (t *User) Validate() error {
 	return nil
 }
 
-func NewUser(UserName, DisplayName string, useguidedfailure bool) *User {
+func NewUser(UserName, DisplayName string) *User {
 	return &User{
 		UserName:             UserName,
 		DisplayName:          DisplayName,
 	}
 }
 
-func (s *UserService) Get(Userid string) (*User, error) {
-	path := fmt.Sprintf("Users/%s", Userid)
+func (s *UserService) Get(UserID string) (*User, error) {
+	path := fmt.Sprintf("Users/%s", UserID)
 	resp, err := apiGet(s.sling, new(User), path)
 
 	if err != nil {
@@ -62,7 +62,7 @@ func (s *UserService) Get(Userid string) (*User, error) {
 func (s *UserService) GetAll() (*[]User, error) {
 	var p []User
 
-	path := "Users"
+	path := "users"
 
 	loadNextPage := true
 
@@ -102,8 +102,8 @@ func (s *UserService) GetByName(UserName string) (*User, error) {
 	return &foundUser, fmt.Errorf("no User found with User name %s", UserName)
 }
 
-func (s *UserService) Add(User *User) (*User, error) {
-	resp, err := apiAdd(s.sling, User, new(User), "Users")
+func (s *UserService) Add(user *User) (*User, error) {
+	resp, err := apiAdd(s.sling, user, new(User), "users")
 
 	if err != nil {
 		return nil, err

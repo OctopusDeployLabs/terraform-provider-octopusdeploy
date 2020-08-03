@@ -30,33 +30,31 @@ func resourceUser() *schema.Resource {
 }
 
 func buildUserResource(d *schema.ResourceData) *octopusdeploy.User {
-	envUserName := d.Get("UserName").(string)
-	envDisplayName := d.Get("DisplayName").(string)
 
-	var envDynamic bool
+	UserName := d.Get("UserName").(string)
+	DisplayName := d.Get("DisplayName").(string)
 
-	allowDynamicInfrastructureInterface, ok := d.GetOk("allow_dynamic_infrastructure")
-	if ok {
-		envDynamic = allowDynamicInfrastructureInterface.(bool)
+	user := octopusdeploy.User(UserName, DisplayName)
+
+	if attr, ok := d.GetOk("description"); ok {
+		user.Description = attr.(string)
 	}
 
-	var User = octopusdeploy.User(envUserName, envDisplayName)
-	User.AllowDynamicInfrastructure = envDynamic
-
-	return User
+	return user
 }
 
 func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
 	newUser := buildUserResource(d)
-	env, err := client.User.Add(newUser)
+
+	newUserCreated, err := client.User.Add(newUser)
 
 	if err != nil {
-		return fmt.Errorf("error creating User %s: %s", User.UserName, err.Error())
+		return fmt.Errorf("error creating User %s: %s", err.Error())
 	}
 
-	d.SetId(env.ID)
+	d.SetId(newUserCreated.ID)
 
 	return nil
 }
