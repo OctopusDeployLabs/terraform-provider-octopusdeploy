@@ -26,7 +26,7 @@ func dataUserReadByName(d *schema.ResourceData, m interface{}) error {
 
 	userName := d.Get("UserName")
 
-	user, err := client.User.GetByName(userName.(string))
+	user, err := client.User.GetByName(UserName.(string))
 
 	if err == octopusdeploy.ErrItemNotFound {
 		return nil

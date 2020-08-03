@@ -23,7 +23,7 @@ type Users struct {
 }
 
 type User struct {
-	ID                         string `json:"Id"`
+	ID                		   string   `json:"Id,omitempty"`
 	UserName                   string `json:"UserName"`
 	DisplayName                string `json:"DisplayName"`
 	SortOrder                  int    `json:"SortOrder"`
@@ -41,7 +41,7 @@ func (t *User) Validate() error {
 	return nil
 }
 
-func NewUser(UserName, DisplayName string) *User {
+func User(UserName, DisplayName string) *User {
 	return &User{
 		UserName:             UserName,
 		DisplayName:          DisplayName,
