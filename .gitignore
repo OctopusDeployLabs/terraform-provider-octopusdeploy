@@ -29,7 +29,9 @@ tflog.txt
 # TF Binaries
 terraform-provider-octopusdeploy
 terraform-provider-octopusdeploy.exe
-main.tf
+
+# Commenting the below because I wasn't able to save my main.tf configs for examples
+#main.tf
 build/
 artifacts/
 .release/
