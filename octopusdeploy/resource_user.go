@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -93,6 +94,6 @@ func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error updating user id %s: %s", d.Id(), err.Error())
 	}
 
-	d.SetId(updatedUserID)
+	d.SetId(updatedUser.ID)
 	return nil
 }
