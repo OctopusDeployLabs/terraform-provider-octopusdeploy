@@ -11,9 +11,9 @@ import (
 func resourceUser() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceUserCreate,
-		//Read:   resourceUserTriggerRead,
-		//Update: resourceUserTriggerUpdate,
-		//Delete: resourcesUserTriggerDelete,
+		Read:   resourceUserRead,
+		Update: resourceUserUpdate,
+		//Delete: resourceUserDelete,
 
 		Schema: map[string]*schema.Schema{
 			"UserName": {
