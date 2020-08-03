@@ -26,17 +26,17 @@ func dataUserReadByName(d *schema.ResourceData, m interface{}) error {
 
 	userName := d.Get("UserName")
 
-	account, err := client.Account.GetByName(userName.(string))
+	user, err := client.User.GetByName(userName.(string))
 
 	if err == octopusdeploy.ErrItemNotFound {
 		return nil
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading account name %s: %s", userName, err.Error())
+		return fmt.Errorf("error reading user name %s: %s", userName, err.Error())
 	}
 
-	d.SetId(account.ID)
+	d.SetId(user.ID)
 
 	log.Printf("[DEBUG] user name: %v", m)
 	d.Set("name", userName)

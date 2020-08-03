@@ -9,10 +9,10 @@ import (
 
 func resourceUserTrigger() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNewUserCreate,
-		//Read:   resourceNewUserTriggerRead,
-		//Update: resourceNewUserTriggerUpdate,
-		//Delete: resourceNewUserTriggerDelete,
+		Create: resourceUserCreate,
+		//Read:   resourceUserTriggerRead,
+		//Update: resourceUserTriggerUpdate,
+		//Delete: resourcesUserTriggerDelete,
 
 		Schema: map[string]*schema.Schema{
 			"UserName": {
@@ -46,14 +46,14 @@ func buildUserResource(d *schema.ResourceData) *octopusdeploy.User {
 	return User
 }
 
-func resourceNewUserCreate(d *schema.ResourceData, m interface{}) error {
+func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
 	newUser := buildUserResource(d)
 	env, err := client.User.Add(newUser)
 
 	if err != nil {
-		return fmt.Errorf("error creating User %s: %s", newUser.UserName, err.Error())
+		return fmt.Errorf("error creating User %s: %s", User.UserName, err.Error())
 	}
 
 	d.SetId(env.ID)
