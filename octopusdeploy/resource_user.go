@@ -40,7 +40,7 @@ func buildUserResource(d *schema.ResourceData) *octopusdeploy.User {
 		envDynamic = allowDynamicInfrastructureInterface.(bool)
 	}
 
-	var User = octopusdeploy.NewUser(envUserName, envDesc, envGuided)
+	var User = octopusdeploy.User(envUserName, envDisplayName)
 	User.AllowDynamicInfrastructure = envDynamic
 
 	return User
