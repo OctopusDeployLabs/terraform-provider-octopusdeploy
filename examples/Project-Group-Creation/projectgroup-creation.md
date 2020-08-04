@@ -1,6 +1,6 @@
-# Create an project with Terraform
+# Create an projectgroup with Terraform
 
-The **project Creation** directory contains the following files:
+The **projectgroup Creation** directory contains the following files:
 
   - main.tf
   - terraform.tfvars
@@ -12,13 +12,13 @@ The Terraform configuration files are used to build a specific aspect of the env
 
 ### main.tf
 
-The `main.tf` configuration file has two blocks, one for the provider and another for the `project` resource. The provider calls for three inputs:
+The `main.tf` configuration file has two blocks, one for the provider and another for the `projectgroup` resource. The provider calls for three inputs:
 
   address = The server URL
   apikey  = The API key to authenticate to an Octopus Deploy server
   space   = The Octopus Deploy space to create the resource in
 
-The resource itself that's being created is done with the `octopusdeploy_project` Terraform resource. The values in the input blocks are:
+The resource itself that's being created is done with the `octopusdeploy_project_group` Terraform resource. The values in the input blocks are:
 
   - name             =
 
@@ -39,7 +39,7 @@ serverURL       = "https://michaellevan.octopus.app"
 space           = "Default"
 ```
 
-## Using the Project Example
+## Using the projectgroup Example
 
 To use Terraform to create the resource:
 
