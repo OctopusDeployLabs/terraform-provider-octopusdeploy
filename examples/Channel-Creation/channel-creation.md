@@ -39,7 +39,7 @@ The `terraform.tfvars` configure file contains the values for the variables that
 ```
 serverURL   = "https://michaellevan.octopus.app"
 space       = "Default"
-channelNale = "DevOpsChannel"
+channelName = "DevOpsChannel"
 ```
 
 ## Using the Project Example
