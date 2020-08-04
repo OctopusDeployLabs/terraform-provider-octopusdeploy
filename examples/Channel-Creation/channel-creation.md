@@ -18,6 +18,11 @@ The `main.tf` configuration file has two blocks, one for the provider and anothe
   apikey  = The API key to authenticate to an Octopus Deploy server
   space   = The Octopus Deploy space to create the resource in
 
+The resource itself that's being created is done with the `opusdeploy_channel` Terraform resource. The values in the input blocks are:
+
+  - name       = 
+  - project_id =
+
 ### variables.tf
 
 The `variables.tf` configuration file contains the following variables to be used in the `main.tf` configuration file.
