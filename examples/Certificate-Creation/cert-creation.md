@@ -18,7 +18,7 @@ The `main.tf` configuration file has two blocks, one for the provider and anothe
   apikey  = The API key to authenticate to an Octopus Deploy server
   space   = The Octopus Deploy space to create the resource in
 
-The resource itself that's being created is done with the `opusdeploy_certificate` Terraform resource. The values in the input blocks are:
+The resource itself that's being created is done with the `octopusdeploy_certificate` Terraform resource. The values in the input blocks are:
 
   - name =
   - certificate_data =
