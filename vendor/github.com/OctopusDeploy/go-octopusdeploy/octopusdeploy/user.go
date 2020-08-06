@@ -82,8 +82,8 @@ func (s *UserService) GetAll() (*[]User, error) {
 	return &p, nil
 }
 
-func (s *UserService) GetByName(UserName string) (*User, error) {
-	var foundUser User
+func (s *UserService) GetByName(Username string) (*User, error) {
+	var foundUser Username
 	Users, err := s.GetAll()
 
 	if err != nil {
