@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dghubble/sling"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type UserService struct {
@@ -39,27 +38,15 @@ type User struct {
 	} `json:"Links"`
 }
 
-func (t *User) Validate() error {
-	validate := validator.New()
-
-	err := validate.Struct(t)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func NewUser(Username, DisplayName string) *User {
 	return &User{
-		Username:    Username,
-		DisplayName: DisplayName,
+		Username:    username,
+		DisplayName: displaydame,
 	}
 }
 
-func (s *UserService) Get(UserID string) (*User, error) {
-	path := fmt.Sprintf("Users/%s", UserID)
+func (s *UserService) Get(userid string) (*User, error) {
+	path := fmt.Sprintf("Users/%s", userid)
 	resp, err := apiGet(s.sling, new(User), path)
 
 	if err != nil {
@@ -122,7 +109,7 @@ func (s *UserService) Add(user *User) (*User, error) {
 	return resp.(*User), nil
 }
 
-func (s *UserService) Delete(Userid string) error {
+func (s *UserService) Delete(userid string) error {
 	path := fmt.Sprintf("Users/%s", Userid)
 	err := apiDelete(s.sling, path)
 
