@@ -18,6 +18,10 @@ github.com/OctopusDeploy/go-octopusdeploy v1.6.0 h1:r9ThVuANGkzm3noAjLF/i7LUcxQx
 github.com/OctopusDeploy/go-octopusdeploy v1.6.0/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200806120252-60233731d8d0 h1:4D4DJOJvjgZ67arXK4pXK0YLTK7bQCSZmTh01NpiQJM=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200806120252-60233731d8d0/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200806165458-ee4596fb677d h1:7/RQAwM6TXc2G0s1pIuzCtyFGZtLo2uTGwetUflTSC4=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200806165458-ee4596fb677d/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200806192608-5f260fe50837 h1:26otQ9RZtzboLbzUfmo2R1Ha3SBf40y6z5b2LgHkJFs=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200806192608-5f260fe50837/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
 github.com/Unknwon/com v0.0.0-20151008135407-28b053d5a292/go.mod h1:KYCjqMOeHpNuTOiFQU6WEcTG7poCJrUs0YgyHNtn1no=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af/go.mod h1:5Jv4cbFiHJMsVxt52+i0Ha45fjshj6wxYr1r19tB9bw=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
