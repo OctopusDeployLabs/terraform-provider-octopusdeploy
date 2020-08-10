@@ -31,14 +31,13 @@ func resourceUser() *schema.Resource {
 }
 
 func buildUserResource(d *schema.ResourceData) *octopusdeploy.User {
+	Username := d.Get("username").(string)
+	Displayname := d.Get("displayname").(string)
 
-	UserName := d.Get("UserName").(string)
-	DisplayName := d.Get("DisplayName").(string)
+	user := octopusdeploy.NewUser(Username, Displayname)
 
-	user := octopusdeploy.User(username, displayname)
-
-	if attr, ok := d.GetOk("description"); ok {
-		user.Description = attr.(string)
+	if attr, ok := d.GetOk("displayname"); ok {
+		user.Username = attr.(string)
 	}
 
 	return user
@@ -77,8 +76,8 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	log.Printf("[DEBUG] user: %v", m)
-	d.Set("name", user.username)
-	d.Set("displayname", user.displayname)
+	d.Set("name", user.Username)
+	d.Set("displayname", user.Displayname)
 	return nil
 }
 
