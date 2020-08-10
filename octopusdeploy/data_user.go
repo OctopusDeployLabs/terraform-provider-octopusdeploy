@@ -24,7 +24,7 @@ func dataUser() *schema.Resource {
 func dataUserReadByName(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
-	userName := d.Get("UserName")
+	userName := d.Get("username")
 
 	user, err := client.User.GetByName(userName.(string))
 
