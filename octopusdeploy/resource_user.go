@@ -13,7 +13,7 @@ func resourceUser() *schema.Resource {
 		Create: resourceUserCreate,
 		Read:   resourceUserRead,
 		Update: resourceUserUpdate,
-		//Delete: resourceUserDelete,
+		Delete: resourceUserDelete,
 
 		Schema: map[string]*schema.Schema{
 			"username": {
@@ -94,5 +94,20 @@ func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(updatedUser.ID)
+	return nil
+}
+
+func resourceUserDelete(d *schema.ResourceData, m interface{}) error {
+	client := m.(*octopusdeploy.Client)
+
+	userID := d.Id()
+
+	err := client.Lifecycle.Delete(userID)
+
+	if err != nil {
+		return fmt.Errorf("error deleting lifecycle id %s: %s", userID, err.Error())
+	}
+
+	d.SetId("")
 	return nil
 }
