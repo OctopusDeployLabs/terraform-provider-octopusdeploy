@@ -13,7 +13,7 @@ func dataUser() *schema.Resource {
 		Read: dataUserReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"UserName": {
+			"username": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
