@@ -16,12 +16,12 @@ func resourceUser() *schema.Resource {
 		//Delete: resourceUserDelete,
 
 		Schema: map[string]*schema.Schema{
-			"UserName": {
+			"username": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The name of the new user.",
 			},
-			"DisplayName": {
+			"displayname": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The display name of the new user.",
@@ -35,7 +35,7 @@ func buildUserResource(d *schema.ResourceData) *octopusdeploy.User {
 	UserName := d.Get("UserName").(string)
 	DisplayName := d.Get("DisplayName").(string)
 
-	user := octopusdeploy.User(UserName, DisplayName)
+	user := octopusdeploy.User(username, displayname)
 
 	if attr, ok := d.GetOk("description"); ok {
 		user.Description = attr.(string)
@@ -77,13 +77,13 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	log.Printf("[DEBUG] user: %v", m)
-	d.Set("name", user.UserName)
-	d.Set("description", user.Description)
+	d.Set("name", user.username)
+	d.Set("displayname", user.displayname)
 	return nil
 }
 
 func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
-	user := buildProjectGroupResource(d)
+	user := buildUserResource(d)
 	user.ID = d.Id()
 
 	client := m.(*octopusdeploy.Client)
