@@ -34,7 +34,7 @@ func buildUserResource(d *schema.ResourceData) *octopusdeploy.User {
 	Username := d.Get("username").(string)
 	Displayname := d.Get("displayname").(string)
 
-	user := octopusdeploy.NewUser(Username, Displayname)
+	var user = octopusdeploy.NewUser(Username, Displayname)
 
 	if attr, ok := d.GetOk("displayname"); ok {
 		user.Username = attr.(string)
@@ -51,7 +51,7 @@ func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
 	newUserCreated, err := client.User.Add(newUser)
 
 	if err != nil {
-		return fmt.Errorf("error creating User %s: %s", err.Error())
+		return fmt.Errorf("error creating User %s: %s", newUser.Username, err.Error())
 	}
 
 	d.SetId(newUserCreated.ID)
