@@ -16,6 +16,12 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.0 h1:r9ThVuANGkzm3noAjLF/i7LUcxQxbCJwpvn1DLwPoOA=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.0/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819135736-3582a10d63fc h1:brpiHiq+u1C/pHeVuC0+PeAWXcJbahj2bEjBhXZbiqA=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819135736-3582a10d63fc/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144220-5afc4c77908c h1:3vSE2FqFwbLauik8zl3Jv5LieMOF9YR5KqWiFjD7w0A=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144220-5afc4c77908c/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144815-f94b77aa996d h1:uyEmUBnGJwY8QAyv7Hu4cgsj/nH1sOpNXRrCM3XuUOQ=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144815-f94b77aa996d/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
 github.com/Unknwon/com v0.0.0-20151008135407-28b053d5a292/go.mod h1:KYCjqMOeHpNuTOiFQU6WEcTG7poCJrUs0YgyHNtn1no=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af/go.mod h1:5Jv4cbFiHJMsVxt52+i0Ha45fjshj6wxYr1r19tB9bw=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
