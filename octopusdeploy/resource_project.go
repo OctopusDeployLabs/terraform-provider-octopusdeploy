@@ -134,14 +134,6 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(createdProject.ID)
 
-	// set the deployment process
-	errUpdatingDeploymentProcess := updateDeploymentProcess(d, client, createdProject.DeploymentProcessID)
-
-	// deployment process is updated, not created, but log message makes more sense if it fails in a create step
-	if errUpdatingDeploymentProcess != nil {
-		return fmt.Errorf("error creating deploymentprocess: %s", errUpdatingDeploymentProcess.Error())
-	}
-
 	return nil
 }
 
@@ -186,14 +178,6 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(project.ID)
-
-	// set the deployment process
-	errUpdatingDeploymentProcess := updateDeploymentProcess(d, client, project.DeploymentProcessID)
-
-	// deployment process is updated, not created, but log message makes more sense if it fails in a create step
-	if errUpdatingDeploymentProcess != nil {
-		return fmt.Errorf("error creating deploymentprocess: %s", errUpdatingDeploymentProcess.Error())
-	}
 
 	return nil
 }
