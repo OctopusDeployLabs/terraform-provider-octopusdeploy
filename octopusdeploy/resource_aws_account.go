@@ -38,14 +38,6 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 				},
 			},
 			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"client_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"tenant_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"secret_key": {
 				Type:     schema.TypeString,
 				Optional: true,
