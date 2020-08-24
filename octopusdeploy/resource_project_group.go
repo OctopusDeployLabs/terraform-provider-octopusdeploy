@@ -1,8 +1,10 @@
 package octopusdeploy
 
 import (
+	"client/projects"
 	"fmt"
 	"log"
+	"models"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -28,22 +30,31 @@ func resourceProjectGroup() *schema.Resource {
 	}
 }
 
-func buildProjectGroupResource(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
+func buildProjectGroupResource(d *schema.ResourceData) *models.ProjectGroupResource {
 	name := d.Get("name").(string)
 
-	projectGroup := octopusdeploy.NewProjectGroup(name)
+	projectGroup := &models.ProjectGroupResource{
+		Name: name,
+	}
 
 	if attr, ok := d.GetOk("description"); ok {
 		projectGroup.Description = attr.(string)
 	}
 
 	return projectGroup
+
 }
 
 func resourceProjectGroupCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
 	newProjectGroup := buildProjectGroupResource(d)
+
+	// TODO: check if we're scoped to a space
+
+	newCreateProjectParams := projects.NewCreateProjectParams()
+	newCreateProjectParams.WithProjectResource(newProjectGroup)
+	createProjectCreated, err := client.Projects.CreateProject(newCreateProjectParams, nil)
 
 	createdProjectGroup, err := client.ProjectGroup.Add(newProjectGroup)
 
