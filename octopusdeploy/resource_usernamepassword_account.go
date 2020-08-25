@@ -23,6 +23,11 @@ func resourceUsernamePassword() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+			"client_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"environments": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
