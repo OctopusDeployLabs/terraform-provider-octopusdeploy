@@ -81,6 +81,14 @@ func buildUsernamePasswordResource(d *schema.ResourceData) *octopusdeploy.Accoun
 	account.Name = d.Get("name").(string)
 	account.Password = octopusdeploy.SensitiveValue{NewValue: d.Get("password").(string)}
 
+	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
+		account.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(v.(string))
+	}
+
+	if v, ok := d.GetOk("tenant_tags"); ok {
+		account.TenantTags = getSliceFromTerraformTypeList(v)
+	}
+
 	return account
 }
 
