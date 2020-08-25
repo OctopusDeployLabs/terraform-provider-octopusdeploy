@@ -39,7 +39,6 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_nuget_feed":                        resourceNugetFeed(),
 			"octopusdeploy_azure_service_principal":           resourceAzureServicePrincipal(),
 			"octopusdeploy_aws_account":           			   resourceAmazonWebServicesAccount(),
-			"octopusdeploy_aws_account":                       resourceAmazonWebServicesAccount(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
