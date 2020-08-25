@@ -30,6 +30,11 @@ func resourceAzureServicePrincipal() *schema.Resource {
 				},
 				Optional: true,
 			},
+			"account_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "Azure",
+			},
 			"tenant_tags": {
 				Type:     schema.TypeList,
 				Optional: true,

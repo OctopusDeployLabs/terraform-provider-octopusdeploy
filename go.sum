@@ -22,6 +22,8 @@ github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144220-5afc4c77908c h
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144220-5afc4c77908c/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144815-f94b77aa996d h1:uyEmUBnGJwY8QAyv7Hu4cgsj/nH1sOpNXRrCM3XuUOQ=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144815-f94b77aa996d/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200825171201-4555f7df4560 h1:bbPUI0J9/BWIV7EJimy03PnQNK4+xjKPCHGAmewvwPQ=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200825171201-4555f7df4560/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
 github.com/Unknwon/com v0.0.0-20151008135407-28b053d5a292/go.mod h1:KYCjqMOeHpNuTOiFQU6WEcTG7poCJrUs0YgyHNtn1no=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af/go.mod h1:5Jv4cbFiHJMsVxt52+i0Ha45fjshj6wxYr1r19tB9bw=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
