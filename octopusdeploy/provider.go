@@ -39,6 +39,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_nuget_feed":                        resourceNugetFeed(),
 			"octopusdeploy_azure_service_principal":           resourceAzureServicePrincipal(),
 			"octopusdeploy_usernamepassword_account":          resourceUsernamePassword(),
+			"octopusdeploy_sshkey_account":                    resourceSSHKey(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
