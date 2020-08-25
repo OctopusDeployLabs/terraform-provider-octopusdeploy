@@ -26,56 +26,6 @@ func resourceAccount() *schema.Resource {
 				},
 				Optional: true,
 			},
-			// Azure
-			"account_type": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"client_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"tenant_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"subscription_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"client_secret": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"tenant_tags": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"tenanted_deployment_participation": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validateValueFunc([]string{
-					"Untenanted",
-					"TenantedOrUntenanted",
-					"Tenanted",
-				}),
-			},
-			"token": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			// AWS
-			"secret_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"access_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 		},
 	}
 }
