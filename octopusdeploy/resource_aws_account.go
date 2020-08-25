@@ -23,6 +23,11 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"account_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "AWS",
+			},
 			"environments": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
