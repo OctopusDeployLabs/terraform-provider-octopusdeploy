@@ -55,8 +55,6 @@ func resourceAccountRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("tenant_tags", account.TenantTags)
 	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
 	d.Set("token", account.Token)
-	d.Set("secret_key", account.SecretKey)
-	d.Set("access_key", account.AccessKey)
 
 	return nil
 }
@@ -73,8 +71,6 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 	var tenantTags []string
 	var tenantedDeploymentParticipation string
 	var token string
-	var accessKey string
-	var secretKey string
 
 	environmentsInterface, ok := d.GetOk("environments")
 	if ok {
@@ -89,16 +85,6 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 	clientIDInterface, ok := d.GetOk("client_id")
 	if ok {
 		clientID = clientIDInterface.(string)
-	}
-
-	accessKeyInterface, ok := d.GetOk("access_key")
-	if ok {
-		accessKey = accessKeyInterface.(string)
-	}
-
-	secretKeyInterface, ok := d.GetOk("secret_key")
-	if ok {
-		secretKey = secretKeyInterface.(string)
 	}
 
 	tenantIDInterface, ok := d.GetOk("tenant_id")
@@ -140,10 +126,6 @@ func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
 	account.EnvironmentIDs = environments
 	account.ClientID = clientID
 	account.TenantID = tenantID
-	account.AccessKey = accessKey
-	account.SecretKey = octopusdeploy.SensitiveValue{
-		NewValue: secretKey,
-	}
 	account.Password = octopusdeploy.SensitiveValue{
 		NewValue: clientSecret,
 	}
