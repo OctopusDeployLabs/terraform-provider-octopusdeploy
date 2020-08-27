@@ -64,18 +64,6 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 						terraformNamePrefix, "name", projectName),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "lifecycle_id", lifeCycleID),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "deployment_step.0.windows_service.0.service_name", serviceName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "deployment_step.0.windows_service.0.step_name", stepName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "deployment_step.0.windows_service.0.target_roles.0", targetRoles[0]),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "deployment_step.0.windows_service.0.target_roles.1", targetRoles[1]),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "deployment_step.0.windows_service.0.executable_path", strings.Replace(executablePath, "\\\\", "\\", 1)), // need to scape the backslashes
-					resource.TestMatchResourceAttr(
-						terraformNamePrefix, "deployment_process_id", deploymentProcessIDRegex),
 				),
 			},
 		},
