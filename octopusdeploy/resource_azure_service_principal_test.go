@@ -16,9 +16,6 @@ func TestAccOctopusDeployAzureServicePrinciaplBasic(t *testing.T) {
 	const tenantID = "18eb006b-c3c8-4a72-93cd-fe4b293f82e2"
 	const subscriptionID = "18eb006b-c3c8-4a72-93cd-fe4b293f82e3"
 	const key = "18eb006b-c3c8-4a72-93cd-fe4b293f82e4"
-	const tagSetName = "TagSet"
-	const tagName = "Tag"
-	var tenantTags = fmt.Sprintf("%s/%s", tagSetName, tagName)
 	const tenantedDeploymentParticipation = octopusdeploy.TenantedOrUntenanted
 
 	resource.Test(t, resource.TestCase{
@@ -27,7 +24,7 @@ func TestAccOctopusDeployAzureServicePrinciaplBasic(t *testing.T) {
 		CheckDestroy: testOctopusDeployAzureServicePrincipalDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAzureServicePrincipalBasic(tagSetName, tagName, accountName, clientID, tenantID, subscriptionID, key, tenantedDeploymentParticipation),
+				Config: testAzureServicePrincipalBasic(accountName, clientID, tenantID, subscriptionID, key, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployAzureServicePrincipalExists(accountPrefix),
 					resource.TestCheckResourceAttr(
@@ -39,8 +36,6 @@ func TestAccOctopusDeployAzureServicePrinciaplBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						accountPrefix, "subscription_number", subscriptionID),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "tenant_tags.0", tenantTags),
-					resource.TestCheckResourceAttr(
 						accountPrefix, "tenanted_deployment_participation", tenantedDeploymentParticipation.String()),
 				),
 			},
@@ -48,18 +43,8 @@ func TestAccOctopusDeployAzureServicePrinciaplBasic(t *testing.T) {
 	})
 }
 
-func testAzureServicePrincipalBasic(tagSetName string, tagName string, accountName string, clientID string, tenantID string, subscriptionID string, clientSecret string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+func testAzureServicePrincipalBasic(accountName string, clientID string, tenantID string, subscriptionID string, clientSecret string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`
-
-		resource "octopusdeploy_tag_set" "testtagset" {
-			name = "%s"
-
-			tag {
-				name = "%s"
-				color = "#6e6e6f"
-			}
-		}
-
 
 		resource "octopusdeploy_azure_service_principal" "foo" {
 			name           = "%s"
@@ -67,11 +52,10 @@ func testAzureServicePrincipalBasic(tagSetName string, tagName string, accountNa
 			tenant_id = "%s"
 			subscription_number = "%s"
 			key = "%s"
-			tenant_tags = ["${octopusdeploy_tag_set.testtagset.name}/%s"]
 			tenanted_deployment_participation = "%s"
 		}
 		`,
-		tagSetName, tagName, accountName, clientID, tenantID, subscriptionID, clientSecret, tagName, tenantedDeploymentParticipation,
+		accountName, clientID, tenantID, subscriptionID, clientSecret, tenantedDeploymentParticipation,
 	)
 }
 
