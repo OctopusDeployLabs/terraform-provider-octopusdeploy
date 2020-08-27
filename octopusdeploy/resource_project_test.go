@@ -47,7 +47,6 @@ func TestAccOctopusDeployProjectWithDeploymentStepWindowsService(t *testing.T) {
 	const packageName = "MyPackage"
 	targetRoles := []string{"Lab1", "Lab2"}
 	projectIDRegex := regexp.MustCompile(`Projects\-`)
-	deploymentProcessIDRegex := regexp.MustCompile(`deploymentprocess\-Projects\-.*`)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
