@@ -152,7 +152,7 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 	d.Set("client_id", account.ClientID)
 	d.Set("tenant_id", account.TenantID)
 	d.Set("subscription_number", account.SubscriptionNumber)
-	d.Set("key", nil)
+	d.Set("key", account.Password)
 	d.Set("azure_environment", account.AzureEnvironment)
 	d.Set("resource_management_endpoint_base_uri", account.ResourceManagementEndpointBaseURI)
 	d.Set("active_directory_endpoint_base_uri", account.ActiveDirectoryEndpointBaseURI)
