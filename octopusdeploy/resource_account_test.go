@@ -27,6 +27,8 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 					testOctopusDeployAccountExists(accountPrefix),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "name", accountName),
+					resource.TestCheckResourceAttr(
+						accountPrefix, "account_type", accountType),
 				),
 			},
 		},
