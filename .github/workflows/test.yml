@@ -1,14 +1,19 @@
 name: Run integration tests against Octopus in a Docker container
+
 on: push
+
 defaults:
   run:
     shell: bash
+
 jobs:
   test:
     env:
       OCTOPUS_VERSION: "2020.2.7"
       OCTOPUS_URL: "http://localhost:8080"
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v1
 
@@ -21,3 +26,9 @@ jobs:
 
       - name: Run the tests
         run: ./ci-scripts/pull_request.sh
+
+      - name: Build
+        run: go build -v .
+
+      - name: Test
+        run: go test -v .
