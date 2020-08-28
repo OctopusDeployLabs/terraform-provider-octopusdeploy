@@ -12,7 +12,6 @@ import (
 func TestAccOctopusDeployAccountBasic(t *testing.T) {
 	const accountPrefix = "octopusdeploy_account.foo"
 	const accountName = "Testing one two three"
-	const accountType = "Token"
 	const tagSetName = "TagSet"
 	const tagName = "Tag"
 
@@ -22,20 +21,18 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 		CheckDestroy: testOctopusDeployAccountDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccountBasic(tagSetName, tagName, accountName, accountType),
+				Config: testAccountBasic(tagSetName, tagName, accountName),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployAccountExists(accountPrefix),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "name", accountName),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "account_type", accountType),
 				),
 			},
 		},
 	})
 }
 
-func testAccountBasic(tagSetName string, tagName string, accountName string, accountType string) string {
+func testAccountBasic(tagSetName string, tagName string, accountName string) string {
 	return fmt.Sprintf(`
 
 		resource "octopusdeploy_tag_set" "testtagset" {
@@ -50,10 +47,9 @@ func testAccountBasic(tagSetName string, tagName string, accountName string, acc
 
 		resource "octopusdeploy_account" "foo" {
 			name           = "%s"
-			account_type    = "%s"
 		}
 		`,
-		tagSetName, tagName, accountName, accountType,
+		tagSetName, tagName, accountName,
 	)
 }
 
