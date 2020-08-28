@@ -15,7 +15,6 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 	const accountType = "Token"
 	const tagSetName = "TagSet"
 	const tagName = "Tag"
-	const tenantedDeploymentParticipation = "TenantedOrUntenanted"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
