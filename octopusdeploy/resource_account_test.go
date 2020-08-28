@@ -12,15 +12,9 @@ import (
 func TestAccOctopusDeployAccountBasic(t *testing.T) {
 	const accountPrefix = "octopusdeploy_account.foo"
 	const accountName = "Testing one two three"
-	const accountType = "AzureServicePrincipal"
-	const clientID = "18eb006b-c3c8-4a72-93cd-fe4b293f82e1"
-	const tenantID = "18eb006b-c3c8-4a72-93cd-fe4b293f82e2"
-	const subscriptionID = "18eb006b-c3c8-4a72-93cd-fe4b293f82e3"
-	//nolint:gosec
-	const clientSecret = "18eb006b-c3c8-4a72-93cd-fe4b293f82e4"
+	const accountType = "Token"
 	const tagSetName = "TagSet"
 	const tagName = "Tag"
-	var tenantTags = fmt.Sprintf("%s/%s", tagSetName, tagName)
 	const tenantedDeploymentParticipation = "TenantedOrUntenanted"
 
 	resource.Test(t, resource.TestCase{
@@ -29,32 +23,18 @@ func TestAccOctopusDeployAccountBasic(t *testing.T) {
 		CheckDestroy: testOctopusDeployAccountDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccountBasic(tagSetName, tagName, accountName, accountType, clientID, tenantID, subscriptionID, clientSecret, tenantedDeploymentParticipation),
+				Config: testAccountBasic(tagSetName, tagName, accountName, accountType),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployAccountExists(accountPrefix),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "name", accountName),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "account_type", accountType),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "client_id", clientID),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "tenant_id", tenantID),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "subscription_id", subscriptionID),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "client_secret", clientSecret),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "tenant_tags.0", tenantTags),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "tenanted_deployment_participation", tenantedDeploymentParticipation),
 				),
 			},
 		},
 	})
 }
 
-func testAccountBasic(tagSetName string, tagName string, accountName string, accountType, clientID string, tenantID string, subscriptionID string, clientSecret string, tenantedDeploymentParticipation string) string {
+func testAccountBasic(tagSetName string, tagName string, accountName string, accountType string) string {
 	return fmt.Sprintf(`
 
 		resource "octopusdeploy_tag_set" "testtagset" {
@@ -70,15 +50,9 @@ func testAccountBasic(tagSetName string, tagName string, accountName string, acc
 		resource "octopusdeploy_account" "foo" {
 			name           = "%s"
 			account_type    = "%s"
-			client_id = "%s"
-			tenant_id = "%s"
-			subscription_id = "%s"
-			client_secret = "%s"
-			tenant_tags = ["${octopusdeploy_tag_set.testtagset.name}/%s"]
-			tenanted_deployment_participation = "%s"
 		}
 		`,
-		tagSetName, tagName, accountName, accountType, clientID, tenantID, subscriptionID, clientSecret, tagName, tenantedDeploymentParticipation,
+		tagSetName, tagName, accountName, accountType,
 	)
 }
 
