@@ -76,38 +76,6 @@ func resourceAzureServicePrincipal() *schema.Resource {
 	}
 }
 
-func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	accountID := d.Id()
-	account, err := client.Account.Get(accountID)
-
-	if err == octopusdeploy.ErrItemNotFound {
-		d.SetId("")
-		return nil
-	}
-
-	if err != nil {
-		return fmt.Errorf("error reading azure service principal %s: %s", accountID, err.Error())
-	}
-
-	d.Set("name", account.Name)
-	d.Set("description", account.Description)
-	d.Set("environments", account.EnvironmentIDs)
-	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
-	d.Set("tenant_tags", account.TenantTags)
-
-	d.Set("client_id", account.ClientID)
-	d.Set("tenant_id", account.TenantID)
-	d.Set("subscription_number", account.SubscriptionNumber)
-	d.Set("key", nil)
-	d.Set("azure_environment", account.AzureEnvironment)
-	d.Set("resource_management_endpoint_base_uri", account.ResourceManagementEndpointBaseURI)
-	d.Set("active_directory_endpoint_base_uri", account.ActiveDirectoryEndpointBaseURI)
-
-	return nil
-}
-
 func buildAzureServicePrincipalResource(d *schema.ResourceData) *octopusdeploy.Account {
 	var account = octopusdeploy.NewAccount(d.Get("name").(string), octopusdeploy.AzureServicePrincipal)
 
@@ -156,6 +124,38 @@ func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) 
 	}
 
 	d.SetId(account.ID)
+
+	return nil
+}
+
+func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) error {
+	client := m.(*octopusdeploy.Client)
+
+	accountID := d.Id()
+	account, err := client.Account.Get(accountID)
+
+	if err == octopusdeploy.ErrItemNotFound {
+		d.SetId("")
+		return nil
+	}
+
+	if err != nil {
+		return fmt.Errorf("error reading azure service principal %s: %s", accountID, err.Error())
+	}
+
+	d.Set("name", account.Name)
+	d.Set("description", account.Description)
+	d.Set("environments", account.EnvironmentIDs)
+	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
+	d.Set("tenant_tags", account.TenantTags)
+
+	d.Set("client_id", account.ClientID)
+	d.Set("tenant_id", account.TenantID)
+	d.Set("subscription_number", account.SubscriptionNumber)
+	d.Set("key", account.Password)
+	d.Set("azure_environment", account.AzureEnvironment)
+	d.Set("resource_management_endpoint_base_uri", account.ResourceManagementEndpointBaseURI)
+	d.Set("active_directory_endpoint_base_uri", account.ActiveDirectoryEndpointBaseURI)
 
 	return nil
 }
