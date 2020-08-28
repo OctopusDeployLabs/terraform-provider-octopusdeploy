@@ -79,6 +79,7 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 	d.Set("client_id", account.ClientID)
 	d.Set("tenant_id", account.TenantID)
 	//d.Set("secret_key", account.SecretKey)
+	//test
 	//d.Set("access_key", account.AccessKey)
 
 	return nil
