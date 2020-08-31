@@ -24,9 +24,6 @@ jobs:
         run: ./tests/Create-ApiKey.ps1
         shell: pwsh
 
-      #- name: Run the tests
-      #  run: ./ci-scripts/pull_request.sh
-
       - name: Build
         run: go build -v .
 
