@@ -1,0 +1,29 @@
+# # name: Apply the examples to make sure they work
+# # on: push
+# # defaults:
+# #   run:
+# #     shell: bash
+# # jobs:
+# #   test:
+# #     env:
+# #       OCTOPUS_VERSION: "2020.2.7"
+# #       OCTOPUS_URL: "http://localhost:8080"
+# #     runs-on: ubuntu-latest
+# #     steps:
+# #       - uses: actions/checkout@v1
+
+# #       - name: Start the Octopus container
+# #         run: ./tests/start-octopus.sh
+
+# #       - name: Generate an API key
+# #         run: ./tests/Create-ApiKey.ps1
+# #         shell: pwsh
+
+# #       - name: Install gox
+# #         run: sudo apt-get install -y gox
+
+# #       - name: Build the plugin
+# #         run: ./ci-scripts/build.sh
+
+# #       - name: Implement the examples
+# #         run: ./tests/run-terraform.sh linux_amd64
