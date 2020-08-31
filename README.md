@@ -1,4 +1,5 @@
 # terraform-provider-octopusdeploy
+![Run integration tests against Octopus in a Docker container](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/workflows/Run%20integration%20tests%20against%20Octopus%20in%20a%20Docker%20container/badge.svg)
 
 A Terraform provider for [Octopus Deploy](https://octopus.com).
 
