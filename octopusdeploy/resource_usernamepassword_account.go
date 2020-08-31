@@ -31,6 +31,14 @@ func resourceUsernamePassword() *schema.Resource {
 				},
 				Optional: true,
 			},
+			"tenant_tags": {
+				Description: "The tags for the tenants that this step applies to",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"account_type": {
 				Type:     schema.TypeString,
 				Optional: true,
