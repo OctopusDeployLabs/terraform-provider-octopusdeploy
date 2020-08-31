@@ -31,4 +31,4 @@ jobs:
         run: go build -v .
 
       - name: Test
-        run: go test -v ./tests/
+        run: go test -v ./octopusdeploy/...
