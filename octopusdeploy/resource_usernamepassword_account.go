@@ -24,10 +24,6 @@ func resourceUsernamePassword() *schema.Resource {
 				Optional: true,
 			},
 			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"client_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"environments": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
@@ -64,7 +60,7 @@ func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("error reading AWS account %s: %s", accountID, err.Error())
+		return fmt.Errorf("error reading username password account %s: %s", accountID, err.Error())
 	}
 
 	d.Set("name", account.Name)
@@ -99,7 +95,7 @@ func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error
 	account, err := client.Account.Add(newAccount)
 
 	if err != nil {
-		return fmt.Errorf("error creating AWS account %s: %s", newAccount.Name, err.Error())
+		return fmt.Errorf("error creating username password account %s: %s", newAccount.Name, err.Error())
 	}
 
 	d.SetId(account.ID)
@@ -116,7 +112,7 @@ func resourceUsernamePasswordUpdate(d *schema.ResourceData, m interface{}) error
 	updatedAccount, err := client.Account.Update(account)
 
 	if err != nil {
-		return fmt.Errorf("error updating AWS account id %s: %s", d.Id(), err.Error())
+		return fmt.Errorf("error updating username password account id %s: %s", d.Id(), err.Error())
 	}
 
 	d.SetId(updatedAccount.ID)
@@ -131,7 +127,7 @@ func resourceUsernamePasswordDelete(d *schema.ResourceData, m interface{}) error
 	err := client.Account.Delete(accountID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting AWS account id %s: %s", accountID, err.Error())
+		return fmt.Errorf("error deleting username password account id %s: %s", accountID, err.Error())
 	}
 
 	d.SetId("")
