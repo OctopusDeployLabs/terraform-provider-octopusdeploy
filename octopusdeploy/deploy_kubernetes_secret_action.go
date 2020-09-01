@@ -2,7 +2,8 @@ package octopusdeploy
 
 import (
 	"encoding/json"
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -36,7 +37,7 @@ func getDeployKubernetesSecretActionSchema() *schema.Schema {
 	return actionSchema
 }
 
-func buildDeployKubernetesSecretActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func buildDeployKubernetesSecretActionResource(tfAction map[string]interface{}) model.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 
 	resource.ActionType = "Octopus.KubernetesDeploySecret"

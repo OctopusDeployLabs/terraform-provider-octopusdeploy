@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -66,16 +66,16 @@ func testVariableBasic(projectName, projectLifecycleID, name, description, value
 
 func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		return existsVarHelper(s, client)
 	}
 }
 
-func existsVarHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func existsVarHelper(s *terraform.State, client *client.Client) error {
 	projID := s.RootModule().Resources["octopusdeploy_project.foo"].Primary.ID
 	varID := s.RootModule().Resources["octopusdeploy_variable.foovar"].Primary.ID
 
-	if _, err := client.Variable.GetByID(projID, varID); err != nil {
+	if _, err := client.Variables.GetByID(projID, varID); err != nil {
 		return fmt.Errorf("Received an error retrieving variable %s", err)
 	}
 
@@ -83,16 +83,16 @@ func existsVarHelper(s *terraform.State, client *octopusdeploy.Client) error {
 }
 
 func testOctopusDeployVariableDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	return destroyVarHelper(s, client)
 }
 
-func destroyVarHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyVarHelper(s *terraform.State, apiClient *client.Client) error {
 	projID := s.RootModule().Resources["octopusdeploy_project.foo"].Primary.ID
 	varID := s.RootModule().Resources["octopusdeploy_variable.foovar"].Primary.ID
 
-	if _, err := client.Variable.DeleteSingle(projID, varID); err != nil {
-		if err == octopusdeploy.ErrItemNotFound {
+	if _, err := apiClient.Variables.DeleteSingle(projID, varID); err != nil {
+		if err == client.ErrItemNotFound {
 			return nil
 		}
 		return fmt.Errorf("Received an error retrieving variable %s", err)

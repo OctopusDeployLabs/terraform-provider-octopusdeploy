@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -94,7 +94,7 @@ func testAccLibraryVariableSetWithDescription(name, description string) string {
 }
 
 func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 
 	if err := destroyHelperLibraryVariableSet(s, client); err != nil {
 		return err
@@ -107,7 +107,7 @@ func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) erro
 
 func testAccCheckOctopusDeployLibraryVariableSetExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		if err := existsHelperLibraryVariableSet(s, client); err != nil {
 			return err
 		}
@@ -115,10 +115,10 @@ func testAccCheckOctopusDeployLibraryVariableSetExists(n string) resource.TestCh
 	}
 }
 
-func destroyHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyHelperLibraryVariableSet(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.LibraryVariableSet.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
+		if _, err := apiClient.LibraryVariableSets.Get(r.Primary.ID); err != nil {
+			if err == client.ErrItemNotFound {
 				continue
 			}
 			return fmt.Errorf("Received an error retrieving library variable set %s", err)
@@ -128,10 +128,10 @@ func destroyHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.C
 	return nil
 }
 
-func existsHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.Client) error {
+func existsHelperLibraryVariableSet(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_libraryVariableSet" {
-			if _, err := client.LibraryVariableSet.Get(r.Primary.ID); err != nil {
+			if _, err := client.LibraryVariableSets.Get(r.Primary.ID); err != nil {
 				return fmt.Errorf("received an error retrieving library variable set %s", err)
 			}
 		}

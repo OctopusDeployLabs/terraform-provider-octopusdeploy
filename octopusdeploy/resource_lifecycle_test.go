@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -157,7 +157,7 @@ func testAccLifecycleComplex() string {
 }
 
 func testAccCheckOctopusDeployLifecycleDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 
 	if err := destroyHelperLifecycle(s, client); err != nil {
 		return err
@@ -170,7 +170,7 @@ func testAccCheckOctopusDeployLifecycleDestroy(s *terraform.State) error {
 
 func testAccCheckOctopusDeployLifecycleExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		if err := existsHelperLifecycle(s, client); err != nil {
 			return err
 		}
@@ -180,8 +180,8 @@ func testAccCheckOctopusDeployLifecycleExists(n string) resource.TestCheckFunc {
 
 func testAccCheckOctopusDeployLifecyclePhaseCount(name string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		lifecycle, err := client.Lifecycle.GetByName(name)
+		client := testAccProvider.Meta().(*client.Client)
+		lifecycle, err := client.Lifecycles.GetByName(name)
 
 		if err != nil {
 			return err
@@ -194,10 +194,10 @@ func testAccCheckOctopusDeployLifecyclePhaseCount(name string, expected int) res
 		return nil
 	}
 }
-func destroyHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyHelperLifecycle(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Lifecycle.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
+		if _, err := apiClient.Lifecycles.Get(r.Primary.ID); err != nil {
+			if err == client.ErrItemNotFound {
 				continue
 			}
 			return fmt.Errorf("Received an error retrieving lifecycle %s", err)
@@ -207,10 +207,10 @@ func destroyHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) er
 	return nil
 }
 
-func existsHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) error {
+func existsHelperLifecycle(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_lifecycle" {
-			if _, err := client.Lifecycle.Get(r.Primary.ID); err != nil {
+			if _, err := client.Lifecycles.Get(r.Primary.ID); err != nil {
 				return fmt.Errorf("received an error retrieving lifecycle %s", err)
 			}
 		}

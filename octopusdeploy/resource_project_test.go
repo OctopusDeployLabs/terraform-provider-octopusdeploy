@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -101,7 +101,7 @@ func testAccProjectBasic(name, lifeCycleID, allowDeploymentsToNoTargets string) 
 }
 
 func testAccCheckOctopusDeployProjectDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 
 	if err := destroyProjectHelper(s, client); err != nil {
 		return err
@@ -111,7 +111,7 @@ func testAccCheckOctopusDeployProjectDestroy(s *terraform.State) error {
 
 func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		if err := existsHelper(s, client); err != nil {
 			return err
 		}
@@ -119,10 +119,10 @@ func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyProjectHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Project.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
+		if _, err := apiClient.Projects.Get(r.Primary.ID); err != nil {
+			if err == client.ErrItemNotFound {
 				continue
 			}
 			return fmt.Errorf("Received an error retrieving project %s", err)
@@ -132,10 +132,10 @@ func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) erro
 	return nil
 }
 
-func existsHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func existsHelper(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopus_deploy_project" {
-			if _, err := client.Project.Get(r.Primary.ID); err != nil {
+			if _, err := client.Projects.Get(r.Primary.ID); err != nil {
 				return fmt.Errorf("Received an error retrieving project with ID %s: %s", r.Primary.ID, err)
 			}
 		}

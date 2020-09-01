@@ -1,9 +1,10 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
 	"strings"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func getDeploymentStepSchema() *schema.Schema {
@@ -29,23 +30,23 @@ func getDeploymentStepSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "Whether to run this step before or after package acquisition (if possible)",
 					Optional:    true,
-					Default:     (string)(octopusdeploy.DeploymentStepPackageRequirement_LetOctopusDecide),
+					Default:     (string)(model.DeploymentStepPackageRequirementLetOctopusDecide),
 					ValidateFunc: validateValueFunc([]string{
-						(string)(octopusdeploy.DeploymentStepPackageRequirement_LetOctopusDecide),
-						(string)(octopusdeploy.DeploymentStepPackageRequirement_BeforePackageAcquisition),
-						(string)(octopusdeploy.DeploymentStepPackageRequirement_AfterPackageAcquisition),
+						(string)(model.DeploymentStepPackageRequirementLetOctopusDecide),
+						(string)(model.DeploymentStepPackageRequirementBeforePackageAcquisition),
+						(string)(model.DeploymentStepPackageRequirementAfterPackageAcquisition),
 					}),
 				},
 				"condition": {
 					Type:        schema.TypeString,
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
 					Optional:    true,
-					Default:     (string)(octopusdeploy.DeploymentStepCondition_Success),
+					Default:     (string)(model.DeploymentStepConditionSuccess),
 					ValidateFunc: validateValueFunc([]string{
-						(string)(octopusdeploy.DeploymentStepCondition_Success),
-						(string)(octopusdeploy.DeploymentStepCondition_Failure),
-						(string)(octopusdeploy.DeploymentStepCondition_Always),
-						(string)(octopusdeploy.DeploymentStepCondition_Variable),
+						(string)(model.DeploymentStepConditionSuccess),
+						(string)(model.DeploymentStepConditionFailure),
+						(string)(model.DeploymentStepConditionAlways),
+						(string)(model.DeploymentStepConditionVariable),
 					}),
 				},
 				"condition_expression": {
@@ -57,10 +58,10 @@ func getDeploymentStepSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')",
 					Optional:    true,
-					Default:     (string)(octopusdeploy.DeploymentStepStartTrigger_StartAfterPrevious),
+					Default:     (string)(model.DeploymentStepStartTriggerStartAfterPrevious),
 					ValidateFunc: validateValueFunc([]string{
-						(string)(octopusdeploy.DeploymentStepStartTrigger_StartAfterPrevious),
-						(string)(octopusdeploy.DeploymentStepStartTrigger_StartWithPrevious),
+						(string)(model.DeploymentStepStartTriggerStartAfterPrevious),
+						(string)(model.DeploymentStepStartTriggerStartWithPrevious),
 					}),
 				},
 				"window_size": {
@@ -81,12 +82,12 @@ func getDeploymentStepSchema() *schema.Schema {
 	}
 }
 
-func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.DeploymentStep {
-	step := octopusdeploy.DeploymentStep{
+func buildDeploymentStepResource(tfStep map[string]interface{}) model.DeploymentStep {
+	step := model.DeploymentStep{
 		Name:               tfStep["name"].(string),
-		PackageRequirement: octopusdeploy.DeploymentStepPackageRequirement(tfStep["package_requirement"].(string)),
-		Condition:          octopusdeploy.DeploymentStepCondition(tfStep["condition"].(string)),
-		StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(tfStep["start_trigger"].(string)),
+		PackageRequirement: model.DeploymentStepPackageRequirement(tfStep["package_requirement"].(string)),
+		Condition:          model.DeploymentStepCondition(tfStep["condition"].(string)),
+		StartTrigger:       model.DeploymentStepStartTrigger(tfStep["start_trigger"].(string)),
 		Properties:         map[string]string{},
 	}
 

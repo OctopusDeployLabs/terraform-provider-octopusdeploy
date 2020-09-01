@@ -2,9 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
 	"log"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func dataLibraryVariableSet() *schema.Resource {
@@ -21,13 +22,13 @@ func dataLibraryVariableSet() *schema.Resource {
 }
 
 func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	name := d.Get("name")
 
-	libraryVariableSet, err := client.LibraryVariableSet.GetByName(name.(string))
+	libraryVariableSet, err := apiClient.LibraryVariableSets.GetByName(name.(string))
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 
@@ -40,6 +41,6 @@ func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) err
 	log.Printf("[DEBUG] libraryVariableSet: %v", m)
 	d.Set("name", libraryVariableSet.Name)
 	d.Set("description", libraryVariableSet.Description)
-	d.Set("variable_set_id", libraryVariableSet.VariableSetId)
+	d.Set("variable_set_id", libraryVariableSet.VariableSetID)
 	return nil
 }

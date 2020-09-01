@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -79,12 +81,12 @@ func resourceProject() *schema.Resource {
 	}
 }
 
-func buildProjectResource(d *schema.ResourceData) *octopusdeploy.Project {
+func buildProjectResource(d *schema.ResourceData) *model.Project {
 	name := d.Get("name").(string)
 	lifecycleID := d.Get("lifecycle_id").(string)
 	projectGroupID := d.Get("project_group_id").(string)
 
-	project := octopusdeploy.NewProject(name, lifecycleID, projectGroupID)
+	project := model.NewProject(name, lifecycleID, projectGroupID)
 
 	if attr, ok := d.GetOk("description"); ok {
 		project.Description = attr.(string)
@@ -103,7 +105,7 @@ func buildProjectResource(d *schema.ResourceData) *octopusdeploy.Project {
 	}
 
 	if attr, ok := d.GetOk("tenanted_deployment_mode"); ok {
-		project.TenantedDeploymentMode, _ = octopusdeploy.ParseTenantedDeploymentMode(attr.(string))
+		project.TenantedDeploymentMode, _ = enum.ParseTenantedDeploymentMode(attr.(string))
 	}
 
 	if attr, ok := d.GetOk("included_library_variable_sets"); ok {
@@ -122,11 +124,11 @@ func buildProjectResource(d *schema.ResourceData) *octopusdeploy.Project {
 }
 
 func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newProject := buildProjectResource(d)
 
-	createdProject, err := client.Project.Add(newProject)
+	createdProject, err := apiClient.Projects.Add(newProject)
 
 	if err != nil {
 		return fmt.Errorf("error creating project: %s", err.Error())
@@ -138,13 +140,13 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	projectID := d.Id()
 
-	project, err := client.Project.Get(projectID)
+	project, err := apiClient.Projects.Get(projectID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -169,9 +171,9 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	project := buildProjectResource(d)
 	project.ID = d.Id() // set project struct ID so octopus knows which project to update
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	project, err := client.Project.Update(project)
+	project, err := apiClient.Projects.Update(project)
 
 	if err != nil {
 		return fmt.Errorf("error updating project id %s: %s", d.Id(), err.Error())
@@ -183,11 +185,11 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	projectID := d.Id()
 
-	err := client.Project.Delete(projectID)
+	err := apiClient.Projects.Delete(projectID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting project id %s: %s", projectID, err.Error())

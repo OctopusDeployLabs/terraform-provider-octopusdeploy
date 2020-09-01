@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -58,12 +58,12 @@ func dataChannel() *schema.Resource {
 }
 
 func dataChannelReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	ChannelName := d.Get("name")
-	env, err := client.Channel.Get(ChannelName.(string))
+	env, err := apiClient.Channels.Get(ChannelName.(string))
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 

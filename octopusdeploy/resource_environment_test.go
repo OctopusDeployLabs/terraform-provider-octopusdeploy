@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -54,14 +54,14 @@ func testEnvironmenttBasic(name, description, useguided string, dynamic string) 
 
 func testOctopusDeployEnvironmentExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		return existsEnvHelper(s, client)
 	}
 }
 
-func existsEnvHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func existsEnvHelper(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Environment.Get(r.Primary.ID); err != nil {
+		if _, err := client.Environments.Get(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving environment %s", err)
 		}
 	}
@@ -69,14 +69,14 @@ func existsEnvHelper(s *terraform.State, client *octopusdeploy.Client) error {
 }
 
 func testOctopusDeployEnvironmentDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	return destroyEnvHelper(s, client)
 }
 
-func destroyEnvHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyEnvHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Environment.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
+		if _, err := apiClient.Environments.Get(r.Primary.ID); err != nil {
+			if err == client.ErrItemNotFound {
 				continue
 			}
 			return fmt.Errorf("Received an error retrieving environment %s", err)

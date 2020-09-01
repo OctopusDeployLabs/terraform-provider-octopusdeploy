@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -64,15 +64,15 @@ func testMachineBasic(machineName string) string {
 
 func testOctopusDeployMachineExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		return existsMachineHelper(s, client)
 	}
 }
 
-func existsMachineHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func existsMachineHelper(s *terraform.State, client *client.Client) error {
 	macID := s.RootModule().Resources["octopusdeploy_machine.foomac"].Primary.ID
 
-	if _, err := client.Machine.Get(macID); err != nil {
+	if _, err := client.Machines.Get(macID); err != nil {
 		return fmt.Errorf("Received an error retrieving machine %s", err)
 	}
 
@@ -80,15 +80,15 @@ func existsMachineHelper(s *terraform.State, client *octopusdeploy.Client) error
 }
 
 func testOctopusDeployMachineDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	return destroyMachineHelper(s, client)
 }
 
-func destroyMachineHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyMachineHelper(s *terraform.State, apiClient *client.Client) error {
 	macID := s.RootModule().Resources["octopusdeploy_machine.foomac"].Primary.ID
 
-	if err := client.Machine.Delete(macID); err != nil {
-		if err == octopusdeploy.ErrItemNotFound {
+	if err := apiClient.Machines.Delete(macID); err != nil {
+		if err == client.ErrItemNotFound {
 			return nil
 		}
 		return fmt.Errorf("Received an error retrieving machine %s", err)

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/encryption"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -110,14 +111,14 @@ func resourceVariableImport(d *schema.ResourceData, m interface{}) ([]*schema.Re
 }
 
 func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	variableID := d.Id()
 	projectID := d.Get("project_id").(string)
 	isSensitive := d.Get("is_sensitive").(bool)
-	tfVar, err := client.Variable.GetByID(projectID, variableID)
+	tfVar, err := apiClient.Variables.GetByID(projectID, variableID)
 
-	if err == octopusdeploy.ErrItemNotFound || tfVar == nil {
+	if err == client.ErrItemNotFound || tfVar == nil {
 		d.SetId("")
 		return nil
 	}
@@ -138,7 +139,7 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
+func buildVariableResource(d *schema.ResourceData) *model.Variable {
 	varName := d.Get("name").(string)
 	varType := d.Get("type").(string)
 
@@ -161,14 +162,14 @@ func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 
 	varScopeInterface := tfVariableScopetoODVariableScope(d)
 
-	newVar := octopusdeploy.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
+	newVar := model.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
 
 	varPrompt, ok := d.GetOk("prompt")
 	if ok {
 		tfPromptSettings := varPrompt.(*schema.Set)
 		if len(tfPromptSettings.List()) == 1 {
 			tfPromptList := tfPromptSettings.List()[0].(map[string]interface{})
-			newPrompt := octopusdeploy.VariablePromptOptions{
+			newPrompt := model.VariablePromptOptions{
 				Description: tfPromptList["description"].(string),
 				Label:       tfPromptList["label"].(string),
 				Required:    tfPromptList["required"].(bool),
@@ -180,7 +181,7 @@ func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 	return newVar
 }
 
-func encryptSensitiveValue(d *schema.ResourceData, ov *octopusdeploy.Variable) (isEncrypted bool, keyFingerprint, encryptedValue string, err error) {
+func encryptSensitiveValue(d *schema.ResourceData, ov *model.Variable) (isEncrypted bool, keyFingerprint, encryptedValue string, err error) {
 	if isSensitive := d.Get("is_sensitive").(bool); !isSensitive {
 		return isEncrypted, keyFingerprint, encryptedValue, nil
 	}
@@ -213,11 +214,11 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 	projID := d.Get("project_id").(string)
 
 	newVariable := buildVariableResource(d)
-	tfVar, err := client.Variable.AddSingle(projID, newVariable)
+	tfVar, err := apiClient.Variables.AddSingle(projID, newVariable)
 
 	if err != nil {
 		return fmt.Errorf("error creating variable %s: %s", newVariable.Name, err.Error())
@@ -230,7 +231,7 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 
 	for _, v := range tfVar.Variables {
 		if v.Name == newVariable.Name && v.Type == newVariable.Type && (v.IsSensitive || v.Value == newVariable.Value) && v.Description == newVariable.Description && v.IsSensitive == newVariable.IsSensitive {
-			scopeMatches, _, err := client.Variable.MatchesScope(v.Scope, newVariable.Scope)
+			scopeMatches, _, err := apiClient.Variables.MatchesScope(v.Scope, newVariable.Scope)
 			if err != nil {
 				return err
 			}
@@ -259,10 +260,10 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 	tfVar := buildVariableResource(d)
 	tfVar.ID = d.Id() // set project struct ID so octopus knows which project to update
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 	projID := d.Get("project_id").(string)
 
-	updatedVars, err := client.Variable.UpdateSingle(projID, tfVar)
+	updatedVars, err := apiClient.Variables.UpdateSingle(projID, tfVar)
 	if err != nil {
 		return fmt.Errorf("error updating variable id %s: %s", d.Id(), err.Error())
 	}
@@ -274,7 +275,7 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 
 	for _, v := range updatedVars.Variables {
 		if v.Name == tfVar.Name && v.Type == tfVar.Type && (v.IsSensitive || v.Value == tfVar.Value) && v.Description == tfVar.Description && v.IsSensitive == tfVar.IsSensitive {
-			scopeMatches, _, _ := client.Variable.MatchesScope(v.Scope, tfVar.Scope)
+			scopeMatches, _, _ := apiClient.Variables.MatchesScope(v.Scope, tfVar.Scope)
 			if scopeMatches {
 				d.SetId(v.ID)
 				if isEncrypted {
@@ -294,12 +295,12 @@ func resourceVariableDelete(d *schema.ResourceData, m interface{}) error {
 	octoMutex.Lock("atom-variable")
 	defer octoMutex.Unlock("atom-variable")
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 	projID := d.Get("project_id").(string)
 
 	variableID := d.Id()
 
-	_, err := client.Variable.DeleteSingle(projID, variableID)
+	_, err := apiClient.Variables.DeleteSingle(projID, variableID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting variable id %s: %s", variableID, err.Error())

@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -53,12 +53,12 @@ func dataAwsAccount() *schema.Resource {
 }
 
 func dataAwsAccountReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	AwsAccountName := d.Get("name")
-	env, err := client.Account.GetByName(AwsAccountName.(string))
+	env, err := apiClient.Accounts.GetByName(AwsAccountName.(string))
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 

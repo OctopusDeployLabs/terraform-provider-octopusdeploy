@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -17,7 +18,7 @@ func TestSSHKeyBasic(t *testing.T) {
 	const tagSetName = "TagSet"
 	const tagName = "Tag"
 	var tenantTags = fmt.Sprintf("%s/%s", tagSetName, tagName)
-	const tenantedDeploymentParticipation = octopusdeploy.TenantedOrUntenanted
+	const tenantedDeploymentParticipation = enum.TenantedOrUntenanted
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -42,7 +43,7 @@ func TestSSHKeyBasic(t *testing.T) {
 	})
 }
 
-func testSSHKeyBasic(tagSetName string, tagName string, username string, passphrase string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+func testSSHKeyBasic(tagSetName string, tagName string, username string, passphrase string, tenantedDeploymentParticipation enum.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`
 
 
@@ -60,16 +61,16 @@ func testSSHKeyBasic(tagSetName string, tagName string, username string, passphr
 
 func testSSHKeyExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		return existsAzureServicePrincipalHelper(s, client)
 	}
 }
 
-func existsSSHKeyHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func existsSSHKeyHelper(s *terraform.State, client *client.Client) error {
 
 	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
 
-	if _, err := client.Account.Get(accountID); err != nil {
+	if _, err := client.Accounts.Get(accountID); err != nil {
 		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
 	}
 
@@ -77,16 +78,16 @@ func existsSSHKeyHelper(s *terraform.State, client *octopusdeploy.Client) error 
 }
 
 func testOctopusDeploySSHKeyDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	return destroyAzureServicePrincipalHelper(s, client)
 }
 
-func destroySSHKeyHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func destroySSHKeyHelper(s *terraform.State, apiClient *client.Client) error {
 
 	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
 
-	if _, err := client.Account.Get(accountID); err != nil {
-		if err == octopusdeploy.ErrItemNotFound {
+	if _, err := apiClient.Accounts.Get(accountID); err != nil {
+		if err == client.ErrItemNotFound {
 			return nil
 		}
 		return fmt.Errorf("Received an error retrieving azure service principal %s", err)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -22,13 +22,13 @@ func dataFeed() *schema.Resource {
 }
 
 func dataFeedReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	feedName := d.Get("name")
 
-	feed, err := client.Feed.GetByName(feedName.(string))
+	feed, err := apiClient.Feeds.GetByName(feedName.(string))
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 

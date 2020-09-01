@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -36,7 +36,7 @@ func addScriptFromPackageSchema(element *schema.Resource) {
 	}
 }
 
-func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func buildRunScriptActionResource(tfAction map[string]interface{}) model.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 
 	resource.ActionType = "Octopus.Script"

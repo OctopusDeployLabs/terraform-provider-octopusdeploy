@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -174,11 +176,11 @@ func resourceMachine() *schema.Resource {
 }
 
 func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	machineID := d.Id()
-	machine, err := client.Machine.Get(machineID)
-	if err == octopusdeploy.ErrItemNotFound {
+	machine, err := apiClient.Machines.Get(machineID)
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -192,7 +194,7 @@ func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func setMachineProperties(d *schema.ResourceData, m *octopusdeploy.Machine) {
+func setMachineProperties(d *schema.ResourceData, m *model.Machine) {
 	d.Set("environments", m.EnvironmentIDs)
 	d.Set("haslatestcalamari", m.HasLatestCalamari)
 	d.Set("isdisabled", m.IsDisabled)
@@ -206,13 +208,13 @@ func setMachineProperties(d *schema.ResourceData, m *octopusdeploy.Machine) {
 	d.Set("tenanttags", m.TenantTags)
 }
 
-func buildMachineResource(d *schema.ResourceData) *octopusdeploy.Machine {
+func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	mName := d.Get("name").(string)
 	mMachinepolicy := d.Get("machinepolicy").(string)
 	mEnvironments := getSliceFromTerraformTypeList(d.Get("environments"))
 	mRoles := getSliceFromTerraformTypeList(d.Get("roles"))
 	mDisabled := d.Get("isdisabled").(bool)
-	mTenantedDeploymentParticipation, _ := octopusdeploy.ParseTenantedDeploymentMode(d.Get("tenanteddeploymentparticipation").(string))
+	mTenantedDeploymentParticipation, _ := enum.ParseTenantedDeploymentMode(d.Get("tenanteddeploymentparticipation").(string))
 	mTenantIDs := getSliceFromTerraformTypeList(d.Get("tenantids"))
 	mTenantTags := getSliceFromTerraformTypeList(d.Get("tenanttags"))
 
@@ -236,7 +238,7 @@ func buildMachineResource(d *schema.ResourceData) *octopusdeploy.Machine {
 	//Get the first element in the list, which is a map of the interfaces
 	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
 
-	tfMachine := octopusdeploy.NewMachine(
+	tfMachine := model.NewMachine(
 		mName,
 		mDisabled,
 		mEnvironments,
@@ -256,7 +258,7 @@ func buildMachineResource(d *schema.ResourceData) *octopusdeploy.Machine {
 		proxyid = &proxyString
 	}
 
-	tfMachine.Endpoint = &octopusdeploy.MachineEndpoint{
+	tfMachine.Endpoint = &model.MachineEndpoint{
 		URI:                 tfSchemaList["uri"].(string),
 		Thumbprint:          tfSchemaList["thumbprint"].(string),
 		CommunicationStyle:  tfSchemaList["communicationstyle"].(string),
@@ -275,7 +277,7 @@ func buildMachineResource(d *schema.ResourceData) *octopusdeploy.Machine {
 			//Get the first element in the list, which is a map of the interfaces
 			tfAuthenticationSchemaList := tfAuthenticationSchemaSet.List()[0].(map[string]interface{})
 
-			tfMachine.Endpoint.Authentication = &octopusdeploy.MachineEndpointAuthentication{
+			tfMachine.Endpoint.Authentication = &model.MachineEndpointAuthentication{
 				AccountID:          tfAuthenticationSchemaList["accountid"].(string),
 				ClientCertificate:  tfAuthenticationSchemaList["clientcertificate"].(string),
 				AuthenticationType: tfAuthenticationSchemaList["authenticationtype"].(string),
@@ -287,10 +289,10 @@ func buildMachineResource(d *schema.ResourceData) *octopusdeploy.Machine {
 }
 
 func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 	newMachine := buildMachineResource(d)
 	newMachine.Status = "Unknown" //We don't want TF to attempt to update a machine just because its status has changed, so set it to Unknown on creation and let TF sort it out in the future.
-	machine, err := client.Machine.Add(newMachine)
+	machine, err := apiClient.Machines.Add(newMachine)
 	if err != nil {
 		return fmt.Errorf("error creating machine %s: %s", newMachine.Name, err.Error())
 	}
@@ -300,9 +302,9 @@ func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceMachineDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 	machineID := d.Id()
-	err := client.Machine.Delete(machineID)
+	err := apiClient.Machines.Delete(machineID)
 	if err != nil {
 		return fmt.Errorf("error deleting machine id %s: %s", machineID, err.Error())
 	}
@@ -313,8 +315,8 @@ func resourceMachineDelete(d *schema.ResourceData, m interface{}) error {
 func resourceMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	machine := buildMachineResource(d)
 	machine.ID = d.Id() // set project struct ID so octopus knows which project to update
-	client := m.(*octopusdeploy.Client)
-	updatedMachine, err := client.Machine.Update(machine)
+	apiClient := m.(*client.Client)
+	updatedMachine, err := apiClient.Machines.Update(machine)
 	if err != nil {
 		return fmt.Errorf("error updating machine id %s: %s", d.Id(), err.Error())
 	}

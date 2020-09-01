@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -22,12 +22,12 @@ func dataTagSet() *schema.Resource {
 }
 
 func dataTagSetReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	TagSetName := d.Get("name")
-	env, err := client.TagSet.GetByName(TagSetName.(string))
+	env, err := apiClient.TagSets.GetByName(TagSetName.(string))
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 

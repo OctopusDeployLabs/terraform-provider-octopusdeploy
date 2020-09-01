@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -57,12 +57,12 @@ func dataCertificate() *schema.Resource {
 }
 
 func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	CertificateName := d.Get("name")
-	env, err := client.Certificate.GetByName(CertificateName.(string))
+	env, err := apiClient.Certificates.GetByName(CertificateName.(string))
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 

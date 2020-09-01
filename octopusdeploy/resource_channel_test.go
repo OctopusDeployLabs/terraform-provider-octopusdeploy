@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -328,7 +328,7 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 
 func testAccCheckOctopusDeployChannelExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		if err := existsHelperChannel(s, client); err != nil {
 			return err
 		}
@@ -336,10 +336,10 @@ func testAccCheckOctopusDeployChannelExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func existsHelperChannel(s *terraform.State, client *octopusdeploy.Client) error {
+func existsHelperChannel(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_channel" {
-			if _, err := client.Channel.Get(r.Primary.ID); err != nil {
+			if _, err := client.Channels.Get(r.Primary.ID); err != nil {
 				return fmt.Errorf("received an error retrieving channel %s", err)
 			}
 		}
@@ -348,7 +348,7 @@ func existsHelperChannel(s *terraform.State, client *octopusdeploy.Client) error
 }
 
 func testAccCheckOctopusDeployChannelDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 
 	if err := destroyHelperChannel(s, client); err != nil {
 		return err
@@ -359,10 +359,10 @@ func testAccCheckOctopusDeployChannelDestroy(s *terraform.State) error {
 	return nil
 }
 
-func destroyHelperChannel(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyHelperChannel(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Channel.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
+		if _, err := apiClient.Channels.Get(r.Primary.ID); err != nil {
+			if err == client.ErrItemNotFound {
 				continue
 			}
 			return fmt.Errorf("Received an error retrieving channel %s", err)

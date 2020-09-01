@@ -1,9 +1,10 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
 	"strconv"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func getDeploymentActionSchema() *schema.Schema {
@@ -112,8 +113,8 @@ func addWorkerPoolSchema(element *schema.Resource) {
 	}
 }
 
-func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	action := octopusdeploy.DeploymentAction{
+func buildDeploymentActionResource(tfAction map[string]interface{}) model.DeploymentAction {
+	action := model.DeploymentAction{
 		Name:                 tfAction["name"].(string),
 		IsDisabled:           tfAction["disabled"].(bool),
 		IsRequired:           tfAction["required"].(bool),
@@ -138,7 +139,7 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 
 	workerPoolID := tfAction["worker_pool_id"]
 	if workerPoolID != nil {
-		action.WorkerPoolId = workerPoolID.(string)
+		action.WorkerPoolID = workerPoolID.(string)
 	}
 
 	if primaryPackage, ok := tfAction["primary_package"]; ok {

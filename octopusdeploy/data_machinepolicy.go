@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -29,11 +29,11 @@ func dataMachinePolicy() *schema.Resource {
 }
 
 func dataMachinePolicyReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	policyName := d.Get("name").(string)
-	policies, err := client.MachinePolicy.GetAll()
-	if err == octopusdeploy.ErrItemNotFound {
+	policies, err := apiClient.MachinePolicies.GetAll()
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 	if err != nil {

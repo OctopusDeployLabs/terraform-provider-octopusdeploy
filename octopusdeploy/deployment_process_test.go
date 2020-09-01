@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -160,7 +161,7 @@ func testAccBuildTestAction(action string) string {
 }
 
 func testAccCheckOctopusDeployDeploymentProcessDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 
 	if err := destroyProjectHelper(s, client); err != nil {
 		return err
@@ -176,7 +177,7 @@ func testAccCheckOctopusDeployDeploymentProcessDestroy(s *terraform.State) error
 
 func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 
 		process, err := getDeploymentProcess(s, client)
 		if err != nil {
@@ -197,10 +198,10 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 	}
 }
 
-func getDeploymentProcess(s *terraform.State, client *octopusdeploy.Client) (*octopusdeploy.DeploymentProcess, error) {
+func getDeploymentProcess(s *terraform.State, client *client.Client) (*model.DeploymentProcess, error) {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_deployment_process" {
-			return client.DeploymentProcess.Get(r.Primary.ID)
+			return client.DeploymentProcesses.Get(r.Primary.ID)
 		}
 	}
 	return nil, fmt.Errorf("No deployment process found in the terraform resources")

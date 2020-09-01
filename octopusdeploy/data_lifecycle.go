@@ -2,9 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
 	"log"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func dataLifecycle() *schema.Resource {
@@ -25,13 +26,13 @@ func dataLifecycle() *schema.Resource {
 }
 
 func dataLifecycleReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	lifecycleName := d.Get("name")
 
-	lifecycle, err := client.Lifecycle.GetByName(lifecycleName.(string))
+	lifecycle, err := apiClient.Lifecycles.GetByName(lifecycleName.(string))
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -68,12 +69,12 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 	}
 }
 
-func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octopusdeploy.ProjectTrigger, error) {
+func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*model.ProjectTrigger, error) {
 	name := d.Get("name").(string)
 	projectID := d.Get("project_id").(string)
 	shouldRedeploy := d.Get("should_redeploy").(bool)
 
-	deploymentTargetTrigger := octopusdeploy.NewProjectDeploymentTargetTrigger(name, projectID, shouldRedeploy, nil, nil, nil)
+	deploymentTargetTrigger := model.NewProjectDeploymentTargetTrigger(name, projectID, shouldRedeploy, nil, nil, nil)
 
 	if attr, ok := d.GetOk("event_groups"); ok {
 		eventGroups := getSliceFromTerraformTypeList(attr)
@@ -129,7 +130,7 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 }
 
 func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	deploymentTargetTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
 
@@ -137,7 +138,7 @@ func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m inte
 		return err
 	}
 
-	createdProjectDeploymentTargetTrigger, err := client.ProjectTrigger.Add(deploymentTargetTrigger)
+	createdProjectDeploymentTargetTrigger, err := apiClient.ProjectTriggers.Add(deploymentTargetTrigger)
 
 	if err != nil {
 		return fmt.Errorf("error creating project deployment target trigger: %s", err.Error())
@@ -148,13 +149,13 @@ func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m inte
 }
 
 func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	projectTriggerID := d.Id()
 
-	projectTrigger, err := client.ProjectTrigger.Get(projectTriggerID)
+	projectTrigger, err := apiClient.ProjectTriggers.Get(projectTriggerID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -182,9 +183,9 @@ func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m inte
 
 	deploymentTargetTrigger.ID = d.Id() // set deploymenttrigger struct ID so octopus knows which to update
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	updatedProjectTrigger, err := client.ProjectTrigger.Update(deploymentTargetTrigger)
+	updatedProjectTrigger, err := apiClient.ProjectTriggers.Update(deploymentTargetTrigger)
 
 	if err != nil {
 		return fmt.Errorf("error updating project trigger id %s: %s", d.Id(), err.Error())
@@ -195,11 +196,11 @@ func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m inte
 }
 
 func resourceProjectDeploymentTargetTriggerDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	projectTriggerID := d.Id()
 
-	err := client.ProjectTrigger.Delete(projectTriggerID)
+	err := apiClient.ProjectTriggers.Delete(projectTriggerID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting project trigger id %s: %s", projectTriggerID, err.Error())

@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -23,7 +23,7 @@ func getManualInterventionActionSchema() *schema.Schema {
 	return actionSchema
 }
 
-func buildManualInterventionActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func buildManualInterventionActionResource(tfAction map[string]interface{}) model.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 	resource.ActionType = "Octopus.Manual"
 	resource.Properties["Octopus.Action.Manual.Instructions"] = tfAction["instructions"].(string)

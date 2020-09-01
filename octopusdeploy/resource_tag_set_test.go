@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -64,14 +64,14 @@ func testTagSettBasic(name, tagName1 string, tagColor1 string, tagName2 string, 
 
 func testOctopusDeployTagSetExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		return existstagSetHelper(s, client)
 	}
 }
 
-func existstagSetHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func existstagSetHelper(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.TagSet.Get(r.Primary.ID); err != nil {
+		if _, err := client.TagSets.Get(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving tagSet %s", err)
 		}
 	}
@@ -79,14 +79,14 @@ func existstagSetHelper(s *terraform.State, client *octopusdeploy.Client) error 
 }
 
 func testOctopusDeployTagSetDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	return destroytagSetHelper(s, client)
 }
 
-func destroytagSetHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func destroytagSetHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.TagSet.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
+		if _, err := apiClient.TagSets.Get(r.Primary.ID); err != nil {
+			if err == client.ErrItemNotFound {
 				continue
 			}
 			return fmt.Errorf("Received an error retrieving tagSet %s", err)

@@ -2,9 +2,11 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
 	"log"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func resourceDeploymentProcess() *schema.Resource {
@@ -25,23 +27,23 @@ func resourceDeploymentProcess() *schema.Resource {
 }
 
 func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newDeploymentProcess := buildDeploymentProcessResource(d)
 
-	project, err := client.Project.Get(newDeploymentProcess.ProjectID)
+	project, err := apiClient.Projects.Get(newDeploymentProcess.ProjectID)
 	if err != nil {
 		return fmt.Errorf("error getting project %s: %s", project.Name, err.Error())
 	}
 
-	current, err := client.DeploymentProcess.Get(project.DeploymentProcessID)
+	current, err := apiClient.DeploymentProcesses.Get(project.DeploymentProcessID)
 	if err != nil {
 		return fmt.Errorf("error getting deployment process for %s: %s", project.Name, err.Error())
 	}
 
 	newDeploymentProcess.ID = current.ID
 	newDeploymentProcess.Version = current.Version
-	createdDeploymentProcess, err := client.DeploymentProcess.Update(newDeploymentProcess)
+	createdDeploymentProcess, err := apiClient.DeploymentProcesses.Update(newDeploymentProcess)
 
 	if err != nil {
 		return fmt.Errorf("error creating deployment process: %s", err.Error())
@@ -52,8 +54,8 @@ func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.DeploymentProcess {
-	deploymentProcess := &octopusdeploy.DeploymentProcess{
+func buildDeploymentProcessResource(d *schema.ResourceData) *model.DeploymentProcess {
+	deploymentProcess := &model.DeploymentProcess{
 		ProjectID: d.Get("project_id").(string),
 	}
 
@@ -70,13 +72,13 @@ func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.Deplo
 }
 
 func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	deploymentProcessID := d.Id()
 
-	_, err := client.DeploymentProcess.Get(deploymentProcessID)
+	_, err := apiClient.DeploymentProcesses.Get(deploymentProcessID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -94,15 +96,15 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 	deploymentProcess := buildDeploymentProcessResource(d)
 	deploymentProcess.ID = d.Id() // set deploymentProcess struct ID so octopus knows which deploymentProcess to update
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	current, err := client.DeploymentProcess.Get(deploymentProcess.ID)
+	current, err := apiClient.DeploymentProcesses.Get(deploymentProcess.ID)
 	if err != nil {
 		return fmt.Errorf("error getting deployment process %s: %s", deploymentProcess.ID, err.Error())
 	}
 
 	deploymentProcess.Version = current.Version
-	deploymentProcess, err = client.DeploymentProcess.Update(deploymentProcess)
+	deploymentProcess, err = apiClient.DeploymentProcesses.Update(deploymentProcess)
 
 	if err != nil {
 		return fmt.Errorf("error updating deployment process id %s: %s", d.Id(), err.Error())
@@ -114,19 +116,19 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-	current, err := client.DeploymentProcess.Get(d.Id())
+	apiClient := m.(*client.Client)
+	current, err := apiClient.DeploymentProcesses.Get(d.Id())
 
 	if err != nil {
 		return fmt.Errorf("error getting deployment process with id %s: %s", d.Id(), err.Error())
 	}
 
-	deploymentProcess := &octopusdeploy.DeploymentProcess{
-		ID:      d.Id(),
+	deploymentProcess := &model.DeploymentProcess{
 		Version: current.Version,
 	}
+	deploymentProcess.ID = d.Id()
 
-	deploymentProcess, err = client.DeploymentProcess.Update(deploymentProcess)
+	deploymentProcess, err = apiClient.DeploymentProcesses.Update(deploymentProcess)
 
 	if err != nil {
 		return fmt.Errorf("error deleting deployment process with id %s: %s", deploymentProcess.ID, err.Error())

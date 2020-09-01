@@ -2,9 +2,11 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
 	"log"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func resourceLifecycle() *schema.Resource {
@@ -41,10 +43,10 @@ func getRetentionPeriodSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "The unit of quantity_to_keep.",
 					Optional:    true,
-					Default:     (string)(octopusdeploy.RetentionUnit_Days),
+					Default:     (string)(model.RetentionUnitDays),
 					ValidateFunc: validateValueFunc([]string{
-						(string)(octopusdeploy.RetentionUnit_Days),
-						(string)(octopusdeploy.RetentionUnit_Items),
+						(string)(model.RetentionUnitDays),
+						(string)(model.RetentionUnitItems),
 					}),
 				},
 				"quantity_to_keep": {
@@ -104,11 +106,11 @@ func getPhasesSchema() *schema.Schema {
 }
 
 func resourceLifecycleCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newLifecycle := buildLifecycleResource(d)
 
-	createdLifecycle, err := client.Lifecycle.Add(newLifecycle)
+	createdLifecycle, err := apiClient.Lifecycles.Add(newLifecycle)
 
 	if err != nil {
 		return fmt.Errorf("error creating project: %s", err.Error())
@@ -119,10 +121,10 @@ func resourceLifecycleCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildLifecycleResource(d *schema.ResourceData) *octopusdeploy.Lifecycle {
+func buildLifecycleResource(d *schema.ResourceData) *model.Lifecycle {
 	name := d.Get("name").(string)
 
-	lifecycle := octopusdeploy.NewLifecycle(name)
+	lifecycle := model.NewLifecycle(name)
 
 	if attr, ok := d.GetOk("description"); ok {
 		lifecycle.Description = attr.(string)
@@ -150,14 +152,14 @@ func buildLifecycleResource(d *schema.ResourceData) *octopusdeploy.Lifecycle {
 	return lifecycle
 }
 
-func getRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.RetentionPeriod {
+func getRetentionPeriod(d *schema.ResourceData, key string) *model.RetentionPeriod {
 	attr, ok := d.GetOk(key)
 	if ok {
 		tfRetentionSettings := attr.(*schema.Set)
 		if len(tfRetentionSettings.List()) == 1 {
 			tfRetentionItem := tfRetentionSettings.List()[0].(map[string]interface{})
-			retention := octopusdeploy.RetentionPeriod{
-				Unit:           octopusdeploy.RetentionUnit(tfRetentionItem["unit"].(string)),
+			retention := model.RetentionPeriod{
+				Unit:           model.RetentionUnit(tfRetentionItem["unit"].(string)),
 				QuantityToKeep: int32(tfRetentionItem["quantity_to_keep"].(int)),
 			}
 			return &retention
@@ -167,8 +169,8 @@ func getRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.Reten
 	return nil
 }
 
-func buildPhaseResource(tfPhase map[string]interface{}) octopusdeploy.Phase {
-	phase := octopusdeploy.Phase{
+func buildPhaseResource(tfPhase map[string]interface{}) model.Phase {
+	phase := model.Phase{
 		Name:                               tfPhase["name"].(string),
 		MinimumEnvironmentsBeforePromotion: int32(tfPhase["minimum_environments_before_promotion"].(int)),
 		IsOptionalPhase:                    tfPhase["is_optional_phase"].(bool),
@@ -187,13 +189,13 @@ func buildPhaseResource(tfPhase map[string]interface{}) octopusdeploy.Phase {
 }
 
 func resourceLifecycleRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	lifecycleID := d.Id()
 
-	lifecycle, err := client.Lifecycle.Get(lifecycleID)
+	lifecycle, err := apiClient.Lifecycles.Get(lifecycleID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -213,9 +215,9 @@ func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
 	lifecycle := buildLifecycleResource(d)
 	lifecycle.ID = d.Id() // set lifecycle struct ID so octopus knows which lifecycle to update
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	lifecycle, err := client.Lifecycle.Update(lifecycle)
+	lifecycle, err := apiClient.Lifecycles.Update(lifecycle)
 
 	if err != nil {
 		return fmt.Errorf("error updating lifecycle id %s: %s", d.Id(), err.Error())
@@ -227,11 +229,11 @@ func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceLifecycleDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	lifecycleID := d.Id()
 
-	err := client.Lifecycle.Delete(lifecycleID)
+	err := apiClient.Lifecycles.Delete(lifecycleID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting lifecycle id %s: %s", lifecycleID, err.Error())

@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -114,11 +114,11 @@ func dataMachine() *schema.Resource {
 }
 
 func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	machineName := d.Get("name").(string)
-	machine, err := client.Machine.GetByName(machineName)
-	if err == octopusdeploy.ErrItemNotFound {
+	machine, err := apiClient.Machines.GetByName(machineName)
+	if err == client.ErrItemNotFound {
 		return nil
 	}
 	if err != nil {

@@ -3,7 +3,10 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -43,12 +46,12 @@ func resourceSSHKey() *schema.Resource {
 }
 
 func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
-	account, err := client.Account.Get(accountID)
+	account, err := apiClient.Accounts.Get(accountID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -63,14 +66,18 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildSSHKeyResource(d *schema.ResourceData) *octopusdeploy.Account {
-	var account = octopusdeploy.NewAccount(d.Get("name").(string), octopusdeploy.SshKeyPair)
+func buildSSHKeyResource(d *schema.ResourceData) *model.Account {
+	account, err := model.NewAccount(d.Get("name").(string), enum.SshKeyPair)
+	if err != nil {
+		return nil
+	}
 
 	account.Name = d.Get("username").(string)
-	account.Password = octopusdeploy.SensitiveValue{NewValue: d.Get("password").(string)}
+	password := d.Get("password").(string)
+	account.Password = &model.SensitiveValue{NewValue: &password}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
@@ -81,10 +88,10 @@ func buildSSHKeyResource(d *schema.ResourceData) *octopusdeploy.Account {
 }
 
 func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newAccount := buildSSHKeyResource(d)
-	account, err := client.Account.Add(newAccount)
+	account, err := apiClient.Accounts.Add(newAccount)
 
 	if err != nil {
 		return fmt.Errorf("error reading SSH Key Pair %s: %s", newAccount.Name, err.Error())
@@ -99,9 +106,9 @@ func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	account := buildSSHKeyResource(d)
 	account.ID = d.Id()
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	updatedAccount, err := client.Account.Update(account)
+	updatedAccount, err := apiClient.Accounts.Update(account)
 
 	if err != nil {
 		return fmt.Errorf("error reading SSH Key Pair %s: %s", d.Id(), err.Error())
@@ -112,11 +119,11 @@ func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSSHKeyDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
 
-	err := client.Account.Delete(accountID)
+	err := apiClient.Accounts.Delete(accountID)
 
 	if err != nil {
 		return fmt.Errorf("error reading SSH Key Pair id %s: %s", accountID, err.Error())

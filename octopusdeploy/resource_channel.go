@@ -3,7 +3,8 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -61,10 +62,10 @@ func resourceChannel() *schema.Resource {
 }
 
 func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newChannel := buildChannelResource(d)
-	channel, err := client.Channel.Add(newChannel)
+	channel, err := apiClient.Channels.Add(newChannel)
 
 	if err != nil {
 		return fmt.Errorf("error creating channel %s: %s", newChannel.Name, err.Error())
@@ -75,8 +76,8 @@ func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
-	channel := &octopusdeploy.Channel{
+func buildChannelResource(d *schema.ResourceData) *model.Channel {
+	channel := &model.Channel{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		ProjectID:   d.Get("project_id").(string),
@@ -96,8 +97,8 @@ func buildChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
 	return channel
 }
 
-func buildRulesResource(tfRule map[string]interface{}) octopusdeploy.ChannelRule {
-	rule := octopusdeploy.ChannelRule{
+func buildRulesResource(tfRule map[string]interface{}) model.ChannelRule {
+	rule := model.ChannelRule{
 		VersionRange: tfRule["version_range"].(string),
 		Tag:          tfRule["tag"].(string),
 		Actions:      getSliceFromTerraformTypeList(tfRule["actions"]),
@@ -106,7 +107,7 @@ func buildRulesResource(tfRule map[string]interface{}) octopusdeploy.ChannelRule
 	return rule
 }
 
-func flattenRules(in []octopusdeploy.ChannelRule) []map[string]interface{} {
+func flattenRules(in []model.ChannelRule) []map[string]interface{} {
 	var flattened = make([]map[string]interface{}, len(in))
 	for i, v := range in {
 		m := make(map[string]interface{})
@@ -121,12 +122,12 @@ func flattenRules(in []octopusdeploy.ChannelRule) []map[string]interface{} {
 }
 
 func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	channelID := d.Id()
-	channel, err := client.Channel.Get(channelID)
+	channel, err := apiClient.Channels.Get(channelID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -149,9 +150,9 @@ func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 	channel := buildChannelResource(d)
 	channel.ID = d.Id() // set channel struct ID so octopus knows which channel to update
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	updatedChannel, err := client.Channel.Update(channel)
+	updatedChannel, err := apiClient.Channels.Update(channel)
 
 	if err != nil {
 		return fmt.Errorf("error updating channel id %s: %s", d.Id(), err.Error())
@@ -163,11 +164,11 @@ func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceChannelDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	channelID := d.Id()
 
-	err := client.Channel.Delete(channelID)
+	err := apiClient.Channels.Delete(channelID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting channel id %s: %s", channelID, err.Error())

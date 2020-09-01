@@ -3,7 +3,8 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -52,12 +53,12 @@ func resourceNugetFeed() *schema.Resource {
 }
 
 func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	feedID := d.Id()
-	feed, err := client.Feed.Get(feedID)
+	feed, err := apiClient.Feeds.Get(feedID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -67,7 +68,7 @@ func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("name", feed.Name)
-	d.Set("feed_uri", feed.FeedUri)
+	d.Set("feed_uri", feed.FeedURI)
 	d.Set("enhanced_mode", feed.EnhancedMode)
 	d.Set("download_attempts", feed.DownloadAttempts)
 	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
@@ -77,7 +78,7 @@ func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildNugetFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
+func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 	feedName := d.Get("name").(string)
 
 	var feedURI string
@@ -117,23 +118,23 @@ func buildNugetFeedResource(d *schema.ResourceData) *octopusdeploy.Feed {
 		feedPassword = feedPasswordInterface.(string)
 	}
 
-	feed := octopusdeploy.NewFeed(feedName, "NuGet", feedURI)
+	feed := model.NewFeed(feedName, "NuGet", feedURI)
 	feed.EnhancedMode = enhancedMode
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
 	feed.Username = feedUsername
-	feed.Password = octopusdeploy.SensitiveValue{
-		NewValue: feedPassword,
+	feed.Password = model.SensitiveValue{
+		NewValue: &feedPassword,
 	}
 
 	return feed
 }
 
 func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newFeed := buildNugetFeedResource(d)
-	feed, err := client.Feed.Add(newFeed)
+	feed, err := apiClient.Feeds.Add(newFeed)
 
 	if err != nil {
 		return fmt.Errorf("error creating nuget feed %s: %s", newFeed.Name, err.Error())
@@ -148,9 +149,9 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 	feed := buildNugetFeedResource(d)
 	feed.ID = d.Id() // set project struct ID so octopus knows which project to update
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	updatedFeed, err := client.Feed.Update(feed)
+	updatedFeed, err := apiClient.Feeds.Update(feed)
 
 	if err != nil {
 		return fmt.Errorf("error updating nuget feed id %s: %s", d.Id(), err.Error())
@@ -161,11 +162,11 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNugetFeedDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	feedID := d.Id()
 
-	err := client.Feed.Delete(feedID)
+	err := apiClient.Feeds.Delete(feedID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting nuget feed id %s: %s", feedID, err.Error())

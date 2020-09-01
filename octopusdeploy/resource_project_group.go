@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -28,10 +29,10 @@ func resourceProjectGroup() *schema.Resource {
 	}
 }
 
-func buildProjectGroupResource(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
+func buildProjectGroupResource(d *schema.ResourceData) *model.ProjectGroup {
 	name := d.Get("name").(string)
 
-	projectGroup := octopusdeploy.NewProjectGroup(name)
+	projectGroup := model.NewProjectGroup(name)
 
 	if attr, ok := d.GetOk("description"); ok {
 		projectGroup.Description = attr.(string)
@@ -41,11 +42,11 @@ func buildProjectGroupResource(d *schema.ResourceData) *octopusdeploy.ProjectGro
 }
 
 func resourceProjectGroupCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newProjectGroup := buildProjectGroupResource(d)
 
-	createdProjectGroup, err := client.ProjectGroup.Add(newProjectGroup)
+	createdProjectGroup, err := apiClient.ProjectGroups.Add(newProjectGroup)
 
 	if err != nil {
 		return fmt.Errorf("error creating projectgroup: %s", err.Error())
@@ -56,13 +57,13 @@ func resourceProjectGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceProjectGroupRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	projectGroupID := d.Id()
 
-	projectGroup, err := client.ProjectGroup.Get(projectGroupID)
+	projectGroup, err := apiClient.ProjectGroups.Get(projectGroupID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -81,9 +82,9 @@ func resourceProjectGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	projectGroup := buildProjectGroupResource(d)
 	projectGroup.ID = d.Id() // set projectgroup struct ID so octopus knows which  to update
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	updatedProject, err := client.ProjectGroup.Update(projectGroup)
+	updatedProject, err := apiClient.ProjectGroups.Update(projectGroup)
 
 	if err != nil {
 		return fmt.Errorf("error updating projectgroup id %s: %s", d.Id(), err.Error())
@@ -94,11 +95,11 @@ func resourceProjectGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceProjectGroupDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	projectGroupID := d.Id()
 
-	err := client.ProjectGroup.Delete(projectGroupID)
+	err := apiClient.ProjectGroups.Delete(projectGroupID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting projectgroup id %s: %s", projectGroupID, err.Error())

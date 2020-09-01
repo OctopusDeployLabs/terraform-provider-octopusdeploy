@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
@@ -142,9 +142,9 @@ func testAccProjectTriggerExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 
-		if _, err := client.ProjectTrigger.Get(rs.Primary.ID); err != nil {
+		if _, err := client.ProjectTriggers.Get(rs.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving project trigger %s", err)
 		}
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -94,7 +94,7 @@ func testAccProjectGroupWithDescription(name, description string) string {
 }
 
 func testAccCheckOctopusDeployProjectGroupDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 
 	if err := destroyHelperProjectGroup(s, client); err != nil {
 		return err
@@ -104,7 +104,7 @@ func testAccCheckOctopusDeployProjectGroupDestroy(s *terraform.State) error {
 
 func testAccCheckOctopusDeployProjectGroupExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		if err := existsHelperProjectGroup(s, client); err != nil {
 			return err
 		}
@@ -112,10 +112,10 @@ func testAccCheckOctopusDeployProjectGroupExists(n string) resource.TestCheckFun
 	}
 }
 
-func destroyHelperProjectGroup(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyHelperProjectGroup(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.ProjectGroup.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
+		if _, err := apiClient.ProjectGroups.Get(r.Primary.ID); err != nil {
+			if err == client.ErrItemNotFound {
 				continue
 			}
 			return fmt.Errorf("Received an error retrieving projectgroup %s", err)
@@ -125,9 +125,9 @@ func destroyHelperProjectGroup(s *terraform.State, client *octopusdeploy.Client)
 	return nil
 }
 
-func existsHelperProjectGroup(s *terraform.State, client *octopusdeploy.Client) error {
+func existsHelperProjectGroup(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.ProjectGroup.Get(r.Primary.ID); err != nil {
+		if _, err := client.ProjectGroups.Get(r.Primary.ID); err != nil {
 			return fmt.Errorf("received an error retrieving projectgroup %s", err)
 		}
 	}

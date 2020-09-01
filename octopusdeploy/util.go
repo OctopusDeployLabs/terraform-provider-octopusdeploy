@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform/helper/mutexkv"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
@@ -86,10 +86,10 @@ func getTenantedDeploymentSchema() *schema.Schema {
 	}
 }
 
-func destroyFeedHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func destroyFeedHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Feed.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
+		if _, err := apiClient.Feeds.Get(r.Primary.ID); err != nil {
+			if err == client.ErrItemNotFound {
 				continue
 			}
 			return fmt.Errorf("Received an error retrieving feed %s", err)
@@ -99,9 +99,9 @@ func destroyFeedHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	return nil
 }
 
-func feedExistsHelper(s *terraform.State, client *octopusdeploy.Client) error {
+func feedExistsHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Feed.Get(r.Primary.ID); err != nil {
+		if _, err := apiClient.Feeds.Get(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving feed %s", err)
 		}
 	}

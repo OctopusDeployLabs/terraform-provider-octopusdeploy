@@ -3,7 +3,10 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -76,14 +79,22 @@ func resourceAzureServicePrincipal() *schema.Resource {
 	}
 }
 
-func buildAzureServicePrincipalResource(d *schema.ResourceData) *octopusdeploy.Account {
-	var account = octopusdeploy.NewAccount(d.Get("name").(string), octopusdeploy.AzureServicePrincipal)
+func buildAzureServicePrincipalResource(d *schema.ResourceData) *model.Account {
+	account, err := model.NewAccount(d.Get("name").(string), enum.AzureServicePrincipal)
+	if err != nil {
+		return nil
+	}
+
+	clientID, err := uuid.Parse(d.Get("client_id").(string))
+	tenantID, err := uuid.Parse(d.Get("tenant_id").(string))
+	subscriptionNumber, err := uuid.Parse(d.Get("subscription_number").(string))
 
 	// Required fields
-	account.ClientID = d.Get("client_id").(string)
-	account.TenantID = d.Get("tenant_id").(string)
-	account.SubscriptionNumber = d.Get("subscription_number").(string)
-	account.Password = octopusdeploy.SensitiveValue{NewValue: d.Get("key").(string)}
+	account.ClientID = &clientID
+	account.TenantID = &tenantID
+	account.SubscriptionNumber = &subscriptionNumber
+	password := d.Get("key").(string)
+	account.Password = &model.SensitiveValue{NewValue: &password}
 
 	// Optional Fields
 	if v, ok := d.GetOk("description"); ok {
@@ -95,7 +106,7 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) *octopusdeploy.A
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
@@ -103,21 +114,21 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) *octopusdeploy.A
 	}
 
 	if v, ok := d.GetOk("resource_management_endpoint_base_uri"); ok {
-		account.ResourceManagementEndpointBaseURI = v.(string)
+		account.ResourceManagementEndpointBase = v.(string)
 	}
 
 	if v, ok := d.GetOk("active_directory_endpoint_base_uri"); ok {
-		account.ActiveDirectoryEndpointBaseURI = v.(string)
+		account.ActiveDirectoryEndpointBase = v.(string)
 	}
 
 	return account
 }
 
 func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newAccount := buildAzureServicePrincipalResource(d)
-	account, err := client.Account.Add(newAccount)
+	account, err := apiClient.Accounts.Add(newAccount)
 
 	if err != nil {
 		return fmt.Errorf("error creating azure service principal %s: %s", newAccount.Name, err.Error())
@@ -129,12 +140,12 @@ func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
-	account, err := client.Account.Get(accountID)
+	account, err := apiClient.Accounts.Get(accountID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -154,8 +165,8 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 	d.Set("subscription_number", account.SubscriptionNumber)
 	d.Set("key", account.Password)
 	d.Set("azure_environment", account.AzureEnvironment)
-	d.Set("resource_management_endpoint_base_uri", account.ResourceManagementEndpointBaseURI)
-	d.Set("active_directory_endpoint_base_uri", account.ActiveDirectoryEndpointBaseURI)
+	d.Set("resource_management_endpoint_base_uri", account.ResourceManagementEndpointBase)
+	d.Set("active_directory_endpoint_base_uri", account.ActiveDirectoryEndpointBase)
 
 	return nil
 }
@@ -164,9 +175,9 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 	account := buildAzureServicePrincipalResource(d)
 	account.ID = d.Id()
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	updatedAccount, err := client.Account.Update(account)
+	updatedAccount, err := apiClient.Accounts.Update(account)
 
 	if err != nil {
 		return fmt.Errorf("error updating azure service principal id %s: %s", d.Id(), err.Error())
@@ -177,11 +188,11 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceAzureServicePrincipalDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
 
-	err := client.Account.Delete(accountID)
+	err := apiClient.Accounts.Delete(accountID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting azure service principal id %s: %s", accountID, err.Error())

@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -53,7 +53,7 @@ func getPackageSchema(required bool) *schema.Schema {
 				"acquisition_location": {
 					Type:        schema.TypeString,
 					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
-					Default:     (string)(octopusdeploy.PackageAcquisitionLocation_Server),
+					Default:     (string)(model.PackageAcquisitionLocationServer),
 					Optional:    true,
 				},
 				"property": getPropertySchema(),
@@ -62,11 +62,11 @@ func getPackageSchema(required bool) *schema.Schema {
 	}
 }
 
-func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
-	pkg := octopusdeploy.PackageReference{
+func buildPackageReferenceResource(tfPkg map[string]interface{}) model.PackageReference {
+	pkg := model.PackageReference{
 		Name:                getStringOrEmpty(tfPkg["name"]),
-		PackageId:           tfPkg["package_id"].(string),
-		FeedId:              tfPkg["feed_id"].(string),
+		PackageID:           tfPkg["package_id"].(string),
+		FeedID:              tfPkg["feed_id"].(string),
 		AcquisitionLocation: tfPkg["acquisition_location"].(string),
 		Properties:          buildPropertiesMap(tfPkg["property"]),
 	}

@@ -3,7 +3,9 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -60,12 +62,12 @@ func resourceCertificate() *schema.Resource {
 }
 
 func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	certificateID := d.Id()
-	certificate, err := client.Certificate.Get(certificateID)
+	certificate, err := apiClient.Certificates.Get(certificateID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == client.ErrItemNotFound {
 		d.SetId("")
 		return nil
 	}
@@ -84,7 +86,7 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildCertificateResource(d *schema.ResourceData) *octopusdeploy.Certificate {
+func buildCertificateResource(d *schema.ResourceData) *model.Certificate {
 	certificateName := d.Get("name").(string)
 
 	var notes string
@@ -142,10 +144,10 @@ func buildCertificateResource(d *schema.ResourceData) *octopusdeploy.Certificate
 		tenantTags = []string{}
 	}
 
-	var certificate = octopusdeploy.NewCertificate(certificateName, octopusdeploy.SensitiveValue{NewValue: certificateData}, octopusdeploy.SensitiveValue{NewValue: password})
+	var certificate = model.NewCertificate(certificateName, model.SensitiveValue{NewValue: &certificateData}, model.SensitiveValue{NewValue: &password})
 	certificate.Notes = notes
 	certificate.EnvironmentIds = environmentIds
-	certificate.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(tenantedDeploymentParticipation)
+	certificate.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(tenantedDeploymentParticipation)
 	certificate.TenantIds = tenantIds
 	certificate.TenantTags = tenantTags
 
@@ -153,10 +155,10 @@ func buildCertificateResource(d *schema.ResourceData) *octopusdeploy.Certificate
 }
 
 func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	newCertificate := buildCertificateResource(d)
-	certificate, err := client.Certificate.Add(newCertificate)
+	certificate, err := apiClient.Certificates.Add(newCertificate)
 
 	if err != nil {
 		return fmt.Errorf("error creating certificate %s: %s", newCertificate.Name, err.Error())
@@ -171,9 +173,9 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	certificate := buildCertificateResource(d)
 	certificate.ID = d.Id()
 
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
-	updatedCertificate, err := client.Certificate.Update(certificate)
+	updatedCertificate, err := apiClient.Certificates.Update(certificate)
 
 	if err != nil {
 		return fmt.Errorf("error updating certificate id %s: %s", d.Id(), err.Error())
@@ -184,11 +186,11 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	apiClient := m.(*client.Client)
 
 	certificateID := d.Id()
 
-	err := client.Certificate.Delete(certificateID)
+	err := apiClient.Certificates.Delete(certificateID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting certificate id %s: %s", certificateID, err.Error())
