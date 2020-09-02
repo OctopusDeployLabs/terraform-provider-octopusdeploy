@@ -29,26 +29,24 @@ func resourceUsernamePassword() *schema.Resource {
 }
 
 func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
-	_, err := fetchAndReadAccount(d, m);
-	//account, err := fetchAndReadAccount(d, m);
+	_, err := fetchAndReadAccount(d, m)
+	account, err := fetchAndReadAccount(d, m)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	// TODO: Username property does not yet exist
-	//d.Set("username", account.Username)
+	d.Set("username", account.Username)
 
-	return nil;
+	return nil
 }
 
 func buildUsernamePasswordResource(d *schema.ResourceData) *octopusdeploy.Account {
-	account := buildAccountResourceCommon(d, octopusdeploy.UsernamePassword);
+	account := buildAccountResourceCommon(d, octopusdeploy.UsernamePassword)
 
-	// TODO: Username property does not yet exist
-	//if v, ok := d.GetOk("username"); ok {
-	//	account.Username = v.(string)
-	//}
+	if v, ok := d.GetOk("username"); ok {
+		account.Username = v.(string)
+	}
 
 	if v, ok := d.GetOk("password"); ok {
 		account.Password = octopusdeploy.SensitiveValue{NewValue: v.(string)}
@@ -59,7 +57,7 @@ func buildUsernamePasswordResource(d *schema.ResourceData) *octopusdeploy.Accoun
 
 func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error {
 	account := buildUsernamePasswordResource(d)
-	return resourceAccountCreateCommon(d, m, account);
+	return resourceAccountCreateCommon(d, m, account)
 }
 
 func resourceUsernamePasswordUpdate(d *schema.ResourceData, m interface{}) error {
