@@ -63,7 +63,7 @@ func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*model.Account,
 	d.Set("description", account.Description)
 	d.Set("environments", account.EnvironmentIDs)
 	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation)
-	d.Set("tenants", account.TenantID)
+	d.Set("tenants", account.TenantIDs)
 	d.Set("tenant_tags", account.EnvironmentIDs)
 
 	return account, nil

@@ -38,6 +38,7 @@ func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("username", account.Username)
+	d.Set("tenants", account.TenantIDs)
 
 	return nil
 }
@@ -52,6 +53,10 @@ func buildUsernamePasswordResource(d *schema.ResourceData) *model.Account {
 	if v, ok := d.GetOk("password"); ok {
 		password := v.(string)
 		account.Password = &model.SensitiveValue{NewValue: &password}
+	}
+
+	if v, ok := d.GetOk("tenants"); ok {
+		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
 	return account

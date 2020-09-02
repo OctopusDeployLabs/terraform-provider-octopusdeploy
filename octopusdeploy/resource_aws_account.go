@@ -73,6 +73,7 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 	}
 
 	d.Set("name", account.Name)
+	d.Set("tenants", account.TenantIDs)
 	d.Set("description", account.Description)
 	d.Set("environments", account.EnvironmentIDs)
 	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
@@ -100,6 +101,10 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) *model.Accoun
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
+	}
+
+	if v, ok := d.GetOk("tenants"); ok {
+		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
 	return account

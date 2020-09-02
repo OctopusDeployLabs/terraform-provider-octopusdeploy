@@ -62,6 +62,7 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("name", account.Name)
 	d.Set("passphrase", account.Password)
+	d.Set("tenants", account.TenantIDs)
 
 	return nil
 }
@@ -82,6 +83,10 @@ func buildSSHKeyResource(d *schema.ResourceData) *model.Account {
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
+	}
+
+	if v, ok := d.GetOk("tenants"); ok {
+		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
 	return account

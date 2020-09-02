@@ -113,6 +113,10 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) *model.Account {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
+	if v, ok := d.GetOk("tenants"); ok {
+		account.TenantIDs = getSliceFromTerraformTypeList(v)
+	}
+
 	if v, ok := d.GetOk("resource_management_endpoint_base_uri"); ok {
 		account.ResourceManagementEndpointBase = v.(string)
 	}
@@ -161,7 +165,7 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 	d.Set("tenant_tags", account.TenantTags)
 
 	d.Set("client_id", account.ClientID)
-	d.Set("tenant_id", account.TenantID)
+	d.Set("tenant_id", account.TenantIDs)
 	d.Set("subscription_number", account.SubscriptionNumber)
 	d.Set("key", account.Password)
 	d.Set("azure_environment", account.AzureEnvironment)
