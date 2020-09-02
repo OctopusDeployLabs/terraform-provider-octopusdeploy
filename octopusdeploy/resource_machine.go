@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -203,7 +202,7 @@ func setMachineProperties(d *schema.ResourceData, m *model.Machine) {
 	d.Set("roles", m.Roles)
 	d.Set("status", m.Status)
 	d.Set("statussummary", m.StatusSummary)
-	d.Set("tenanteddeploymentparticipation", m.TenantedDeploymentParticipation)
+	d.Set("tenanteddeploymentparticipation", m.DeploymentMode)
 	d.Set("tenantids", m.TenantIDs)
 	d.Set("tenanttags", m.TenantTags)
 }
@@ -214,7 +213,7 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	mEnvironments := getSliceFromTerraformTypeList(d.Get("environments"))
 	mRoles := getSliceFromTerraformTypeList(d.Get("roles"))
 	mDisabled := d.Get("isdisabled").(bool)
-	mTenantedDeploymentParticipation, _ := enum.ParseTenantedDeploymentMode(d.Get("tenanteddeploymentparticipation").(string))
+	mTenantedDeploymentParticipation, _ := d.Get("tenanteddeploymentparticipation").(string)
 	mTenantIDs := getSliceFromTerraformTypeList(d.Get("tenantids"))
 	mTenantTags := getSliceFromTerraformTypeList(d.Get("tenanttags"))
 
@@ -238,16 +237,16 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	//Get the first element in the list, which is a map of the interfaces
 	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
 
-	tfMachine := model.NewMachine(
-		mName,
-		mDisabled,
-		mEnvironments,
-		mRoles,
-		mMachinepolicy,
-		mTenantedDeploymentParticipation,
-		mTenantIDs,
-		mTenantTags,
-	)
+	tfMachine := &model.Machine{
+		Name:            mName,
+		IsDisabled:      mDisabled,
+		EnvironmentIDs:  mEnvironments,
+		Roles:           mRoles,
+		MachinePolicyID: mMachinepolicy,
+		DeploymentMode:  mTenantedDeploymentParticipation,
+		TenantIDs:       mTenantIDs,
+		TenantTags:      mTenantTags,
+	}
 
 	tfMachine.URI = tfSchemaList["uri"].(string)
 	tfMachine.Thumbprint = tfSchemaList["thumbprint"].(string)
@@ -263,12 +262,13 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 		Thumbprint:          tfSchemaList["thumbprint"].(string),
 		CommunicationStyle:  tfSchemaList["communicationstyle"].(string),
 		ProxyID:             proxyid,
-		ClusterCertificate:  tfSchemaList["clustercertificate"].(string),
-		ClusterURL:          tfSchemaList["clusterurl"].(string),
-		Namespace:           tfSchemaList["namespace"].(string),
-		SkipTLSVerification: strconv.FormatBool(tfSchemaList["skiptlsverification"].(bool)),
 		DefaultWorkerPoolID: tfSchemaList["defaultworkerpoolid"].(string),
 	}
+
+	tfMachine.Endpoint.ClusterCertificate = tfSchemaList["clustercertificate"].(string)
+	tfMachine.Endpoint.ClusterURL = tfSchemaList["clusterurl"].(string)
+	tfMachine.Endpoint.Namespace = tfSchemaList["namespace"].(string)
+	tfMachine.Endpoint.SkipTLSVerification = strconv.FormatBool(tfSchemaList["skiptlsverification"].(bool))
 
 	tfAuthenticationSchemaSetInterface, ok := tfSchemaList["authentication"]
 	if ok {

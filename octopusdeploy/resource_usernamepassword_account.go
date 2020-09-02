@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -42,14 +43,15 @@ func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func buildUsernamePasswordResource(d *schema.ResourceData) *model.Account {
-	account := buildAccountResourceCommon(d, models.UsernamePassword)
+	account := buildAccountResourceCommon(d, enum.UsernamePassword)
 
 	if v, ok := d.GetOk("username"); ok {
 		account.Username = v.(string)
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		account.Password = model.SensitiveValue{NewValue: v.(string)}
+		password := v.(string)
+		account.Password = &model.SensitiveValue{NewValue: &password}
 	}
 
 	return account

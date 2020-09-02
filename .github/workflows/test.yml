@@ -17,15 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
+      - name: Build
+        run: go build -v .
+
       - name: Start the Octopus container
         run: ./tests/start-octopus.sh
 
       - name: Generate an API key
         run: ./tests/Create-ApiKey.ps1
         shell: pwsh
-
-      - name: Build
-        run: go build -v .
 
       - name: Test
         run: go test -v ./octopusdeploy/...
