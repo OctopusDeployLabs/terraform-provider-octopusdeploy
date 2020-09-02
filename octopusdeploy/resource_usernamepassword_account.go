@@ -1,4 +1,4 @@
-package octopusdeploy
+package model
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -42,7 +42,7 @@ func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func buildUsernamePasswordResource(d *schema.ResourceData) *octopusdeploy.Account {
-	account := buildAccountResourceCommon(d, octopusdeploy.UsernamePassword)
+	account := buildAccountResourceCommon(d, models.UsernamePassword)
 
 	if v, ok := d.GetOk("username"); ok {
 		account.Username = v.(string)

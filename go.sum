@@ -20,10 +20,6 @@ github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022 h1:y8Gs8CzNf
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.0 h1:r9ThVuANGkzm3noAjLF/i7LUcxQxbCJwpvn1DLwPoOA=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.0/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
-github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144815-f94b77aa996d h1:uyEmUBnGJwY8QAyv7Hu4cgsj/nH1sOpNXRrCM3XuUOQ=
-github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200819144815-f94b77aa996d/go.mod h1:maPbD8azyb2mcNN6E4SGrwiLN7XmDSML5ui+mcWR/R0=
-github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200901055901-a6c30405bc08 h1:3biHq1uSvow0re9lVvdMMboAuPFqXKXZ5TMuqHw0cpA=
-github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200901055901-a6c30405bc08/go.mod h1:meUJVjHuccC1I6R6n5b2Vj5jY+md5v4fqCHt+rhvNhs=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200902192410-1156237a14ba h1:aiwPRXy+9aSmwpqEwow/cYsO8gYjDIYyudMfXg7WKzE=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200902192410-1156237a14ba/go.mod h1:VUM2NeeMGfZo0aiKk3U61f74DbQSDHujBOwGM+sIzDs=
 github.com/Unknwon/com v0.0.0-20151008135407-28b053d5a292 h1:tuQ7w+my8a8mkwN7x2TSd7OzTjkZ7rAeSyH4xncuAMI=
@@ -408,6 +404,7 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
+github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/svanharmelen/jsonapi v0.0.0-20180618144545-0c0828c3f16d h1:Z4EH+5EffvBEhh37F0C0DnpklTMh00JOkjW5zK3ofBI=

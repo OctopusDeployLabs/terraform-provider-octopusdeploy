@@ -1,4 +1,4 @@
-package octopusdeploy
+package model
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
