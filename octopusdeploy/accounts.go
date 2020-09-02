@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -42,13 +42,13 @@ func getCommonAccountsSchema() map[string]*schema.Schema {
 	}
 }
 
-func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*octopusdeploy.Account, error) {
-	client := m.(*octopusdeploy.Client)
+func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*model.Account, error) {
+	client := m.(*model.Client)
 
 	accountID := d.Id()
 	account, err := client.Account.Get(accountID)
 
-	if err == octopusdeploy.ErrItemNotFound {
+	if err == model.ErrItemNotFound {
 		d.SetId("")
 		return nil, fmt.Errorf("account %s not found: %s ", accountID, err.Error())
 	}
@@ -67,15 +67,15 @@ func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*octopusdeploy.
 	return account, nil
 }
 
-func buildAccountResourceCommon(d *schema.ResourceData, accountType octopusdeploy.AccountType) *octopusdeploy.Account {
-	var account = octopusdeploy.NewAccount(d.Get("name").(string), accountType)
+func buildAccountResourceCommon(d *schema.ResourceData, accountType model.AccountType) *model.Account {
+	var account = model.NewAccount(d.Get("name").(string), accountType)
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentParticipation, _ = model.ParseTenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenants"); ok {
@@ -89,8 +89,8 @@ func buildAccountResourceCommon(d *schema.ResourceData, accountType octopusdeplo
 	return account
 }
 
-func resourceAccountCreateCommon(d *schema.ResourceData, m interface{}, account *octopusdeploy.Account) error {
-	client := m.(*octopusdeploy.Client)
+func resourceAccountCreateCommon(d *schema.ResourceData, m interface{}, account *model.Account) error {
+	client := m.(*model.Client)
 
 	account, err := client.Account.Add(account)
 
@@ -103,10 +103,10 @@ func resourceAccountCreateCommon(d *schema.ResourceData, m interface{}, account 
 	return nil
 }
 
-func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, account *octopusdeploy.Account) error {
+func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, account *model.Account) error {
 	account.ID = d.Id()
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*model.Client)
 
 	updatedAccount, err := client.Account.Update(account)
 
@@ -119,7 +119,7 @@ func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, account 
 }
 
 func resourceAccountDeleteCommon(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	client := m.(*model.Client)
 
 	accountID := d.Id()
 
