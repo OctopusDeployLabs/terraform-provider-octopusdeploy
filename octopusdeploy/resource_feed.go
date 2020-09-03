@@ -10,11 +10,10 @@ import (
 
 func resourceFeed() *schema.Resource {
 	return &schema.Resource{
-		DeprecationMessage: "use type-specific feed resources instead (ex: octopusdeploy_nuget_feed, etc",
-		Create:             resourceFeedCreate,
-		Read:               resourceFeedRead,
-		Update:             resourceFeedUpdate,
-		Delete:             resourceFeedDelete,
+		Create: resourceFeedCreate,
+		Read:   resourceFeedRead,
+		Update: resourceFeedUpdate,
+		Delete: resourceFeedDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {

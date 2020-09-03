@@ -6,5 +6,5 @@ provider "octopusdeploy" {
 
 resource "octopusdeploy_channel" "newChannel" {
   name            = var.channelName
-  project_id      = "Dev"
+  project_id      = "Projects-1"
 }

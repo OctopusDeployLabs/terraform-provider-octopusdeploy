@@ -7,7 +7,5 @@ provider "octopusdeploy" {
 resource "octopusdeploy_project_deployment_target_trigger" "deploymentTrigger" {
     name = var.name
     project_id = var.projectID
-    event_groups = ["MachineHealthChanged"]
     event_categories = ["MachineUnhealthy"]
-    environment_ids = ["Dev", "UAT"]
 }

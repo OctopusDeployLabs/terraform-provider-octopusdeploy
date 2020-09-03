@@ -5,7 +5,7 @@ provider "octopusdeploy" {
 }
 
 resource "octopusdeploy_project" "DevOpsProject" {
-  name             = "testProject"
+  name             = "Terratest"
   lifecycle_id     = "Default Lifecycle"
-  project_group_id = "Dev"
+  project_group_id = "Projects-1"
 }

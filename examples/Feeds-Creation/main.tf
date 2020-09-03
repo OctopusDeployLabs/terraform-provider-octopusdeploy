@@ -8,7 +8,7 @@ provider "octopusdeploy" {
 
 resource "octopusdeploy_feed" "newFeed" {
   name      = var.feedName
-  feed_type = "octopusdeploy_nuget_feed"
+  feed_type = "GitHub"
   feed_uri  = var.feed_uri
   #username = github_username
   #password = github_password

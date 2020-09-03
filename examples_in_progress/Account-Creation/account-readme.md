@@ -41,7 +41,7 @@ The `variables.tf` configuration file contains the following variables to be use
 The `terraform.tfvars` configure file contains the values for the variables that are being passed in at runtime. An example is below:
 
 ```
-serverURL = "https://michaellevan.octopus.app"
+serverURL = "https://mikelevanoctopus.octopus.app"
 space     = "Default"
 azureAccountName = "AzureAC"
 subID = "f31cfbfd-37fb-4e3d-a713-7bd6ceb2f7bf"

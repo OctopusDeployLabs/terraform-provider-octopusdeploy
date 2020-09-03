@@ -1,0 +1,7 @@
+serverURL = "https://mikelevanoctopus.octopus.app"
+space     = "Default"
+azureAccountName = "AzureAC"
+subID = "subscription_id"
+clientID = "client_id"
+clientSecret = "client_secret"
+apiKey = "API-BHABOG2QTIWBLBZXIFUVVCRGSEG"
