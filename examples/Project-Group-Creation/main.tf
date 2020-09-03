@@ -6,4 +6,5 @@ provider "octopusdeploy" {
 
 resource "octopusdeploy_project_group" "DevOpsProject" {
     name = "testProject"
+    description = "my test project group"
 }
