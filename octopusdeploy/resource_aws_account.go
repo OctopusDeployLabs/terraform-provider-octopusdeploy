@@ -45,13 +45,14 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 				},
 			},
 			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"secret_key": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"access_key": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"secret_key": {
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
 			},
 		},
 	}
@@ -92,8 +93,8 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) *model.Accoun
 
 	account.Name = d.Get("name").(string)
 	account.AccessKey = d.Get("access_key").(string)
-	password := d.Get("secret_key").(string)
-	account.Password = &model.SensitiveValue{NewValue: &password}
+	pass := d.Get("secret_key").(string)
+	account.Password = &model.SensitiveValue{NewValue: &pass}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))

@@ -7,6 +7,6 @@ provider "octopusdeploy" {
 resource "octopusdeploy_aws_account" "aws" {
     name = "awsaccount"
     description = "myawsaccount"
-    secret_key = var.secretKey
     access_key = var.accessKey
+    secret_key = var.secretKey
 }
