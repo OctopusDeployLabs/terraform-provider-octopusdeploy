@@ -79,7 +79,7 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 	d.Set("environments", account.EnvironmentIDs)
 	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
 	d.Set("tenant_tags", account.TenantTags)
-	d.Set("secret_key", account.SecretKey)
+	d.Set("secret_key", account.Password)
 	d.Set("access_key", account.AccessKey)
 
 	return nil
@@ -94,7 +94,7 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) *model.Accoun
 	account.Name = d.Get("name").(string)
 	account.AccessKey = d.Get("access_key").(string)
 	pass := d.Get("secret_key").(string)
-	account.Password = &model.SensitiveValue{NewValue: &pass}
+	account.SecretKey = &model.SensitiveValue{NewValue: &pass}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
