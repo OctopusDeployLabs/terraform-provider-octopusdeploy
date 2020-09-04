@@ -9,7 +9,8 @@ import (
 
 func TestAccountCreation(test *testing.T) {
 	terraformTest := &terraform.Options{
-		TerraformDir: "../examples/Account-Creation",
+		TerraformDir: "../examples/AWS-Account",
+		VarFiles:     []string{"/Users/michaellevan/gitrepos/terraform-provider-octopusdeploy/examples/terraform.tfvars"},
 	}
 
 	defer terraform.Destroy(test, terraformTest)
