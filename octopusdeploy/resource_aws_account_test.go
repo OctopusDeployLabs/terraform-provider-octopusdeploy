@@ -6,6 +6,9 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
+	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -44,6 +47,20 @@ func TestAWSAccountBasic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testIsAccountTypeAWS(t *testing.T) *model.Account {
+	accountName := "awsaccounttest"
+	testType, err := model.NewAccount(accountName, enum.AmazonWebServicesAccount)
+
+	if err != nil {
+		assert.FailNow(t, "The test has failed due to: ", err)
+	}
+
+	assert.Error(t, err)
+	assert.NotNil(t, err)
+
+	return testType
 }
 
 func testAWSAccountBasic(tagSetName string, tagName string, name string, accessKey string, secretKey string, tenantedDeploymentParticipation enum.TenantedDeploymentMode) string {
