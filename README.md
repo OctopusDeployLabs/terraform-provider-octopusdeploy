@@ -1,28 +1,51 @@
 # terraform-provider-octopusdeploy
+> :warning: This is a community project under development. Please raise a GitHub issue for any problems or feature requests.
+
 ![Run integration tests against Octopus in a Docker container](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/workflows/Run%20integration%20tests%20against%20Octopus%20in%20a%20Docker%20container/badge.svg)
 
 A Terraform provider for [Octopus Deploy](https://octopus.com).
 
 It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopusdeploy) Octopus Deploy client SDK.
 
-> :warning: This is a community project under development. Please raise a GitHub issue for any problems or feature requests.
-
 ## Testing
 
-A GitHub action has been added to this project which initializes an instance of Octopus Deploy and runs the tests
-against it. These same tests can be run in a forked repository.
+A GitHub Action Workflow has been added to this project which initializes an instance of Octopus Deploy and runs the tests against it. These same tests can be run in a forked repository.
+
+The GitHub Action Workflow can be found [here](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/actions?query=workflow%3A%22Run+integration+tests+against+Octopus+in+a+Docker+container%22)
 
 ## Downloading & Installing
+We are actively working with Hashicorp to join the partner program so you don't need to do the following manual steps. 
 
 As this provider is still under development, you will need to manually download it.
 
-There are compiled binaries for most platforms in [Releases](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/releases).
+You can find the most recent compiled binary here [Releases](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/releases/tag/v0.6.0).
 
-To use it, extract the binary for your platform into the same folder as your `.tf` file(s) will be located, then run `terraform init`.
+To use it the binary:
+
+1. The first command you will want to run is go get to pull down the executable
+
+`go get github.com/OctopusDeploy/terraform-provider-octopusdeploy`
+
+Once the executable is pulled down, it'll automatically go into the ~/go directory on Linux/MacOS or the go directory on the home folder in Windows. Three folders will be shown in the go directory:
+
+* bin
+* pkg
+* src
+
+Typically the executable is in the *bin directory.
+
+2. cd into ~/go/bin
+
+3. Switching gears for a moment - in the directory where you want the Terraform configuration files to exist to use the Octopus Deploy Terraform provider, create the directory .terraform/plugins/OS plugin. The OS Plugin will be different based on OS, so for example, MacOS would look like .terraform/plugins/darwin_amd64
+
+4. Copy the terraform-provider-octopusdeploy into `.`terraform/plugins/OS plugin`
+
+You should know be able to initialize the environment.
 
 ## Configure the Provider
 
-### Default Space
+### Provider
+The provider will always be used per the code below. You will need to specify the Octopus Deploy server address, the API key (which should be passed in securely), and the space name.
 
 ```hcl
 # main.tf
@@ -30,22 +53,7 @@ To use it, extract the binary for your platform into the same folder as your `.t
 provider "octopusdeploy" {
   address = "http://octopus.production.yolo"
   apikey  = "API-XXXXXXXXXXXXX"
-}
-```
-
-### Scoped to a single Space
-
-Simply provide the _name_ of the space (not the space ID)
-
-**Note:** System level resources such as Teams are not support on a Space-scoped provider.
-
-```hcl
-# main.tf
-
-provider "octopusdeploy" {
-  address = "http://octopus.production.yolo"
-  apikey  = "API-XXXXXXXXXXXXX"
-  space   = "Support" // The name of the space
+  space   = "Space Name
 }
 ```
 
