@@ -22,11 +22,11 @@ func dataAccount() *schema.Resource {
 }
 
 func dataAccountReadByName(d *schema.ResourceData, m interface{}) error {
-	apiapiClient := m.(*client.Client)
+	apiClient := m.(*client.Client)
 
 	accountName := d.Get("name")
 
-	account, err := apiapiClient.Accounts.GetByName(accountName.(string))
+	account, err := apiClient.Accounts.GetByName(accountName.(string))
 
 	if err == client.ErrItemNotFound {
 		return nil
