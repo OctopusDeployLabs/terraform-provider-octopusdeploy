@@ -63,6 +63,18 @@ func testIsAccountTypeAWS(t *testing.T) *model.Account {
 	return testType
 }
 
+func testIsAWSAccountNil(t *testing.T) *model.Account {
+	accountName := "awsaccounttest"
+	testNil, err := model.NewAccount(accountName, enum.AmazonWebServicesAccount)
+
+	var pnt *model.Account
+	fmt.Printf("Type Account is nil: %v", pnt == nil)
+
+	assert.NotNil(t, err)
+
+	return testNil
+}
+
 func testAWSAccountBasic(tagSetName string, tagName string, name string, accessKey string, secretKey string, tenantedDeploymentParticipation enum.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`
 
