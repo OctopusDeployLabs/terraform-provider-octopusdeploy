@@ -40,7 +40,7 @@ func Provider() terraform.ResourceProvider {
 			"octopusdeploy_azure_service_principal":           resourceAzureServicePrincipal(),
 			"octopusdeploy_usernamepassword_account":          resourceUsernamePassword(),
 			"octopusdeploy_sshkey_account":                    resourceSSHKey(),
-			"octopusdeploy_aws_account":           			       resourceAmazonWebServicesAccount(),
+			"octopusdeploy_aws_account":                       resourceAmazonWebServicesAccount(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
