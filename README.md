@@ -5,8 +5,6 @@ A Terraform provider for [Octopus Deploy](https://octopus.com).
 
 It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopusdeploy) Octopus Deploy client SDK.
 
-> :warning: This is a community project under development. Please raise a GitHub issue for any problems or feature requests.
-
 ## Testing
 
 A GitHub action has been added to this project which initializes an instance of Octopus Deploy and runs the tests
