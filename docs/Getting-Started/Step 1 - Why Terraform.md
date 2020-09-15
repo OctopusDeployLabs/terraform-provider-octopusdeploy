@@ -2,7 +2,7 @@
 
 If you're new to Terraform in general, it may be in your best interest to start with some Terraform Getting Started Docs. 
 
-![Getting Started](https://www.terraform.io/intro/index.html)
+[Getting Started](https://www.terraform.io/intro/index.html)
 
 ## Why Terraform?
 
