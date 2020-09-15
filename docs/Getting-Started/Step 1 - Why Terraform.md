@@ -1,4 +1,4 @@
-# Part 1 - Why Terraform?
+# Step 1 - Why Terraform?
 
 If you're new to Terraform in general, it may be in your best interest to start with some Terraform Getting Started Docs. 
 
