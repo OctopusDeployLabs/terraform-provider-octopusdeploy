@@ -10,69 +10,128 @@ import (
 )
 
 func resourceUsernamePassword() *schema.Resource {
-
-	schemaMap := getCommonAccountsSchema()
-
-	schemaMap["username"] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-	}
-
-	schemaMap["password"] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-	}
-
 	return &schema.Resource{
 		Create: resourceUsernamePasswordCreate,
 		Read:   resourceUsernamePasswordRead,
 		Update: resourceUsernamePasswordUpdate,
 		Delete: resourceUsernamePasswordDelete,
-		Schema: schemaMap,
+
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+			"environments": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+			},
+			"tenant_tags": {
+				Description: "The tags for the tenants that this step applies to",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"account_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "UsernamePassword",
+			},
+			"username": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"password": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+		},
 	}
 }
 
 func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
-	_, err := fetchAndReadAccount(d, m)
-	account, err := fetchAndReadAccount(d, m)
+	apiClient := m.(*client.Client)
 
-	if err != nil {
-		return err
+	accountID := d.Id()
+	account, err := apiClient.Accounts.Get(accountID)
+
+	if err == client.ErrItemNotFound {
+		d.SetId("")
+		return nil
 	}
 
-	d.Set("username", account.Username)
-	d.Set("tenants", account.TenantIDs)
+	if err != nil {
+		return fmt.Errorf("error reading username password account %s: %s", accountID, err.Error())
+	}
+
+	d.Set("name", account.Name)
+	d.Set("description", account.Description)
+	d.Set("environments", account.EnvironmentIDs)
+	d.Set("password", account.Password)
 
 	return nil
 }
 
 func buildUsernamePasswordResource(d *schema.ResourceData) *model.Account {
-	account := buildAccountResourceCommon(d, enum.UsernamePassword)
+	var account, err = model.NewAccount(d.Get("name").(string), enum.UsernamePassword)
 
-	if v, ok := d.GetOk("username"); ok {
-		account.Username = v.(string)
+	if err != nil {
+		return nil
 	}
 
-	if v, ok := d.GetOk("password"); ok {
-		password := v.(string)
-		account.Password = &model.SensitiveValue{NewValue: &password}
+	account.Name = d.Get("name").(string)
+	pass := d.Get("password").(string)
+	account.Password = &model.SensitiveValue{NewValue: &pass}
+
+	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
+		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
 	}
 
-	if v, ok := d.GetOk("tenants"); ok {
-		account.TenantIDs = getSliceFromTerraformTypeList(v)
+	if v, ok := d.GetOk("tenant_tags"); ok {
+		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
 	return account
 }
 
 func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error {
-	account := buildUsernamePasswordResource(d)
-	return resourceAccountCreateCommon(d, m, account)
+	apiClient := m.(*client.Client)
+
+	newAccount := buildUsernamePasswordResource(d)
+	account, err := apiClient.Accounts.Add(newAccount)
+
+	if err != nil {
+		return fmt.Errorf("error creating username password account %s: %s", newAccount.Name, err.Error())
+	}
+
+	d.SetId(account.ID)
+
+	return nil
 }
 
 func resourceUsernamePasswordUpdate(d *schema.ResourceData, m interface{}) error {
 	account := buildUsernamePasswordResource(d)
-	return resourceAccountUpdateCommon(d, m, account)
+	account.ID = d.Id()
+
+	apiClient := m.(*client.Client)
+
+	updatedAccount, err := apiClient.Accounts.Update(*account)
+
+	if err != nil {
+		return fmt.Errorf("error updating username password account id %s: %s", d.Id(), err.Error())
+	}
+
+	d.SetId(updatedAccount.ID)
+	return nil
 }
 
 func resourceUsernamePasswordDelete(d *schema.ResourceData, m interface{}) error {
@@ -83,7 +142,7 @@ func resourceUsernamePasswordDelete(d *schema.ResourceData, m interface{}) error
 	err := apiClient.Accounts.Delete(accountID)
 
 	if err != nil {
-		return fmt.Errorf("error reading username password account %s: %s", accountID, err.Error())
+		return fmt.Errorf("error deleting username password account id %s: %s", accountID, err.Error())
 	}
 
 	d.SetId("")
