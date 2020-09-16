@@ -128,7 +128,7 @@ func resourceAccountDeleteCommon(d *schema.ResourceData, m interface{}) error {
 	err := octopusClient.Accounts.Delete(accountID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting username password account id %s: %s", accountID, err.Error())
+		return fmt.Errorf("error deleting account ID %s: %s", accountID, err.Error())
 	}
 
 	d.SetId("")

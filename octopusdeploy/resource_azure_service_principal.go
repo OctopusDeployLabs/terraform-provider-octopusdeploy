@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -79,22 +80,38 @@ func resourceAzureServicePrincipal() *schema.Resource {
 	}
 }
 
-func buildAzureServicePrincipalResource(d *schema.ResourceData) *model.Account {
-	account, err := model.NewAccount(d.Get("name").(string), enum.AzureServicePrincipal)
-	if err != nil {
-		return nil
+func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account, error) {
+	if d == nil {
+		return nil, createInvalidParameterError("buildAzureServicePrincipalResource", "d")
 	}
 
-	clientID, err := uuid.Parse(d.Get("client_id").(string))
-	tenantID, err := uuid.Parse(d.Get("tenant_id").(string))
-	subscriptionNumber, err := uuid.Parse(d.Get("subscription_number").(string))
-
-	// Required fields
-	account.ApplicationID = &clientID
-	account.TenantID = &tenantID
-	account.SubscriptionID = &subscriptionNumber
+	name := d.Get("name").(string)
 	password := d.Get("key").(string)
-	account.Password = &model.SensitiveValue{NewValue: &password}
+	secretKey := model.NewSensitiveValue(password)
+
+	applicationID, err := uuid.Parse(d.Get("client_id").(string))
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	tenantID, err := uuid.Parse(d.Get("tenant_id").(string))
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	subscriptionID, err := uuid.Parse(d.Get("subscription_number").(string))
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	account, err := model.NewAzureServicePrincipalAccount(name, subscriptionID, tenantID, applicationID, secretKey)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
 
 	// Optional Fields
 	if v, ok := d.GetOk("description"); ok {
@@ -125,13 +142,17 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) *model.Account {
 		account.ActiveDirectoryEndpointBase = v.(string)
 	}
 
-	return account
+	return account, nil
 }
 
 func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	newAccount := buildAzureServicePrincipalResource(d)
+	newAccount, err := buildAzureServicePrincipalResource(d)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 	account, err := apiClient.Accounts.Add(newAccount)
 
 	if err != nil {
@@ -176,7 +197,11 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) error {
-	account := buildAzureServicePrincipalResource(d)
+	account, err := buildAzureServicePrincipalResource(d)
+	if err != nil {
+		return err
+	}
+
 	account.ID = d.Id()
 
 	apiClient := m.(*client.Client)

@@ -11,37 +11,22 @@ import (
 )
 
 func resourceSSHKey() *schema.Resource {
+	schemaMap := getCommonAccountsSchema()
+
+	schemaMap["username"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	schemaMap["passphrase"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
 	return &schema.Resource{
 		Create: resourceSSHKeyCreate,
 		Read:   resourceSSHKeyRead,
 		Update: resourceSSHKeyUpdate,
-		Delete: resourceSSHKeyDelete,
-
-		Schema: map[string]*schema.Schema{
-			"username": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"environments": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-			},
-			"passphrase": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-		},
+		Delete: resourceAccountDeleteCommon,
+		Schema: schemaMap,
 	}
 }
 
@@ -67,15 +52,20 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildSSHKeyResource(d *schema.ResourceData) *model.Account {
-	account, err := model.NewAccount(d.Get("name").(string), enum.SshKeyPair)
-	if err != nil {
-		return nil
+func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
+	if d == nil {
+		return nil, createInvalidParameterError("buildSSHKeyResource", "d")
 	}
 
-	account.Name = d.Get("username").(string)
+	name := d.Get("name").(string)
+	userName := d.Get("username").(string)
 	password := d.Get("password").(string)
-	account.Password = &model.SensitiveValue{NewValue: &password}
+	secretKey := model.NewSensitiveValue(password)
+
+	account, err := model.NewSSHKeyAccount(name, userName, secretKey)
+	if err != nil {
+		return nil, err
+	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
@@ -89,17 +79,25 @@ func buildSSHKeyResource(d *schema.ResourceData) *model.Account {
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
-	return account
+	return account, nil
 }
 
 func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceSSHKeyCreate", "d")
+	}
+
 	apiClient := m.(*client.Client)
 
-	newAccount := buildSSHKeyResource(d)
+	newAccount, err := buildSSHKeyResource(d)
+	if err != nil {
+		return err
+	}
+
 	account, err := apiClient.Accounts.Add(newAccount)
 
 	if err != nil {
-		return fmt.Errorf("error reading SSH Key Pair %s: %s", newAccount.Name, err.Error())
+		return fmt.Errorf("error creating SSH Key Pair %s: %s", newAccount.Name, err.Error())
 	}
 
 	d.SetId(account.ID)
@@ -108,7 +106,11 @@ func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
-	account := buildSSHKeyResource(d)
+	account, err := buildSSHKeyResource(d)
+	if err != nil {
+		return err
+	}
+
 	account.ID = d.Id()
 
 	apiClient := m.(*client.Client)
@@ -116,24 +118,9 @@ func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	updatedAccount, err := apiClient.Accounts.Update(*account)
 
 	if err != nil {
-		return fmt.Errorf("error reading SSH Key Pair %s: %s", d.Id(), err.Error())
+		return fmt.Errorf("error updating SSH Key Pair %s: %s", d.Id(), err.Error())
 	}
 
 	d.SetId(updatedAccount.ID)
-	return nil
-}
-
-func resourceSSHKeyDelete(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
-	accountID := d.Id()
-
-	err := apiClient.Accounts.Delete(accountID)
-
-	if err != nil {
-		return fmt.Errorf("error reading SSH Key Pair id %s: %s", accountID, err.Error())
-	}
-
-	d.SetId("")
 	return nil
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -82,7 +81,6 @@ func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 	feedName := d.Get("name").(string)
 
-	var feedType enum.FeedType
 	var feedURI string
 	var enhancedMode bool
 	var downloadAttempts int
@@ -120,7 +118,8 @@ func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 		feedPassword = feedPasswordInterface.(string)
 	}
 
-	feed := model.NewFeed(feedName, feedType, feedURI)
+	feed := model.NewNuGetFeed(feedName)
+	feed.FeedURI = feedURI
 	feed.EnhancedMode = enhancedMode
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds

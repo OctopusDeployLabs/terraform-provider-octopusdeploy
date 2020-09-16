@@ -10,51 +10,22 @@ import (
 )
 
 func resourceUsernamePassword() *schema.Resource {
+	schemaMap := getCommonAccountsSchema()
+
+	schemaMap["username"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	schemaMap["password"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
 	return &schema.Resource{
 		Create: resourceUsernamePasswordCreate,
 		Read:   resourceUsernamePasswordRead,
 		Update: resourceUsernamePasswordUpdate,
-		Delete: resourceUsernamePasswordDelete,
-
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"environments": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-			},
-			"tenant_tags": {
-				Description: "The tags for the tenants that this step applies to",
-				Type:        schema.TypeList,
-				Optional:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"account_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "UsernamePassword",
-			},
-			"username": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"password": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-		},
+		Delete: resourceAccountDeleteCommon,
+		Schema: schemaMap,
 	}
 }
 
@@ -81,16 +52,22 @@ func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildUsernamePasswordResource(d *schema.ResourceData) *model.Account {
-	var account, err = model.NewAccount(d.Get("name").(string), enum.UsernamePassword)
-
-	if err != nil {
-		return nil
+func buildUsernamePasswordResource(d *schema.ResourceData) (*model.Account, error) {
+	if d == nil {
+		return nil, createInvalidParameterError("buildUsernamePasswordResource", "d")
 	}
 
-	account.Name = d.Get("name").(string)
-	pass := d.Get("password").(string)
-	account.Password = &model.SensitiveValue{NewValue: &pass}
+	name := d.Get("name").(string)
+
+	account, err := model.NewUsernamePasswordAccount(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	password := d.Get("password").(string)
+	privateKey := model.NewSensitiveValue(password)
+	account.Password = &privateKey
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
@@ -100,13 +77,17 @@ func buildUsernamePasswordResource(d *schema.ResourceData) *model.Account {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
-	return account
+	return account, nil
 }
 
 func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	newAccount := buildUsernamePasswordResource(d)
+	newAccount, err := buildUsernamePasswordResource(d)
+	if err != nil {
+		return err
+	}
+
 	account, err := apiClient.Accounts.Add(newAccount)
 
 	if err != nil {
@@ -119,7 +100,11 @@ func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceUsernamePasswordUpdate(d *schema.ResourceData, m interface{}) error {
-	account := buildUsernamePasswordResource(d)
+	account, err := buildUsernamePasswordResource(d)
+	if err != nil {
+		return err
+	}
+
 	account.ID = d.Id()
 
 	apiClient := m.(*client.Client)

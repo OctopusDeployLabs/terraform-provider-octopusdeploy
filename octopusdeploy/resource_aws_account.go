@@ -59,6 +59,14 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 }
 
 func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceAmazonWebServicesAccountRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceAmazonWebServicesAccountRead", "m")
+	}
+
 	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
@@ -85,16 +93,20 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 	return nil
 }
 
-func buildAmazonWebServicesAccountResource(d *schema.ResourceData) *model.Account {
-	account, err := model.NewAccount(d.Get("name").(string), enum.AmazonWebServicesAccount)
-	if err != nil {
-		return nil
+func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Account, error) {
+	if d == nil {
+		return nil, createInvalidParameterError("buildAmazonWebServicesAccountResource", "d")
 	}
 
-	account.Name = d.Get("name").(string)
-	account.AccessKey = d.Get("access_key").(string)
-	pass := d.Get("secret_key").(string)
-	account.SecretKey = &model.SensitiveValue{NewValue: &pass}
+	name := d.Get("name").(string)
+	accessKey := d.Get("access_key").(string)
+	password := d.Get("secret_key").(string)
+	secretKey := model.NewSensitiveValue(password)
+
+	account, err := model.NewAwsServicePrincipalAccount(name, accessKey, secretKey)
+	if err != nil {
+		return nil, err
+	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
@@ -108,13 +120,17 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) *model.Accoun
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
-	return account
+	return account, nil
 }
 
 func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	newAccount := buildAmazonWebServicesAccountResource(d)
+	newAccount, err := buildAmazonWebServicesAccountResource(d)
+	if err != nil {
+		return err
+	}
+
 	account, err := apiClient.Accounts.Add(newAccount)
 
 	if err != nil {
@@ -127,7 +143,15 @@ func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{
 }
 
 func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{}) error {
-	account := buildAmazonWebServicesAccountResource(d)
+	if d == nil {
+		return createInvalidParameterError("resourceAmazonWebServicesAccountUpdate", "d")
+	}
+
+	account, err := buildAmazonWebServicesAccountResource(d)
+	if err != nil {
+		return err
+	}
+
 	account.ID = d.Id()
 
 	apiClient := m.(*client.Client)

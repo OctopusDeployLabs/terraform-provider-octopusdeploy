@@ -18,13 +18,11 @@ type Config struct {
 func (c *Config) Client() (*client.Client, error) {
 	apiClient, err := client.NewClient(&(http.Client{}), c.Address, c.APIKey, c.Space)
 
-	if c.Space == "" {
-		if err != nil {
-			log.Println(err)
-		}
-
-		log.Printf("[INFO] Octopus Deploy Client configured against default space")
+	if err != nil {
+		log.Println(err)
 	}
+
+	log.Printf("[INFO] Octopus Deploy Client Ready")
 
 	return apiClient, err
 }
