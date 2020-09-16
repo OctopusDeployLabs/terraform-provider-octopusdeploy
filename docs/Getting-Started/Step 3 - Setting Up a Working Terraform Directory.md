@@ -18,7 +18,7 @@ The directory is:
 
 After you create the directory, it should look something like the screenshot below on Mac for example.
 
-![](images/terraformdirectory.jpg)
+![](images/terraformdirectory.png)
 
 ## The Terraform Provider
 Once the directory is created, you'll need to add in the Terraform provider. The latest provider can be downloaded from the releases page found here:
