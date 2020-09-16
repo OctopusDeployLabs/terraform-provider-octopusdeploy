@@ -16,7 +16,7 @@ type Config struct {
 
 // Client returns a new Octopus Deploy client
 func (c *Config) Client() (*client.Client, error) {
-	apiClient, err := client.NewClient(&(http.Client{}), c.Address, c.APIKey)
+	apiClient, err := client.NewClient(&(http.Client{}), c.Address, c.APIKey, c.Space)
 
 	if c.Space == "" {
 
