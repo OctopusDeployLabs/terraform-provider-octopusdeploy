@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -78,7 +79,7 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("name", certificate.Name)
 	d.Set("notes", certificate.Notes)
-	d.Set("environment_ids", certificate.EnvironmentIds)
+	d.Set("environment_ids", certificate.EnvironmentIDs)
 	d.Set("tenanted_deployment_participation", certificate.TenantedDeploymentParticipation)
 	d.Set("tenant_ids", certificate.TenantIds)
 	d.Set("tenant_tags", certificate.TenantTags)
@@ -144,12 +145,16 @@ func buildCertificateResource(d *schema.ResourceData) *model.Certificate {
 		tenantTags = []string{}
 	}
 
-	var certificate = model.NewCertificate(certificateName, model.SensitiveValue{NewValue: &certificateData}, model.SensitiveValue{NewValue: &password})
+	var certificate, err = model.NewCertificate(certificateName, model.SensitiveValue{NewValue: &certificateData}, model.SensitiveValue{NewValue: &password})
 	certificate.Notes = notes
-	certificate.EnvironmentIds = environmentIds
+	certificate.EnvironmentIDs = environmentIds
 	certificate.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(tenantedDeploymentParticipation)
 	certificate.TenantIds = tenantIds
 	certificate.TenantTags = tenantTags
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	return certificate
 }
@@ -175,7 +180,7 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 
-	updatedCertificate, err := apiClient.Certificates.Update(certificate)
+	updatedCertificate, err := apiClient.Certificates.Update(*certificate)
 
 	if err != nil {
 		return fmt.Errorf("error updating certificate id %s: %s", d.Id(), err.Error())

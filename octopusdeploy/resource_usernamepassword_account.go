@@ -1,6 +1,9 @@
 package octopusdeploy
 
 import (
+	"fmt"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -24,7 +27,7 @@ func resourceUsernamePassword() *schema.Resource {
 		Create: resourceUsernamePasswordCreate,
 		Read:   resourceUsernamePasswordRead,
 		Update: resourceUsernamePasswordUpdate,
-		Delete: resourceAccountDeleteCommon,
+		Delete: resourceUsernamePasswordDelete,
 		Schema: schemaMap,
 	}
 }
@@ -70,4 +73,19 @@ func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error
 func resourceUsernamePasswordUpdate(d *schema.ResourceData, m interface{}) error {
 	account := buildUsernamePasswordResource(d)
 	return resourceAccountUpdateCommon(d, m, account)
+}
+
+func resourceUsernamePasswordDelete(d *schema.ResourceData, m interface{}) error {
+	apiClient := m.(*client.Client)
+
+	accountID := d.Id()
+
+	err := apiClient.Accounts.Delete(accountID)
+
+	if err != nil {
+		return fmt.Errorf("error reading username password account %s: %s", accountID, err.Error())
+	}
+
+	d.SetId("")
+	return nil
 }

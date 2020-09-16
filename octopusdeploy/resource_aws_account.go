@@ -132,7 +132,7 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 
 	apiClient := m.(*client.Client)
 
-	updatedAccount, err := apiClient.Accounts.Update(account)
+	updatedAccount, err := apiClient.Accounts.Update(*account)
 
 	if err != nil {
 		return fmt.Errorf("error updating aws acccount id %s: %s", d.Id(), err.Error())

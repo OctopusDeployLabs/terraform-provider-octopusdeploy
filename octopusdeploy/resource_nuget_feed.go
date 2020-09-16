@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -81,6 +82,7 @@ func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 	feedName := d.Get("name").(string)
 
+	var feedType enum.FeedType
 	var feedURI string
 	var enhancedMode bool
 	var downloadAttempts int
@@ -118,7 +120,7 @@ func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 		feedPassword = feedPasswordInterface.(string)
 	}
 
-	feed := model.NewFeed(feedName, "NuGet", feedURI)
+	feed := model.NewFeed(feedName, feedType, feedURI)
 	feed.EnhancedMode = enhancedMode
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
@@ -134,7 +136,7 @@ func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
 	newFeed := buildNugetFeedResource(d)
-	feed, err := apiClient.Feeds.Add(newFeed)
+	feed, err := apiClient.Feeds.Add(*newFeed)
 
 	if err != nil {
 		return fmt.Errorf("error creating nuget feed %s: %s", newFeed.Name, err.Error())
@@ -151,7 +153,7 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 
-	updatedFeed, err := apiClient.Feeds.Update(feed)
+	updatedFeed, err := apiClient.Feeds.Update(*feed)
 
 	if err != nil {
 		return fmt.Errorf("error updating nuget feed id %s: %s", d.Id(), err.Error())

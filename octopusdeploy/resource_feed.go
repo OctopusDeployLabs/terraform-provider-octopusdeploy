@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -86,7 +87,7 @@ func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
 func buildFeedResource(d *schema.ResourceData) *model.Feed {
 	feedName := d.Get("name").(string)
 
-	var feedType string
+	var feedType enum.FeedType
 	var feedURI string
 	var enhancedMode bool
 	var downloadAttempts int
@@ -96,7 +97,7 @@ func buildFeedResource(d *schema.ResourceData) *model.Feed {
 
 	feedTypeInterface, ok := d.GetOk("feed_type")
 	if ok {
-		feedType = feedTypeInterface.(string)
+		feedType = feedTypeInterface.(enum.FeedType)
 	}
 
 	feedURIInterface, ok := d.GetOk("feed_uri")
@@ -145,7 +146,7 @@ func resourceFeedCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
 	newFeed := buildFeedResource(d)
-	feed, err := apiClient.Feeds.Add(newFeed)
+	feed, err := apiClient.Feeds.Add(*newFeed)
 
 	if err != nil {
 		return fmt.Errorf("error creating feed %s: %s", newFeed.Name, err.Error())
@@ -162,7 +163,7 @@ func resourceFeedUpdate(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 
-	updatedFeed, err := apiClient.Feeds.Update(feed)
+	updatedFeed, err := apiClient.Feeds.Update(*feed)
 
 	if err != nil {
 		return fmt.Errorf("error updating feed id %s: %s", d.Id(), err.Error())

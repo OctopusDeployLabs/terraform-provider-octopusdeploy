@@ -113,7 +113,7 @@ func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 
-	updatedAccount, err := apiClient.Accounts.Update(account)
+	updatedAccount, err := apiClient.Accounts.Update(*account)
 
 	if err != nil {
 		return fmt.Errorf("error reading SSH Key Pair %s: %s", d.Id(), err.Error())

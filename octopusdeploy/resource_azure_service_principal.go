@@ -90,9 +90,9 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) *model.Account {
 	subscriptionNumber, err := uuid.Parse(d.Get("subscription_number").(string))
 
 	// Required fields
-	account.ClientID = &clientID
+	account.ApplicationID = &clientID
 	account.TenantID = &tenantID
-	account.SubscriptionNumber = &subscriptionNumber
+	account.SubscriptionID = &subscriptionNumber
 	password := d.Get("key").(string)
 	account.Password = &model.SensitiveValue{NewValue: &password}
 
@@ -164,9 +164,9 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
 	d.Set("tenant_tags", account.TenantTags)
 
-	d.Set("client_id", account.ClientID)
+	d.Set("client_id", account.ApplicationID)
 	d.Set("tenant_id", account.TenantIDs)
-	d.Set("subscription_number", account.SubscriptionNumber)
+	d.Set("subscription_number", account.SubscriptionID)
 	d.Set("key", account.Password)
 	d.Set("azure_environment", account.AzureEnvironment)
 	d.Set("resource_management_endpoint_base_uri", account.ResourceManagementEndpointBase)
@@ -181,7 +181,7 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 
 	apiClient := m.(*client.Client)
 
-	updatedAccount, err := apiClient.Accounts.Update(account)
+	updatedAccount, err := apiClient.Accounts.Update(*account)
 
 	if err != nil {
 		return fmt.Errorf("error updating azure service principal id %s: %s", d.Id(), err.Error())
