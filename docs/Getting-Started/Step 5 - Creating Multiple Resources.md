@@ -179,4 +179,4 @@ awsAccountName = "DevAWS"
 
 When you're all done, the directory containing the configurations should look like the screenshot below.
 
-![Build](images/build.jpg)
+![Build](images/build.png)
