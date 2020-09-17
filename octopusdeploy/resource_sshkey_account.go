@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 
@@ -59,7 +60,12 @@ func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
 
 	name := d.Get("name").(string)
 	userName := d.Get("username").(string)
+
 	password := d.Get("password").(string)
+	if password == "" {
+		log.Println("Key is nil. Must add in a password")
+	}
+
 	secretKey := model.NewSensitiveValue(password)
 
 	account, err := model.NewSSHKeyAccount(name, userName, secretKey)

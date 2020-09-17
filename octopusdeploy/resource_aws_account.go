@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -72,7 +73,12 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 
 	name := d.Get("name").(string)
 	accessKey := d.Get("access_key").(string)
+
 	password := d.Get("secret_key").(string)
+	if password == "" {
+		log.Println("Key is nil. Must add in a password")
+	}
+
 	secretKey := model.NewSensitiveValue(password)
 
 	account, err := model.NewAwsServicePrincipalAccount(name, accessKey, secretKey)

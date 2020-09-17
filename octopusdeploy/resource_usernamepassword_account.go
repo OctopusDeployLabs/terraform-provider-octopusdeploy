@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -66,6 +67,10 @@ func buildUsernamePasswordResource(d *schema.ResourceData) (*model.Account, erro
 	}
 
 	password := d.Get("password").(string)
+	if password == "" {
+		log.Println("Key is nil. Must add in a password")
+	}
+
 	privateKey := model.NewSensitiveValue(password)
 	account.Password = &privateKey
 
