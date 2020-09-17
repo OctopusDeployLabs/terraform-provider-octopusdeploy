@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -71,6 +72,10 @@ func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*model.Account,
 
 func buildAccountResourceCommon(d *schema.ResourceData, accountType enum.AccountType) *model.Account {
 	var account, _ = model.NewAccount(d.Get("name").(string), accountType)
+
+	if account == nil {
+		log.Println(nameIsNil("buildAccountResourceCommon"))
+	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)

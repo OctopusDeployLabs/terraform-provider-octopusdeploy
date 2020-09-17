@@ -68,6 +68,7 @@ github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022/go.mod h1:nu
 github.com/GoogleCloudPlatform/k8s-cloud-provider v0.0.0-20190822182118-27a4ced34534/go.mod h1:iroGtC8B3tQiqtds1l+mgk/BBOrxbqjH+eUfFQYRc14=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/NYTimes/gziphandler v0.0.0-20170623195520-56545f4a5d46/go.mod h1:3wb06e3pkSAbeQ52E9H9iFoQsEEwGN64994WTCIhntQ=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.0 h1:r9ThVuANGkzm3noAjLF/i7LUcxQxbCJwpvn1DLwPoOA=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200902205442-31b95451d4d3 h1:z1jlFH7oEpciPywwaBeH0eEOGGouGTjyfR5WMQBv2Co=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200902205442-31b95451d4d3/go.mod h1:INF9xhL97JGBzFDRhwx0aQ7LUawdyrC/SChhtsc2AeE=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200916115526-ae4bfa8aba93 h1:qeHJTYJNDYmo9chi6bKs5Qse0eBp6BIpzV5YI9QbwTU=

@@ -59,7 +59,12 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 	}
 
 	name := d.Get("name").(string)
+
 	password := d.Get("key").(string)
+	if password == "" {
+		log.Println("Key is nil")
+	}
+
 	secretKey := model.NewSensitiveValue(password)
 
 	applicationID, err := uuid.Parse(d.Get("client_id").(string))
