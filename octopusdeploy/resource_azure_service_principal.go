@@ -188,18 +188,3 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 	d.SetId(updatedAccount.ID)
 	return nil
 }
-
-func resourceAzureServicePrincipalDelete(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
-	accountID := d.Id()
-
-	err := apiClient.Accounts.Delete(accountID)
-
-	if err != nil {
-		return fmt.Errorf("error deleting azure service principal id %s: %s", accountID, err.Error())
-	}
-
-	d.SetId("")
-	return nil
-}
