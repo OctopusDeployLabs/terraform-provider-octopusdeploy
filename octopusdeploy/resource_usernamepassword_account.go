@@ -94,6 +94,14 @@ func buildUsernamePasswordResource(d *schema.ResourceData) (*model.Account, erro
 }
 
 func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
+	}
+
 	apiClient := m.(*client.Client)
 
 	newAccount, err := buildUsernamePasswordResource(d)
@@ -113,6 +121,14 @@ func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceUsernamePasswordUpdate(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
+	}
+
 	account, err := buildUsernamePasswordResource(d)
 	if err != nil {
 		return err

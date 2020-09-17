@@ -98,6 +98,14 @@ func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
 
 func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
 	if d == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
+	}
+
+	if d == nil {
 		return createInvalidParameterError("resourceSSHKeyCreate", "d")
 	}
 
@@ -120,6 +128,14 @@ func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
+	}
+
 	account, err := buildSSHKeyResource(d)
 	if err != nil {
 		return err

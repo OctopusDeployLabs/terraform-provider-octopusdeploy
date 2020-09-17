@@ -124,6 +124,14 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 }
 
 func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
+	}
+
 	apiClient := m.(*client.Client)
 
 	newAccount, err := buildAzureServicePrincipalResource(d)
@@ -183,6 +191,14 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
+	}
+
 	account, err := buildAzureServicePrincipalResource(d)
 	if err != nil {
 		return err
