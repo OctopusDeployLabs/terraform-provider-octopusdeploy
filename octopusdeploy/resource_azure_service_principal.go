@@ -12,71 +12,44 @@ import (
 )
 
 func resourceAzureServicePrincipal() *schema.Resource {
+	schemaMap := getCommonAccountsSchema()
+
+	schemaMap["client_id"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Required: true,
+	}
+	schemaMap["tenant_id"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Required: true,
+	}
+	schemaMap["subscription_number"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Required: true,
+	}
+	schemaMap["key"] = &schema.Schema{
+		Type:      schema.TypeString,
+		Required:  true,
+		Sensitive: true,
+	}
+	schemaMap["azure_environment"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	schemaMap["resource_management_endpoint_base_uri"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+	schemaMap["active_directory_endpoint_base_uri"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+	}
+
 	return &schema.Resource{
 		Create: resourceAzureServicePrincipalCreate,
 		Read:   resourceAzureServicePrincipalRead,
 		Update: resourceAzureServicePrincipalUpdate,
-		Delete: resourceAzureServicePrincipalDelete,
-
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"environments": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-			},
-			"account_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Azure",
-			},
-			"tenant_tags": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"client_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"tenant_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"subscription_number": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"key": {
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
-			},
-			"azure_environment": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"resource_management_endpoint_base_uri": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"active_directory_endpoint_base_uri": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-		},
+		Delete: resourceAccountDeleteCommon,
+		Schema: schemaMap,
 	}
 }
 
