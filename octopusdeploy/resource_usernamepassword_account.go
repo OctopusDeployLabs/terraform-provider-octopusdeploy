@@ -31,6 +31,14 @@ func resourceUsernamePassword() *schema.Resource {
 }
 
 func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceUsernamePasswordRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceUsernamePasswordRead", "m")
+	}
+
 	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
