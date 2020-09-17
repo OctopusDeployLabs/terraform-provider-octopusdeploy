@@ -143,6 +143,14 @@ func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
+	}
+
 	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
