@@ -10,51 +10,23 @@ import (
 )
 
 func resourceAmazonWebServicesAccount() *schema.Resource {
+	schemaMap := getCommonAccountsSchema()
+
+	schemaMap["access_key"] = &schema.Schema{
+		Type:     schema.TypeString,
+		Required: true,
+	}
+	schemaMap["secret_key"] = &schema.Schema{
+		Type:      schema.TypeString,
+		Required:  true,
+		Sensitive: true,
+	}
 	return &schema.Resource{
 		Create: resourceAmazonWebServicesAccountCreate,
 		Read:   resourceAmazonWebServicesAccountRead,
 		Update: resourceAmazonWebServicesAccountUpdate,
-		Delete: resourceAmazonWebServicesAccountDelete,
-
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"account_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  AccountTypeAWS,
-			},
-			"environments": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-			},
-			"tenant_tags": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"access_key": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"secret_key": {
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
-			},
-		},
+		Delete: resourceAccountDeleteCommon,
+		Schema: schemaMap,
 	}
 }
 
@@ -163,20 +135,5 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 	}
 
 	d.SetId(updatedAccount.ID)
-	return nil
-}
-
-func resourceAmazonWebServicesAccountDelete(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
-	accountID := d.Id()
-
-	err := apiClient.Accounts.Delete(accountID)
-
-	if err != nil {
-		return fmt.Errorf("error deleting AWS account id %s: %s", accountID, err.Error())
-	}
-
-	d.SetId("")
 	return nil
 }
