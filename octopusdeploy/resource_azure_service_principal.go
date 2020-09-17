@@ -62,7 +62,7 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 
 	password := d.Get("key").(string)
 	if password == "" {
-		log.Println("Key is nil")
+		log.Println("Key is nil. Must add in a password")
 	}
 
 	secretKey := model.NewSensitiveValue(password)
