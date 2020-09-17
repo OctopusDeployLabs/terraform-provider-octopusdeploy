@@ -110,7 +110,7 @@ func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, account 
 
 	octopusClient := m.(*client.Client)
 
-	updatedAccount, err := octopusClient.Accounts.Update(account)
+	updatedAccount, err := octopusClient.Accounts.Update(*account)
 
 	if err != nil {
 		return fmt.Errorf("error updating username password account id %s: %s", d.Id(), err.Error())
