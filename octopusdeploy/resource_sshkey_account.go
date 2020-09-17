@@ -32,6 +32,14 @@ func resourceSSHKey() *schema.Resource {
 }
 
 func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceSSHKeyRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceSSHKeyRead", "m")
+	}
+
 	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
