@@ -23,7 +23,7 @@ To test the output and see some resources that were created, the terminal will s
 provider "octopusdeploy" {
   address = var.serverURL
   apikey  = var.apiKey
-  space   = var.space
+  space_id = var.space
 }
 
 resource "octopusdeploy_environment" "newEnvironment" {

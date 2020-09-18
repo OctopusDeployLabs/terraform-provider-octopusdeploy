@@ -10,7 +10,7 @@ import (
 func TestFeedsCreation(test *testing.T) {
 	terraformTest := &terraform.Options{
 		TerraformDir: "../examples/Feeds-Creation",
-		VarFiles:     []string{"/Users/michaellevan/gitrepos/terraform-provider-octopusdeploy/examples/terraform.tfvars"},
+		VarFiles:     []string{"C:/Users/Mike/Desktop/terraform-provider-octopusdeploy/examples/terraform.tfvars"},
 	}
 
 	defer terraform.Destroy(test, terraformTest)

@@ -3,12 +3,13 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 //Provider is the plugin entry point
 func Provider() terraform.ResourceProvider {
+	log.Println("[INFO] Initializing Resource Provider")
 	return &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_project":              dataProject(),
@@ -55,7 +56,7 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),
 				Description: "The API to use with the Octopus Deploy server.",
 			},
-			"space": {
+			"space_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_SPACE", ""),
@@ -68,10 +69,11 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+	log.Println("[INFO] Parsing Client Configuration")
 	config := Config{
 		Address: d.Get("address").(string),
 		APIKey:  d.Get("apikey").(string),
-		Space:   d.Get("space").(string),
+		Space:   d.Get("space_id").(string),
 	}
 
 	log.Println("[INFO] Initializing Octopus Deploy client")

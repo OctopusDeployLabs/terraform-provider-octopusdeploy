@@ -17,3 +17,11 @@ variable "subscription_number" {
 variable "key" {
     type = string
 }
+
+variable "space" {
+    type = string
+}
+
+variable "serverURL" {
+  type = string
+}

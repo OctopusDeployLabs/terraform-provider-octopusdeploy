@@ -7,7 +7,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceUsernamePassword() *schema.Resource {
@@ -62,6 +62,11 @@ func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func buildUsernamePasswordResource(d *schema.ResourceData) (*model.Account, error) {
+	accountStruct := model.Account{}
+	if accountStruct.Username == "" {
+		log.Println("Username struct is nil")
+	}
+
 	if d == nil {
 		return nil, createInvalidParameterError("buildUsernamePasswordResource", "d")
 	}

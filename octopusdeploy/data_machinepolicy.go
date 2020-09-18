@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataMachinePolicy() *schema.Resource {
@@ -40,7 +40,7 @@ func dataMachinePolicyReadByName(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error reading machine policy with name %s: %s", policyName, err.Error())
 	}
 
-	for _, p := range *policies {
+	for _, p := range policies {
 		if p.Name == policyName {
 			d.SetId(p.ID)
 			d.Set("description", p.Description)

@@ -1,7 +1,7 @@
 provider "octopusdeploy" {
-  address = "https://mikelevanoctopus.octopus.app"
+  address = var.serverURL
   apikey  = var.apiKey
-  space   = "Default"
+  space_id   = var.space
 }
 
 resource "octopusdeploy_azure_service_principal" "Azure" {

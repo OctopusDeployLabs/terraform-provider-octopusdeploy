@@ -1,7 +1,7 @@
 provider "octopusdeploy" {
   address = var.serverURL
   apikey  = var.apiKey
-  space   = var.space
+  space_id   = var.space
 }
 
 # Feed username and password are only needed if authentication is required

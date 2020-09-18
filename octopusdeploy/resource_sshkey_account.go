@@ -8,7 +8,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceSSHKey() *schema.Resource {
@@ -62,6 +62,11 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
+	accountStruct := model.Account{}
+	if accountStruct.Name == "" {
+		log.Println("Name struct is nil")
+	}
+
 	if d == nil {
 		return nil, createInvalidParameterError("buildSSHKeyResource", "d")
 	}

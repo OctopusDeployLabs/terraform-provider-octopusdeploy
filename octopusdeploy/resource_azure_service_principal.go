@@ -8,10 +8,12 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	uuid "github.com/google/uuid"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 func resourceAzureServicePrincipal() *schema.Resource {
+	log.Println("Hello")
 	schemaMap := getCommonAccountsSchema()
 
 	schemaMap["client_id"] = &schema.Schema{
@@ -23,8 +25,10 @@ func resourceAzureServicePrincipal() *schema.Resource {
 		Required: true,
 	}
 	schemaMap["subscription_number"] = &schema.Schema{
-		Type:     schema.TypeString,
-		Required: true,
+		Type: schema.TypeString,
+		//Computed:     true,
+		Required:     true,
+		ValidateFunc: validation.IsUUID,
 	}
 	schemaMap["key"] = &schema.Schema{
 		Type:      schema.TypeString,
@@ -54,6 +58,7 @@ func resourceAzureServicePrincipal() *schema.Resource {
 }
 
 func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account, error) {
+
 	if d == nil {
 		return nil, createInvalidParameterError("buildAzureServicePrincipalResource", "d")
 	}
@@ -118,6 +123,11 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 
 	if v, ok := d.GetOk("active_directory_endpoint_base_uri"); ok {
 		account.ActiveDirectoryEndpointBase = v.(string)
+	}
+
+	err = account.Validate()
+	if err != nil {
+		return nil, err
 	}
 
 	return account, nil

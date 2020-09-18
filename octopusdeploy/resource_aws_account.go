@@ -7,7 +7,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceAmazonWebServicesAccount() *schema.Resource {
@@ -67,6 +67,11 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 }
 
 func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Account, error) {
+	accountStruct := model.Account{}
+	if accountStruct.Name == "" {
+		log.Println("Name struct is nil")
+	}
+
 	if d == nil {
 		return nil, createInvalidParameterError("buildAmazonWebServicesAccountResource", "d")
 	}

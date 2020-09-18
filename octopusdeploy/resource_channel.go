@@ -5,7 +5,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceChannel() *schema.Resource {
@@ -152,7 +152,7 @@ func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 
-	updatedChannel, err := apiClient.Channels.Update(channel)
+	updatedChannel, err := apiClient.Channels.Update(*channel)
 
 	if err != nil {
 		return fmt.Errorf("error updating channel id %s: %s", d.Id(), err.Error())
