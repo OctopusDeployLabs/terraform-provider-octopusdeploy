@@ -57,6 +57,7 @@ const (
 	ErrorUpdatingSSHKeyPair = "error updating SSH key pair ID %s: %s"
 
 	ErrorCreatingUsernamePasswordAccount = "error creating username password account %s: %s"
+	/* #nosec */
 	ErrorDeletingUsernamePasswordAccount = "error deleting username password account ID %s: %s"
 	ErrorReadingUsernamePasswordAccount  = "error reading username password account %s: %s"
 	ErrorUpdatingUsernamePasswordAccount = "error updating username password account ID %s: %s"
