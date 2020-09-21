@@ -16,8 +16,8 @@ import (
 func TestAWSAccountBasic(t *testing.T) {
 	const accountPrefix = "octopusdeploy_aws_account.foo"
 	const name = "awsaccount"
-	const accessKey = "AKIA6DEJDS6OY7FC3I50"
-	const secretKey = "x81L4H3riyiWRuBEPlz1"
+	const accessKey = "AKIA6DEJDS6test123"
+	const secretKey = "ThisIsATest"
 
 	const tagSetName = "TagSet"
 	const tagName = "Tag"

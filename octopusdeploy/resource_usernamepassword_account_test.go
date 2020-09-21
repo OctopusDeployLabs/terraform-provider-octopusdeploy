@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-func TestUsernamepasswordBasic(t *testing.T) {
+func TestUsernamePasswordBasic(t *testing.T) {
 	const accountPrefix = "octopusdeploy_usernamepassword_account.foo"
 	const username = "foo"
 	const password = "H3lloWorld"
