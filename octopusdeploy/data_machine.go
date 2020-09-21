@@ -146,8 +146,6 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 	d.Set("tenanteddeploymentparticipation", machine.DeploymentMode)
 	d.Set("tenantids", machine.TenantIDs)
 	d.Set("tenanttags", machine.TenantTags)
-	//d.Set("thumbprint", machine.Thumbprint)
-	//d.Set("uri", machine.URI)
 
 	return nil
 }
