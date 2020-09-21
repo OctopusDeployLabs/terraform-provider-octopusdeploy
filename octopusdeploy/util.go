@@ -4,14 +4,9 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
-
-// Octopus can get itself into some race conditions, so this mutex can be used to ensure
-// that we wait for other commands to finish first.
-var octoMutex = mutexkv.NewMutexKV()
 
 // Validate a value against a set of possible values
 func validateValueFunc(values []string) schema.SchemaValidateFunc {
