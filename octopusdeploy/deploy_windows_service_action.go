@@ -9,12 +9,12 @@ func getDeployWindowsServiceActionSchema() *schema.Schema {
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addPrimaryPackageSchema(element, true)
 	addDeployWindowsServiceSchema(element)
-	//addCustomInstallationDirectoryFeature(element)
-	//addCustomDeploymentScriptsFeature(element)
-	//addJsonConfigurationVariablesFeature(element)
-	//addConfigurationVariablesFeature(element)
-	//addConfigurationTransformsFeature(element)
-	//addSubstituteVariablesInFilesFeature(element)
+	// addCustomInstallationDirectoryFeature(element)
+	// addCustomDeploymentScriptsFeature(element)
+	// addJsonConfigurationVariablesFeature(element)
+	// addConfigurationVariablesFeature(element)
+	// addConfigurationTransformsFeature(element)
+	// addSubstituteVariablesInFilesFeature(element)
 	return actionSchema
 }
 
