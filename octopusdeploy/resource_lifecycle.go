@@ -98,8 +98,8 @@ func getPhasesSchema() *schema.Schema {
 						Type: schema.TypeString,
 					},
 				},
-				//"release_retention_policy": getRetentionPeriodSchema(),
-				//"tentacle_retention_policy": getRetentionPeriodSchema(),
+				// "release_retention_policy": getRetentionPeriodSchema(),
+				// "tentacle_retention_policy": getRetentionPeriodSchema(),
 			},
 		},
 	}
