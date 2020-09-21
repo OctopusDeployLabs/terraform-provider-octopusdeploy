@@ -4,6 +4,7 @@ require (
 	github.com/Djarvur/go-err113 v0.1.0 // indirect
 	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200918004128-e9a9cbc9c0a4
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 	github.com/aws/aws-sdk-go v1.34.13 // indirect
 	github.com/golangci/golangci-lint v1.31.0 // indirect
 	github.com/golangci/misspell v0.3.5 // indirect
