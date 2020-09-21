@@ -63,8 +63,8 @@ var schemaVariableScope = &schema.Schema{
 
 // tfVariableScopetoODVariableScope converts a Terraform ResourceData into an OctopusDeploy VariableScope
 func tfVariableScopetoODVariableScope(d *schema.ResourceData) *model.VariableScope {
-	//Get the schema set. We specify a MaxItems of 1, so we will only ever have zero or one items
-	//in our list.
+	// Get the schema set. We specify a MaxItems of 1, so we will only ever have zero or one items
+	// in our list.
 	tfSchemaSetInterface, ok := d.GetOk("scope")
 	if !ok {
 		return nil
@@ -78,8 +78,8 @@ func tfVariableScopetoODVariableScope(d *schema.ResourceData) *model.VariableSco
 	//Get the first element in the list, which is a map of the interfaces
 	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
 
-	//Use the getSliceFromTerraformTypeList helper to convert the data from the map into []string and
-	//assign as the variable scopes we need
+	// Use the getSliceFromTerraformTypeList helper to convert the data from the map into []string and
+	// assign as the variable scopes we need
 	var newScope model.VariableScope
 	newScope.Environment = getSliceFromTerraformTypeList(tfSchemaList["environments"])
 	newScope.Action = getSliceFromTerraformTypeList(tfSchemaList["actions"])
