@@ -6,7 +6,6 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/encryption"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -82,9 +81,10 @@ func resourceVariable() *schema.Resource {
 				},
 			},
 			"pgp_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
+				Sensitive: true,
 			},
 			"key_fingerprint": {
 				Type:     schema.TypeString,
@@ -181,32 +181,6 @@ func buildVariableResource(d *schema.ResourceData) *model.Variable {
 	return newVar
 }
 
-func encryptSensitiveValue(d *schema.ResourceData, ov *model.Variable) (isEncrypted bool, keyFingerprint, encryptedValue string, err error) {
-	if isSensitive := d.Get("is_sensitive").(bool); !isSensitive {
-		return isEncrypted, keyFingerprint, encryptedValue, nil
-	}
-
-	if v, ok := d.GetOk("pgp_key"); ok {
-		pgpKey := strings.TrimSpace(v.(string))
-
-		encryptionKey, err := encryption.RetrieveGPGKey(pgpKey)
-		if err != nil {
-			return isEncrypted, keyFingerprint, encryptedValue, fmt.Errorf("error retrieving PGP Key during Sensitive Variable (%s) creation: %s", ov.Name, err)
-		}
-
-		keyFingerprint, encryptedValue, err = encryption.EncryptValue(encryptionKey, ov.Value, "Sensitive Value")
-		if err != nil {
-			return isEncrypted, keyFingerprint, encryptedValue, fmt.Errorf("error encrypting value during Sensitive Variable (%s) creation: %s", ov.Name, err)
-		}
-		isEncrypted = true
-
-	} else {
-		return isEncrypted, keyFingerprint, encryptedValue, nil
-	}
-
-	return isEncrypted, keyFingerprint, encryptedValue, nil
-}
-
 func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 	octoMutex.Lock("atom-variable")
 	defer octoMutex.Unlock("atom-variable")
@@ -224,11 +198,6 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error creating variable %s: %s", newVariable.Name, err.Error())
 	}
 
-	isEncrypted, fingerprint, encryptedValue, err := encryptSensitiveValue(d, newVariable)
-	if err != nil {
-		return fmt.Errorf("Error encrypting sensitive value: %s", err)
-	}
-
 	for _, v := range tfVar.Variables {
 		if v.Name == newVariable.Name && v.Type == newVariable.Type && (v.IsSensitive || v.Value == newVariable.Value) && v.Description == newVariable.Description && v.IsSensitive == newVariable.IsSensitive {
 			scopeMatches, _, err := apiClient.Variables.MatchesScope(v.Scope, newVariable.Scope)
@@ -237,10 +206,6 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 			}
 			if scopeMatches {
 				d.SetId(v.ID)
-				if isEncrypted {
-					d.Set("key_fingerprint", fingerprint)
-					d.Set("encrypted_value", encryptedValue)
-				}
 				return nil
 			}
 		}
@@ -268,20 +233,11 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error updating variable id %s: %s", d.Id(), err.Error())
 	}
 
-	isEncrypted, fingerprint, encryptedValue, err := encryptSensitiveValue(d, tfVar)
-	if err != nil {
-		return fmt.Errorf("Error encrypting sensitive value: %s", err)
-	}
-
 	for _, v := range updatedVars.Variables {
 		if v.Name == tfVar.Name && v.Type == tfVar.Type && (v.IsSensitive || v.Value == tfVar.Value) && v.Description == tfVar.Description && v.IsSensitive == tfVar.IsSensitive {
 			scopeMatches, _, _ := apiClient.Variables.MatchesScope(v.Scope, tfVar.Scope)
 			if scopeMatches {
 				d.SetId(v.ID)
-				if isEncrypted {
-					d.Set("key_fingerprint", fingerprint)
-					d.Set("encrypted_value", encryptedValue)
-				}
 				return nil
 			}
 		}
