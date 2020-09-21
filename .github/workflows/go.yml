@@ -1,0 +1,29 @@
+name: Go
+
+on:
+  push:
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.15
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Install golang-ci
+      run: GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    
+    - name: Run golang-ci with all linters enabled
+      run: golangci-lint run --enable
+    
+    - name: Run golang-ci
+      run: golangci-lint run -v
