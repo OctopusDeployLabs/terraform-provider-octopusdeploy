@@ -1,7 +1,6 @@
 name: Go
 
-on:
-  push:
+on: push
 
 jobs:
 
