@@ -2,7 +2,8 @@ name: Go
 
 on:
   push: 
-    branches: beta-candidate-01
+    branches: 
+      - beta-candidate-01
 
 jobs:
 
