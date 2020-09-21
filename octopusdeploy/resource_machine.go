@@ -217,8 +217,8 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	mTenantIDs := getSliceFromTerraformTypeList(d.Get("tenantids"))
 	mTenantTags := getSliceFromTerraformTypeList(d.Get("tenanttags"))
 
-	//If we end up with a nil return, Octopus doesn't accept the API call. This ensure that we send
-	//blank values rather than nil values.
+	// If we end up with a nil return, Octopus doesn't accept the API call. This ensure that we send
+	// blank values rather than nil values.
 	if mTenantIDs == nil {
 		mTenantIDs = []string{}
 	}
@@ -234,7 +234,7 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	if len(tfSchemaSet.List()) == 0 {
 		return nil
 	}
-	//Get the first element in the list, which is a map of the interfaces
+	// Get the first element in the list, which is a map of the interfaces
 	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
 
 	tfMachine := &model.Machine{
@@ -274,7 +274,7 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	if ok {
 		tfAuthenticationSchemaSet := tfAuthenticationSchemaSetInterface.(*schema.Set)
 		if len(tfAuthenticationSchemaSet.List()) == 1 {
-			//Get the first element in the list, which is a map of the interfaces
+			// Get the first element in the list, which is a map of the interfaces
 			tfAuthenticationSchemaList := tfAuthenticationSchemaSet.List()[0].(map[string]interface{})
 
 			tfMachine.Endpoint.Authentication = &model.MachineEndpointAuthentication{
@@ -291,7 +291,7 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 	newMachine := buildMachineResource(d)
-	newMachine.Status = "Unknown" //We don't want TF to attempt to update a machine just because its status has changed, so set it to Unknown on creation and let TF sort it out in the future.
+	newMachine.Status = "Unknown" // We don't want TF to attempt to update a machine just because its status has changed, so set it to Unknown on creation and let TF sort it out in the future.
 	machine, err := apiClient.Machines.Add(newMachine)
 	if err != nil {
 		return fmt.Errorf("error creating machine %s: %s", newMachine.Name, err.Error())

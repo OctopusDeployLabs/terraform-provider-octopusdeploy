@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
-//Provider is the plugin entry point
+// Provider is the plugin entry point
 func Provider() terraform.ResourceProvider {
 	log.Println("[INFO] Initializing Resource Provider")
 	return &schema.Provider{
