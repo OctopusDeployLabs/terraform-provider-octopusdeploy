@@ -23,4 +23,4 @@ jobs:
       run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.31.0
     
     - name: Run golang-ci with all linters enabled
-      run: golangci-lint run -v
+      run: golangci-lint run --disable unused --disable deadcode
