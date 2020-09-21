@@ -7,6 +7,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform/helper/mutexkv"
 )
 
 func resourceVariable() *schema.Resource {
@@ -182,8 +183,9 @@ func buildVariableResource(d *schema.ResourceData) *model.Variable {
 }
 
 func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
-	octoMutex.Lock("atom-variable")
-	defer octoMutex.Unlock("atom-variable")
+	mutex := mutexkv.NewMutexKV()
+	mutex.Lock("atom-variable")
+	defer mutex.Unlock("atom-variable")
 	if err := validateVariable(d); err != nil {
 		return err
 	}
@@ -216,8 +218,9 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
-	octoMutex.Lock("atom-variable")
-	defer octoMutex.Unlock("atom-variable")
+	mutex := mutexkv.NewMutexKV()
+	mutex.Lock("atom-variable")
+	defer mutex.Unlock("atom-variable")
 	if err := validateVariable(d); err != nil {
 		return err
 	}
@@ -248,8 +251,9 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceVariableDelete(d *schema.ResourceData, m interface{}) error {
-	octoMutex.Lock("atom-variable")
-	defer octoMutex.Unlock("atom-variable")
+	mutex := mutexkv.NewMutexKV()
+	mutex.Lock("atom-variable")
+	defer mutex.Unlock("atom-variable")
 
 	apiClient := m.(*client.Client)
 	projID := d.Get("project_id").(string)
