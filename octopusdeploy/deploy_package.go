@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"log"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -24,6 +26,11 @@ func getDeployPackageAction() *schema.Schema {
 func buildDeployPackageActionResource(tfAction map[string]interface{}) model.DeploymentAction {
 	action := buildDeploymentActionResource(tfAction)
 	action.ActionType = "Octopus.TentaclePackage"
+
+	if tfAction == nil {
+		log.Println("Deploy Package Resource is nil. Please confirm the package resource")
+	}
+
 	addWindowsServiceFeatureToActionResource(tfAction, action)
 	return action
 }
