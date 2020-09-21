@@ -1,4 +1,4 @@
-package octopusdeploy // #nosec
+package octopusdeploy
 
 const (
 	AccessKey             = "access_key"

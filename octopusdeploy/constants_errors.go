@@ -1,4 +1,4 @@
-package octopusdeploy // #nosec
+package octopusdeploy
 
 const (
 	ErrorCreatingAWSAccount = "error creating AWS account %s: %s"
