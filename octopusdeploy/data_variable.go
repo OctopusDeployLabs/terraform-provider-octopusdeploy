@@ -75,7 +75,7 @@ func tfVariableScopetoODVariableScope(d *schema.ResourceData) *model.VariableSco
 		return nil
 	}
 
-	//Get the first element in the list, which is a map of the interfaces
+	// Get the first element in the list, which is a map of the interfaces
 	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
 
 	// Use the getSliceFromTerraformTypeList helper to convert the data from the map into []string and
