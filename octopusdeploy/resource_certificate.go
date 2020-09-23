@@ -3,6 +3,9 @@ package octopusdeploy
 import (
 	"fmt"
 	"log"
+	"strconv"
+
+	"github.com/asaskevich/govalidator"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -65,6 +68,18 @@ func resourceCertificate() *schema.Resource {
 func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
+	if apiClient == nil {
+		log.Println("Client is empty. go-octopusdeploy SDK may be facing issues.")
+	}
+
+	if d == nil {
+		return createInvalidParameterError("esourceCertificateRead", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("esourceCertificateRead", "m")
+	}
+
 	certificateID := d.Id()
 	certificate, err := apiClient.Certificates.Get(certificateID)
 
@@ -88,7 +103,22 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func buildCertificateResource(d *schema.ResourceData) *model.Certificate {
+	if d == nil {
+		log.Println("The schema for certificate resource is nil")
+	}
+
 	certificateName := d.Get("name").(string)
+
+	if govalidator.IsNull("name") {
+		fmt.Println("Please confirm the certificate name is a string and is not null")
+	}
+
+	str, intErr := strconv.Atoi("name")
+	if intErr != nil {
+		log.Println(str)
+	} else {
+		fmt.Println("Please ensure that the name is of type: string")
+	}
 
 	var notes string
 	var certificateData string

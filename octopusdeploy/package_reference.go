@@ -1,13 +1,29 @@
 package octopusdeploy
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/asaskevich/govalidator"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func addPrimaryPackageSchema(element *schema.Resource, required bool) {
+func addPrimaryPackageSchema(element *schema.Resource, required bool) error {
+	if element == nil {
+		return createInvalidParameterError("addPrimaryPackageSchema", "element")
+	}
+
+	if govalidator.IsInt("required") {
+		fmt.Println("")
+	} else {
+		log.Println("the required arg is not a bool")
+	}
+
 	element.Schema["primary_package"] = getPackageSchema(required)
 	element.Schema["primary_package"].MaxItems = 1
+
+	return nil
 }
 
 func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
