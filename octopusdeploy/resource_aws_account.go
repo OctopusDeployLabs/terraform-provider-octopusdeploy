@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
@@ -49,14 +48,6 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 	accountID := d.Id()
 	account, err := apiClient.Accounts.Get(accountID)
 
-	if account.Validate() == nil {
-		return nil
-	}
-	// Here would typically be an else statement, but it's more idiomatic to write the error
-	// underneath the if statement in Go. Otherwise, golint complains.
-	err1 := errors.New("Validation on account struct: unsucessful")
-	log.Println(err1)
-
 	if err != nil {
 		return fmt.Errorf("error reading aws account %s: %s", accountID, err.Error())
 	}
@@ -70,7 +61,18 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 	d.Set("secret_key", account.Password)
 	d.Set("access_key", account.AccessKey)
 
-	return nil
+	// Validate checks the state of the account and returns an error if invalid.
+	// Otherwise, if valid, it returns nil.
+	err = account.Validate()
+
+	// Here would typically be an else statement, but it's more idiomatic to write the error
+	// underneath the if statement in Go. Otherwise, golint complains.
+	// err1 := errors.New("Validation on account struct: unsucessful")
+	// log.Println(err1)
+
+	// return fmt.Errorf("error reading aws account %s: %s", accountID, err.Error())
+
+	return err
 }
 
 func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Account, error) {
@@ -78,26 +80,30 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 		return nil, createInvalidParameterError("buildAmazonWebServicesAccountResource", "d")
 	}
 
-	accountStruct := model.Account{}
-	if accountStruct.Name == "" {
-		log.Println("Name struct is nil")
-	}
+	// accountStruct := model.Account{}
+	// if accountStruct.Name == "" {
+	// 	log.Println("Name struct is nil")
+	// }
 
-	if accountStruct.AccessKey == "" {
-		log.Println("Access Key struct is nil")
-	}
+	// if accountStruct.AccessKey == "" {
+	// 	log.Println("Access Key struct is nil")
+	// }
 
 	name := d.Get("name").(string)
 	accessKey := d.Get("access_key").(string)
-
 	password := d.Get("secret_key").(string)
-	if password == "" {
-		log.Println("Key is nil. Must add in a password")
-	}
+
+	// if password == "" {
+	// 	log.Println("Key is nil. Must add in a password")
+	// }
 
 	secretKey := model.NewSensitiveValue(password)
 
+	// NewAwsServicePrincipalAccount initializes and returns an AWS service
+	// principal account with a name, access key, and secret key. If any of the
+	// input parameters are invalid, it will return nil and an error.
 	account, err := model.NewAwsServicePrincipalAccount(name, accessKey, secretKey)
+
 	if err != nil {
 		return nil, err
 	}
