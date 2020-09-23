@@ -1,16 +1,26 @@
 package octopusdeploy
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/go-playground/validator"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceAmazonWebServicesAccount() *schema.Resource {
+	val := validator.New()
+	Schema := &schema.Resource{}
+	validate := val.Struct(Schema)
+
+	if validate != nil {
+		log.Println("Ensure that the schema map is valid: https://www.terraform.io/docs/extend/schemas/schema-types.html")
+	}
+
 	schemaMap := getCommonAccountsSchema()
 
 	schemaMap["access_key"] = &schema.Schema{
@@ -45,10 +55,13 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 	accountID := d.Id()
 	account, err := apiClient.Accounts.Get(accountID)
 
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	if account.Validate() == nil {
 		return nil
 	}
+	// Here would typically be an else statement, but it's more idiomatic to write the error
+	// underneath the if statement in Go. Otherwise, golint complains.
+	err1 := errors.New("Validation on account struct: unsucessful")
+	log.Println(err1)
 
 	if err != nil {
 		return fmt.Errorf("error reading aws account %s: %s", accountID, err.Error())
@@ -70,6 +83,10 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 	accountStruct := model.Account{}
 	if accountStruct.Name == "" {
 		log.Println("Name struct is nil")
+	}
+
+	if accountStruct.AccessKey == "" {
+		log.Println("Access Key struct is nil")
 	}
 
 	if d == nil {
@@ -128,7 +145,11 @@ func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{
 		return fmt.Errorf("error creating AWS account %s: %s", newAccount.Name, err.Error())
 	}
 
-	d.SetId(account.ID)
+	if account.ID == "" {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(account.ID)
+	}
 
 	return nil
 }
@@ -147,7 +168,11 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 		return err
 	}
 
-	account.ID = d.Id()
+	if account.ID == "" {
+		log.Println("ID is nil")
+	} else {
+		account.ID = d.Id()
+	}
 
 	apiClient := m.(*client.Client)
 
@@ -157,6 +182,11 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 		return fmt.Errorf("error updating aws acccount id %s: %s", d.Id(), err.Error())
 	}
 
-	d.SetId(updatedAccount.ID)
+	if updatedAccount.ID == "" {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(updatedAccount.ID)
+	}
+
 	return nil
 }
