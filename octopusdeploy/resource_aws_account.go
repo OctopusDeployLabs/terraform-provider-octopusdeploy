@@ -74,6 +74,10 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 }
 
 func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Account, error) {
+	if d == nil {
+		return nil, createInvalidParameterError("buildAmazonWebServicesAccountResource", "d")
+	}
+
 	accountStruct := model.Account{}
 	if accountStruct.Name == "" {
 		log.Println("Name struct is nil")
@@ -81,10 +85,6 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 
 	if accountStruct.AccessKey == "" {
 		log.Println("Access Key struct is nil")
-	}
-
-	if d == nil {
-		return nil, createInvalidParameterError("buildAmazonWebServicesAccountResource", "d")
 	}
 
 	name := d.Get("name").(string)
