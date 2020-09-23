@@ -22,6 +22,7 @@ func getDeployPackageAction() *schema.Schema {
 }
 
 func buildDeployPackageActionResource(tfAction map[string]interface{}) model.DeploymentAction {
+
 	action := buildDeploymentActionResource(tfAction)
 	action.ActionType = "Octopus.TentaclePackage"
 	addWindowsServiceFeatureToActionResource(tfAction, action)

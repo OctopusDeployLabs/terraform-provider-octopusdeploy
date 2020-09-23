@@ -26,7 +26,7 @@ func resourceCertificate() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"certificate_data": {
+			CertificateData: {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
@@ -68,7 +68,7 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	certificateID := d.Id()
 	certificate, err := apiClient.Certificates.Get(certificateID)
 
-	if err == client.ErrItemNotFound {
+	if certificate == nil {
 		d.SetId("")
 		return nil
 	}

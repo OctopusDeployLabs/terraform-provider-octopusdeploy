@@ -108,11 +108,11 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 
 func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{}) error {
 	if d == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+		return createInvalidParameterError("resourceAmazonWebServicesAccountCreate", "d")
 	}
 
 	if m == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
+		return createInvalidParameterError("resourceAmazonWebServicesAccountCreate", "m")
 	}
 
 	apiClient := m.(*client.Client)
@@ -135,15 +135,11 @@ func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{
 
 func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{}) error {
 	if d == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
+		return createInvalidParameterError("resourceAmazonWebServicesAccountUpdate", "d")
 	}
 
 	if m == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
-	}
-
-	if d == nil {
-		return createInvalidParameterError("resourceAmazonWebServicesAccountUpdate", "d")
+		return createInvalidParameterError("resourceAmazonWebServicesAccountUpdate", "m")
 	}
 
 	account, err := buildAmazonWebServicesAccountResource(d)
