@@ -8,18 +8,12 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
-	"github.com/go-playground/validator"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceAmazonWebServicesAccount() *schema.Resource {
-	val := validator.New()
-	Schema := &schema.Resource{}
-	validate := val.Struct(Schema)
 
-	if validate != nil {
-		log.Println("Ensure that the schema map is valid: https://www.terraform.io/docs/extend/schemas/schema-types.html")
-	}
+	validateSchema()
 
 	schemaMap := getCommonAccountsSchema()
 
@@ -136,6 +130,7 @@ func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{
 
 	newAccount, err := buildAmazonWebServicesAccountResource(d)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 

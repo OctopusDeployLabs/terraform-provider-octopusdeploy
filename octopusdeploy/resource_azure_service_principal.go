@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -13,6 +14,8 @@ import (
 )
 
 func resourceAzureServicePrincipal() *schema.Resource {
+	validateSchema()
+
 	log.Println("Hello")
 	schemaMap := getCommonAccountsSchema()
 
@@ -58,6 +61,10 @@ func resourceAzureServicePrincipal() *schema.Resource {
 }
 
 func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account, error) {
+	accountStruct := model.Account{}
+	if accountStruct.Name == "" {
+		log.Println("Name struct is nil")
+	}
 
 	if d == nil {
 		return nil, createInvalidParameterError("buildAzureServicePrincipalResource", "d")
@@ -155,7 +162,11 @@ func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("error creating azure service principal %s: %s", newAccount.Name, err.Error())
 	}
 
-	d.SetId(account.ID)
+	if account.ID == "" {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(account.ID)
+	}
 
 	return nil
 }
@@ -174,10 +185,12 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 	accountID := d.Id()
 	account, err := apiClient.Accounts.Get(accountID)
 
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	if account.Validate() == nil {
 		return nil
 	}
+
+	err1 := errors.New("Validation on account struct: unsucessful")
+	log.Println(err1)
 
 	if err != nil {
 		return fmt.Errorf("error reading azure service principal %s: %s", accountID, err.Error())
@@ -214,7 +227,11 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	account.ID = d.Id()
+	if account.ID == "" {
+		log.Println("ID is nil")
+	} else {
+		account.ID = d.Id()
+	}
 
 	apiClient := m.(*client.Client)
 
@@ -224,6 +241,11 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("error updating azure service principal id %s: %s", d.Id(), err.Error())
 	}
 
-	d.SetId(updatedAccount.ID)
+	if updatedAccount.ID == "" {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(updatedAccount.ID)
+	}
+
 	return nil
 }
