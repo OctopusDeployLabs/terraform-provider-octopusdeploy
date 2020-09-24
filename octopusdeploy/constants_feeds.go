@@ -1,10 +1,10 @@
 package octopusdeploy
 
 const (
-	DownloadAttempts            = "download_attempts"
-	DownloadRetryBackoffSeconds = "download_retry_backoff_seconds"
-	EnhancedMode                = "enhanced_mode"
-	FeedID                      = "feed_id"
-	FeedType                    = "feed_type"
-	FeedURI                     = "feed_uri"
+	DownloadAttempts            string = "download_attempts"
+	DownloadRetryBackoffSeconds string = "download_retry_backoff_seconds"
+	EnhancedMode                string = "enhanced_mode"
+	FeedID                      string = "feed_id"
+	FeedType                    string = "feed_type"
+	FeedURI                     string = "feed_uri"
 )

@@ -1,5 +1,5 @@
 package octopusdeploy
 
 const (
-	AcquisitionLocation = "acquisition_location"
+	AcquisitionLocation string = "acquisition_location"
 )
