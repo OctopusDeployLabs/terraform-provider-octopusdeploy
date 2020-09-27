@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 )
@@ -16,7 +15,7 @@ type Config struct {
 
 // Client returns a new Octopus Deploy client
 func (c *Config) Client() (*client.Client, error) {
-	apiClient, err := client.NewClient(&(http.Client{}), c.Address, c.APIKey, c.Space)
+	apiClient, err := client.NewClient(nil, c.Address, c.APIKey, c.Space)
 
 	if err != nil {
 		log.Println(err)
