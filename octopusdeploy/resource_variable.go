@@ -83,7 +83,7 @@ func resourceVariable() *schema.Resource {
 					},
 				},
 			},
-			"pgp_key": {
+			constPGPKey: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				ForceNew:  true,

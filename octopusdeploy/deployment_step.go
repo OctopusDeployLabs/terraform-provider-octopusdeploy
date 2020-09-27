@@ -74,7 +74,7 @@ func getDeploymentStepSchema() *schema.Schema {
 				constApplyTerraformAction:          getApplyTerraformActionSchema(),
 				constDeployPackageAction:           getDeployPackageAction(),
 				constDeployWindowsServiceAction:   getDeployWindowsServiceActionSchema(),
-				"run_script_action":               getRunScriptActionSchema(),
+				constRunScriptAction:               getRunScriptActionSchema(),
 				constRunKubectlScriptAction:       getRunRunKubectlScriptSchema(),
 				constDeployKubernetesSecretAction: getDeployKubernetesSecretActionSchema(),
 			},
@@ -141,7 +141,7 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) model.Deployment
 		}
 	}
 
-	if attr, ok := tfStep["run_script_action"]; ok {
+	if attr, ok := tfStep[constRunScriptAction]; ok {
 		for _, tfAction := range attr.([]interface{}) {
 			action := buildRunScriptActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)

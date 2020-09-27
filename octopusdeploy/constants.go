@@ -101,6 +101,7 @@ const (
 	constPackageID                                   string = "package_id"
 	constPackageRequirement                          string = "package_requirement"
 	constPassword                                    string = "password"
+	constPGPKey                                      string = "pgp_key"
 	constPhase                                       string = "phase"
 	constPrimaryPackage                              string = "primary_package"
 	constProject                                     string = "project"
@@ -119,6 +120,7 @@ const (
 	constRule                                        string = "rule"
 	constRunKubectlScriptAction                      string = "run_kubectl_script_action"
 	constRunOnServer                                 string = "run_on_server"
+	constRunScriptAction                             string = "run_script_action"
 	constScope                                       string = "scope"
 	constScriptParameters                            string = "script_parameters"
 	constScriptFileName                              string = "script_file_name"
@@ -174,7 +176,5 @@ const (
 	IsDefault2                                     string = "isdefault"
 	IsInProcess                                    string = "isinprocess"
 	MachinePolicy                                  string = "machinepolicy"
-	PGPKey                                         string = "pgp_key"
-	RunScriptAction                                string = "run_script_action"
 	StatusSummary                                  string = "statussummary"
 )
