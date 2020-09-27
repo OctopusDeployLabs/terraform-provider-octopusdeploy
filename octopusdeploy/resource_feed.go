@@ -58,24 +58,28 @@ func resourceFeed() *schema.Resource {
 }
 
 func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	feedID := d.Id()
-	feed, err := apiClient.Feeds.GetByID(feedID)
-
+	resource, err := apiClient.Feeds.GetByID(id)
 	if err != nil {
+		return createResourceOperationError(errorReadingFeed, id, err)
+	}
+	if resource == nil {
 		d.SetId(constEmptyString)
-		return fmt.Errorf(errorReadingFeed, feedID, err.Error())
+		return nil
 	}
 
-	d.Set(constName, feed.Name)
-	d.Set(constFeedType, feed.FeedType)
-	d.Set(constFeedURI, feed.FeedURI)
-	d.Set(constEnhancedMode, feed.EnhancedMode)
-	d.Set(constDownloadAttempts, feed.DownloadAttempts)
-	d.Set(constDownloadRetryBackoffSeconds, feed.DownloadRetryBackoffSeconds)
-	d.Set(constUsername, feed.Username)
-	d.Set(constPassword, feed.Password)
+	logResource(constFeed, m)
+
+	d.Set(constName, resource.Name)
+	d.Set(constFeedType, resource.FeedType)
+	d.Set(constFeedURI, resource.FeedURI)
+	d.Set(constEnhancedMode, resource.EnhancedMode)
+	d.Set(constDownloadAttempts, resource.DownloadAttempts)
+	d.Set(constDownloadRetryBackoffSeconds, resource.DownloadRetryBackoffSeconds)
+	d.Set(constUsername, resource.Username)
+	d.Set(constPassword, resource.Password)
 
 	return nil
 }
@@ -161,7 +165,7 @@ func resourceFeedDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 	err := apiClient.Feeds.DeleteByID(id)
 	if err != nil {
-		return fmt.Errorf(errorDeletingFeed, id, err.Error())
+		return createResourceOperationError(errorDeletingFeed, id, err)
 	}
 
 	d.SetId(constEmptyString)

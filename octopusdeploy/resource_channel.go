@@ -122,12 +122,12 @@ func flattenRules(in []model.ChannelRule) []map[string]interface{} {
 }
 
 func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-	channelID := d.Id()
-	resource, err := apiClient.Channels.GetByID(channelID)
+	id := d.Id()
 
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Channels.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingChannel, channelID, err)
+		return createResourceOperationError(errorReadingChannel, id, err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -164,17 +164,14 @@ func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceChannelDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	channelID := d.Id()
-
-	err := apiClient.Channels.DeleteByID(channelID)
-
+	err := apiClient.Channels.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingChannel, channelID, err)
+		return createResourceOperationError(errorDeletingChannel, id, err)
 	}
 
 	d.SetId(constEmptyString)
-
 	return nil
 }

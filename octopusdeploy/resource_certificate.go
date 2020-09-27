@@ -64,25 +64,26 @@ func resourceCertificate() *schema.Resource {
 }
 
 func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
-	certificateID := d.Id()
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	certificate, err := apiClient.Certificates.GetByID(certificateID)
-
+	resource, err := apiClient.Certificates.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingCertificate, certificateID, err)
+		return createResourceOperationError(errorReadingCertificate, id, err)
 	}
-	if certificate == nil {
+	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
-	d.Set(constName, certificate.Name)
-	d.Set(constNotes, certificate.Notes)
-	d.Set(constEnvironmentIDs, certificate.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, certificate.TenantedDeploymentParticipation)
-	d.Set(constTenantIDs, certificate.TenantIds)
-	d.Set(constTenantTags, certificate.TenantTags)
+	logResource(constCertificate, m)
+
+	d.Set(constName, resource.Name)
+	d.Set(constNotes, resource.Notes)
+	d.Set(constEnvironmentIDs, resource.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, resource.TenantedDeploymentParticipation)
+	d.Set(constTenantIDs, resource.TenantIDs)
+	d.Set(constTenantTags, resource.TenantTags)
 
 	return nil
 }
@@ -170,12 +171,12 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
-	certificateID := d.Id()
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	err := apiClient.Certificates.DeleteByID(certificateID)
+	err := apiClient.Certificates.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingCertificate, certificateID, err)
+		return createResourceOperationError(errorDeletingCertificate, id, err)
 	}
 
 	d.SetId(constEmptyString)

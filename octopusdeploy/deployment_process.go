@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -72,20 +71,19 @@ func buildDeploymentProcessResource(d *schema.ResourceData) *model.DeploymentPro
 }
 
 func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	deploymentProcessID := d.Id()
-
-	resource, err := apiClient.DeploymentProcesses.GetByID(deploymentProcessID)
+	resource, err := apiClient.DeploymentProcesses.GetByID(id)
 	if err != nil {
-		return fmt.Errorf("error reading deployment process id %s: %s", deploymentProcessID, err.Error())
+		return createResourceOperationError(errorReadingDeploymentProcess, id, err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
-	log.Printf("[DEBUG] deploymentProcess: %v", m)
+	logResource(constDeploymentProcess, m)
 
 	return nil
 }
@@ -98,14 +96,13 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 
 	current, err := apiClient.DeploymentProcesses.GetByID(deploymentProcess.ID)
 	if err != nil {
-		return fmt.Errorf("error getting deployment process %s: %s", deploymentProcess.ID, err.Error())
+		return createResourceOperationError(errorReadingDeploymentProcess, deploymentProcess.ID, err)
 	}
 
 	deploymentProcess.Version = current.Version
 	deploymentProcess, err = apiClient.DeploymentProcesses.Update(*deploymentProcess)
-
 	if err != nil {
-		return fmt.Errorf("error updating deployment process id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingDeploymentProcess, d.Id(), err)
 	}
 
 	d.SetId(deploymentProcess.ID)
@@ -116,9 +113,8 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 	current, err := apiClient.DeploymentProcesses.GetByID(d.Id())
-
 	if err != nil {
-		return fmt.Errorf("error getting deployment process with id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorReadingDeploymentProcess, d.Id(), err)
 	}
 
 	deploymentProcess := &model.DeploymentProcess{
@@ -127,9 +123,8 @@ func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) erro
 	deploymentProcess.ID = d.Id()
 
 	deploymentProcess, err = apiClient.DeploymentProcesses.Update(*deploymentProcess)
-
 	if err != nil {
-		return fmt.Errorf("error deleting deployment process with id %s: %s", deploymentProcess.ID, err.Error())
+		return createResourceOperationError(errorDeletingDeploymentProcess, deploymentProcess.ID, err)
 	}
 
 	d.SetId(constEmptyString)

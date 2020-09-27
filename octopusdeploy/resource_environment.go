@@ -42,17 +42,19 @@ func resourceEnvironment() *schema.Resource {
 }
 
 func resourceEnvironmentRead(d *schema.ResourceData, m interface{}) error {
-	environmentID := d.Id()
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.Environments.GetByID(environmentID)
+	resource, err := apiClient.Environments.GetByID(id)
 	if err != nil {
-		return fmt.Errorf(errorReadingEnvironment, environmentID, err.Error())
+		return createResourceOperationError(errorReadingEnvironment, id, err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constEnvironment, m)
 
 	d.Set(constName, resource.Name)
 	d.Set(constDescription, resource.Description)
@@ -122,14 +124,12 @@ func resourceEnvironmentUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceEnvironmentDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	environmentID := d.Id()
-
-	err := apiClient.Environments.DeleteByID(environmentID)
-
+	err := apiClient.Environments.DeleteByID(id)
 	if err != nil {
-		return fmt.Errorf("error deleting environment id %s: %s", environmentID, err.Error())
+		return createResourceOperationError(errorDeletingEnvironment, id, err)
 	}
 
 	d.SetId(constEmptyString)

@@ -87,9 +87,9 @@ func resourceProjectGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceProjectGroupDelete(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	id := d.Id()
+
+	apiClient := m.(*client.Client)
 	err := apiClient.ProjectGroups.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingProjectGroup, id, err)

@@ -99,15 +99,13 @@ func buildTemplateResource(tfTemplate map[string]interface{}) model.ActionTempla
 }
 
 func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	id := d.Id()
-	resource, err := apiClient.LibraryVariableSets.GetByID(id)
 
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.LibraryVariableSets.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingLibraryVariableSet, id, err)
 	}
-
 	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
@@ -139,9 +137,9 @@ func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) err
 }
 
 func resourceLibraryVariableSetDelete(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
 	id := d.Id()
 
+	apiClient := m.(*client.Client)
 	err := apiClient.LibraryVariableSets.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingLibraryVariableSet, id, err)

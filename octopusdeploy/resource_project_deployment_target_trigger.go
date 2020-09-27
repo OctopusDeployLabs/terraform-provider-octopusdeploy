@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -123,7 +122,7 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*model
 	}
 
 	if attr, ok := d.GetOk(constEnvironmentIDs); ok {
-		deploymentTargetTrigger.Filter.EnvironmentIds = getSliceFromTerraformTypeList(attr)
+		deploymentTargetTrigger.Filter.EnvironmentIDs = getSliceFromTerraformTypeList(attr)
 	}
 
 	return deploymentTargetTrigger, nil
@@ -154,21 +153,21 @@ func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectTriggers.GetByID(id)
 	if err != nil {
-		return fmt.Errorf(errorReadingProjectTrigger, id, err.Error())
+		return createResourceOperationError(errorReadingProjectTrigger, id, err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
-	log.Printf("[DEBUG] project trigger: %v", m)
+	logResource(constProjectTrigger, m)
 
 	d.Set(constName, resource.Name)
 	d.Set(constShouldRedeploy, resource.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
 	d.Set(constEventGroups, resource.Filter.EventGroups)
 	d.Set(constEventCategories, resource.Filter.EventCategories)
 	d.Set(constRoles, resource.Filter.Roles)
-	d.Set(constEnvironmentIDs, resource.Filter.EnvironmentIds)
+	d.Set(constEnvironmentIDs, resource.Filter.EnvironmentIDs)
 
 	return nil
 }
@@ -195,14 +194,12 @@ func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m inte
 }
 
 func resourceProjectDeploymentTargetTriggerDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	projectTriggerID := d.Id()
-
-	err := apiClient.ProjectTriggers.DeleteByID(projectTriggerID)
-
+	err := apiClient.ProjectTriggers.DeleteByID(id)
 	if err != nil {
-		return fmt.Errorf("error deleting project trigger id %s: %s", projectTriggerID, err.Error())
+		return createResourceOperationError(errorDeletingProjectTrigger, id, err)
 	}
 
 	d.SetId(constEmptyString)

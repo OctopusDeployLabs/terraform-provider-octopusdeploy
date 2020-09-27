@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -205,19 +203,19 @@ func buildPhaseResource(tfPhase map[string]interface{}) model.Phase {
 }
 
 func resourceLifecycleRead(d *schema.ResourceData, m interface{}) error {
-	lifecycleID := d.Id()
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.Lifecycles.GetByID(lifecycleID)
+	resource, err := apiClient.Lifecycles.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingLifecycle, lifecycleID, err)
+		return createResourceOperationError(errorReadingLifecycle, id, err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
-	log.Printf("[DEBUG] lifecycle: %v", m)
+	logResource(constLifecycle, m)
 
 	d.Set(constName, resource.Name)
 	d.Set(constDescription, resource.Description)
@@ -246,17 +244,14 @@ func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceLifecycleDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	lifecycleID := d.Id()
-
-	err := apiClient.Lifecycles.DeleteByID(lifecycleID)
-
+	err := apiClient.Lifecycles.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingLifecycle, lifecycleID, err)
+		return createResourceOperationError(errorDeletingLifecycle, id, err)
 	}
 
 	d.SetId(constEmptyString)
-
 	return nil
 }

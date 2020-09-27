@@ -177,17 +177,19 @@ func resourceMachine() *schema.Resource {
 }
 
 func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
-	machineID := d.Id()
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	machine, err := apiClient.Machines.GetByID(machineID)
+	machine, err := apiClient.Machines.GetByID(id)
 	if err != nil {
-		return fmt.Errorf(errorReadingMachine, machineID, err.Error())
+		return createResourceOperationError(errorReadingMachine, id, err)
 	}
 	if machine == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constMachine, m)
 
 	d.SetId(machine.ID)
 	setMachineProperties(d, machine)
@@ -306,16 +308,15 @@ func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceMachineDelete(d *schema.ResourceData, m interface{}) error {
-	machineID := d.Id()
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	err := apiClient.Machines.DeleteByID(machineID)
+	err := apiClient.Machines.DeleteByID(id)
 	if err != nil {
-		return fmt.Errorf(errorDeletingMachine, machineID, err.Error())
+		return createResourceOperationError(errorDeletingMachine, id, err)
 	}
 
 	d.SetId(constEmptyString)
-
 	return nil
 }
 

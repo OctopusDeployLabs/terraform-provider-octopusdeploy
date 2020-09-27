@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"errors"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
@@ -171,43 +170,32 @@ func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
-	}
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-
-	accountID := d.Id()
-	account, err := apiClient.Accounts.GetByID(accountID)
-
-	if account.Validate() == nil {
+	resource, err := apiClient.Accounts.GetByID(id)
+	if err != nil {
+		return createResourceOperationError(errorReadingAzureServicePrincipal, id, err)
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	err1 := errors.New("Validation on account struct: unsucessful")
-	log.Println(err1)
+	logResource(constAccount, m)
 
-	if err != nil {
-		return createResourceOperationError(errorReadingAzureServicePrincipal, accountID, err)
-	}
-
-	d.Set(constName, account.Name)
-	d.Set(constDescription, account.Description)
-	d.Set(constEnvironments, account.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentParticipation.String())
-	d.Set(constTenantTags, account.TenantTags)
-
-	d.Set(constClientID, account.ApplicationID)
-	d.Set(constTenantID, account.TenantIDs)
-	d.Set(constSubscriptionNumber, account.SubscriptionID)
-	d.Set(constKey, account.Password)
-	d.Set(constAzureEnvironment, account.AzureEnvironment)
-	d.Set(constResourceManagementEndpointBaseURI, account.ResourceManagementEndpointBase)
-	d.Set(constActiveDirectoryEndpointBaseURI, account.ActiveDirectoryEndpointBase)
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
+	d.Set(constEnvironments, resource.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, resource.TenantedDeploymentParticipation.String())
+	d.Set(constTenantTags, resource.TenantTags)
+	d.Set(constClientID, resource.ApplicationID)
+	d.Set(constTenantID, resource.TenantIDs)
+	d.Set(constSubscriptionNumber, resource.SubscriptionID)
+	d.Set(constKey, resource.Password)
+	d.Set(constAzureEnvironment, resource.AzureEnvironment)
+	d.Set(constResourceManagementEndpointBaseURI, resource.ResourceManagementEndpointBase)
+	d.Set(constActiveDirectoryEndpointBaseURI, resource.ActiveDirectoryEndpointBase)
 
 	return nil
 }

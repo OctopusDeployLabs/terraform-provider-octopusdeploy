@@ -53,17 +53,19 @@ func resourceNugetFeed() *schema.Resource {
 }
 
 func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
-	feedID := d.Id()
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.Feeds.GetByID(feedID)
+	resource, err := apiClient.Feeds.GetByID(id)
 	if err != nil {
-		return fmt.Errorf(errorReadingFeed, feedID, err.Error())
+		return createResourceOperationError(errorReadingFeed, id, err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constFeed, m)
 
 	d.Set(constName, resource.Name)
 	d.Set(constFeedURI, resource.FeedURI)
@@ -161,14 +163,12 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNugetFeedDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	feedID := d.Id()
-
-	err := apiClient.Feeds.DeleteByID(feedID)
-
+	err := apiClient.Feeds.DeleteByID(id)
 	if err != nil {
-		return fmt.Errorf("error deleting nuget feed id %s: %s", feedID, err.Error())
+		return createResourceOperationError(errorDeletingNuGetFeed, id, err)
 	}
 
 	d.SetId(constEmptyString)

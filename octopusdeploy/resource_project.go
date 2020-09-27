@@ -106,7 +106,7 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 	}
 
 	if attr, ok := d.GetOk("included_library_variable_sets"); ok {
-		project.IncludedLibraryVariableSetIds = getSliceFromTerraformTypeList(attr)
+		project.IncludedLibraryVariableSetIDs = getSliceFromTerraformTypeList(attr)
 	}
 
 	if attr, ok := d.GetOk("discrete_channel_release"); ok {

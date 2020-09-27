@@ -34,34 +34,28 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 }
 
 func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceAmazonWebServicesAccountRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceAmazonWebServicesAccountRead", "m")
-	}
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	accountID := d.Id()
-	account, err := apiClient.Accounts.GetByID(accountID)
-
+	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingAWSAccount, accountID, err)
+		return createResourceOperationError(errorReadingAWSAccount, id, err)
 	}
-	if account == nil {
+	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
-	d.Set(constName, account.Name)
-	d.Set(constTenants, account.TenantIDs)
-	d.Set(constDescription, account.Description)
-	d.Set(constEnvironments, account.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentParticipation.String())
-	d.Set(constTenantTags, account.TenantTags)
-	d.Set(constSecretKey, account.Password)
-	d.Set(constAccessKey, account.AccessKey)
+	logResource(constAccount, m)
+
+	d.Set(constName, resource.Name)
+	d.Set(constTenants, resource.TenantIDs)
+	d.Set(constDescription, resource.Description)
+	d.Set(constEnvironments, resource.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, resource.TenantedDeploymentParticipation.String())
+	d.Set(constTenantTags, resource.TenantTags)
+	d.Set(constSecretKey, resource.Password)
+	d.Set(constAccessKey, resource.AccessKey)
 
 	return nil
 }
