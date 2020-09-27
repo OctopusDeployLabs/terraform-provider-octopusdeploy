@@ -1,9 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -13,11 +10,11 @@ func dataLifecycle() *schema.Resource {
 		Read: dataLifecycleReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -28,22 +25,31 @@ func dataLifecycle() *schema.Resource {
 func dataLifecycleReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	lifecycleName := d.Get("name")
+	name := d.Get(constName).(string)
+	resourceList, err := apiClient.Lifecycles.GetByPartialName(name)
 
-	lifecycle, err := apiClient.Lifecycles.GetByName(lifecycleName.(string))
-
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingLifecycle, name, err)
+	}
+	if len(resourceList) == 0 {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading lifecycle name %s: %s", lifecycleName, err.Error())
+	// NOTE: two or more lifecycles can have the same name in Octopus and
+	// therefore, a better search criteria needs to be implemented below
+
+	for _, resource := range resourceList {
+		if resource.Name == name {
+			logResource(constLifecycle, m)
+
+			d.SetId(resource.ID)
+			d.Set(constName, resource.Name)
+			d.Set(constDescription, resource.Description)
+
+			return nil
+		}
 	}
 
-	d.SetId(lifecycle.ID)
-
-	log.Printf("[DEBUG] lifecycle: %v", m)
-	d.Set("name", lifecycle.Name)
-	d.Set("description", lifecycle.Description)
 	return nil
 }

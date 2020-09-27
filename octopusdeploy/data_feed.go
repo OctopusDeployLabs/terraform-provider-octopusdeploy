@@ -1,9 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -13,7 +10,7 @@ func dataFeed() *schema.Resource {
 		Read: dataFeedReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -24,21 +21,30 @@ func dataFeed() *schema.Resource {
 func dataFeedReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	feedName := d.Get("name")
+	name := d.Get(constName).(string)
+	resourceList, err := apiClient.Feeds.GetByPartialName(name)
 
-	feed, err := apiClient.Feeds.GetByName(feedName.(string))
-
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingFeed, name, err)
+	}
+	if len(resourceList) == 0 {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading feed name %s: %s", feedName, err.Error())
+	// NOTE: two or more feeds can have the same name in Octopus and
+	// therefore, a better search criteria needs to be implemented below
+
+	for _, resource := range resourceList {
+		if resource.Name == name {
+			logResource(constFeed, m)
+
+			d.SetId(resource.ID)
+			d.Set(constName, resource.Name)
+
+			return nil
+		}
 	}
 
-	d.SetId(feed.ID)
-
-	log.Printf("[DEBUG] feed: %v", m)
-	d.Set("name", feed.Name)
 	return nil
 }

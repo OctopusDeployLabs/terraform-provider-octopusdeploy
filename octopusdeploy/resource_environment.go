@@ -19,20 +19,20 @@ func resourceEnvironment() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"use_guided_failure": {
+			constUseGuidedFailure: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"allow_dynamic_infrastructure": {
+			constAllowDynamicInfrastructure: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -42,46 +42,44 @@ func resourceEnvironment() *schema.Resource {
 }
 
 func resourceEnvironmentRead(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	environmentID := d.Id()
-	env, err := apiClient.Environments.Get(environmentID)
 
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Environments.GetByID(environmentID)
+	if err != nil {
+		return fmt.Errorf(errorReadingEnvironment, environmentID, err.Error())
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading environment %s: %s", environmentID, err.Error())
-	}
-
-	d.Set("name", env.Name)
-	d.Set("description", env.Description)
-	d.Set("use_guided_failure", env.UseGuidedFailure)
-	d.Set("allow_dynamic_infrastructure", env.AllowDynamicInfrastructure)
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
+	d.Set(constUseGuidedFailure, resource.UseGuidedFailure)
+	d.Set(constAllowDynamicInfrastructure, resource.AllowDynamicInfrastructure)
 
 	return nil
 }
 
 func buildEnvironmentResource(d *schema.ResourceData) *model.Environment {
-	envName := d.Get("name").(string)
+	envName := d.Get(constName).(string)
 
 	var envDesc string
 	var envGuided bool
 	var envDynamic bool
 
-	envDescInterface, ok := d.GetOk("description")
+	envDescInterface, ok := d.GetOk(constDescription)
 	if ok {
 		envDesc = envDescInterface.(string)
 	}
 
-	envGuidedInterface, ok := d.GetOk("use_guided_failure")
+	envGuidedInterface, ok := d.GetOk(constUseGuidedFailure)
 	if ok {
 		envGuided = envGuidedInterface.(bool)
 	}
 
-	allowDynamicInfrastructureInterface, ok := d.GetOk("allow_dynamic_infrastructure")
+	allowDynamicInfrastructureInterface, ok := d.GetOk(constAllowDynamicInfrastructure)
 	if ok {
 		envDynamic = allowDynamicInfrastructureInterface.(bool)
 	}
@@ -128,12 +126,12 @@ func resourceEnvironmentDelete(d *schema.ResourceData, m interface{}) error {
 
 	environmentID := d.Id()
 
-	err := apiClient.Environments.Delete(environmentID)
+	err := apiClient.Environments.DeleteByID(environmentID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting environment id %s: %s", environmentID, err.Error())
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

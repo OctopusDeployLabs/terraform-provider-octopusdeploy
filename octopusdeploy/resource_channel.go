@@ -16,40 +16,40 @@ func resourceChannel() *schema.Resource {
 		Delete: resourceChannelDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"project_id": {
+			constProjectID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"lifecycle_id": {
+			constLifecycleID: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"is_default": {
+			constIsDefault: {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"rule": {
+			constRule: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"version_range": {
+						constVersionRange: {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"tag": {
+						constTag: {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"actions": {
+						constActions: {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
@@ -78,14 +78,14 @@ func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
 
 func buildChannelResource(d *schema.ResourceData) *model.Channel {
 	channel := &model.Channel{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
-		ProjectID:   d.Get("project_id").(string),
-		LifecycleID: d.Get("lifecycle_id").(string),
-		IsDefault:   d.Get("is_default").(bool),
+		Name:        d.Get(constName).(string),
+		Description: d.Get(constDescription).(string),
+		ProjectID:   d.Get(constProjectID).(string),
+		LifecycleID: d.Get(constLifecycleID).(string),
+		IsDefault:   d.Get(constIsDefault).(bool),
 	}
 
-	if attr, ok := d.GetOk("rule"); ok {
+	if attr, ok := d.GetOk(constRule); ok {
 		tfRules := attr.([]interface{})
 
 		for _, tfrule := range tfRules {
@@ -99,9 +99,9 @@ func buildChannelResource(d *schema.ResourceData) *model.Channel {
 
 func buildRulesResource(tfRule map[string]interface{}) model.ChannelRule {
 	rule := model.ChannelRule{
-		VersionRange: tfRule["version_range"].(string),
-		Tag:          tfRule["tag"].(string),
-		Actions:      getSliceFromTerraformTypeList(tfRule["actions"]),
+		VersionRange: tfRule[constVersionRange].(string),
+		Tag:          tfRule[constTag].(string),
+		Actions:      getSliceFromTerraformTypeList(tfRule[constActions]),
 	}
 
 	return rule
@@ -111,9 +111,9 @@ func flattenRules(in []model.ChannelRule) []map[string]interface{} {
 	var flattened = make([]map[string]interface{}, len(in))
 	for i, v := range in {
 		m := make(map[string]interface{})
-		m["version_range"] = v.VersionRange
-		m["tag"] = v.Tag
-		m["actions"] = v.Actions
+		m[constVersionRange] = v.VersionRange
+		m[constTag] = v.Tag
+		m[constActions] = v.Actions
 
 		flattened[i] = m
 	}
@@ -123,25 +123,25 @@ func flattenRules(in []model.ChannelRule) []map[string]interface{} {
 
 func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
-
 	channelID := d.Id()
-	channel, err := apiClient.Channels.Get(channelID)
+	resource, err := apiClient.Channels.GetByID(channelID)
 
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	if err != nil {
+		return createResourceOperationError(errorReadingChannel, channelID, err)
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading channel %s: %s", channelID, err.Error())
-	}
+	logResource(constChannel, m)
 
-	d.Set("name", channel.Name)
-	d.Set("project_id", channel.ProjectID)
-	d.Set("description", channel.Description)
-	d.Set("lifecycle_id", channel.LifecycleID)
-	d.Set("is_default", channel.IsDefault)
-	d.Set("rule", flattenRules(channel.Rules))
+	d.Set(constName, resource.Name)
+	d.Set(constProjectID, resource.ProjectID)
+	d.Set(constDescription, resource.Description)
+	d.Set(constLifecycleID, resource.LifecycleID)
+	d.Set(constIsDefault, resource.IsDefault)
+	d.Set(constRule, flattenRules(resource.Rules))
 
 	return nil
 }
@@ -155,7 +155,7 @@ func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 	updatedChannel, err := apiClient.Channels.Update(*channel)
 
 	if err != nil {
-		return fmt.Errorf("error updating channel id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingChannel, d.Id(), err)
 	}
 
 	d.SetId(updatedChannel.ID)
@@ -168,13 +168,13 @@ func resourceChannelDelete(d *schema.ResourceData, m interface{}) error {
 
 	channelID := d.Id()
 
-	err := apiClient.Channels.Delete(channelID)
+	err := apiClient.Channels.DeleteByID(channelID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting channel id %s: %s", channelID, err.Error())
+		return createResourceOperationError(errorDeletingChannel, channelID, err)
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 
 	return nil
 }

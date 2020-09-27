@@ -27,7 +27,7 @@ func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployTagSetExists(tagSetPrefix),
 					resource.TestCheckResourceAttr(
-						tagSetPrefix, "name", tagSetName),
+						tagSetPrefix, constName, tagSetName),
 					resource.TestCheckResourceAttr(
 						tagSetPrefix, "tag.0.name", tagName1),
 					resource.TestCheckResourceAttr(
@@ -44,7 +44,7 @@ func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 
 func testTagSettBasic(name, tagName1 string, tagColor1 string, tagName2 string, tagColor2 string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_tag_set" "foo" {
+		resource constOctopusDeployTagSet "foo" {
 			name = "%s"
 
 			tag {
@@ -71,7 +71,7 @@ func testOctopusDeployTagSetExists(n string) resource.TestCheckFunc {
 
 func existstagSetHelper(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.TagSets.Get(r.Primary.ID); err != nil {
+		if _, err := client.TagSets.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving tagSet %s", err)
 		}
 	}
@@ -85,10 +85,7 @@ func testOctopusDeployTagSetDestroy(s *terraform.State) error {
 
 func destroytagSetHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.TagSets.Get(r.Primary.ID); err != nil {
-			if err == client.ErrItemNotFound {
-				continue
-			}
+		if _, err := apiClient.TagSets.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving tagSet %s", err)
 		}
 		return fmt.Errorf("TagSet still exists")

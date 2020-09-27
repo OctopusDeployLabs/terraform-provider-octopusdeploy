@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"errors"
-	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
@@ -21,40 +19,40 @@ func resourceCertificate() *schema.Resource {
 		Delete: resourceCertificateDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"notes": {
+			constNotes: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			CertificateData: {
+			constCertificateData: {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
 			},
-			"password": {
+			constPassword: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
 			},
-			"environment_ids": {
+			constEnvironmentIDs: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"tenant_ids": {
+			constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
+			constTenantIDs: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"tenant_tags": {
+			constTenantTags: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -66,77 +64,57 @@ func resourceCertificate() *schema.Resource {
 }
 
 func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceCertificateRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceCertificateRead", "m")
-	}
+	certificateID := d.Id()
 
 	apiClient := m.(*client.Client)
+	certificate, err := apiClient.Certificates.GetByID(certificateID)
 
-	certificateID := d.Id()
-	certificate, err := apiClient.Certificates.Get(certificateID)
-
-	if certificate.Validate() == nil {
-		d.SetId("")
+	if err != nil {
+		return createResourceOperationError(errorReadingCertificate, certificateID, err)
+	}
+	if certificate == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	err1 := errors.New("Validation on certificate struct: unsucessful")
-	log.Println(err1)
-
-	if err != nil {
-		return fmt.Errorf("error reading certificate %s: %s", certificateID, err.Error())
-	}
-
-	d.Set("name", certificate.Name)
-	d.Set("notes", certificate.Notes)
-	d.Set("environment_ids", certificate.EnvironmentIDs)
-	d.Set("tenanted_deployment_participation", certificate.TenantedDeploymentParticipation)
-	d.Set("tenant_ids", certificate.TenantIds)
-	d.Set("tenant_tags", certificate.TenantTags)
+	d.Set(constName, certificate.Name)
+	d.Set(constNotes, certificate.Notes)
+	d.Set(constEnvironmentIDs, certificate.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, certificate.TenantedDeploymentParticipation)
+	d.Set(constTenantIDs, certificate.TenantIds)
+	d.Set(constTenantTags, certificate.TenantTags)
 
 	return nil
 }
 
 func buildCertificateResource(d *schema.ResourceData) (*model.Certificate, error) {
-	if d == nil {
-		return nil, createInvalidParameterError("buildCertificateResource", "d")
+	name := d.Get(constName).(string)
+	if isEmpty(name) {
+		log.Println("certificate name is empty; please specify a name for the certificate")
 	}
 
-	certificateStruct := model.Certificate{}
-	if certificateStruct.Name == "" {
-		log.Println("Name struct is nil")
-	}
-
-	certificateName := d.Get("name").(string)
-
-	password := d.Get("password").(string)
-	if password == "" {
-		log.Println("Password is nil. Must add in password")
+	password := d.Get(constPassword).(string)
+	if isEmpty(password) {
+		log.Println("password is empty; please specify a password")
 	}
 
 	pass := model.NewSensitiveValue(password)
-
-	certData := d.Get(CertificateData).(string)
-	if certData == "" {
-		log.Println("Certificate data is nil. Must add cert data")
+	certData := d.Get(constCertificateData).(string)
+	if isEmpty(certData) {
+		log.Println("certificate data is empty; please specify certificate data")
 	}
 
 	certificateData := model.NewSensitiveValue(certData)
-
-	certificate, err := model.NewCertificate(certificateName, certificateData, pass)
+	certificate, err := model.NewCertificate(name, certificateData, pass)
 	if err != nil {
 		log.Println(err)
 	}
 
-	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
+	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
 		certificate.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
 	}
 
-	if v, ok := d.GetOk("tenant_tags"); ok {
+	if v, ok := d.GetOk(constTenantTags); ok {
 		certificate.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
@@ -144,30 +122,19 @@ func buildCertificateResource(d *schema.ResourceData) (*model.Certificate, error
 }
 
 func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceCertificateCreate", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceCertificateCreate", "m")
-	}
-
-	apiClient := m.(*client.Client)
-
 	newCertificate, err := buildCertificateResource(d)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
+	apiClient := m.(*client.Client)
 	certificate, err := apiClient.Certificates.Add(newCertificate)
-
 	if err != nil {
-		return fmt.Errorf("error creating certificate %s: %s", newCertificate.Name, err.Error())
+		return createResourceOperationError(errorCreatingCertificate, newCertificate.Name, err)
 	}
 
-	if certificate.ID == "" {
-		log.Println("ID is nil")
+	if isEmpty(certificate.ID) {
+		log.Println("ID is empty")
 	} else {
 		d.SetId(certificate.ID)
 	}
@@ -176,34 +143,25 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceCertificateUpdate", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceCertificateUpdate", "m")
-	}
-
 	certificate, err := buildCertificateResource(d)
 	if err != nil {
 		return err
 	}
 
-	if certificate.ID == "" {
-		log.Println("ID is nil")
+	if isEmpty(certificate.ID) {
+		log.Println("ID is empty")
 	} else {
 		certificate.ID = d.Id()
 	}
 
 	apiClient := m.(*client.Client)
-
 	updatedCertificate, err := apiClient.Certificates.Update(*certificate)
-
 	if err != nil {
-		return fmt.Errorf("error updating certificate id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingCertificate, d.Id(), err)
 	}
-	if updatedCertificate.ID == "" {
-		log.Println("ID is nil")
+
+	if isEmpty(updatedCertificate.ID) {
+		log.Println("ID is empty")
 	} else {
 		d.SetId(updatedCertificate.ID)
 	}
@@ -212,24 +170,14 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceCertificateDelete", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceCertificateDelete", "m")
-	}
-
-	apiClient := m.(*client.Client)
-
 	certificateID := d.Id()
 
-	err := apiClient.Certificates.Delete(certificateID)
-
+	apiClient := m.(*client.Client)
+	err := apiClient.Certificates.DeleteByID(certificateID)
 	if err != nil {
-		return fmt.Errorf("error deleting certificate id %s: %s", certificateID, err.Error())
+		return createResourceOperationError(errorDeletingCertificate, certificateID, err)
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

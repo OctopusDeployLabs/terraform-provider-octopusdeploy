@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -12,11 +10,11 @@ func dataAzureServicePrincipal() *schema.Resource {
 		Read: dataAzureServicePrincipalReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -27,27 +25,27 @@ func dataAzureServicePrincipal() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"tenant_tags": {
+			constTenantTags: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"client_id": {
+			constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
+			constClientID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"tenant_id": {
+			constTenantID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"subscription_number": {
+			constSubscriptionNumber: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"key": {
+			constKey: {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
@@ -56,11 +54,11 @@ func dataAzureServicePrincipal() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"resource_management_endpoint_base_uri": {
+			constResourceManagementEndpointBaseURI: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"active_directory_endpoint_base_uri": {
+			constActiveDirectoryEndpointBaseURI: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -71,21 +69,22 @@ func dataAzureServicePrincipal() *schema.Resource {
 func dataAzureServicePrincipalReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	AzureServicePrincipalName := d.Get("name")
-	env, err := apiClient.Accounts.GetByName(AzureServicePrincipalName.(string))
+	name := d.Get(constName).(string)
+	resource, err := apiClient.Accounts.GetByName(name)
 
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingAzureServicePrincipal, name, err)
+	}
+	if resource == nil {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading AzureServicePrincipal with name %s: %s", AzureServicePrincipalName, err.Error())
-	}
+	logResource(constAccount, m)
 
-	d.SetId(env.ID)
-
-	d.Set("name", env.Name)
-	d.Set("description", env.Description)
+	d.SetId(resource.ID)
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
 
 	return nil
 }

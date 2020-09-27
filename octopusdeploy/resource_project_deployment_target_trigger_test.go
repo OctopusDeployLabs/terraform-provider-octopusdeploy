@@ -25,9 +25,9 @@ func TestAccOctopusDeployDeploymentTargetTriggerAddDelete(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectTriggerExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", deployTargetTriggerName),
+						terraformNamePrefix, constName, deployTargetTriggerName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "true"),
+						terraformNamePrefix, constShouldRedeploy, constTrue),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "event_groups.0", "Machine"),
 					resource.TestCheckResourceAttr(
@@ -57,7 +57,7 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "true"),
+						terraformNamePrefix, constShouldRedeploy, constTrue),
 				),
 			},
 			{
@@ -71,7 +71,7 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "event_categories.0", "MachineHealthy"),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "false"),
+						terraformNamePrefix, constShouldRedeploy, "false"),
 				),
 			},
 		},
@@ -80,17 +80,17 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 
 func testAccProjectDeploymentTargetTriggerResource(t *testing.T, triggerName, projectName string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource constOctopusDeployProject "foo" {
 			lifecycle_id          = "Lifecycles-1"
 			name                  = "%s"
 			project_group_id      = "${octopusdeploy_project_group.foo.id}"
 	  	}
 
-		resource "octopusdeploy_project_deployment_target_trigger" "foo" {
+		resource constOctopusDeployProjectDeploymentTargetTrigger "foo" {
 			name             = "%s"
 			project_id       = "${octopusdeploy_project.foo.id}"
 			event_groups     = ["Machine"]
@@ -108,17 +108,17 @@ func testAccProjectDeploymentTargetTriggerResource(t *testing.T, triggerName, pr
 
 func testAccProjectDeploymentTargetTriggerResourceUpdated(t *testing.T, triggerName, projectName string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource constOctopusDeployProject "foo" {
 			lifecycle_id          = "Lifecycles-1"
 			name                  = "%s"
 			project_group_id      = "${octopusdeploy_project_group.foo.id}"
 	  	}
 
-		resource "octopusdeploy_project_deployment_target_trigger" "foo" {
+		resource constOctopusDeployProjectDeploymentTargetTrigger "foo" {
 			name             = "%s"
 			project_id       = "${octopusdeploy_project.foo.id}"
 			event_groups     = ["Machine", "MachineCritical"]
@@ -144,7 +144,7 @@ func testAccProjectTriggerExists(resourceName string) resource.TestCheckFunc {
 
 		client := testAccProvider.Meta().(*client.Client)
 
-		if _, err := client.ProjectTriggers.Get(rs.Primary.ID); err != nil {
+		if _, err := client.ProjectTriggers.GetByID(rs.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving project trigger %s", err)
 		}
 

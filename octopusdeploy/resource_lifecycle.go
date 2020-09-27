@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
@@ -17,17 +16,17 @@ func resourceLifecycle() *schema.Resource {
 		Delete: resourceLifecycleDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"release_retention_policy":  getRetentionPeriodSchema(),
-			"tentacle_retention_policy": getRetentionPeriodSchema(),
-			"phase":                     getPhasesSchema(),
+			constReleaseRetentionPolicy:  getRetentionPeriodSchema(),
+			constTentacleRetentionPolicy: getRetentionPeriodSchema(),
+			constPhase:                   getPhasesSchema(),
 		},
 	}
 }
@@ -39,7 +38,7 @@ func getRetentionPeriodSchema() *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"unit": {
+				constUnit: {
 					Type:        schema.TypeString,
 					Description: "The unit of quantity_to_keep.",
 					Optional:    true,
@@ -49,7 +48,7 @@ func getRetentionPeriodSchema() *schema.Schema {
 						(string)(model.RetentionUnitItems),
 					}),
 				},
-				"quantity_to_keep": {
+				constQuantityToKeep: {
 					Type:        schema.TypeInt,
 					Description: "The number of days/releases to keep. If 0 all are kept.",
 					Default:     0,
@@ -66,23 +65,23 @@ func getPhasesSchema() *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"name": {
+				constName: {
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"minimum_environments_before_promotion": {
+				constMinimumEnvironmentsBeforePromotion: {
 					Description: "The number of units required before a release can enter the next phase. If 0, all environments are required.",
 					Type:        schema.TypeInt,
 					Optional:    true,
 					Default:     0,
 				},
-				"is_optional_phase": {
+				constIsOptionalPhase: {
 					Description: "If false a release must be deployed to this phase before it can be deployed to the next phase.",
 					Type:        schema.TypeBool,
 					Optional:    true,
 					Default:     false,
 				},
-				"automatic_deployment_targets": {
+				constAutomaticDeploymentTargets: {
 					Description: "Environment Ids in this phase that a release is automatically deployed to when it is eligible for this phase",
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -90,7 +89,7 @@ func getPhasesSchema() *schema.Schema {
 						Type: schema.TypeString,
 					},
 				},
-				"optional_deployment_targets": {
+				constOptionalDeploymentTargets: {
 					Description: "Environment Ids in this phase that a release can be deployed to, but is not automatically deployed to",
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -98,49 +97,66 @@ func getPhasesSchema() *schema.Schema {
 						Type: schema.TypeString,
 					},
 				},
-				// "release_retention_policy": getRetentionPeriodSchema(),
-				// "tentacle_retention_policy": getRetentionPeriodSchema(),
+				// constReleaseRetentionPolicy: getRetentionPeriodSchema(),
+				// constTentacleRetentionPolicy: getRetentionPeriodSchema(),
 			},
 		},
 	}
 }
 
 func resourceLifecycleCreate(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
-	newLifecycle := buildLifecycleResource(d)
-
-	createdLifecycle, err := apiClient.Lifecycles.Add(newLifecycle)
-
-	if err != nil {
-		return fmt.Errorf("error creating project: %s", err.Error())
+	if d == nil {
+		return createInvalidParameterError("resourceLifecycleCreate", "d")
 	}
 
-	d.SetId(createdLifecycle.ID)
+	if m == nil {
+		return createInvalidParameterError("resourceLifecycleCreate", "m")
+	}
+
+	apiClient := m.(*client.Client)
+
+	newResource, err := buildLifecycleResource(d)
+	if err != nil {
+		return err
+	}
+
+	createdResource, err := apiClient.Lifecycles.Add(newResource)
+	if err != nil {
+		return createResourceOperationError(errorCreatingLifecycle, newResource.Name, err)
+	}
+
+	d.SetId(createdResource.ID)
 
 	return nil
 }
 
-func buildLifecycleResource(d *schema.ResourceData) *model.Lifecycle {
-	name := d.Get("name").(string)
+func buildLifecycleResource(d *schema.ResourceData) (*model.Lifecycle, error) {
+	if d == nil {
+		return nil, createInvalidParameterError("buildLifecycleResource", "d")
+	}
 
-	lifecycle := model.NewLifecycle(name)
+	name := d.Get(constName).(string)
 
-	if attr, ok := d.GetOk("description"); ok {
+	lifecycle, err := model.NewLifecycle(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if attr, ok := d.GetOk(constDescription); ok {
 		lifecycle.Description = attr.(string)
 	}
 
-	releaseRetentionPolicy := getRetentionPeriod(d, "release_retention_policy")
+	releaseRetentionPolicy := getRetentionPeriod(d, constReleaseRetentionPolicy)
 	if releaseRetentionPolicy != nil {
 		lifecycle.ReleaseRetentionPolicy = *releaseRetentionPolicy
 	}
 
-	tentacleRetentionPolicy := getRetentionPeriod(d, "tentacle_retention_policy")
+	tentacleRetentionPolicy := getRetentionPeriod(d, constTentacleRetentionPolicy)
 	if tentacleRetentionPolicy != nil {
 		lifecycle.TentacleRetentionPolicy = *tentacleRetentionPolicy
 	}
 
-	if attr, ok := d.GetOk("phase"); ok {
+	if attr, ok := d.GetOk(constPhase); ok {
 		tfPhases := attr.([]interface{})
 
 		for _, tfPhase := range tfPhases {
@@ -149,7 +165,7 @@ func buildLifecycleResource(d *schema.ResourceData) *model.Lifecycle {
 		}
 	}
 
-	return lifecycle
+	return lifecycle, nil
 }
 
 func getRetentionPeriod(d *schema.ResourceData, key string) *model.RetentionPeriod {
@@ -159,8 +175,8 @@ func getRetentionPeriod(d *schema.ResourceData, key string) *model.RetentionPeri
 		if len(tfRetentionSettings.List()) == 1 {
 			tfRetentionItem := tfRetentionSettings.List()[0].(map[string]interface{})
 			retention := model.RetentionPeriod{
-				Unit:           model.RetentionUnit(tfRetentionItem["unit"].(string)),
-				QuantityToKeep: int32(tfRetentionItem["quantity_to_keep"].(int)),
+				Unit:           model.RetentionUnit(tfRetentionItem[constUnit].(string)),
+				QuantityToKeep: int32(tfRetentionItem[constQuantityToKeep].(int)),
 			}
 			return &retention
 		}
@@ -171,11 +187,11 @@ func getRetentionPeriod(d *schema.ResourceData, key string) *model.RetentionPeri
 
 func buildPhaseResource(tfPhase map[string]interface{}) model.Phase {
 	phase := model.Phase{
-		Name:                               tfPhase["name"].(string),
-		MinimumEnvironmentsBeforePromotion: int32(tfPhase["minimum_environments_before_promotion"].(int)),
-		IsOptionalPhase:                    tfPhase["is_optional_phase"].(bool),
-		AutomaticDeploymentTargets:         getSliceFromTerraformTypeList(tfPhase["automatic_deployment_targets"]),
-		OptionalDeploymentTargets:          getSliceFromTerraformTypeList(tfPhase["optional_deployment_targets"]),
+		Name:                               tfPhase[constName].(string),
+		MinimumEnvironmentsBeforePromotion: int32(tfPhase[constMinimumEnvironmentsBeforePromotion].(int)),
+		IsOptionalPhase:                    tfPhase[constIsOptionalPhase].(bool),
+		AutomaticDeploymentTargets:         getSliceFromTerraformTypeList(tfPhase[constAutomaticDeploymentTargets]),
+		OptionalDeploymentTargets:          getSliceFromTerraformTypeList(tfPhase[constOptionalDeploymentTargets]),
 	}
 
 	if phase.AutomaticDeploymentTargets == nil {
@@ -189,38 +205,39 @@ func buildPhaseResource(tfPhase map[string]interface{}) model.Phase {
 }
 
 func resourceLifecycleRead(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	lifecycleID := d.Id()
 
-	lifecycle, err := apiClient.Lifecycles.Get(lifecycleID)
-
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Lifecycles.GetByID(lifecycleID)
+	if err != nil {
+		return createResourceOperationError(errorReadingLifecycle, lifecycleID, err)
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading lifecycle id %s: %s", lifecycleID, err.Error())
-	}
-
 	log.Printf("[DEBUG] lifecycle: %v", m)
-	d.Set("name", lifecycle.Name)
-	d.Set("description", lifecycle.Description)
+
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
 
 	return nil
 }
 
 func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
-	lifecycle := buildLifecycleResource(d)
-	lifecycle.ID = d.Id() // set lifecycle struct ID so octopus knows which lifecycle to update
+	lifecycle, err := buildLifecycleResource(d)
+	if err != nil {
+		return err
+	}
+
+	lifecycle.ID = d.Id() // set lifecycle struct ID so Octopus API knows which lifecycle to update
 
 	apiClient := m.(*client.Client)
-
-	lifecycle, err := apiClient.Lifecycles.Update(lifecycle)
+	lifecycle, err = apiClient.Lifecycles.Update(*lifecycle)
 
 	if err != nil {
-		return fmt.Errorf("error updating lifecycle id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingLifecycle, d.Id(), err)
 	}
 
 	d.SetId(lifecycle.ID)
@@ -233,12 +250,13 @@ func resourceLifecycleDelete(d *schema.ResourceData, m interface{}) error {
 
 	lifecycleID := d.Id()
 
-	err := apiClient.Lifecycles.Delete(lifecycleID)
+	err := apiClient.Lifecycles.DeleteByID(lifecycleID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting lifecycle id %s: %s", lifecycleID, err.Error())
+		return createResourceOperationError(errorDeletingLifecycle, lifecycleID, err)
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
+
 	return nil
 }

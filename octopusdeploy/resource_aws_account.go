@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
@@ -16,11 +15,11 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 
 	schemaMap := getCommonAccountsSchema()
 
-	schemaMap["access_key"] = &schema.Schema{
+	schemaMap[constAccessKey] = &schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 	}
-	schemaMap["secret_key"] = &schema.Schema{
+	schemaMap[constSecretKey] = &schema.Schema{
 		Type:      schema.TypeString,
 		Required:  true,
 		Sensitive: true,
@@ -44,35 +43,27 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 	}
 
 	apiClient := m.(*client.Client)
-
 	accountID := d.Id()
-	account, err := apiClient.Accounts.Get(accountID)
+	account, err := apiClient.Accounts.GetByID(accountID)
 
 	if err != nil {
-		return fmt.Errorf("error reading aws account %s: %s", accountID, err.Error())
+		return createResourceOperationError(errorReadingAWSAccount, accountID, err)
+	}
+	if account == nil {
+		d.SetId(constEmptyString)
+		return nil
 	}
 
-	d.Set("name", account.Name)
-	d.Set("tenants", account.TenantIDs)
-	d.Set("description", account.Description)
-	d.Set("environments", account.EnvironmentIDs)
-	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
-	d.Set("tenant_tags", account.TenantTags)
-	d.Set("secret_key", account.Password)
-	d.Set("access_key", account.AccessKey)
+	d.Set(constName, account.Name)
+	d.Set(constTenants, account.TenantIDs)
+	d.Set(constDescription, account.Description)
+	d.Set(constEnvironments, account.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentParticipation.String())
+	d.Set(constTenantTags, account.TenantTags)
+	d.Set(constSecretKey, account.Password)
+	d.Set(constAccessKey, account.AccessKey)
 
-	// Validate checks the state of the account and returns an error if invalid.
-	// Otherwise, if valid, it returns nil.
-	err = account.Validate()
-
-	// Here would typically be an else statement, but it's more idiomatic to write the error
-	// underneath the if statement in Go. Otherwise, golint complains.
-	// err1 := errors.New("Validation on account struct: unsucessful")
-	// log.Println(err1)
-
-	// return fmt.Errorf("error reading aws account %s: %s", accountID, err.Error())
-
-	return err
+	return nil
 }
 
 func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Account, error) {
@@ -80,43 +71,25 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 		return nil, createInvalidParameterError("buildAmazonWebServicesAccountResource", "d")
 	}
 
-	// accountStruct := model.Account{}
-	// if accountStruct.Name == "" {
-	// 	log.Println("Name struct is nil")
-	// }
-
-	// if accountStruct.AccessKey == "" {
-	// 	log.Println("Access Key struct is nil")
-	// }
-
-	name := d.Get("name").(string)
-	accessKey := d.Get("access_key").(string)
-	password := d.Get("secret_key").(string)
-
-	// if password == "" {
-	// 	log.Println("Key is nil. Must add in a password")
-	// }
-
+	name := d.Get(constName).(string)
+	accessKey := d.Get(constAccessKey).(string)
+	password := d.Get(constSecretKey).(string)
 	secretKey := model.NewSensitiveValue(password)
 
-	// NewAwsServicePrincipalAccount initializes and returns an AWS service
-	// principal account with a name, access key, and secret key. If any of the
-	// input parameters are invalid, it will return nil and an error.
 	account, err := model.NewAwsServicePrincipalAccount(name, accessKey, secretKey)
-
 	if err != nil {
 		return nil, err
 	}
 
-	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
+	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
 	}
 
-	if v, ok := d.GetOk("tenant_tags"); ok {
+	if v, ok := d.GetOk(constTenantTags); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk("tenants"); ok {
+	if v, ok := d.GetOk(constTenants); ok {
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
@@ -141,12 +114,11 @@ func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{
 	}
 
 	account, err := apiClient.Accounts.Add(newAccount)
-
 	if err != nil {
-		return fmt.Errorf("error creating AWS account %s: %s", newAccount.Name, err.Error())
+		return createResourceOperationError(errorCreatingAWSAccount, newAccount.Name, err)
 	}
 
-	if account.ID == "" {
+	if account.ID == constEmptyString {
 		log.Println("ID is nil")
 	} else {
 		d.SetId(account.ID)
@@ -169,7 +141,7 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 		return err
 	}
 
-	if account.ID == "" {
+	if account.ID == constEmptyString {
 		log.Println("ID is nil")
 	} else {
 		account.ID = d.Id()
@@ -178,12 +150,11 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 	apiClient := m.(*client.Client)
 
 	updatedAccount, err := apiClient.Accounts.Update(*account)
-
 	if err != nil {
-		return fmt.Errorf("error updating aws acccount id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingAWSAccount, d.Id(), err)
 	}
 
-	if updatedAccount.ID == "" {
+	if updatedAccount.ID == constEmptyString {
 		log.Println("ID is nil")
 	} else {
 		d.SetId(updatedAccount.ID)

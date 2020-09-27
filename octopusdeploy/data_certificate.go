@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -12,20 +10,20 @@ func dataCertificate() *schema.Resource {
 		Read: dataCertificateReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"notes": {
+			constNotes: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"certificate_data": {
+			constCertificateData: {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
 			},
-			"password": {
+			constPassword: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
@@ -37,15 +35,15 @@ func dataCertificate() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"tenant_ids": {
+			constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
+			constTenantIDs: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"tenant_tags": {
+			constTenantTags: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -59,20 +57,30 @@ func dataCertificate() *schema.Resource {
 func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	CertificateName := d.Get("name")
-	env, err := apiClient.Certificates.GetByName(CertificateName.(string))
+	name := d.Get(constName).(string)
+	resourceList, err := apiClient.Certificates.GetByPartialName(name)
 
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingCertificate, name, err)
+	}
+	if len(resourceList) == 0 {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading Certificate with name %s: %s", CertificateName, err.Error())
+	// NOTE: two or more certificates could have the same name in Octopus and
+	// therefore, a better search criteria needs to be implemented below
+
+	for _, resource := range resourceList {
+		if resource.Name == name {
+			logResource(constCertificate, m)
+
+			d.SetId(resource.ID)
+			d.Set(constName, resource.Name)
+
+			return nil
+		}
 	}
-
-	d.SetId(env.ID)
-
-	d.Set("name", env.Name)
 
 	return nil
 }

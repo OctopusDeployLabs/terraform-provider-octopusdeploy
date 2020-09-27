@@ -28,21 +28,21 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 
 func testAccDeploymentProcessBasic() string {
 	return `
-		resource "octopusdeploy_lifecycle" "test" {
+		resource constOctopusDeployLifecycle "test" {
 			name = "Test Lifecycle"
 		}
 
-		resource "octopusdeploy_project_group" "test" {
+		resource constOctopusDeployProjectGroup "test" {
 			name = "Test Group"
 		}
 
-		resource "octopusdeploy_project" "test" {
+		resource constOctopusDeployProject "test" {
 			name             = "Test Project"
 			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
 			project_group_id = "${octopusdeploy_project_group.test.id}"
 		}
 
-		resource "octopusdeploy_deployment_process" "test" {
+		resource constOctopusDeployDeploymentProcess "test" {
 			project_id = "${octopusdeploy_project.test.id}"
 
 			step {
@@ -133,21 +133,21 @@ func testAccDeploymentProcessBasic() string {
 
 func testAccBuildTestAction(action string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_lifecycle" "test" {
+		resource constOctopusDeployLifecycle "test" {
 			name = "Test Lifecycle"
 		}
 
-		resource "octopusdeploy_project_group" "test" {
+		resource constOctopusDeployProjectGroup "test" {
 			name = "Test Group"
 		}
 
-		resource "octopusdeploy_project" "test" {
+		resource constOctopusDeployProject "test" {
 			name             = "Test Project"
 			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
 			project_group_id = "${octopusdeploy_project_group.test.id}"
 		}
 
-		resource "octopusdeploy_deployment_process" "test" {
+		resource constOctopusDeployDeploymentProcess "test" {
 			project_id = "${octopusdeploy_project.test.id}"
 
 			step {
@@ -190,7 +190,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 			return fmt.Errorf("Deployment process has %d steps instead of the expected %d", numberOfSteps, expectedNumberOfSteps)
 		}
 
-		if process.Steps[0].Actions[0].Properties["Octopus.Action.RunOnServer"] != "true" {
+		if process.Steps[0].Actions[0].Properties["Octopus.Action.RunOnServer"] != constTrue {
 			return fmt.Errorf("The RunOnServer property has not been set to true on the deployment process")
 		}
 
@@ -200,8 +200,8 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 
 func getDeploymentProcess(s *terraform.State, client *client.Client) (*model.DeploymentProcess, error) {
 	for _, r := range s.RootModule().Resources {
-		if r.Type == "octopusdeploy_deployment_process" {
-			return client.DeploymentProcesses.Get(r.Primary.ID)
+		if r.Type == constOctopusDeployDeploymentProcess {
+			return client.DeploymentProcesses.GetByID(r.Primary.ID)
 		}
 	}
 	return nil, fmt.Errorf("No deployment process found in the terraform resources")

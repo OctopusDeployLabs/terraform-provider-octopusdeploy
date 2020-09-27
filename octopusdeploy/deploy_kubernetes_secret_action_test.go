@@ -34,8 +34,8 @@ func testAccDeployKuberentesSecretAction() string {
 			secret_name = "secret name"
 
 			secret_values {
-				key = "key"
-				value = "value"
+				key = constKey
+				value = constValue
 			}
 
 			secret_values {
@@ -65,7 +65,7 @@ func testAccCheckDeployKuberentesSecretAction() resource.TestCheckFunc {
 			return fmt.Errorf("SecretName is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretName"])
 		}
 
-		if action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] != `{"key":"value","key1":"value1"}` {
+		if action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] != `{constKey:constValue,"key1":"value1"}` {
 			return fmt.Errorf("SecretValue is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretValues"])
 		}
 

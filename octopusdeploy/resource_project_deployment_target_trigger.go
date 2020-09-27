@@ -17,23 +17,23 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 		Delete: resourceProjectDeploymentTargetTriggerDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The name of the trigger.",
 			},
-			"project_id": {
+			constProjectID: {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The project_id of the Project to attach the trigger to.",
 			},
-			"should_redeploy": {
+			constShouldRedeploy: {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 				Description: "Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.",
 			},
-			"event_groups": {
+			constEventGroups: {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -41,7 +41,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event group filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			"event_categories": {
+			constEventCategories: {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -49,7 +49,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event category filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			"roles": {
+			constRoles: {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -57,7 +57,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event role filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			"environment_ids": {
+			constEnvironmentIDs: {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -70,13 +70,13 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 }
 
 func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*model.ProjectTrigger, error) {
-	name := d.Get("name").(string)
-	projectID := d.Get("project_id").(string)
-	shouldRedeploy := d.Get("should_redeploy").(bool)
+	name := d.Get(constName).(string)
+	projectID := d.Get(constProjectID).(string)
+	shouldRedeploy := d.Get(constShouldRedeploy).(bool)
 
 	deploymentTargetTrigger := model.NewProjectDeploymentTargetTrigger(name, projectID, shouldRedeploy, nil, nil, nil)
 
-	if attr, ok := d.GetOk("event_groups"); ok {
+	if attr, ok := d.GetOk(constEventGroups); ok {
 		eventGroups := getSliceFromTerraformTypeList(attr)
 
 		// need to validate here "ValidateFunc is not yet supported on lists or sets."
@@ -95,7 +95,7 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*model
 		deploymentTargetTrigger.AddEventGroups(eventGroups)
 	}
 
-	if attr, ok := d.GetOk("event_categories"); ok {
+	if attr, ok := d.GetOk(constEventCategories); ok {
 		eventCategories := getSliceFromTerraformTypeList(attr)
 
 		// need to validate here "ValidateFunc is not yet supported on lists or sets."
@@ -118,11 +118,11 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*model
 		deploymentTargetTrigger.AddEventCategories(eventCategories)
 	}
 
-	if attr, ok := d.GetOk("roles"); ok {
+	if attr, ok := d.GetOk(constRoles); ok {
 		deploymentTargetTrigger.Filter.Roles = getSliceFromTerraformTypeList(attr)
 	}
 
-	if attr, ok := d.GetOk("environment_ids"); ok {
+	if attr, ok := d.GetOk(constEnvironmentIDs); ok {
 		deploymentTargetTrigger.Filter.EnvironmentIds = getSliceFromTerraformTypeList(attr)
 	}
 
@@ -149,28 +149,27 @@ func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m inte
 }
 
 func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	projectTriggerID := d.Id()
-
-	projectTrigger, err := apiClient.ProjectTriggers.Get(projectTriggerID)
-
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	resource, err := apiClient.ProjectTriggers.GetByID(id)
+	if err != nil {
+		return fmt.Errorf(errorReadingProjectTrigger, id, err.Error())
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading project trigger id %s: %s", projectTrigger.ID, err.Error())
-	}
-
 	log.Printf("[DEBUG] project trigger: %v", m)
-	d.Set("name", projectTrigger.Name)
-	d.Set("should_redeploy", projectTrigger.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
-	d.Set("event_groups", projectTrigger.Filter.EventGroups)
-	d.Set("event_categories", projectTrigger.Filter.EventCategories)
-	d.Set("roles", projectTrigger.Filter.Roles)
-	d.Set("environment_ids", projectTrigger.Filter.EnvironmentIds)
+
+	d.Set(constName, resource.Name)
+	d.Set(constShouldRedeploy, resource.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
+	d.Set(constEventGroups, resource.Filter.EventGroups)
+	d.Set(constEventCategories, resource.Filter.EventCategories)
+	d.Set(constRoles, resource.Filter.Roles)
+	d.Set(constEnvironmentIDs, resource.Filter.EnvironmentIds)
+
 	return nil
 }
 
@@ -200,12 +199,12 @@ func resourceProjectDeploymentTargetTriggerDelete(d *schema.ResourceData, m inte
 
 	projectTriggerID := d.Id()
 
-	err := apiClient.ProjectTriggers.Delete(projectTriggerID)
+	err := apiClient.ProjectTriggers.DeleteByID(projectTriggerID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting project trigger id %s: %s", projectTriggerID, err.Error())
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

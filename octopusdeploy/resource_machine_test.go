@@ -23,7 +23,7 @@ func TestAccOctopusDeployMachineBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployMachineExists(tfVarPrefix),
 					resource.TestCheckResourceAttr(
-						tfVarPrefix, "name", tfMachineName),
+						tfVarPrefix, constName, tfMachineName),
 				),
 			},
 		},
@@ -32,17 +32,17 @@ func TestAccOctopusDeployMachineBasic(t *testing.T) {
 
 func testMachineBasic(machineName string) string {
 	config := fmt.Sprintf(`
-	data "octopusdeploy_machinepolicy" "default" {
+	data constOctopusDeployMachinePolicy "default" {
 		name = "Default Machine Policy"
 	}
 
-	resource "octopusdeploy_environment" "tf_test_env" {
+	resource constOctopusDeployEnvironment "tf_test_env" {
 		name           = "OctopusTestMachineBasic"
 		description    = "Environment for testing Octopus Machines"
 		use_guided_failure = "false"
 	}
 
-	resource "octopusdeploy_machine" "foomac" {
+	resource constOctopusDeployMachine "foomac" {
 		name                            = "%s"
 		environments                    = ["${octopusdeploy_environment.tf_test_env.id}"]
 		isdisabled                      = true
@@ -72,7 +72,7 @@ func testOctopusDeployMachineExists(n string) resource.TestCheckFunc {
 func existsMachineHelper(s *terraform.State, client *client.Client) error {
 	macID := s.RootModule().Resources["octopusdeploy_machine.foomac"].Primary.ID
 
-	if _, err := client.Machines.Get(macID); err != nil {
+	if _, err := client.Machines.GetByID(macID); err != nil {
 		return fmt.Errorf("Received an error retrieving machine %s", err)
 	}
 
@@ -85,12 +85,8 @@ func testOctopusDeployMachineDestroy(s *terraform.State) error {
 }
 
 func destroyMachineHelper(s *terraform.State, apiClient *client.Client) error {
-	macID := s.RootModule().Resources["octopusdeploy_machine.foomac"].Primary.ID
-
-	if err := apiClient.Machines.Delete(macID); err != nil {
-		if err == client.ErrItemNotFound {
-			return nil
-		}
+	id := s.RootModule().Resources["octopusdeploy_machine.foomac"].Primary.ID
+	if err := apiClient.Machines.DeleteByID(id); err != nil {
 		return fmt.Errorf("Received an error retrieving machine %s", err)
 	}
 	return fmt.Errorf("Machine still exists")

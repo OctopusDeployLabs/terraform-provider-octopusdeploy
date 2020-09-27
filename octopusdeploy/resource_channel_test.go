@@ -23,9 +23,9 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", channelName),
+						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", channelDescription),
+						terraformNamePrefix, constDescription, channelDescription),
 				),
 			},
 		},
@@ -46,9 +46,9 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", channelName),
+						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", "this is funky"),
+						terraformNamePrefix, constDescription, "this is funky"),
 				),
 			},
 			// update channel with a new description
@@ -57,9 +57,9 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", channelName),
+						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", "funky it is"),
+						terraformNamePrefix, constDescription, "funky it is"),
 				),
 			},
 		},
@@ -82,9 +82,9 @@ func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", channelName),
+						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", channelDescription),
+						terraformNamePrefix, constDescription, channelDescription),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "rule.0.version_range", versionRange),
 					resource.TestCheckResourceAttr(
@@ -115,9 +115,9 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", channelName),
+						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", channelDescription),
+						terraformNamePrefix, constDescription, channelDescription),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "rule.0.version_range", versionRange),
 					resource.TestCheckResourceAttr(
@@ -129,9 +129,9 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", updatedChannelName),
+						terraformNamePrefix, constName, updatedChannelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", updatedChannelDescription),
+						terraformNamePrefix, constDescription, updatedChannelDescription),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "rule.0.version_range", updatedVersionRange),
 					resource.TestCheckResourceAttr(
@@ -160,9 +160,9 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", channelName),
+						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", channelDescription),
+						terraformNamePrefix, constDescription, channelDescription),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "rule.0.version_range", versionRange1),
 					resource.TestCheckResourceAttr(
@@ -180,18 +180,18 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 func testAccChannelBasic(name, description string) string {
 	return fmt.Sprintf(`
 
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource constOctopusDeployProject "foo" {
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
 			allow_deployments_to_no_targets = true
 		}
 		
-		resource "octopusdeploy_channel" "ch" {
+		resource constOctopusDeployChannel "ch" {
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
@@ -204,18 +204,18 @@ func testAccChannelBasic(name, description string) string {
 func testAccChannelWithOneRule(name, description, versionRange, actionName string) string {
 	return fmt.Sprintf(`
 
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource constOctopusDeployProject "foo" {
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
 			allow_deployments_to_no_targets = true
 		}
 
-		resource "octopusdeploy_deployment_process" "deploy_step_template" {
+		resource constOctopusDeployDeploymentProcess "deploy_step_template" {
 			project_id          = "${octopusdeploy_project.foo.id}"
 			step {
 				name            = "step-1"
@@ -237,7 +237,7 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 			}
 		}
 		
-		resource "octopusdeploy_channel" "ch" {
+		resource constOctopusDeployChannel "ch" {
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
@@ -255,18 +255,18 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, versionRange2, actionName2 string) string {
 	return fmt.Sprintf(`
 
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource constOctopusDeployProject "foo" {
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
 			allow_deployments_to_no_targets = true
 		}
 
-		resource "octopusdeploy_deployment_process" "deploy_step_template" {
+		resource constOctopusDeployDeploymentProcess "deploy_step_template" {
 			project_id          = "${octopusdeploy_project.foo.id}"
 			step {
 				name            = "step-1"
@@ -305,7 +305,7 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 			}
 		}
 		
-		resource "octopusdeploy_channel" "ch" {
+		resource constOctopusDeployChannel "ch" {
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
@@ -338,8 +338,8 @@ func testAccCheckOctopusDeployChannelExists(n string) resource.TestCheckFunc {
 
 func existsHelperChannel(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if r.Type == "octopusdeploy_channel" {
-			if _, err := client.Channels.Get(r.Primary.ID); err != nil {
+		if r.Type == constOctopusDeployChannel {
+			if _, err := client.Channels.GetByID(r.Primary.ID); err != nil {
 				return fmt.Errorf("received an error retrieving channel %s", err)
 			}
 		}
@@ -361,10 +361,7 @@ func testAccCheckOctopusDeployChannelDestroy(s *terraform.State) error {
 
 func destroyHelperChannel(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Channels.Get(r.Primary.ID); err != nil {
-			if err == client.ErrItemNotFound {
-				continue
-			}
+		if _, err := apiClient.Channels.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving channel %s", err)
 		}
 		return fmt.Errorf("channel still exists")

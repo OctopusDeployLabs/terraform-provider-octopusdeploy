@@ -16,34 +16,34 @@ func resourceNugetFeed() *schema.Resource {
 		Delete: resourceNugetFeedDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"feed_uri": {
+			constFeedURI: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"enhanced_mode": {
+			constEnhancedMode: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"download_attempts": {
+			constDownloadAttempts: {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  5,
 			},
-			"download_retry_backoff_seconds": {
+			constDownloadRetryBackoffSeconds: {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  10,
 			},
-			"username": {
+			constUsername: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"password": {
+			constPassword: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
@@ -53,33 +53,31 @@ func resourceNugetFeed() *schema.Resource {
 }
 
 func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	feedID := d.Id()
-	feed, err := apiClient.Feeds.Get(feedID)
 
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Feeds.GetByID(feedID)
+	if err != nil {
+		return fmt.Errorf(errorReadingFeed, feedID, err.Error())
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading feed %s: %s", feedID, err.Error())
-	}
-
-	d.Set("name", feed.Name)
-	d.Set("feed_uri", feed.FeedURI)
-	d.Set("enhanced_mode", feed.EnhancedMode)
-	d.Set("download_attempts", feed.DownloadAttempts)
-	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
-	d.Set("username", feed.Username)
-	d.Set("password", feed.Password)
+	d.Set(constName, resource.Name)
+	d.Set(constFeedURI, resource.FeedURI)
+	d.Set(constEnhancedMode, resource.EnhancedMode)
+	d.Set(constDownloadAttempts, resource.DownloadAttempts)
+	d.Set(constDownloadRetryBackoffSeconds, resource.DownloadRetryBackoffSeconds)
+	d.Set(constUsername, resource.Username)
+	d.Set(constPassword, resource.Password)
 
 	return nil
 }
 
 func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
-	feedName := d.Get("name").(string)
+	feedName := d.Get(constName).(string)
 
 	var feedURI string
 	var enhancedMode bool
@@ -88,32 +86,32 @@ func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 	var feedUsername string
 	var feedPassword string
 
-	feedURIInterface, ok := d.GetOk("feed_uri")
+	feedURIInterface, ok := d.GetOk(constFeedURI)
 	if ok {
 		feedURI = feedURIInterface.(string)
 	}
 
-	enhancedModeInterface, ok := d.GetOk("enhanced_mode")
+	enhancedModeInterface, ok := d.GetOk(constEnhancedMode)
 	if ok {
 		enhancedMode = enhancedModeInterface.(bool)
 	}
 
-	downloadAttemptsInterface, ok := d.GetOk("download_attempts")
+	downloadAttemptsInterface, ok := d.GetOk(constDownloadAttempts)
 	if ok {
 		downloadAttempts = downloadAttemptsInterface.(int)
 	}
 
-	downloadRetryBackoffSecondsInterface, ok := d.GetOk("download_retry_backoff_seconds")
+	downloadRetryBackoffSecondsInterface, ok := d.GetOk(constDownloadRetryBackoffSeconds)
 	if ok {
 		downloadRetryBackoffSeconds = downloadRetryBackoffSecondsInterface.(int)
 	}
 
-	feedUsernameInterface, ok := d.GetOk("username")
+	feedUsernameInterface, ok := d.GetOk(constUsername)
 	if ok {
 		feedUsername = feedUsernameInterface.(string)
 	}
 
-	feedPasswordInterface, ok := d.GetOk("password")
+	feedPasswordInterface, ok := d.GetOk(constPassword)
 	if ok {
 		feedPassword = feedPasswordInterface.(string)
 	}
@@ -167,12 +165,12 @@ func resourceNugetFeedDelete(d *schema.ResourceData, m interface{}) error {
 
 	feedID := d.Id()
 
-	err := apiClient.Feeds.Delete(feedID)
+	err := apiClient.Feeds.DeleteByID(feedID)
 
 	if err != nil {
 		return fmt.Errorf("error deleting nuget feed id %s: %s", feedID, err.Error())
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

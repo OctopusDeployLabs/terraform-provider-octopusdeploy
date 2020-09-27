@@ -1,9 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -13,27 +10,27 @@ func dataProject() *schema.Resource {
 		Read: dataProjectReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"lifecycle_id": {
+			constLifecycleID: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"project_group_id": {
+			constProjectGroupID: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"default_failure_mode": {
+			constDefaultFailureMode: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"skip_machine_behavior": {
+			constSkipMachineBehavior: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -44,27 +41,26 @@ func dataProject() *schema.Resource {
 func dataProjectReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	projectName := d.Get("name")
+	name := d.Get(constName).(string)
+	resource, err := apiClient.Projects.GetByName(name)
 
-	project, err := apiClient.Projects.GetByName(projectName.(string))
-
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingProject, name, err)
+	}
+	if resource == nil {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading project name %s: %s", projectName, err.Error())
-	}
+	logResource(constProject, m)
 
-	d.SetId(project.ID)
-
-	log.Printf("[DEBUG] project: %v", m)
-	d.Set("name", project.Name)
-	d.Set("description", project.Description)
-	d.Set("lifecycle_id", project.LifecycleID)
-	d.Set("project_group_id", project.ProjectGroupID)
-	d.Set("default_failure_mode", project.DefaultGuidedFailureMode)
-	d.Set("skip_machine_behavior", project.ProjectConnectivityPolicy.SkipMachineBehavior)
+	d.SetId(resource.ID)
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
+	d.Set(constLifecycleID, resource.LifecycleID)
+	d.Set(constProjectGroupID, resource.ProjectGroupID)
+	d.Set(constDefaultFailureMode, resource.DefaultGuidedFailureMode)
+	d.Set(constSkipMachineBehavior, resource.ProjectConnectivityPolicy.SkipMachineBehavior)
 
 	return nil
 }

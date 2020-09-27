@@ -1,9 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -17,15 +14,15 @@ func resourceLibraryVariableSet() *schema.Resource {
 		Delete: resourceLibraryVariableSetDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"templates": getTemplatesSchema(),
+			constTemplates: getTemplatesSchema(),
 		},
 	}
 }
@@ -36,7 +33,7 @@ func getTemplatesSchema() *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"name": {
+				constName: {
 					Type:     schema.TypeString,
 					Required: true,
 				},
@@ -46,6 +43,14 @@ func getTemplatesSchema() *schema.Schema {
 }
 
 func resourceLibraryVariableSetCreate(d *schema.ResourceData, m interface{}) error {
+	if d == nil {
+		return createInvalidParameterError("resourceLibraryVariableSetCreate", "d")
+	}
+
+	if m == nil {
+		return createInvalidParameterError("resourceLibraryVariableSetCreate", "m")
+	}
+
 	apiClient := m.(*client.Client)
 
 	newLibraryVariableSet := buildLibraryVariableSetResource(d)
@@ -53,7 +58,7 @@ func resourceLibraryVariableSetCreate(d *schema.ResourceData, m interface{}) err
 	createdLibraryVariableSet, err := apiClient.LibraryVariableSets.Add(newLibraryVariableSet)
 
 	if err != nil {
-		return fmt.Errorf("error creating project: %s", err.Error())
+		return createResourceOperationError(errorCreatingLibraryVariableSet, newLibraryVariableSet.Name, err)
 	}
 
 	d.SetId(createdLibraryVariableSet.ID)
@@ -62,89 +67,86 @@ func resourceLibraryVariableSetCreate(d *schema.ResourceData, m interface{}) err
 }
 
 func buildLibraryVariableSetResource(d *schema.ResourceData) *model.LibraryVariableSet {
-	name := d.Get("name").(string)
+	name := d.Get(constName).(string)
 
-	libraryVariableSet := model.NewLibraryVariableSet(name)
+	resource := model.NewLibraryVariableSet(name)
 
-	if attr, ok := d.GetOk("description"); ok {
-		libraryVariableSet.Description = attr.(string)
+	if attr, ok := d.GetOk(constDescription); ok {
+		resource.Description = attr.(string)
 	}
 
-	if attr, ok := d.GetOk("templates"); ok {
+	if attr, ok := d.GetOk(constTemplates); ok {
 		tfTemplates := attr.([]interface{})
 
 		for _, tfTemplate := range tfTemplates {
 			template := buildTemplateResource(tfTemplate.(map[string]interface{}))
-			libraryVariableSet.Templates = append(libraryVariableSet.Templates, &template)
+			resource.Templates = append(resource.Templates, &template)
 		}
 	}
 
-	return libraryVariableSet
+	return resource
 }
 
 func buildTemplateResource(tfTemplate map[string]interface{}) model.ActionTemplateParameter {
-	template := model.ActionTemplateParameter{
-		Name: tfTemplate["name"].(string),
+	resource := model.ActionTemplateParameter{
+		Name: tfTemplate[constName].(string),
 		DisplaySettings: map[string]string{
 			"Octopus.ControlType": "SingleLineText",
 		},
 	}
 
-	return template
+	return resource
 }
 
 func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	libraryVariableSetID := d.Id()
+	id := d.Id()
+	resource, err := apiClient.LibraryVariableSets.GetByID(id)
 
-	libraryVariableSet, err := apiClient.LibraryVariableSets.Get(libraryVariableSetID)
+	if err != nil {
+		return createResourceOperationError(errorReadingLibraryVariableSet, id, err)
+	}
 
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading libraryVariableSet id %s: %s", libraryVariableSetID, err.Error())
-	}
+	logResource(constLibraryVariableSet, m)
 
-	log.Printf("[DEBUG] libraryVariableSet: %v", m)
-	d.Set("name", libraryVariableSet.Name)
-	d.Set("description", libraryVariableSet.Description)
-	d.Set("variable_set_id", libraryVariableSet.VariableSetID)
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
+	d.Set(constVariableSetID, resource.VariableSetID)
 
 	return nil
 }
 
 func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) error {
-	libraryVariableSet := buildLibraryVariableSetResource(d)
-	libraryVariableSet.ID = d.Id() // set libraryVariableSet struct ID so octopus knows which libraryVariableSet to update
+	resource := buildLibraryVariableSetResource(d)
+	resource.ID = d.Id() // set libraryVariableSet struct ID so octopus knows which libraryVariableSet to update
 
 	apiClient := m.(*client.Client)
-
-	libraryVariableSet, err := apiClient.LibraryVariableSets.Update(libraryVariableSet)
+	updatedResource, err := apiClient.LibraryVariableSets.Update(*resource)
 
 	if err != nil {
-		return fmt.Errorf("error updating libraryVariableSet id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingLibraryVariableSet, d.Id(), err)
 	}
 
-	d.SetId(libraryVariableSet.ID)
+	d.SetId(updatedResource.ID)
 
 	return nil
 }
 
 func resourceLibraryVariableSetDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
+	id := d.Id()
 
-	libraryVariableSetID := d.Id()
-
-	err := apiClient.LibraryVariableSets.Delete(libraryVariableSetID)
-
+	err := apiClient.LibraryVariableSets.DeleteByID(id)
 	if err != nil {
-		return fmt.Errorf("error deleting libraryVariableSet id %s: %s", libraryVariableSetID, err.Error())
+		return createResourceOperationError(errorDeletingLibraryVariableSet, id, err)
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

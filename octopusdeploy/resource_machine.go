@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/enum"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -20,11 +22,11 @@ func resourceMachine() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"endpoint": {
+			constEndpoint: {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				MinItems: 1,
@@ -51,11 +53,11 @@ func resourceMachine() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"thumbprint": {
+						constThumbprint: {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"uri": {
+						constURI: {
 							Type:     schema.TypeString,
 							Required: true,
 						},
@@ -67,7 +69,7 @@ func resourceMachine() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"namespace": {
+						constNamespace: {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
@@ -79,7 +81,7 @@ func resourceMachine() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"authentication": {
+						constAuthentication: {
 							Type:     schema.TypeSet,
 							MaxItems: 1,
 							MinItems: 0,
@@ -108,7 +110,7 @@ func resourceMachine() *schema.Resource {
 					},
 				},
 			},
-			"environments": {
+			constEnvironments: {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -131,7 +133,7 @@ func resourceMachine() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"roles": {
+			constRoles: {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type:     schema.TypeString,
@@ -139,7 +141,7 @@ func resourceMachine() *schema.Resource {
 				},
 				Required: true,
 			},
-			"status": {
+			constStatus: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -175,16 +177,16 @@ func resourceMachine() *schema.Resource {
 }
 
 func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	machineID := d.Id()
-	machine, err := apiClient.Machines.Get(machineID)
-	if err == client.ErrItemNotFound {
-		d.SetId("")
-		return nil
-	}
+
+	apiClient := m.(*client.Client)
+	machine, err := apiClient.Machines.GetByID(machineID)
 	if err != nil {
-		return fmt.Errorf("error reading machine %s: %s", machineID, err.Error())
+		return fmt.Errorf(errorReadingMachine, machineID, err.Error())
+	}
+	if machine == nil {
+		d.SetId(constEmptyString)
+		return nil
 	}
 
 	d.SetId(machine.ID)
@@ -194,13 +196,13 @@ func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func setMachineProperties(d *schema.ResourceData, m *model.Machine) {
-	d.Set("environments", m.EnvironmentIDs)
+	d.Set(constEnvironments, m.EnvironmentIDs)
 	d.Set("haslatestcalamari", m.HasLatestCalamari)
 	d.Set("isdisabled", m.IsDisabled)
 	d.Set("isinprocess", m.IsInProcess)
 	d.Set("machinepolicy", m.MachinePolicyID)
-	d.Set("roles", m.Roles)
-	d.Set("status", m.Status)
+	d.Set(constRoles, m.Roles)
+	d.Set(constStatus, m.Status)
 	d.Set("statussummary", m.StatusSummary)
 	d.Set("tenanteddeploymentparticipation", m.DeploymentMode)
 	d.Set("tenantids", m.TenantIDs)
@@ -208,25 +210,25 @@ func setMachineProperties(d *schema.ResourceData, m *model.Machine) {
 }
 
 func buildMachineResource(d *schema.ResourceData) *model.Machine {
-	mName := d.Get("name").(string)
-	mMachinepolicy := d.Get("machinepolicy").(string)
-	mEnvironments := getSliceFromTerraformTypeList(d.Get("environments"))
-	mRoles := getSliceFromTerraformTypeList(d.Get("roles"))
-	mDisabled := d.Get("isdisabled").(bool)
-	mTenantedDeploymentParticipation, _ := d.Get("tenanteddeploymentparticipation").(string)
-	mTenantIDs := getSliceFromTerraformTypeList(d.Get("tenantids"))
-	mTenantTags := getSliceFromTerraformTypeList(d.Get("tenanttags"))
+	name := d.Get(constName).(string)
+	machinePolicy := d.Get("machinepolicy").(string)
+	environments := getSliceFromTerraformTypeList(d.Get(constEnvironments))
+	roles := getSliceFromTerraformTypeList(d.Get(constRoles))
+	isDisabled := d.Get("isdisabled").(bool)
+	deploymentMode, _ := d.Get("tenanteddeploymentparticipation").(string)
+	tenantIDs := getSliceFromTerraformTypeList(d.Get("tenantids"))
+	tenantTags := getSliceFromTerraformTypeList(d.Get("tenanttags"))
 
 	// If we end up with a nil return, Octopus doesn't accept the API call. This ensure that we send
 	// blank values rather than nil values.
-	if mTenantIDs == nil {
-		mTenantIDs = []string{}
+	if tenantIDs == nil {
+		tenantIDs = []string{}
 	}
-	if mTenantTags == nil {
-		mTenantTags = []string{}
+	if tenantTags == nil {
+		tenantTags = []string{}
 	}
 
-	tfSchemaSetInterface, ok := d.GetOk("endpoint")
+	tfSchemaSetInterface, ok := d.GetOk(constEndpoint)
 	if !ok {
 		return nil
 	}
@@ -237,47 +239,46 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	// Get the first element in the list, which is a map of the interfaces
 	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
 
-	tfMachine := &model.Machine{
-		Name:            mName,
-		IsDisabled:      mDisabled,
-		EnvironmentIDs:  mEnvironments,
-		Roles:           mRoles,
-		MachinePolicyID: mMachinepolicy,
-		DeploymentMode:  mTenantedDeploymentParticipation,
-		TenantIDs:       mTenantIDs,
-		TenantTags:      mTenantTags,
-	}
+	machine, err := model.NewMachine(name, isDisabled, environments, roles, machinePolicy, deploymentMode, tenantIDs, tenantTags)
+	machine.URI = tfSchemaList[constURI].(string)
+	machine.Thumbprint = tfSchemaList[constThumbprint].(string)
 
-	tfMachine.URI = tfSchemaList["uri"].(string)
-	tfMachine.Thumbprint = tfSchemaList["thumbprint"].(string)
-
-	var proxyid *string
+	var proxyID string
 	if tfSchemaList["proxyid"] != nil {
 		proxyString := tfSchemaList["proxyid"].(string)
-		proxyid = &proxyString
+		proxyID = proxyString
 	}
 
-	tfMachine.Endpoint = &model.MachineEndpoint{
-		URI:                 tfSchemaList["uri"].(string),
-		Thumbprint:          tfSchemaList["thumbprint"].(string),
-		CommunicationStyle:  tfSchemaList["communicationstyle"].(string),
-		ProxyID:             proxyid,
-		DefaultWorkerPoolID: tfSchemaList["defaultworkerpoolid"].(string),
+	communicationStyle, err := enum.ParseCommunicationStyle(tfSchemaList["communicationstyle"].(string))
+	if err != nil {
+		return nil
 	}
 
-	tfMachine.Endpoint.ClusterCertificate = tfSchemaList["clustercertificate"].(string)
-	tfMachine.Endpoint.ClusterURL = tfSchemaList["clusterurl"].(string)
-	tfMachine.Endpoint.Namespace = tfSchemaList["namespace"].(string)
-	tfMachine.Endpoint.SkipTLSVerification = strconv.FormatBool(tfSchemaList["skiptlsverification"].(bool))
+	endpoint, err := model.NewMachineEndpoint(
+		tfSchemaList[constURI].(string),
+		tfSchemaList[constThumbprint].(string),
+		communicationStyle,
+		proxyID,
+		tfSchemaList["defaultworkerpoolid"].(string),
+	)
+	if err != nil {
+		return nil
+	}
 
-	tfAuthenticationSchemaSetInterface, ok := tfSchemaList["authentication"]
+	machine.Endpoint = endpoint
+	machine.Endpoint.ClusterCertificate = tfSchemaList["clustercertificate"].(string)
+	machine.Endpoint.ClusterURL = tfSchemaList["clusterurl"].(string)
+	machine.Endpoint.Namespace = tfSchemaList[constNamespace].(string)
+	machine.Endpoint.SkipTLSVerification = strconv.FormatBool(tfSchemaList["skiptlsverification"].(bool))
+
+	tfAuthenticationSchemaSetInterface, ok := tfSchemaList[constAuthentication]
 	if ok {
 		tfAuthenticationSchemaSet := tfAuthenticationSchemaSetInterface.(*schema.Set)
 		if len(tfAuthenticationSchemaSet.List()) == 1 {
 			// Get the first element in the list, which is a map of the interfaces
 			tfAuthenticationSchemaList := tfAuthenticationSchemaSet.List()[0].(map[string]interface{})
 
-			tfMachine.Endpoint.Authentication = &model.MachineEndpointAuthentication{
+			machine.Endpoint.Authentication = &model.MachineEndpointAuthentication{
 				AccountID:          tfAuthenticationSchemaList["accountid"].(string),
 				ClientCertificate:  tfAuthenticationSchemaList["clientcertificate"].(string),
 				AuthenticationType: tfAuthenticationSchemaList["authenticationtype"].(string),
@@ -285,42 +286,51 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 		}
 	}
 
-	return tfMachine
+	return machine
 }
 
 func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
 	newMachine := buildMachineResource(d)
 	newMachine.Status = "Unknown" // We don't want TF to attempt to update a machine just because its status has changed, so set it to Unknown on creation and let TF sort it out in the future.
+
+	apiClient := m.(*client.Client)
 	machine, err := apiClient.Machines.Add(newMachine)
 	if err != nil {
-		return fmt.Errorf("error creating machine %s: %s", newMachine.Name, err.Error())
+		return fmt.Errorf(errorCreatingMachine, newMachine.Name, err.Error())
 	}
+
 	d.SetId(machine.ID)
 	setMachineProperties(d, machine)
+
 	return nil
 }
 
 func resourceMachineDelete(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
 	machineID := d.Id()
-	err := apiClient.Machines.Delete(machineID)
+
+	apiClient := m.(*client.Client)
+	err := apiClient.Machines.DeleteByID(machineID)
 	if err != nil {
-		return fmt.Errorf("error deleting machine id %s: %s", machineID, err.Error())
+		return fmt.Errorf(errorDeletingMachine, machineID, err.Error())
 	}
-	d.SetId("")
+
+	d.SetId(constEmptyString)
+
 	return nil
 }
 
 func resourceMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	machine := buildMachineResource(d)
 	machine.ID = d.Id() // set project struct ID so octopus knows which project to update
+
 	apiClient := m.(*client.Client)
 	updatedMachine, err := apiClient.Machines.Update(machine)
 	if err != nil {
-		return fmt.Errorf("error updating machine id %s: %s", d.Id(), err.Error())
+		return fmt.Errorf(errorUpdatingMachine, d.Id(), err.Error())
 	}
+
 	d.SetId(updatedMachine.ID)
 	setMachineProperties(d, machine)
+
 	return nil
 }

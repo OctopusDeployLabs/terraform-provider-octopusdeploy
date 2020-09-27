@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -14,7 +13,7 @@ import (
 func resourceSSHKey() *schema.Resource {
 	schemaMap := getCommonAccountsSchema()
 
-	schemaMap["username"] = &schema.Schema{
+	schemaMap[constUsername] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
@@ -32,69 +31,54 @@ func resourceSSHKey() *schema.Resource {
 }
 
 func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceSSHKeyRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceSSHKeyRead", "m")
-	}
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-
-	accountID := d.Id()
-	account, err := apiClient.Accounts.Get(accountID)
-
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	resource, err := apiClient.Accounts.GetByID(id)
+	if err != nil {
+		return createResourceOperationError(errorReadingSSHKeyPair, id, err)
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading SSH Key Pair %s: %s", accountID, err.Error())
-	}
-
-	d.Set("name", account.Name)
-	d.Set("passphrase", account.Password)
-	d.Set("tenants", account.TenantIDs)
+	d.Set(constName, resource.Name)
+	d.Set("passphrase", resource.Password)
+	d.Set(constTenants, resource.TenantIDs)
 
 	return nil
 }
 
 func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
-	accountStruct := model.Account{}
-	if accountStruct.Name == "" {
-		log.Println("Name struct is nil")
-	}
-
 	if d == nil {
 		return nil, createInvalidParameterError("buildSSHKeyResource", "d")
 	}
 
-	name := d.Get("name").(string)
-	userName := d.Get("username").(string)
+	name := d.Get(constName).(string)
+	username := d.Get(constUsername).(string)
 
-	password := d.Get("password").(string)
-	if password == "" {
+	password := d.Get(constPassword).(string)
+	if isEmpty(password) {
 		log.Println("Key is nil. Must add in a password")
 	}
 
 	secretKey := model.NewSensitiveValue(password)
 
-	account, err := model.NewSSHKeyAccount(name, userName, secretKey)
+	account, err := model.NewSSHKeyAccount(name, username, secretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
+	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
 	}
 
-	if v, ok := d.GetOk("tenant_tags"); ok {
+	if v, ok := d.GetOk(constTenantTags); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk("tenants"); ok {
+	if v, ok := d.GetOk(constTenants); ok {
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
@@ -114,21 +98,18 @@ func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
 		return createInvalidParameterError("resourceSSHKeyCreate", "d")
 	}
 
-	apiClient := m.(*client.Client)
-
 	newAccount, err := buildSSHKeyResource(d)
 	if err != nil {
 		return err
 	}
 
+	apiClient := m.(*client.Client)
 	account, err := apiClient.Accounts.Add(newAccount)
-
 	if err != nil {
-		return fmt.Errorf("error creating SSH Key Pair %s: %s", newAccount.Name, err.Error())
+		return createResourceOperationError(errorCreatingSSHKeyPair, newAccount.Name, err)
 	}
 
 	d.SetId(account.ID)
-
 	return nil
 }
 
@@ -149,11 +130,9 @@ func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	account.ID = d.Id()
 
 	apiClient := m.(*client.Client)
-
 	updatedAccount, err := apiClient.Accounts.Update(*account)
-
 	if err != nil {
-		return fmt.Errorf("error updating SSH Key Pair %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingSSHKeyPair, d.Id(), err)
 	}
 
 	d.SetId(updatedAccount.ID)

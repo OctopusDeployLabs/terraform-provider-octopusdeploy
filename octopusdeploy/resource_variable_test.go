@@ -27,11 +27,11 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployVariableExists(tfVarPrefix),
 					resource.TestCheckResourceAttr(
-						tfVarPrefix, "name", tfVarName),
+						tfVarPrefix, constName, tfVarName),
 					resource.TestCheckResourceAttr(
-						tfVarPrefix, "description", tfVarDesc),
+						tfVarPrefix, constDescription, tfVarDesc),
 					resource.TestCheckResourceAttr(
-						tfVarPrefix, "value", tfVarValue),
+						tfVarPrefix, constValue, tfVarValue),
 				),
 			},
 		},
@@ -40,17 +40,17 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 
 func testVariableBasic(projectName, projectLifecycleID, name, description, value string) string {
 	config := fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource constOctopusDeployProject "foo" {
 			name           = "%s"
 			lifecycle_id    = "%s"
 			project_group_id = "${octopusdeploy_project_group.foo.id}"
 		}
 
-		resource "octopusdeploy_variable" "foovar" {
+		resource constOctopusDeployVariable "foovar" {
 			project_id  = "${octopusdeploy_project.foo.id}"
 			name        = "%s"
 			description = "%s"
@@ -88,13 +88,10 @@ func testOctopusDeployVariableDestroy(s *terraform.State) error {
 }
 
 func destroyVarHelper(s *terraform.State, apiClient *client.Client) error {
-	projID := s.RootModule().Resources["octopusdeploy_project.foo"].Primary.ID
-	varID := s.RootModule().Resources["octopusdeploy_variable.foovar"].Primary.ID
+	projectID := s.RootModule().Resources["octopusdeploy_project.foo"].Primary.ID
+	variableID := s.RootModule().Resources["octopusdeploy_variable.foovar"].Primary.ID
 
-	if _, err := apiClient.Variables.DeleteSingle(projID, varID); err != nil {
-		if err == client.ErrItemNotFound {
-			return nil
-		}
+	if _, err := apiClient.Variables.DeleteSingle(projectID, variableID); err != nil {
 		return fmt.Errorf("Received an error retrieving variable %s", err)
 	}
 	return fmt.Errorf("Variable still exists")

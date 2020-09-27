@@ -12,30 +12,30 @@ import (
 
 func getCommonAccountsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": {
+		constName: {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"description": {
+		constDescription: {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
-		"environments": {
+		constEnvironments: {
 			Type: schema.TypeList,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 			Optional: true,
 		},
-		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants": {
+		constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
+		constTenants: {
 			Type: schema.TypeList,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
 			Optional: true,
 		},
-		"tenant_tags": {
+		constTenantTags: {
 			Type: schema.TypeList,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
@@ -49,47 +49,47 @@ func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*model.Account,
 	octopusClient := m.(*client.Client)
 
 	accountID := d.Id()
-	account, err := octopusClient.Accounts.Get(accountID)
-
-	if err == client.ErrItemNotFound {
-		d.SetId("")
-		return nil, fmt.Errorf("account %s not found: %s ", accountID, err.Error())
-	}
+	account, err := octopusClient.Accounts.GetByID(accountID)
 
 	if err != nil {
-		return nil, fmt.Errorf("error readingaccount %s: %s", accountID, err.Error())
+		return nil, fmt.Errorf(errorReadingAccount, accountID, err.Error())
 	}
 
-	d.Set("name", account.Name)
-	d.Set("description", account.Description)
-	d.Set("environments", account.EnvironmentIDs)
-	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation)
-	d.Set("tenants", account.TenantIDs)
-	d.Set("tenant_tags", account.EnvironmentIDs)
+	if account == nil {
+		d.SetId(constEmptyString)
+		return nil, fmt.Errorf(errorAccountNotFound, accountID)
+	}
+
+	d.Set(constName, account.Name)
+	d.Set(constDescription, account.Description)
+	d.Set(constEnvironments, account.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentParticipation)
+	d.Set(constTenants, account.TenantIDs)
+	d.Set(constTenantTags, account.EnvironmentIDs)
 
 	return account, nil
 }
 
 func buildAccountResourceCommon(d *schema.ResourceData, accountType enum.AccountType) *model.Account {
-	var account, _ = model.NewAccount(d.Get("name").(string), accountType)
+	var account, _ = model.NewAccount(d.Get(constName).(string), accountType)
 
 	if account == nil {
 		log.Println(nameIsNil("buildAccountResourceCommon"))
 	}
 
-	if v, ok := d.GetOk("tenant_tags"); ok {
+	if v, ok := d.GetOk(constTenantTags); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
+	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
 	}
 
-	if v, ok := d.GetOk("tenants"); ok {
+	if v, ok := d.GetOk(constTenants); ok {
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk("tenant_tags"); ok {
+	if v, ok := d.GetOk(constTenantTags); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
@@ -102,7 +102,7 @@ func resourceAccountCreateCommon(d *schema.ResourceData, m interface{}, account 
 	account, err := octopusClient.Accounts.Add(account)
 
 	if err != nil {
-		return fmt.Errorf("error creating account %s: %s", account.Name, err.Error())
+		return createResourceOperationError(errorCreatingAccount, account.Name, err)
 	}
 
 	d.SetId(account.ID)
@@ -118,7 +118,7 @@ func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, account 
 	updatedAccount, err := octopusClient.Accounts.Update(*account)
 
 	if err != nil {
-		return fmt.Errorf("error updating username password account id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingAccount, d.Id(), err)
 	}
 
 	d.SetId(updatedAccount.ID)
@@ -130,12 +130,12 @@ func resourceAccountDeleteCommon(d *schema.ResourceData, m interface{}) error {
 
 	accountID := d.Id()
 
-	err := octopusClient.Accounts.Delete(accountID)
+	err := octopusClient.Accounts.DeleteByID(accountID)
 
 	if err != nil {
-		return fmt.Errorf("error deleting account ID %s: %s", accountID, err.Error())
+		return createResourceOperationError(errorDeletingAccount, accountID, err)
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

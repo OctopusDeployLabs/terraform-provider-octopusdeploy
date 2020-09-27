@@ -34,15 +34,15 @@ func TestAWSAccountBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAWSAccountExists(accountPrefix),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "name", name),
+						accountPrefix, constName, name),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "access_key", accessKey),
+						accountPrefix, constAccessKey, accessKey),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "secret_key", secretKey),
+						accountPrefix, constSecretKey, secretKey),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "tenant_tags.0", tenantTags),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "tenanted_deployment_participation", tenantedDeploymentParticipation.String()),
+						accountPrefix, constTenantedDeploymentParticipation, tenantedDeploymentParticipation.String()),
 				),
 			},
 		},
@@ -79,7 +79,7 @@ func testAWSAccountBasic(tagSetName string, tagName string, name string, accessK
 	return fmt.Sprintf(`
 
 
-		resource "octopusdeploy_azure_service_principal" "foo" {
+		resource constOctopusDeployAzureServicePrincipal "foo" {
 			name           = "%s"
 			access_key = "%s"
 			secret_key = "%s"
@@ -103,7 +103,7 @@ func existsAWSAccountHelper(s *terraform.State, client *client.Client) error {
 
 	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
 
-	if _, err := client.Accounts.Get(accountID); err != nil {
+	if _, err := client.Accounts.GetByID(accountID); err != nil {
 		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
 	}
 
@@ -116,13 +116,8 @@ func testOctopusDeployAWSAccountDestroy(s *terraform.State) error {
 }
 
 func destroyAWSAccountHelper(s *terraform.State, apiClient *client.Client) error {
-
-	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
-
-	if _, err := apiClient.Accounts.Get(accountID); err != nil {
-		if err == client.ErrItemNotFound {
-			return nil
-		}
+	id := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
+	if _, err := apiClient.Accounts.GetByID(id); err != nil {
 		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
 	}
 	return fmt.Errorf("Azure Service Principal still exists")

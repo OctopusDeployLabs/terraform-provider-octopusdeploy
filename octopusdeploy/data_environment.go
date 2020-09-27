@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -12,19 +10,19 @@ func dataEnvironment() *schema.Resource {
 		Read: dataEnvironmentReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"use_guided_failure": {
+			constUseGuidedFailure: {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"allow_dynamic_infrastructure": {
+			constAllowDynamicInfrastructure: {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -35,23 +33,24 @@ func dataEnvironment() *schema.Resource {
 func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	environmentName := d.Get("name")
-	env, err := apiClient.Environments.GetByName(environmentName.(string))
+	name := d.Get(constName).(string)
+	resource, err := apiClient.Environments.GetByName(name)
 
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingEnvironment, name, err)
+	}
+	if resource == nil {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading environment with name %s: %s", environmentName, err.Error())
-	}
+	logResource(constEnvironment, m)
 
-	d.SetId(env.ID)
-
-	d.Set("name", env.Name)
-	d.Set("description", env.Description)
-	d.Set("use_guided_failure", env.UseGuidedFailure)
-	d.Set("allow_dynamic_infrastructure", env.AllowDynamicInfrastructure)
+	d.SetId(resource.ID)
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
+	d.Set(constUseGuidedFailure, resource.UseGuidedFailure)
+	d.Set(constAllowDynamicInfrastructure, resource.AllowDynamicInfrastructure)
 
 	return nil
 }

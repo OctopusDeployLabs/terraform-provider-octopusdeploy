@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
@@ -19,34 +18,34 @@ func resourceAzureServicePrincipal() *schema.Resource {
 	log.Println("Hello")
 	schemaMap := getCommonAccountsSchema()
 
-	schemaMap["client_id"] = &schema.Schema{
+	schemaMap[constClientID] = &schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 	}
-	schemaMap["tenant_id"] = &schema.Schema{
+	schemaMap[constTenantID] = &schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 	}
-	schemaMap["subscription_number"] = &schema.Schema{
+	schemaMap[constSubscriptionNumber] = &schema.Schema{
 		Type: schema.TypeString,
 		//Computed:     true,
 		Required:     true,
 		ValidateFunc: validation.IsUUID,
 	}
-	schemaMap["key"] = &schema.Schema{
+	schemaMap[constKey] = &schema.Schema{
 		Type:      schema.TypeString,
 		Required:  true,
 		Sensitive: true,
 	}
-	schemaMap["azure_environment"] = &schema.Schema{
+	schemaMap[constAzureEnvironment] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
-	schemaMap["resource_management_endpoint_base_uri"] = &schema.Schema{
+	schemaMap[constResourceManagementEndpointBaseURI] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
-	schemaMap["active_directory_endpoint_base_uri"] = &schema.Schema{
+	schemaMap[constActiveDirectoryEndpointBaseURI] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
@@ -62,7 +61,7 @@ func resourceAzureServicePrincipal() *schema.Resource {
 
 func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account, error) {
 	accountStruct := model.Account{}
-	if accountStruct.Name == "" {
+	if accountStruct.Name == constEmptyString {
 		log.Println("Name struct is nil")
 	}
 
@@ -70,28 +69,28 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 		return nil, createInvalidParameterError("buildAzureServicePrincipalResource", "d")
 	}
 
-	name := d.Get("name").(string)
+	name := d.Get(constName).(string)
 
-	password := d.Get("key").(string)
-	if password == "" {
+	password := d.Get(constKey).(string)
+	if password == constEmptyString {
 		log.Println("Key is nil. Must add in a password")
 	}
 
 	secretKey := model.NewSensitiveValue(password)
 
-	applicationID, err := uuid.Parse(d.Get("client_id").(string))
+	applicationID, err := uuid.Parse(d.Get(constClientID).(string))
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	tenantID, err := uuid.Parse(d.Get("tenant_id").(string))
+	tenantID, err := uuid.Parse(d.Get(constTenantID).(string))
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	subscriptionID, err := uuid.Parse(d.Get("subscription_number").(string))
+	subscriptionID, err := uuid.Parse(d.Get(constSubscriptionNumber).(string))
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -104,31 +103,31 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 	}
 
 	// Optional Fields
-	if v, ok := d.GetOk("description"); ok {
+	if v, ok := d.GetOk(constDescription); ok {
 		account.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk("environments"); ok {
+	if v, ok := d.GetOk(constEnvironments); ok {
 		account.EnvironmentIDs = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
+	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
 		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
 	}
 
-	if v, ok := d.GetOk("tenant_tags"); ok {
+	if v, ok := d.GetOk(constTenantTags); ok {
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk("tenants"); ok {
+	if v, ok := d.GetOk(constTenants); ok {
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk("resource_management_endpoint_base_uri"); ok {
+	if v, ok := d.GetOk(constResourceManagementEndpointBaseURI); ok {
 		account.ResourceManagementEndpointBase = v.(string)
 	}
 
-	if v, ok := d.GetOk("active_directory_endpoint_base_uri"); ok {
+	if v, ok := d.GetOk(constActiveDirectoryEndpointBaseURI); ok {
 		account.ActiveDirectoryEndpointBase = v.(string)
 	}
 
@@ -159,10 +158,10 @@ func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) 
 	account, err := apiClient.Accounts.Add(newAccount)
 
 	if err != nil {
-		return fmt.Errorf("error creating azure service principal %s: %s", newAccount.Name, err.Error())
+		createResourceOperationError(errorCreatingAzureServicePrincipal, newAccount.Name, err)
 	}
 
-	if account.ID == "" {
+	if account.ID == constEmptyString {
 		log.Println("ID is nil")
 	} else {
 		d.SetId(account.ID)
@@ -183,7 +182,7 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 	apiClient := m.(*client.Client)
 
 	accountID := d.Id()
-	account, err := apiClient.Accounts.Get(accountID)
+	account, err := apiClient.Accounts.GetByID(accountID)
 
 	if account.Validate() == nil {
 		return nil
@@ -193,22 +192,22 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 	log.Println(err1)
 
 	if err != nil {
-		return fmt.Errorf("error reading azure service principal %s: %s", accountID, err.Error())
+		return createResourceOperationError(errorReadingAzureServicePrincipal, accountID, err)
 	}
 
-	d.Set("name", account.Name)
-	d.Set("description", account.Description)
-	d.Set("environments", account.EnvironmentIDs)
-	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
-	d.Set("tenant_tags", account.TenantTags)
+	d.Set(constName, account.Name)
+	d.Set(constDescription, account.Description)
+	d.Set(constEnvironments, account.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentParticipation.String())
+	d.Set(constTenantTags, account.TenantTags)
 
-	d.Set("client_id", account.ApplicationID)
-	d.Set("tenant_id", account.TenantIDs)
-	d.Set("subscription_number", account.SubscriptionID)
-	d.Set("key", account.Password)
-	d.Set("azure_environment", account.AzureEnvironment)
-	d.Set("resource_management_endpoint_base_uri", account.ResourceManagementEndpointBase)
-	d.Set("active_directory_endpoint_base_uri", account.ActiveDirectoryEndpointBase)
+	d.Set(constClientID, account.ApplicationID)
+	d.Set(constTenantID, account.TenantIDs)
+	d.Set(constSubscriptionNumber, account.SubscriptionID)
+	d.Set(constKey, account.Password)
+	d.Set(constAzureEnvironment, account.AzureEnvironment)
+	d.Set(constResourceManagementEndpointBaseURI, account.ResourceManagementEndpointBase)
+	d.Set(constActiveDirectoryEndpointBaseURI, account.ActiveDirectoryEndpointBase)
 
 	return nil
 }
@@ -227,7 +226,7 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	if account.ID == "" {
+	if account.ID == constEmptyString {
 		log.Println("ID is nil")
 	} else {
 		account.ID = d.Id()
@@ -238,10 +237,10 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 	updatedAccount, err := apiClient.Accounts.Update(*account)
 
 	if err != nil {
-		return fmt.Errorf("error updating azure service principal id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err)
 	}
 
-	if updatedAccount.ID == "" {
+	if updatedAccount.ID == constEmptyString {
 		log.Println("ID is nil")
 	} else {
 		d.SetId(updatedAccount.ID)

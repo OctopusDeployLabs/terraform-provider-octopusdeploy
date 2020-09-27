@@ -17,7 +17,7 @@ func resourceDeploymentProcess() *schema.Resource {
 		Delete: resourceDeploymentProcessDelete,
 
 		Schema: map[string]*schema.Schema{
-			"project_id": {
+			constProjectID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -31,19 +31,19 @@ func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) erro
 
 	newDeploymentProcess := buildDeploymentProcessResource(d)
 
-	project, err := apiClient.Projects.Get(newDeploymentProcess.ProjectID)
+	project, err := apiClient.Projects.GetByID(newDeploymentProcess.ProjectID)
 	if err != nil {
 		return fmt.Errorf("error getting project %s: %s", project.Name, err.Error())
 	}
 
-	current, err := apiClient.DeploymentProcesses.Get(project.DeploymentProcessID)
+	current, err := apiClient.DeploymentProcesses.GetByID(project.DeploymentProcessID)
 	if err != nil {
 		return fmt.Errorf("error getting deployment process for %s: %s", project.Name, err.Error())
 	}
 
 	newDeploymentProcess.ID = current.ID
 	newDeploymentProcess.Version = current.Version
-	createdDeploymentProcess, err := apiClient.DeploymentProcesses.Update(newDeploymentProcess)
+	createdDeploymentProcess, err := apiClient.DeploymentProcesses.Update(*newDeploymentProcess)
 
 	if err != nil {
 		return fmt.Errorf("error creating deployment process: %s", err.Error())
@@ -56,7 +56,7 @@ func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) erro
 
 func buildDeploymentProcessResource(d *schema.ResourceData) *model.DeploymentProcess {
 	deploymentProcess := &model.DeploymentProcess{
-		ProjectID: d.Get("project_id").(string),
+		ProjectID: d.Get(constProjectID).(string),
 	}
 
 	if attr, ok := d.GetOk("step"); ok {
@@ -76,15 +76,13 @@ func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error 
 
 	deploymentProcessID := d.Id()
 
-	_, err := apiClient.DeploymentProcesses.Get(deploymentProcessID)
-
-	if err == client.ErrItemNotFound {
-		d.SetId("")
-		return nil
-	}
-
+	resource, err := apiClient.DeploymentProcesses.GetByID(deploymentProcessID)
 	if err != nil {
 		return fmt.Errorf("error reading deployment process id %s: %s", deploymentProcessID, err.Error())
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
+		return nil
 	}
 
 	log.Printf("[DEBUG] deploymentProcess: %v", m)
@@ -98,13 +96,13 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 
 	apiClient := m.(*client.Client)
 
-	current, err := apiClient.DeploymentProcesses.Get(deploymentProcess.ID)
+	current, err := apiClient.DeploymentProcesses.GetByID(deploymentProcess.ID)
 	if err != nil {
 		return fmt.Errorf("error getting deployment process %s: %s", deploymentProcess.ID, err.Error())
 	}
 
 	deploymentProcess.Version = current.Version
-	deploymentProcess, err = apiClient.DeploymentProcesses.Update(deploymentProcess)
+	deploymentProcess, err = apiClient.DeploymentProcesses.Update(*deploymentProcess)
 
 	if err != nil {
 		return fmt.Errorf("error updating deployment process id %s: %s", d.Id(), err.Error())
@@ -117,7 +115,7 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 
 func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
-	current, err := apiClient.DeploymentProcesses.Get(d.Id())
+	current, err := apiClient.DeploymentProcesses.GetByID(d.Id())
 
 	if err != nil {
 		return fmt.Errorf("error getting deployment process with id %s: %s", d.Id(), err.Error())
@@ -128,12 +126,12 @@ func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) erro
 	}
 	deploymentProcess.ID = d.Id()
 
-	deploymentProcess, err = apiClient.DeploymentProcesses.Update(deploymentProcess)
+	deploymentProcess, err = apiClient.DeploymentProcesses.Update(*deploymentProcess)
 
 	if err != nil {
 		return fmt.Errorf("error deleting deployment process with id %s: %s", deploymentProcess.ID, err.Error())
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

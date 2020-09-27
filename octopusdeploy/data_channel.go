@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -12,40 +10,40 @@ func dataChannel() *schema.Resource {
 		Read: dataChannelReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"project_id": {
+			constProjectID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"lifecycle_id": {
+			constLifecycleID: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"is_default": {
+			constIsDefault: {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"rule": {
+			constRule: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"version_range": {
+						constVersionRange: {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"tag": {
+						constTag: {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"actions": {
+						constActions: {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
@@ -60,21 +58,31 @@ func dataChannel() *schema.Resource {
 func dataChannelReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	ChannelName := d.Get("name")
-	env, err := apiClient.Channels.Get(ChannelName.(string))
+	name := d.Get(constName).(string)
+	resourceList, err := apiClient.Channels.GetByPartialName(name)
 
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingChannel, name, err)
+	}
+	if len(resourceList) == 0 {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading Channel with name %s: %s", ChannelName, err.Error())
+	// NOTE: two or more channels can have the same name in Octopus and
+	// therefore, a better search criteria needs to be implemented below
+
+	for _, resource := range resourceList {
+		if resource.Name == name {
+			logResource(constChannel, m)
+
+			d.SetId(resource.ID)
+			d.Set(constName, resource.Name)
+			d.Set(constDescription, resource.Description)
+
+			return nil
+		}
 	}
-
-	d.SetId(env.ID)
-
-	d.Set("name", env.Name)
-	d.Set("description", env.Description)
 
 	return nil
 }

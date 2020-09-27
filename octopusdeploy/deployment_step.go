@@ -13,12 +13,12 @@ func getDeploymentStepSchema() *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"name": {
+				constName: {
 					Type:        schema.TypeString,
 					Description: "The name of the step",
 					Required:    true,
 				},
-				"target_roles": {
+				constTargetRoles: {
 					Description: "The roles that this step run against, or runs on behalf of",
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -26,7 +26,7 @@ func getDeploymentStepSchema() *schema.Schema {
 						Type: schema.TypeString,
 					},
 				},
-				"package_requirement": {
+				constPackageRequirement: {
 					Type:        schema.TypeString,
 					Description: "Whether to run this step before or after package acquisition (if possible)",
 					Optional:    true,
@@ -37,7 +37,7 @@ func getDeploymentStepSchema() *schema.Schema {
 						(string)(model.DeploymentStepPackageRequirementAfterPackageAcquisition),
 					}),
 				},
-				"condition": {
+				constCondition: {
 					Type:        schema.TypeString,
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
 					Optional:    true,
@@ -49,12 +49,12 @@ func getDeploymentStepSchema() *schema.Schema {
 						(string)(model.DeploymentStepConditionVariable),
 					}),
 				},
-				"condition_expression": {
+				constConditionExpression: {
 					Type:        schema.TypeString,
 					Description: "The expression to evaluate to determine whether to run this step when 'condition' is 'Variable'",
 					Optional:    true,
 				},
-				"start_trigger": {
+				constStartTrigger: {
 					Type:        schema.TypeString,
 					Description: "Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')",
 					Optional:    true,
@@ -64,19 +64,19 @@ func getDeploymentStepSchema() *schema.Schema {
 						(string)(model.DeploymentStepStartTriggerStartWithPrevious),
 					}),
 				},
-				"window_size": {
+				constWindowSize: {
 					Type:        schema.TypeString,
 					Description: "The maximum number of targets to deploy to simultaneously",
 					Optional:    true,
 				},
 				"action":                          getDeploymentActionSchema(),
-				"manual_intervention_action":      getManualInterventionActionSchema(),
-				"apply_terraform_action":          getApplyTerraformActionSchema(),
-				"deploy_package_action":           getDeployPackageAction(),
-				"deploy_windows_service_action":   getDeployWindowsServiceActionSchema(),
+				constManualInterventionAction:      getManualInterventionActionSchema(),
+				constApplyTerraformAction:          getApplyTerraformActionSchema(),
+				constDeployPackageAction:           getDeployPackageAction(),
+				constDeployWindowsServiceAction:   getDeployWindowsServiceActionSchema(),
 				"run_script_action":               getRunScriptActionSchema(),
-				"run_kubectl_script_action":       getRunRunKubectlScriptSchema(),
-				"deploy_kubernetes_secret_action": getDeployKubernetesSecretActionSchema(),
+				constRunKubectlScriptAction:       getRunRunKubectlScriptSchema(),
+				constDeployKubernetesSecretAction: getDeployKubernetesSecretActionSchema(),
 			},
 		},
 	}
@@ -84,24 +84,24 @@ func getDeploymentStepSchema() *schema.Schema {
 
 func buildDeploymentStepResource(tfStep map[string]interface{}) model.DeploymentStep {
 	step := model.DeploymentStep{
-		Name:               tfStep["name"].(string),
-		PackageRequirement: model.DeploymentStepPackageRequirement(tfStep["package_requirement"].(string)),
-		Condition:          model.DeploymentStepCondition(tfStep["condition"].(string)),
-		StartTrigger:       model.DeploymentStepStartTrigger(tfStep["start_trigger"].(string)),
+		Name:               tfStep[constName].(string),
+		PackageRequirement: model.DeploymentStepPackageRequirement(tfStep[constPackageRequirement].(string)),
+		Condition:          model.DeploymentStepCondition(tfStep[constCondition].(string)),
+		StartTrigger:       model.DeploymentStepStartTrigger(tfStep[constStartTrigger].(string)),
 		Properties:         map[string]string{},
 	}
 
-	targetRoles := tfStep["target_roles"]
+	targetRoles := tfStep[constTargetRoles]
 	if targetRoles != nil {
 		step.Properties["Octopus.Action.TargetRoles"] = strings.Join(getSliceFromTerraformTypeList(targetRoles), ",")
 	}
 
-	conditionExpression := tfStep["condition_expression"]
+	conditionExpression := tfStep[constConditionExpression]
 	if conditionExpression != nil {
 		step.Properties["Octopus.Action.ConditionVariableExpression"] = conditionExpression.(string)
 	}
 
-	windowSize := tfStep["window_size"]
+	windowSize := tfStep[constWindowSize]
 	if windowSize != nil {
 		step.Properties["Octopus.Action.MaxParallelism"] = windowSize.(string)
 	}
@@ -113,28 +113,28 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) model.Deployment
 		}
 	}
 
-	if attr, ok := tfStep["manual_intervention_action"]; ok {
+	if attr, ok := tfStep[constManualInterventionAction]; ok {
 		for _, tfAction := range attr.([]interface{}) {
 			action := buildManualInterventionActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["apply_terraform_action"]; ok {
+	if attr, ok := tfStep[constApplyTerraformAction]; ok {
 		for _, tfAction := range attr.([]interface{}) {
 			action := buildApplyTerraformActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["deploy_package_action"]; ok {
+	if attr, ok := tfStep[constDeployPackageAction]; ok {
 		for _, tfAction := range attr.([]interface{}) {
 			action := buildDeployPackageActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["deploy_windows_service_action"]; ok {
+	if attr, ok := tfStep[constDeployWindowsServiceAction]; ok {
 		for _, tfAction := range attr.([]interface{}) {
 			action := buildDeployWindowsServiceActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
@@ -148,14 +148,14 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) model.Deployment
 		}
 	}
 
-	if attr, ok := tfStep["run_kubectl_script_action"]; ok {
+	if attr, ok := tfStep[constRunKubectlScriptAction]; ok {
 		for _, tfAction := range attr.([]interface{}) {
 			action := buildRunKubectlScriptActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["deploy_kubernetes_secret_action"]; ok {
+	if attr, ok := tfStep[constDeployKubernetesSecretAction]; ok {
 		for _, tfAction := range attr.([]interface{}) {
 			action := buildDeployKubernetesSecretActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)

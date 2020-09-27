@@ -1,9 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -13,7 +10,7 @@ func dataLibraryVariableSet() *schema.Resource {
 		Read: dataLibraryVariableSetReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -24,23 +21,32 @@ func dataLibraryVariableSet() *schema.Resource {
 func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	name := d.Get("name")
+	name := d.Get(constName).(string)
+	resourceList, err := apiClient.LibraryVariableSets.GetByPartialName(name)
 
-	libraryVariableSet, err := apiClient.LibraryVariableSets.GetByName(name.(string))
-
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingLibraryVariableSet, name, err)
+	}
+	if len(resourceList) == 0 {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading libraryVariableSet name %s: %s", name, err.Error())
+	// NOTE: two or more library variables can have the same name in Octopus.
+	// Therefore, a better search criteria needs to be implemented below.
+
+	for _, resource := range resourceList {
+		if resource.Name == name {
+			logResource(constLibraryVariableSet, m)
+
+			d.SetId(resource.ID)
+			d.Set(constName, resource.Name)
+			d.Set(constDescription, resource.Description)
+			d.Set(constVariableSetID, resource.VariableSetID)
+
+			return nil
+		}
 	}
 
-	d.SetId(libraryVariableSet.ID)
-
-	log.Printf("[DEBUG] libraryVariableSet: %v", m)
-	d.Set("name", libraryVariableSet.Name)
-	d.Set("description", libraryVariableSet.Description)
-	d.Set("variable_set_id", libraryVariableSet.VariableSetID)
 	return nil
 }

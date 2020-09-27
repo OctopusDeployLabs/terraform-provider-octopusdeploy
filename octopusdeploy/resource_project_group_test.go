@@ -22,7 +22,7 @@ func TestAccOctopusDeployProjectGroupBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectGroupExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", projectGroupName),
+						terraformNamePrefix, constName, projectGroupName),
 				),
 			},
 		},
@@ -44,7 +44,7 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectGroupExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", projectGroupName),
+						terraformNamePrefix, constName, projectGroupName),
 				),
 			},
 			// create update it with a description
@@ -53,9 +53,9 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectGroupExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", projectGroupName),
+						terraformNamePrefix, constName, projectGroupName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", description),
+						terraformNamePrefix, constDescription, description),
 				),
 			},
 			// update again by remove its description
@@ -64,9 +64,9 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectGroupExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", projectGroupName),
+						terraformNamePrefix, constName, projectGroupName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", ""),
+						terraformNamePrefix, constDescription, ""),
 				),
 			},
 		},
@@ -75,7 +75,7 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 
 func testAccProjectGroupBasic(name string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name           = "%s"
 		  }
 		`,
@@ -84,7 +84,7 @@ func testAccProjectGroupBasic(name string) string {
 }
 func testAccProjectGroupWithDescription(name, description string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name           = "%s"
 			description    = "%s"
 		  }
@@ -114,10 +114,7 @@ func testAccCheckOctopusDeployProjectGroupExists(n string) resource.TestCheckFun
 
 func destroyHelperProjectGroup(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.ProjectGroups.Get(r.Primary.ID); err != nil {
-			if err == client.ErrItemNotFound {
-				continue
-			}
+		if _, err := apiClient.ProjectGroups.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving projectgroup %s", err)
 		}
 		return fmt.Errorf("projectgroup still exists")
@@ -127,7 +124,7 @@ func destroyHelperProjectGroup(s *terraform.State, apiClient *client.Client) err
 
 func existsHelperProjectGroup(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.ProjectGroups.Get(r.Primary.ID); err != nil {
+		if _, err := client.ProjectGroups.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("received an error retrieving projectgroup %s", err)
 		}
 	}

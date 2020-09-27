@@ -22,15 +22,15 @@ func resourceVariable() *schema.Resource {
 			State: resourceVariableImport,
 		},
 		Schema: map[string]*schema.Schema{
-			"project_id": {
+			constProjectID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"type": {
+			constType: {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validateValueFunc([]string{
@@ -41,42 +41,42 @@ func resourceVariable() *schema.Resource {
 					"AzureAccount",
 				}),
 			},
-			"value": {
+			constValue: {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{"sensitive_value"},
+				ConflictsWith: []string{constSensitiveValue},
 			},
-			"sensitive_value": {
+			constSensitiveValue: {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{"value"},
+				ConflictsWith: []string{constValue},
 				Sensitive:     true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"scope": schemaVariableScope,
-			"is_sensitive": {
+			constScope: schemaVariableScope,
+			constIsSensitive: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"prompt": {
+			constPrompt: {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						constLabel: {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"description": {
+						constDescription: {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"required": {
+						constRequired: {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
@@ -89,11 +89,11 @@ func resourceVariable() *schema.Resource {
 				ForceNew:  true,
 				Sensitive: true,
 			},
-			"key_fingerprint": {
+			constKeyFingerprint: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"encrypted_value": {
+			constEncryptedValue: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -107,75 +107,75 @@ func resourceVariableImport(d *schema.ResourceData, m interface{}) ([]*schema.Re
 		return nil, fmt.Errorf("octopusdeploy_variable import must be in the form of ProjectID:VariableID (e.g. Projects-62:0906031f-68ba-4a15-afaa-657c1564e07b")
 	}
 
-	d.Set("project_id", importStrings[0])
+	d.Set(constProjectID, importStrings[0])
 	d.SetId(importStrings[1])
 
 	return []*schema.ResourceData{d}, nil
 }
 
 func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+	projectID := d.Get(constProjectID).(string)
+
 	apiClient := m.(*client.Client)
-
-	variableID := d.Id()
-	projectID := d.Get("project_id").(string)
-	isSensitive := d.Get("is_sensitive").(bool)
-	tfVar, err := apiClient.Variables.GetByID(projectID, variableID)
-
-	if err == client.ErrItemNotFound || tfVar == nil {
-		d.SetId("")
+	resource, err := apiClient.Variables.GetByID(projectID, id)
+	if err != nil {
+		return createResourceOperationError(errorReadingVariable, id, err)
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading Variable %s: %s", variableID, err.Error())
+	d.Set(constName, resource.Name)
+	d.Set(constType, resource.Type)
+
+	isSensitive := d.Get(constIsSensitive).(bool)
+	if isSensitive {
+		d.Set(constValue, nil)
+	} else {
+		d.Set(constValue, resource.Value)
 	}
 
-	d.Set("name", tfVar.Name)
-	d.Set("type", tfVar.Type)
-	if isSensitive {
-		d.Set("value", nil)
-	} else {
-		d.Set("value", tfVar.Value)
-	}
-	d.Set("description", tfVar.Description)
+	d.Set(constDescription, resource.Description)
 
 	return nil
 }
 
 func buildVariableResource(d *schema.ResourceData) *model.Variable {
-	varName := d.Get("name").(string)
-	varType := d.Get("type").(string)
+	varName := d.Get(constName).(string)
+	varType := d.Get(constType).(string)
 
 	var varDesc, varValue string
 	var varSensitive bool
 
-	if varDescInterface, ok := d.GetOk("description"); ok {
+	if varDescInterface, ok := d.GetOk(constDescription); ok {
 		varDesc = varDescInterface.(string)
 	}
 
-	if varSensitiveInterface, ok := d.GetOk("is_sensitive"); ok {
+	if varSensitiveInterface, ok := d.GetOk(constIsSensitive); ok {
 		varSensitive = varSensitiveInterface.(bool)
 	}
 
 	if varSensitive {
-		varValue = d.Get("sensitive_value").(string)
+		varValue = d.Get(constSensitiveValue).(string)
 	} else {
-		varValue = d.Get("value").(string)
+		varValue = d.Get(constValue).(string)
 	}
 
 	varScopeInterface := tfVariableScopetoODVariableScope(d)
 
 	newVar := model.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
 
-	varPrompt, ok := d.GetOk("prompt")
+	varPrompt, ok := d.GetOk(constPrompt)
 	if ok {
 		tfPromptSettings := varPrompt.(*schema.Set)
 		if len(tfPromptSettings.List()) == 1 {
 			tfPromptList := tfPromptSettings.List()[0].(map[string]interface{})
 			newPrompt := model.VariablePromptOptions{
-				Description: tfPromptList["description"].(string),
-				Label:       tfPromptList["label"].(string),
-				Required:    tfPromptList["required"].(bool),
+				Description: tfPromptList[constDescription].(string),
+				Label:       tfPromptList[constLabel].(string),
+				Required:    tfPromptList[constRequired].(bool),
 			}
 			newVar.Prompt = &newPrompt
 		}
@@ -191,14 +191,13 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	apiClient := m.(*client.Client)
-	projID := d.Get("project_id").(string)
-
+	projID := d.Get(constProjectID).(string)
 	newVariable := buildVariableResource(d)
-	tfVar, err := apiClient.Variables.AddSingle(projID, newVariable)
 
+	apiClient := m.(*client.Client)
+	tfVar, err := apiClient.Variables.AddSingle(projID, newVariable)
 	if err != nil {
-		return fmt.Errorf("error creating variable %s: %s", newVariable.Name, err.Error())
+		return createResourceOperationError(errorCreatingVariable, newVariable.Name, err)
 	}
 
 	for _, v := range tfVar.Variables {
@@ -214,7 +213,7 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return fmt.Errorf("unable to locate variable in project %s", projID)
 }
 
@@ -228,13 +227,12 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 
 	tfVar := buildVariableResource(d)
 	tfVar.ID = d.Id() // set project struct ID so octopus knows which project to update
+	projID := d.Get(constProjectID).(string)
 
 	apiClient := m.(*client.Client)
-	projID := d.Get("project_id").(string)
-
 	updatedVars, err := apiClient.Variables.UpdateSingle(projID, tfVar)
 	if err != nil {
-		return fmt.Errorf("error updating variable id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingVariable, d.Id(), err)
 	}
 
 	for _, v := range updatedVars.Variables {
@@ -247,7 +245,7 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return fmt.Errorf("unable to locate variable in project %s", projID)
 }
 
@@ -255,18 +253,16 @@ func resourceVariableDelete(d *schema.ResourceData, m interface{}) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	apiClient := m.(*client.Client)
-	projID := d.Get("project_id").(string)
-
+	projID := d.Get(constProjectID).(string)
 	variableID := d.Id()
 
+	apiClient := m.(*client.Client)
 	_, err := apiClient.Variables.DeleteSingle(projID, variableID)
-
 	if err != nil {
-		return fmt.Errorf("error deleting variable id %s: %s", variableID, err.Error())
+		return createResourceOperationError(errorDeletingVariable, variableID, err)
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }
 
@@ -274,8 +270,8 @@ func resourceVariableDelete(d *schema.ResourceData, m interface{}) error {
 // schema has been parsed, which as far as I can tell we can't do in a normal validation
 // function.
 func validateVariable(d *schema.ResourceData) error {
-	tfSensitive := d.Get("is_sensitive").(bool)
-	tfType := d.Get("type").(string)
+	tfSensitive := d.Get(constIsSensitive).(bool)
+	tfType := d.Get(constType).(string)
 
 	if tfSensitive && tfType != "Sensitive" {
 		return fmt.Errorf("when is_sensitive is set to true, type needs to be 'Sensitive'")

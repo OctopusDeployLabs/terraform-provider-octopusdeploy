@@ -30,13 +30,13 @@ func TestUsernamePasswordBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testusernamepasswordExists(accountPrefix),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "username", username),
+						accountPrefix, constUsername, username),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "password", password),
+						accountPrefix, constPassword, password),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "tenant_tags.0", tenantTags),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "tenanted_deployment_participation", tenantedDeploymentParticipation.String()),
+						accountPrefix, constTenantedDeploymentParticipation, tenantedDeploymentParticipation.String()),
 				),
 			},
 		},
@@ -47,7 +47,7 @@ func testusernamepasswordBasic(tagSetName string, tagName string, username strin
 	return fmt.Sprintf(`
 
 
-		resource "octopusdeploy_azure_service_principal" "foo" {
+		resource constOctopusDeployAzureServicePrincipal "foo" {
 			usernamename           = "%s"
 			password = "%s"
 			tagSetName = "%s"
@@ -70,7 +70,7 @@ func existsusernamepasswordHelper(s *terraform.State, client *client.Client) err
 
 	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
 
-	if _, err := client.Accounts.Get(accountID); err != nil {
+	if _, err := client.Accounts.GetByID(accountID); err != nil {
 		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
 	}
 
@@ -83,13 +83,8 @@ func testOctopusDeployusernamepasswordDestroy(s *terraform.State) error {
 }
 
 func destroyusernamepasswordHelper(s *terraform.State, apiClient *client.Client) error {
-
-	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
-
-	if _, err := apiClient.Accounts.Get(accountID); err != nil {
-		if err == client.ErrItemNotFound {
-			return nil
-		}
+	id := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
+	if _, err := apiClient.Accounts.GetByID(id); err != nil {
 		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
 	}
 	return fmt.Errorf("Azure Service Principal still exists")

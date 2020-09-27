@@ -17,38 +17,38 @@ func resourceFeed() *schema.Resource {
 		Delete: resourceFeedDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"feed_type": {
+			constFeedType: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"feed_uri": {
+			constFeedURI: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"enhanced_mode": {
+			constEnhancedMode: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"download_attempts": {
+			constDownloadAttempts: {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  5,
 			},
-			"download_retry_backoff_seconds": {
+			constDownloadRetryBackoffSeconds: {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  10,
 			},
-			"username": {
+			constUsername: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"password": {
+			constPassword: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
@@ -61,95 +61,77 @@ func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
 	feedID := d.Id()
-	feed, err := apiClient.Feeds.Get(feedID)
-
-	if err == client.ErrItemNotFound {
-		d.SetId("")
-		return nil
-	}
+	feed, err := apiClient.Feeds.GetByID(feedID)
 
 	if err != nil {
-		return fmt.Errorf("error reading feed %s: %s", feedID, err.Error())
+		d.SetId(constEmptyString)
+		return fmt.Errorf(errorReadingFeed, feedID, err.Error())
 	}
 
-	d.Set("name", feed.Name)
-	d.Set("feed_type", feed.FeedType)
-	d.Set("feed_uri", feed.FeedURI)
-	d.Set("enhanced_mode", feed.EnhancedMode)
-	d.Set("download_attempts", feed.DownloadAttempts)
-	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
-	d.Set("username", feed.Username)
-	d.Set("password", feed.Password)
+	d.Set(constName, feed.Name)
+	d.Set(constFeedType, feed.FeedType)
+	d.Set(constFeedURI, feed.FeedURI)
+	d.Set(constEnhancedMode, feed.EnhancedMode)
+	d.Set(constDownloadAttempts, feed.DownloadAttempts)
+	d.Set(constDownloadRetryBackoffSeconds, feed.DownloadRetryBackoffSeconds)
+	d.Set(constUsername, feed.Username)
+	d.Set(constPassword, feed.Password)
 
 	return nil
 }
 
 func buildFeedResource(d *schema.ResourceData) *model.Feed {
-	feedName := d.Get("name").(string)
+	name := d.Get(constName).(string)
 
 	var feedType enum.FeedType
-	var feedURI string
-	var enhancedMode bool
-	var downloadAttempts int
-	var downloadRetryBackoffSeconds int
-	var feedUsername string
-	var feedPassword string
-
-	feedTypeInterface, ok := d.GetOk("feed_type")
+	feedTypeInterface, ok := d.GetOk(constFeedType)
 	if ok {
 		feedType = feedTypeInterface.(enum.FeedType)
 	}
 
-	feedURIInterface, ok := d.GetOk("feed_uri")
+	var feedURI string
+	feedURIInterface, ok := d.GetOk(constFeedURI)
 	if ok {
 		feedURI = feedURIInterface.(string)
 	}
 
-	enhancedModeInterface, ok := d.GetOk("enhanced_mode")
+	var feed = model.NewFeed(name, feedType, feedURI)
+
+	enhancedModeInterface, ok := d.GetOk(constEnhancedMode)
 	if ok {
-		enhancedMode = enhancedModeInterface.(bool)
+		feed.EnhancedMode = enhancedModeInterface.(bool)
 	}
 
-	downloadAttemptsInterface, ok := d.GetOk("download_attempts")
+	downloadAttemptsInterface, ok := d.GetOk(constDownloadAttempts)
 	if ok {
-		downloadAttempts = downloadAttemptsInterface.(int)
+		feed.DownloadAttempts = downloadAttemptsInterface.(int)
 	}
 
-	downloadRetryBackoffSecondsInterface, ok := d.GetOk("download_retry_backoff_seconds")
+	downloadRetryBackoffSecondsInterface, ok := d.GetOk(constDownloadRetryBackoffSeconds)
 	if ok {
-		downloadRetryBackoffSeconds = downloadRetryBackoffSecondsInterface.(int)
+		feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSecondsInterface.(int)
 	}
 
-	feedUsernameInterface, ok := d.GetOk("username")
+	feedUsernameInterface, ok := d.GetOk(constUsername)
 	if ok {
-		feedUsername = feedUsernameInterface.(string)
+		feed.Username = feedUsernameInterface.(string)
 	}
 
-	feedPasswordInterface, ok := d.GetOk("password")
+	feedPasswordInterface, ok := d.GetOk(constPassword)
 	if ok {
-		feedPassword = feedPasswordInterface.(string)
-	}
-
-	var feed = model.NewFeed(feedName, feedType, feedURI)
-	feed.EnhancedMode = enhancedMode
-	feed.DownloadAttempts = downloadAttempts
-	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
-	feed.Username = feedUsername
-	feed.Password = model.SensitiveValue{
-		NewValue: &feedPassword,
+		feed.Password = model.NewSensitiveValue(feedPasswordInterface.(string))
 	}
 
 	return feed
 }
 
 func resourceFeedCreate(d *schema.ResourceData, m interface{}) error {
+	resource := buildFeedResource(d)
+
 	apiClient := m.(*client.Client)
-
-	newFeed := buildFeedResource(d)
-	feed, err := apiClient.Feeds.Add(*newFeed)
-
+	feed, err := apiClient.Feeds.Add(*resource)
 	if err != nil {
-		return fmt.Errorf("error creating feed %s: %s", newFeed.Name, err.Error())
+		return fmt.Errorf(errorCreatingFeed, resource.Name, err.Error())
 	}
 
 	d.SetId(feed.ID)
@@ -158,32 +140,30 @@ func resourceFeedCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceFeedUpdate(d *schema.ResourceData, m interface{}) error {
-	feed := buildFeedResource(d)
-	feed.ID = d.Id() // set project struct ID so octopus knows which project to update
+	resource := buildFeedResource(d)
+
+	// set ID to inform Octopus API which feed to update
+	resource.ID = d.Id()
 
 	apiClient := m.(*client.Client)
-
-	updatedFeed, err := apiClient.Feeds.Update(*feed)
-
+	resource, err := apiClient.Feeds.Update(*resource)
 	if err != nil {
-		return fmt.Errorf("error updating feed id %s: %s", d.Id(), err.Error())
+		return fmt.Errorf(errorUpdatingFeed, d.Id(), err.Error())
 	}
 
-	d.SetId(updatedFeed.ID)
+	d.SetId(resource.ID)
 	return nil
 }
 
 func resourceFeedDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	feedID := d.Id()
-
-	err := apiClient.Feeds.Delete(feedID)
-
+	err := apiClient.Feeds.DeleteByID(id)
 	if err != nil {
-		return fmt.Errorf("error deleting feed id %s: %s", feedID, err.Error())
+		return fmt.Errorf(errorDeletingFeed, id, err.Error())
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

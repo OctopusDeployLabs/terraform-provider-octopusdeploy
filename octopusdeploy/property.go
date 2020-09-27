@@ -8,12 +8,12 @@ func getPropertySchema() *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"key": {
+				constKey: {
 					Type:        schema.TypeString,
 					Description: "The name of the action",
 					Required:    true,
 				},
-				"value": {
+				constValue: {
 					Type:        schema.TypeString,
 					Description: "The type of action",
 					Required:    true,
@@ -28,7 +28,7 @@ func buildPropertiesMap(tfProperties interface{}) map[string]string {
 	if tfProperties != nil {
 		for _, tfProp := range tfProperties.(*schema.Set).List() {
 			m := tfProp.(map[string]interface{})
-			properties[m["key"].(string)] = m["value"].(string)
+			properties[m[constKey].(string)] = m[constValue].(string)
 		}
 	}
 	return properties

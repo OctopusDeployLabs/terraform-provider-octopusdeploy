@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -12,11 +10,11 @@ func dataMachinePolicy() *schema.Resource {
 		Read: dataMachinePolicyReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -31,20 +29,29 @@ func dataMachinePolicy() *schema.Resource {
 func dataMachinePolicyReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	policyName := d.Get("name").(string)
-	policies, err := apiClient.MachinePolicies.GetAll()
-	if err == client.ErrItemNotFound {
+	name := d.Get(constName).(string)
+	resourceList, err := apiClient.MachinePolicies.GetAll()
+
+	if err != nil {
+		return createResourceOperationError(errorReadingMachinePolicy, name, err)
+	}
+	if len(resourceList) == 0 {
+		// d.SetId(constEmptyString)
 		return nil
 	}
-	if err != nil {
-		return fmt.Errorf("error reading machine policy with name %s: %s", policyName, err.Error())
-	}
 
-	for _, p := range policies {
-		if p.Name == policyName {
-			d.SetId(p.ID)
-			d.Set("description", p.Description)
-			d.Set("isdefault", p.IsDefault)
+	// NOTE: two or more machine policies could have the same name in Octopus
+	// and therefore, a better search criteria needs to be implemented below
+
+	for _, resource := range resourceList {
+		if resource.Name == name {
+			logResource(constMachinePolicy, m)
+
+			d.SetId(resource.ID)
+			d.Set(constDescription, resource.Description)
+			d.Set("isdefault", resource.IsDefault)
+
+			return nil
 		}
 	}
 

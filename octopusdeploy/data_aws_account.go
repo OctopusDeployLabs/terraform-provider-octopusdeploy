@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -12,39 +10,39 @@ func dataAwsAccount() *schema.Resource {
 		Read: dataAwsAccountReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"account_type": {
+			constAccountType: {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "AWS",
+				Default:  constAccountTypeAWS,
 			},
-			"environments": {
+			constEnvironments: {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Optional: true,
 			},
-			"tenant_tags": {
+			constTenantTags: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"secret_key": {
+			constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
+			constSecretKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"access_key": {
+			constAccessKey: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -55,21 +53,22 @@ func dataAwsAccount() *schema.Resource {
 func dataAwsAccountReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	AwsAccountName := d.Get("name")
-	env, err := apiClient.Accounts.GetByName(AwsAccountName.(string))
+	name := d.Get(constName).(string)
+	resource, err := apiClient.Accounts.GetByName(name)
 
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingAWSAccount, name, err)
+	}
+	if resource == nil {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading Aws Account with name %s: %s", AwsAccountName, err.Error())
-	}
+	logResource(constAccount, m)
 
-	d.SetId(env.ID)
-
-	d.Set("name", env.Name)
-	d.Set("description", env.Description)
+	d.SetId(resource.ID)
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
 
 	return nil
 }

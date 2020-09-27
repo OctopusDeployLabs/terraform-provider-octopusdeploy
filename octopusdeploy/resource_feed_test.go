@@ -14,9 +14,9 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 	const feedName = "Testing one two three"
 	const feedType = "NuGet"
 	const feedURI = "http://test.com"
-	const enhancedMode = "true"
-	const feedUsername = "username"
-	const feedPassword = "password"
+	const enhancedMode = constTrue
+	const feedUsername = constUsername
+	const feedPassword = constPassword
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -28,17 +28,17 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployFeedExists(feedPrefix),
 					resource.TestCheckResourceAttr(
-						feedPrefix, "name", feedName),
+						feedPrefix, constName, feedName),
 					resource.TestCheckResourceAttr(
 						feedPrefix, "feed_type", feedType),
 					resource.TestCheckResourceAttr(
-						feedPrefix, "feed_uri", feedURI),
+						feedPrefix, constFeedURI, feedURI),
 					resource.TestCheckResourceAttr(
-						feedPrefix, "username", feedUsername),
+						feedPrefix, constUsername, feedUsername),
 					resource.TestCheckResourceAttr(
-						feedPrefix, "password", feedPassword),
+						feedPrefix, constPassword, feedPassword),
 					resource.TestCheckResourceAttr(
-						feedPrefix, "enhanced_mode", enhancedMode),
+						feedPrefix, constEnhancedMode, enhancedMode),
 				),
 			},
 		},
@@ -47,7 +47,7 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 
 func testFeedtBasic(name, feedType, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_feed" "foo" {
+		resource constOctopusDeployFeed "foo" {
 			name          = "%s"
 			feed_type     = "%s"
 			feed_uri      = "%s"

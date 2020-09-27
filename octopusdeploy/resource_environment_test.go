@@ -26,13 +26,13 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployEnvironmentExists(envPrefix),
 					resource.TestCheckResourceAttr(
-						envPrefix, "name", envName),
+						envPrefix, constName, envName),
 					resource.TestCheckResourceAttr(
-						envPrefix, "description", envDesc),
+						envPrefix, constDescription, envDesc),
 					resource.TestCheckResourceAttr(
-						envPrefix, "use_guided_failure", envGuided),
+						envPrefix, constUseGuidedFailure, envGuided),
 					resource.TestCheckResourceAttr(
-						envPrefix, "allow_dynamic_infrastructure", envDynamic),
+						envPrefix, constAllowDynamicInfrastructure, envDynamic),
 				),
 			},
 		},
@@ -41,7 +41,7 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 
 func testEnvironmenttBasic(name, description, useguided string, dynamic string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_environment" "foo" {
+		resource constOctopusDeployEnvironment "foo" {
 			name           = "%s"
 			description    = "%s"
 			use_guided_failure = "%s"
@@ -61,7 +61,7 @@ func testOctopusDeployEnvironmentExists(n string) resource.TestCheckFunc {
 
 func existsEnvHelper(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.Environments.Get(r.Primary.ID); err != nil {
+		if _, err := client.Environments.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving environment %s", err)
 		}
 	}
@@ -75,10 +75,7 @@ func testOctopusDeployEnvironmentDestroy(s *terraform.State) error {
 
 func destroyEnvHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Environments.Get(r.Primary.ID); err != nil {
-			if err == client.ErrItemNotFound {
-				continue
-			}
+		if _, err := apiClient.Environments.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving environment %s", err)
 		}
 		return fmt.Errorf("Environment still exists")

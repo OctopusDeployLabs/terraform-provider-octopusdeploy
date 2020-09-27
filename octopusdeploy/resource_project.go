@@ -1,9 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -18,23 +15,23 @@ func resourceProject() *schema.Resource {
 		Delete: resourceProjectDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"lifecycle_id": {
+			constLifecycleID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"project_group_id": {
+			constProjectGroupID: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			constDescription: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"default_failure_mode": {
+			constDefaultFailureMode: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "EnvironmentDefault",
@@ -44,7 +41,7 @@ func resourceProject() *schema.Resource {
 					"On",
 				}),
 			},
-			"skip_machine_behavior": {
+			constSkipMachineBehavior: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "None",
@@ -82,21 +79,21 @@ func resourceProject() *schema.Resource {
 }
 
 func buildProjectResource(d *schema.ResourceData) *model.Project {
-	name := d.Get("name").(string)
-	lifecycleID := d.Get("lifecycle_id").(string)
-	projectGroupID := d.Get("project_group_id").(string)
+	name := d.Get(constName).(string)
+	lifecycleID := d.Get(constLifecycleID).(string)
+	projectGroupID := d.Get(constProjectGroupID).(string)
 
 	project := model.NewProject(name, lifecycleID, projectGroupID)
 
-	if attr, ok := d.GetOk("description"); ok {
+	if attr, ok := d.GetOk(constDescription); ok {
 		project.Description = attr.(string)
 	}
 
-	if attr, ok := d.GetOk("default_failure_mode"); ok {
+	if attr, ok := d.GetOk(constDefaultFailureMode); ok {
 		project.DefaultGuidedFailureMode = attr.(string)
 	}
 
-	if attr, ok := d.GetOk("skip_machine_behavior"); ok {
+	if attr, ok := d.GetOk(constSkipMachineBehavior); ok {
 		project.ProjectConnectivityPolicy.SkipMachineBehavior = attr.(string)
 	}
 
@@ -124,46 +121,40 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 }
 
 func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	newProject := buildProjectResource(d)
 
-	createdProject, err := apiClient.Projects.Add(newProject)
-
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Projects.Add(newProject)
 	if err != nil {
-		return fmt.Errorf("error creating project: %s", err.Error())
+		return createResourceOperationError(errorCreatingProject, newProject.ID, err)
 	}
 
-	d.SetId(createdProject.ID)
-
+	d.SetId(resource.ID)
 	return nil
 }
 
 func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	projectID := d.Id()
-
-	project, err := apiClient.Projects.Get(projectID)
-
-	if err == client.ErrItemNotFound {
-		d.SetId("")
+	resource, err := apiClient.Projects.GetByID(id)
+	if err != nil {
+		return createResourceOperationError(errorReadingProject, id, err)
+	}
+	if resource == nil {
+		d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading project id %s: %s", projectID, err.Error())
-	}
+	logResource(constProject, m)
 
-	log.Printf("[DEBUG] project: %v", m)
-	d.Set("name", project.Name)
-	d.Set("description", project.Description)
-	d.Set("lifecycle_id", project.LifecycleID)
-	d.Set("project_group_id", project.ProjectGroupID)
-	d.Set("default_failure_mode", project.DefaultGuidedFailureMode)
-	d.Set("skip_machine_behavior", project.ProjectConnectivityPolicy.SkipMachineBehavior)
-	d.Set("allow_deployments_to_no_targets", project.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets)
-
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
+	d.Set(constLifecycleID, resource.LifecycleID)
+	d.Set(constProjectGroupID, resource.ProjectGroupID)
+	d.Set(constDefaultFailureMode, resource.DefaultGuidedFailureMode)
+	d.Set(constSkipMachineBehavior, resource.ProjectConnectivityPolicy.SkipMachineBehavior)
+	d.Set("allow_deployments_to_no_targets", resource.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets)
 	return nil
 }
 
@@ -172,29 +163,24 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	project.ID = d.Id() // set project struct ID so octopus knows which project to update
 
 	apiClient := m.(*client.Client)
-
 	project, err := apiClient.Projects.Update(project)
-
 	if err != nil {
-		return fmt.Errorf("error updating project id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingProject, d.Id(), err)
 	}
 
 	d.SetId(project.ID)
-
 	return nil
 }
 
 func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+
 	apiClient := m.(*client.Client)
-
-	projectID := d.Id()
-
-	err := apiClient.Projects.Delete(projectID)
-
+	err := apiClient.Projects.DeleteByID(id)
 	if err != nil {
-		return fmt.Errorf("error deleting project id %s: %s", projectID, err.Error())
+		return createResourceOperationError(errorDeletingProject, d.Id(), err)
 	}
 
-	d.SetId("")
+	d.SetId(constEmptyString)
 	return nil
 }

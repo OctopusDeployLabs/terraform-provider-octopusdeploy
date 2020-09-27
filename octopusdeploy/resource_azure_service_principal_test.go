@@ -32,17 +32,17 @@ func TestAccOctopusDeployAzureServicePrinciaplBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployAzureServicePrincipalExists(accountPrefix),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "name", accountName),
+						accountPrefix, constName, accountName),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "client_id", clientID),
+						accountPrefix, constClientID, clientID),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "tenant_id", tenantID),
+						accountPrefix, constTenantID, tenantID),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "subscription_number", subscriptionID),
+						accountPrefix, constSubscriptionNumber, subscriptionID),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "tenant_tags.0", tenantTags),
 					resource.TestCheckResourceAttr(
-						accountPrefix, "tenanted_deployment_participation", tenantedDeploymentParticipation.String()),
+						accountPrefix, constTenantedDeploymentParticipation, tenantedDeploymentParticipation.String()),
 				),
 			},
 		},
@@ -52,7 +52,7 @@ func TestAccOctopusDeployAzureServicePrinciaplBasic(t *testing.T) {
 func testAzureServicePrincipalBasic(tagSetName string, tagName string, accountName string, clientID string, tenantID string, subscriptionID string, clientSecret string, tenantedDeploymentParticipation enum.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`
 
-		resource "octopusdeploy_tag_set" "testtagset" {
+		resource constOctopusDeployTagSet "testtagset" {
 			name = "%s"
 
 			tag {
@@ -62,7 +62,7 @@ func testAzureServicePrincipalBasic(tagSetName string, tagName string, accountNa
 		}
 
 
-		resource "octopusdeploy_azure_service_principal" "foo" {
+		resource constOctopusDeployAzureServicePrincipal "foo" {
 			name           = "%s"
 			client_id = "%s"
 			tenant_id = "%s"
@@ -87,7 +87,7 @@ func existsAzureServicePrincipalHelper(s *terraform.State, client *client.Client
 
 	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
 
-	if _, err := client.Accounts.Get(accountID); err != nil {
+	if _, err := client.Accounts.GetByID(accountID); err != nil {
 		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
 	}
 
@@ -100,13 +100,8 @@ func testOctopusDeployAzureServicePrincipalDestroy(s *terraform.State) error {
 }
 
 func destroyAzureServicePrincipalHelper(s *terraform.State, apiClient *client.Client) error {
-
-	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
-
-	if _, err := apiClient.Accounts.Get(accountID); err != nil {
-		if err == client.ErrItemNotFound {
-			return nil
-		}
+	id := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
+	if _, err := apiClient.Accounts.GetByID(id); err != nil {
 		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
 	}
 	return fmt.Errorf("Azure Service Principal still exists")

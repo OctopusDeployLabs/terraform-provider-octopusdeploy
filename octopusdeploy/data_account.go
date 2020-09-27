@@ -1,9 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -13,7 +10,7 @@ func dataAccount() *schema.Resource {
 		Read: dataAccountReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -24,21 +21,21 @@ func dataAccount() *schema.Resource {
 func dataAccountReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	accountName := d.Get("name")
+	name := d.Get(constName).(string)
+	resource, err := apiClient.Accounts.GetByName(name)
 
-	account, err := apiClient.Accounts.GetByName(accountName.(string))
-
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingAccount, name, err)
+	}
+	if resource == nil {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading account name %s: %s", accountName, err.Error())
-	}
+	logResource(constAccount, m)
 
-	d.SetId(account.ID)
+	d.SetId(resource.ID)
+	d.Set(constName, resource.Name)
 
-	log.Printf("[DEBUG] account: %v", m)
-	d.Set("name", account.Name)
 	return nil
 }

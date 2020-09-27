@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -12,11 +10,11 @@ func dataTagSet() *schema.Resource {
 		Read: dataTagSetReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"tag": getTagSchema(),
+			constTag: getTagSchema(),
 		},
 	}
 }
@@ -24,20 +22,20 @@ func dataTagSet() *schema.Resource {
 func dataTagSetReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	TagSetName := d.Get("name")
-	env, err := apiClient.TagSets.GetByName(TagSetName.(string))
+	name := d.Get(constName).(string)
+	resource, err := apiClient.TagSets.GetByName(name)
 
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingTagSet, name, err)
+	}
+	if resource == nil {
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading TagSet with name %s: %s", TagSetName, err.Error())
-	}
+	logResource(constTagSet, m)
 
-	d.SetId(env.ID)
-
-	d.Set("name", env.Name)
+	d.SetId(resource.ID)
+	d.Set(constName, resource.Name)
 
 	return nil
 }

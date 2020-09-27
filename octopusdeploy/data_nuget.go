@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -12,34 +10,34 @@ func dataNuget() *schema.Resource {
 		Read: dataNugetReadByName,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"feed_uri": {
+			constFeedURI: {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"enhanced_mode": {
+			constEnhancedMode: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"download_attempts": {
+			constDownloadAttempts: {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  5,
 			},
-			"download_retry_backoff_seconds": {
+			constDownloadRetryBackoffSeconds: {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  10,
 			},
-			"username": {
+			constUsername: {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"password": {
+			constPassword: {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
@@ -51,20 +49,30 @@ func dataNuget() *schema.Resource {
 func dataNugetReadByName(d *schema.ResourceData, m interface{}) error {
 	apiClient := m.(*client.Client)
 
-	NugetName := d.Get("name")
-	env, err := apiClient.Feeds.GetByName(NugetName.(string))
+	name := d.Get(constName).(string)
+	resourceList, err := apiClient.Feeds.GetByPartialName(name)
 
-	if err == client.ErrItemNotFound {
+	if err != nil {
+		return createResourceOperationError(errorReadingNuGetFeed, name, err)
+	}
+	if len(resourceList) == 0 {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading Nuget with name %s: %s", NugetName, err.Error())
+	// NOTE: two or more feeds can have the same name in Octopus and
+	// therefore, a better search criteria needs to be implemented below
+
+	for _, resource := range resourceList {
+		if resource.Name == name {
+			logResource(constFeed, m)
+
+			d.SetId(resource.ID)
+			d.Set(constName, resource.Name)
+
+			return nil
+		}
 	}
-
-	d.SetId(env.ID)
-
-	d.Set("name", env.Name)
 
 	return nil
 }

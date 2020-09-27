@@ -29,10 +29,10 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	if v := os.Getenv("OCTOPUS_URL"); v == "" {
+	if v := os.Getenv("OCTOPUS_URL"); v == constEmptyString {
 		t.Fatal("OCTOPUS_URL must be set for acceptance tests")
 	}
-	if v := os.Getenv("OCTOPUS_APIKEY"); v == "" {
+	if v := os.Getenv("OCTOPUS_APIKEY"); v == constEmptyString {
 		t.Fatal("OCTOPUS_APIKEY must be set for acceptance tests")
 	}
 }

@@ -22,7 +22,7 @@ func TestAccOctopusDeployLifecycleBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", lifecycleName),
+						terraformNamePrefix, constName, lifecycleName),
 				),
 			},
 		},
@@ -44,7 +44,7 @@ func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", lifecycleName),
+						terraformNamePrefix, constName, lifecycleName),
 				),
 			},
 			// create update it with a description
@@ -53,9 +53,9 @@ func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", lifecycleName),
+						terraformNamePrefix, constName, lifecycleName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", description),
+						terraformNamePrefix, constDescription, description),
 				),
 			},
 			// update again by remove its description
@@ -64,9 +64,9 @@ func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", lifecycleName),
+						terraformNamePrefix, constName, lifecycleName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", ""),
+						terraformNamePrefix, constDescription, ""),
 				),
 			},
 		},
@@ -86,7 +86,7 @@ func TestAccOctopusDeployLifecycleComplex(t *testing.T) {
 					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
 					testAccCheckOctopusDeployLifecyclePhaseCount("Funky Lifecycle", 2),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", "Funky Lifecycle"),
+						terraformNamePrefix, constName, "Funky Lifecycle"),
 				),
 			},
 		},
@@ -95,7 +95,7 @@ func TestAccOctopusDeployLifecycleComplex(t *testing.T) {
 
 func testAccLifecycleBasic(name string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_lifecycle" "foo" {
+		resource constOctopusDeployLifecycle "foo" {
 			name           = "%s"
 		  }
 		`,
@@ -104,7 +104,7 @@ func testAccLifecycleBasic(name string) string {
 }
 func testAccLifecycleWithDescription(name, description string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_lifecycle" "foo" {
+		resource constOctopusDeployLifecycle "foo" {
 			name           = "%s"
 			description    = "%s"
 		  }
@@ -115,19 +115,19 @@ func testAccLifecycleWithDescription(name, description string) string {
 
 func testAccLifecycleComplex() string {
 	return `
-        resource "octopusdeploy_environment" "Env1" {
+        resource constOctopusDeployEnvironment "Env1" {
            name =  "LifecycleTestEnv1"        
         }
 
-        resource "octopusdeploy_environment" "Env2" {
+        resource constOctopusDeployEnvironment "Env2" {
            name =  "LifecycleTestEnv2"
         }
 
- 		resource "octopusdeploy_environment" "Env3" {
+ 		resource constOctopusDeployEnvironment "Env3" {
            name =  "LifecycleTestEnv3"
         }
 
-        resource "octopusdeploy_lifecycle" "foo" {
+        resource constOctopusDeployLifecycle "foo" {
            name        = "Funky Lifecycle"
            description = "Funky Lifecycle description"
 
@@ -181,14 +181,15 @@ func testAccCheckOctopusDeployLifecycleExists(n string) resource.TestCheckFunc {
 func testAccCheckOctopusDeployLifecyclePhaseCount(name string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*client.Client)
-		lifecycle, err := client.Lifecycles.GetByName(name)
-
+		resourceList, err := client.Lifecycles.GetByPartialName(name)
 		if err != nil {
 			return err
 		}
 
-		if len(lifecycle.Phases) != expected {
-			return fmt.Errorf("Lifecycle has %d phases instead of the expected %d", len(lifecycle.Phases), expected)
+		resource := resourceList[0]
+
+		if len(resource.Phases) != expected {
+			return fmt.Errorf("Lifecycle has %d phases instead of the expected %d", len(resource.Phases), expected)
 		}
 
 		return nil
@@ -196,10 +197,7 @@ func testAccCheckOctopusDeployLifecyclePhaseCount(name string, expected int) res
 }
 func destroyHelperLifecycle(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Lifecycles.Get(r.Primary.ID); err != nil {
-			if err == client.ErrItemNotFound {
-				continue
-			}
+		if _, err := apiClient.Lifecycles.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving lifecycle %s", err)
 		}
 		return fmt.Errorf("lifecycle still exists")
@@ -209,8 +207,8 @@ func destroyHelperLifecycle(s *terraform.State, apiClient *client.Client) error 
 
 func existsHelperLifecycle(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if r.Type == "octopusdeploy_lifecycle" {
-			if _, err := client.Lifecycles.Get(r.Primary.ID); err != nil {
+		if r.Type == constOctopusDeployLifecycle {
+			if _, err := client.Lifecycles.GetByID(r.Primary.ID); err != nil {
 				return fmt.Errorf("received an error retrieving lifecycle %s", err)
 			}
 		}

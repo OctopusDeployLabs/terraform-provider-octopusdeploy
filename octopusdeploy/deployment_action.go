@@ -12,7 +12,7 @@ func getDeploymentActionSchema() *schema.Schema {
 	addExecutionLocationSchema(element)
 	addActionTypeSchema(element)
 	addExecutionLocationSchema(element)
-	element.Schema["action_type"] = &schema.Schema{
+	element.Schema[constActionType] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "The type of action",
 		Required:    true,
@@ -26,7 +26,7 @@ func getDeploymentActionSchema() *schema.Schema {
 func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 	element := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"name": {
+			constName: {
 				Type:        schema.TypeString,
 				Description: "The name of the action",
 				Required:    true,
@@ -37,13 +37,13 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 				Optional:    true,
 				Default:     false,
 			},
-			"required": {
+			constRequired: {
 				Type:        schema.TypeBool,
 				Description: "Whether this step is required and cannot be skipped",
 				Optional:    true,
 				Default:     false,
 			},
-			"environments": {
+			constEnvironments: {
 				Description: "The environments that this step will run in",
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -51,7 +51,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 					Type: schema.TypeString,
 				},
 			},
-			"excluded_environments": {
+			constExcludedEnvironments: {
 				Description: "The environments that this step will be skipped in",
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -59,7 +59,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 					Type: schema.TypeString,
 				},
 			},
-			"channels": {
+			constChannels: {
 				Description: "The channels that this step applies to",
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -67,7 +67,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 					Type: schema.TypeString,
 				},
 			},
-			"tenant_tags": {
+			constTenantTags: {
 				Description: "The tags for the tenants that this step applies to",
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -75,7 +75,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 					Type: schema.TypeString,
 				},
 			},
-			"property": getPropertySchema(),
+			constProperty: getPropertySchema(),
 		},
 	}
 
@@ -89,7 +89,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 }
 
 func addExecutionLocationSchema(element *schema.Resource) {
-	element.Schema["run_on_server"] = &schema.Schema{
+	element.Schema[constRunOnServer] = &schema.Schema{
 		Type:        schema.TypeBool,
 		Description: "Whether this step runs on a worker or on the target",
 		Optional:    true,
@@ -98,7 +98,7 @@ func addExecutionLocationSchema(element *schema.Resource) {
 }
 
 func addActionTypeSchema(element *schema.Resource) {
-	element.Schema["action_type"] = &schema.Schema{
+	element.Schema[constActionType] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "The type of action",
 		Required:    true,
@@ -106,7 +106,7 @@ func addActionTypeSchema(element *schema.Resource) {
 }
 
 func addWorkerPoolSchema(element *schema.Resource) {
-	element.Schema["worker_pool_id"] = &schema.Schema{
+	element.Schema[constWorkerPoolID] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "Which worker pool to run on",
 		Optional:    true,
@@ -115,34 +115,34 @@ func addWorkerPoolSchema(element *schema.Resource) {
 
 func buildDeploymentActionResource(tfAction map[string]interface{}) model.DeploymentAction {
 	action := model.DeploymentAction{
-		Name:                 tfAction["name"].(string),
+		Name:                 tfAction[constName].(string),
 		IsDisabled:           tfAction["disabled"].(bool),
-		IsRequired:           tfAction["required"].(bool),
-		Environments:         getSliceFromTerraformTypeList(tfAction["environments"]),
-		ExcludedEnvironments: getSliceFromTerraformTypeList(tfAction["excluded_environments"]),
-		Channels:             getSliceFromTerraformTypeList(tfAction["channels"]),
-		TenantTags:           getSliceFromTerraformTypeList(tfAction["tenant_tags"]),
+		IsRequired:           tfAction[constRequired].(bool),
+		Environments:         getSliceFromTerraformTypeList(tfAction[constEnvironments]),
+		ExcludedEnvironments: getSliceFromTerraformTypeList(tfAction[constExcludedEnvironments]),
+		Channels:             getSliceFromTerraformTypeList(tfAction[constChannels]),
+		TenantTags:           getSliceFromTerraformTypeList(tfAction[constTenantTags]),
 		Properties:           map[string]string{},
 	}
 
-	actionType := tfAction["action_type"]
+	actionType := tfAction[constActionType]
 	if actionType != nil {
 		action.ActionType = actionType.(string)
 	}
 
 	// Even though not all actions have these properties, we'll keep them here.
 	// They will just be ignored if the action doesn't have it
-	runOnServer := tfAction["run_on_server"]
+	runOnServer := tfAction[constRunOnServer]
 	if runOnServer != nil {
 		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
 	}
 
-	workerPoolID := tfAction["worker_pool_id"]
+	workerPoolID := tfAction[constWorkerPoolID]
 	if workerPoolID != nil {
 		action.WorkerPoolID = workerPoolID.(string)
 	}
 
-	if primaryPackage, ok := tfAction["primary_package"]; ok {
+	if primaryPackage, ok := tfAction[constPrimaryPackage]; ok {
 		tfPrimaryPackage := primaryPackage.(*schema.Set).List()
 		if len(tfPrimaryPackage) > 0 {
 			primaryPackage := buildPackageReferenceResource(tfPrimaryPackage[0].(map[string]interface{}))
@@ -150,17 +150,17 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) model.Deploy
 		}
 	}
 
-	if tfPkgs, ok := tfAction["package"]; ok {
+	if tfPkgs, ok := tfAction[constPackage]; ok {
 		for _, tfPkg := range tfPkgs.(*schema.Set).List() {
 			pkg := buildPackageReferenceResource(tfPkg.(map[string]interface{}))
 			action.Packages = append(action.Packages, pkg)
 		}
 	}
 
-	if tfProps, ok := tfAction["property"]; ok {
+	if tfProps, ok := tfAction[constProperty]; ok {
 		for _, tfProp := range tfProps.(*schema.Set).List() {
 			tfPropi := tfProp.(map[string]interface{})
-			action.Properties[tfPropi["key"].(string)] = tfPropi["value"].(string)
+			action.Properties[tfPropi[constKey].(string)] = tfPropi[constValue].(string)
 		}
 	}
 

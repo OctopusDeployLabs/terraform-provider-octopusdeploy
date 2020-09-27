@@ -13,7 +13,7 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 	const terraformNamePrefix = "octopusdeploy_project.foo"
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
-	const allowDeploymentsToNoTargets = "true"
+	const allowDeploymentsToNoTargets = constTrue
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -24,9 +24,9 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", projectName),
+						terraformNamePrefix, constName, projectName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "lifecycle_id", lifeCycleID),
+						terraformNamePrefix, constLifecycleID, lifeCycleID),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "allow_deployments_to_no_targets", allowDeploymentsToNoTargets),
 				),
@@ -42,7 +42,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	const terraformNamePrefix = "octopusdeploy_project.foo"
 	const projectName = "Funky Monkey"
 	const lifeCycleID = "Lifecycles-1"
-	const allowDeploymentsToNoTargets = "true"
+	const allowDeploymentsToNoTargets = constTrue
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -54,9 +54,9 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", projectName),
+						terraformNamePrefix, constName, projectName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "lifecycle_id", lifeCycleID),
+						terraformNamePrefix, constLifecycleID, lifeCycleID),
 				),
 			},
 			// create update it with a description + build steps
@@ -66,11 +66,11 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", projectName),
+						terraformNamePrefix, constName, projectName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "lifecycle_id", lifeCycleID),
+						terraformNamePrefix, constLifecycleID, lifeCycleID),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "description", ""),
+						terraformNamePrefix, constDescription, ""),
 					resource.TestCheckNoResourceAttr(
 						terraformNamePrefix, "deployment_step.0.windows_service.0.step_name"),
 					resource.TestCheckNoResourceAttr(
@@ -85,11 +85,11 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 
 func testAccProjectBasic(name, lifeCycleID, allowDeploymentsToNoTargets string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
+		resource constOctopusDeployProjectGroup "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource constOctopusDeployProject "foo" {
 			name           = "%s"
 			lifecycle_id    = "%s"
 			project_group_id = "${octopusdeploy_project_group.foo.id}"
@@ -121,10 +121,7 @@ func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 
 func destroyProjectHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Projects.Get(r.Primary.ID); err != nil {
-			if err == client.ErrItemNotFound {
-				continue
-			}
+		if _, err := apiClient.Projects.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving project %s", err)
 		}
 		return fmt.Errorf("Project still exists")
@@ -135,7 +132,7 @@ func destroyProjectHelper(s *terraform.State, apiClient *client.Client) error {
 func existsHelper(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopus_deploy_project" {
-			if _, err := client.Projects.Get(r.Primary.ID); err != nil {
+			if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {
 				return fmt.Errorf("Received an error retrieving project with ID %s: %s", r.Primary.ID, err)
 			}
 		}
