@@ -2,6 +2,8 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -45,27 +47,31 @@ func validateAllSliceItemsInSlice(givenSlice, validationSlice []string) (string,
 		}
 	}
 
-	return "", true
+	return constEmptyString, true
 }
 
 func getSliceFromTerraformTypeList(inputTypeList interface{}) []string {
 	var newSlice []string
-
 	terraformList := inputTypeList.([]interface{})
-
 	for _, item := range terraformList {
 		newSlice = append(newSlice, item.(string))
 	}
-
 	return newSlice
+}
+
+func isEmpty(s string) bool {
+	return len(strings.TrimSpace(s)) == 0
+}
+
+func logResource(name string, resource interface{}) {
+	log.Printf("[DEBUG] %s: %v", name, resource)
 }
 
 func getStringOrEmpty(tfAttr interface{}) string {
 	if tfAttr == nil {
-		return ""
+		return constEmptyString
 	}
 	return tfAttr.(string)
-
 }
 
 func getTenantedDeploymentSchema() *schema.Schema {
@@ -83,10 +89,7 @@ func getTenantedDeploymentSchema() *schema.Schema {
 
 func destroyFeedHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Feeds.Get(r.Primary.ID); err != nil {
-			if err == client.ErrItemNotFound {
-				continue
-			}
+		if _, err := apiClient.Feeds.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving feed %s", err)
 		}
 		return fmt.Errorf("Feed still exists")
@@ -96,7 +99,7 @@ func destroyFeedHelper(s *terraform.State, apiClient *client.Client) error {
 
 func feedExistsHelper(s *terraform.State, apiClient *client.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Feeds.Get(r.Primary.ID); err != nil {
+		if _, err := apiClient.Feeds.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving feed %s", err)
 		}
 	}
