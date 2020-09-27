@@ -153,6 +153,7 @@ const (
 	constUseGuidedFailure                            string = "use_guided_failure"
 	constUsername                                    string = "username"
 	constValue                                       string = "value"
+	constVariable                                    string = "variable"
 	constVariableSetID                               string = "variable_set_id"
 	constVariableSubstitutionInFiles                 string = "variable_substitution_in_files"
 	constVersionRange                                string = "version_range"
