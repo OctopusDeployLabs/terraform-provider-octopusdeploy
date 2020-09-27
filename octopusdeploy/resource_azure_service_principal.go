@@ -59,11 +59,6 @@ func resourceAzureServicePrincipal() *schema.Resource {
 }
 
 func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account, error) {
-	accountStruct := model.Account{}
-	if accountStruct.Name == constEmptyString {
-		log.Println("Name struct is nil")
-	}
-
 	if d == nil {
 		return nil, createInvalidParameterError("buildAzureServicePrincipalResource", "d")
 	}
