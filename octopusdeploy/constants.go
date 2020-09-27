@@ -31,6 +31,7 @@ const (
 	constDefaultFailureMode                          string = "default_failure_mode"
 	constDependencies                                string = "dependencies"
 	constDeployKubernetesSecretAction                string = "deploy_kubernetes_secret_action"
+	constDeploymentProcess                           string = "deployment_process"
 	constDeployPackageAction                         string = "deploy_package_action"
 	constDeployWindowsServiceAction                  string = "deploy_windows_service_action"
 	constDescription                                 string = "description"
