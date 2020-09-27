@@ -103,6 +103,7 @@ const (
 	constPhase                                       string = "phase"
 	constPrimaryPackage                              string = "primary_package"
 	constProject                                     string = "project"
+	constProjectGroup                                string = "project_group"
 	constProjectGroupID                              string = "project_group_id"
 	constProjectID                                   string = "project_id"
 	constPrompt                                      string = "prompt"
