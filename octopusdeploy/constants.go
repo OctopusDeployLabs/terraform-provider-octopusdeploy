@@ -107,6 +107,7 @@ const (
 	constProjectGroup                                string = "project_group"
 	constProjectGroupID                              string = "project_group_id"
 	constProjectID                                   string = "project_id"
+	constProjectTrigger                              string = "project_trigger"
 	constPrompt                                      string = "prompt"
 	constProperty                                    string = "property"
 	constQuantityToKeep                              string = "quantity_to_keep"
