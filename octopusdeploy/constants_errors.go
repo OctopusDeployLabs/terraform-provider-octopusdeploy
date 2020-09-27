@@ -27,6 +27,11 @@ const (
 	errorReadingChannel  string = "error reading channel %s: %s"
 	errorUpdatingChannel string = "error updating channel ID %s: %s"
 
+	errorCreatingDeploymentProcess string = "error creating deployment process %s: %s"
+	errorDeletingDeploymentProcess string = "error deleting deployment process ID %s: %s"
+	errorReadingDeploymentProcess  string = "error reading deployment process %s: %s"
+	errorUpdatingDeploymentProcess string = "error updating deployment process ID %s: %s"
+
 	errorCreatingEnvironment string = "error creating environment %s: %s"
 	errorDeletingEnvironment string = "error deleting environment ID %s: %s"
 	errorReadingEnvironment  string = "error reading environment %s: %s"
