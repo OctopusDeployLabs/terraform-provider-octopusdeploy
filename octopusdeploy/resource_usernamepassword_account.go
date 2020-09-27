@@ -30,30 +30,24 @@ func resourceUsernamePassword() *schema.Resource {
 }
 
 func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceUsernamePasswordRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceUsernamePasswordRead", "m")
-	}
-
-	accountID := d.Id()
+	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	account, err := apiClient.Accounts.GetByID(accountID)
+	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingUsernamePasswordAccount, accountID, err)
+		return createResourceOperationError(errorReadingUsernamePasswordAccount, id, err)
 	}
-	if account == nil {
+	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
-	d.Set(constName, account.Name)
-	d.Set(constDescription, account.Description)
-	d.Set(constEnvironments, account.EnvironmentIDs)
-	d.Set(constPassword, account.Password)
+	logResource(constAccount, m)
+
+	d.Set(constName, resource.Name)
+	d.Set(constDescription, resource.Description)
+	d.Set(constEnvironments, resource.EnvironmentIDs)
+	d.Set(constPassword, resource.Password)
 
 	return nil
 }

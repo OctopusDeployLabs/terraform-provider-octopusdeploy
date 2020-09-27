@@ -127,6 +127,8 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
+	logResource(constVariable, m)
+
 	d.Set(constName, resource.Name)
 	d.Set(constType, resource.Type)
 
