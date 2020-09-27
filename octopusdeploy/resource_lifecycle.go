@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"log"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -103,27 +105,22 @@ func getPhasesSchema() *schema.Schema {
 }
 
 func resourceLifecycleCreate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceLifecycleCreate", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceLifecycleCreate", "m")
-	}
-
-	apiClient := m.(*client.Client)
-
-	newResource, err := buildLifecycleResource(d)
+	lifecycle, err := buildLifecycleResource(d)
 	if err != nil {
 		return err
 	}
 
-	createdResource, err := apiClient.Lifecycles.Add(newResource)
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Lifecycles.Add(lifecycle)
 	if err != nil {
-		return createResourceOperationError(errorCreatingLifecycle, newResource.Name, err)
+		return createResourceOperationError(errorCreatingLifecycle, lifecycle.Name, err)
 	}
 
-	d.SetId(createdResource.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
 
 	return nil
 }

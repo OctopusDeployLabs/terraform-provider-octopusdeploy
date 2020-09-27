@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -62,16 +62,19 @@ func resourceChannel() *schema.Resource {
 }
 
 func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
+	channel := buildChannelResource(d)
+
 	apiClient := m.(*client.Client)
-
-	newChannel := buildChannelResource(d)
-	channel, err := apiClient.Channels.Add(newChannel)
-
+	resource, err := apiClient.Channels.Add(channel)
 	if err != nil {
-		return fmt.Errorf("error creating channel %s: %s", newChannel.Name, err.Error())
+		return createResourceOperationError(errorCreatingChannel, channel.Name, err)
 	}
 
-	d.SetId(channel.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
 
 	return nil
 }

@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"log"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -57,7 +59,10 @@ func resourceTagSetRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
+	logResource(constTagSet, m)
+
 	d.Set(constName, resource.Name)
+
 	return nil
 }
 
@@ -88,15 +93,20 @@ func buildTagResource(tfTag map[string]interface{}) model.Tag {
 }
 
 func resourceTagSetCreate(d *schema.ResourceData, m interface{}) error {
-	newTagSet := buildTagSetResource(d)
+	tagSet := buildTagSetResource(d)
 
 	apiClient := m.(*client.Client)
-	tagSet, err := apiClient.TagSets.Add(newTagSet)
+	resource, err := apiClient.TagSets.Add(tagSet)
 	if err != nil {
-		return createResourceOperationError(errorCreatingTagSet, newTagSet.Name, err)
+		return createResourceOperationError(errorCreatingTagSet, tagSet.Name, err)
 	}
 
-	d.SetId(tagSet.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
+
 	return nil
 }
 

@@ -43,6 +43,8 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
+	logResource(constAccount, m)
+
 	d.Set(constName, resource.Name)
 	d.Set("passphrase", resource.Password)
 	d.Set(constTenants, resource.TenantIDs)
@@ -86,30 +88,23 @@ func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
 }
 
 func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
-	}
-
-	if d == nil {
-		return createInvalidParameterError("resourceSSHKeyCreate", "d")
-	}
-
-	newAccount, err := buildSSHKeyResource(d)
+	account, err := buildSSHKeyResource(d)
 	if err != nil {
 		return err
 	}
 
 	apiClient := m.(*client.Client)
-	account, err := apiClient.Accounts.Add(newAccount)
+	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		return createResourceOperationError(errorCreatingSSHKeyPair, newAccount.Name, err)
+		return createResourceOperationError(errorCreatingSSHKeyPair, account.Name, err)
 	}
 
-	d.SetId(account.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
+
 	return nil
 }
 

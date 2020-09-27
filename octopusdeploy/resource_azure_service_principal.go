@@ -134,31 +134,22 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 }
 
 func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
-	}
-
-	apiClient := m.(*client.Client)
-
-	newAccount, err := buildAzureServicePrincipalResource(d)
+	account, err := buildAzureServicePrincipalResource(d)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	account, err := apiClient.Accounts.Add(newAccount)
 
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		createResourceOperationError(errorCreatingAzureServicePrincipal, newAccount.Name, err)
+		createResourceOperationError(errorCreatingAzureServicePrincipal, account.Name, err)
 	}
 
-	if account.ID == constEmptyString {
+	if isEmpty(resource.ID) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(account.ID)
+		d.SetId(resource.ID)
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -130,15 +131,19 @@ func buildFeedResource(d *schema.ResourceData) *model.Feed {
 }
 
 func resourceFeedCreate(d *schema.ResourceData, m interface{}) error {
-	resource := buildFeedResource(d)
+	feed := buildFeedResource(d)
 
 	apiClient := m.(*client.Client)
-	feed, err := apiClient.Feeds.Add(*resource)
+	resource, err := apiClient.Feeds.Add(*feed)
 	if err != nil {
-		return fmt.Errorf(errorCreatingFeed, resource.Name, err.Error())
+		return createResourceOperationError(errorCreatingFeed, feed.Name, err)
 	}
 
-	d.SetId(feed.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
 
 	return nil
 }

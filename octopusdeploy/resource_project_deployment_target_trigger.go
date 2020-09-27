@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -129,21 +130,23 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*model
 }
 
 func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
-	deploymentTargetTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
-
+	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
 	if err != nil {
 		return err
 	}
 
-	createdProjectDeploymentTargetTrigger, err := apiClient.ProjectTriggers.Add(deploymentTargetTrigger)
-
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.ProjectTriggers.Add(projectTrigger)
 	if err != nil {
-		return fmt.Errorf("error creating project deployment target trigger: %s", err.Error())
+		return createResourceOperationError(errorCreatingProjectTrigger, projectTrigger.Name, err)
 	}
 
-	d.SetId(createdProjectDeploymentTargetTrigger.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
+
 	return nil
 }
 

@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -20,35 +20,38 @@ func resourceDeploymentProcess() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"step": getDeploymentStepSchema(),
+			constStep: getDeploymentStepSchema(),
 		},
 	}
 }
 
 func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) error {
+	deploymentProcess := buildDeploymentProcessResource(d)
+
 	apiClient := m.(*client.Client)
-
-	newDeploymentProcess := buildDeploymentProcessResource(d)
-
-	project, err := apiClient.Projects.GetByID(newDeploymentProcess.ProjectID)
+	project, err := apiClient.Projects.GetByID(deploymentProcess.ProjectID)
 	if err != nil {
-		return fmt.Errorf("error getting project %s: %s", project.Name, err.Error())
+		return createResourceOperationError(errorReadingProject, project.Name, err)
 	}
 
 	current, err := apiClient.DeploymentProcesses.GetByID(project.DeploymentProcessID)
 	if err != nil {
-		return fmt.Errorf("error getting deployment process for %s: %s", project.Name, err.Error())
+		return createResourceOperationError(errorReadingDeploymentProcess, project.DeploymentProcessID, err)
 	}
 
-	newDeploymentProcess.ID = current.ID
-	newDeploymentProcess.Version = current.Version
-	createdDeploymentProcess, err := apiClient.DeploymentProcesses.Update(*newDeploymentProcess)
+	deploymentProcess.ID = current.ID
+	deploymentProcess.Version = current.Version
 
+	resource, err := apiClient.DeploymentProcesses.Update(*deploymentProcess)
 	if err != nil {
-		return fmt.Errorf("error creating deployment process: %s", err.Error())
+		return createResourceOperationError(errorCreatingDeploymentProcess, deploymentProcess.ID, err)
 	}
 
-	d.SetId(createdDeploymentProcess.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
 
 	return nil
 }
@@ -58,7 +61,7 @@ func buildDeploymentProcessResource(d *schema.ResourceData) *model.DeploymentPro
 		ProjectID: d.Get(constProjectID).(string),
 	}
 
-	if attr, ok := d.GetOk("step"); ok {
+	if attr, ok := d.GetOk(constStep); ok {
 		tfSteps := attr.([]interface{})
 
 		for _, tfStep := range tfSteps {

@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"log"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -39,15 +41,20 @@ func buildProjectGroupResource(d *schema.ResourceData) *model.ProjectGroup {
 }
 
 func resourceProjectGroupCreate(d *schema.ResourceData, m interface{}) error {
-	newProjectGroup := buildProjectGroupResource(d)
+	projectGroup := buildProjectGroupResource(d)
 
 	apiClient := m.(*client.Client)
-	createdProjectGroup, err := apiClient.ProjectGroups.Add(newProjectGroup)
+	resource, err := apiClient.ProjectGroups.Add(projectGroup)
 	if err != nil {
-		return createResourceOperationError(errorCreatingProjectGroup, newProjectGroup.ID, err)
+		return createResourceOperationError(errorCreatingProjectGroup, projectGroup.ID, err)
 	}
 
-	d.SetId(createdProjectGroup.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
+
 	return nil
 }
 

@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -93,16 +94,19 @@ func buildEnvironmentResource(d *schema.ResourceData) *model.Environment {
 }
 
 func resourceEnvironmentCreate(d *schema.ResourceData, m interface{}) error {
+	environment := buildEnvironmentResource(d)
+
 	apiClient := m.(*client.Client)
-
-	newEnvironment := buildEnvironmentResource(d)
-	env, err := apiClient.Environments.Add(newEnvironment)
-
+	resource, err := apiClient.Environments.Add(environment)
 	if err != nil {
-		return fmt.Errorf("error creating environment %s: %s", newEnvironment.Name, err.Error())
+		return createResourceOperationError(errorCreatingEnvironment, environment.Name, err)
 	}
 
-	d.SetId(env.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
 
 	return nil
 }

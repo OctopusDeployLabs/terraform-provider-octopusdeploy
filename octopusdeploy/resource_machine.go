@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
@@ -292,17 +293,22 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 }
 
 func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
-	newMachine := buildMachineResource(d)
-	newMachine.Status = "Unknown" // We don't want TF to attempt to update a machine just because its status has changed, so set it to Unknown on creation and let TF sort it out in the future.
+	machine := buildMachineResource(d)
+	machine.Status = "Unknown" // We don't want TF to attempt to update a machine just because its status has changed, so set it to Unknown on creation and let TF sort it out in the future.
 
 	apiClient := m.(*client.Client)
-	machine, err := apiClient.Machines.Add(newMachine)
+	resource, err := apiClient.Machines.Add(machine)
 	if err != nil {
-		return fmt.Errorf(errorCreatingMachine, newMachine.Name, err.Error())
+		return createResourceOperationError(errorCreatingMachine, machine.Name, err)
 	}
 
-	d.SetId(machine.ID)
-	setMachineProperties(d, machine)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
+
+	setMachineProperties(d, resource)
 
 	return nil
 }

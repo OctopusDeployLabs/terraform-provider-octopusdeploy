@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -132,16 +133,19 @@ func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 }
 
 func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
+	feed := buildNugetFeedResource(d)
+
 	apiClient := m.(*client.Client)
-
-	newFeed := buildNugetFeedResource(d)
-	feed, err := apiClient.Feeds.Add(*newFeed)
-
+	resource, err := apiClient.Feeds.Add(*feed)
 	if err != nil {
-		return fmt.Errorf("error creating nuget feed %s: %s", newFeed.Name, err.Error())
+		return createResourceOperationError(errorCreatingNuGetFeed, feed.Name, err)
 	}
 
-	d.SetId(feed.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
 
 	return nil
 }

@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"log"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -43,25 +45,19 @@ func getTemplatesSchema() *schema.Schema {
 }
 
 func resourceLibraryVariableSetCreate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceLibraryVariableSetCreate", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceLibraryVariableSetCreate", "m")
-	}
+	libraryVariableSet := buildLibraryVariableSetResource(d)
 
 	apiClient := m.(*client.Client)
-
-	newLibraryVariableSet := buildLibraryVariableSetResource(d)
-
-	createdLibraryVariableSet, err := apiClient.LibraryVariableSets.Add(newLibraryVariableSet)
-
+	resource, err := apiClient.LibraryVariableSets.Add(libraryVariableSet)
 	if err != nil {
-		return createResourceOperationError(errorCreatingLibraryVariableSet, newLibraryVariableSet.Name, err)
+		return createResourceOperationError(errorCreatingLibraryVariableSet, libraryVariableSet.Name, err)
 	}
 
-	d.SetId(createdLibraryVariableSet.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
 
 	return nil
 }

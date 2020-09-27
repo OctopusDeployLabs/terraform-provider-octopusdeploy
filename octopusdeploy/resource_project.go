@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"log"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
@@ -50,7 +52,7 @@ func resourceProject() *schema.Resource {
 					"None",
 				}),
 			},
-			"allow_deployments_to_no_targets": {
+			constAllowDeploymentsToNoTargets: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -97,7 +99,7 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 		project.ProjectConnectivityPolicy.SkipMachineBehavior = attr.(string)
 	}
 
-	if attr, ok := d.GetOk("allow_deployments_to_no_targets"); ok {
+	if attr, ok := d.GetOk(constAllowDeploymentsToNoTargets); ok {
 		project.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets = attr.(bool)
 	}
 
@@ -121,15 +123,20 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 }
 
 func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
-	newProject := buildProjectResource(d)
+	project := buildProjectResource(d)
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.Projects.Add(newProject)
+	resource, err := apiClient.Projects.Add(project)
 	if err != nil {
-		return createResourceOperationError(errorCreatingProject, newProject.ID, err)
+		return createResourceOperationError(errorCreatingProject, project.ID, err)
 	}
 
-	d.SetId(resource.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
+
 	return nil
 }
 
@@ -154,7 +161,8 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(constProjectGroupID, resource.ProjectGroupID)
 	d.Set(constDefaultFailureMode, resource.DefaultGuidedFailureMode)
 	d.Set(constSkipMachineBehavior, resource.ProjectConnectivityPolicy.SkipMachineBehavior)
-	d.Set("allow_deployments_to_no_targets", resource.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets)
+	d.Set(constAllowDeploymentsToNoTargets, resource.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets)
+
 	return nil
 }
 

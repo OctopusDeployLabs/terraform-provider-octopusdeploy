@@ -28,7 +28,7 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constLifecycleID, lifeCycleID),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "allow_deployments_to_no_targets", allowDeploymentsToNoTargets),
+						terraformNamePrefix, constAllowDeploymentsToNoTargets, allowDeploymentsToNoTargets),
 				),
 			},
 		},

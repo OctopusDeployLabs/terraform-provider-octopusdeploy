@@ -123,21 +123,21 @@ func buildCertificateResource(d *schema.ResourceData) (*model.Certificate, error
 }
 
 func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
-	newCertificate, err := buildCertificateResource(d)
+	certificate, err := buildCertificateResource(d)
 	if err != nil {
 		return err
 	}
 
 	apiClient := m.(*client.Client)
-	certificate, err := apiClient.Certificates.Add(newCertificate)
+	resource, err := apiClient.Certificates.Add(certificate)
 	if err != nil {
-		return createResourceOperationError(errorCreatingCertificate, newCertificate.Name, err)
+		return createResourceOperationError(errorCreatingCertificate, certificate.Name, err)
 	}
 
-	if isEmpty(certificate.ID) {
-		log.Println("ID is empty")
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
 	} else {
-		d.SetId(certificate.ID)
+		d.SetId(resource.ID)
 	}
 
 	return nil

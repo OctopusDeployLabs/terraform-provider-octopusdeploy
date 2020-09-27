@@ -91,31 +91,22 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 }
 
 func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceAmazonWebServicesAccountCreate", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceAmazonWebServicesAccountCreate", "m")
-	}
-
-	apiClient := m.(*client.Client)
-
-	newAccount, err := buildAmazonWebServicesAccountResource(d)
+	account, err := buildAmazonWebServicesAccountResource(d)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
-	account, err := apiClient.Accounts.Add(newAccount)
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		return createResourceOperationError(errorCreatingAWSAccount, newAccount.Name, err)
+		return createResourceOperationError(errorCreatingAWSAccount, account.Name, err)
 	}
 
-	if account.ID == constEmptyString {
+	if isEmpty(resource.ID) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(account.ID)
+		d.SetId(resource.ID)
 	}
 
 	return nil
