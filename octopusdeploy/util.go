@@ -17,6 +17,7 @@ func validateValueFunc(values []string) schema.SchemaValidateDiagFunc {
 
 	return func(v interface{}, c cty.Path) diag.Diagnostics {
 		var diags diag.Diagnostics
+
 		value := v.(string)
 		valid := false
 		for _, val := range values {
@@ -27,9 +28,9 @@ func validateValueFunc(values []string) schema.SchemaValidateDiagFunc {
 		}
 
 		if !valid {
-			diags = append(errors, fmt.Errorf("%#v is an invalid value for argument %s. Must be one of %#v", value, k, values))
+			diags = append(diag.Errorf("unexpected: %s", values))
 		}
-		return
+		return diags
 	}
 }
 
@@ -83,7 +84,7 @@ func getTenantedDeploymentSchema() *schema.Schema {
 		Type:     schema.TypeString,
 		Optional: true,
 		Default:  "Untenanted",
-		ValidateFunc: validateValueFunc([]string{
+		ValidateDiagFunc: validateValueFunc([]string{
 			"Untenanted",
 			"TenantedOrUntenanted",
 			"Tenanted",
