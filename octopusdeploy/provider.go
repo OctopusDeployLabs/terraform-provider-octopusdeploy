@@ -3,12 +3,11 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider is the plugin entry point
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	log.Println("[INFO] Initializing Resource Provider")
 	return &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{

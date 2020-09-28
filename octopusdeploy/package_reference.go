@@ -6,7 +6,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/asaskevich/govalidator"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func addPrimaryPackageSchema(element *schema.Resource, required bool) error {

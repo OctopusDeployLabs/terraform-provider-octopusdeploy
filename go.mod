@@ -2,7 +2,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 
 require (
 	github.com/Djarvur/go-err113 v0.1.0 // indirect
-	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200918004128-e9a9cbc9c0a4
+	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200927214259-3319b826ed8d
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 	github.com/aws/aws-sdk-go v1.34.13 // indirect
@@ -18,7 +18,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.6.0 // indirect
 	github.com/hashicorp/terraform v0.13.3
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20191212124732-c6ae6269b9d7 // indirect
-	github.com/hashicorp/terraform-plugin-sdk v1.15.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.3
 	github.com/jirfag/go-printf-func-name v0.0.0-20200119135958-7558a9eaa5af // indirect
 	github.com/magiconair/properties v1.8.3 // indirect
 	github.com/matoous/godox v0.0.0-20200801072554-4fb83dc2941e // indirect
