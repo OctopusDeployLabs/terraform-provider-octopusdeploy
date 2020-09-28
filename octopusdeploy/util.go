@@ -6,13 +6,17 @@ import (
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // Validate a value against a set of possible values
 func validateValueFunc(values []string) schema.SchemaValidateDiagFunc {
-	return func(v interface{}, k string) (we []string, errors []error) {
+
+	return func(v interface{}, c cty.Path) diag.Diagnostics {
+		var diags diag.Diagnostics
 		value := v.(string)
 		valid := false
 		for _, val := range values {
@@ -23,7 +27,7 @@ func validateValueFunc(values []string) schema.SchemaValidateDiagFunc {
 		}
 
 		if !valid {
-			errors = append(errors, fmt.Errorf("%#v is an invalid value for argument %s. Must be one of %#v", value, k, values))
+			diags = append(errors, fmt.Errorf("%#v is an invalid value for argument %s. Must be one of %#v", value, k, values))
 		}
 		return
 	}

@@ -13,6 +13,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/gostaticanalysis/analysisutil v0.2.1 // indirect
 	github.com/gruntwork-io/terratest v0.29.0
+	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-getter v1.4.2-0.20200106182914-9813cbd4eb02 // indirect
 	github.com/hashicorp/go-plugin v1.3.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.6.0 // indirect
@@ -33,7 +34,7 @@ require (
 	github.com/tdakkota/asciicheck v0.0.0-20200416200610-e657995f937b // indirect
 	github.com/tetafro/godot v0.4.9 // indirect
 	github.com/timakin/bodyclose v0.0.0-20200424151742-cb6215831a94 // indirect
-	github.com/zclconf/go-cty v1.5.1 // indirect
+	github.com/zclconf/go-cty v1.5.1
 	github.com/zclconf/go-cty-yaml v1.0.2 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
 	golang.org/x/sys v0.0.0-20200918174421-af09f7315aff // indirect
