@@ -22,12 +22,12 @@ func TestTokenAccountBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployAzureServicePrincipalDestroy,
+		CheckDestroy: testOctopusDeployTokenServicePrincipalDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testTokenAccountBasic(tagSetName, tagName, name, token, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
-					testAWSAccountExists(accountPrefix),
+					testTokenAccountExists(accountPrefix),
 					resource.TestCheckResourceAttr(
 						accountPrefix, "name", name),
 					resource.TestCheckResourceAttr(
@@ -46,7 +46,7 @@ func testTokenAccountBasic(tagSetName string, tagName string, name string, token
 	return fmt.Sprintf(`
 
 
-		resource "octopusdeploy_azure_service_principal" "foo" {
+		resource "octopusdeploy_token_service_principal" "foo" {
 			name           = "%s"
 			token = "%s"
 			tagSetName = "%s"
@@ -105,4 +105,9 @@ func destroyTokenServicePrincipalHelper(s *terraform.State, client *octopusdeplo
 		return fmt.Errorf("Received an error retrieving token service principal %s", err)
 	}
 	return fmt.Errorf("Token Service Principal still exists")
+}
+
+func testOctopusDeployTokenServicePrincipalDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	return destroyTokenServicePrincipalHelper(s, client)
 }
