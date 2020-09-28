@@ -6,6 +6,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceLifecycle() *schema.Resource {
@@ -14,7 +15,6 @@ func resourceLifecycle() *schema.Resource {
 		Read:   resourceLifecycleRead,
 		Update: resourceLifecycleUpdate,
 		Delete: resourceLifecycleDelete,
-
 		Schema: map[string]*schema.Schema{
 			constName: {
 				Type:     schema.TypeString,
@@ -42,11 +42,11 @@ func getRetentionPeriodSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "The unit of quantity_to_keep.",
 					Optional:    true,
-					Default:     (string)(model.RetentionUnitDays),
-					ValidateDiagFunc: validateValueFunc([]string{
-						(string)(model.RetentionUnitDays),
-						(string)(model.RetentionUnitItems),
-					}),
+					Default:     model.RetentionUnitDays,
+					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+						model.RetentionUnitDays,
+						model.RetentionUnitItems,
+					}, false)),
 				},
 				constQuantityToKeep: {
 					Type:        schema.TypeInt,
@@ -82,7 +82,7 @@ func getPhasesSchema() *schema.Schema {
 					Default:     false,
 				},
 				constAutomaticDeploymentTargets: {
-					Description: "Environment Ids in this phase that a release is automatically deployed to when it is eligible for this phase",
+					Description: "Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase",
 					Type:        schema.TypeList,
 					Optional:    true,
 					Elem: &schema.Schema{
@@ -90,7 +90,7 @@ func getPhasesSchema() *schema.Schema {
 					},
 				},
 				constOptionalDeploymentTargets: {
-					Description: "Environment Ids in this phase that a release can be deployed to, but is not automatically deployed to",
+					Description: "Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to",
 					Type:        schema.TypeList,
 					Optional:    true,
 					Elem: &schema.Schema{
@@ -166,7 +166,7 @@ func getRetentionPeriod(d *schema.ResourceData, key string) *model.RetentionPeri
 		if len(tfRetentionSettings.List()) == 1 {
 			tfRetentionItem := tfRetentionSettings.List()[0].(map[string]interface{})
 			retention := model.RetentionPeriod{
-				Unit:           model.RetentionUnit(tfRetentionItem[constUnit].(string)),
+				Unit:           tfRetentionItem[constUnit].(string),
 				QuantityToKeep: int32(tfRetentionItem[constQuantityToKeep].(int)),
 			}
 			return &retention
