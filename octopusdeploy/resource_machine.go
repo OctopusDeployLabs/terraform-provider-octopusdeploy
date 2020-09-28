@@ -243,7 +243,7 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 
 	machine, err := model.NewMachine(name, isDisabled, environments, roles, machinePolicy, deploymentMode, tenantIDs, tenantTags)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	machine.URI = tfSchemaList[constURI].(string)
