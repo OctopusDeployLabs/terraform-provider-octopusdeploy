@@ -109,7 +109,6 @@ func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-
 	account.ID = d.Id() // set ID so Octopus API knows which account to update
 
 	apiClient := m.(*client.Client)

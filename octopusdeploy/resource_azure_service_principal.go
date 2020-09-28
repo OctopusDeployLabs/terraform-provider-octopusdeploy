@@ -187,12 +187,7 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return err
 	}
-
-	if isEmpty(account.ID) {
-		log.Println("ID is nil")
-	} else {
-		account.ID = d.Id() // set ID so Octopus API knows which account to update
-	}
+	account.ID = d.Id() // set ID so Octopus API knows which account to update
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
@@ -200,11 +195,7 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 		return createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err)
 	}
 
-	if isEmpty(resource.ID) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.ID)
-	}
+	d.SetId(resource.ID)
 
 	return nil
 }

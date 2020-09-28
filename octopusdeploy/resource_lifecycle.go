@@ -221,7 +221,6 @@ func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-
 	lifecycle.ID = d.Id() // set ID so Octopus API knows which lifecycle to update
 
 	apiClient := m.(*client.Client)
