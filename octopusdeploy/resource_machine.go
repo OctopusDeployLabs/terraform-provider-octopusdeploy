@@ -99,7 +99,7 @@ func resourceMachine() *schema.Resource {
 									"authenticationtype": {
 										Type:     schema.TypeString,
 										Optional: true,
-										ValidateFunc: validateValueFunc([]string{
+										ValidateDiagFunc: validateValueFunc([]string{
 											"KubernetesCertificate",
 											"KubernetesStandard",
 										}),
