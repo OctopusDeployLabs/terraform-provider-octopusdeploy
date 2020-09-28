@@ -242,6 +242,10 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
 
 	machine, err := model.NewMachine(name, isDisabled, environments, roles, machinePolicy, deploymentMode, tenantIDs, tenantTags)
+	if err != nil {
+		return err
+	}
+
 	machine.URI = tfSchemaList[constURI].(string)
 	machine.Thumbprint = tfSchemaList[constThumbprint].(string)
 

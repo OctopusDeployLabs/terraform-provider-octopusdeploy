@@ -93,6 +93,7 @@ const (
 	errorUpdatingTagSet string = "error updating tag set ID %s: %s"
 
 	errorCreatingUsernamePasswordAccount string = "error creating username password account %s: %s"
+	/* #nosec */
 	errorDeletingUsernamePasswordAccount string = "error deleting username password account ID %s: %s"
 	errorReadingUsernamePasswordAccount  string = "error reading username password account %s: %s"
 	errorUpdatingUsernamePasswordAccount string = "error updating username password account ID %s: %s"
