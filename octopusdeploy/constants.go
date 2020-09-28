@@ -1,10 +1,13 @@
 package octopusdeploy
 
 const (
-	constAccessKey                      string = "access_key"
-	constAccount                        string = "account"
-	constAccountType                    string = "account_type"
-	constAccountTypeAzure               string = "Azure"
+	constAccessKey   string = "access_key"
+	constAccount     string = "account"
+	constAccountType string = "account_type"
+	// This variable is no longer being used in the resource_azure_service_principal since
+	// we now have the New NewAzureServicePrincipalAccount type, so the constAccountTypeAzure
+	// is no longer needed
+	// constAccountTypeAzure               string = "Azure"
 	constAccountTypeAWS                 string = "AWS"
 	constAction                         string = "action"
 	constActions                        string = "actions"
