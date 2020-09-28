@@ -31,7 +31,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "Whether to run this step before or after package acquisition (if possible)",
 					Optional:    true,
 					Default:     (string)(model.DeploymentStepPackageRequirementLetOctopusDecide),
-					ValidateFunc: validateValueFunc([]string{
+					ValidateDiagFunc: validateValueFunc([]string{
 						(string)(model.DeploymentStepPackageRequirementLetOctopusDecide),
 						(string)(model.DeploymentStepPackageRequirementBeforePackageAcquisition),
 						(string)(model.DeploymentStepPackageRequirementAfterPackageAcquisition),
@@ -42,7 +42,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
 					Optional:    true,
 					Default:     (string)(model.DeploymentStepConditionSuccess),
-					ValidateFunc: validateValueFunc([]string{
+					ValidateDiagFunc: validateValueFunc([]string{
 						(string)(model.DeploymentStepConditionSuccess),
 						(string)(model.DeploymentStepConditionFailure),
 						(string)(model.DeploymentStepConditionAlways),
@@ -59,7 +59,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')",
 					Optional:    true,
 					Default:     (string)(model.DeploymentStepStartTriggerStartAfterPrevious),
-					ValidateFunc: validateValueFunc([]string{
+					ValidateDiagFunc: validateValueFunc([]string{
 						(string)(model.DeploymentStepStartTriggerStartAfterPrevious),
 						(string)(model.DeploymentStepStartTriggerStartWithPrevious),
 					}),
