@@ -152,7 +152,7 @@ func resourceMachine() *schema.Resource {
 			"tenanteddeploymentparticipation": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: validateValueFunc([]string{
+				ValidateDiagFunc: validateValueFunc([]string{
 					"Untenanted",
 					"TenantedOrUntenanted",
 					"Tenanted",
