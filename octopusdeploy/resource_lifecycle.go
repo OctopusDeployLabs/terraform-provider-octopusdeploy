@@ -43,7 +43,7 @@ func getRetentionPeriodSchema() *schema.Schema {
 					Description: "The unit of quantity_to_keep.",
 					Optional:    true,
 					Default:     (string)(model.RetentionUnitDays),
-					ValidateFunc: validateValueFunc([]string{
+					ValidateDiagFunc: validateValueFunc([]string{
 						(string)(model.RetentionUnitDays),
 						(string)(model.RetentionUnitItems),
 					}),

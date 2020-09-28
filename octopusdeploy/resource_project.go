@@ -37,7 +37,7 @@ func resourceProject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "EnvironmentDefault",
-				ValidateFunc: validateValueFunc([]string{
+				ValidateDiagFunc: validateValueFunc([]string{
 					"EnvironmentDefault",
 					"Off",
 					"On",
@@ -47,7 +47,7 @@ func resourceProject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "None",
-				ValidateFunc: validateValueFunc([]string{
+				ValidateDiagFunc: validateValueFunc([]string{
 					"SkipUnavailableMachines",
 					"None",
 				}),

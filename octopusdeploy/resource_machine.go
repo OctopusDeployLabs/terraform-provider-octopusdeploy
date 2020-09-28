@@ -36,7 +36,7 @@ func resourceMachine() *schema.Resource {
 						"communicationstyle": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validateValueFunc([]string{
+							ValidateDiagFunc: validateValueFunc([]string{
 								"None",
 								"TentaclePassive",
 								"TentacleActive",

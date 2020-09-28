@@ -33,7 +33,7 @@ func resourceVariable() *schema.Resource {
 			constType: {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: validateValueFunc([]string{
+				ValidateDiagFunc: validateValueFunc([]string{
 					"String",
 					"Sensitive",
 					"Certificate",
