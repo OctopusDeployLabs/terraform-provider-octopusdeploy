@@ -92,28 +92,27 @@ func tfVariableScopetoODVariableScope(d *schema.ResourceData) *model.VariableSco
 }
 
 func dataVariableReadByName(d *schema.ResourceData, m interface{}) error {
+	projectID := d.Get(constProjectID)
+	name := d.Get(constName)
+	scope := tfVariableScopetoODVariableScope(d)
+
 	apiClient := m.(*client.Client)
-
-	varProject := d.Get(constProjectID)
-	varName := d.Get(constName)
-	varScope := tfVariableScopetoODVariableScope(d)
-
-	varItems, err := apiClient.Variables.GetByName(varProject.(string), varName.(string), varScope)
+	variables, err := apiClient.Variables.GetByName(projectID.(string), name.(string), scope)
 	if err != nil {
-		return fmt.Errorf("error reading variable from project %s with name %s: %s", varProject, varName, err.Error())
+		return fmt.Errorf("error reading variable from project %s with name %s: %s", projectID, name, err.Error())
 	}
-	if varItems == nil {
+	if variables == nil {
 		return nil
 	}
-	if len(varItems) > 1 {
-		return fmt.Errorf("found %v variables for project %s with name %s, should match exactly 1", len(varItems), varProject, varName)
+	if len(variables) > 1 {
+		return fmt.Errorf("found %v variables for project %s with name %s, should match exactly 1", len(variables), projectID, name)
 	}
 
-	d.SetId(varItems[0].ID)
-	d.Set(constName, varItems[0].Name)
-	d.Set(constType, varItems[0].Type)
-	d.Set(constValue, varItems[0].Value)
-	d.Set(constDescription, varItems[0].Description)
+	d.SetId(variables[0].ID)
+	d.Set(constName, variables[0].Name)
+	d.Set(constType, variables[0].Type)
+	d.Set(constValue, variables[0].Value)
+	d.Set(constDescription, variables[0].Description)
 
 	return nil
 }

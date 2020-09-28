@@ -56,11 +56,10 @@ func dataChannel() *schema.Resource {
 }
 
 func dataChannelReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resourceList, err := apiClient.Channels.GetByPartialName(name)
 
+	apiClient := m.(*client.Client)
+	resourceList, err := apiClient.Channels.GetByPartialName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingChannel, name, err)
 	}
@@ -68,6 +67,8 @@ func dataChannelReadByName(d *schema.ResourceData, m interface{}) error {
 		// d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constChannel, m)
 
 	// NOTE: two or more channels can have the same name in Octopus and
 	// therefore, a better search criteria needs to be implemented below

@@ -47,11 +47,10 @@ func dataNuget() *schema.Resource {
 }
 
 func dataNugetReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resourceList, err := apiClient.Feeds.GetByPartialName(name)
 
+	apiClient := m.(*client.Client)
+	resourceList, err := apiClient.Feeds.GetByPartialName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingNuGetFeed, name, err)
 	}
@@ -59,6 +58,8 @@ func dataNugetReadByName(d *schema.ResourceData, m interface{}) error {
 		// d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constFeed, m)
 
 	// NOTE: two or more feeds can have the same name in Octopus and
 	// therefore, a better search criteria needs to be implemented below

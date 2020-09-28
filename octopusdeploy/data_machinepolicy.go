@@ -27,11 +27,10 @@ func dataMachinePolicy() *schema.Resource {
 }
 
 func dataMachinePolicyReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resourceList, err := apiClient.MachinePolicies.GetAll()
 
+	apiClient := m.(*client.Client)
+	resourceList, err := apiClient.MachinePolicies.GetAll()
 	if err != nil {
 		return createResourceOperationError(errorReadingMachinePolicy, name, err)
 	}
@@ -39,6 +38,8 @@ func dataMachinePolicyReadByName(d *schema.ResourceData, m interface{}) error {
 		// d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constMachinePolicy, m)
 
 	// NOTE: two or more machine policies could have the same name in Octopus
 	// and therefore, a better search criteria needs to be implemented below

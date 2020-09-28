@@ -19,11 +19,10 @@ func dataAccount() *schema.Resource {
 }
 
 func dataAccountReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resource, err := apiClient.Accounts.GetByName(name)
 
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Accounts.GetByName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingAccount, name, err)
 	}

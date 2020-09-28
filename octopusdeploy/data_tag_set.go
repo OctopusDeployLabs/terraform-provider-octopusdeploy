@@ -20,15 +20,15 @@ func dataTagSet() *schema.Resource {
 }
 
 func dataTagSetReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resource, err := apiClient.TagSets.GetByName(name)
 
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.TagSets.GetByName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingTagSet, name, err)
 	}
 	if resource == nil {
+		// d.SetId(constEmptyString)
 		return nil
 	}
 

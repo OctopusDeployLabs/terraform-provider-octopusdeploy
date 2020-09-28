@@ -13,5 +13,5 @@ func createResourceOperationError(text string, resourceID string, err error) err
 }
 
 func nameIsNil(methodName string) error {
-	return fmt.Errorf("%s: Name is nil", methodName)
+	return fmt.Errorf("%s: name is nil", methodName)
 }

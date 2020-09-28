@@ -19,11 +19,10 @@ func dataLibraryVariableSet() *schema.Resource {
 }
 
 func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resourceList, err := apiClient.LibraryVariableSets.GetByPartialName(name)
 
+	apiClient := m.(*client.Client)
+	resourceList, err := apiClient.LibraryVariableSets.GetByPartialName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingLibraryVariableSet, name, err)
 	}
@@ -31,6 +30,8 @@ func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) err
 		// d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constLibraryVariableSet, m)
 
 	// NOTE: two or more library variables can have the same name in Octopus.
 	// Therefore, a better search criteria needs to be implemented below.

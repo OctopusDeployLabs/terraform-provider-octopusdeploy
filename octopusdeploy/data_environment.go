@@ -31,11 +31,10 @@ func dataEnvironment() *schema.Resource {
 }
 
 func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resource, err := apiClient.Environments.GetByName(name)
 
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Environments.GetByName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingEnvironment, name, err)
 	}

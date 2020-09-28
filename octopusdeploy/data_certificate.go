@@ -55,11 +55,10 @@ func dataCertificate() *schema.Resource {
 }
 
 func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resourceList, err := apiClient.Certificates.GetByPartialName(name)
 
+	apiClient := m.(*client.Client)
+	resourceList, err := apiClient.Certificates.GetByPartialName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingCertificate, name, err)
 	}
@@ -67,6 +66,8 @@ func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
 		// d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constCertificate, m)
 
 	// NOTE: two or more certificates could have the same name in Octopus and
 	// therefore, a better search criteria needs to be implemented below

@@ -69,7 +69,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "The maximum number of targets to deploy to simultaneously",
 					Optional:    true,
 				},
-				"action":                          getDeploymentActionSchema(),
+				constAction:                          getDeploymentActionSchema(),
 				constManualInterventionAction:      getManualInterventionActionSchema(),
 				constApplyTerraformAction:          getApplyTerraformActionSchema(),
 				constDeployPackageAction:           getDeployPackageAction(),
@@ -106,7 +106,7 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) model.Deployment
 		step.Properties["Octopus.Action.MaxParallelism"] = windowSize.(string)
 	}
 
-	if attr, ok := tfStep["action"]; ok {
+	if attr, ok := tfStep[constAction]; ok {
 		for _, tfAction := range attr.([]interface{}) {
 			action := buildDeploymentActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)

@@ -23,11 +23,10 @@ func dataLifecycle() *schema.Resource {
 }
 
 func dataLifecycleReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resourceList, err := apiClient.Lifecycles.GetByPartialName(name)
 
+	apiClient := m.(*client.Client)
+	resourceList, err := apiClient.Lifecycles.GetByPartialName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingLifecycle, name, err)
 	}
@@ -35,6 +34,8 @@ func dataLifecycleReadByName(d *schema.ResourceData, m interface{}) error {
 		// d.SetId(constEmptyString)
 		return nil
 	}
+
+	logResource(constLifecycle, m)
 
 	// NOTE: two or more lifecycles can have the same name in Octopus and
 	// therefore, a better search criteria needs to be implemented below

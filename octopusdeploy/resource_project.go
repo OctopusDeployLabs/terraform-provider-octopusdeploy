@@ -57,21 +57,21 @@ func resourceProject() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"tenanted_deployment_mode": getTenantedDeploymentSchema(),
-			"included_library_variable_sets": {
+			constTenantedDeploymentMode: getTenantedDeploymentSchema(),
+			constIncludedLibraryVariableSets: {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"discrete_channel_release": {
+			constDiscreteChannelRelease: {
 				Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 			},
-			"skip_package_steps_that_are_already_installed": {
+			constSkipPackageStepsThatAreAlreadyInstalled: {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -103,19 +103,19 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 		project.ProjectConnectivityPolicy.AllowDeploymentsToNoTargets = attr.(bool)
 	}
 
-	if attr, ok := d.GetOk("tenanted_deployment_mode"); ok {
+	if attr, ok := d.GetOk(constTenantedDeploymentMode); ok {
 		project.TenantedDeploymentMode, _ = enum.ParseTenantedDeploymentMode(attr.(string))
 	}
 
-	if attr, ok := d.GetOk("included_library_variable_sets"); ok {
+	if attr, ok := d.GetOk(constIncludedLibraryVariableSets); ok {
 		project.IncludedLibraryVariableSetIDs = getSliceFromTerraformTypeList(attr)
 	}
 
-	if attr, ok := d.GetOk("discrete_channel_release"); ok {
+	if attr, ok := d.GetOk(constDiscreteChannelRelease); ok {
 		project.DiscreteChannelRelease = attr.(bool)
 	}
 
-	if attr, ok := d.GetOk("skip_package_steps_that_are_already_installed"); ok {
+	if attr, ok := d.GetOk(constSkipPackageStepsThatAreAlreadyInstalled); ok {
 		project.DefaultToSkipIfAlreadyInstalled = attr.(bool)
 	}
 

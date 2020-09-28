@@ -112,11 +112,10 @@ func dataMachine() *schema.Resource {
 }
 
 func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-
 	name := d.Get(constName).(string)
-	resource, err := apiClient.Machines.GetByName(name)
 
+	apiClient := m.(*client.Client)
+	resource, err := apiClient.Machines.GetByName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingMachine, name, err)
 	}

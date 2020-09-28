@@ -11,7 +11,7 @@ func getApplyTerraformActionSchema() *schema.Schema {
 	addExecutionLocationSchema(element)
 	addPrimaryPackageSchema(element, false)
 
-	element.Schema["additional_init_params"] = &schema.Schema{
+	element.Schema[constAdditionalInitParams] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "Additional parameters passed to the init command",
 		Optional:    true,
@@ -24,7 +24,7 @@ func buildApplyTerraformActionResource(tfAction map[string]interface{}) model.De
 	resource := buildDeploymentActionResource(tfAction)
 
 	resource.ActionType = "Octopus.TerraformApply"
-	resource.Properties["Octopus.Action.Terraform.AdditionalInitParams"] = tfAction["additional_init_params"].(string)
+	resource.Properties["Octopus.Action.Terraform.AdditionalInitParams"] = tfAction[constAdditionalInitParams].(string)
 	resource.Properties["Octopus.Action.Terraform.AllowPluginDownloads"] = "True"
 	resource.Properties["Octopus.Action.Terraform.ManagedAccount"] = "None"
 
