@@ -11,7 +11,7 @@ import (
 )
 
 // Validate a value against a set of possible values
-func validateValueFunc(values []string) schema.SchemaValidateFunc {
+func validateValueFunc(values []string) schema.SchemaValidateDiagFunc {
 	return func(v interface{}, k string) (we []string, errors []error) {
 		value := v.(string)
 		valid := false
