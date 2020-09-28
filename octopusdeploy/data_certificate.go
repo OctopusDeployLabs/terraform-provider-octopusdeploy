@@ -63,7 +63,6 @@ func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
 		return createResourceOperationError(errorReadingCertificate, name, err)
 	}
 	if len(resourceList) == 0 {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 

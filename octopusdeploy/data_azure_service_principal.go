@@ -75,7 +75,6 @@ func dataAzureServicePrincipalReadByName(d *schema.ResourceData, m interface{}) 
 		return createResourceOperationError(errorReadingAzureServicePrincipal, name, err)
 	}
 	if resource == nil {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 

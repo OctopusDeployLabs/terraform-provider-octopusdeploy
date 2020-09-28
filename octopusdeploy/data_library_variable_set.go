@@ -27,7 +27,6 @@ func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) err
 		return createResourceOperationError(errorReadingLibraryVariableSet, name, err)
 	}
 	if len(resourceList) == 0 {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 

@@ -47,7 +47,6 @@ func dataProjectReadByName(d *schema.ResourceData, m interface{}) error {
 		return createResourceOperationError(errorReadingProject, name, err)
 	}
 	if resource == nil {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 

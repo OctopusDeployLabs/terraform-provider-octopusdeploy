@@ -39,7 +39,6 @@ func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 		return createResourceOperationError(errorReadingEnvironment, name, err)
 	}
 	if resource == nil {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 

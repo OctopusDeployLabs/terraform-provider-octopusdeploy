@@ -28,7 +28,6 @@ func dataTagSetReadByName(d *schema.ResourceData, m interface{}) error {
 		return createResourceOperationError(errorReadingTagSet, name, err)
 	}
 	if resource == nil {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 

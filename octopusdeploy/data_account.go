@@ -8,7 +8,6 @@ import (
 func dataAccount() *schema.Resource {
 	return &schema.Resource{
 		Read: dataAccountReadByName,
-
 		Schema: map[string]*schema.Schema{
 			constName: {
 				Type:     schema.TypeString,
@@ -27,7 +26,6 @@ func dataAccountReadByName(d *schema.ResourceData, m interface{}) error {
 		return createResourceOperationError(errorReadingAccount, name, err)
 	}
 	if resource == nil {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 

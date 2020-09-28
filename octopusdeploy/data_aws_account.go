@@ -59,7 +59,6 @@ func dataAwsAccountReadByName(d *schema.ResourceData, m interface{}) error {
 		return createResourceOperationError(errorReadingAWSAccount, name, err)
 	}
 	if resource == nil {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 

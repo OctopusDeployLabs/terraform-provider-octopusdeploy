@@ -108,11 +108,7 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 		return createResourceOperationError(errorUpdatingDeploymentProcess, d.Id(), err)
 	}
 
-	if isEmpty(resource.ID) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.ID)
-	}
+	d.SetId(resource.ID)
 
 	return nil
 }

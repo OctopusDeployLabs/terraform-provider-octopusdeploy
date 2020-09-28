@@ -64,7 +64,6 @@ func dataChannelReadByName(d *schema.ResourceData, m interface{}) error {
 		return createResourceOperationError(errorReadingChannel, name, err)
 	}
 	if len(resourceList) == 0 {
-		// d.SetId(constEmptyString)
 		return nil
 	}
 
