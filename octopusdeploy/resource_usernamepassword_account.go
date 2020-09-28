@@ -65,7 +65,7 @@ func buildUsernamePasswordResource(d *schema.ResourceData) (*model.Account, erro
 	}
 
 	password := d.Get(constPassword).(string)
-	if password == constEmptyString {
+	if isEmpty(password) {
 		log.Println("Key is nil. Must add in a password")
 	}
 

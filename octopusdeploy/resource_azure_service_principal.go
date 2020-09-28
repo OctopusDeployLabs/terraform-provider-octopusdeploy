@@ -66,7 +66,7 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 	name := d.Get(constName).(string)
 
 	password := d.Get(constKey).(string)
-	if password == constEmptyString {
+	if isEmpty(password) {
 		log.Println("Key is nil. Must add in a password")
 	}
 
@@ -200,21 +200,19 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	if account.ID == constEmptyString {
+	if isEmpty(account.ID) {
 		log.Println("ID is nil")
 	} else {
 		account.ID = d.Id()
 	}
 
 	apiClient := m.(*client.Client)
-
 	updatedAccount, err := apiClient.Accounts.Update(*account)
-
 	if err != nil {
 		return createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err)
 	}
 
-	if updatedAccount.ID == constEmptyString {
+	if isEmpty(updatedAccount.ID) {
 		log.Println("ID is nil")
 	} else {
 		d.SetId(updatedAccount.ID)

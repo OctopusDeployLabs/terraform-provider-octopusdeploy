@@ -126,7 +126,7 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 		return err
 	}
 
-	if account.ID == constEmptyString {
+	if isEmpty(account.ID) {
 		log.Println("ID is nil")
 	} else {
 		account.ID = d.Id()
@@ -139,7 +139,7 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 		return createResourceOperationError(errorUpdatingAWSAccount, d.Id(), err)
 	}
 
-	if updatedAccount.ID == constEmptyString {
+	if isEmpty(updatedAccount.ID) {
 		log.Println("ID is nil")
 	} else {
 		d.SetId(updatedAccount.ID)
