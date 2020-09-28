@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
@@ -112,18 +111,16 @@ func resourceEnvironmentCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceEnvironmentUpdate(d *schema.ResourceData, m interface{}) error {
-	env := buildEnvironmentResource(d)
-	env.ID = d.Id() // set project struct ID so octopus knows which project to update
+	environment := buildEnvironmentResource(d)
+	environment.ID = d.Id() // set ID so Octopus API knows which environment to update
 
 	apiClient := m.(*client.Client)
-
-	updatedEnv, err := apiClient.Environments.Update(env)
-
+	resource, err := apiClient.Environments.Update(environment)
 	if err != nil {
-		return fmt.Errorf("error updating environment id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingEnvironment, d.Id(), err)
 	}
 
-	d.SetId(updatedEnv.ID)
+	d.SetId(resource.ID)
 	return nil
 }
 

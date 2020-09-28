@@ -59,10 +59,6 @@ func resourceAzureServicePrincipal() *schema.Resource {
 }
 
 func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account, error) {
-	if d == nil {
-		return nil, createInvalidParameterError("buildAzureServicePrincipalResource", "d")
-	}
-
 	name := d.Get(constName).(string)
 
 	password := d.Get(constKey).(string)
@@ -187,14 +183,6 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
-	}
-
 	account, err := buildAzureServicePrincipalResource(d)
 	if err != nil {
 		return err
@@ -203,19 +191,19 @@ func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) 
 	if isEmpty(account.ID) {
 		log.Println("ID is nil")
 	} else {
-		account.ID = d.Id()
+		account.ID = d.Id() // set ID so Octopus API knows which account to update
 	}
 
 	apiClient := m.(*client.Client)
-	updatedAccount, err := apiClient.Accounts.Update(*account)
+	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err)
 	}
 
-	if isEmpty(updatedAccount.ID) {
+	if isEmpty(resource.ID) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(updatedAccount.ID)
+		d.SetId(resource.ID)
 	}
 
 	return nil

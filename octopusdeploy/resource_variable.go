@@ -228,7 +228,7 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	tfVar := buildVariableResource(d)
-	tfVar.ID = d.Id() // set project struct ID so octopus knows which project to update
+	tfVar.ID = d.Id() // set ID so Octopus API knows which variable to update
 	projID := d.Get(constProjectID).(string)
 
 	apiClient := m.(*client.Client)

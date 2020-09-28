@@ -149,18 +149,17 @@ func resourceFeedCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceFeedUpdate(d *schema.ResourceData, m interface{}) error {
-	resource := buildFeedResource(d)
-
-	// set ID to inform Octopus API which feed to update
-	resource.ID = d.Id()
+	feed := buildFeedResource(d)
+	feed.ID = d.Id() // set ID so Octopus API knows which feed to update
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.Feeds.Update(*resource)
+	resource, err := apiClient.Feeds.Update(*feed)
 	if err != nil {
 		return fmt.Errorf(errorUpdatingFeed, d.Id(), err.Error())
 	}
 
 	d.SetId(resource.ID)
+
 	return nil
 }
 

@@ -126,10 +126,6 @@ func resourceLifecycleCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func buildLifecycleResource(d *schema.ResourceData) (*model.Lifecycle, error) {
-	if d == nil {
-		return nil, createInvalidParameterError("buildLifecycleResource", "d")
-	}
-
 	name := d.Get(constName).(string)
 
 	lifecycle, err := model.NewLifecycle(name)
@@ -226,16 +222,15 @@ func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	lifecycle.ID = d.Id() // set lifecycle struct ID so Octopus API knows which lifecycle to update
+	lifecycle.ID = d.Id() // set ID so Octopus API knows which lifecycle to update
 
 	apiClient := m.(*client.Client)
-	lifecycle, err = apiClient.Lifecycles.Update(*lifecycle)
-
+	resource, err := apiClient.Lifecycles.Update(*lifecycle)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingLifecycle, d.Id(), err)
 	}
 
-	d.SetId(lifecycle.ID)
+	d.SetId(resource.ID)
 
 	return nil
 }
@@ -250,5 +245,6 @@ func resourceLifecycleDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(constEmptyString)
+
 	return nil
 }

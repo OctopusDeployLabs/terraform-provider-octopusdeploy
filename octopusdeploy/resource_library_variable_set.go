@@ -117,17 +117,16 @@ func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) error {
-	resource := buildLibraryVariableSetResource(d)
-	resource.ID = d.Id() // set libraryVariableSet struct ID so octopus knows which libraryVariableSet to update
+	libraryVariableSet := buildLibraryVariableSetResource(d)
+	libraryVariableSet.ID = d.Id() // set ID so Octopus API knows which library variable set to update
 
 	apiClient := m.(*client.Client)
-	updatedResource, err := apiClient.LibraryVariableSets.Update(*resource)
-
+	resource, err := apiClient.LibraryVariableSets.Update(*libraryVariableSet)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingLibraryVariableSet, d.Id(), err)
 	}
 
-	d.SetId(updatedResource.ID)
+	d.SetId(resource.ID)
 
 	return nil
 }
@@ -142,5 +141,6 @@ func resourceLibraryVariableSetDelete(d *schema.ResourceData, m interface{}) err
 	}
 
 	d.SetId(constEmptyString)
+
 	return nil
 }

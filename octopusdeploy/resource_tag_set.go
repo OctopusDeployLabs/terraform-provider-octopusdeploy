@@ -112,15 +112,16 @@ func resourceTagSetCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceTagSetUpdate(d *schema.ResourceData, m interface{}) error {
 	tagSet := buildTagSetResource(d)
-	tagSet.ID = d.Id() // set project struct ID so octopus knows which project to update
+	tagSet.ID = d.Id() // set ID so Octopus API knows which tag set to update
 
 	apiClient := m.(*client.Client)
-	updatedTagSet, err := apiClient.TagSets.Update(tagSet)
+	resource, err := apiClient.TagSets.Update(tagSet)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingTagSet, d.Id(), err)
 	}
 
-	d.SetId(updatedTagSet.ID)
+	d.SetId(resource.ID)
+
 	return nil
 }
 
@@ -134,5 +135,6 @@ func resourceTagSetDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(constEmptyString)
+
 	return nil
 }

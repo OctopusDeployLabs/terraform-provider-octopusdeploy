@@ -151,17 +151,15 @@ func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 	channel := buildChannelResource(d)
-	channel.ID = d.Id() // set channel struct ID so octopus knows which channel to update
+	channel.ID = d.Id() // set ID so Octopus API knows which channel to update
 
 	apiClient := m.(*client.Client)
-
-	updatedChannel, err := apiClient.Channels.Update(*channel)
-
+	resource, err := apiClient.Channels.Update(*channel)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingChannel, d.Id(), err)
 	}
 
-	d.SetId(updatedChannel.ID)
+	d.SetId(resource.ID)
 
 	return nil
 }

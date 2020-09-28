@@ -61,10 +61,6 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 }
 
 func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Account, error) {
-	if d == nil {
-		return nil, createInvalidParameterError("buildAmazonWebServicesAccountResource", "d")
-	}
-
 	name := d.Get(constName).(string)
 	accessKey := d.Get(constAccessKey).(string)
 	password := d.Get(constSecretKey).(string)
@@ -113,14 +109,6 @@ func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{
 }
 
 func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceAmazonWebServicesAccountUpdate", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceAmazonWebServicesAccountUpdate", "m")
-	}
-
 	account, err := buildAmazonWebServicesAccountResource(d)
 	if err != nil {
 		return err
@@ -129,20 +117,19 @@ func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{
 	if isEmpty(account.ID) {
 		log.Println("ID is nil")
 	} else {
-		account.ID = d.Id()
+		account.ID = d.Id() // set ID so Octopus API knows which account to update
 	}
 
 	apiClient := m.(*client.Client)
-
-	updatedAccount, err := apiClient.Accounts.Update(*account)
+	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingAWSAccount, d.Id(), err)
 	}
 
-	if isEmpty(updatedAccount.ID) {
+	if isEmpty(resource.ID) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(updatedAccount.ID)
+		d.SetId(resource.ID)
 	}
 
 	return nil

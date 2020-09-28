@@ -176,23 +176,21 @@ func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interf
 }
 
 func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m interface{}) error {
-	deploymentTargetTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
-
+	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
 	if err != nil {
 		return err
 	}
 
-	deploymentTargetTrigger.ID = d.Id() // set deploymenttrigger struct ID so octopus knows which to update
+	projectTrigger.ID = d.Id() // set ID so Octopus API knows which project trigger to update
 
 	apiClient := m.(*client.Client)
-
-	updatedProjectTrigger, err := apiClient.ProjectTriggers.Update(deploymentTargetTrigger)
-
+	resource, err := apiClient.ProjectTriggers.Update(projectTrigger)
 	if err != nil {
-		return fmt.Errorf("error updating project trigger id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingProjectTrigger, d.Id(), err)
 	}
 
-	d.SetId(updatedProjectTrigger.ID)
+	d.SetId(resource.ID)
+
 	return nil
 }
 
@@ -206,5 +204,6 @@ func resourceProjectDeploymentTargetTriggerDelete(d *schema.ResourceData, m inte
 	}
 
 	d.SetId(constEmptyString)
+
 	return nil
 }

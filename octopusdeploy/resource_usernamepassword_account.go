@@ -53,10 +53,6 @@ func resourceUsernamePasswordRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func buildUsernamePasswordResource(d *schema.ResourceData) (*model.Account, error) {
-	if d == nil {
-		return nil, createInvalidParameterError("buildUsernamePasswordResource", "d")
-	}
-
 	name := d.Get(constName).(string)
 
 	account, err := model.NewUsernamePasswordAccount(name)
@@ -105,28 +101,20 @@ func resourceUsernamePasswordCreate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceUsernamePasswordUpdate(d *schema.ResourceData, m interface{}) error {
-	if d == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "d")
-	}
-
-	if m == nil {
-		return createInvalidParameterError("resourceAzureServicePrincipalRead", "m")
-	}
-
 	account, err := buildUsernamePasswordResource(d)
 	if err != nil {
 		return err
 	}
 
-	account.ID = d.Id()
+	account.ID = d.Id() // set ID so Octopus API knows which account to update
 
 	apiClient := m.(*client.Client)
-	updatedAccount, err := apiClient.Accounts.Update(*account)
+	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingUsernamePasswordAccount, d.Id(), err)
 	}
 
-	d.SetId(updatedAccount.ID)
+	d.SetId(resource.ID)
 
 	return nil
 }

@@ -81,15 +81,16 @@ func resourceProjectGroupRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceProjectGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	projectGroup := buildProjectGroupResource(d)
-	projectGroup.ID = d.Id() // set projectgroup struct ID so octopus knows which  to update
+	projectGroup.ID = d.Id() // set ID so Octopus API knows which project group to update
 
 	apiClient := m.(*client.Client)
-	updatedProject, err := apiClient.ProjectGroups.Update(projectGroup)
+	resource, err := apiClient.ProjectGroups.Update(projectGroup)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingProjectGroup, d.Id(), err)
 	}
 
-	d.SetId(updatedProject.ID)
+	d.SetId(resource.ID)
+
 	return nil
 }
 
@@ -103,5 +104,6 @@ func resourceProjectGroupDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(constEmptyString)
+
 	return nil
 }

@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 
@@ -181,19 +180,19 @@ func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
 	apiClient := m.(*client.Client)
-	machine, err := apiClient.Machines.GetByID(id)
+	resource, err := apiClient.Machines.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingMachine, id, err)
 	}
-	if machine == nil {
+	if resource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
 	logResource(constMachine, m)
 
-	d.SetId(machine.ID)
-	setMachineProperties(d, machine)
+	d.SetId(resource.ID)
+	setMachineProperties(d, resource)
 
 	return nil
 }
@@ -323,17 +322,18 @@ func resourceMachineDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(constEmptyString)
+
 	return nil
 }
 
 func resourceMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	machine := buildMachineResource(d)
-	machine.ID = d.Id() // set project struct ID so octopus knows which project to update
+	machine.ID = d.Id() // set ID so Octopus API knows which machine to update
 
 	apiClient := m.(*client.Client)
 	updatedMachine, err := apiClient.Machines.Update(machine)
 	if err != nil {
-		return fmt.Errorf(errorUpdatingMachine, d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingMachine, d.Id(), err)
 	}
 
 	d.SetId(updatedMachine.ID)

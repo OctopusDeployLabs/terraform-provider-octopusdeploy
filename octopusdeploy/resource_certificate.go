@@ -152,19 +152,19 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	if isEmpty(certificate.ID) {
 		log.Println("ID is empty")
 	} else {
-		certificate.ID = d.Id()
+		certificate.ID = d.Id() // set ID so Octopus API knows which certificate to update
 	}
 
 	apiClient := m.(*client.Client)
-	updatedCertificate, err := apiClient.Certificates.Update(*certificate)
+	resource, err := apiClient.Certificates.Update(*certificate)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingCertificate, d.Id(), err)
 	}
 
-	if isEmpty(updatedCertificate.ID) {
+	if isEmpty(resource.ID) {
 		log.Println("ID is empty")
 	} else {
-		d.SetId(updatedCertificate.ID)
+		d.SetId(resource.ID)
 	}
 
 	return nil

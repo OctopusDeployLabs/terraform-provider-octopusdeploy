@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
@@ -152,17 +151,16 @@ func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 	feed := buildNugetFeedResource(d)
-	feed.ID = d.Id() // set project struct ID so octopus knows which project to update
+	feed.ID = d.Id() // set ID so Octopus API knows which feed to update
 
 	apiClient := m.(*client.Client)
-
 	updatedFeed, err := apiClient.Feeds.Update(*feed)
-
 	if err != nil {
-		return fmt.Errorf("error updating nuget feed id %s: %s", d.Id(), err.Error())
+		return createResourceOperationError(errorUpdatingNuGetFeed, d.Id(), err)
 	}
 
 	d.SetId(updatedFeed.ID)
+
 	return nil
 }
 
@@ -176,5 +174,6 @@ func resourceNugetFeedDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(constEmptyString)
+
 	return nil
 }

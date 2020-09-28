@@ -57,8 +57,9 @@ func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) erro
 }
 
 func buildDeploymentProcessResource(d *schema.ResourceData) *model.DeploymentProcess {
-	deploymentProcess := &model.DeploymentProcess{
-		ProjectID: d.Get(constProjectID).(string),
+	deploymentProcess, err := model.NewDeploymentProcess(d.Get(constProjectID).(string))
+	if err != nil {
+		return nil
 	}
 
 	if attr, ok := d.GetOk(constStep); ok {
@@ -93,22 +94,25 @@ func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error 
 
 func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) error {
 	deploymentProcess := buildDeploymentProcessResource(d)
-	deploymentProcess.ID = d.Id() // set deploymentProcess struct ID so octopus knows which deploymentProcess to update
+	deploymentProcess.ID = d.Id() // set ID so Octopus API knows which deployment process to update
 
 	apiClient := m.(*client.Client)
-
 	current, err := apiClient.DeploymentProcesses.GetByID(deploymentProcess.ID)
 	if err != nil {
 		return createResourceOperationError(errorReadingDeploymentProcess, deploymentProcess.ID, err)
 	}
 
 	deploymentProcess.Version = current.Version
-	deploymentProcess, err = apiClient.DeploymentProcesses.Update(*deploymentProcess)
+	resource, err := apiClient.DeploymentProcesses.Update(*deploymentProcess)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingDeploymentProcess, d.Id(), err)
 	}
 
-	d.SetId(deploymentProcess.ID)
+	if isEmpty(resource.ID) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.ID)
+	}
 
 	return nil
 }
