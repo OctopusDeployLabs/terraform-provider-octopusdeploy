@@ -8,12 +8,10 @@ const (
 	errorUpdatingAccount string = "error updating account ID %s: %s"
 
 	errorCreatingAWSAccount string = "error creating AWS account %s: %s"
-	errorDeletingAWSAccount string = "error deleting AWS account ID %s: %s"
 	errorReadingAWSAccount  string = "error reading AWS account %s: %s"
 	errorUpdatingAWSAccount string = "error updating AWS account ID %s: %s"
 
 	errorCreatingAzureServicePrincipal string = "error creating Azure service principal %s: %s"
-	errorDeletingAzureServicePrincipal string = "error deleting Azure service principal ID %s: %s"
 	errorReadingAzureServicePrincipal  string = "error reading Azure service principal %s: %s"
 	errorUpdatingAzureServicePrincipal string = "error updating Azure service principal ID %s: %s"
 
@@ -62,10 +60,7 @@ const (
 	errorReadingMachine  string = "error reading machine %s: %s"
 	errorUpdatingMachine string = "error updating machine ID %s: %s"
 
-	errorCreatingMachinePolicy string = "error creating machine policy %s: %s"
-	errorDeletingMachinePolicy string = "error deleting machine policy ID %s: %s"
-	errorReadingMachinePolicy  string = "error reading machine policy %s: %s"
-	errorUpdatingMachinePolicy string = "error updating machine policy ID %s: %s"
+	errorReadingMachinePolicy string = "error reading machine policy %s: %s"
 
 	errorCreatingProject string = "error creating project: %s"
 	errorDeletingProject string = "error deleting project ID %s: %s"
@@ -83,7 +78,6 @@ const (
 	errorUpdatingProjectTrigger string = "error updating project trigger ID %s: %s"
 
 	errorCreatingSSHKeyPair string = "error creating SSH key pair %s: %s"
-	errorDeletingSSHKeyPair string = "error deleting SSH key pair ID %s: %s"
 	errorReadingSSHKeyPair  string = "error reading SSH key pair %s: %s"
 	errorUpdatingSSHKeyPair string = "error updating SSH key pair ID %s: %s"
 
@@ -94,7 +88,6 @@ const (
 
 	errorCreatingUsernamePasswordAccount string = "error creating username password account %s: %s"
 	/* #nosec */
-	errorDeletingUsernamePasswordAccount string = "error deleting username password account ID %s: %s"
 	errorReadingUsernamePasswordAccount  string = "error reading username password account %s: %s"
 	errorUpdatingUsernamePasswordAccount string = "error updating username password account ID %s: %s"
 
