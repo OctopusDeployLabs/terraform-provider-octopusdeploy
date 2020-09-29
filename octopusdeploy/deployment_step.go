@@ -5,6 +5,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func getDeploymentStepSchema() *schema.Schema {
@@ -31,23 +32,23 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "Whether to run this step before or after package acquisition (if possible)",
 					Optional:    true,
 					Default:     (string)(model.DeploymentStepPackageRequirementLetOctopusDecide),
-					ValidateDiagFunc: validateValueFunc([]string{
+					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 						(string)(model.DeploymentStepPackageRequirementLetOctopusDecide),
 						(string)(model.DeploymentStepPackageRequirementBeforePackageAcquisition),
 						(string)(model.DeploymentStepPackageRequirementAfterPackageAcquisition),
-					}),
+					}, false)),
 				},
 				constCondition: {
 					Type:        schema.TypeString,
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
 					Optional:    true,
 					Default:     (string)(model.DeploymentStepConditionSuccess),
-					ValidateDiagFunc: validateValueFunc([]string{
+					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 						(string)(model.DeploymentStepConditionSuccess),
 						(string)(model.DeploymentStepConditionFailure),
 						(string)(model.DeploymentStepConditionAlways),
 						(string)(model.DeploymentStepConditionVariable),
-					}),
+					}, false)),
 				},
 				constConditionExpression: {
 					Type:        schema.TypeString,
@@ -59,10 +60,10 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')",
 					Optional:    true,
 					Default:     (string)(model.DeploymentStepStartTriggerStartAfterPrevious),
-					ValidateDiagFunc: validateValueFunc([]string{
+					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 						(string)(model.DeploymentStepStartTriggerStartAfterPrevious),
 						(string)(model.DeploymentStepStartTriggerStartWithPrevious),
-					}),
+					}, false)),
 				},
 				constWindowSize: {
 					Type:        schema.TypeString,

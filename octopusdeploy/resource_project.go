@@ -7,6 +7,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceProject() *schema.Resource {
@@ -37,20 +38,20 @@ func resourceProject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "EnvironmentDefault",
-				ValidateDiagFunc: validateValueFunc([]string{
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 					"EnvironmentDefault",
 					"Off",
 					"On",
-				}),
+				}, false)),
 			},
 			constSkipMachineBehavior: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "None",
-				ValidateDiagFunc: validateValueFunc([]string{
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 					"SkipUnavailableMachines",
 					"None",
-				}),
+				}, false)),
 			},
 			constAllowDeploymentsToNoTargets: {
 				Type:     schema.TypeBool,

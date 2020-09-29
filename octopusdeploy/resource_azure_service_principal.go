@@ -28,8 +28,8 @@ func resourceAzureServicePrincipal() *schema.Resource {
 	schemaMap[constSubscriptionNumber] = &schema.Schema{
 		Type: schema.TypeString,
 		//Computed:     true,
-		Required:     true,
-		ValidateFunc: validation.IsUUID,
+		Required:         true,
+		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
 	}
 	schemaMap[constKey] = &schema.Schema{
 		Type:      schema.TypeString,
