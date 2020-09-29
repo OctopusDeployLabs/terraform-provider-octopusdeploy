@@ -100,6 +100,8 @@ github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200918004128-e9a9cbc9c0a4 h
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200918004128-e9a9cbc9c0a4/go.mod h1:INF9xhL97JGBzFDRhwx0aQ7LUawdyrC/SChhtsc2AeE=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200927214259-3319b826ed8d h1:jw+NHXXGaQ9LWtnf7+rm9RBwCh1U4FvoPwB4VYbLmFY=
 github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200927214259-3319b826ed8d/go.mod h1:INF9xhL97JGBzFDRhwx0aQ7LUawdyrC/SChhtsc2AeE=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200929123159-3dc0734a3e8f h1:qsB2X3kLTf9NvUDx2sRHaLE16dbOYa1e5Pm3YrGvOuU=
+github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200929123159-3dc0734a3e8f/go.mod h1:INF9xhL97JGBzFDRhwx0aQ7LUawdyrC/SChhtsc2AeE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/OpenPeeDeeP/depguard v1.0.1 h1:VlW4R6jmBIv3/u1JNlawEvJMM4J+dPORPaZasQee8Us=
 github.com/OpenPeeDeeP/depguard v1.0.1/go.mod h1:xsIw86fROiiwelg+jB2uM9PiKihMMmUx/1V+TNhjQvM=

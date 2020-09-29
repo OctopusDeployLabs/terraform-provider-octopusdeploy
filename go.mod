@@ -2,7 +2,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 
 require (
 	github.com/Djarvur/go-err113 v0.1.0 // indirect
-	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200927214259-3319b826ed8d
+	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20200929123159-3dc0734a3e8f
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 	github.com/aws/aws-sdk-go v1.34.13 // indirect
