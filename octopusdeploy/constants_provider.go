@@ -23,6 +23,7 @@ const (
 	OctopusDeployProjectGroup                   string = "octopusdeploy_project_group"
 	OctopusDeploySSHKeyAccount                  string = "octopusdeploy_sshkey_account"
 	OctopusDeployTagSet                         string = "octopusdeploy_tag_set"
+	OctopusDeployTokenAccount                   string = "octopusdeploy_token_account"
 	OctopusDeployUsernamePasswordAccount        string = "octopusdeploy_usernamepassword_account"
 	OctopusDeployVariable                       string = "octopusdeploy_variable"
 )
