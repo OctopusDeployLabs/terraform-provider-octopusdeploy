@@ -20,6 +20,7 @@ func Provider() *schema.Provider {
 			constOctopusDeployLifecycle:          dataLifecycle(),
 			constOctopusDeployFeed:               dataFeed(),
 			constOctopusDeployAccount:            dataAccount(),
+			constOctopusDeployTokenAccount:       dataTokenAccount(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			constOctopusDeployProject:                        resourceProject(),
@@ -41,6 +42,7 @@ func Provider() *schema.Provider {
 			constOctopusDeployUsernamePasswordAccount: resourceUsernamePassword(),
 			constOctopusDeploySSHKeyAccount:           resourceSSHKey(),
 			constOctopusDeployAWSAccount:              resourceAmazonWebServicesAccount(),
+			constOctopusDeployTokenAccount:            resourceTokenAccount(),
 		},
 		Schema: map[string]*schema.Schema{
 			constAddress: {
