@@ -8,6 +8,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var mutex = &sync.Mutex{}
@@ -33,13 +34,13 @@ func resourceVariable() *schema.Resource {
 			constType: {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateDiagFunc: validateValueFunc([]string{
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 					"String",
 					"Sensitive",
 					"Certificate",
 					"AmazonWebServicesAccount",
 					"AzureAccount",
-				}),
+				}, false)),
 			},
 			constValue: {
 				Type:          schema.TypeString,

@@ -9,6 +9,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceMachine() *schema.Resource {
@@ -36,7 +37,7 @@ func resourceMachine() *schema.Resource {
 						"communicationstyle": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateDiagFunc: validateValueFunc([]string{
+							ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 								"None",
 								"TentaclePassive",
 								"TentacleActive",
@@ -46,7 +47,7 @@ func resourceMachine() *schema.Resource {
 								"Ftp",
 								"AzureCloudService",
 								"Kubernetes",
-							}),
+							}, false)),
 						},
 
 						"proxyid": {
@@ -99,10 +100,10 @@ func resourceMachine() *schema.Resource {
 									"authenticationtype": {
 										Type:     schema.TypeString,
 										Optional: true,
-										ValidateDiagFunc: validateValueFunc([]string{
+										ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 											"KubernetesCertificate",
 											"KubernetesStandard",
-										}),
+										}, false)),
 									},
 								},
 							},
@@ -152,11 +153,11 @@ func resourceMachine() *schema.Resource {
 			"tenanteddeploymentparticipation": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateDiagFunc: validateValueFunc([]string{
+				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 					"Untenanted",
 					"TenantedOrUntenanted",
 					"Tenanted",
-				}),
+				}, false)),
 			},
 			"tenantids": {
 				Type: schema.TypeList,
