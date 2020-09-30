@@ -115,7 +115,7 @@ func resourceTagSetUpdate(d *schema.ResourceData, m interface{}) error {
 	tagSet.ID = d.Id() // set ID so Octopus API knows which tag set to update
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.TagSets.Update(tagSet)
+	resource, err := apiClient.TagSets.Update(*tagSet)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingTagSet, d.Id(), err)
 	}
