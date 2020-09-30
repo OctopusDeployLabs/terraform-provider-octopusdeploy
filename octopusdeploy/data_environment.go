@@ -43,6 +43,7 @@ func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 	}
 
 	logResource(constEnvironment, m)
+	d.SetId(name)
 
 	return nil
 }

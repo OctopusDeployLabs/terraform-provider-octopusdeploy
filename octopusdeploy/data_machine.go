@@ -124,6 +124,7 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 	}
 
 	logResource(constMachine, m)
+	d.SetId(name)
 
 	return nil
 }
