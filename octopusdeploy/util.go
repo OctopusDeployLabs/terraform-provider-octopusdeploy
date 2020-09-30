@@ -49,7 +49,7 @@ func validateValueFunc(values []string) schema.SchemaValidateDiagFunc {
 		}
 
 		if !valid {
-			diags = append(diag.Errorf("unexpected: %s", values))
+			diags = append(diag.Errorf("unexpected: %s", value))
 		}
 		return diags
 	}
