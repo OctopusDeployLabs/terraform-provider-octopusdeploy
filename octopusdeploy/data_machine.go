@@ -116,6 +116,7 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Machines.GetByName(name)
+
 	if err != nil {
 		return createResourceOperationError(errorReadingMachine, name, err)
 	}
@@ -124,7 +125,7 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 	}
 
 	logResource(constMachine, m)
-	d.SetId(name)
+	d.Set(constName, name)
 
 	return nil
 }

@@ -35,6 +35,7 @@ func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Environments.GetByName(name)
+
 	if err != nil {
 		return createResourceOperationError(errorReadingEnvironment, name, err)
 	}
@@ -43,7 +44,7 @@ func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 	}
 
 	logResource(constEnvironment, m)
-	d.SetId(name)
+	d.Set(constName, name)
 
 	return nil
 }

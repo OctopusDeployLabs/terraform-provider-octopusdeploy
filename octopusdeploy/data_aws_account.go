@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -55,10 +57,12 @@ func dataAwsAccountReadByName(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByName(name)
+
 	if err != nil {
 		return createResourceOperationError(errorReadingAWSAccount, name, err)
 	}
 	if resource == nil {
+		fmt.Println("Nil resource")
 		return nil
 	}
 

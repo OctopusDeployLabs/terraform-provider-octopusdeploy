@@ -71,6 +71,7 @@ func dataAzureServicePrincipalReadByName(d *schema.ResourceData, m interface{}) 
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByName(name)
+
 	if err != nil {
 		return createResourceOperationError(errorReadingAzureServicePrincipal, name, err)
 	}
