@@ -43,6 +43,7 @@ func dataProjectReadByName(d *schema.ResourceData, m interface{}) error {
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Projects.GetByName(name)
+
 	if err != nil {
 		return createResourceOperationError(errorReadingProject, name, err)
 	}
