@@ -44,11 +44,5 @@ func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 
 	logResource(constEnvironment, m)
 
-	d.SetId(resource.ID)
-	d.Set(constName, resource.Name)
-	d.Set(constDescription, resource.Description)
-	d.Set(constUseGuidedFailure, resource.UseGuidedFailure)
-	d.Set(constAllowDynamicInfrastructure, resource.AllowDynamicInfrastructure)
-
 	return nil
 }

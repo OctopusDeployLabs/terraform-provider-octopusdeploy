@@ -125,27 +125,5 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 
 	logResource(constMachine, m)
 
-	d.SetId(resource.ID)
-	d.Set(constEndpointCommunicationStyle, resource.Endpoint.CommunicationStyle)
-	d.Set(constEndpointID, resource.Endpoint.ID)
-	d.Set("endpoint_proxyid", resource.Endpoint.ProxyID)
-	d.Set("endpoint_tentacleversiondetails_upgradelocked", resource.Endpoint.TentacleVersionDetails.UpgradeLocked)
-	d.Set("endpoint_tentacleversiondetails_upgraderequired", resource.Endpoint.TentacleVersionDetails.UpgradeRequired)
-	d.Set("endpoint_tentacleversiondetails_upgradesuggested", resource.Endpoint.TentacleVersionDetails.UpgradeSuggested)
-	d.Set("endpoint_tentacleversiondetails_version", resource.Endpoint.TentacleVersionDetails.Version)
-	d.Set(constEndpointThumbprint, resource.Endpoint.Thumbprint)
-	d.Set(constEndpointURI, resource.Endpoint.URI)
-	d.Set(constEnvironments, resource.EnvironmentIDs)
-	d.Set("haslatestcalamari", resource.HasLatestCalamari)
-	d.Set("isdisabled", resource.IsDisabled)
-	d.Set("isinprocess", resource.IsInProcess)
-	d.Set("machinepolicy", resource.MachinePolicyID)
-	d.Set(constRoles, resource.Roles)
-	d.Set(constStatus, resource.Status)
-	d.Set("statussummary", resource.StatusSummary)
-	d.Set("tenanteddeploymentparticipation", resource.DeploymentMode)
-	d.Set("tenantids", resource.TenantIDs)
-	d.Set("tenanttags", resource.TenantTags)
-
 	return nil
 }
