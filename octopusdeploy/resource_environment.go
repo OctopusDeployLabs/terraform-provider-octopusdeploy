@@ -115,7 +115,7 @@ func resourceEnvironmentUpdate(d *schema.ResourceData, m interface{}) error {
 	environment.ID = d.Id() // set ID so Octopus API knows which environment to update
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.Environments.Update(environment)
+	resource, err := apiClient.Environments.Update(*environment)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingEnvironment, d.Id(), err)
 	}

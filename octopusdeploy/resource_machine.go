@@ -336,7 +336,7 @@ func resourceMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	machine.ID = d.Id() // set ID so Octopus API knows which machine to update
 
 	apiClient := m.(*client.Client)
-	updatedMachine, err := apiClient.Machines.Update(machine)
+	updatedMachine, err := apiClient.Machines.Update(*machine)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingMachine, d.Id(), err)
 	}

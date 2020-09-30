@@ -172,7 +172,7 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	project.ID = d.Id() // set ID so Octopus API knows which project to update
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.Projects.Update(project)
+	resource, err := apiClient.Projects.Update(*project)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingProject, d.Id(), err)
 	}

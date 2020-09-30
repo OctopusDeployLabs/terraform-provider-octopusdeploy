@@ -183,7 +183,7 @@ func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m inte
 	projectTrigger.ID = d.Id() // set ID so Octopus API knows which project trigger to update
 
 	apiClient := m.(*client.Client)
-	resource, err := apiClient.ProjectTriggers.Update(projectTrigger)
+	resource, err := apiClient.ProjectTriggers.Update(*projectTrigger)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingProjectTrigger, d.Id(), err)
 	}
