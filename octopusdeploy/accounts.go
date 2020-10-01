@@ -58,13 +58,11 @@ func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*model.Account,
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		// return nil, createResourceOperationError(errorReadingAccount, id, err)
-		diag.FromErr(err)
+		return nil, diag.FromErr(createResourceOperationError(errorReadingAccount, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
-		// return nil, fmt.Errorf(errorAccountNotFound, id)
-		diag.Errorf(errorAccountNotFound, id)
+		return nil, diag.Errorf(errorAccountNotFound, id)
 	}
 
 	d.Set(constName, resource.Name)
@@ -114,8 +112,7 @@ func resourceAccountCreateCommon(ctx context.Context, d *schema.ResourceData, m 
 
 	account, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingAccount, account.Name, err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingAccount, account.Name, err))
 	}
 
 	d.SetId(account.ID)
@@ -135,8 +132,7 @@ func resourceAccountUpdateCommon(ctx context.Context, d *schema.ResourceData, m 
 	apiClient := m.(*client.Client)
 	updatedAccount, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingAccount, d.Id(), err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingAccount, d.Id(), err))
 	}
 
 	d.SetId(updatedAccount.ID)
@@ -156,8 +152,7 @@ func resourceAccountDeleteCommon(ctx context.Context, d *schema.ResourceData, m 
 	apiClient := m.(*client.Client)
 	err := apiClient.Accounts.DeleteByID(accountID)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingAccount, accountID, err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingAccount, accountID, err))
 	}
 
 	d.SetId(constEmptyString)
