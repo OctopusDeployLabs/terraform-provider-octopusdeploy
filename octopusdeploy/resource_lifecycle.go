@@ -117,8 +117,7 @@ func resourceLifecycleCreate(ctx context.Context, d *schema.ResourceData, m inte
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Lifecycles.Add(lifecycle)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingLifecycle, lifecycle.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingLifecycle, lifecycle.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -207,8 +206,7 @@ func resourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Lifecycles.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingLifecycle, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingLifecycle, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -235,8 +233,7 @@ func resourceLifecycleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Lifecycles.Update(*lifecycle)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingLifecycle, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingLifecycle, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -251,8 +248,7 @@ func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m inte
 	apiClient := m.(*client.Client)
 	err := apiClient.Lifecycles.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingLifecycle, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingLifecycle, id, err))
 	}
 
 	d.SetId(constEmptyString)
