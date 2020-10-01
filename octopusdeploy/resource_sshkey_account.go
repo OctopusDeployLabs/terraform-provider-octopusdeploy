@@ -40,8 +40,7 @@ func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingSSHKeyPair, id, err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingSSHKeyPair, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -99,8 +98,7 @@ func resourceSSHKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingSSHKeyPair, account.Name, err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingSSHKeyPair, account.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -124,8 +122,7 @@ func resourceSSHKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingSSHKeyPair, d.Id(), err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingSSHKeyPair, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)

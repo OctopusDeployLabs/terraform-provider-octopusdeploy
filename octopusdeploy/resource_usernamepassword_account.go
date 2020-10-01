@@ -39,8 +39,7 @@ func resourceUsernamePasswordRead(ctx context.Context, d *schema.ResourceData, m
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingUsernamePasswordAccount, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingUsernamePasswordAccount, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -92,8 +91,7 @@ func resourceUsernamePasswordCreate(ctx context.Context, d *schema.ResourceData,
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingUsernamePasswordAccount, account.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingUsernamePasswordAccount, account.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -115,8 +113,7 @@ func resourceUsernamePasswordUpdate(ctx context.Context, d *schema.ResourceData,
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingUsernamePasswordAccount, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingUsernamePasswordAccount, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)

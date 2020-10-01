@@ -125,8 +125,7 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Variables.GetByID(projectID, id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingVariable, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingVariable, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -207,8 +206,7 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 	apiClient := m.(*client.Client)
 	tfVar, err := apiClient.Variables.AddSingle(projID, newVariable)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingVariable, newVariable.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingVariable, newVariable.Name, err))
 	}
 
 	for _, v := range tfVar.Variables {
@@ -245,8 +243,7 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	apiClient := m.(*client.Client)
 	updatedVars, err := apiClient.Variables.UpdateSingle(projID, tfVar)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingVariable, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingVariable, d.Id(), err))
 	}
 
 	for _, v := range updatedVars.Variables {
@@ -275,8 +272,7 @@ func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m inter
 	apiClient := m.(*client.Client)
 	_, err := apiClient.Variables.DeleteSingle(projID, variableID)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingVariable, variableID, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingVariable, variableID, err))
 	}
 
 	d.SetId(constEmptyString)

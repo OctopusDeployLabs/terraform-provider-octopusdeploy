@@ -53,8 +53,7 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.LibraryVariableSets.Add(libraryVariableSet)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingLibraryVariableSet, libraryVariableSet.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingLibraryVariableSet, libraryVariableSet.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -105,8 +104,7 @@ func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData,
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.LibraryVariableSets.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingLibraryVariableSet, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingLibraryVariableSet, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -130,8 +128,7 @@ func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceDat
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.LibraryVariableSets.Update(*libraryVariableSet)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingLibraryVariableSet, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingLibraryVariableSet, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -146,8 +143,7 @@ func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceDat
 	apiClient := m.(*client.Client)
 	err := apiClient.LibraryVariableSets.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingLibraryVariableSet, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingLibraryVariableSet, id, err))
 	}
 
 	d.SetId(constEmptyString)

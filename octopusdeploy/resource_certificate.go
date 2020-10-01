@@ -73,8 +73,7 @@ func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m inte
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Certificates.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingCertificate, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingCertificate, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -138,8 +137,7 @@ func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m in
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Certificates.Add(certificate)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingCertificate, certificate.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingCertificate, certificate.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -163,8 +161,7 @@ func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m in
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Certificates.Update(*certificate)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingCertificate, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingCertificate, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -179,8 +176,7 @@ func resourceCertificateDelete(ctx context.Context, d *schema.ResourceData, m in
 	apiClient := m.(*client.Client)
 	err := apiClient.Certificates.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingCertificate, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingCertificate, id, err))
 	}
 
 	d.SetId(constEmptyString)

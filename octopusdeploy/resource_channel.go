@@ -70,8 +70,7 @@ func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Channels.Add(channel)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingChannel, channel.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingChannel, channel.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -135,8 +134,7 @@ func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interfac
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Channels.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingChannel, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingChannel, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -163,8 +161,7 @@ func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Channels.Update(*channel)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingChannel, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingChannel, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -179,8 +176,7 @@ func resourceChannelDelete(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	err := apiClient.Channels.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingChannel, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingChannel, id, err))
 	}
 
 	d.SetId(constEmptyString)

@@ -66,8 +66,7 @@ func resourceFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Feeds.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingFeed, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingFeed, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -140,8 +139,7 @@ func resourceFeedCreate(ctx context.Context, d *schema.ResourceData, m interface
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Feeds.Add(*feed)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingFeed, feed.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingFeed, feed.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -161,8 +159,7 @@ func resourceFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Feeds.Update(*feed)
 	if err != nil {
-		// return fmt.Errorf(errorUpdatingFeed, d.Id(), err.Error())
-		return diag.FromErr(err)
+		return diag.Errorf(errorUpdatingFeed, d.Id(), err.Error())
 	}
 
 	d.SetId(resource.ID)
@@ -177,8 +174,7 @@ func resourceFeedDelete(ctx context.Context, d *schema.ResourceData, m interface
 	apiClient := m.(*client.Client)
 	err := apiClient.Feeds.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingFeed, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingFeed, id, err))
 	}
 
 	d.SetId(constEmptyString)

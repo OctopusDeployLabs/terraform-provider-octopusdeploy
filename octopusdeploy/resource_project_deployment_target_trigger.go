@@ -142,8 +142,7 @@ func resourceProjectDeploymentTargetTriggerCreate(ctx context.Context, d *schema
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectTriggers.Add(projectTrigger)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingProjectTrigger, projectTrigger.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingProjectTrigger, projectTrigger.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -162,8 +161,7 @@ func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.R
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectTriggers.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingProjectTrigger, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingProjectTrigger, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -192,8 +190,7 @@ func resourceProjectDeploymentTargetTriggerUpdate(ctx context.Context, d *schema
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectTriggers.Update(*projectTrigger)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingProjectTrigger, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingProjectTrigger, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -208,8 +205,7 @@ func resourceProjectDeploymentTargetTriggerDelete(ctx context.Context, d *schema
 	apiClient := m.(*client.Client)
 	err := apiClient.ProjectTriggers.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingProjectTrigger, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingProjectTrigger, id, err))
 	}
 
 	d.SetId(constEmptyString)

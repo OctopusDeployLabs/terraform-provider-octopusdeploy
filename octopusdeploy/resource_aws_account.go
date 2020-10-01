@@ -43,8 +43,7 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingAWSAccount, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingAWSAccount, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -100,8 +99,7 @@ func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.Resou
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingAWSAccount, account.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingAWSAccount, account.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -125,8 +123,7 @@ func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.Resou
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingAWSAccount, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingAWSAccount, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)

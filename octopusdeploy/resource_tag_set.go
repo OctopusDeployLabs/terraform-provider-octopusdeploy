@@ -55,8 +55,7 @@ func resourceTagSetRead(ctx context.Context, d *schema.ResourceData, m interface
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.TagSets.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingTagSet, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingTagSet, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -103,8 +102,7 @@ func resourceTagSetCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.TagSets.Add(tagSet)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingTagSet, tagSet.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingTagSet, tagSet.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -125,8 +123,7 @@ func resourceTagSetUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.TagSets.Update(*tagSet)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingTagSet, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingTagSet, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -141,8 +138,7 @@ func resourceTagSetDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	apiClient := m.(*client.Client)
 	err := apiClient.TagSets.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingTagSet, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingTagSet, id, err))
 	}
 
 	d.SetId(constEmptyString)

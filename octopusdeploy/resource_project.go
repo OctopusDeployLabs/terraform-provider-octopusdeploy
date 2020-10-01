@@ -132,8 +132,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Projects.Add(project)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingProject, project.ID, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingProject, project.ID, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -152,8 +151,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Projects.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingProject, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingProject, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -182,8 +180,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Projects.Update(*project)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingProject, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingProject, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -198,8 +195,7 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	err := apiClient.Projects.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingProject, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingProject, d.Id(), err))
 	}
 
 	d.SetId(constEmptyString)

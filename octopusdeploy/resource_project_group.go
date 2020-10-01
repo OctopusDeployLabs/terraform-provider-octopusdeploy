@@ -49,8 +49,7 @@ func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectGroups.Add(projectGroup)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingProjectGroup, projectGroup.ID, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingProjectGroup, projectGroup.ID, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -69,8 +68,7 @@ func resourceProjectGroupRead(ctx context.Context, d *schema.ResourceData, m int
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectGroups.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingProjectGroup, id, err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingProjectGroup, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -94,8 +92,7 @@ func resourceProjectGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectGroups.Update(*projectGroup)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingProjectGroup, d.Id(), err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingProjectGroup, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -111,8 +108,7 @@ func resourceProjectGroupDelete(ctx context.Context, d *schema.ResourceData, m i
 	apiClient := m.(*client.Client)
 	err := apiClient.ProjectGroups.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingProjectGroup, id, err)
-		diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingProjectGroup, id, err))
 	}
 
 	d.SetId(constEmptyString)

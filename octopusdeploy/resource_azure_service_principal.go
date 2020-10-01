@@ -143,8 +143,7 @@ func resourceAzureServicePrincipalCreate(ctx context.Context, d *schema.Resource
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		// createResourceOperationError(errorCreatingAzureServicePrincipal, account.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingAzureServicePrincipal, account.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -164,8 +163,7 @@ func resourceAzureServicePrincipalRead(ctx context.Context, d *schema.ResourceDa
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingAzureServicePrincipal, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingAzureServicePrincipal, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -202,8 +200,7 @@ func resourceAzureServicePrincipalUpdate(ctx context.Context, d *schema.Resource
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)

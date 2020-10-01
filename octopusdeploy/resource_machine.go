@@ -186,8 +186,7 @@ func resourceMachineRead(ctx context.Context, d *schema.ResourceData, m interfac
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Machines.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingMachine, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingMachine, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -309,8 +308,7 @@ func resourceMachineCreate(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Machines.Add(machine)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingMachine, machine.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingMachine, machine.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -331,8 +329,7 @@ func resourceMachineDelete(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	err := apiClient.Machines.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingMachine, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingMachine, id, err))
 	}
 
 	d.SetId(constEmptyString)
@@ -349,8 +346,7 @@ func resourceMachineUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	apiClient := m.(*client.Client)
 	updatedMachine, err := apiClient.Machines.Update(*machine)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingMachine, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingMachine, d.Id(), err))
 	}
 
 	d.SetId(updatedMachine.ID)

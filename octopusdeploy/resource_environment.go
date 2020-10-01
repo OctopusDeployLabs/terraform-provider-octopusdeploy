@@ -50,8 +50,7 @@ func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m inte
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Environments.GetByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorReadingEnvironment, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorReadingEnvironment, id, err))
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -103,8 +102,7 @@ func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m in
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Environments.Add(environment)
 	if err != nil {
-		// return createResourceOperationError(errorCreatingEnvironment, environment.Name, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorCreatingEnvironment, environment.Name, err))
 	}
 
 	if isEmpty(resource.ID) {
@@ -123,8 +121,7 @@ func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m in
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Environments.Update(*environment)
 	if err != nil {
-		// return createResourceOperationError(errorUpdatingEnvironment, d.Id(), err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorUpdatingEnvironment, d.Id(), err))
 	}
 
 	d.SetId(resource.ID)
@@ -139,8 +136,7 @@ func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m in
 	apiClient := m.(*client.Client)
 	err := apiClient.Environments.DeleteByID(id)
 	if err != nil {
-		// return createResourceOperationError(errorDeletingEnvironment, id, err)
-		return diag.FromErr(err)
+		return diag.FromErr(createResourceOperationError(errorDeletingEnvironment, id, err))
 	}
 
 	d.SetId(constEmptyString)
