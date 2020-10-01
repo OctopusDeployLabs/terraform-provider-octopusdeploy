@@ -1,20 +1,22 @@
 package octopusdeploy
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectDeploymentTargetTriggerCreate,
-		Read:   resourceProjectDeploymentTargetTriggerRead,
-		Update: resourceProjectDeploymentTargetTriggerUpdate,
-		Delete: resourceProjectDeploymentTargetTriggerDelete,
+		CreateContext: resourceProjectDeploymentTargetTriggerCreate,
+		ReadContext:   resourceProjectDeploymentTargetTriggerRead,
+		UpdateContext: resourceProjectDeploymentTargetTriggerUpdate,
+		DeleteContext: resourceProjectDeploymentTargetTriggerDelete,
 
 		Schema: map[string]*schema.Schema{
 			constName: {
@@ -129,16 +131,19 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*model
 	return deploymentTargetTrigger, nil
 }
 
-func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
+
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectTriggers.Add(projectTrigger)
 	if err != nil {
-		return createResourceOperationError(errorCreatingProjectTrigger, projectTrigger.Name, err)
+		// return createResourceOperationError(errorCreatingProjectTrigger, projectTrigger.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -150,13 +155,15 @@ func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m inte
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectTriggers.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingProjectTrigger, id, err)
+		// return createResourceOperationError(errorReadingProjectTrigger, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -175,17 +182,18 @@ func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interf
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	projectTrigger.ID = d.Id() // set ID so Octopus API knows which project trigger to update
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectTriggers.Update(*projectTrigger)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingProjectTrigger, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingProjectTrigger, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)
@@ -193,13 +201,15 @@ func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m inte
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerDelete(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.ProjectTriggers.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingProjectTrigger, id, err)
+		// return createResourceOperationError(errorDeletingProjectTrigger, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
