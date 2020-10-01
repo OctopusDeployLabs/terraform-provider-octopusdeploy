@@ -1,19 +1,21 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceNugetFeed() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNugetFeedCreate,
-		Read:   resourceNugetFeedRead,
-		Update: resourceNugetFeedUpdate,
-		Delete: resourceNugetFeedDelete,
+		CreateContext: resourceNugetFeedCreate,
+		ReadContext:   resourceNugetFeedRead,
+		UpdateContext: resourceNugetFeedUpdate,
+		DeleteContext: resourceNugetFeedDelete,
 
 		Schema: map[string]*schema.Schema{
 			constName: {
@@ -52,13 +54,15 @@ func resourceNugetFeed() *schema.Resource {
 	}
 }
 
-func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
+func resourceNugetFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Feeds.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingFeed, id, err)
+		// return createResourceOperationError(errorReadingFeed, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -131,13 +135,15 @@ func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 	return feed
 }
 
-func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNugetFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	feed := buildNugetFeedResource(d)
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Feeds.Add(*feed)
 	if err != nil {
-		return createResourceOperationError(errorCreatingNuGetFeed, feed.Name, err)
+		// return createResourceOperationError(errorCreatingNuGetFeed, feed.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -149,14 +155,15 @@ func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNugetFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	feed := buildNugetFeedResource(d)
 	feed.ID = d.Id() // set ID so Octopus API knows which feed to update
 
 	apiClient := m.(*client.Client)
 	updatedFeed, err := apiClient.Feeds.Update(*feed)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingNuGetFeed, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingNuGetFeed, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(updatedFeed.ID)
@@ -164,13 +171,15 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNugetFeedDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNugetFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.Feeds.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingNuGetFeed, id, err)
+		// return createResourceOperationError(errorDeletingNuGetFeed, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
