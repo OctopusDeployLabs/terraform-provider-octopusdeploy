@@ -1,21 +1,23 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceProject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectCreate,
-		Read:   resourceProjectRead,
-		Update: resourceProjectUpdate,
-		Delete: resourceProjectDelete,
+		CreateContext: resourceProjectCreate,
+		ReadContext:   resourceProjectRead,
+		UpdateContext: resourceProjectUpdate,
+		DeleteContext: resourceProjectDelete,
 
 		Schema: map[string]*schema.Schema{
 			constName: {
@@ -123,13 +125,15 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 	return project
 }
 
-func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := buildProjectResource(d)
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Projects.Add(project)
 	if err != nil {
-		return createResourceOperationError(errorCreatingProject, project.ID, err)
+		// return createResourceOperationError(errorCreatingProject, project.ID, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -141,13 +145,15 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
+func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Projects.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingProject, id, err)
+		// return createResourceOperationError(errorReadingProject, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -167,14 +173,17 @@ func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	project := buildProjectResource(d)
 	project.ID = d.Id() // set ID so Octopus API knows which project to update
+
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Projects.Update(*project)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingProject, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingProject, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)
@@ -182,13 +191,15 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.Projects.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingProject, d.Id(), err)
+		// return createResourceOperationError(errorDeletingProject, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
