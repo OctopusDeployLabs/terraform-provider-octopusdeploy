@@ -4,6 +4,7 @@ on:
   push: 
     branches: 
       - beta-candidate-01
+      - feature/diag-diagnostics
 
 jobs:
 
