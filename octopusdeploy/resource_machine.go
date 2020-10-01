@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 	"strconv"
 
@@ -8,16 +9,17 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceMachine() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceMachineCreate,
-		Read:   resourceMachineRead,
-		Update: resourceMachineUpdate,
-		Delete: resourceMachineDelete,
+		CreateContext: resourceMachineCreate,
+		ReadContext:   resourceMachineRead,
+		UpdateContext: resourceMachineUpdate,
+		DeleteContext: resourceMachineDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -177,13 +179,15 @@ func resourceMachine() *schema.Resource {
 	}
 }
 
-func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
+func resourceMachineRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Machines.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingMachine, id, err)
+		// return createResourceOperationError(errorReadingMachine, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -296,14 +300,17 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	return machine
 }
 
-func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
+func resourceMachineCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	machine := buildMachineResource(d)
 	machine.Status = "Unknown" // We don't want TF to attempt to update a machine just because its status has changed, so set it to Unknown on creation and let TF sort it out in the future.
+
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Machines.Add(machine)
 	if err != nil {
-		return createResourceOperationError(errorCreatingMachine, machine.Name, err)
+		// return createResourceOperationError(errorCreatingMachine, machine.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -317,13 +324,15 @@ func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceMachineDelete(d *schema.ResourceData, m interface{}) error {
+func resourceMachineDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.Machines.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingMachine, id, err)
+		// return createResourceOperationError(errorDeletingMachine, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
@@ -331,14 +340,17 @@ func resourceMachineDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceMachineUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceMachineUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	machine := buildMachineResource(d)
 	machine.ID = d.Id() // set ID so Octopus API knows which machine to update
+
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	updatedMachine, err := apiClient.Machines.Update(*machine)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingMachine, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingMachine, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(updatedMachine.ID)
