@@ -1,12 +1,13 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -45,17 +46,25 @@ func getCommonAccountsSchema() map[string]*schema.Schema {
 	}
 }
 
-func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*model.Account, error) {
+func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (*model.Account, diag.Diagnostics) {
 	id := d.Id()
+
+	var diags diag.Diagnostics
+
+	if diags == nil {
+		log.Println("diag package is empty")
+	}
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		return nil, createResourceOperationError(errorReadingAccount, id, err)
+		// return nil, createResourceOperationError(errorReadingAccount, id, err)
+		diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
-		return nil, fmt.Errorf(errorAccountNotFound, id)
+		// return nil, fmt.Errorf(errorAccountNotFound, id)
+		diag.Errorf(errorAccountNotFound, id)
 	}
 
 	d.Set(constName, resource.Name)
@@ -94,25 +103,40 @@ func buildAccountResourceCommon(d *schema.ResourceData, accountType enum.Account
 	return account
 }
 
-func resourceAccountCreateCommon(d *schema.ResourceData, m interface{}, account *model.Account) error {
+func resourceAccountCreateCommon(ctx context.Context, d *schema.ResourceData, m interface{}, account *model.Account) diag.Diagnostics {
 	apiClient := m.(*client.Client)
+
+	var diags diag.Diagnostics
+
+	if diags == nil {
+		log.Println("diag package is empty")
+	}
+
 	account, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		return createResourceOperationError(errorCreatingAccount, account.Name, err)
+		// return createResourceOperationError(errorCreatingAccount, account.Name, err)
+		diag.FromErr(err)
 	}
 
 	d.SetId(account.ID)
 
-	return nil
+	return diags
 }
 
-func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, account *model.Account) error {
+func resourceAccountUpdateCommon(ctx context.Context, d *schema.ResourceData, m interface{}, account *model.Account) diag.Diagnostics {
 	account.ID = d.Id()
+
+	var diags diag.Diagnostics
+
+	if diags == nil {
+		log.Println("diag package is empty")
+	}
 
 	apiClient := m.(*client.Client)
 	updatedAccount, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingAccount, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingAccount, d.Id(), err)
+		diag.FromErr(err)
 	}
 
 	d.SetId(updatedAccount.ID)
@@ -120,13 +144,20 @@ func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, account 
 	return nil
 }
 
-func resourceAccountDeleteCommon(d *schema.ResourceData, m interface{}) error {
+func resourceAccountDeleteCommon(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	accountID := d.Id()
+
+	var diags diag.Diagnostics
+
+	if diags == nil {
+		log.Println("diag package is empty")
+	}
 
 	apiClient := m.(*client.Client)
 	err := apiClient.Accounts.DeleteByID(accountID)
 	if err != nil {
-		return createResourceOperationError(errorDeletingAccount, accountID, err)
+		// return createResourceOperationError(errorDeletingAccount, accountID, err)
+		diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
