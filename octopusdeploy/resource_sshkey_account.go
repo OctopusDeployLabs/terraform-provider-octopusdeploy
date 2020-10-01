@@ -35,11 +35,7 @@ func resourceSSHKey() *schema.Resource {
 func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
-	var diags diag.Diagnostics
-
-	if diags == nil {
-		log.Println("diag package is empty")
-	}
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
@@ -58,7 +54,7 @@ func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 	d.Set("passphrase", resource.Password)
 	d.Set(constTenants, resource.TenantIDs)
 
-	return diags
+	return nil
 }
 
 func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
@@ -98,11 +94,7 @@ func resourceSSHKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	var diags diag.Diagnostics
-
-	if diags == nil {
-		log.Println("diag package is empty")
-	}
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Add(account)
@@ -117,7 +109,7 @@ func resourceSSHKeyCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		d.SetId(resource.ID)
 	}
 
-	return diags
+	return nil
 }
 
 func resourceSSHKeyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -127,11 +119,7 @@ func resourceSSHKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	account.ID = d.Id() // set ID so Octopus API knows which account to update
 
-	var diags diag.Diagnostics
-
-	if diags == nil {
-		log.Println("diag package is empty")
-	}
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
@@ -142,5 +130,5 @@ func resourceSSHKeyUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	d.SetId(resource.ID)
 
-	return diags
+	return nil
 }

@@ -1,12 +1,14 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
 	uuid "github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -50,11 +52,11 @@ func resourceAzureServicePrincipal() *schema.Resource {
 	}
 
 	return &schema.Resource{
-		Create: resourceAzureServicePrincipalCreate,
-		Read:   resourceAzureServicePrincipalRead,
-		Update: resourceAzureServicePrincipalUpdate,
-		Delete: resourceAccountDeleteCommon,
-		Schema: schemaMap,
+		CreateContext: resourceAzureServicePrincipalCreate,
+		ReadContext:   resourceAzureServicePrincipalRead,
+		UpdateContext: resourceAzureServicePrincipalUpdate,
+		DeleteContext: resourceAccountDeleteCommon,
+		Schema:        schemaMap,
 	}
 }
 
@@ -129,17 +131,20 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*model.Account,
 	return account, nil
 }
 
-func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAzureServicePrincipalCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account, err := buildAzureServicePrincipalResource(d)
 	if err != nil {
 		log.Println(err)
-		return err
+		return diag.FromErr(err)
 	}
+
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		createResourceOperationError(errorCreatingAzureServicePrincipal, account.Name, err)
+		// createResourceOperationError(errorCreatingAzureServicePrincipal, account.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -151,13 +156,16 @@ func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) 
 	return nil
 }
 
-func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) error {
+func resourceAzureServicePrincipalRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingAzureServicePrincipal, id, err)
+		// return createResourceOperationError(errorReadingAzureServicePrincipal, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -182,17 +190,20 @@ func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) er
 	return nil
 }
 
-func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAzureServicePrincipalUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	diagValidate()
 	account, err := buildAzureServicePrincipalResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
+
 	account.ID = d.Id() // set ID so Octopus API knows which account to update
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)

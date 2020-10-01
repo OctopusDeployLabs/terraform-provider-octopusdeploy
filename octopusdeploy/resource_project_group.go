@@ -44,11 +44,7 @@ func buildProjectGroupResource(d *schema.ResourceData) *model.ProjectGroup {
 
 func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectGroup := buildProjectGroupResource(d)
-	var diags diag.Diagnostics
-
-	if diags == nil {
-		log.Println("diag package is empty")
-	}
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectGroups.Add(projectGroup)
@@ -63,17 +59,12 @@ func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 		d.SetId(resource.ID)
 	}
 
-	return diags
+	return nil
 }
 
 func resourceProjectGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
-
-	var diags diag.Diagnostics
-
-	if diags == nil {
-		log.Println("diag package is empty")
-	}
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectGroups.GetByID(id)
@@ -91,18 +82,14 @@ func resourceProjectGroupRead(ctx context.Context, d *schema.ResourceData, m int
 	d.Set(constName, resource.Name)
 	d.Set(constDescription, resource.Description)
 
-	return diags
+	return nil
 }
 
 func resourceProjectGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectGroup := buildProjectGroupResource(d)
 	projectGroup.ID = d.Id() // set ID so Octopus API knows which project group to update
 
-	var diags diag.Diagnostics
-
-	if diags == nil {
-		log.Println("diag package is empty")
-	}
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectGroups.Update(*projectGroup)
@@ -113,17 +100,13 @@ func resourceProjectGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	d.SetId(resource.ID)
 
-	return diags
+	return nil
 }
 
 func resourceProjectGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
-	var diags diag.Diagnostics
-
-	if diags == nil {
-		log.Println("diag package is empty")
-	}
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.ProjectGroups.DeleteByID(id)
@@ -134,5 +117,5 @@ func resourceProjectGroupDelete(ctx context.Context, d *schema.ResourceData, m i
 
 	d.SetId(constEmptyString)
 
-	return diags
+	return nil
 }

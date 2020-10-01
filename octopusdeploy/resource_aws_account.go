@@ -1,11 +1,13 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -25,21 +27,24 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 		Sensitive: true,
 	}
 	return &schema.Resource{
-		Create: resourceAmazonWebServicesAccountCreate,
-		Read:   resourceAmazonWebServicesAccountRead,
-		Update: resourceAmazonWebServicesAccountUpdate,
-		Delete: resourceAccountDeleteCommon,
-		Schema: schemaMap,
+		CreateContext: resourceAmazonWebServicesAccountCreate,
+		ReadContext:   resourceAmazonWebServicesAccountRead,
+		UpdateContext: resourceAmazonWebServicesAccountUpdate,
+		DeleteContext: resourceAccountDeleteCommon,
+		Schema:        schemaMap,
 	}
 }
 
-func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{}) error {
+func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingAWSAccount, id, err)
+		// return createResourceOperationError(errorReadingAWSAccount, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -61,6 +66,7 @@ func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{})
 }
 
 func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Account, error) {
+
 	name := d.Get(constName).(string)
 	accessKey := d.Get(constAccessKey).(string)
 	password := d.Get(constSecretKey).(string)
@@ -86,17 +92,16 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 	return account, nil
 }
 
-func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{}) error {
-	account, err := buildAmazonWebServicesAccountResource(d)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
+func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	diagValidate()
+
+	account, _ := buildAmazonWebServicesAccountResource(d)
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		return createResourceOperationError(errorCreatingAWSAccount, account.Name, err)
+		// return createResourceOperationError(errorCreatingAWSAccount, account.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -108,17 +113,20 @@ func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{
 	return nil
 }
 
-func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	diagValidate()
+
 	account, err := buildAmazonWebServicesAccountResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	account.ID = d.Id() // set ID so Octopus API knows which account to update
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingAWSAccount, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingAWSAccount, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)
