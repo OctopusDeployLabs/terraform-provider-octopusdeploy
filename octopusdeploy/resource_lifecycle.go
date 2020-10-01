@@ -1,20 +1,22 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceLifecycle() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLifecycleCreate,
-		Read:   resourceLifecycleRead,
-		Update: resourceLifecycleUpdate,
-		Delete: resourceLifecycleDelete,
+		CreateContext: resourceLifecycleCreate,
+		ReadContext:   resourceLifecycleRead,
+		UpdateContext: resourceLifecycleUpdate,
+		DeleteContext: resourceLifecycleDelete,
 		Schema: map[string]*schema.Schema{
 			constName: {
 				Type:     schema.TypeString,
@@ -104,16 +106,19 @@ func getPhasesSchema() *schema.Schema {
 	}
 }
 
-func resourceLifecycleCreate(d *schema.ResourceData, m interface{}) error {
+func resourceLifecycleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	lifecycle, err := buildLifecycleResource(d)
+	diagValidate()
+
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Lifecycles.Add(lifecycle)
 	if err != nil {
-		return createResourceOperationError(errorCreatingLifecycle, lifecycle.Name, err)
+		// return createResourceOperationError(errorCreatingLifecycle, lifecycle.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -195,13 +200,15 @@ func buildPhaseResource(tfPhase map[string]interface{}) model.Phase {
 	return phase
 }
 
-func resourceLifecycleRead(d *schema.ResourceData, m interface{}) error {
+func resourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Lifecycles.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingLifecycle, id, err)
+		// return createResourceOperationError(errorReadingLifecycle, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -216,17 +223,20 @@ func resourceLifecycleRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceLifecycleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	lifecycle, err := buildLifecycleResource(d)
+	diagValidate()
+
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	lifecycle.ID = d.Id() // set ID so Octopus API knows which lifecycle to update
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Lifecycles.Update(*lifecycle)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingLifecycle, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingLifecycle, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)
@@ -234,13 +244,15 @@ func resourceLifecycleUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceLifecycleDelete(d *schema.ResourceData, m interface{}) error {
+func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.Lifecycles.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingLifecycle, id, err)
+		// return createResourceOperationError(errorDeletingLifecycle, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
