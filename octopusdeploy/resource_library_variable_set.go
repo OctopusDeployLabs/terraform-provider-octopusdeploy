@@ -1,19 +1,21 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceLibraryVariableSet() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLibraryVariableSetCreate,
-		Read:   resourceLibraryVariableSetRead,
-		Update: resourceLibraryVariableSetUpdate,
-		Delete: resourceLibraryVariableSetDelete,
+		CreateContext: resourceLibraryVariableSetCreate,
+		ReadContext:   resourceLibraryVariableSetRead,
+		UpdateContext: resourceLibraryVariableSetUpdate,
+		DeleteContext: resourceLibraryVariableSetDelete,
 
 		Schema: map[string]*schema.Schema{
 			constName: {
@@ -44,13 +46,15 @@ func getTemplatesSchema() *schema.Schema {
 	}
 }
 
-func resourceLibraryVariableSetCreate(d *schema.ResourceData, m interface{}) error {
+func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	libraryVariableSet := buildLibraryVariableSetResource(d)
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.LibraryVariableSets.Add(libraryVariableSet)
 	if err != nil {
-		return createResourceOperationError(errorCreatingLibraryVariableSet, libraryVariableSet.Name, err)
+		// return createResourceOperationError(errorCreatingLibraryVariableSet, libraryVariableSet.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -94,13 +98,15 @@ func buildTemplateResource(tfTemplate map[string]interface{}) model.ActionTempla
 	return resource
 }
 
-func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error {
+func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.LibraryVariableSets.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingLibraryVariableSet, id, err)
+		// return createResourceOperationError(errorReadingLibraryVariableSet, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -116,14 +122,16 @@ func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error
 	return nil
 }
 
-func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	libraryVariableSet := buildLibraryVariableSetResource(d)
 	libraryVariableSet.ID = d.Id() // set ID so Octopus API knows which library variable set to update
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.LibraryVariableSets.Update(*libraryVariableSet)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingLibraryVariableSet, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingLibraryVariableSet, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)
@@ -131,13 +139,15 @@ func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func resourceLibraryVariableSetDelete(d *schema.ResourceData, m interface{}) error {
+func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.LibraryVariableSets.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingLibraryVariableSet, id, err)
+		// return createResourceOperationError(errorDeletingLibraryVariableSet, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
