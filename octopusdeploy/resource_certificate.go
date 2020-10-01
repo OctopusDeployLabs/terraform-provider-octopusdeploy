@@ -1,11 +1,13 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -13,10 +15,10 @@ func resourceCertificate() *schema.Resource {
 	validateSchema()
 
 	return &schema.Resource{
-		Create: resourceCertificateCreate,
-		Read:   resourceCertificateRead,
-		Update: resourceCertificateUpdate,
-		Delete: resourceCertificateDelete,
+		CreateContext: resourceCertificateCreate,
+		ReadContext:   resourceCertificateRead,
+		UpdateContext: resourceCertificateUpdate,
+		DeleteContext: resourceCertificateDelete,
 
 		Schema: map[string]*schema.Schema{
 			constName: {
@@ -63,13 +65,16 @@ func resourceCertificate() *schema.Resource {
 	}
 }
 
-func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Certificates.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingCertificate, id, err)
+		// return createResourceOperationError(errorReadingCertificate, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -122,16 +127,19 @@ func buildCertificateResource(d *schema.ResourceData) (*model.Certificate, error
 	return certificate, nil
 }
 
-func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	certificate, err := buildCertificateResource(d)
+	diagValidate()
+
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Certificates.Add(certificate)
 	if err != nil {
-		return createResourceOperationError(errorCreatingCertificate, certificate.Name, err)
+		// return createResourceOperationError(errorCreatingCertificate, certificate.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -143,17 +151,20 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	certificate, err := buildCertificateResource(d)
+	diagValidate()
+
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	certificate.ID = d.Id() // set ID so Octopus API knows which certificate to update
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Certificates.Update(*certificate)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingCertificate, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingCertificate, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)
@@ -161,13 +172,15 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.Certificates.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingCertificate, id, err)
+		// return createResourceOperationError(errorDeletingCertificate, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
