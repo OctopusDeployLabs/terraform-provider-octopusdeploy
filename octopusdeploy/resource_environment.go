@@ -1,19 +1,21 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceEnvironment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceEnvironmentCreate,
-		Read:   resourceEnvironmentRead,
-		Update: resourceEnvironmentUpdate,
-		Delete: resourceEnvironmentDelete,
+		CreateContext: resourceEnvironmentCreate,
+		ReadContext:   resourceEnvironmentRead,
+		UpdateContext: resourceEnvironmentUpdate,
+		DeleteContext: resourceEnvironmentDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -41,13 +43,15 @@ func resourceEnvironment() *schema.Resource {
 	}
 }
 
-func resourceEnvironmentRead(d *schema.ResourceData, m interface{}) error {
+func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Environments.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingEnvironment, id, err)
+		// return createResourceOperationError(errorReadingEnvironment, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -92,13 +96,15 @@ func buildEnvironmentResource(d *schema.ResourceData) *model.Environment {
 	return environment
 }
 
-func resourceEnvironmentCreate(d *schema.ResourceData, m interface{}) error {
+func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	environment := buildEnvironmentResource(d)
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Environments.Add(environment)
 	if err != nil {
-		return createResourceOperationError(errorCreatingEnvironment, environment.Name, err)
+		// return createResourceOperationError(errorCreatingEnvironment, environment.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -110,14 +116,15 @@ func resourceEnvironmentCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceEnvironmentUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	environment := buildEnvironmentResource(d)
 	environment.ID = d.Id() // set ID so Octopus API knows which environment to update
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Environments.Update(*environment)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingEnvironment, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingEnvironment, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)
@@ -125,13 +132,15 @@ func resourceEnvironmentUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceEnvironmentDelete(d *schema.ResourceData, m interface{}) error {
+func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+	diagValidate()
 
 	apiClient := m.(*client.Client)
 	err := apiClient.Environments.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingEnvironment, id, err)
+		// return createResourceOperationError(errorDeletingEnvironment, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
