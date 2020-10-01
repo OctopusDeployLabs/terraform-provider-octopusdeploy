@@ -1,19 +1,21 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceProjectGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectGroupCreate,
-		Read:   resourceProjectGroupRead,
-		Update: resourceProjectGroupUpdate,
-		Delete: resourceProjectGroupDelete,
+		// Create: resourceProjectGroupCreate,
+		// Read:   resourceProjectGroupRead,
+		// Update: resourceProjectGroupUpdate,
+		// Delete: resourceProjectGroupDelete,
 
 		Schema: map[string]*schema.Schema{
 			constName: {
@@ -40,14 +42,19 @@ func buildProjectGroupResource(d *schema.ResourceData) *model.ProjectGroup {
 	return projectGroup
 }
 
-func resourceProjectGroupCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectGroup := buildProjectGroupResource(d)
+	var diags diag.Diagnostics
+
+	if diags == nil {
+		log.Println("diag package is empty")
+	}
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.ProjectGroups.Add(projectGroup)
 	if err != nil {
-		return createResourceOperationError(errorCreatingProjectGroup, projectGroup.ID, err)
-		// return diag.FromErr(err)
+		// return createResourceOperationError(errorCreatingProjectGroup, projectGroup.ID, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -56,7 +63,7 @@ func resourceProjectGroupCreate(d *schema.ResourceData, m interface{}) error {
 		d.SetId(resource.ID)
 	}
 
-	return nil
+	return diags
 }
 
 func resourceProjectGroupRead(d *schema.ResourceData, m interface{}) error {
