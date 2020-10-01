@@ -17,6 +17,7 @@ require (
 	github.com/zclconf/go-cty v1.5.1 // indirect
 	golang.org/x/sys v0.0.0-20200918174421-af09f7315aff // indirect
 	golang.org/x/tools v0.0.0-20200918232735-d647fc253266 // indirect
+	google.golang.org/appengine v1.6.6
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
