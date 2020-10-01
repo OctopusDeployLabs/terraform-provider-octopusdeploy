@@ -1,12 +1,14 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/enum"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -22,21 +24,28 @@ func resourceSSHKey() *schema.Resource {
 		Optional: true,
 	}
 	return &schema.Resource{
-		Create: resourceSSHKeyCreate,
-		Read:   resourceSSHKeyRead,
-		Update: resourceSSHKeyUpdate,
-		Delete: resourceAccountDeleteCommon,
-		Schema: schemaMap,
+		CreateContext: resourceSSHKeyCreate,
+		ReadContext:   resourceSSHKeyRead,
+		UpdateContext: resourceSSHKeyUpdate,
+		DeleteContext: resourceAccountDeleteCommon,
+		Schema:        schemaMap,
 	}
 }
 
-func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
+func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
+
+	var diags diag.Diagnostics
+
+	if diags == nil {
+		log.Println("diag package is empty")
+	}
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingSSHKeyPair, id, err)
+		// return createResourceOperationError(errorReadingSSHKeyPair, id, err)
+		diag.FromErr(err)
 	}
 	if resource == nil {
 		d.SetId(constEmptyString)
@@ -49,7 +58,7 @@ func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("passphrase", resource.Password)
 	d.Set(constTenants, resource.TenantIDs)
 
-	return nil
+	return diags
 }
 
 func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
@@ -83,16 +92,23 @@ func buildSSHKeyResource(d *schema.ResourceData) (*model.Account, error) {
 	return account, nil
 }
 
-func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
+func resourceSSHKeyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account, err := buildSSHKeyResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
+	}
+
+	var diags diag.Diagnostics
+
+	if diags == nil {
+		log.Println("diag package is empty")
 	}
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Add(account)
 	if err != nil {
-		return createResourceOperationError(errorCreatingSSHKeyPair, account.Name, err)
+		// return createResourceOperationError(errorCreatingSSHKeyPair, account.Name, err)
+		diag.FromErr(err)
 	}
 
 	if isEmpty(resource.ID) {
@@ -101,23 +117,30 @@ func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
 		d.SetId(resource.ID)
 	}
 
-	return nil
+	return diags
 }
 
-func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceSSHKeyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account, err := buildSSHKeyResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	account.ID = d.Id() // set ID so Octopus API knows which account to update
+
+	var diags diag.Diagnostics
+
+	if diags == nil {
+		log.Println("diag package is empty")
+	}
 
 	apiClient := m.(*client.Client)
 	resource, err := apiClient.Accounts.Update(*account)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingSSHKeyPair, d.Id(), err)
+		// return createResourceOperationError(errorUpdatingSSHKeyPair, d.Id(), err)
+		diag.FromErr(err)
 	}
 
 	d.SetId(resource.ID)
 
-	return nil
+	return diags
 }
