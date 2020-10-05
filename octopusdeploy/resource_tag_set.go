@@ -12,6 +12,7 @@ import (
 
 func resourceTagSet() *schema.Resource {
 	return &schema.Resource{
+		Description:   tagSetResourceDescription,
 		CreateContext: resourceTagSetCreate,
 		ReadContext:   resourceTagSetRead,
 		UpdateContext: resourceTagSetUpdate,

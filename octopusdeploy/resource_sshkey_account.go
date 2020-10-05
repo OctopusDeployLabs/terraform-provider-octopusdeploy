@@ -24,6 +24,7 @@ func resourceSSHKey() *schema.Resource {
 		Optional: true,
 	}
 	return &schema.Resource{
+		Description:   sshKeyAccountResourceDescription,
 		CreateContext: resourceSSHKeyCreate,
 		ReadContext:   resourceSSHKeyRead,
 		UpdateContext: resourceSSHKeyUpdate,

@@ -17,6 +17,7 @@ var mutex = &sync.Mutex{}
 
 func resourceVariable() *schema.Resource {
 	return &schema.Resource{
+		Description:   variableResourceDescription,
 		CreateContext: resourceVariableCreate,
 		ReadContext:   resourceVariableRead,
 		UpdateContext: resourceVariableUpdate,

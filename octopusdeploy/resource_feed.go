@@ -13,6 +13,7 @@ import (
 
 func resourceFeed() *schema.Resource {
 	return &schema.Resource{
+		Description:   feedResourceDescriptionDescription,
 		CreateContext: resourceFeedCreate,
 		ReadContext:   resourceFeedRead,
 		UpdateContext: resourceFeedUpdate,

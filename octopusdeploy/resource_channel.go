@@ -12,6 +12,7 @@ import (
 
 func resourceChannel() *schema.Resource {
 	return &schema.Resource{
+		Description:   channelResourceDescription,
 		CreateContext: resourceChannelCreate,
 		ReadContext:   resourceChannelRead,
 		UpdateContext: resourceChannelUpdate,

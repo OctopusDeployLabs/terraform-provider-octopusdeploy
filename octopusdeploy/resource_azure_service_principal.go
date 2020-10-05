@@ -52,6 +52,7 @@ func resourceAzureServicePrincipal() *schema.Resource {
 	}
 
 	return &schema.Resource{
+		Description:   azureAccountResourceDescription,
 		CreateContext: resourceAzureServicePrincipalCreate,
 		ReadContext:   resourceAzureServicePrincipalRead,
 		UpdateContext: resourceAzureServicePrincipalUpdate,

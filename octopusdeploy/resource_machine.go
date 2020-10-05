@@ -16,6 +16,7 @@ import (
 
 func resourceMachine() *schema.Resource {
 	return &schema.Resource{
+		Description:   machineResourceDescription,
 		CreateContext: resourceMachineCreate,
 		ReadContext:   resourceMachineRead,
 		UpdateContext: resourceMachineUpdate,

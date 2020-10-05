@@ -12,6 +12,7 @@ import (
 
 func resourceNugetFeed() *schema.Resource {
 	return &schema.Resource{
+		Description:   nugetFeedResourceDescription,
 		CreateContext: resourceNugetFeedCreate,
 		ReadContext:   resourceNugetFeedRead,
 		UpdateContext: resourceNugetFeedUpdate,

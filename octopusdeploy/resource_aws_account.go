@@ -27,6 +27,7 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 		Sensitive: true,
 	}
 	return &schema.Resource{
+		Description:   awsAccountResourceDescription,
 		CreateContext: resourceAmazonWebServicesAccountCreate,
 		ReadContext:   resourceAmazonWebServicesAccountRead,
 		UpdateContext: resourceAmazonWebServicesAccountUpdate,

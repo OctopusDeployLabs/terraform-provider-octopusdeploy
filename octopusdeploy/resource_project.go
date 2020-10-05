@@ -14,6 +14,7 @@ import (
 
 func resourceProject() *schema.Resource {
 	return &schema.Resource{
+		Description:   projectResourceDescription,
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
 		UpdateContext: resourceProjectUpdate,

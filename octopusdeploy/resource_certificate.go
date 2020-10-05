@@ -15,6 +15,7 @@ func resourceCertificate() *schema.Resource {
 	validateSchema()
 
 	return &schema.Resource{
+		Description:   certificateResourceDescription,
 		CreateContext: resourceCertificateCreate,
 		ReadContext:   resourceCertificateRead,
 		UpdateContext: resourceCertificateUpdate,

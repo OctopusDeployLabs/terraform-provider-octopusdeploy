@@ -13,6 +13,7 @@ import (
 
 func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 	return &schema.Resource{
+		Description:   projectDeploymentTriggerResourceDescription,
 		CreateContext: resourceProjectDeploymentTargetTriggerCreate,
 		ReadContext:   resourceProjectDeploymentTargetTriggerRead,
 		UpdateContext: resourceProjectDeploymentTargetTriggerUpdate,

@@ -12,6 +12,7 @@ import (
 
 func resourceLibraryVariableSet() *schema.Resource {
 	return &schema.Resource{
+		Description:   libraryVariableSetResourceDescription,
 		CreateContext: resourceLibraryVariableSetCreate,
 		ReadContext:   resourceLibraryVariableSetRead,
 		UpdateContext: resourceLibraryVariableSetUpdate,

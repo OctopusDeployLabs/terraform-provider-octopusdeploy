@@ -23,6 +23,7 @@ func resourceUsernamePassword() *schema.Resource {
 		Optional: true,
 	}
 	return &schema.Resource{
+		Description:   usernamePasswordAccountResourceDescription,
 		CreateContext: resourceUsernamePasswordCreate,
 		ReadContext:   resourceUsernamePasswordRead,
 		UpdateContext: resourceUsernamePasswordUpdate,

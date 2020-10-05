@@ -13,6 +13,7 @@ import (
 
 func resourceLifecycle() *schema.Resource {
 	return &schema.Resource{
+		Description:   lifecycleResourceDescription,
 		CreateContext: resourceLifecycleCreate,
 		ReadContext:   resourceLifecycleRead,
 		UpdateContext: resourceLifecycleUpdate,
