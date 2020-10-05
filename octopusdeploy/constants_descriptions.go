@@ -1,9 +1,10 @@
 package octopusdeploy
 
 const (
-	awsAccountResourceDescription               string = "Resource for CRUD operations on AWS accounts in Octopus Deploy"
-	azureAccountResourceDescription             string = "Resource for CRUD operations on Azure accounts in Octopus Deploy"
-	sshKeyAccountResourceDescription            string = "Resource for CRUD operations on SSH key accounts in Octopus Deploy"
+	awsAccountResourceDescription    string = "Resource for CRUD operations on AWS accounts in Octopus Deploy"
+	azureAccountResourceDescription  string = "Resource for CRUD operations on Azure accounts in Octopus Deploy"
+	sshKeyAccountResourceDescription string = "Resource for CRUD operations on SSH key accounts in Octopus Deploy"
+	/* #nosec */
 	usernamePasswordAccountResourceDescription  string = "Resource for CRUD operations on username password accounts in Octopus Deploy"
 	certificateResourceDescription              string = "Resource for CRUD operations on certifications in Octopus Deploy"
 	channelResourceDescription                  string = "Resource for CRUD operations on channels in Octopus Deploy"
