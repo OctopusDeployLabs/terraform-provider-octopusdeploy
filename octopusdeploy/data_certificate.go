@@ -22,7 +22,7 @@ func dataCertificate() *schema.Resource {
 			},
 			"certificate_data": {
 				Type:      schema.TypeString,
-				Required:  true,
+				Optional:  true,
 				Sensitive: true,
 			},
 			"password": {
@@ -30,12 +30,16 @@ func dataCertificate() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
-			"Certificate_ids": {
+			"certificate_ids": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"serial_number": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
 			"tenant_ids": {
@@ -52,6 +56,10 @@ func dataCertificate() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"thumbprint": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -60,7 +68,7 @@ func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
 	CertificateName := d.Get("name")
-	env, err := client.Certificate.GetByName(CertificateName.(string))
+	cert, err := client.Certificate.GetByName(CertificateName.(string))
 
 	if err == octopusdeploy.ErrItemNotFound {
 		return nil
@@ -70,9 +78,11 @@ func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error reading Certificate with name %s: %s", CertificateName, err.Error())
 	}
 
-	d.SetId(env.ID)
+	d.SetId(cert.ID)
 
-	d.Set("name", env.Name)
+	d.Set("name", cert.Name)
+	d.Set("serial_number", cert.SerialNumber)
+	d.Set("thumbprint", cert.Thumbprint)
 
 	return nil
 }
