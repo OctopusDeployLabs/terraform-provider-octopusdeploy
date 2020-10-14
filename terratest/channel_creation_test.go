@@ -10,7 +10,6 @@ import (
 func TestChannelCreation(test *testing.T) {
 	terraformTest := &terraform.Options{
 		TerraformDir: "../examples/Channel-Creation",
-		VarFiles:     []string{"C:/Users/Mike/Desktop/terraform-provider-octopusdeploy/examples/terraform.tfvars"},
 	}
 
 	defer terraform.Destroy(test, terraformTest)

@@ -10,7 +10,6 @@ import (
 func BenchmarkPLibraryVariableSetCreation(b *testing.B) {
 	terraformTest := &terraform.Options{
 		TerraformDir: "../examples/Library-VariableSet-Creation",
-		VarFiles:     []string{"C:/Users/Mike/Desktop/terraform-provider-octopusdeploy/examples/terraform.tfvars"},
 	}
 
 	defer terraform.Destroy(b, terraformTest)
