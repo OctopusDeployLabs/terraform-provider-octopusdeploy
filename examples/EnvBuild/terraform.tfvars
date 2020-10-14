@@ -1,6 +1,6 @@
 serverURL = "https://mikelevanoctopus.octopus.app"
 apiKey = "octous_deploy_api_key"
-space = "Default"
+space = "Spaces-1"
 accessKey = "aws_access_key"
 secretKey = "aws_secret_key"
 channelName = "DevChannel"

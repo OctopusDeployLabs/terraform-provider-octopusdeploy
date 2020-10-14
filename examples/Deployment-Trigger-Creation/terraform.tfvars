@@ -1,4 +1,4 @@
 serverURL = "https://mikelevanoctopus.octopus.app"
-space     = "Default"
+space     = "Spaces-1"
 name      = "AzureTrigger"
 projectID = "Projects-1"
