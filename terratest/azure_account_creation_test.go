@@ -26,5 +26,4 @@ func TestAzureCreation(test *testing.T) {
 	if _, err := terraform.ApplyE(test, terraformTest); err != nil {
 		fmt.Println(err)
 	}
-
 }

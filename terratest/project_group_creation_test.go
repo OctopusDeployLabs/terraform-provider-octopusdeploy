@@ -7,9 +7,9 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestCertificateCreation(test *testing.T) {
+func TestProjectGroupCreation(test *testing.T) {
 	terraformTest := &terraform.Options{
-		TerraformDir: "../examples/Certificate-Creation",
+		TerraformDir: "../examples/Project-Group-Creation",
 		VarFiles:     []string{"C:/Users/Mike/Desktop/terraform-provider-octopusdeploy/examples/terraform.tfvars"},
 	}
 

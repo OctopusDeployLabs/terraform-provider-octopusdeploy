@@ -7,23 +7,23 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestAWSCreation(test *testing.T) {
+func BenchmarkFeedsCreation(b *testing.B) {
 	terraformTest := &terraform.Options{
-		TerraformDir: "../examples/AWS-Account",
+		TerraformDir: "../examples/Feeds-Creation",
 		VarFiles:     []string{"C:/Users/Mike/Desktop/terraform-provider-octopusdeploy/examples/terraform.tfvars"},
 	}
 
-	defer terraform.Destroy(test, terraformTest)
+	defer terraform.Destroy(b, terraformTest)
 
-	if _, err := terraform.InitE(test, terraformTest); err != nil {
+	if _, err := terraform.InitE(b, terraformTest); err != nil {
 		fmt.Println(err)
 	}
 
-	if _, err := terraform.PlanE(test, terraformTest); err != nil {
+	if _, err := terraform.PlanE(b, terraformTest); err != nil {
 		fmt.Println(err)
 	}
 
-	if _, err := terraform.ApplyE(test, terraformTest); err != nil {
+	if _, err := terraform.ApplyE(b, terraformTest); err != nil {
 		fmt.Println(err)
 	}
 }
