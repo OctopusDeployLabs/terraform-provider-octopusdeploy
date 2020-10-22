@@ -9,11 +9,17 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@master
-    - name: Build
-      uses: docker://moonswitch/golang-semver-builder:master
+    - name: Import GPG key
+      id: import_gpg
+      uses: paultyng/ghaction-import-gpg@v2.1.0
       env:
-        GO111MODULE: "on"
-    - name: Publish
-      uses: docker://moonswitch/github-upload-release:master
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASE: ${{ secrets.PASSPHRASE }}
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@v2
+      with:
+        version: latest
+        args: release --rm-dist
       env:
+        GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
