@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -15,7 +15,7 @@ func getRunRunKubectlScriptSchema() *schema.Schema {
 	return actionSchema
 }
 
-func buildRunKubectlScriptActionResource(tfAction map[string]interface{}) model.DeploymentAction {
+func buildRunKubectlScriptActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 
 	resource.ActionType = "Octopus.KubernetesRunScript"

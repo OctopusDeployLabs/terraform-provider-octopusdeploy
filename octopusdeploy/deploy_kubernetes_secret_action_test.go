@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -30,14 +30,11 @@ func testAccDeployKuberentesSecretAction() string {
 		deploy_kubernetes_secret_action {
             name = "Run Script"
             run_on_server = true
-			
 			secret_name = "secret name"
-
 			secret_values {
-				key = constKey
-				value = constValue
+				key = "key"
+				value = "key"
 			}
-
 			secret_values {
 				key = "key1"
 				value = "value1"
@@ -48,7 +45,7 @@ func testAccDeployKuberentesSecretAction() string {
 
 func testAccCheckDeployKuberentesSecretAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 		process, err := getDeploymentProcess(s, client)
 		if err != nil {

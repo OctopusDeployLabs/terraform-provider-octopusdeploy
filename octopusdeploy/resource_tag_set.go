@@ -3,8 +3,7 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -49,8 +48,8 @@ func getTagSchema() *schema.Schema {
 func resourceTagSetRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.TagSets.GetByID(id)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.TagSets.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingTagSet, id, err)
 	}
@@ -66,10 +65,10 @@ func resourceTagSetRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildTagSetResource(d *schema.ResourceData) *model.TagSet {
+func buildTagSetResource(d *schema.ResourceData) *octopusdeploy.TagSet {
 	tagSetName := d.Get(constName).(string)
 
-	var tagSet = model.NewTagSet(tagSetName)
+	var tagSet = octopusdeploy.NewTagSet(tagSetName)
 
 	if attr, ok := d.GetOk(constTag); ok {
 		tfTags := attr.([]interface{})
@@ -83,8 +82,8 @@ func buildTagSetResource(d *schema.ResourceData) *model.TagSet {
 	return tagSet
 }
 
-func buildTagResource(tfTag map[string]interface{}) model.Tag {
-	tag := model.Tag{
+func buildTagResource(tfTag map[string]interface{}) octopusdeploy.Tag {
+	tag := octopusdeploy.Tag{
 		Name:  tfTag[constName].(string),
 		Color: tfTag[constColor].(string),
 	}
@@ -95,16 +94,16 @@ func buildTagResource(tfTag map[string]interface{}) model.Tag {
 func resourceTagSetCreate(d *schema.ResourceData, m interface{}) error {
 	tagSet := buildTagSetResource(d)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.TagSets.Add(tagSet)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.TagSets.Add(tagSet)
 	if err != nil {
 		return createResourceOperationError(errorCreatingTagSet, tagSet.Name, err)
 	}
 
-	if isEmpty(resource.ID) {
+	if isEmpty(resource.GetID()) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(resource.ID)
+		d.SetId(resource.GetID())
 	}
 
 	return nil
@@ -114,13 +113,13 @@ func resourceTagSetUpdate(d *schema.ResourceData, m interface{}) error {
 	tagSet := buildTagSetResource(d)
 	tagSet.ID = d.Id() // set ID so Octopus API knows which tag set to update
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.TagSets.Update(*tagSet)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.TagSets.Update(*tagSet)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingTagSet, d.Id(), err)
 	}
 
-	d.SetId(resource.ID)
+	d.SetId(resource.GetID())
 
 	return nil
 }
@@ -128,8 +127,8 @@ func resourceTagSetUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceTagSetDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	err := apiClient.TagSets.DeleteByID(id)
+	client := m.(*octopusdeploy.Client)
+	err := client.TagSets.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingTagSet, id, err)
 	}

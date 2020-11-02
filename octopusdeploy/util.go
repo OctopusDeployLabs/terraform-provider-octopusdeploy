@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -100,6 +100,23 @@ func getStringOrEmpty(tfAttr interface{}) string {
 	return tfAttr.(string)
 }
 
+func getAccountTypeSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		Default:  "None",
+		ValidateDiagFunc: validateValueFunc([]string{
+			"None",
+			"AmazonWebServicesAccount",
+			"AzureServicePrincipal",
+			"AzureSubscription",
+			"SshKeyPair",
+			"Token",
+			"UsernamePassword",
+		}),
+	}
+}
+
 func getTenantedDeploymentSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeString,
@@ -113,9 +130,9 @@ func getTenantedDeploymentSchema() *schema.Schema {
 	}
 }
 
-func destroyFeedHelper(s *terraform.State, apiClient *client.Client) error {
+func destroyFeedHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Feeds.GetByID(r.Primary.ID); err != nil {
+		if _, err := client.Feeds.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving feed %s", err)
 		}
 		return fmt.Errorf("Feed still exists")
@@ -123,9 +140,9 @@ func destroyFeedHelper(s *terraform.State, apiClient *client.Client) error {
 	return nil
 }
 
-func feedExistsHelper(s *terraform.State, apiClient *client.Client) error {
+func feedExistsHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Feeds.GetByID(r.Primary.ID); err != nil {
+		if _, err := client.Feeds.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving feed %s", err)
 		}
 	}

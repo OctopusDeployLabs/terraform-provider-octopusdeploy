@@ -7,22 +7,22 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestAWSCreation(test *testing.T) {
+func TestAWSCreation(t *testing.T) {
 	terraformTest := &terraform.Options{
 		TerraformDir: "../examples/AWS-Account",
 	}
 
-	defer terraform.Destroy(test, terraformTest)
+	defer terraform.Destroy(t, terraformTest)
 
-	if _, err := terraform.InitE(test, terraformTest); err != nil {
+	if _, err := terraform.InitE(t, terraformTest); err != nil {
 		fmt.Println(err)
 	}
 
-	if _, err := terraform.PlanE(test, terraformTest); err != nil {
+	if _, err := terraform.PlanE(t, terraformTest); err != nil {
 		fmt.Println(err)
 	}
 
-	if _, err := terraform.ApplyE(test, terraformTest); err != nil {
+	if _, err := terraform.ApplyE(t, terraformTest); err != nil {
 		fmt.Println(err)
 	}
 }

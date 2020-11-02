@@ -3,8 +3,7 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -62,7 +61,7 @@ var schemaVariableScope = &schema.Schema{
 }
 
 // tfVariableScopetoODVariableScope converts a Terraform ResourceData into an OctopusDeploy VariableScope
-func tfVariableScopetoODVariableScope(d *schema.ResourceData) *model.VariableScope {
+func tfVariableScopetoODVariableScope(d *schema.ResourceData) *octopusdeploy.VariableScope {
 	// Get the schema set. We specify a MaxItems of 1, so we will only ever have zero or one items
 	// in our list.
 	tfSchemaSetInterface, ok := d.GetOk(constScope)
@@ -80,7 +79,7 @@ func tfVariableScopetoODVariableScope(d *schema.ResourceData) *model.VariableSco
 
 	// Use the getSliceFromTerraformTypeList helper to convert the data from the map into []string and
 	// assign as the variable scopes we need
-	var newScope model.VariableScope
+	var newScope octopusdeploy.VariableScope
 	newScope.Environment = getSliceFromTerraformTypeList(tfSchemaList[constEnvironments])
 	newScope.Action = getSliceFromTerraformTypeList(tfSchemaList[constActions])
 	newScope.Role = getSliceFromTerraformTypeList(tfSchemaList[constRoles])
@@ -96,8 +95,8 @@ func dataVariableReadByName(d *schema.ResourceData, m interface{}) error {
 	name := d.Get(constName)
 	scope := tfVariableScopetoODVariableScope(d)
 
-	apiClient := m.(*client.Client)
-	variables, err := apiClient.Variables.GetByName(projectID.(string), name.(string), scope)
+	client := m.(*octopusdeploy.Client)
+	variables, err := client.Variables.GetByName(projectID.(string), name.(string), scope)
 	if err != nil {
 		return fmt.Errorf("error reading variable from project %s with name %s: %s", projectID, name, err.Error())
 	}

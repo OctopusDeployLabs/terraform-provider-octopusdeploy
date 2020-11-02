@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -21,8 +21,8 @@ func dataLibraryVariableSet() *schema.Resource {
 func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) error {
 	name := d.Get(constName).(string)
 
-	apiClient := m.(*client.Client)
-	resourceList, err := apiClient.LibraryVariableSets.GetByPartialName(name)
+	client := m.(*octopusdeploy.Client)
+	resourceList, err := client.LibraryVariableSets.GetByPartialName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingLibraryVariableSet, name, err)
 	}
@@ -39,7 +39,7 @@ func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) err
 		if resource.Name == name {
 			logResource(constLibraryVariableSet, m)
 
-			d.SetId(resource.ID)
+			d.SetId(resource.GetID())
 			d.Set(constName, resource.Name)
 			d.Set(constDescription, resource.Description)
 			d.Set(constVariableSetID, resource.VariableSetID)

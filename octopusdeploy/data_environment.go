@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -33,8 +33,8 @@ func dataEnvironment() *schema.Resource {
 func dataEnvironmentReadByName(d *schema.ResourceData, m interface{}) error {
 	name := d.Get(constName).(string)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Environments.GetByName(name)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Environments.GetByName(name)
 
 	if err != nil {
 		return createResourceOperationError(errorReadingEnvironment, name, err)

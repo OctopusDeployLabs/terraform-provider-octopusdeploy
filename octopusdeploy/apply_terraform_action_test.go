@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -30,12 +30,10 @@ func testAccApplyTerraformAction() string {
 		apply_terraform_action {
             name = "Apply Terraform"
             run_on_server = true
-			
 			primary_package {
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
 			}
-			
 			additional_init_params = "Init params"
         }
 	`)
@@ -43,7 +41,7 @@ func testAccApplyTerraformAction() string {
 
 func testAccCheckApplyTerraformAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 		process, err := getDeploymentProcess(s, client)
 		if err != nil {

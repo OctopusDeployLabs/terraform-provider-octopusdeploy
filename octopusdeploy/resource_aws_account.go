@@ -1,20 +1,16 @@
 package octopusdeploy
 
 import (
-	"log"
+	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/enum"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceAmazonWebServicesAccount() *schema.Resource {
-
 	validateSchema()
-
 	schemaMap := getCommonAccountsSchema()
-
 	schemaMap[constAccessKey] = &schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
@@ -25,54 +21,59 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 		Sensitive: true,
 	}
 	return &schema.Resource{
-		Create: resourceAmazonWebServicesAccountCreate,
-		Read:   resourceAmazonWebServicesAccountRead,
-		Update: resourceAmazonWebServicesAccountUpdate,
-		Delete: resourceAccountDeleteCommon,
-		Schema: schemaMap,
+		CreateContext: resourceAmazonWebServicesAccountCreate,
+		DeleteContext: resourceAccountDeleteCommon,
+		ReadContext:   resourceAmazonWebServicesAccountRead,
+		UpdateContext: resourceAmazonWebServicesAccountUpdate,
+		Schema:        schemaMap,
 	}
 }
 
-func resourceAmazonWebServicesAccountRead(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
+func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*octopusdeploy.Client)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Accounts.GetByID(id)
+	var diags diag.Diagnostics
+	accountID := d.Id()
+
+	account, err := client.Accounts.GetByID(accountID)
 	if err != nil {
-		return createResourceOperationError(errorReadingAWSAccount, id, err)
-	}
-	if resource == nil {
-		d.SetId(constEmptyString)
-		return nil
+		return diag.FromErr(err)
 	}
 
-	logResource(constAccount, m)
+	logResource(constAccount, meta)
 
-	d.Set(constName, resource.Name)
-	d.Set(constTenants, resource.TenantIDs)
-	d.Set(constDescription, resource.Description)
-	d.Set(constEnvironments, resource.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, resource.TenantedDeploymentParticipation.String())
-	d.Set(constTenantTags, resource.TenantTags)
-	d.Set(constSecretKey, resource.Password)
-	d.Set(constAccessKey, resource.AccessKey)
+	accountResource := account.(*octopusdeploy.AccountResource)
 
-	return nil
+	d.Set(constName, accountResource.Name)
+	d.Set(constTenants, accountResource.TenantIDs)
+	d.Set(constDescription, accountResource.Description)
+	d.Set(constEnvironments, accountResource.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, accountResource.TenantedDeploymentMode)
+	d.Set(constTenantTags, accountResource.TenantTags)
+
+	// TODO: determine what to do here...
+	// d.Set(constSecretKey, accountResource.SecretKey)
+
+	d.Set(constAccessKey, accountResource.AccessKey)
+
+	d.SetId(accountID)
+
+	return diags
 }
 
-func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Account, error) {
+func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*octopusdeploy.AmazonWebServicesAccount, error) {
 	name := d.Get(constName).(string)
 	accessKey := d.Get(constAccessKey).(string)
 	password := d.Get(constSecretKey).(string)
-	secretKey := model.NewSensitiveValue(password)
+	secretKey := octopusdeploy.NewSensitiveValue(password)
 
-	account, err := model.NewAwsServicePrincipalAccount(name, accessKey, secretKey)
+	account, err := octopusdeploy.NewAmazonWebServicesAccount(name, accessKey, secretKey)
 	if err != nil {
 		return nil, err
 	}
 
 	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
-		account.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk(constTenantTags); ok {
@@ -86,42 +87,39 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*model.Accou
 	return account, nil
 }
 
-func resourceAmazonWebServicesAccountCreate(d *schema.ResourceData, m interface{}) error {
-	account, err := buildAmazonWebServicesAccountResource(d)
+func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	amazonWebServicesAccount, err := buildAmazonWebServicesAccountResource(d)
 	if err != nil {
-		log.Println(err)
-		return err
+		return diag.FromErr(err)
 	}
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Accounts.Add(account)
+	client := m.(*octopusdeploy.Client)
+	account, err := client.Accounts.Add(amazonWebServicesAccount)
 	if err != nil {
-		return createResourceOperationError(errorCreatingAWSAccount, account.Name, err)
+		return diag.FromErr(err)
 	}
 
-	if isEmpty(resource.ID) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.ID)
-	}
+	d.SetId(account.GetID())
 
-	return nil
+	return diags
 }
 
-func resourceAmazonWebServicesAccountUpdate(d *schema.ResourceData, m interface{}) error {
-	account, err := buildAmazonWebServicesAccountResource(d)
+func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	amazonWebServicesAccount, err := buildAmazonWebServicesAccountResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	account.ID = d.Id() // set ID so Octopus API knows which account to update
+	amazonWebServicesAccount.ID = d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Accounts.Update(*account)
+	client := m.(*octopusdeploy.Client)
+	account, err := client.Accounts.Update(amazonWebServicesAccount)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingAWSAccount, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(resource.ID)
+	d.SetId(account.GetID())
 
 	return nil
 }

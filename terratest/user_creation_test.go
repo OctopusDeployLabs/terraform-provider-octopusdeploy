@@ -9,7 +9,7 @@ import (
 
 func TestUserCreation(test *testing.T) {
 	terraformTest := &terraform.Options{
-		TerraformDir: "../examples/User-Creation",
+		TerraformDir: "../examples_in_progress/User-Creation",
 	}
 
 	defer terraform.Destroy(test, terraformTest)

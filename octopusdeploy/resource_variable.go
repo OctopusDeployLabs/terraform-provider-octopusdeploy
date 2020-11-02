@@ -5,8 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -118,8 +117,8 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	projectID := d.Get(constProjectID).(string)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Variables.GetByID(projectID, id)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Variables.GetByID(projectID, id)
 	if err != nil {
 		return createResourceOperationError(errorReadingVariable, id, err)
 	}
@@ -145,7 +144,7 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildVariableResource(d *schema.ResourceData) *model.Variable {
+func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 	varName := d.Get(constName).(string)
 	varType := d.Get(constType).(string)
 
@@ -168,14 +167,14 @@ func buildVariableResource(d *schema.ResourceData) *model.Variable {
 
 	varScopeInterface := tfVariableScopetoODVariableScope(d)
 
-	newVar := model.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
+	newVar := octopusdeploy.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
 
 	varPrompt, ok := d.GetOk(constPrompt)
 	if ok {
 		tfPromptSettings := varPrompt.(*schema.Set)
 		if len(tfPromptSettings.List()) == 1 {
 			tfPromptList := tfPromptSettings.List()[0].(map[string]interface{})
-			newPrompt := model.VariablePromptOptions{
+			newPrompt := octopusdeploy.VariablePromptOptions{
 				Description: tfPromptList[constDescription].(string),
 				Label:       tfPromptList[constLabel].(string),
 				Required:    tfPromptList[constRequired].(bool),
@@ -197,15 +196,15 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 	projID := d.Get(constProjectID).(string)
 	newVariable := buildVariableResource(d)
 
-	apiClient := m.(*client.Client)
-	tfVar, err := apiClient.Variables.AddSingle(projID, newVariable)
+	client := m.(*octopusdeploy.Client)
+	tfVar, err := client.Variables.AddSingle(projID, newVariable)
 	if err != nil {
 		return createResourceOperationError(errorCreatingVariable, newVariable.Name, err)
 	}
 
 	for _, v := range tfVar.Variables {
 		if v.Name == newVariable.Name && v.Type == newVariable.Type && (v.IsSensitive || v.Value == newVariable.Value) && v.Description == newVariable.Description && v.IsSensitive == newVariable.IsSensitive {
-			scopeMatches, _, err := apiClient.Variables.MatchesScope(v.Scope, newVariable.Scope)
+			scopeMatches, _, err := client.Variables.MatchesScope(v.Scope, newVariable.Scope)
 			if err != nil {
 				return err
 			}
@@ -232,15 +231,15 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 	tfVar.ID = d.Id() // set ID so Octopus API knows which variable to update
 	projID := d.Get(constProjectID).(string)
 
-	apiClient := m.(*client.Client)
-	updatedVars, err := apiClient.Variables.UpdateSingle(projID, tfVar)
+	client := m.(*octopusdeploy.Client)
+	updatedVars, err := client.Variables.UpdateSingle(projID, tfVar)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingVariable, d.Id(), err)
 	}
 
 	for _, v := range updatedVars.Variables {
 		if v.Name == tfVar.Name && v.Type == tfVar.Type && (v.IsSensitive || v.Value == tfVar.Value) && v.Description == tfVar.Description && v.IsSensitive == tfVar.IsSensitive {
-			scopeMatches, _, _ := apiClient.Variables.MatchesScope(v.Scope, tfVar.Scope)
+			scopeMatches, _, _ := client.Variables.MatchesScope(v.Scope, tfVar.Scope)
 			if scopeMatches {
 				d.SetId(v.ID)
 				return nil
@@ -259,8 +258,8 @@ func resourceVariableDelete(d *schema.ResourceData, m interface{}) error {
 	projID := d.Get(constProjectID).(string)
 	variableID := d.Id()
 
-	apiClient := m.(*client.Client)
-	_, err := apiClient.Variables.DeleteSingle(projID, variableID)
+	client := m.(*octopusdeploy.Client)
+	_, err := client.Variables.DeleteSingle(projID, variableID)
 	if err != nil {
 		return createResourceOperationError(errorDeletingVariable, variableID, err)
 	}

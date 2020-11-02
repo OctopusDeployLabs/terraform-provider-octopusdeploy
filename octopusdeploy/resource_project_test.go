@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -85,11 +85,11 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 
 func testAccProjectBasic(name, lifeCycleID, allowDeploymentsToNoTargets string) string {
 	return fmt.Sprintf(`
-		resource constOctopusDeployProjectGroup "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource constOctopusDeployProject "foo" {
+		resource octopusdeploy_project "foo" {
 			name           = "%s"
 			lifecycle_id    = "%s"
 			project_group_id = "${octopusdeploy_project_group.foo.id}"
@@ -101,7 +101,7 @@ func testAccProjectBasic(name, lifeCycleID, allowDeploymentsToNoTargets string) 
 }
 
 func testAccCheckOctopusDeployProjectDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 	if err := destroyProjectHelper(s, client); err != nil {
 		return err
@@ -111,7 +111,7 @@ func testAccCheckOctopusDeployProjectDestroy(s *terraform.State) error {
 
 func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		if err := existsHelper(s, client); err != nil {
 			return err
 		}
@@ -119,9 +119,9 @@ func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func destroyProjectHelper(s *terraform.State, apiClient *client.Client) error {
+func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Projects.GetByID(r.Primary.ID); err != nil {
+		if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving project %s", err)
 		}
 		return fmt.Errorf("Project still exists")
@@ -129,7 +129,7 @@ func destroyProjectHelper(s *terraform.State, apiClient *client.Client) error {
 	return nil
 }
 
-func existsHelper(s *terraform.State, client *client.Client) error {
+func existsHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopus_deploy_project" {
 			if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {

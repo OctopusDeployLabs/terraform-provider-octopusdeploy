@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -47,21 +47,19 @@ func TestAccOctopusDeployCertificateBasic(t *testing.T) {
 
 func testCertificateBasic(tagSetName string, tagName string, environmentName string, certName string, notes string, certificateData string, tenantedDeploymentParticipation string) string {
 	return fmt.Sprintf(`
-
-		resource constOctopusDeployTagSet "testtagset" {
+		resource octopusdeploy_tag_set "testtagset" {
 			name = "%s"
-
 			tag {
 				name = "%s"
 				color = "#6e6e6f"
 			}
 		}
 
-		resource constOctopusDeployEnvironment "test_env" {
+		resource octopusdeploy_environment "test_env" {
 			name = "%s"
 		}
 
-		resource constOctopusDeployCertificate "foo" {
+		resource octopusdeploy_certificate "foo" {
 			name = "%s"
 			notes = "%s"
 			certificate_data = "%s"
@@ -76,12 +74,12 @@ func testCertificateBasic(tagSetName string, tagName string, environmentName str
 
 func testOctopusDeployCertificateExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		return existscertHelper(s, client)
 	}
 }
 
-func existscertHelper(s *terraform.State, client *client.Client) error {
+func existscertHelper(s *terraform.State, client *octopusdeploy.Client) error {
 
 	certID := s.RootModule().Resources["octopusdeploy_certificate.foo"].Primary.ID
 
@@ -93,13 +91,13 @@ func existscertHelper(s *terraform.State, client *client.Client) error {
 }
 
 func testOctopusDeployCertificateDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	return destroycertHelper(s, client)
 }
 
-func destroycertHelper(s *terraform.State, apiClient *client.Client) error {
+func destroycertHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	id := s.RootModule().Resources["octopusdeploy_certificate.foo"].Primary.ID
-	if _, err := apiClient.Certificates.GetByID(id); err != nil {
+	if _, err := client.Certificates.GetByID(id); err != nil {
 		return fmt.Errorf("Received an error retrieving certificate %s", err)
 	}
 	return fmt.Errorf("Certificate still exists")

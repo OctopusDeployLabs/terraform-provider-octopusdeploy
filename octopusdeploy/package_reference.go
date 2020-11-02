@@ -1,23 +1,13 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
-	"github.com/asaskevich/govalidator"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func addPrimaryPackageSchema(element *schema.Resource, required bool) error {
 	if element == nil {
 		return createInvalidParameterError("addPrimaryPackageSchema", "element")
-	}
-
-	if govalidator.IsInt(constRequired) {
-		fmt.Println(constEmptyString)
-	} else {
-		log.Println("the required arg is not a bool")
 	}
 
 	element.Schema[constPrimaryPackage] = getPackageSchema(required)
@@ -69,7 +59,7 @@ func getPackageSchema(required bool) *schema.Schema {
 				constAcquisitionLocation: {
 					Type:        schema.TypeString,
 					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
-					Default:     (string)(model.PackageAcquisitionLocationServer),
+					Default:     (string)(octopusdeploy.PackageAcquisitionLocationServer),
 					Optional:    true,
 				},
 				constProperty: getPropertySchema(),
@@ -78,8 +68,8 @@ func getPackageSchema(required bool) *schema.Schema {
 	}
 }
 
-func buildPackageReferenceResource(tfPkg map[string]interface{}) model.PackageReference {
-	pkg := model.PackageReference{
+func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
+	pkg := octopusdeploy.PackageReference{
 		Name:                getStringOrEmpty(tfPkg[constName]),
 		PackageID:           tfPkg[constPackageID].(string),
 		FeedID:              tfPkg[constFeedID].(string),

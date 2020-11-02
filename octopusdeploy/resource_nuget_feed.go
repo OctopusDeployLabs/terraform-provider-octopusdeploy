@@ -3,8 +3,7 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -55,30 +54,32 @@ func resourceNugetFeed() *schema.Resource {
 func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Feeds.GetByID(id)
+	client := m.(*octopusdeploy.Client)
+	feedResource, err := client.Feeds.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingFeed, id, err)
 	}
-	if resource == nil {
+	if feedResource == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
 	logResource(constFeed, m)
 
-	d.Set(constName, resource.Name)
-	d.Set(constFeedURI, resource.FeedURI)
-	d.Set(constEnhancedMode, resource.EnhancedMode)
-	d.Set(constDownloadAttempts, resource.DownloadAttempts)
-	d.Set(constDownloadRetryBackoffSeconds, resource.DownloadRetryBackoffSeconds)
-	d.Set(constUsername, resource.Username)
-	d.Set(constPassword, resource.Password)
+	nuGetFeed := feedResource.(*octopusdeploy.NuGetFeed)
+
+	d.Set(constName, nuGetFeed.Name)
+	d.Set(constFeedURI, nuGetFeed.FeedURI)
+	d.Set(constEnhancedMode, nuGetFeed.EnhancedMode)
+	d.Set(constDownloadAttempts, nuGetFeed.DownloadAttempts)
+	d.Set(constDownloadRetryBackoffSeconds, nuGetFeed.DownloadRetryBackoffSeconds)
+	d.Set(constUsername, nuGetFeed.Username)
+	d.Set(constPassword, nuGetFeed.Password)
 
 	return nil
 }
 
-func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
+func buildNugetFeedResource(d *schema.ResourceData) *octopusdeploy.NuGetFeed {
 	feedName := d.Get(constName).(string)
 
 	var feedURI string
@@ -118,15 +119,12 @@ func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 		feedPassword = feedPasswordInterface.(string)
 	}
 
-	feed := model.NewNuGetFeed(feedName)
-	feed.FeedURI = feedURI
+	feed := octopusdeploy.NewNuGetFeed(feedName, feedURI)
 	feed.EnhancedMode = enhancedMode
 	feed.DownloadAttempts = downloadAttempts
 	feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSeconds
 	feed.Username = feedUsername
-	feed.Password = model.SensitiveValue{
-		NewValue: &feedPassword,
-	}
+	feed.Password = octopusdeploy.NewSensitiveValue(feedPassword)
 
 	return feed
 }
@@ -134,16 +132,16 @@ func buildNugetFeedResource(d *schema.ResourceData) *model.Feed {
 func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
 	feed := buildNugetFeedResource(d)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Feeds.Add(*feed)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Feeds.Add(feed)
 	if err != nil {
 		return createResourceOperationError(errorCreatingNuGetFeed, feed.Name, err)
 	}
 
-	if isEmpty(resource.ID) {
+	if isEmpty(resource.GetID()) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(resource.ID)
+		d.SetId(resource.GetID())
 	}
 
 	return nil
@@ -153,13 +151,13 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 	feed := buildNugetFeedResource(d)
 	feed.ID = d.Id() // set ID so Octopus API knows which feed to update
 
-	apiClient := m.(*client.Client)
-	updatedFeed, err := apiClient.Feeds.Update(*feed)
+	client := m.(*octopusdeploy.Client)
+	updatedFeed, err := client.Feeds.Update(feed)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingNuGetFeed, d.Id(), err)
 	}
 
-	d.SetId(updatedFeed.ID)
+	d.SetId(updatedFeed.GetID())
 
 	return nil
 }
@@ -167,8 +165,8 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceNugetFeedDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	err := apiClient.Feeds.DeleteByID(id)
+	client := m.(*octopusdeploy.Client)
+	err := client.Feeds.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingNuGetFeed, id, err)
 	}

@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -29,8 +29,8 @@ func dataMachinePolicy() *schema.Resource {
 func dataMachinePolicyReadByName(d *schema.ResourceData, m interface{}) error {
 	name := d.Get(constName).(string)
 
-	apiClient := m.(*client.Client)
-	resourceList, err := apiClient.MachinePolicies.GetAll()
+	client := m.(*octopusdeploy.Client)
+	resourceList, err := client.MachinePolicies.GetAll()
 	if err != nil {
 		return createResourceOperationError(errorReadingMachinePolicy, name, err)
 	}
@@ -47,7 +47,7 @@ func dataMachinePolicyReadByName(d *schema.ResourceData, m interface{}) error {
 		if resource.Name == name {
 			logResource(constMachinePolicy, m)
 
-			d.SetId(resource.ID)
+			d.SetId(resource.GetID())
 			d.Set(constDescription, resource.Description)
 			d.Set("isdefault", resource.IsDefault)
 

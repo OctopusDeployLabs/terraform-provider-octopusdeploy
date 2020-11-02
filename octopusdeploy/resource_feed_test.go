@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -47,7 +47,7 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 
 func testFeedtBasic(name, feedType, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
 	return fmt.Sprintf(`
-		resource constOctopusDeployFeed "foo" {
+		resource octopusdeploy_feed "foo" {
 			name          = "%s"
 			feed_type     = "%s"
 			feed_uri      = "%s"
@@ -62,12 +62,12 @@ func testFeedtBasic(name, feedType, feedURI string, feedUsername string, feedPas
 
 func testOctopusDeployFeedExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		return feedExistsHelper(s, client)
 	}
 }
 
 func testOctopusDeployFeedDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	return destroyFeedHelper(s, client)
 }

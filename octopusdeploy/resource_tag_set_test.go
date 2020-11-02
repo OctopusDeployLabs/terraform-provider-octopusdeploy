@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -44,14 +44,12 @@ func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 
 func testTagSettBasic(name, tagName1 string, tagColor1 string, tagName2 string, tagColor2 string) string {
 	return fmt.Sprintf(`
-		resource constOctopusDeployTagSet "foo" {
+		resource octopusdeploy_tag_set "foo" {
 			name = "%s"
-
 			tag {
 				name = "%s"
 				color = "%s"
 			}
-
 			tag {
 				name = "%s"
 				color = "%s"
@@ -64,12 +62,12 @@ func testTagSettBasic(name, tagName1 string, tagColor1 string, tagName2 string, 
 
 func testOctopusDeployTagSetExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		return existstagSetHelper(s, client)
 	}
 }
 
-func existstagSetHelper(s *terraform.State, client *client.Client) error {
+func existstagSetHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if _, err := client.TagSets.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving tagSet %s", err)
@@ -79,13 +77,13 @@ func existstagSetHelper(s *terraform.State, client *client.Client) error {
 }
 
 func testOctopusDeployTagSetDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	return destroytagSetHelper(s, client)
 }
 
-func destroytagSetHelper(s *terraform.State, apiClient *client.Client) error {
+func destroytagSetHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.TagSets.GetByID(r.Primary.ID); err != nil {
+		if _, err := client.TagSets.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving tagSet %s", err)
 		}
 		return fmt.Errorf("TagSet still exists")

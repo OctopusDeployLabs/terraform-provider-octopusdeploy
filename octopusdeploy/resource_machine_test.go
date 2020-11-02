@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -32,17 +32,17 @@ func TestAccOctopusDeployMachineBasic(t *testing.T) {
 
 func testMachineBasic(machineName string) string {
 	config := fmt.Sprintf(`
-	data constOctopusDeployMachinePolicy "default" {
+	data octopusdeploy_machinepolicy "default" {
 		name = "Default Machine Policy"
 	}
 
-	resource constOctopusDeployEnvironment "tf_test_env" {
+	resource octopusdeploy_environment "tf_test_env" {
 		name           = "OctopusTestMachineBasic"
 		description    = "Environment for testing Octopus Machines"
 		use_guided_failure = "false"
 	}
 
-	resource constOctopusDeployMachine "foomac" {
+	resource octopusdeploy_machine "foomac" {
 		name                            = "%s"
 		environments                    = ["${octopusdeploy_environment.tf_test_env.id}"]
 		isdisabled                      = true
@@ -64,12 +64,12 @@ func testMachineBasic(machineName string) string {
 
 func testOctopusDeployMachineExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		return existsMachineHelper(s, client)
 	}
 }
 
-func existsMachineHelper(s *terraform.State, client *client.Client) error {
+func existsMachineHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	macID := s.RootModule().Resources["octopusdeploy_machine.foomac"].Primary.ID
 
 	if _, err := client.Machines.GetByID(macID); err != nil {
@@ -80,13 +80,13 @@ func existsMachineHelper(s *terraform.State, client *client.Client) error {
 }
 
 func testOctopusDeployMachineDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	return destroyMachineHelper(s, client)
 }
 
-func destroyMachineHelper(s *terraform.State, apiClient *client.Client) error {
+func destroyMachineHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	id := s.RootModule().Resources["octopusdeploy_machine.foomac"].Primary.ID
-	if err := apiClient.Machines.DeleteByID(id); err != nil {
+	if err := client.Machines.DeleteByID(id); err != nil {
 		return fmt.Errorf("Received an error retrieving machine %s", err)
 	}
 	return fmt.Errorf("Machine still exists")

@@ -3,8 +3,7 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -47,25 +46,25 @@ func getTemplatesSchema() *schema.Schema {
 func resourceLibraryVariableSetCreate(d *schema.ResourceData, m interface{}) error {
 	libraryVariableSet := buildLibraryVariableSetResource(d)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.LibraryVariableSets.Add(libraryVariableSet)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.LibraryVariableSets.Add(libraryVariableSet)
 	if err != nil {
 		return createResourceOperationError(errorCreatingLibraryVariableSet, libraryVariableSet.Name, err)
 	}
 
-	if isEmpty(resource.ID) {
+	if isEmpty(resource.GetID()) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(resource.ID)
+		d.SetId(resource.GetID())
 	}
 
 	return nil
 }
 
-func buildLibraryVariableSetResource(d *schema.ResourceData) *model.LibraryVariableSet {
+func buildLibraryVariableSetResource(d *schema.ResourceData) *octopusdeploy.LibraryVariableSet {
 	name := d.Get(constName).(string)
 
-	resource := model.NewLibraryVariableSet(name)
+	resource := octopusdeploy.NewLibraryVariableSet(name)
 
 	if attr, ok := d.GetOk(constDescription); ok {
 		resource.Description = attr.(string)
@@ -83,8 +82,8 @@ func buildLibraryVariableSetResource(d *schema.ResourceData) *model.LibraryVaria
 	return resource
 }
 
-func buildTemplateResource(tfTemplate map[string]interface{}) model.ActionTemplateParameter {
-	resource := model.ActionTemplateParameter{
+func buildTemplateResource(tfTemplate map[string]interface{}) octopusdeploy.ActionTemplateParameter {
+	resource := octopusdeploy.ActionTemplateParameter{
 		Name: tfTemplate[constName].(string),
 		DisplaySettings: map[string]string{
 			"Octopus.ControlType": "SingleLineText",
@@ -97,8 +96,8 @@ func buildTemplateResource(tfTemplate map[string]interface{}) model.ActionTempla
 func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.LibraryVariableSets.GetByID(id)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.LibraryVariableSets.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingLibraryVariableSet, id, err)
 	}
@@ -120,13 +119,13 @@ func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) err
 	libraryVariableSet := buildLibraryVariableSetResource(d)
 	libraryVariableSet.ID = d.Id() // set ID so Octopus API knows which library variable set to update
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.LibraryVariableSets.Update(*libraryVariableSet)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.LibraryVariableSets.Update(libraryVariableSet)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingLibraryVariableSet, d.Id(), err)
 	}
 
-	d.SetId(resource.ID)
+	d.SetId(resource.GetID())
 
 	return nil
 }
@@ -134,8 +133,8 @@ func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) err
 func resourceLibraryVariableSetDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	err := apiClient.LibraryVariableSets.DeleteByID(id)
+	client := m.(*octopusdeploy.Client)
+	err := client.LibraryVariableSets.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingLibraryVariableSet, id, err)
 	}

@@ -3,8 +3,7 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -28,13 +27,13 @@ func resourceDeploymentProcess() *schema.Resource {
 func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) error {
 	deploymentProcess := buildDeploymentProcessResource(d)
 
-	apiClient := m.(*client.Client)
-	project, err := apiClient.Projects.GetByID(deploymentProcess.ProjectID)
+	client := m.(*octopusdeploy.Client)
+	project, err := client.Projects.GetByID(deploymentProcess.ProjectID)
 	if err != nil {
 		return createResourceOperationError(errorReadingProject, project.Name, err)
 	}
 
-	current, err := apiClient.DeploymentProcesses.GetByID(project.DeploymentProcessID)
+	current, err := client.DeploymentProcesses.GetByID(project.DeploymentProcessID)
 	if err != nil {
 		return createResourceOperationError(errorReadingDeploymentProcess, project.DeploymentProcessID, err)
 	}
@@ -42,25 +41,22 @@ func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) erro
 	deploymentProcess.ID = current.ID
 	deploymentProcess.Version = current.Version
 
-	resource, err := apiClient.DeploymentProcesses.Update(*deploymentProcess)
+	resource, err := client.DeploymentProcesses.Update(*deploymentProcess)
 	if err != nil {
 		return createResourceOperationError(errorCreatingDeploymentProcess, deploymentProcess.ID, err)
 	}
 
-	if isEmpty(resource.ID) {
+	if isEmpty(resource.GetID()) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(resource.ID)
+		d.SetId(resource.GetID())
 	}
 
 	return nil
 }
 
-func buildDeploymentProcessResource(d *schema.ResourceData) *model.DeploymentProcess {
-	deploymentProcess, err := model.NewDeploymentProcess(d.Get(constProjectID).(string))
-	if err != nil {
-		return nil
-	}
+func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.DeploymentProcess {
+	deploymentProcess := octopusdeploy.NewDeploymentProcess(d.Get(constProjectID).(string))
 
 	if attr, ok := d.GetOk(constStep); ok {
 		tfSteps := attr.([]interface{})
@@ -77,8 +73,8 @@ func buildDeploymentProcessResource(d *schema.ResourceData) *model.DeploymentPro
 func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.DeploymentProcesses.GetByID(id)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.DeploymentProcesses.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingDeploymentProcess, id, err)
 	}
@@ -96,36 +92,36 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 	deploymentProcess := buildDeploymentProcessResource(d)
 	deploymentProcess.ID = d.Id() // set ID so Octopus API knows which deployment process to update
 
-	apiClient := m.(*client.Client)
-	current, err := apiClient.DeploymentProcesses.GetByID(deploymentProcess.ID)
+	client := m.(*octopusdeploy.Client)
+	current, err := client.DeploymentProcesses.GetByID(deploymentProcess.ID)
 	if err != nil {
 		return createResourceOperationError(errorReadingDeploymentProcess, deploymentProcess.ID, err)
 	}
 
 	deploymentProcess.Version = current.Version
-	resource, err := apiClient.DeploymentProcesses.Update(*deploymentProcess)
+	resource, err := client.DeploymentProcesses.Update(*deploymentProcess)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingDeploymentProcess, d.Id(), err)
 	}
 
-	d.SetId(resource.ID)
+	d.SetId(resource.GetID())
 
 	return nil
 }
 
 func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) error {
-	apiClient := m.(*client.Client)
-	current, err := apiClient.DeploymentProcesses.GetByID(d.Id())
+	client := m.(*octopusdeploy.Client)
+	current, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err != nil {
 		return createResourceOperationError(errorReadingDeploymentProcess, d.Id(), err)
 	}
 
-	deploymentProcess := &model.DeploymentProcess{
+	deploymentProcess := &octopusdeploy.DeploymentProcess{
 		Version: current.Version,
 	}
 	deploymentProcess.ID = d.Id()
 
-	deploymentProcess, err = apiClient.DeploymentProcesses.Update(*deploymentProcess)
+	deploymentProcess, err = client.DeploymentProcesses.Update(*deploymentProcess)
 	if err != nil {
 		return createResourceOperationError(errorDeletingDeploymentProcess, deploymentProcess.ID, err)
 	}

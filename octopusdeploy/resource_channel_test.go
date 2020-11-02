@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -180,18 +180,18 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 func testAccChannelBasic(name, description string) string {
 	return fmt.Sprintf(`
 
-		resource constOctopusDeployProjectGroup "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource constOctopusDeployProject "foo" {
+		resource octopusdeploy_project "foo" {
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
 			allow_deployments_to_no_targets = true
 		}
 		
-		resource constOctopusDeployChannel "ch" {
+		resource octopusdeploy_channel "ch" {
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
@@ -204,18 +204,18 @@ func testAccChannelBasic(name, description string) string {
 func testAccChannelWithOneRule(name, description, versionRange, actionName string) string {
 	return fmt.Sprintf(`
 
-		resource constOctopusDeployProjectGroup "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource constOctopusDeployProject "foo" {
+		resource octopusdeploy_project  "foo" {
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
 			allow_deployments_to_no_targets = true
 		}
 
-		resource constOctopusDeployDeploymentProcess "deploy_step_template" {
+		resource octopusdeploy_deployment_process "deploy_step_template" {
 			project_id          = "${octopusdeploy_project.foo.id}"
 			step {
 				name            = "step-1"
@@ -237,7 +237,7 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 			}
 		}
 		
-		resource constOctopusDeployChannel "ch" {
+		resource octopusdeploy_project_channel "ch" {
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
@@ -255,18 +255,18 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, versionRange2, actionName2 string) string {
 	return fmt.Sprintf(`
 
-		resource constOctopusDeployProjectGroup "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource constOctopusDeployProject "foo" {
+		resource octopusdeploy_project "foo" {
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
 			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
 			allow_deployments_to_no_targets = true
 		}
 
-		resource constOctopusDeployDeploymentProcess "deploy_step_template" {
+		resource octopusdeploy_deployment_process "deploy_step_template" {
 			project_id          = "${octopusdeploy_project.foo.id}"
 			step {
 				name            = "step-1"
@@ -305,7 +305,7 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 			}
 		}
 		
-		resource constOctopusDeployChannel "ch" {
+		resource octopusdeploy_channel "ch" {
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
@@ -328,7 +328,7 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 
 func testAccCheckOctopusDeployChannelExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		if err := existsHelperChannel(s, client); err != nil {
 			return err
 		}
@@ -336,7 +336,7 @@ func testAccCheckOctopusDeployChannelExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func existsHelperChannel(s *terraform.State, client *client.Client) error {
+func existsHelperChannel(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == constOctopusDeployChannel {
 			if _, err := client.Channels.GetByID(r.Primary.ID); err != nil {
@@ -348,7 +348,7 @@ func existsHelperChannel(s *terraform.State, client *client.Client) error {
 }
 
 func testAccCheckOctopusDeployChannelDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 	if err := destroyHelperChannel(s, client); err != nil {
 		return err
@@ -359,9 +359,9 @@ func testAccCheckOctopusDeployChannelDestroy(s *terraform.State) error {
 	return nil
 }
 
-func destroyHelperChannel(s *terraform.State, apiClient *client.Client) error {
+func destroyHelperChannel(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.Channels.GetByID(r.Primary.ID); err != nil {
+		if _, err := client.Channels.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving channel %s", err)
 		}
 		return fmt.Errorf("channel still exists")

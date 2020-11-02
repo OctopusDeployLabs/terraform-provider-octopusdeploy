@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -80,17 +80,17 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 
 func testAccProjectDeploymentTargetTriggerResource(t *testing.T, triggerName, projectName string) string {
 	return fmt.Sprintf(`
-		resource constOctopusDeployProjectGroup "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource constOctopusDeployProject "foo" {
+		resource octopusdeploy_project "foo" {
 			lifecycle_id          = "Lifecycles-1"
 			name                  = "%s"
 			project_group_id      = "${octopusdeploy_project_group.foo.id}"
 	  	}
 
-		resource constOctopusDeployProjectDeploymentTargetTrigger "foo" {
+		resource octopusdeploy_project_deployment_target_trigger "foo" {
 			name             = "%s"
 			project_id       = "${octopusdeploy_project.foo.id}"
 			event_groups     = ["Machine"]
@@ -108,17 +108,17 @@ func testAccProjectDeploymentTargetTriggerResource(t *testing.T, triggerName, pr
 
 func testAccProjectDeploymentTargetTriggerResourceUpdated(t *testing.T, triggerName, projectName string) string {
 	return fmt.Sprintf(`
-		resource constOctopusDeployProjectGroup "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource constOctopusDeployProject "foo" {
+		resource octopusdeploy_project "foo" {
 			lifecycle_id          = "Lifecycles-1"
 			name                  = "%s"
 			project_group_id      = "${octopusdeploy_project_group.foo.id}"
 	  	}
 
-		resource constOctopusDeployProjectDeploymentTargetTrigger "foo" {
+		resource octopusdeploy_project_deployment_target_trigger "foo" {
 			name             = "%s"
 			project_id       = "${octopusdeploy_project.foo.id}"
 			event_groups     = ["Machine", "MachineCritical"]
@@ -142,7 +142,7 @@ func testAccProjectTriggerExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 		if _, err := client.ProjectTriggers.GetByID(rs.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving project trigger %s", err)

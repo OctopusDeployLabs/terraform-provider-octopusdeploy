@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -75,7 +75,7 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 
 func testAccLibraryVariableSetBasic(name string) string {
 	return fmt.Sprintf(`
-		resource constOctopusDeployLibraryVariableSet "foo" {
+		resource octopusdeploy_library_variable_set "foo" {
 			name           = "%s"
 		  }
 		`,
@@ -84,7 +84,7 @@ func testAccLibraryVariableSetBasic(name string) string {
 }
 func testAccLibraryVariableSetWithDescription(name, description string) string {
 	return fmt.Sprintf(`
-		resource constOctopusDeployLibraryVariableSet "foo" {
+		resource octopusdeploy_library_variable_set "foo" {
 			name           = "%s"
 			description    = "%s"
 		  }
@@ -94,7 +94,7 @@ func testAccLibraryVariableSetWithDescription(name, description string) string {
 }
 
 func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 	if err := destroyHelperLibraryVariableSet(s, client); err != nil {
 		return err
@@ -107,7 +107,7 @@ func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) erro
 
 func testAccCheckOctopusDeployLibraryVariableSetExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		if err := existsHelperLibraryVariableSet(s, client); err != nil {
 			return err
 		}
@@ -115,9 +115,9 @@ func testAccCheckOctopusDeployLibraryVariableSetExists(n string) resource.TestCh
 	}
 }
 
-func destroyHelperLibraryVariableSet(s *terraform.State, apiClient *client.Client) error {
+func destroyHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := apiClient.LibraryVariableSets.GetByID(r.Primary.ID); err != nil {
+		if _, err := client.LibraryVariableSets.GetByID(r.Primary.ID); err != nil {
 			return fmt.Errorf("Received an error retrieving library variable set %s", err)
 		}
 		return fmt.Errorf("library variable set still exists")
@@ -125,7 +125,7 @@ func destroyHelperLibraryVariableSet(s *terraform.State, apiClient *client.Clien
 	return nil
 }
 
-func existsHelperLibraryVariableSet(s *terraform.State, client *client.Client) error {
+func existsHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_libraryVariableSet" {
 			if _, err := client.LibraryVariableSets.GetByID(r.Primary.ID); err != nil {

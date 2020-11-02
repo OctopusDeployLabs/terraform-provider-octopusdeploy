@@ -3,9 +3,7 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/enum"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -81,12 +79,12 @@ func resourceProject() *schema.Resource {
 	}
 }
 
-func buildProjectResource(d *schema.ResourceData) *model.Project {
+func buildProjectResource(d *schema.ResourceData) *octopusdeploy.Project {
 	name := d.Get(constName).(string)
 	lifecycleID := d.Get(constLifecycleID).(string)
 	projectGroupID := d.Get(constProjectGroupID).(string)
 
-	project := model.NewProject(name, lifecycleID, projectGroupID)
+	project := octopusdeploy.NewProject(name, lifecycleID, projectGroupID)
 
 	if attr, ok := d.GetOk(constDescription); ok {
 		project.Description = attr.(string)
@@ -97,7 +95,7 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 	}
 
 	if attr, ok := d.GetOk(constSkipMachineBehavior); ok {
-		project.ProjectConnectivityPolicy.SkipMachineBehavior = attr.(string)
+		project.ProjectConnectivityPolicy.SkipMachineBehavior = octopusdeploy.SkipMachineBehavior(attr.(string))
 	}
 
 	if attr, ok := d.GetOk(constAllowDeploymentsToNoTargets); ok {
@@ -105,7 +103,7 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 	}
 
 	if attr, ok := d.GetOk(constTenantedDeploymentMode); ok {
-		project.TenantedDeploymentMode, _ = enum.ParseTenantedDeploymentMode(attr.(string))
+		project.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(attr.(string))
 	}
 
 	if attr, ok := d.GetOk(constIncludedLibraryVariableSets); ok {
@@ -126,16 +124,16 @@ func buildProjectResource(d *schema.ResourceData) *model.Project {
 func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 	project := buildProjectResource(d)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Projects.Add(project)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Projects.Add(project)
 	if err != nil {
 		return createResourceOperationError(errorCreatingProject, project.ID, err)
 	}
 
-	if isEmpty(resource.ID) {
+	if isEmpty(resource.GetID()) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(resource.ID)
+		d.SetId(resource.GetID())
 	}
 
 	return nil
@@ -144,8 +142,8 @@ func resourceProjectCreate(d *schema.ResourceData, m interface{}) error {
 func resourceProjectRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Projects.GetByID(id)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Projects.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingProject, id, err)
 	}
@@ -171,13 +169,13 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 	project := buildProjectResource(d)
 	project.ID = d.Id() // set ID so Octopus API knows which project to update
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Projects.Update(*project)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Projects.Update(project)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingProject, d.Id(), err)
 	}
 
-	d.SetId(resource.ID)
+	d.SetId(resource.GetID())
 
 	return nil
 }
@@ -185,8 +183,8 @@ func resourceProjectUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceProjectDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	err := apiClient.Projects.DeleteByID(id)
+	client := m.(*octopusdeploy.Client)
+	err := client.Projects.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingProject, d.Id(), err)
 	}

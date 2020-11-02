@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -57,8 +57,8 @@ func dataCertificate() *schema.Resource {
 func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
 	name := d.Get(constName).(string)
 
-	apiClient := m.(*client.Client)
-	resourceList, err := apiClient.Certificates.GetByPartialName(name)
+	client := m.(*octopusdeploy.Client)
+	resourceList, err := client.Certificates.GetByPartialName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingCertificate, name, err)
 	}
@@ -75,7 +75,7 @@ func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
 		if resource.Name == name {
 			logResource(constCertificate, m)
 
-			d.SetId(resource.ID)
+			d.SetId(resource.GetID())
 			d.Set(constName, resource.Name)
 
 			return nil

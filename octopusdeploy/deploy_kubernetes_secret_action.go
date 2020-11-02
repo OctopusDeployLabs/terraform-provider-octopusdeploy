@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"encoding/json"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -37,15 +37,13 @@ func getDeployKubernetesSecretActionSchema() *schema.Schema {
 	return actionSchema
 }
 
-func buildDeployKubernetesSecretActionResource(tfAction map[string]interface{}) model.DeploymentAction {
+func buildDeployKubernetesSecretActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 
 	resource.ActionType = "Octopus.KubernetesDeploySecret"
-
 	resource.Properties["Octopus.Action.KubernetesContainers.SecretName"] = tfAction[constSecretValues].(string)
 
 	if tfSecretValues, ok := tfAction[constSecretValues]; ok {
-
 		secretValues := make(map[string]string)
 
 		for _, tfSecretValue := range tfSecretValues.([]interface{}) {
@@ -54,7 +52,6 @@ func buildDeployKubernetesSecretActionResource(tfAction map[string]interface{}) 
 		}
 
 		j, _ := json.Marshal(secretValues)
-
 		resource.Properties["Octopus.Action.KubernetesContainers.SecretValues"] = string(j)
 	}
 

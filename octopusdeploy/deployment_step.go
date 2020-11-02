@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -31,23 +31,23 @@ func getDeploymentStepSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "Whether to run this step before or after package acquisition (if possible)",
 					Optional:    true,
-					Default:     (string)(model.DeploymentStepPackageRequirementLetOctopusDecide),
+					Default:     (string)(octopusdeploy.DeploymentStepPackageRequirementLetOctopusDecide),
 					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-						(string)(model.DeploymentStepPackageRequirementLetOctopusDecide),
-						(string)(model.DeploymentStepPackageRequirementBeforePackageAcquisition),
-						(string)(model.DeploymentStepPackageRequirementAfterPackageAcquisition),
+						(string)(octopusdeploy.DeploymentStepPackageRequirementLetOctopusDecide),
+						(string)(octopusdeploy.DeploymentStepPackageRequirementBeforePackageAcquisition),
+						(string)(octopusdeploy.DeploymentStepPackageRequirementAfterPackageAcquisition),
 					}, false)),
 				},
 				constCondition: {
 					Type:        schema.TypeString,
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
 					Optional:    true,
-					Default:     (string)(model.DeploymentStepConditionSuccess),
+					Default:     (string)(octopusdeploy.DeploymentStepConditionTypeSuccess),
 					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-						(string)(model.DeploymentStepConditionSuccess),
-						(string)(model.DeploymentStepConditionFailure),
-						(string)(model.DeploymentStepConditionAlways),
-						(string)(model.DeploymentStepConditionVariable),
+						(string)(octopusdeploy.DeploymentStepConditionTypeSuccess),
+						(string)(octopusdeploy.DeploymentStepConditionTypeFailure),
+						(string)(octopusdeploy.DeploymentStepConditionTypeAlways),
+						(string)(octopusdeploy.DeploymentStepConditionTypeVariable),
 					}, false)),
 				},
 				constConditionExpression: {
@@ -59,10 +59,10 @@ func getDeploymentStepSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')",
 					Optional:    true,
-					Default:     (string)(model.DeploymentStepStartTriggerStartAfterPrevious),
+					Default:     (string)(octopusdeploy.DeploymentStepStartTriggerStartAfterPrevious),
 					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-						(string)(model.DeploymentStepStartTriggerStartAfterPrevious),
-						(string)(model.DeploymentStepStartTriggerStartWithPrevious),
+						(string)(octopusdeploy.DeploymentStepStartTriggerStartAfterPrevious),
+						(string)(octopusdeploy.DeploymentStepStartTriggerStartWithPrevious),
 					}, false)),
 				},
 				constWindowSize: {
@@ -83,12 +83,12 @@ func getDeploymentStepSchema() *schema.Schema {
 	}
 }
 
-func buildDeploymentStepResource(tfStep map[string]interface{}) model.DeploymentStep {
-	step := model.DeploymentStep{
+func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.DeploymentStep {
+	step := octopusdeploy.DeploymentStep{
 		Name:               tfStep[constName].(string),
-		PackageRequirement: model.DeploymentStepPackageRequirement(tfStep[constPackageRequirement].(string)),
-		Condition:          model.DeploymentStepCondition(tfStep[constCondition].(string)),
-		StartTrigger:       model.DeploymentStepStartTrigger(tfStep[constStartTrigger].(string)),
+		PackageRequirement: octopusdeploy.DeploymentStepPackageRequirement(tfStep[constPackageRequirement].(string)),
+		Condition:          octopusdeploy.DeploymentStepConditionType(tfStep[constCondition].(string)),
+		StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(tfStep[constStartTrigger].(string)),
 		Properties:         map[string]string{},
 	}
 

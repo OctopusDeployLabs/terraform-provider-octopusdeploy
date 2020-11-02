@@ -3,9 +3,7 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/enum"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -66,8 +64,8 @@ func resourceCertificate() *schema.Resource {
 func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Certificates.GetByID(id)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Certificates.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingCertificate, id, err)
 	}
@@ -81,14 +79,14 @@ func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
 	d.Set(constName, resource.Name)
 	d.Set(constNotes, resource.Notes)
 	d.Set(constEnvironmentIDs, resource.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, resource.TenantedDeploymentParticipation)
+	d.Set(constTenantedDeploymentParticipation, resource.TenantedDeploymentMode)
 	d.Set(constTenantIDs, resource.TenantIDs)
 	d.Set(constTenantTags, resource.TenantTags)
 
 	return nil
 }
 
-func buildCertificateResource(d *schema.ResourceData) (*model.Certificate, error) {
+func buildCertificateResource(d *schema.ResourceData) (*octopusdeploy.CertificateResource, error) {
 	name := d.Get(constName).(string)
 	if isEmpty(name) {
 		log.Println("certificate name is empty; please specify a name for the certificate")
@@ -99,20 +97,17 @@ func buildCertificateResource(d *schema.ResourceData) (*model.Certificate, error
 		log.Println("password is empty; please specify a password")
 	}
 
-	pass := model.NewSensitiveValue(password)
+	pass := octopusdeploy.NewSensitiveValue(password)
 	certData := d.Get(constCertificateData).(string)
 	if isEmpty(certData) {
 		log.Println("certificate data is empty; please specify certificate data")
 	}
 
-	certificateData := model.NewSensitiveValue(certData)
-	certificate, err := model.NewCertificate(name, certificateData, pass)
-	if err != nil {
-		log.Println(err)
-	}
+	certificateData := octopusdeploy.NewSensitiveValue(certData)
+	certificate := octopusdeploy.NewCertificateResource(name, certificateData, pass)
 
 	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
-		certificate.TenantedDeploymentParticipation, _ = enum.ParseTenantedDeploymentMode(v.(string))
+		certificate.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk(constTenantTags); ok {
@@ -128,16 +123,16 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Certificates.Add(certificate)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Certificates.Add(certificate)
 	if err != nil {
 		return createResourceOperationError(errorCreatingCertificate, certificate.Name, err)
 	}
 
-	if isEmpty(resource.ID) {
+	if isEmpty(resource.GetID()) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(resource.ID)
+		d.SetId(resource.GetID())
 	}
 
 	return nil
@@ -150,13 +145,13 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	certificate.ID = d.Id() // set ID so Octopus API knows which certificate to update
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Certificates.Update(*certificate)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Certificates.Update(*certificate)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingCertificate, d.Id(), err)
 	}
 
-	d.SetId(resource.ID)
+	d.SetId(resource.GetID())
 
 	return nil
 }
@@ -164,8 +159,8 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	err := apiClient.Certificates.DeleteByID(id)
+	client := m.(*octopusdeploy.Client)
+	err := client.Certificates.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingCertificate, id, err)
 	}

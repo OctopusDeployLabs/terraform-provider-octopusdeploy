@@ -4,121 +4,91 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/enum"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
-	"github.com/stretchr/testify/assert"
-
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAWSAccountBasic(t *testing.T) {
-	const accountPrefix = "octopusdeploy_aws_account.foo"
-	const name = "awsaccount"
-	const accessKey = "AKIA6DEJDS6test123"
-	const secretKey = "ThisIsATest"
+	accessKey := acctest.RandString(10)
+	name := acctest.RandString(10)
+	secretKey := acctest.RandString(10)
 
-	const tagSetName = "TagSet"
-	const tagName = "Tag"
-	var tenantTags = fmt.Sprintf("%s/%s", tagSetName, tagName)
-	const tenantedDeploymentParticipation = enum.TenantedOrUntenanted
+	const accountPrefix = constOctopusDeployAWSAccount + ".foo"
+	const tenantedDeploymentParticipation = octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
+	var account octopusdeploy.AmazonWebServicesAccount
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployAzureServicePrincipalDestroy,
+		CheckDestroy: testOctopusDeployAWSAccountDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAWSAccountBasic(tagSetName, tagName, name, accessKey, secretKey, tenantedDeploymentParticipation),
+				Config: testAWSAccountBasic(name, accessKey, secretKey, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
-					testAWSAccountExists(accountPrefix),
-					resource.TestCheckResourceAttr(
-						accountPrefix, constName, name),
-					resource.TestCheckResourceAttr(
-						accountPrefix, constAccessKey, accessKey),
-					resource.TestCheckResourceAttr(
-						accountPrefix, constSecretKey, secretKey),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "tenant_tags.0", tenantTags),
-					resource.TestCheckResourceAttr(
-						accountPrefix, constTenantedDeploymentParticipation, tenantedDeploymentParticipation.String()),
+					testAWSAccountExists(name, &account),
+					resource.TestCheckResourceAttr(accountPrefix, constName, name),
+					resource.TestCheckResourceAttr(accountPrefix, constAccessKey, accessKey),
+					resource.TestCheckResourceAttr(accountPrefix, constSecretKey, secretKey),
+					resource.TestCheckResourceAttr(accountPrefix, constTenantedDeploymentParticipation, string(tenantedDeploymentParticipation)),
 				),
 			},
 		},
 	})
 }
 
-func testIsAccountTypeAWS(t *testing.T) *model.Account {
-	accountName := "awsaccounttest"
-	testType, err := model.NewAccount(accountName, enum.AmazonWebServicesAccount)
-
-	if err != nil {
-		assert.FailNow(t, "The test has failed due to: ", err)
-	}
-
-	assert.Error(t, err)
-	assert.NotNil(t, err)
-
-	return testType
+func testAWSAccountBasic(name string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+	return fmt.Sprintf(`resource "%s" "foo" {
+		name = "%s"
+		access_key = "%s"
+		secret_key = "%s"
+		tenanted_deployment_participation = "%s"
+	}`, constOctopusDeployAWSAccount, name, accessKey, secretKey, tenantedDeploymentParticipation)
 }
 
-func testIsAWSAccountNil(t *testing.T) *model.Account {
-	accountName := "awsaccounttest"
-	testNil, err := model.NewAccount(accountName, enum.AmazonWebServicesAccount)
-
-	var pnt *model.Account
-	fmt.Printf("Type Account is nil: %v", pnt == nil)
-
-	assert.NotNil(t, err)
-
-	return testNil
-}
-
-func testAWSAccountBasic(tagSetName string, tagName string, name string, accessKey string, secretKey string, tenantedDeploymentParticipation enum.TenantedDeploymentMode) string {
-	return fmt.Sprintf(`
-
-
-		resource constOctopusDeployAzureServicePrincipal "foo" {
-			name           = "%s"
-			access_key = "%s"
-			secret_key = "%s"
-			tagSetName = "%s"
-			tenant_tags = ["${octopusdeploy_tag_set.testtagset.name}/%s"]
-			tenanted_deployment_participation = "%s"
-		}
-		`,
-		tagSetName, tagName, name, accessKey, secretKey, tenantedDeploymentParticipation,
-	)
-}
-
-func testAWSAccountExists(n string) resource.TestCheckFunc {
+func testAWSAccountExists(accountName string, account *octopusdeploy.AmazonWebServicesAccount) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-		return existsAzureServicePrincipalHelper(s, client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		return existsAWSAccountHelper(s, client)
 	}
 }
 
-func existsAWSAccountHelper(s *terraform.State, client *client.Client) error {
+func existsAWSAccountHelper(s *terraform.State, client *octopusdeploy.Client) error {
+	// client := testAccProvider.Meta().(*octopusdeploy.Client)
+	// query := octopusdeploy.AccountsQuery{PartialName: accountName, Take: 1}
+	// accounts, err := client.Accounts.Get(query)
+	// if err != nil {
+	// 	return err
+	// }
+	// if len(accounts.Items) != 1 {
+	// 	return fmt.Errorf("account not found")
+	// }
 
-	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
+	// *account = *(accounts.Items[0]).(*octopusdeploy.AmazonWebServicesAccount)
+	// return nil
 
+	accountID := s.RootModule().Resources[constOctopusDeployAWSAccount+".foo"].Primary.ID
 	if _, err := client.Accounts.GetByID(accountID); err != nil {
-		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
+		return err
 	}
 
 	return nil
 }
 
 func testOctopusDeployAWSAccountDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
-	return destroyAzureServicePrincipalHelper(s, client)
-}
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != constOctopusDeployAWSAccount {
+			continue
+		}
 
-func destroyAWSAccountHelper(s *terraform.State, apiClient *client.Client) error {
-	id := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
-	if _, err := apiClient.Accounts.GetByID(id); err != nil {
-		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
+		accountID := rs.Primary.ID
+		if _, err := client.Accounts.GetByID(accountID); err != nil {
+			return err
+		}
+		return fmt.Errorf("account (%s) still exists", rs.Primary.ID)
 	}
-	return fmt.Errorf("Azure Service Principal still exists")
+
+	return nil
 }

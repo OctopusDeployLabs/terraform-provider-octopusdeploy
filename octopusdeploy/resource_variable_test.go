@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -40,17 +40,17 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 
 func testVariableBasic(projectName, projectLifecycleID, name, description, value string) string {
 	config := fmt.Sprintf(`
-		resource constOctopusDeployProjectGroup "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource constOctopusDeployProject "foo" {
+		resource octopusdeploy_project "foo" {
 			name           = "%s"
 			lifecycle_id    = "%s"
 			project_group_id = "${octopusdeploy_project_group.foo.id}"
 		}
 
-		resource constOctopusDeployVariable "foovar" {
+		resource octopusdeploy_variable "foovar" {
 			project_id  = "${octopusdeploy_project.foo.id}"
 			name        = "%s"
 			description = "%s"
@@ -66,12 +66,12 @@ func testVariableBasic(projectName, projectLifecycleID, name, description, value
 
 func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		return existsVarHelper(s, client)
 	}
 }
 
-func existsVarHelper(s *terraform.State, client *client.Client) error {
+func existsVarHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	projID := s.RootModule().Resources["octopusdeploy_project.foo"].Primary.ID
 	varID := s.RootModule().Resources["octopusdeploy_variable.foovar"].Primary.ID
 
@@ -83,15 +83,15 @@ func existsVarHelper(s *terraform.State, client *client.Client) error {
 }
 
 func testOctopusDeployVariableDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	return destroyVarHelper(s, client)
 }
 
-func destroyVarHelper(s *terraform.State, apiClient *client.Client) error {
+func destroyVarHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	projectID := s.RootModule().Resources["octopusdeploy_project.foo"].Primary.ID
 	variableID := s.RootModule().Resources["octopusdeploy_variable.foovar"].Primary.ID
 
-	if _, err := apiClient.Variables.DeleteSingle(projectID, variableID); err != nil {
+	if _, err := client.Variables.DeleteSingle(projectID, variableID); err != nil {
 		return fmt.Errorf("Received an error retrieving variable %s", err)
 	}
 	return fmt.Errorf("Variable still exists")

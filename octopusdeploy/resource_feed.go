@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/enum"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -61,37 +59,39 @@ func resourceFeed() *schema.Resource {
 func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Feeds.GetByID(id)
+	client := m.(*octopusdeploy.Client)
+	feed, err := client.Feeds.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingFeed, id, err)
 	}
-	if resource == nil {
+	if feed == nil {
 		d.SetId(constEmptyString)
 		return nil
 	}
 
 	logResource(constFeed, m)
 
-	d.Set(constName, resource.Name)
-	d.Set(constFeedType, resource.FeedType)
-	d.Set(constFeedURI, resource.FeedURI)
-	d.Set(constEnhancedMode, resource.EnhancedMode)
-	d.Set(constDownloadAttempts, resource.DownloadAttempts)
-	d.Set(constDownloadRetryBackoffSeconds, resource.DownloadRetryBackoffSeconds)
-	d.Set(constUsername, resource.Username)
-	d.Set(constPassword, resource.Password)
+	feedResource := feed.(*octopusdeploy.FeedResource)
+
+	d.Set(constName, feedResource.Name)
+	d.Set(constFeedType, feedResource.FeedType)
+	d.Set(constFeedURI, feedResource.FeedURI)
+	d.Set(constEnhancedMode, feedResource.EnhancedMode)
+	d.Set(constDownloadAttempts, feedResource.DownloadAttempts)
+	d.Set(constDownloadRetryBackoffSeconds, feedResource.DownloadRetryBackoffSeconds)
+	d.Set(constUsername, feedResource.Username)
+	d.Set(constPassword, feedResource.Password)
 
 	return nil
 }
 
-func buildFeedResource(d *schema.ResourceData) *model.Feed {
+func buildFeedResource(d *schema.ResourceData) *octopusdeploy.FeedResource {
 	name := d.Get(constName).(string)
 
-	var feedType enum.FeedType
+	var feedType octopusdeploy.FeedType
 	feedTypeInterface, ok := d.GetOk(constFeedType)
 	if ok {
-		feedType = feedTypeInterface.(enum.FeedType)
+		feedType = octopusdeploy.FeedType(feedTypeInterface.(string))
 	}
 
 	var feedURI string
@@ -100,65 +100,67 @@ func buildFeedResource(d *schema.ResourceData) *model.Feed {
 		feedURI = feedURIInterface.(string)
 	}
 
-	var feed = model.NewFeed(name, feedType, feedURI)
+	var feedResource = octopusdeploy.NewFeedResource(name, feedType)
+	feedResource.FeedURI = feedURI
 
 	enhancedModeInterface, ok := d.GetOk(constEnhancedMode)
 	if ok {
-		feed.EnhancedMode = enhancedModeInterface.(bool)
+		feedResource.EnhancedMode = enhancedModeInterface.(bool)
 	}
 
 	downloadAttemptsInterface, ok := d.GetOk(constDownloadAttempts)
 	if ok {
-		feed.DownloadAttempts = downloadAttemptsInterface.(int)
+		feedResource.DownloadAttempts = downloadAttemptsInterface.(int)
 	}
 
 	downloadRetryBackoffSecondsInterface, ok := d.GetOk(constDownloadRetryBackoffSeconds)
 	if ok {
-		feed.DownloadRetryBackoffSeconds = downloadRetryBackoffSecondsInterface.(int)
+		feedResource.DownloadRetryBackoffSeconds = downloadRetryBackoffSecondsInterface.(int)
 	}
 
 	feedUsernameInterface, ok := d.GetOk(constUsername)
 	if ok {
-		feed.Username = feedUsernameInterface.(string)
+		feedResource.Username = feedUsernameInterface.(string)
 	}
 
 	feedPasswordInterface, ok := d.GetOk(constPassword)
 	if ok {
-		feed.Password = model.NewSensitiveValue(feedPasswordInterface.(string))
+		feedResource.Password = octopusdeploy.NewSensitiveValue(feedPasswordInterface.(string))
 	}
 
-	return feed
+	return feedResource
 }
 
 func resourceFeedCreate(d *schema.ResourceData, m interface{}) error {
-	feed := buildFeedResource(d)
+	feedResource := buildFeedResource(d)
+	client := m.(*octopusdeploy.Client)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Feeds.Add(*feed)
+	feed, err := client.Feeds.Add(feedResource)
 	if err != nil {
-		return createResourceOperationError(errorCreatingFeed, feed.Name, err)
+		return createResourceOperationError(errorCreatingFeed, feedResource.Name, err)
 	}
 
-	if isEmpty(resource.ID) {
+	if isEmpty(feed.GetID()) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(resource.ID)
+		d.SetId(feed.GetID())
 	}
 
 	return nil
 }
 
 func resourceFeedUpdate(d *schema.ResourceData, m interface{}) error {
-	feed := buildFeedResource(d)
-	feed.ID = d.Id() // set ID so Octopus API knows which feed to update
+	feedResource := buildFeedResource(d)
+	client := m.(*octopusdeploy.Client)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Feeds.Update(*feed)
+	feedResource.ID = d.Id() // set ID so Octopus API knows which feed to update
+
+	feed, err := client.Feeds.Update(feedResource)
 	if err != nil {
 		return fmt.Errorf(errorUpdatingFeed, d.Id(), err.Error())
 	}
 
-	d.SetId(resource.ID)
+	d.SetId(feed.GetID())
 
 	return nil
 }
@@ -166,8 +168,8 @@ func resourceFeedUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceFeedDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	err := apiClient.Feeds.DeleteByID(id)
+	client := m.(*octopusdeploy.Client)
+	err := client.Feeds.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingFeed, id, err)
 	}

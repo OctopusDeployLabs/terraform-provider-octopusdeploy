@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -25,8 +25,8 @@ func dataLifecycle() *schema.Resource {
 func dataLifecycleReadByName(d *schema.ResourceData, m interface{}) error {
 	name := d.Get(constName).(string)
 
-	apiClient := m.(*client.Client)
-	resourceList, err := apiClient.Lifecycles.GetByPartialName(name)
+	client := m.(*octopusdeploy.Client)
+	resourceList, err := client.Lifecycles.GetByPartialName(name)
 	if err != nil {
 		return createResourceOperationError(errorReadingLifecycle, name, err)
 	}
@@ -43,7 +43,7 @@ func dataLifecycleReadByName(d *schema.ResourceData, m interface{}) error {
 		if resource.Name == name {
 			logResource(constLifecycle, m)
 
-			d.SetId(resource.ID)
+			d.SetId(resource.GetID())
 			d.Set(constName, resource.Name)
 			d.Set(constDescription, resource.Description)
 

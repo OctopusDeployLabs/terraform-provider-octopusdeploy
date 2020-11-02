@@ -1,38 +1,66 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"context"
+	"fmt"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataAccount() *schema.Resource {
 	return &schema.Resource{
-		Read: dataAccountReadByName,
+		ReadContext: dataAccountReadByName,
 		Schema: map[string]*schema.Schema{
 			constName: {
-				Type:     schema.TypeString,
 				Required: true,
+				Type:     schema.TypeString,
 			},
 		},
 	}
 }
 
-func dataAccountReadByName(d *schema.ResourceData, m interface{}) error {
+func dataAccountReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
 	name := d.Get(constName).(string)
-
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Accounts.GetByName(name)
-	if err != nil {
-		return createResourceOperationError(errorReadingAccount, name, err)
+	query := octopusdeploy.AccountsQuery{
+		PartialName: name,
+		Take:        1,
 	}
-	if resource == nil {
-		return nil
+
+	accounts, err := client.Accounts.Get(query)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if accounts == nil || len(accounts.Items) == 0 {
+		d.SetId("")
+		return diag.FromErr(fmt.Errorf("Unable to retrieve account (partial name: %s)", name))
 	}
 
 	logResource(constAccount, m)
 
-	d.SetId(resource.ID)
-	d.Set(constName, resource.Name)
+	accountResource := accounts.Items[0].(*octopusdeploy.AccountResource)
+
+	d.SetId(accountResource.GetID())
+	d.Set(constAccessKey, accountResource.AccessKey)
+	d.Set(constAccountType, accountResource.AccountType)
+	d.Set(constClientID, accountResource.ApplicationID)
+	d.Set(constActiveDirectoryEndpointBaseURI, accountResource.AuthenticationEndpoint)
+	d.Set(constAzureEnvironment, accountResource.AzureEnvironment)
+	d.Set(constCertificateData, accountResource.CertificateBytes)
+	d.Set(constCertificateThumbprint, accountResource.CertificateThumbprint)
+	d.Set(constDescription, accountResource.Description)
+	d.Set(constEnvironments, accountResource.EnvironmentIDs)
+	d.Set(constName, accountResource.GetName())
+	d.Set(constSpaceID, accountResource.SpaceID)
+	d.Set(constResourceManagementEndpointBaseURI, accountResource.ResourceManagerEndpoint)
+	d.Set(constSubscriptionNumber, accountResource.SubscriptionID)
+	d.Set(constTenants, accountResource.TenantIDs)
+	d.Set(constTenantTags, accountResource.TenantTags)
+	d.Set(constTenantedDeploymentParticipation, accountResource.TenantedDeploymentMode)
+	d.Set(constToken, accountResource.Token)
+	d.Set(constUsername, accountResource.Username)
 
 	return nil
 }

@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -87,14 +87,14 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 	}
 }
 
-func buildDeployWindowsServiceActionResource(tfAction map[string]interface{}) model.DeploymentAction {
+func buildDeployWindowsServiceActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := buildDeploymentActionResource(tfAction)
 	resource.ActionType = "Octopus.WindowsService"
 	addWindowsServiceToActionResource(tfAction, resource)
 	return resource
 }
 
-func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, action model.DeploymentAction) {
+func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
 	if windowsServiceList, ok := tfAction[constWindowsService]; ok {
 		tfWindowsService := windowsServiceList.(*schema.Set).List()
 		if len(tfWindowsService) > 0 {
@@ -103,7 +103,7 @@ func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, a
 	}
 }
 
-func addWindowsServiceToActionResource(tfAction map[string]interface{}, action model.DeploymentAction) {
+func addWindowsServiceToActionResource(tfAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
 	action.Properties["Octopus.Action.WindowsService.CreateOrUpdateService"] = "True"
 	action.Properties["Octopus.Action.WindowsService.ServiceName"] = tfAction[constServiceName].(string)
 

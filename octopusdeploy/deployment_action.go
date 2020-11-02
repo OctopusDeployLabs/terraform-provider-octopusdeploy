@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"strconv"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -113,8 +113,8 @@ func addWorkerPoolSchema(element *schema.Resource) {
 	}
 }
 
-func buildDeploymentActionResource(tfAction map[string]interface{}) model.DeploymentAction {
-	action := model.DeploymentAction{
+func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
+	action := octopusdeploy.DeploymentAction{
 		Name:                 tfAction[constName].(string),
 		IsDisabled:           tfAction["disabled"].(bool),
 		IsRequired:           tfAction[constRequired].(bool),

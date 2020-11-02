@@ -2,12 +2,9 @@ package octopusdeploy
 
 import (
 	"log"
-	"strconv"
+	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/enum"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -180,8 +177,8 @@ func resourceMachine() *schema.Resource {
 func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Machines.GetByID(id)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Machines.GetByID(id)
 	if err != nil {
 		return createResourceOperationError(errorReadingMachine, id, err)
 	}
@@ -192,13 +189,13 @@ func resourceMachineRead(d *schema.ResourceData, m interface{}) error {
 
 	logResource(constMachine, m)
 
-	d.SetId(resource.ID)
+	d.SetId(resource.GetID())
 	setMachineProperties(d, resource)
 
 	return nil
 }
 
-func setMachineProperties(d *schema.ResourceData, m *model.Machine) {
+func setMachineProperties(d *schema.ResourceData, m *octopusdeploy.DeploymentTarget) {
 	d.Set(constEnvironments, m.EnvironmentIDs)
 	d.Set("haslatestcalamari", m.HasLatestCalamari)
 	d.Set("isdisabled", m.IsDisabled)
@@ -207,18 +204,18 @@ func setMachineProperties(d *schema.ResourceData, m *model.Machine) {
 	d.Set(constRoles, m.Roles)
 	d.Set(constStatus, m.Status)
 	d.Set("statussummary", m.StatusSummary)
-	d.Set("tenanteddeploymentparticipation", m.DeploymentMode)
+	d.Set("tenanteddeploymentparticipation", m.TenantedDeploymentMode)
 	d.Set("tenantids", m.TenantIDs)
 	d.Set("tenanttags", m.TenantTags)
 }
 
-func buildMachineResource(d *schema.ResourceData) *model.Machine {
+func buildMachineResource(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
 	name := d.Get(constName).(string)
 	machinePolicy := d.Get("machinepolicy").(string)
 	environments := getSliceFromTerraformTypeList(d.Get(constEnvironments))
 	roles := getSliceFromTerraformTypeList(d.Get(constRoles))
 	isDisabled := d.Get("isdisabled").(bool)
-	deploymentMode, _ := d.Get("tenanteddeploymentparticipation").(string)
+	deploymentMode := octopusdeploy.TenantedDeploymentMode(d.Get("tenanteddeploymentparticipation").(string))
 	tenantIDs := getSliceFromTerraformTypeList(d.Get("tenantids"))
 	tenantTags := getSliceFromTerraformTypeList(d.Get("tenanttags"))
 
@@ -242,54 +239,75 @@ func buildMachineResource(d *schema.ResourceData) *model.Machine {
 	// Get the first element in the list, which is a map of the interfaces
 	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
 
-	machine, err := model.NewMachine(name, isDisabled, environments, roles, machinePolicy, deploymentMode, tenantIDs, tenantTags)
-	if err != nil {
-		return nil
-	}
-
-	machine.URI = tfSchemaList[constURI].(string)
-	machine.Thumbprint = tfSchemaList[constThumbprint].(string)
-
 	var proxyID string
 	if tfSchemaList["proxyid"] != nil {
 		proxyString := tfSchemaList["proxyid"].(string)
 		proxyID = proxyString
 	}
 
-	communicationStyle, err := enum.ParseCommunicationStyle(tfSchemaList["communicationstyle"].(string))
-	if err != nil {
-		return nil
+	communicationStyle := octopusdeploy.CommunicationStyle(tfSchemaList["communicationstyle"].(string))
+
+	var endpoint octopusdeploy.IEndpoint
+	switch communicationStyle {
+	case "AzureCloudService":
+		azureCloudServiceEndpoint := octopusdeploy.NewAzureCloudServiceEndpoint()
+		azureCloudServiceEndpoint.DefaultWorkerPoolID = tfSchemaList["defaultworkerpoolid"].(string)
+		endpoint = azureCloudServiceEndpoint
+	case "AzureServiceFabricCluster":
+		endpoint = octopusdeploy.NewServiceFabricEndpoint()
+	case "AzureWebApp":
+		endpoint = octopusdeploy.NewAzureWebAppEndpoint()
+	case "Kubernetes":
+		clusterURL := d.Get("clusterURL").(url.URL)
+		kubernetesEndpoint := octopusdeploy.NewKubernetesEndpoint(clusterURL)
+		kubernetesEndpoint.ClusterCertificate = tfSchemaList["clustercertificate"].(string)
+		kubernetesEndpoint.ClusterURL, _ = url.Parse(tfSchemaList["clusterurl"].(string))
+		kubernetesEndpoint.Namespace = tfSchemaList[constNamespace].(string)
+		kubernetesEndpoint.ProxyID = proxyID
+		kubernetesEndpoint.SkipTLSVerification = tfSchemaList["skiptlsverification"].(bool)
+		endpoint = kubernetesEndpoint
+	case "None":
+		endpoint = octopusdeploy.NewCloudRegionEndpoint()
+	case "OfflineDrop":
+		endpoint = octopusdeploy.NewOfflineDropEndpoint()
+	case "Ssh":
+		host := d.Get("host").(string)
+		port := d.Get("port").(int)
+		fingerprint := d.Get("fingerprint").(string)
+		sshEndpoint := octopusdeploy.NewSSHEndpoint(host, port, fingerprint)
+		sshEndpoint.ProxyID = proxyID
+		endpoint = sshEndpoint
+	case "TentacleActive":
+		uri, _ := url.Parse(tfSchemaList[constURI].(string))
+		thumbprint := tfSchemaList[constThumbprint].(string)
+		endpoint = octopusdeploy.NewPollingTentacleEndpoint(uri, thumbprint)
+	case "TentaclePassive":
+		uri, _ := url.Parse(tfSchemaList[constURI].(string))
+		thumbprint := tfSchemaList[constThumbprint].(string)
+		endpoint = octopusdeploy.NewListeningTentacleEndpoint(uri, thumbprint)
 	}
 
-	endpoint, err := model.NewMachineEndpoint(
-		tfSchemaList[constURI].(string),
-		tfSchemaList[constThumbprint].(string),
-		communicationStyle,
-		proxyID,
-		tfSchemaList["defaultworkerpoolid"].(string),
-	)
-	if err != nil {
-		return nil
-	}
-
-	machine.Endpoint = endpoint
-	machine.Endpoint.ClusterCertificate = tfSchemaList["clustercertificate"].(string)
-	machine.Endpoint.ClusterURL = tfSchemaList["clusterurl"].(string)
-	machine.Endpoint.Namespace = tfSchemaList[constNamespace].(string)
-	machine.Endpoint.SkipTLSVerification = strconv.FormatBool(tfSchemaList["skiptlsverification"].(bool))
+	machine := octopusdeploy.NewDeploymentTarget(name, endpoint, environments, roles)
+	machine.TenantedDeploymentMode = deploymentMode
+	machine.IsDisabled = isDisabled
+	machine.MachinePolicyID = machinePolicy
+	machine.TenantIDs = tenantIDs
+	machine.TenantTags = tenantTags
+	machine.Thumbprint = tfSchemaList[constThumbprint].(string)
+	machine.URI = tfSchemaList[constURI].(string)
 
 	tfAuthenticationSchemaSetInterface, ok := tfSchemaList[constAuthentication]
 	if ok {
 		tfAuthenticationSchemaSet := tfAuthenticationSchemaSetInterface.(*schema.Set)
 		if len(tfAuthenticationSchemaSet.List()) == 1 {
 			// Get the first element in the list, which is a map of the interfaces
-			tfAuthenticationSchemaList := tfAuthenticationSchemaSet.List()[0].(map[string]interface{})
+			// tfAuthenticationSchemaList := tfAuthenticationSchemaSet.List()[0].(map[string]interface{})
 
-			machine.Endpoint.Authentication = &model.MachineEndpointAuthentication{
-				AccountID:          tfAuthenticationSchemaList["accountid"].(string),
-				ClientCertificate:  tfAuthenticationSchemaList["clientcertificate"].(string),
-				AuthenticationType: tfAuthenticationSchemaList["authenticationtype"].(string),
-			}
+			// machine.Endpoint.Authentication = &octopusdeploy.MachineEndpointAuthentication{
+			// 	AccountID:          tfAuthenticationSchemaList["accountid"].(string),
+			// 	ClientCertificate:  tfAuthenticationSchemaList["clientcertificate"].(string),
+			// 	AuthenticationType: tfAuthenticationSchemaList["authenticationtype"].(string),
+			// }
 		}
 	}
 
@@ -300,16 +318,16 @@ func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
 	machine := buildMachineResource(d)
 	machine.Status = "Unknown" // We don't want TF to attempt to update a machine just because its status has changed, so set it to Unknown on creation and let TF sort it out in the future.
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Machines.Add(machine)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Machines.Add(machine)
 	if err != nil {
 		return createResourceOperationError(errorCreatingMachine, machine.Name, err)
 	}
 
-	if isEmpty(resource.ID) {
+	if isEmpty(resource.GetID()) {
 		log.Println("ID is nil")
 	} else {
-		d.SetId(resource.ID)
+		d.SetId(resource.GetID())
 	}
 
 	setMachineProperties(d, resource)
@@ -320,8 +338,8 @@ func resourceMachineCreate(d *schema.ResourceData, m interface{}) error {
 func resourceMachineDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 
-	apiClient := m.(*client.Client)
-	err := apiClient.Machines.DeleteByID(id)
+	client := m.(*octopusdeploy.Client)
+	err := client.Machines.DeleteByID(id)
 	if err != nil {
 		return createResourceOperationError(errorDeletingMachine, id, err)
 	}
@@ -335,8 +353,8 @@ func resourceMachineUpdate(d *schema.ResourceData, m interface{}) error {
 	machine := buildMachineResource(d)
 	machine.ID = d.Id() // set ID so Octopus API knows which machine to update
 
-	apiClient := m.(*client.Client)
-	updatedMachine, err := apiClient.Machines.Update(*machine)
+	client := m.(*octopusdeploy.Client)
+	updatedMachine, err := client.Machines.Update(machine)
 	if err != nil {
 		return createResourceOperationError(errorUpdatingMachine, d.Id(), err)
 	}

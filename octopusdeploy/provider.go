@@ -1,46 +1,49 @@
 package octopusdeploy
 
 import (
-	"log"
+	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider is the plugin entry point
 func Provider() *schema.Provider {
-	log.Println("[INFO] Initializing Resource Provider")
 	return &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
-			constOctopusDeployProject:            dataProject(),
+			constOctopusDeployAccount:            dataAccount(),
+			constOctopusDeployAWSAccount:         dataAwsAccount(),
 			constOctopusDeployEnvironment:        dataEnvironment(),
-			constOctopusDeployVariable:           dataVariable(),
-			constOctopusDeployMachinePolicy:      dataMachinePolicy(),
-			constOctopusDeployMachine:            dataMachine(),
 			constOctopusDeployLibraryVariableSet: dataLibraryVariableSet(),
 			constOctopusDeployLifecycle:          dataLifecycle(),
+			constOctopusDeployMachine:            dataMachine(),
+			constOctopusDeployMachinePolicy:      dataMachinePolicy(),
+			constOctopusDeployProject:            dataProject(),
 			constOctopusDeployFeed:               dataFeed(),
-			constOctopusDeployAccount:            dataAccount(),
+			constOctopusDeployUser:               dataUser(),
+			constOctopusDeployVariable:           dataVariable(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			constOctopusDeployProject:                        resourceProject(),
-			constOctopusDeployProjectGroup:                   resourceProjectGroup(),
-			constOctopusDeployProjectDeploymentTargetTrigger: resourceProjectDeploymentTargetTrigger(),
+			constOctopusDeployAccount:                        resourceAccount(),
+			constOctopusDeployAWSAccount:                     resourceAmazonWebServicesAccount(),
+			constOctopusDeployAzureServicePrincipal:          resourceAzureServicePrincipal(),
+			constOctopusDeployCertificate:                    resourceCertificate(),
+			constOctopusDeployChannel:                        resourceChannel(),
+			constOctopusDeployDeploymentProcess:              resourceDeploymentProcess(),
 			constOctopusDeployEnvironment:                    resourceEnvironment(),
-			// constOctopusDeployAccount:                           resourceAccount(),
-			constOctopusDeployFeed:                    resourceFeed(),
-			constOctopusDeployVariable:                resourceVariable(),
-			constOctopusDeployMachine:                 resourceMachine(),
-			constOctopusDeployLibraryVariableSet:      resourceLibraryVariableSet(),
-			constOctopusDeployLifecycle:               resourceLifecycle(),
-			constOctopusDeployDeploymentProcess:       resourceDeploymentProcess(),
-			constOctopusDeployTagSet:                  resourceTagSet(),
-			constOctopusDeployCertificate:             resourceCertificate(),
-			constOctopusDeployChannel:                 resourceChannel(),
-			constOctopusDeployNuGetFeed:               resourceNugetFeed(),
-			constOctopusDeployAzureServicePrincipal:   resourceAzureServicePrincipal(),
-			constOctopusDeployUsernamePasswordAccount: resourceUsernamePassword(),
-			constOctopusDeploySSHKeyAccount:           resourceSSHKey(),
-			constOctopusDeployAWSAccount:              resourceAmazonWebServicesAccount(),
+			constOctopusDeployFeed:                           resourceFeed(),
+			constOctopusDeployLibraryVariableSet:             resourceLibraryVariableSet(),
+			constOctopusDeployLifecycle:                      resourceLifecycle(),
+			constOctopusDeployMachine:                        resourceMachine(),
+			constOctopusDeployProject:                        resourceProject(),
+			constOctopusDeployProjectDeploymentTargetTrigger: resourceProjectDeploymentTargetTrigger(),
+			constOctopusDeployProjectGroup:                   resourceProjectGroup(),
+			constOctopusDeployTagSet:                         resourceTagSet(),
+			constOctopusDeployNuGetFeed:                      resourceNugetFeed(),
+			constOctopusDeploySSHKeyAccount:                  resourceSSHKey(),
+			constOctopusDeployUsernamePasswordAccount:        resourceUsernamePassword(),
+			constOctopusDeployUser:                           resourceUser(),
+			constOctopusDeployVariable:                       resourceVariable(),
 		},
 		Schema: map[string]*schema.Schema{
 			constAddress: {
@@ -63,20 +66,16 @@ func Provider() *schema.Provider {
 			},
 		},
 
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	log.Println("[INFO] Parsing Client Configuration")
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := Config{
 		Address: d.Get(constAddress).(string),
 		APIKey:  d.Get(constAPIKey).(string),
 		Space:   d.Get(constSpaceID).(string),
 	}
 
-	log.Println("[INFO] Initializing Octopus Deploy client")
-	client, err := config.Client()
-
-	return client, err
+	return config.Client()
 }

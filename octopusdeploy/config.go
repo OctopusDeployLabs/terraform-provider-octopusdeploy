@@ -1,9 +1,10 @@
 package octopusdeploy
 
 import (
-	"log"
+	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 // Config holds Address and the APIKey of the Octopus Deploy server
@@ -14,14 +15,16 @@ type Config struct {
 }
 
 // Client returns a new Octopus Deploy client
-func (c *Config) Client() (*client.Client, error) {
-	apiClient, err := client.NewClient(nil, c.Address, c.APIKey, c.Space)
-
+func (c *Config) Client() (*octopusdeploy.Client, diag.Diagnostics) {
+	apiURL, err := url.Parse(c.Address)
 	if err != nil {
-		log.Println(err)
+		return nil, diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Octopus Deploy Client Ready")
+	client, err := octopusdeploy.NewClient(nil, apiURL, c.APIKey, c.Space)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
 
-	return apiClient, err
+	return client, nil
 }

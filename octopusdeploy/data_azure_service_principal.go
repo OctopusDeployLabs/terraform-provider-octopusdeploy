@@ -1,7 +1,9 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"fmt"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -67,23 +69,28 @@ func dataAzureServicePrincipal() *schema.Resource {
 }
 
 func dataAzureServicePrincipalReadByName(d *schema.ResourceData, m interface{}) error {
+	client := m.(*octopusdeploy.Client)
 	name := d.Get(constName).(string)
+	query := octopusdeploy.AccountsQuery{
+		PartialName: name,
+		Take:        1,
+	}
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Accounts.GetByName(name)
-
+	accounts, err := client.Accounts.Get(query)
 	if err != nil {
 		return createResourceOperationError(errorReadingAzureServicePrincipal, name, err)
 	}
-	if resource == nil {
-		return nil
+	if accounts == nil || len(accounts.Items) == 0 {
+		return fmt.Errorf("Unabled to retrieve account (partial name: %s)", name)
 	}
 
 	logResource(constAccount, m)
 
-	d.SetId(resource.ID)
-	d.Set(constName, resource.Name)
-	d.Set(constDescription, resource.Description)
+	account := accounts.Items[0].(*octopusdeploy.AzureServicePrincipalAccount)
+
+	d.SetId(account.GetID())
+	d.Set(constName, account.GetName())
+	d.Set(constDescription, account.Description)
 
 	return nil
 }

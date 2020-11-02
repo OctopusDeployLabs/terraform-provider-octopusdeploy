@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -28,21 +27,21 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 
 func testAccDeploymentProcessBasic() string {
 	return `
-		resource constOctopusDeployLifecycle "test" {
+		resource octopusdeploy_lifecycle "test" {
 			name = "Test Lifecycle"
 		}
 
-		resource constOctopusDeployProjectGroup "test" {
+		resource octopusdeploy_project_group "test" {
 			name = "Test Group"
 		}
 
-		resource constOctopusDeployProject "test" {
+		resource octopusdeploy_project "test" {
 			name             = "Test Project"
 			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
 			project_group_id = "${octopusdeploy_project_group.test.id}"
 		}
 
-		resource constOctopusDeployDeploymentProcess "test" {
+		resource octopusdeploy_deployment_process "test" {
 			project_id = "${octopusdeploy_project.test.id}"
 
 			step {
@@ -133,21 +132,21 @@ func testAccDeploymentProcessBasic() string {
 
 func testAccBuildTestAction(action string) string {
 	return fmt.Sprintf(`
-		resource constOctopusDeployLifecycle "test" {
+		resource octopusdeploy_lifecycle "test" {
 			name = "Test Lifecycle"
 		}
 
-		resource constOctopusDeployProjectGroup "test" {
+		resource octopusdeploy_project_group "test" {
 			name = "Test Group"
 		}
 
-		resource constOctopusDeployProject "test" {
+		resource octopusdeploy_project "test" {
 			name             = "Test Project"
 			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
 			project_group_id = "${octopusdeploy_project_group.test.id}"
 		}
 
-		resource constOctopusDeployDeploymentProcess "test" {
+		resource octopusdeploy_deployment_process "test" {
 			project_id = "${octopusdeploy_project.test.id}"
 
 			step {
@@ -161,7 +160,7 @@ func testAccBuildTestAction(action string) string {
 }
 
 func testAccCheckOctopusDeployDeploymentProcessDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 	if err := destroyProjectHelper(s, client); err != nil {
 		return err
@@ -177,7 +176,7 @@ func testAccCheckOctopusDeployDeploymentProcessDestroy(s *terraform.State) error
 
 func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 		process, err := getDeploymentProcess(s, client)
 		if err != nil {
@@ -198,7 +197,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 	}
 }
 
-func getDeploymentProcess(s *terraform.State, client *client.Client) (*model.DeploymentProcess, error) {
+func getDeploymentProcess(s *terraform.State, client *octopusdeploy.Client) (*octopusdeploy.DeploymentProcess, error) {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == constOctopusDeployDeploymentProcess {
 			return client.DeploymentProcesses.GetByID(r.Primary.ID)

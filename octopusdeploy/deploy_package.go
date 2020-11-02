@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/model"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -23,7 +23,7 @@ func getDeployPackageAction() *schema.Schema {
 	return actionSchema
 }
 
-func buildDeployPackageActionResource(tfAction map[string]interface{}) model.DeploymentAction {
+func buildDeployPackageActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 
 	action := buildDeploymentActionResource(tfAction)
 	action.ActionType = "Octopus.TentaclePackage"

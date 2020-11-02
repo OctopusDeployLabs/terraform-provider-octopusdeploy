@@ -1,7 +1,7 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -114,8 +114,8 @@ func dataMachine() *schema.Resource {
 func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 	name := d.Get(constName).(string)
 
-	apiClient := m.(*client.Client)
-	resource, err := apiClient.Machines.GetByName(name)
+	client := m.(*octopusdeploy.Client)
+	resource, err := client.Machines.GetByName(name)
 
 	if err != nil {
 		return createResourceOperationError(errorReadingMachine, name, err)
