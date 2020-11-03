@@ -7,6 +7,7 @@ First, you'll set up a `main.tf` configuration with multiple resources to create
 Below is the `main.tf` configuration to use.
 
 The below configuration will create:
+
 1. An Octopus Deploy environment
 2. Lifecycle
 3. ProjectGroup
@@ -16,10 +17,11 @@ The below configuration will create:
 7. Channel
 
 To test the output and see some resources that were created, the terminal will show at the end:
+
 1. The output of the new environment
 2. The output of the new lifecycle
 
-```
+```hcl
 provider "octopusdeploy" {
   address = var.serverURL
   apikey  = var.apiKey
@@ -92,7 +94,7 @@ Because you don't want to have to add in static values manually into the larger 
 
 All variables will have a type of `String` and won't have default values because you'll be passing in the values at runtime using a `terraform.tfvars` configuration file.
 
-```
+```hcl
 variable "serverURL" {
     type = string
 }
@@ -159,8 +161,8 @@ Finally, to pass in new values at runtime. You'll have a `terraform.tfvars` conf
 
 The values that you see below are placeholders. Feel free to add in your own values. If you don't have values certain parts, for example, the Azure Service Principle which requires a GUID, simply add in a random GUID.
 
-```
-serverURL = "https://mikelevanoctopus.octopus.app"
+```hcl
+serverURL = "https://octopus-cloud-or-server-uri"
 apiKey = "octous_deploy_api_key"
 space = "Default"
 accessKey = "aws_access_key"
