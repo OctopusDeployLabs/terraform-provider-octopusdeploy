@@ -1,86 +1,78 @@
 package octopusdeploy
 
 import (
-	"fmt"
-	"log"
+	"context"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceFeed() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceFeedCreate,
-		Read:   resourceFeedRead,
-		Update: resourceFeedUpdate,
-		Delete: resourceFeedDelete,
-
-		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			constFeedType: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			constFeedURI: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			constEnhancedMode: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			constDownloadAttempts: {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  5,
-			},
-			constDownloadRetryBackoffSeconds: {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  10,
-			},
-			constUsername: {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			constPassword: {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
-			},
+	schemaMap := map[string]*schema.Schema{
+		constName: {
+			Type:     schema.TypeString,
+			Required: true,
 		},
+		constFeedURI: {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		constEnhancedMode: {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		constDownloadAttempts: {
+			Type:     schema.TypeInt,
+			Optional: true,
+			Default:  5,
+		},
+		constDownloadRetryBackoffSeconds: {
+			Type:     schema.TypeInt,
+			Optional: true,
+			Default:  10,
+		},
+		constUsername: {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		constPassword: {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+	}
+	schemaMap[constFeedType] = getFeedTypeSchema()
+
+	return &schema.Resource{
+		CreateContext: resourceFeedCreate,
+		DeleteContext: resourceFeedDelete,
+		ReadContext:   resourceFeedRead,
+		Schema:        schemaMap,
+		UpdateContext: resourceFeedUpdate,
 	}
 }
 
-func resourceFeedRead(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-
+func resourceFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	feed, err := client.Feeds.GetByID(id)
-	if err != nil {
-		return createResourceOperationError(errorReadingFeed, id, err)
-	}
-	if feed == nil {
-		d.SetId(constEmptyString)
-		return nil
-	}
 
-	logResource(constFeed, m)
+	feedID := d.Id()
+	feed, err := client.Feeds.GetByID(feedID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	feedResource := feed.(*octopusdeploy.FeedResource)
 
-	d.Set(constName, feedResource.Name)
-	d.Set(constFeedType, feedResource.FeedType)
-	d.Set(constFeedURI, feedResource.FeedURI)
-	d.Set(constEnhancedMode, feedResource.EnhancedMode)
 	d.Set(constDownloadAttempts, feedResource.DownloadAttempts)
 	d.Set(constDownloadRetryBackoffSeconds, feedResource.DownloadRetryBackoffSeconds)
-	d.Set(constUsername, feedResource.Username)
+	d.Set(constEnhancedMode, feedResource.EnhancedMode)
+	d.Set(constFeedType, feedResource.FeedType)
+	d.Set(constFeedURI, feedResource.FeedURI)
+	d.Set(constName, feedResource.Name)
 	d.Set(constPassword, feedResource.Password)
+	d.Set(constUsername, feedResource.Username)
 
 	return nil
 }
@@ -131,33 +123,13 @@ func buildFeedResource(d *schema.ResourceData) *octopusdeploy.FeedResource {
 	return feedResource
 }
 
-func resourceFeedCreate(d *schema.ResourceData, m interface{}) error {
+func resourceFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	feedResource := buildFeedResource(d)
-	client := m.(*octopusdeploy.Client)
 
+	client := m.(*octopusdeploy.Client)
 	feed, err := client.Feeds.Add(feedResource)
 	if err != nil {
-		return createResourceOperationError(errorCreatingFeed, feedResource.Name, err)
-	}
-
-	if isEmpty(feed.GetID()) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(feed.GetID())
-	}
-
-	return nil
-}
-
-func resourceFeedUpdate(d *schema.ResourceData, m interface{}) error {
-	feedResource := buildFeedResource(d)
-	client := m.(*octopusdeploy.Client)
-
-	feedResource.ID = d.Id() // set ID so Octopus API knows which feed to update
-
-	feed, err := client.Feeds.Update(feedResource)
-	if err != nil {
-		return fmt.Errorf(errorUpdatingFeed, d.Id(), err.Error())
+		return diag.FromErr(err)
 	}
 
 	d.SetId(feed.GetID())
@@ -165,15 +137,31 @@ func resourceFeedUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceFeedDelete(d *schema.ResourceData, m interface{}) error {
+func resourceFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	feedResource := buildFeedResource(d)
+	feedResource.ID = d.Id()
+
+	client := m.(*octopusdeploy.Client)
+	feed, err := client.Feeds.Update(feedResource)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(feed.GetID())
+
+	return nil
+}
+
+func resourceFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	err := client.Feeds.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingFeed, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
+
 	return nil
 }

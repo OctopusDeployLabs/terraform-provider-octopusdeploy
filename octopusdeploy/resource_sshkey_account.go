@@ -1,68 +1,80 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceSSHKey() *schema.Resource {
 	schemaMap := getCommonAccountsSchema()
-
 	schemaMap[constUsername] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
 	schemaMap[constPassphrase] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
+		Optional:  true,
+		Sensitive: true,
+		Type:      schema.TypeString,
 	}
 	return &schema.Resource{
 		Create:        resourceSSHKeyCreate,
-		Read:          resourceSSHKeyRead,
+		ReadContext:   resourceSSHKeyRead,
 		Update:        resourceSSHKeyUpdate,
 		DeleteContext: resourceAccountDeleteCommon,
 		Schema:        schemaMap,
 	}
 }
 
-func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-
+func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	account, err := client.Accounts.GetByID(id)
+	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		return createResourceOperationError(errorReadingSSHKeyPair, id, err)
-	}
-	if account == nil {
-		d.SetId(constEmptyString)
-		return nil
+		return diag.FromErr(err)
 	}
 
-	logResource(constAccount, m)
+	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	accountResource := account.(*octopusdeploy.AccountResource)
+	account := accountResource.(*octopusdeploy.SSHKeyAccount)
 
-	d.Set(constName, accountResource.Name)
-	d.Set(constPassphrase, accountResource.PrivateKeyPassphrase)
-	d.Set(constTenants, accountResource.TenantIDs)
+	d.Set(constDescription, account.Description)
+	d.Set(constEnvironments, account.EnvironmentIDs)
+	d.Set(constName, account.GetName())
+	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentMode)
+	d.Set(constTenants, account.TenantIDs)
+	d.Set(constTenantTags, account.TenantTags)
+
+	// TODO: determine what to do here...
+	// d.Set(constPassphrase, account.PrivateKeyPassphrase)
+
+	d.SetId(account.GetID())
 
 	return nil
 }
 
 func buildSSHKeyResource(d *schema.ResourceData) (*octopusdeploy.SSHKeyAccount, error) {
-	name := d.Get(constName).(string)
-	username := d.Get(constUsername).(string)
-
-	password := d.Get(constPassword).(string)
-	if isEmpty(password) {
-		log.Println("Key is nil. Must add in a password")
+	var name string
+	if v, ok := d.GetOk(constName); ok {
+		name = v.(string)
 	}
 
-	secretKey := octopusdeploy.NewSensitiveValue(password)
+	var username string
+	if v, ok := d.GetOk(constUsername); ok {
+		username = v.(string)
+	}
 
-	account, err := octopusdeploy.NewSSHKeyAccount(name, username, secretKey)
+	var passphrase string
+	if v, ok := d.GetOk(constPassphrase); ok {
+		passphrase = v.(string)
+	}
+
+	account, err := octopusdeploy.NewSSHKeyAccount(name, username, octopusdeploy.NewSensitiveValue(passphrase))
 	if err != nil {
 		return nil, err
 	}
