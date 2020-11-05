@@ -5,24 +5,27 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployProjectGroupBasic(t *testing.T) {
-	const terraformNamePrefix = "octopusdeploy_project_group.foo"
-	const projectGroupName = "Funky Group"
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployProjectGroup + "." + localName
+
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployProjectGroupDestroy,
+		CheckDestroy: testProjectGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectGroupBasic(projectGroupName),
+				Config: testAccProjectGroupBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployProjectGroupExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, projectGroupName),
+					testProjectGroupExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
 			},
 		},
@@ -30,84 +33,83 @@ func TestAccOctopusDeployProjectGroupBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
-	const terraformNamePrefix = "octopusdeploy_project_group.foo"
-	const projectGroupName = "Funky Group"
-	const description = "I am a new group description"
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployProjectGroup + "." + localName
+
+	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployProjectGroupDestroy,
+		CheckDestroy: testProjectGroupDestroy,
 		Steps: []resource.TestStep{
 			// create projectgroup with no description
 			{
-				Config: testAccProjectGroupBasic(projectGroupName),
+				Config: testAccProjectGroupBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployProjectGroupExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, projectGroupName),
+					testProjectGroupExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
 			},
 			// create update it with a description
 			{
-				Config: testAccProjectGroupWithDescription(projectGroupName, description),
+				Config: testAccProjectGroupWithDescription(localName, name, description),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployProjectGroupExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, projectGroupName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, description),
+					testProjectGroupExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constDescription, description),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
 			},
 			// update again by remove its description
 			{
-				Config: testAccProjectGroupBasic(projectGroupName),
+				Config: testAccProjectGroupBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployProjectGroupExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, projectGroupName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, ""),
+					testProjectGroupExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constDescription, ""),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
 			},
 		},
 	})
 }
 
-func testAccProjectGroupBasic(name string) string {
-	return fmt.Sprintf(`
-		resource octopusdeploy_project_group "foo" {
-			name           = "%s"
-		  }
-		`,
-		name,
-	)
-}
-func testAccProjectGroupWithDescription(name, description string) string {
-	return fmt.Sprintf(`
-		resource octopusdeploy_project_group "foo" {
-			name           = "%s"
-			description    = "%s"
-		  }
-		`,
-		name, description,
-	)
+func testAccProjectGroupBasic(localName string, name string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		name = "%s"
+	}`, constOctopusDeployProjectGroup, localName, name)
 }
 
-func testAccCheckOctopusDeployProjectGroupDestroy(s *terraform.State) error {
+func testAccProjectGroupWithDescription(localName string, name string, description string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		name        = "%s"
+		description = "%s"
+	}`, constOctopusDeployProjectGroup, localName, name, description)
+}
+
+func testProjectGroupDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
-
-	if err := destroyHelperProjectGroup(s, client); err != nil {
-		return err
+	for _, rs := range s.RootModule().Resources {
+		projectGroupID := rs.Primary.ID
+		projectGroup, err := client.ProjectGroups.GetByID(projectGroupID)
+		if err == nil {
+			if projectGroup != nil {
+				return fmt.Errorf("project group (%s) still exists", rs.Primary.ID)
+			}
+		}
 	}
+
 	return nil
 }
 
-func testAccCheckOctopusDeployProjectGroupExists(n string) resource.TestCheckFunc {
+func testProjectGroupExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		if err := existsHelperProjectGroup(s, client); err != nil {
+		projectGroupID := s.RootModule().Resources[prefix].Primary.ID
+		if _, err := client.ProjectGroups.GetByID(projectGroupID); err != nil {
 			return err
 		}
+
 		return nil
 	}
 }
@@ -118,15 +120,6 @@ func destroyHelperProjectGroup(s *terraform.State, client *octopusdeploy.Client)
 			return fmt.Errorf("Received an error retrieving projectgroup %s", err)
 		}
 		return fmt.Errorf("projectgroup still exists")
-	}
-	return nil
-}
-
-func existsHelperProjectGroup(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.ProjectGroups.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("received an error retrieving projectgroup %s", err)
-		}
 	}
 	return nil
 }
