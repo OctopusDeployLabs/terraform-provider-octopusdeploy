@@ -5,99 +5,108 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployProjectBasic(t *testing.T) {
-	const terraformNamePrefix = "octopusdeploy_project.foo"
-	const projectName = "Funky Monkey"
-	const lifeCycleID = "Lifecycles-1"
-	const allowDeploymentsToNoTargets = constTrue
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployProject + "." + localName
+
+	allowDeploymentsToNoTargets := constTrue
+	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
+		CheckDestroy: testProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, allowDeploymentsToNoTargets),
+				Config: testAccProjectBasic(localName, name, allowDeploymentsToNoTargets, description),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, projectName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constLifecycleID, lifeCycleID),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constAllowDeploymentsToNoTargets, allowDeploymentsToNoTargets),
+					testAccCheckOctopusDeployProjectExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constAllowDeploymentsToNoTargets, allowDeploymentsToNoTargets),
+					resource.TestCheckResourceAttr(prefix, constDescription, description),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
 			},
 		},
 	})
 }
 
-//nolint:govet
 func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
-	return
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployProject + "." + localName
 
-	const terraformNamePrefix = "octopusdeploy_project.foo"
-	const projectName = "Funky Monkey"
-	const lifeCycleID = "Lifecycles-1"
-	const allowDeploymentsToNoTargets = constTrue
+	allowDeploymentsToNoTargets := constTrue
+	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testProjectDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
-			// create project with no description
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, allowDeploymentsToNoTargets),
+				Config: testAccProjectBasic(localName, name, allowDeploymentsToNoTargets, description),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, projectName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constLifecycleID, lifeCycleID),
+					testAccCheckOctopusDeployProjectExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constAllowDeploymentsToNoTargets, allowDeploymentsToNoTargets),
+					resource.TestCheckResourceAttr(prefix, constDescription, description),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
 			},
-			// create update it with a description + build steps
-			// update again by remove its description
 			{
-				Config: testAccProjectBasic(projectName, lifeCycleID, allowDeploymentsToNoTargets),
+				Config: testAccProjectBasic(localName, name, allowDeploymentsToNoTargets, description),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployProjectExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, projectName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constLifecycleID, lifeCycleID),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, ""),
-					resource.TestCheckNoResourceAttr(
-						terraformNamePrefix, "deployment_step.0.windows_service.0.step_name"),
-					resource.TestCheckNoResourceAttr(
-						terraformNamePrefix, "deployment_step.0.windows_service.1.step_name"),
-					resource.TestCheckNoResourceAttr(
-						terraformNamePrefix, "deployment_step.0.iis_website.0.step_name"),
+					testAccCheckOctopusDeployProjectExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constAllowDeploymentsToNoTargets, allowDeploymentsToNoTargets),
+					resource.TestCheckResourceAttr(prefix, constDescription, description),
+					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.0.step_name"),
+					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.1.step_name"),
+					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.iis_website.0.step_name"),
 				),
 			},
 		},
 	})
 }
 
-func testAccProjectBasic(name, lifeCycleID, allowDeploymentsToNoTargets string) string {
-	return fmt.Sprintf(`
-		resource octopusdeploy_project_group "foo" {
-			name = "Integration Test Project Group"
-		}
+func testAccProjectBasic(localName string, name string, allowDeploymentsToNoTargets string, description string) string {
+	lifecycleLocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
-		resource octopusdeploy_project "foo" {
-			name           = "%s"
-			lifecycle_id    = "%s"
-			project_group_id = "${octopusdeploy_project_group.foo.id}"
+	lifecycleID := "${" + constOctopusDeployLifecycle + "." + lifecycleLocalName + ".id}"
+	projectGroupID := "${" + constOctopusDeployProjectGroup + "." + projectGroupLocalName + ".id}"
+
+	return fmt.Sprintf(testAccLifecycleBasic(lifecycleLocalName, lifecycleName)+"\n"+
+		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
+		`resource "%s" "%s" {
 			allow_deployments_to_no_targets = "%s"
+			description                     = "%s"
+			lifecycle_id                    = "%s"
+			name                            = "%s"
+			project_group_id                = "%s"
+		}`, constOctopusDeployProject, localName, allowDeploymentsToNoTargets, description, lifecycleID, name, projectGroupID)
+}
+
+func testProjectDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		projectID := rs.Primary.ID
+		project, err := client.Projects.GetByID(projectID)
+		if err == nil {
+			if project != nil {
+				return fmt.Errorf("project (%s) still exists", rs.Primary.ID)
+			}
 		}
-		`,
-		name, lifeCycleID, allowDeploymentsToNoTargets,
-	)
+	}
+
+	return nil
 }
 
 func testAccCheckOctopusDeployProjectDestroy(s *terraform.State) error {
@@ -131,7 +140,7 @@ func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) erro
 
 func existsHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if r.Type == "octopus_deploy_project" {
+		if r.Type == constOctopusDeployProject {
 			if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {
 				return fmt.Errorf("Received an error retrieving project with ID %s: %s", r.Primary.ID, err)
 			}
