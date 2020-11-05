@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -12,10 +11,6 @@ import (
 
 func getCommonAccountsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		constName: {
-			Required: true,
-			Type:     schema.TypeString,
-		},
 		constDescription: {
 			Optional: true,
 			Type:     schema.TypeString,
@@ -26,6 +21,10 @@ func getCommonAccountsSchema() map[string]*schema.Schema {
 			},
 			Optional: true,
 			Type:     schema.TypeList,
+		},
+		constName: {
+			Required: true,
+			Type:     schema.TypeString,
 		},
 		constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
 		constTenants: {
@@ -70,30 +69,25 @@ func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (octopusdeploy.I
 	return accountResource, nil
 }
 
-func buildAccountResourceCommon(d *schema.ResourceData, accountType string) octopusdeploy.IAccount {
-	var account = octopusdeploy.NewAccountResource(d.Get(constName).(string), octopusdeploy.AccountType(accountType))
+func buildAccountResourceCommon(d *schema.ResourceData) *octopusdeploy.AccountResource {
+	name := d.Get(constName).(string)
+	accountType := d.Get(constAccountType).(string)
 
-	if account == nil {
-		log.Println(nameIsNil("buildAccountResourceCommon"))
+	var accountResource = octopusdeploy.NewAccountResource(name, octopusdeploy.AccountType(accountType))
+
+	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
+		accountResource.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk(constTenantTags); ok {
-		account.TenantTags = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
-		account.TenantedDeploymentMode = v.(octopusdeploy.TenantedDeploymentMode)
+		accountResource.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk(constTenants); ok {
-		account.TenantIDs = getSliceFromTerraformTypeList(v)
+		accountResource.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk(constTenantTags); ok {
-		account.TenantTags = getSliceFromTerraformTypeList(v)
-	}
-
-	return account
+	return accountResource
 }
 
 func resourceAccountCreateCommon(d *schema.ResourceData, m interface{}, account octopusdeploy.IAccount) error {
@@ -108,13 +102,14 @@ func resourceAccountCreateCommon(d *schema.ResourceData, m interface{}, account 
 	return nil
 }
 
-func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, accountResource *octopusdeploy.AccountResource) error {
+func resourceAccountUpdateCommon(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	accountResource := buildAccountResourceCommon(d)
 	accountResource.ID = d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	updatedAccount, err := client.Accounts.Update(accountResource)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingAccount, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(updatedAccount.GetID())
@@ -123,10 +118,10 @@ func resourceAccountUpdateCommon(d *schema.ResourceData, m interface{}, accountR
 }
 
 func resourceAccountDeleteCommon(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	accountID := d.Id()
+	id := d.Id()
 
 	client := m.(*octopusdeploy.Client)
-	err := client.Accounts.DeleteByID(accountID)
+	err := client.Accounts.DeleteByID(id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

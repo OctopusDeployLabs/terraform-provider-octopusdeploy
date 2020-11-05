@@ -29,36 +29,34 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 	}
 }
 
-func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*octopusdeploy.Client)
-
-	var diags diag.Diagnostics
-	accountID := d.Id()
-
-	account, err := client.Accounts.GetByID(accountID)
+func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	logResource(constAccount, meta)
+	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	accountResource := account.(*octopusdeploy.AccountResource)
+	account := accountResource.(*octopusdeploy.AmazonWebServicesAccount)
 
-	d.Set(constName, accountResource.Name)
-	d.Set(constTenants, accountResource.TenantIDs)
-	d.Set(constDescription, accountResource.Description)
-	d.Set(constEnvironments, accountResource.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, accountResource.TenantedDeploymentMode)
-	d.Set(constTenantTags, accountResource.TenantTags)
+	d.Set(constAccessKey, account.AccessKey)
+	d.Set(constDescription, account.Description)
+	d.Set(constEnvironments, account.EnvironmentIDs)
+	d.Set(constName, account.GetName())
+	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentMode)
+	d.Set(constTenants, account.TenantIDs)
+	d.Set(constTenantTags, account.TenantTags)
 
 	// TODO: determine what to do here...
-	// d.Set(constSecretKey, accountResource.SecretKey)
+	// d.Set(constSecretKey, account.SecretKey)
 
-	d.Set(constAccessKey, accountResource.AccessKey)
+	d.SetId(account.GetID())
 
-	d.SetId(accountID)
-
-	return diags
+	return nil
 }
 
 func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*octopusdeploy.AmazonWebServicesAccount, error) {
@@ -88,8 +86,6 @@ func buildAmazonWebServicesAccountResource(d *schema.ResourceData) (*octopusdepl
 }
 
 func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
 	amazonWebServicesAccount, err := buildAmazonWebServicesAccountResource(d)
 	if err != nil {
 		return diag.FromErr(err)
@@ -103,7 +99,7 @@ func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.Resou
 
 	d.SetId(account.GetID())
 
-	return diags
+	return nil
 }
 
 func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

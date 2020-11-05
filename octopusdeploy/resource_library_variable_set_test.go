@@ -99,7 +99,7 @@ func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) erro
 	if err := destroyHelperLibraryVariableSet(s, client); err != nil {
 		return err
 	}
-	if err := destroyEnvHelper(s, client); err != nil {
+	if err := testEnvironmentDestroy(s); err != nil {
 		return err
 	}
 	return nil

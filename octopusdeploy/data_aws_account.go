@@ -76,7 +76,7 @@ func dataAwsAccountReadByName(ctx context.Context, d *schema.ResourceData, m int
 
 	d.SetId(account.GetID())
 	d.Set(constAccessKey, account.AccessKey)
-	d.Set(constAccountType, account.AccountType)
+	d.Set(constAccountType, "AmazonWebServicesAccount")
 	d.Set(constDescription, account.Description)
 	d.Set(constEnvironments, account.EnvironmentIDs)
 	d.Set(constName, account.GetName())
