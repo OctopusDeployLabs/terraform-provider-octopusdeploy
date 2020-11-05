@@ -2,91 +2,93 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployTagSetBasic(t *testing.T) {
-	const tagSetPrefix = "octopusdeploy_tag_set.foo"
-	const tagSetName = "Testing one two three"
-	const tagName1 = "tagName1"
-	const tagName2 = "tagName2"
-	const tagColor1 = "#6e6e6e"
-	const tagColor2 = "#6e6e6f"
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployTagSet + "." + localName
+
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	tagColor := "#6e6e6e"
+	tagDescription := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	tagName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	tagSortOrder := acctest.RandIntRange(0, 10)
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testTagSetDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployTagSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testTagSettBasic(tagSetName, tagName1, tagColor1, tagName2, tagColor2),
 				Check: resource.ComposeTestCheckFunc(
-					testOctopusDeployTagSetExists(tagSetPrefix),
-					resource.TestCheckResourceAttr(
-						tagSetPrefix, constName, tagSetName),
-					resource.TestCheckResourceAttr(
-						tagSetPrefix, "tag.0.name", tagName1),
-					resource.TestCheckResourceAttr(
-						tagSetPrefix, "tag.0.color", tagColor1),
-					resource.TestCheckResourceAttr(
-						tagSetPrefix, "tag.1.name", tagName2),
-					resource.TestCheckResourceAttr(
-						tagSetPrefix, "tag.1.color", tagColor2),
+					testTagSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
+				Config: testTagSetMinimal(localName, name),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testTagSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "tag.0.color", tagColor),
+					resource.TestCheckResourceAttr(prefix, "tag.0.description", tagDescription),
+					resource.TestCheckResourceAttr(prefix, "tag.0.name", tagName),
+					resource.TestCheckResourceAttr(prefix, "tag.0.sort_order", strconv.Itoa(tagSortOrder)),
+				),
+				Config: testTagSetComplete(localName, name, tagColor, tagDescription, tagName, tagSortOrder),
 			},
 		},
 	})
 }
 
-func testTagSettBasic(name, tagName1 string, tagColor1 string, tagName2 string, tagColor2 string) string {
-	return fmt.Sprintf(`
-		resource octopusdeploy_tag_set "foo" {
-			name = "%s"
-			tag {
-				name = "%s"
-				color = "%s"
-			}
-			tag {
-				name = "%s"
-				color = "%s"
-			}
-		}
-		`,
-		name, tagName1, tagColor1, tagName2, tagColor2,
-	)
+func testTagSetMinimal(localName string, name string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		name = "%s"
+	}`, constOctopusDeployTagSet, localName, name)
 }
 
-func testOctopusDeployTagSetExists(n string) resource.TestCheckFunc {
+func testTagSetComplete(localName string, name string, tagColor string, tagDescription string, tagName string, tagSortOrder int) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		name = "%s"
+		tag {
+			color = "%s"
+			description = "%s"
+			name = "%s"
+			sort_order = "%v"
+		}
+	}`, constOctopusDeployTagSet, localName, name, tagColor, tagDescription, tagName, tagSortOrder)
+}
+
+func testTagSetExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		return existstagSetHelper(s, client)
-	}
-}
-
-func existstagSetHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.TagSets.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving tagSet %s", err)
+		tagSetID := s.RootModule().Resources[prefix].Primary.ID
+		if _, err := client.TagSets.GetByID(tagSetID); err != nil {
+			return err
 		}
+
+		return nil
 	}
-	return nil
 }
 
-func testOctopusDeployTagSetDestroy(s *terraform.State) error {
+func testTagSetDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
-	return destroytagSetHelper(s, client)
-}
-
-func destroytagSetHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.TagSets.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving tagSet %s", err)
+	for _, rs := range s.RootModule().Resources {
+		tagSetID := rs.Primary.ID
+		tagSet, err := client.TagSets.GetByID(tagSetID)
+		if err == nil {
+			if tagSet != nil {
+				return fmt.Errorf("tag set (%s) still exists", rs.Primary.ID)
+			}
 		}
-		return fmt.Errorf("TagSet still exists")
 	}
+
 	return nil
 }
