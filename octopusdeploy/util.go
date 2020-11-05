@@ -117,6 +117,25 @@ func getAccountTypeSchema() *schema.Schema {
 	}
 }
 
+func getFeedTypeSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		Default:  "None",
+		ValidateDiagFunc: validateValueFunc([]string{
+			"None",
+			"AwsElasticContainerRegistry",
+			"BuiltIn",
+			"Docker",
+			"GitHub",
+			"Helm",
+			"Maven",
+			"NuGet",
+			"OctopusProject",
+		}),
+	}
+}
+
 func getTenantedDeploymentSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeString,
