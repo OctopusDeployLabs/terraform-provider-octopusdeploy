@@ -11,72 +11,115 @@ import (
 func resourceUser() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceUserCreate,
+		DeleteContext: resourceUserDelete,
 		ReadContext:   resourceUserRead,
 		UpdateContext: resourceUserUpdate,
-		DeleteContext: resourceUserDelete,
 		Schema: map[string]*schema.Schema{
 			constCanPasswordBeEdited: {
-				Type:     schema.TypeBool,
 				Optional: true,
+				Type:     schema.TypeBool,
 			},
 			constDisplayName: {
-				Type:     schema.TypeString,
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constEmailAddress: {
-				Type:     schema.TypeString,
 				Optional: true,
+				Type:     schema.TypeString,
 			},
 			constIdentities: {
-				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Optional: true,
+				Type:     schema.TypeList,
 			},
 			constIsActive: {
-				Type:     schema.TypeBool,
 				Optional: true,
+				Type:     schema.TypeBool,
 			},
 			constIsRequestor: {
-				Type:     schema.TypeBool,
 				Optional: true,
+				Type:     schema.TypeBool,
 			},
 			constIsService: {
-				Type:     schema.TypeBool,
 				Optional: true,
+				Type:     schema.TypeBool,
 			},
 			constUsername: {
-				Type:     schema.TypeString,
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constPassword: {
-				Type:     schema.TypeString,
 				Optional: true,
+				Type:     schema.TypeString,
 			},
 		},
 	}
 }
 
-func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id := d.Id()
+func buildUser(d *schema.ResourceData) *octopusdeploy.User {
+	var username string
+	if v, ok := d.GetOk(constUsername); ok {
+		username = v.(string)
+	}
 
+	var displayName string
+	if v, ok := d.GetOk(constDisplayName); ok {
+		displayName = v.(string)
+	}
+
+	user := octopusdeploy.NewUser(username, displayName)
+
+	if v, ok := d.GetOk(constCanPasswordBeEdited); ok {
+		user.CanPasswordBeEdited = v.(bool)
+	}
+
+	if v, ok := d.GetOk(constEmailAddress); ok {
+		user.EmailAddress = v.(string)
+	}
+
+	if v, ok := d.GetOk(constIsActive); ok {
+		user.IsActive = v.(bool)
+	}
+
+	if v, ok := d.GetOk(constIsRequestor); ok {
+		user.IsRequestor = v.(bool)
+	}
+
+	if v, ok := d.GetOk(constIsService); ok {
+		user.IsService = v.(bool)
+	}
+
+	if v, ok := d.GetOk(constPassword); ok {
+		user.Password = v.(string)
+	}
+
+	return user
+}
+
+func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	user, err := client.Users.GetByID(id)
+	user, err := client.Users.GetByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
+	d.Set(constCanPasswordBeEdited, user.CanPasswordBeEdited)
+	d.Set(constDisplayName, user.DisplayName)
+	d.Set(constEmailAddress, user.EmailAddress)
+	d.Set(constIsActive, user.IsActive)
+	d.Set(constIsRequestor, user.IsRequestor)
+	d.Set(constIsService, user.IsService)
+	d.Set(constPassword, user.Password)
 	d.Set(constUsername, user.Username)
+	d.SetId(user.GetID())
 
 	return nil
 }
 
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	username := d.Get(constUsername).(string)
-	displayName := d.Get(constDisplayName).(string)
-
-	user := octopusdeploy.NewUser(username, displayName)
+	user := buildUser(d)
 
 	client := m.(*octopusdeploy.Client)
 	user, err := client.Users.Add(user)
@@ -90,13 +133,11 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	username := d.Get(constUsername).(string)
-	displayName := d.Get(constDisplayName).(string)
-	user := octopusdeploy.NewUser(username, displayName)
+	user := buildUser(d)
 	user.ID = d.Id()
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Users.Update(*user)
+	resource, err := client.Users.Update(user)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -107,10 +148,8 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	userID := d.Id()
-
 	client := m.(*octopusdeploy.Client)
-	err := client.Users.DeleteByID(userID)
+	err := client.Users.DeleteByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
