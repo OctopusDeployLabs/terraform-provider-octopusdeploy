@@ -5,112 +5,107 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployLifecycleBasic(t *testing.T) {
-	const terraformNamePrefix = "octopusdeploy_lifecycle.foo"
-	const lifecycleName = "Funky Cycle"
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployLifecycle + "." + localName
+
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLifecycleBasic(lifecycleName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, lifecycleName),
+					testAccCheckOctopusDeployLifecycleExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
+				Config: testAccLifecycleBasic(localName, name),
 			},
 		},
 	})
 }
 
 func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
-	const terraformNamePrefix = "octopusdeploy_lifecycle.foo"
-	const lifecycleName = "Funky Cycle"
-	const description = "I am a new lifecycle description"
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployLifecycle + "." + localName
+
+	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
 		Steps: []resource.TestStep{
-			// create projectgroup with no description
+			// create lifecycle with no description
 			{
-				Config: testAccLifecycleBasic(lifecycleName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, lifecycleName),
+					testAccCheckOctopusDeployLifecycleExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
+				Config: testAccLifecycleBasic(localName, name),
 			},
-			// create update it with a description
+			// update lifecycle with a description
 			{
-				Config: testAccLifecycleWithDescription(lifecycleName, description),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, lifecycleName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, description),
+					testAccCheckOctopusDeployLifecycleExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, constDescription, description),
 				),
+				Config: testAccLifecycleWithDescription(localName, name, description),
 			},
-			// update again by remove its description
+			// update lifecycle by removing its description
 			{
-				Config: testAccLifecycleBasic(lifecycleName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, lifecycleName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, ""),
+					testAccCheckOctopusDeployLifecycleExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, constDescription, ""),
 				),
+				Config: testAccLifecycleBasic(localName, name),
 			},
 		},
 	})
 }
 
 func TestAccOctopusDeployLifecycleComplex(t *testing.T) {
-	const terraformNamePrefix = "octopusdeploy_lifecycle.foo"
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployLifecycle + "." + localName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLifecycleComplex(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLifecycleExists(terraformNamePrefix),
+					testAccCheckOctopusDeployLifecycleExists(prefix),
 					testAccCheckOctopusDeployLifecyclePhaseCount("Funky Lifecycle", 2),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, "Funky Lifecycle"),
+					resource.TestCheckResourceAttr(prefix, constName, "Funky Lifecycle"),
 				),
+				Config: testAccLifecycleComplex(),
 			},
 		},
 	})
 }
 
-func testAccLifecycleBasic(name string) string {
-	return fmt.Sprintf(`
-		resource octopusdeploy_lifecycle "foo" {
-			name           = "%s"
-		  }
-		`,
-		name,
-	)
+func testAccLifecycleBasic(localName string, name string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		name = "%s"
+	}`, constOctopusDeployLifecycle, localName, name)
 }
-func testAccLifecycleWithDescription(name, description string) string {
-	return fmt.Sprintf(`
-		resource octopusdeploy_lifecycle "foo" {
-			name           = "%s"
-			description    = "%s"
-		  }
-		`,
-		name, description,
-	)
+
+func testAccLifecycleWithDescription(localName string, name string, description string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		description    = "%s"
+		name           = "%s"
+	}`, constOctopusDeployLifecycle, localName, description, name)
 }
 
 func testAccLifecycleComplex() string {
@@ -162,7 +157,7 @@ func testAccCheckOctopusDeployLifecycleDestroy(s *terraform.State) error {
 	if err := destroyHelperLifecycle(s, client); err != nil {
 		return err
 	}
-	if err := destroyEnvHelper(s, client); err != nil {
+	if err := testEnvironmentDestroy(s); err != nil {
 		return err
 	}
 	return nil
