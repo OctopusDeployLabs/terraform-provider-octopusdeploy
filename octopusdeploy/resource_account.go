@@ -88,9 +88,7 @@ func resourceAccount() *schema.Resource {
 func resourceAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*octopusdeploy.Client)
 
-	var diags diag.Diagnostics
 	accountID := d.Id()
-
 	account, err := client.Accounts.GetByID(accountID)
 	if err != nil {
 		return diag.FromErr(err)
@@ -121,7 +119,7 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 	}
 
-	return diags
+	return nil
 }
 
 func buildAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResource {
