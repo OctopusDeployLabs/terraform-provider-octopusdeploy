@@ -71,7 +71,10 @@ func resourceFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	d.Set(constFeedType, feedResource.FeedType)
 	d.Set(constFeedURI, feedResource.FeedURI)
 	d.Set(constName, feedResource.Name)
-	d.Set(constPassword, feedResource.Password)
+
+	// TODO
+	// d.Set(constPassword, feedResource.Password)
+
 	d.Set(constUsername, feedResource.Username)
 
 	return nil
