@@ -19,7 +19,7 @@ func TestAccOctopusDeployLifecycleBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
+		CheckDestroy: testLifecycleDestroy,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -40,7 +40,7 @@ func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
 	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
+		CheckDestroy: testLifecycleDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -78,18 +78,20 @@ func TestAccOctopusDeployLifecycleComplex(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	prefix := constOctopusDeployLifecycle + "." + localName
 
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(prefix),
-					testAccCheckOctopusDeployLifecyclePhaseCount("Funky Lifecycle", 2),
-					resource.TestCheckResourceAttr(prefix, constName, "Funky Lifecycle"),
+					testAccCheckOctopusDeployLifecyclePhaseCount(name, 2),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
-				Config: testAccLifecycleComplex(),
+				Config: testAccLifecycleComplex(localName, name),
 			},
 		},
 	})
@@ -103,52 +105,44 @@ func testAccLifecycleBasic(localName string, name string) string {
 
 func testAccLifecycleWithDescription(localName string, name string, description string) string {
 	return fmt.Sprintf(`resource "%s" "%s" {
-		description    = "%s"
-		name           = "%s"
+		description = "%s"
+		name        = "%s"
 	}`, constOctopusDeployLifecycle, localName, description, name)
 }
 
-func testAccLifecycleComplex() string {
-	return `
-        resource octopusdeploy_environment "Env1" {
-           name =  "LifecycleTestEnv1"        
-        }
+func testAccLifecycleComplex(localName string, name string) string {
+	environment1LocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	environment1Name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	environment2LocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	environment2Name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	environment3LocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	environment3Name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
-        resource octopusdeploy_environment "Env2" {
-           name =  "LifecycleTestEnv2"
-        }
-
- 		resource octopusdeploy_environment "Env3" {
-           name =  "LifecycleTestEnv3"
-        }
-
-        resource octopusdeploy_lifecycle "foo" {
-           name        = "Funky Lifecycle"
-           description = "Funky Lifecycle description"
-
-           release_retention_policy {
-               unit            = "Items"
-               quantity_to_keep = 2
-           }
-
-           tentacle_retention_policy {
-               unit            = "Days"
-               quantity_to_keep = 1
-           }
-
-           phase {
-               name = "P1"
-               minimum_environments_before_promotion = 2
-               is_optional_phase = true
-               automatic_deployment_targets = ["${octopusdeploy_environment.Env1.id}"]
-               optional_deployment_targets = ["${octopusdeploy_environment.Env2.id}"]
-           }
-
-           phase {
-               name = "P2"
-           }
-        }
-		`
+	return fmt.Sprintf(testEnvironmentMinimum(environment1LocalName, environment1Name)+"\n"+
+		testEnvironmentMinimum(environment2LocalName, environment2Name)+"\n"+
+		testEnvironmentMinimum(environment3LocalName, environment3Name)+"\n"+
+		`resource "%s" "%s" {
+			name        = "%s"
+			description = "Funky Lifecycle description"
+			release_retention_policy {
+				unit             = "Days"
+				quantity_to_keep = 2
+			}
+			tentacle_retention_policy {
+				unit             = "Days"
+				quantity_to_keep = 1
+			}
+			phase {
+				automatic_deployment_targets          = ["${octopusdeploy_environment.%s.id}"]
+				is_optional_phase                     = true
+				minimum_environments_before_promotion = 2
+				name                                  = "P1"
+				optional_deployment_targets           = ["${octopusdeploy_environment.%s.id}"]
+			}
+			phase {
+				name = "P2"
+			}
+	}`, constOctopusDeployLifecycle, localName, name, environment2LocalName, environment3LocalName)
 }
 
 func testAccCheckOctopusDeployLifecycleDestroy(s *terraform.State) error {
@@ -208,5 +202,20 @@ func existsHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) err
 			}
 		}
 	}
+	return nil
+}
+
+func testLifecycleDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		lifecycleID := rs.Primary.ID
+		lifecycle, err := client.Lifecycles.GetByID(lifecycleID)
+		if err == nil {
+			if lifecycle != nil {
+				return fmt.Errorf("lifecycle (%s) still exists", rs.Primary.ID)
+			}
+		}
+	}
+
 	return nil
 }
