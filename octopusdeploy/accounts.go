@@ -9,41 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func getCommonAccountsSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		constDescription: {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		constEnvironments: {
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		constName: {
-			Required: true,
-			Type:     schema.TypeString,
-		},
-		constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
-		constTenants: {
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		constTenantTags: {
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-	}
-}
-
 func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (octopusdeploy.IAccount, error) {
 	id := d.Id()
 
@@ -69,41 +34,20 @@ func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (octopusdeploy.I
 	return accountResource, nil
 }
 
-func buildAccountResourceCommon(d *schema.ResourceData) *octopusdeploy.AccountResource {
-	name := d.Get(constName).(string)
-	accountType := d.Get(constAccountType).(string)
-
-	var accountResource = octopusdeploy.NewAccountResource(name, octopusdeploy.AccountType(accountType))
-
-	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
-		accountResource.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
-	}
-
-	if v, ok := d.GetOk(constTenantTags); ok {
-		accountResource.TenantTags = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk(constTenants); ok {
-		accountResource.TenantIDs = getSliceFromTerraformTypeList(v)
-	}
-
-	return accountResource
-}
-
-func resourceAccountCreateCommon(d *schema.ResourceData, m interface{}, account octopusdeploy.IAccount) error {
+func resourceAccountCreateCommon(ctx context.Context, d *schema.ResourceData, m interface{}, account octopusdeploy.IAccount) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	account, err := client.Accounts.Add(account)
+	createdAccount, err := client.Accounts.Add(account)
 	if err != nil {
-		return createResourceOperationError(errorCreatingAccount, account.GetName(), err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(account.GetID())
+	d.SetId(createdAccount.GetID())
 
 	return nil
 }
 
 func resourceAccountUpdateCommon(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	accountResource := buildAccountResourceCommon(d)
+	accountResource := buildAccountResource(d)
 	accountResource.ID = d.Id()
 
 	client := m.(*octopusdeploy.Client)
@@ -118,10 +62,8 @@ func resourceAccountUpdateCommon(ctx context.Context, d *schema.ResourceData, m 
 }
 
 func resourceAccountDeleteCommon(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id := d.Id()
-
 	client := m.(*octopusdeploy.Client)
-	err := client.Accounts.DeleteByID(id)
+	err := client.Accounts.DeleteByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
