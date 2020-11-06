@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,15 +20,15 @@ func resourceSSHKey() *schema.Resource {
 		Type:      schema.TypeString,
 	}
 	return &schema.Resource{
-		Create:        resourceSSHKeyCreate,
-		ReadContext:   resourceSSHKeyRead,
-		Update:        resourceSSHKeyUpdate,
+		CreateContext: resourceSSHKeyAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
+		ReadContext:   resourceSSHKeyAccountRead,
 		Schema:        schemaMap,
+		UpdateContext: resourceSSHKeyAccountUpdate,
 	}
 }
 
-func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
@@ -58,7 +57,7 @@ func resourceSSHKeyRead(ctx context.Context, d *schema.ResourceData, m interface
 	return nil
 }
 
-func buildSSHKeyResource(d *schema.ResourceData) (*octopusdeploy.SSHKeyAccount, error) {
+func buildSSHKeyAccount(d *schema.ResourceData) (*octopusdeploy.SSHKeyAccount, error) {
 	var name string
 	if v, ok := d.GetOk(constName); ok {
 		name = v.(string)
@@ -94,41 +93,37 @@ func buildSSHKeyResource(d *schema.ResourceData) (*octopusdeploy.SSHKeyAccount, 
 	return account, nil
 }
 
-func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
-	account, err := buildSSHKeyResource(d)
+func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	account, err := buildSSHKeyAccount(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Accounts.Add(account)
+	sshKeyAccount, err := client.Accounts.Add(account)
 	if err != nil {
-		return createResourceOperationError(errorCreatingSSHKeyPair, account.Name, err)
+		diag.FromErr(err)
 	}
 
-	if isEmpty(resource.GetID()) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.GetID())
-	}
+	d.SetId(sshKeyAccount.GetID())
 
 	return nil
 }
 
-func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
-	account, err := buildSSHKeyResource(d)
+func resourceSSHKeyAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	account, err := buildSSHKeyAccount(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	account.ID = d.Id() // set ID so Octopus API knows which account to update
+	account.ID = d.Id()
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Accounts.Update(account)
+	updatedAccount, err := client.Accounts.Update(account)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingSSHKeyPair, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(resource.GetID())
+	d.SetId(updatedAccount.GetID())
 
 	return nil
 }
