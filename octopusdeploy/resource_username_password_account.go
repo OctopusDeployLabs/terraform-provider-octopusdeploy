@@ -31,28 +31,26 @@ func resourceUsernamePassword() *schema.Resource {
 }
 
 func resourceUsernamePasswordRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id := d.Id()
-
 	client := m.(*octopusdeploy.Client)
-	account, err := client.Accounts.GetByID(id)
+	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	logResource(constAccount, m)
-
-	accountResource := account.(*octopusdeploy.AccountResource)
-
-	d.Set(constDescription, accountResource.Description)
-	d.Set(constEnvironments, accountResource.EnvironmentIDs)
-	d.Set(constName, accountResource.Name)
-	d.Set(constUsername, accountResource.Username)
-
-	if accountResource.ApplicationPassword.HasValue {
-		if accountResource.ApplicationPassword.NewValue != nil {
-			d.Set(constPassword, accountResource.ApplicationPassword.NewValue)
-		}
+	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
 	}
+
+	account := accountResource.(*octopusdeploy.UsernamePasswordAccount)
+
+	d.Set(constDescription, account.Description)
+	d.Set(constEnvironments, account.EnvironmentIDs)
+	d.Set(constName, account.Name)
+	d.Set(constUsername, account.Username)
+
+	// TODO: determine how to persist this sensitive value
+	// d.Set(constPassword, account.Password)
 
 	return nil
 }
