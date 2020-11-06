@@ -1,87 +1,80 @@
 package octopusdeploy
 
 import (
-	"log"
+	"context"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	uuid "github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAzureServicePrincipal() *schema.Resource {
 	validateSchema()
-	schemaMap := getCommonAccountsSchema()
-	schemaMap[constClientID] = &schema.Schema{
+	resourceAzureServicePrincipalSchema := getCommonAccountsSchema()
+	resourceAzureServicePrincipalSchema[constClientID] = &schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 	}
-	schemaMap[constTenantID] = &schema.Schema{
+	resourceAzureServicePrincipalSchema[constTenantID] = &schema.Schema{
 		Type:     schema.TypeString,
 		Required: true,
 	}
-	schemaMap[constSubscriptionNumber] = &schema.Schema{
+	resourceAzureServicePrincipalSchema[constSubscriptionNumber] = &schema.Schema{
 		Type:             schema.TypeString,
 		Required:         true,
 		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
 	}
-	schemaMap[constKey] = &schema.Schema{
+	resourceAzureServicePrincipalSchema[constKey] = &schema.Schema{
 		Type:      schema.TypeString,
 		Required:  true,
 		Sensitive: true,
 	}
-	schemaMap[constAzureEnvironment] = &schema.Schema{
+	resourceAzureServicePrincipalSchema[constAzureEnvironment] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
-	schemaMap[constResourceManagementEndpointBaseURI] = &schema.Schema{
+	resourceAzureServicePrincipalSchema[constResourceManagementEndpointBaseURI] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
-	schemaMap[constActiveDirectoryEndpointBaseURI] = &schema.Schema{
+	resourceAzureServicePrincipalSchema[constActiveDirectoryEndpointBaseURI] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
+
 	return &schema.Resource{
-		Create:        resourceAzureServicePrincipalCreate,
-		Read:          resourceAzureServicePrincipalRead,
-		Update:        resourceAzureServicePrincipalUpdate,
+		CreateContext: resourceAzureServicePrincipalCreate,
 		DeleteContext: resourceAccountDeleteCommon,
-		Schema:        schemaMap,
+		ReadContext:   resourceAzureServicePrincipalRead,
+		Schema:        resourceAzureServicePrincipalSchema,
+		UpdateContext: resourceAzureServicePrincipalUpdate,
 	}
 }
 
 func buildAzureServicePrincipalResource(d *schema.ResourceData) (*octopusdeploy.AzureServicePrincipalAccount, error) {
 	name := d.Get(constName).(string)
-
 	password := d.Get(constKey).(string)
-	if isEmpty(password) {
-		log.Println("Key is nil. Must add in a password")
-	}
-
 	secretKey := octopusdeploy.NewSensitiveValue(password)
 
 	applicationID, err := uuid.Parse(d.Get(constClientID).(string))
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	tenantID, err := uuid.Parse(d.Get(constTenantID).(string))
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	subscriptionID, err := uuid.Parse(d.Get(constSubscriptionNumber).(string))
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	account, err := octopusdeploy.NewAzureServicePrincipalAccount(name, subscriptionID, tenantID, applicationID, secretKey)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -122,78 +115,70 @@ func buildAzureServicePrincipalResource(d *schema.ResourceData) (*octopusdeploy.
 	return account, nil
 }
 
-func resourceAzureServicePrincipalCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAzureServicePrincipalCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account, err := buildAzureServicePrincipalResource(d)
 	if err != nil {
-		log.Println(err)
-		return err
+		return diag.FromErr(err)
 	}
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Accounts.Add(account)
+	createdAccount, err := client.Accounts.Add(account)
 	if err != nil {
-		return createResourceOperationError(errorCreatingAzureServicePrincipal, account.GetName(), err)
+		return diag.FromErr(err)
 	}
 
-	if isEmpty(resource.GetID()) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.GetID())
-	}
+	d.SetId(createdAccount.GetID())
 
 	return nil
 }
 
-func resourceAzureServicePrincipalRead(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-
+func resourceAzureServicePrincipalRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Accounts.GetByID(id)
+	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		return createResourceOperationError(errorReadingAzureServicePrincipal, id, err)
-	}
-	if resource == nil {
-		d.SetId(constEmptyString)
-		return nil
+		return diag.FromErr(err)
 	}
 
-	logResource(constAccount, m)
+	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	accountResource := resource.(*octopusdeploy.AccountResource)
+	account := accountResource.(*octopusdeploy.AzureServicePrincipalAccount)
 
-	d.Set(constName, accountResource.Name)
-	d.Set(constDescription, accountResource.Description)
-	d.Set(constEnvironments, accountResource.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, accountResource.TenantedDeploymentMode)
-	d.Set(constTenantTags, accountResource.TenantTags)
-	d.Set(constClientID, accountResource.ApplicationID.String())
-	d.Set(constTenantID, accountResource.TenantID.String())
-	d.Set(constSubscriptionNumber, accountResource.SubscriptionID.String())
+	d.Set(constName, account.Name)
+	d.Set(constDescription, account.Description)
+	d.Set(constEnvironments, account.EnvironmentIDs)
+	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentMode)
+	d.Set(constTenantTags, account.TenantTags)
+	d.Set(constClientID, account.ApplicationID.String())
+	d.Set(constTenantID, account.TenantID.String())
+	d.Set(constSubscriptionNumber, account.SubscriptionID.String())
 
 	// TODO: determine what to do here...
-	// d.Set(constKey, accountResource.ApplicationPassword)
+	// d.Set(constKey, account.ApplicationPassword)
 
-	d.Set(constAzureEnvironment, accountResource.AzureEnvironment)
-	d.Set(constResourceManagementEndpointBaseURI, accountResource.ResourceManagerEndpoint)
-	d.Set(constActiveDirectoryEndpointBaseURI, accountResource.AuthenticationEndpoint)
+	d.Set(constAzureEnvironment, account.AzureEnvironment)
+	d.Set(constResourceManagementEndpointBaseURI, account.ResourceManagerEndpoint)
+	d.Set(constActiveDirectoryEndpointBaseURI, account.AuthenticationEndpoint)
 
 	return nil
 }
 
-func resourceAzureServicePrincipalUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAzureServicePrincipalUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account, err := buildAzureServicePrincipalResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	account.ID = d.Id() // set ID so Octopus API knows which account to update
+	account.ID = d.Id()
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Accounts.Update(account)
+	updatedAccount, err := client.Accounts.Update(account)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingAzureServicePrincipal, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(resource.GetID())
+	d.SetId(updatedAccount.GetID())
 
 	return nil
 }
