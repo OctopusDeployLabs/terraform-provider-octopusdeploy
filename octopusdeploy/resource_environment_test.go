@@ -33,18 +33,24 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, constName, name),
 					resource.TestCheckResourceAttr(prefix, constUseGuidedFailure, strconv.FormatBool(useGuidedFailure)),
 				),
-				Config: testEnvironmenttBasic(localName, name, description, allowDynamicInfrastructure, useGuidedFailure),
+				Config: testEnvironmentBasic(localName, name, description, allowDynamicInfrastructure, useGuidedFailure),
 			},
 		},
 	})
 }
 
-func testEnvironmenttBasic(localName string, name string, description string, allowDynamicInfrastructure bool, useGuidedFailure bool) string {
+func testEnvironmentMinimum(localName string, name string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		name = "%s"
+	}`, constOctopusDeployEnvironment, localName, name)
+}
+
+func testEnvironmentBasic(localName string, name string, description string, allowDynamicInfrastructure bool, useGuidedFailure bool) string {
 	return fmt.Sprintf(`resource "%s" "%s" {
 		allow_dynamic_infrastructure = "%v"
-		description    = "%s"
-		name           = "%s"
-		use_guided_failure = "%v"
+		description                  = "%s"
+		name                         = "%s"
+		use_guided_failure           = "%v"
 	}`, constOctopusDeployEnvironment, localName, allowDynamicInfrastructure, description, name, useGuidedFailure)
 }
 

@@ -10,45 +10,49 @@ import (
 )
 
 func resourceEnvironment() *schema.Resource {
+	resourceEnvironmentImporter := &schema.ResourceImporter{
+		StateContext: schema.ImportStatePassthroughContext,
+	}
+	resourceEnvironmentSchema := map[string]*schema.Schema{
+		constAllowDynamicInfrastructure: &schema.Schema{
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		constDescription: &schema.Schema{
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		constName: &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
+		},
+		constSortOrder: &schema.Schema{
+			Computed: true,
+			Type:     schema.TypeInt,
+		},
+		constUseGuidedFailure: &schema.Schema{
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+	}
+
 	return &schema.Resource{
 		CreateContext: resourceEnvironmentCreate,
 		DeleteContext: resourceEnvironmentDelete,
+		Importer:      resourceEnvironmentImporter,
 		ReadContext:   resourceEnvironmentRead,
+		Schema:        resourceEnvironmentSchema,
 		UpdateContext: resourceEnvironmentUpdate,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-		Schema: map[string]*schema.Schema{
-			constAllowDynamicInfrastructure: {
-				Default:  false,
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
-			constDescription: {
-				Optional: true,
-				Type:     schema.TypeString,
-			},
-			constName: {
-				Required:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringIsNotEmpty,
-			},
-			constSortOrder: {
-				Default:  -1,
-				Optional: true,
-				Type:     schema.TypeInt,
-			},
-			constUseGuidedFailure: {
-				Default:  false,
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
-		},
 	}
 }
 
 func buildEnvironmentResource(d *schema.ResourceData) *octopusdeploy.Environment {
-	name := d.Get(constName).(string)
+	var name string
+	if v, ok := d.GetOk(constName); ok {
+		name = v.(string)
+	}
+
 	environment := octopusdeploy.NewEnvironment(name)
 
 	if v, ok := d.GetOk(constAllowDynamicInfrastructure); ok {
@@ -70,26 +74,6 @@ func buildEnvironmentResource(d *schema.ResourceData) *octopusdeploy.Environment
 	return environment
 }
 
-func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id := d.Id()
-
-	client := m.(*octopusdeploy.Client)
-	environment, err := client.Environments.GetByID(id)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	logResource(constEnvironment, m)
-
-	d.Set(constAllowDynamicInfrastructure, environment.AllowDynamicInfrastructure)
-	d.Set(constDescription, environment.Description)
-	d.Set(constName, environment.Name)
-	d.Set(constSortOrder, environment.SortOrder)
-	d.Set(constUseGuidedFailure, environment.UseGuidedFailure)
-
-	return nil
-}
-
 func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	environment := buildEnvironmentResource(d)
 
@@ -99,8 +83,18 @@ func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	d.SetId(createdEnvironment.GetID())
+	updateEnvironmentState(ctx, d, createdEnvironment)
+	return nil
+}
 
+func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	environment, err := client.Environments.GetByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	updateEnvironmentState(ctx, d, environment)
 	return nil
 }
 
@@ -114,20 +108,26 @@ func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	d.SetId(updatedEnvironment.GetID())
-
+	updateEnvironmentState(ctx, d, updatedEnvironment)
 	return nil
 }
 
 func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id := d.Id()
-
 	client := m.(*octopusdeploy.Client)
-	err := client.Environments.DeleteByID(id)
+	err := client.Environments.DeleteByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
 	return nil
+}
+
+func updateEnvironmentState(ctx context.Context, d *schema.ResourceData, environment *octopusdeploy.Environment) {
+	d.Set(constAllowDynamicInfrastructure, environment.AllowDynamicInfrastructure)
+	d.Set(constDescription, environment.Description)
+	d.Set(constName, environment.Name)
+	d.Set(constSortOrder, environment.SortOrder)
+	d.Set(constUseGuidedFailure, environment.UseGuidedFailure)
+	d.SetId(environment.ID)
 }
