@@ -22,8 +22,16 @@ func resourceLifecycle() *schema.Resource {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		constPhase:                   getPhasesSchema(),
-		constReleaseRetentionPolicy:  getRetentionPeriodSchema(),
+		constPhase: {
+			Elem:     phaseSchema(),
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		constReleaseRetentionPolicy: getRetentionPeriodSchema(),
+		constSpaceID: {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
 		constTentacleRetentionPolicy: getRetentionPeriodSchema(),
 	}
 
@@ -69,52 +77,50 @@ func getRetentionPeriodSchema() *schema.Schema {
 	}
 }
 
-func getPhasesSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				constAutomaticDeploymentTargets: {
-					Description: "Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase",
-					Type:        schema.TypeList,
-					Optional:    true,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-				constID: {
-					Computed: true,
-					Type:     schema.TypeString,
-				},
-				constName: {
-					Type:     schema.TypeString,
-					Required: true,
-				},
-				constMinimumEnvironmentsBeforePromotion: {
-					Description: "The number of units required before a release can enter the next phase. If 0, all environments are required.",
-					Type:        schema.TypeInt,
-					Optional:    true,
-					Default:     0,
-				},
-				constIsOptionalPhase: {
-					Description: "If false a release must be deployed to this phase before it can be deployed to the next phase.",
-					Type:        schema.TypeBool,
-					Optional:    true,
-					Default:     false,
-				},
-				constOptionalDeploymentTargets: {
-					Description: "Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to",
-					Type:        schema.TypeList,
-					Optional:    true,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-				constReleaseRetentionPolicy:  getRetentionPeriodSchema(),
-				constTentacleRetentionPolicy: getRetentionPeriodSchema(),
+func phaseSchema() *schema.Resource {
+	phaseSchema := map[string]*schema.Schema{
+		constAutomaticDeploymentTargets: {
+			Description: "Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
 			},
+			Optional: true,
+			Type:     schema.TypeList,
 		},
+		constID: {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		constIsOptionalPhase: {
+			Default:     false,
+			Description: "If false a release must be deployed to this phase before it can be deployed to the next phase.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
+		constMinimumEnvironmentsBeforePromotion: {
+			Default:     0,
+			Description: "The number of units required before a release can enter the next phase. If 0, all environments are required.",
+			Optional:    true,
+			Type:        schema.TypeInt,
+		},
+		constName: {
+			Required: true,
+			Type:     schema.TypeString,
+		},
+		constOptionalDeploymentTargets: {
+			Description: "Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		constReleaseRetentionPolicy:  getRetentionPeriodSchema(),
+		constTentacleRetentionPolicy: getRetentionPeriodSchema(),
+	}
+
+	return &schema.Resource{
+		Schema: phaseSchema,
 	}
 }
 
@@ -143,6 +149,10 @@ func buildLifecycleResource(d *schema.ResourceData) *octopusdeploy.Lifecycle {
 		lifecycle.Description = v.(string)
 	}
 
+	if v, ok := d.GetOk(constSpaceID); ok {
+		lifecycle.SpaceID = v.(string)
+	}
+
 	releaseRetentionPolicy := getRetentionPeriod(d, constReleaseRetentionPolicy)
 	if releaseRetentionPolicy != nil {
 		lifecycle.ReleaseRetentionPolicy = *releaseRetentionPolicy
@@ -153,7 +163,7 @@ func buildLifecycleResource(d *schema.ResourceData) *octopusdeploy.Lifecycle {
 		lifecycle.TentacleRetentionPolicy = *tentacleRetentionPolicy
 	}
 
-	if attr, ok := d.GetOk(constPhase); ok {
+	if attr, ok := d.GetOk(constPhases); ok {
 		tfPhases := attr.([]interface{})
 
 		for _, tfPhase := range tfPhases {
@@ -172,8 +182,9 @@ func getRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.Reten
 		if len(retentionPeriod) == 1 {
 			tfRetentionItem := retentionPeriod[0].(map[string]interface{})
 			retention := octopusdeploy.RetentionPeriod{
-				Unit:           tfRetentionItem[constUnit].(string),
-				QuantityToKeep: int32(tfRetentionItem[constQuantityToKeep].(int)),
+				QuantityToKeep:    int32(tfRetentionItem[constQuantityToKeep].(int)),
+				ShouldKeepForever: tfRetentionItem[constShouldKeepForever].(bool),
+				Unit:              tfRetentionItem[constUnit].(string),
 			}
 			return &retention
 		}
@@ -184,10 +195,10 @@ func getRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.Reten
 
 func buildPhaseResource(tfPhase map[string]interface{}) octopusdeploy.Phase {
 	phase := octopusdeploy.Phase{
-		Name:                               tfPhase[constName].(string),
-		MinimumEnvironmentsBeforePromotion: int32(tfPhase[constMinimumEnvironmentsBeforePromotion].(int)),
-		IsOptionalPhase:                    tfPhase[constIsOptionalPhase].(bool),
 		AutomaticDeploymentTargets:         getSliceFromTerraformTypeList(tfPhase[constAutomaticDeploymentTargets]),
+		IsOptionalPhase:                    tfPhase[constIsOptionalPhase].(bool),
+		MinimumEnvironmentsBeforePromotion: int32(tfPhase[constMinimumEnvironmentsBeforePromotion].(int)),
+		Name:                               tfPhase[constName].(string),
 		OptionalDeploymentTargets:          getSliceFromTerraformTypeList(tfPhase[constOptionalDeploymentTargets]),
 	}
 
@@ -237,23 +248,39 @@ func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m inte
 	return nil
 }
 
-func flattenPhase(p octopusdeploy.Phase) []interface{} {
-	phase := make(map[string]interface{})
-	phase[constAutomaticDeploymentTargets] = p.AutomaticDeploymentTargets
-	phase[constID] = p.ID
-	phase[constIsOptionalPhase] = p.IsOptionalPhase
-	phase[constMinimumEnvironmentsBeforePromotion] = p.MinimumEnvironmentsBeforePromotion
-	phase[constName] = p.Name
-	phase[constOptionalDeploymentTargets] = p.OptionalDeploymentTargets
-	phase[constReleaseRetentionPolicy] = p.ReleaseRetentionPolicy
-	phase[constTentacleRetentionPolicy] = p.TentacleRetentionPolicy
-	return []interface{}{phase}
+func flattenStringArray(values []string) []interface{} {
+	s := make([]interface{}, len(values))
+	for i, v := range values {
+		s[i] = v
+	}
+	return s
+}
+
+func flattenPhases(phases []octopusdeploy.Phase) []interface{} {
+	flattenedPhases := make([]interface{}, 0)
+	for _, phase := range phases {
+		p := make(map[string]interface{})
+		p[constAutomaticDeploymentTargets] = flattenStringArray(phase.AutomaticDeploymentTargets)
+		p[constID] = phase.ID
+		p[constIsOptionalPhase] = phase.IsOptionalPhase
+		p[constMinimumEnvironmentsBeforePromotion] = int(phase.MinimumEnvironmentsBeforePromotion)
+		p[constName] = phase.Name
+		p[constOptionalDeploymentTargets] = flattenStringArray(phase.OptionalDeploymentTargets)
+		if phase.ReleaseRetentionPolicy != nil {
+			p[constReleaseRetentionPolicy] = flattenRetentionPeriod(*phase.ReleaseRetentionPolicy)
+		}
+		if phase.TentacleRetentionPolicy != nil {
+			p[constTentacleRetentionPolicy] = flattenRetentionPeriod(*phase.TentacleRetentionPolicy)
+		}
+		flattenedPhases = append(flattenedPhases, p)
+	}
+	return flattenedPhases
 }
 
 func flattenRetentionPeriod(r octopusdeploy.RetentionPeriod) []interface{} {
 	retentionPeriod := make(map[string]interface{})
 	retentionPeriod[constUnit] = r.Unit
-	retentionPeriod[constQuantityToKeep] = r.QuantityToKeep
+	retentionPeriod[constQuantityToKeep] = int(r.QuantityToKeep)
 	retentionPeriod[constShouldKeepForever] = r.ShouldKeepForever
 	return []interface{}{retentionPeriod}
 }
@@ -261,11 +288,8 @@ func flattenRetentionPeriod(r octopusdeploy.RetentionPeriod) []interface{} {
 func flattenLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *octopusdeploy.Lifecycle) {
 	d.Set(constDescription, lifecycle.Description)
 	d.Set(constName, lifecycle.Name)
-
-	for _, phase := range lifecycle.Phases {
-		d.Set(constPhase, flattenPhase(phase))
-	}
-
+	d.Set(constPhase, flattenPhases(lifecycle.Phases))
+	d.Set(constSpaceID, lifecycle.SpaceID)
 	d.Set(constReleaseRetentionPolicy, flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy))
 	d.Set(constTentacleRetentionPolicy, flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy))
 

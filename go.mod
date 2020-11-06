@@ -1,7 +1,7 @@
 module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20201104074852-ad2025ddd246
+	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20201106225944-de786ac1e947
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.34.13 // indirect

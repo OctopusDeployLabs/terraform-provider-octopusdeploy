@@ -18,8 +18,17 @@ func dataSourceLifecycle() *schema.Resource {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		constPhase:                   getPhasesSchema(),
-		constReleaseRetentionPolicy:  getRetentionPeriodSchema(),
+		constPhase: {
+			Elem:     phaseSchema(),
+			Optional: true,
+			Set:      schema.HashResource(phaseSchema()),
+			Type:     schema.TypeSet,
+		},
+		constReleaseRetentionPolicy: getRetentionPeriodSchema(),
+		constSpaceID: {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
 		constTentacleRetentionPolicy: getRetentionPeriodSchema(),
 	}
 
