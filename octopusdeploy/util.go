@@ -90,7 +90,7 @@ func isEmpty(s string) bool {
 }
 
 func logResource(name string, resource interface{}) {
-	log.Printf("[DEBUG] %s: %v", name, resource)
+	log.Printf("[DEBUG] %s: %#v", name, resource)
 }
 
 func getStringOrEmpty(tfAttr interface{}) string {
