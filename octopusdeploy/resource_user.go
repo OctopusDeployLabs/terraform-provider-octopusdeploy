@@ -26,11 +26,11 @@ func resourceUser() *schema.Resource {
 			Type:     schema.TypeString,
 		},
 		constIdentities: {
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
 			Optional: true,
-			Type:     schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: getIdentitiesSchema(),
+			},
+			Type: schema.TypeList,
 		},
 		constIsActive: {
 			Optional: true,
@@ -64,6 +64,15 @@ func resourceUser() *schema.Resource {
 	}
 }
 
+func getIdentitiesSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		constIdentityProviderName: {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+	}
+}
+
 func buildUser(d *schema.ResourceData) *octopusdeploy.User {
 	var username string
 	if v, ok := d.GetOk(constUsername); ok {
@@ -83,6 +92,10 @@ func buildUser(d *schema.ResourceData) *octopusdeploy.User {
 
 	if v, ok := d.GetOk(constEmailAddress); ok {
 		user.EmailAddress = v.(string)
+	}
+
+	if v, ok := d.GetOk(constIdentities); ok {
+		user.Identities = expandIdentities(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk(constIsActive); ok {
@@ -163,4 +176,26 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface
 	d.SetId(constEmptyString)
 
 	return nil
+}
+
+func expandClaims(claims []interface{}) map[string]octopusdeploy.IdentityClaim {
+	expandedClaims := make(map[string]octopusdeploy.IdentityClaim, len(claims))
+	// for _, value := range claims {
+	// 	identityClaim := octopusdeploy.IdentityClaim{}
+	// 	expandedClaims["email"] = identityClaim
+	// }
+	return expandedClaims
+}
+
+func expandIdentities(identities []interface{}) []octopusdeploy.Identity {
+	expandedIdentities := make([]octopusdeploy.Identity, 0, len(identities))
+	for _, identity := range identities {
+		rawIdentity := identity.(map[string]interface{})
+		i := octopusdeploy.Identity{
+			IdentityProviderName: rawIdentity["IdentityProviderName"].(string),
+			Claims:               expandClaims(rawIdentity["Claims"].([]interface{})),
+		}
+		expandedIdentities = append(expandedIdentities, i)
+	}
+	return expandedIdentities
 }
