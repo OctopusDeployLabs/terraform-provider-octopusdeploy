@@ -17,12 +17,12 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testLibraryVariableSetDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployLibraryVariableSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLibraryVariableSetBasic(localName, name),
+				Config: testLibraryVariableSetBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
 					resource.TestCheckResourceAttr(prefix, constName, name),
@@ -39,9 +39,9 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testLibraryVariableSetDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployLibraryVariableSetDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testLibraryVariableSetComplex(localName, name),
@@ -62,9 +62,9 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testLibraryVariableSetDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployLibraryVariableSetDestroy,
 		Steps: []resource.TestStep{
 			// create variable set with no description
 			{
@@ -72,7 +72,7 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
 					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
-				Config: testAccLibraryVariableSetBasic(localName, name),
+				Config: testLibraryVariableSetBasic(localName, name),
 			},
 			// create update it with a description
 			{
@@ -90,13 +90,13 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, constName, name),
 					resource.TestCheckResourceAttr(prefix, constDescription, ""),
 				),
-				Config: testAccLibraryVariableSetBasic(localName, name),
+				Config: testLibraryVariableSetBasic(localName, name),
 			},
 		},
 	})
 }
 
-func testAccLibraryVariableSetBasic(localName string, name string) string {
+func testLibraryVariableSetBasic(localName string, name string) string {
 	return fmt.Sprintf(`resource "%s" "%s" {
 		name = "%s"
 	}`, constOctopusDeployLibraryVariableSet, localName, name)
@@ -143,13 +143,8 @@ func testLibraryVariableSetComplex(localName string, name string) string {
 	}`, constOctopusDeployLibraryVariableSet, localName, name)
 }
 
-func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
-
-	if err := destroyHelperLibraryVariableSet(s, client); err != nil {
-		return err
-	}
-	if err := testEnvironmentDestroy(s); err != nil {
+func testLibraryVariableSetDestroy(s *terraform.State) error {
+	if err := destroyHelperLibraryVariableSet(s); err != nil {
 		return err
 	}
 	return nil
@@ -165,13 +160,18 @@ func testAccCheckOctopusDeployLibraryVariableSetExists(n string) resource.TestCh
 	}
 }
 
-func destroyHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.LibraryVariableSets.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving library variable set %s", err)
+func destroyHelperLibraryVariableSet(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		libraryVariableSetID := rs.Primary.ID
+		libraryVariableSet, err := client.LibraryVariableSets.GetByID(libraryVariableSetID)
+		if err == nil {
+			if libraryVariableSet != nil {
+				return fmt.Errorf("library variable set (%s) still exists", rs.Primary.ID)
+			}
 		}
-		return fmt.Errorf("library variable set still exists")
 	}
+
 	return nil
 }
 
