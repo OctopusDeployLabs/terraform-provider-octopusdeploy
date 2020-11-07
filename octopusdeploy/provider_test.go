@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"log"
 	"os"
 	"testing"
 
@@ -29,7 +28,6 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	log.Println("testAccPreCheck")
 	if v := os.Getenv("OCTOPUS_URL"); isEmpty(v) {
 		t.Fatal("OCTOPUS_URL must be set for acceptance tests")
 	}
