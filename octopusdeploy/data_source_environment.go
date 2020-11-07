@@ -10,25 +10,9 @@ import (
 
 func dataSourceEnvironment() *schema.Resource {
 	dataSourceEnvironmentSchema := map[string]*schema.Schema{
-		constAllowDynamicInfrastructure: &schema.Schema{
-			Computed: true,
-			Type:     schema.TypeBool,
-		},
-		constDescription: &schema.Schema{
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		constName: &schema.Schema{
+		constName: {
 			Required: true,
 			Type:     schema.TypeString,
-		},
-		constSortOrder: &schema.Schema{
-			Computed: true,
-			Type:     schema.TypeInt,
-		},
-		constUseGuidedFailure: &schema.Schema{
-			Computed: true,
-			Type:     schema.TypeBool,
 		},
 	}
 
