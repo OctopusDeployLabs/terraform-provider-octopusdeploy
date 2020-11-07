@@ -5,24 +5,27 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
-	const terraformNamePrefix = "octopusdeploy_library_variable_set.foo"
-	const libraryVariableSetName = "Funky Set"
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployLibraryVariableSet + "." + localName
+
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOctopusDeployLibraryVariableSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLibraryVariableSetBasic(libraryVariableSetName),
+				Config: testAccLibraryVariableSetBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLibraryVariableSetExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, libraryVariableSetName),
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
 			},
 		},
@@ -30,9 +33,12 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
-	const terraformNamePrefix = "octopusdeploy_library_variable_set.foo"
-	const libraryVariableSetName = "Funky Set"
-	const description = "I am a new set description"
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployLibraryVariableSet + "." + localName
+
+	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -40,57 +46,45 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// create variable set with no description
 			{
-				Config: testAccLibraryVariableSetBasic(libraryVariableSetName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLibraryVariableSetExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, libraryVariableSetName),
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
 				),
+				Config: testAccLibraryVariableSetBasic(localName, name),
 			},
 			// create update it with a description
 			{
-				Config: testAccLibraryVariableSetWithDescription(libraryVariableSetName, description),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLibraryVariableSetExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, libraryVariableSetName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, description),
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, constDescription, description),
 				),
+				Config: testAccLibraryVariableSetWithDescription(localName, name, description),
 			},
 			// update again by remove its description
 			{
-				Config: testAccLibraryVariableSetBasic(libraryVariableSetName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployLibraryVariableSetExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, libraryVariableSetName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, ""),
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, constDescription, ""),
 				),
+				Config: testAccLibraryVariableSetBasic(localName, name),
 			},
 		},
 	})
 }
 
-func testAccLibraryVariableSetBasic(name string) string {
-	return fmt.Sprintf(`
-		resource octopusdeploy_library_variable_set "foo" {
-			name           = "%s"
-		  }
-		`,
-		name,
-	)
+func testAccLibraryVariableSetBasic(localName string, name string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		name = "%s"
+	}`, constOctopusDeployLibraryVariableSet, localName, name)
 }
-func testAccLibraryVariableSetWithDescription(name, description string) string {
-	return fmt.Sprintf(`
-		resource octopusdeploy_library_variable_set "foo" {
-			name           = "%s"
-			description    = "%s"
-		  }
-		`,
-		name, description,
-	)
+
+func testAccLibraryVariableSetWithDescription(localName string, name string, description string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		name        = "%s"
+		description = "%s"
+	}`, constOctopusDeployLibraryVariableSet, localName, name, description)
 }
 
 func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) error {
@@ -127,7 +121,7 @@ func destroyHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.C
 
 func existsHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if r.Type == "octopusdeploy_libraryVariableSet" {
+		if r.Type == constOctopusDeployLibraryVariableSet {
 			if _, err := client.LibraryVariableSets.GetByID(r.Primary.ID); err != nil {
 				return fmt.Errorf("received an error retrieving library variable set %s", err)
 			}

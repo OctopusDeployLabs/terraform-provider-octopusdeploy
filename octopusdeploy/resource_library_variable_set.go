@@ -1,73 +1,105 @@
 package octopusdeploy
 
 import (
-	"log"
+	"context"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceLibraryVariableSet() *schema.Resource {
+	resourceLibraryVariableSetImporter := &schema.ResourceImporter{
+		StateContext: schema.ImportStatePassthroughContext,
+	}
+	resourceLibraryVariableSetSchema := map[string]*schema.Schema{
+		constDescription: {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		constName: {
+			Required: true,
+			Type:     schema.TypeString,
+		},
+		constSpaceID: {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		constTemplates: {
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: getTemplateSchema(),
+			},
+			Type: schema.TypeList,
+		},
+		constVariableSetID: {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+	}
+
 	return &schema.Resource{
-		Create: resourceLibraryVariableSetCreate,
-		Read:   resourceLibraryVariableSetRead,
-		Update: resourceLibraryVariableSetUpdate,
-		Delete: resourceLibraryVariableSetDelete,
+		CreateContext: resourceLibraryVariableSetCreate,
+		DeleteContext: resourceLibraryVariableSetDelete,
+		Importer:      resourceLibraryVariableSetImporter,
+		ReadContext:   resourceLibraryVariableSetRead,
+		Schema:        resourceLibraryVariableSetSchema,
+		UpdateContext: resourceLibraryVariableSetUpdate,
+	}
+}
 
-		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			constDescription: {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			constTemplates: getTemplatesSchema(),
+func getTemplateSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		constDefaultValue: {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		constDisplaySettings: {
+			Optional: true,
+			Type:     schema.TypeMap,
+		},
+		constHelpText: {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		constID: {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		constLabel: {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		constName: {
+			Required: true,
+			Type:     schema.TypeString,
 		},
 	}
 }
 
-func getTemplatesSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				constName: {
-					Type:     schema.TypeString,
-					Required: true,
-				},
-			},
-		},
-	}
-}
-
-func resourceLibraryVariableSetCreate(d *schema.ResourceData, m interface{}) error {
+func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	libraryVariableSet := buildLibraryVariableSetResource(d)
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.LibraryVariableSets.Add(libraryVariableSet)
+	createdLibraryVariableSet, err := client.LibraryVariableSets.Add(libraryVariableSet)
 	if err != nil {
-		return createResourceOperationError(errorCreatingLibraryVariableSet, libraryVariableSet.Name, err)
+		return diag.FromErr(err)
 	}
 
-	if isEmpty(resource.GetID()) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.GetID())
-	}
-
+	flattenLibraryVariableSet(ctx, d, createdLibraryVariableSet)
 	return nil
 }
 
 func buildLibraryVariableSetResource(d *schema.ResourceData) *octopusdeploy.LibraryVariableSet {
-	name := d.Get(constName).(string)
+	var name string
+	if v, ok := d.GetOk(constName); ok {
+		name = v.(string)
+	}
 
-	resource := octopusdeploy.NewLibraryVariableSet(name)
+	libraryVariableSet := octopusdeploy.NewLibraryVariableSet(name)
 
-	if attr, ok := d.GetOk(constDescription); ok {
-		resource.Description = attr.(string)
+	if v, ok := d.GetOk(constDescription); ok {
+		libraryVariableSet.Description = v.(string)
 	}
 
 	if attr, ok := d.GetOk(constTemplates); ok {
@@ -75,71 +107,85 @@ func buildLibraryVariableSetResource(d *schema.ResourceData) *octopusdeploy.Libr
 
 		for _, tfTemplate := range tfTemplates {
 			template := buildTemplateResource(tfTemplate.(map[string]interface{}))
-			resource.Templates = append(resource.Templates, &template)
+			libraryVariableSet.Templates = append(libraryVariableSet.Templates, template)
 		}
 	}
 
-	return resource
+	return libraryVariableSet
 }
 
-func buildTemplateResource(tfTemplate map[string]interface{}) octopusdeploy.ActionTemplateParameter {
-	resource := octopusdeploy.ActionTemplateParameter{
-		Name: tfTemplate[constName].(string),
-		DisplaySettings: map[string]string{
-			"Octopus.ControlType": "SingleLineText",
-		},
+func buildTemplateResource(tfTemplate map[string]interface{}) *octopusdeploy.ActionTemplateParameter {
+	actionTemplateParameter := octopusdeploy.NewActionTemplateParameter()
+
+	actionTemplateParameter.DefaultValue = &octopusdeploy.PropertyValueResource{
+		PropertyValue: tfTemplate[constDefaultValue].(*octopusdeploy.PropertyValue),
 	}
+	// actionTemplateParameter.DisplaySettings = tfTemplate[constHelpText].(string)
+	actionTemplateParameter.HelpText = tfTemplate[constHelpText].(string)
+	actionTemplateParameter.ID = tfTemplate[constID].(string)
+	actionTemplateParameter.Label = tfTemplate[constLabel].(string)
+	actionTemplateParameter.Name = tfTemplate[constName].(string)
 
-	return resource
+	return actionTemplateParameter
 }
 
-func resourceLibraryVariableSetRead(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-
+func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.LibraryVariableSets.GetByID(id)
+	libraryVariableSet, err := client.LibraryVariableSets.GetByID(d.Id())
 	if err != nil {
-		return createResourceOperationError(errorReadingLibraryVariableSet, id, err)
-	}
-	if resource == nil {
-		d.SetId(constEmptyString)
-		return nil
+		return diag.FromErr(err)
 	}
 
-	logResource(constLibraryVariableSet, m)
-
-	d.Set(constName, resource.Name)
-	d.Set(constDescription, resource.Description)
-	d.Set(constVariableSetID, resource.VariableSetID)
-
+	flattenLibraryVariableSet(ctx, d, libraryVariableSet)
 	return nil
 }
 
-func resourceLibraryVariableSetUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	libraryVariableSet := buildLibraryVariableSetResource(d)
-	libraryVariableSet.ID = d.Id() // set ID so Octopus API knows which library variable set to update
+	libraryVariableSet.ID = d.Id()
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.LibraryVariableSets.Update(libraryVariableSet)
+	updatedLibraryVariableSet, err := client.LibraryVariableSets.Update(libraryVariableSet)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingLibraryVariableSet, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(resource.GetID())
-
+	flattenLibraryVariableSet(ctx, d, updatedLibraryVariableSet)
 	return nil
 }
 
-func resourceLibraryVariableSetDelete(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-
+func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	err := client.LibraryVariableSets.DeleteByID(id)
+	err := client.LibraryVariableSets.DeleteByID(d.Id())
 	if err != nil {
-		return createResourceOperationError(errorDeletingLibraryVariableSet, id, err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(constEmptyString)
-
 	return nil
+}
+
+func flattenActionTemplateParameters(actionTemplateParameters []*octopusdeploy.ActionTemplateParameter) []interface{} {
+	flattenedActionTemplateParameters := make([]interface{}, 0)
+	for _, actionTemplateParameter := range actionTemplateParameters {
+		a := make(map[string]interface{})
+		a[constDefaultValue] = actionTemplateParameter.DefaultValue.PropertyValue
+		a[constDisplaySettings] = actionTemplateParameter.DisplaySettings
+		a[constHelpText] = actionTemplateParameter.HelpText
+		a[constID] = actionTemplateParameter.ID
+		a[constLabel] = actionTemplateParameter.Label
+		a[constName] = actionTemplateParameter.Name
+		flattenedActionTemplateParameters = append(flattenedActionTemplateParameters, a)
+	}
+	return flattenedActionTemplateParameters
+}
+
+func flattenLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryVariableSet *octopusdeploy.LibraryVariableSet) {
+	d.Set(constDescription, libraryVariableSet.Description)
+	d.Set(constName, libraryVariableSet.Name)
+	d.Set(constSpaceID, libraryVariableSet.SpaceID)
+	d.Set(constVariableSetID, libraryVariableSet.VariableSetID)
+	d.Set(constTemplates, flattenActionTemplateParameters(libraryVariableSet.Templates))
+
+	d.SetId(libraryVariableSet.GetID())
 }
