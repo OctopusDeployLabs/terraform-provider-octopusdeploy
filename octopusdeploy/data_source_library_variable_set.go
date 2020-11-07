@@ -5,10 +5,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataLibraryVariableSet() *schema.Resource {
+func dataSourceLibraryVariableSet() *schema.Resource {
 	return &schema.Resource{
-		Read: dataLibraryVariableSetReadByName,
-
+		Read: dataSourceLibraryVariableSetReadByName,
 		Schema: map[string]*schema.Schema{
 			constName: {
 				Type:     schema.TypeString,
@@ -18,7 +17,7 @@ func dataLibraryVariableSet() *schema.Resource {
 	}
 }
 
-func dataLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) error {
+func dataSourceLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) error {
 	name := d.Get(constName).(string)
 
 	client := m.(*octopusdeploy.Client)
