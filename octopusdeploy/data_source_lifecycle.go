@@ -10,26 +10,10 @@ import (
 
 func dataSourceLifecycle() *schema.Resource {
 	dataSourceLifecycleSchema := map[string]*schema.Schema{
-		constDescription: &schema.Schema{
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		constName: &schema.Schema{
+		constName: {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		constPhase: {
-			Elem:     phaseSchema(),
-			Optional: true,
-			Set:      schema.HashResource(phaseSchema()),
-			Type:     schema.TypeSet,
-		},
-		constReleaseRetentionPolicy: getRetentionPeriodSchema(),
-		constSpaceID: {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		constTentacleRetentionPolicy: getRetentionPeriodSchema(),
 	}
 
 	return &schema.Resource{
