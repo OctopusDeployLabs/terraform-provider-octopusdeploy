@@ -62,7 +62,6 @@ const (
 	constEndpointThumbprint                          string = "endpoint_thumbprint"
 	constEndpointURI                                 string = "endpoint_uri"
 	constEnhancedMode                                string = "enhanced_mode"
-	constEnvironment                                 string = "environment"
 	constEnvironmentIDs                              string = "environment_ids"
 	constEnvironments                                string = "environments"
 	constExcludedEnvironments                        string = "excluded_environments"

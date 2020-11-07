@@ -2,18 +2,9 @@ package octopusdeploy
 
 const (
 	errorAccountNotFound string = "account %s not found"
-	errorCreatingAccount string = "error creating account %s: %s"
-	errorDeletingAccount string = "error deleting account ID %s: %s"
 	errorReadingAccount  string = "error reading account %s: %s"
-	errorUpdatingAccount string = "error updating account ID %s: %s"
 
-	errorCreatingAWSAccount string = "error creating AWS account %s: %s"
-	errorReadingAWSAccount  string = "error reading AWS account %s: %s"
-	errorUpdatingAWSAccount string = "error updating AWS account ID %s: %s"
-
-	errorCreatingAzureServicePrincipal string = "error creating Azure service principal %s: %s"
-	errorReadingAzureServicePrincipal  string = "error reading Azure service principal %s: %s"
-	errorUpdatingAzureServicePrincipal string = "error updating Azure service principal ID %s: %s"
+	errorReadingAzureServicePrincipal string = "error reading Azure service principal %s: %s"
 
 	errorCreatingCertificate string = "error creating certificate %s: %s"
 	errorDeletingCertificate string = "error deleting certificate ID %s: %s"
@@ -30,25 +21,9 @@ const (
 	errorReadingDeploymentProcess  string = "error reading deployment process %s: %s"
 	errorUpdatingDeploymentProcess string = "error updating deployment process ID %s: %s"
 
-	errorCreatingEnvironment string = "error creating environment %s: %s"
-	errorDeletingEnvironment string = "error deleting environment ID %s: %s"
-	errorReadingEnvironment  string = "error reading environment %s: %s"
-	errorUpdatingEnvironment string = "error updating environment ID %s: %s"
+	errorReadingFeed string = "error reading feed %s: %s"
 
-	errorCreatingFeed string = "error creating feed %s: %s"
-	errorDeletingFeed string = "error deleting feed ID %s: %s"
-	errorReadingFeed  string = "error reading feed %s: %s"
-	errorUpdatingFeed string = "error updating feed ID %s: %s"
-
-	errorCreatingLibraryVariableSet string = "error creating library variable set: %s"
-	errorDeletingLibraryVariableSet string = "error deleting library variable set ID %s: %s"
-	errorReadingLibraryVariableSet  string = "error reading library variable set %s: %s"
-	errorUpdatingLibraryVariableSet string = "error updating library variable set ID %s: %s"
-
-	errorCreatingLifecycle string = "error creating lifecycle: %s"
-	errorDeletingLifecycle string = "error deleting lifecycle ID %s: %s"
-	errorReadingLifecycle  string = "error reading lifecycle %s: %s"
-	errorUpdatingLifecycle string = "error updating lifecycle ID %s: %s"
+	errorReadingLibraryVariableSet string = "error reading library variable set %s: %s"
 
 	errorCreatingNuGetFeed string = "error creating NuGet feed %s: %s"
 	errorDeletingNuGetFeed string = "error deleting NuGet feed ID %s: %s"
@@ -77,19 +52,7 @@ const (
 	errorReadingProjectTrigger  string = "error reading project trigger %s: %s"
 	errorUpdatingProjectTrigger string = "error updating project trigger ID %s: %s"
 
-	errorCreatingSSHKeyPair string = "error creating SSH key pair %s: %s"
-	errorReadingSSHKeyPair  string = "error reading SSH key pair %s: %s"
-	errorUpdatingSSHKeyPair string = "error updating SSH key pair ID %s: %s"
-
-	errorCreatingTagSet string = "error creating tag set %s: %s"
-	errorDeletingTagSet string = "error deleting tag set ID %s: %s"
-	errorReadingTagSet  string = "error reading tag set %s: %s"
-	errorUpdatingTagSet string = "error updating tag set ID %s: %s"
-
-	errorCreatingUsernamePasswordAccount string = "error creating username password account %s: %s"
-	/* #nosec */
-	errorReadingUsernamePasswordAccount  string = "error reading username password account %s: %s"
-	errorUpdatingUsernamePasswordAccount string = "error updating username password account ID %s: %s"
+	errorReadingTagSet string = "error reading tag set %s: %s"
 
 	errorCreatingVariable string = "error creating variable %s: %s"
 	errorDeletingVariable string = "error deleting variable ID %s: %s"
