@@ -40,6 +40,7 @@ const (
 	constCustomAccountName              string = "custom_account_name"
 	constCustomAccountPassword          string = "custom_account_password"
 	constDefaultFailureMode             string = "default_failure_mode"
+	constDefaultValue                   string = "default_value"
 	constDependencies                   string = "dependencies"
 	/* #nosec */
 	constDeployKubernetesSecretAction                string = "deploy_kubernetes_secret_action"
@@ -49,6 +50,7 @@ const (
 	constDescription                                 string = "description"
 	constDiscreteChannelRelease                      string = "discrete_channel_release"
 	constDisplayName                                 string = "display_name"
+	constDisplaySettings                             string = "display_settings"
 	constDownloadAttempts                            string = "download_attempts"
 	constDownloadRetryBackoffSeconds                 string = "download_retry_backoff_seconds"
 	constEmptyString                                 string = ""
@@ -72,6 +74,7 @@ const (
 	constFeedID                                      string = "feed_id"
 	constFeedType                                    string = "feed_type"
 	constFeedURI                                     string = "feed_uri"
+	constHelpText                                    string = "help_text"
 	constID                                          string = "id"
 	constIdentities                                  string = "identities"
 	constIsActive                                    string = "is_active"
