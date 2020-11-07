@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataUser() *schema.Resource {
+func dataSourceUser() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataUserReadByName,
+		ReadContext: dataSourceUserReadByName,
 		Schema: map[string]*schema.Schema{
 			constName: {
 				Type:     schema.TypeString,
@@ -21,7 +21,7 @@ func dataUser() *schema.Resource {
 	}
 }
 
-func dataUserReadByName(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceUserReadByName(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*octopusdeploy.Client)
 	username := d.Get(constUsername).(string)
 	query := octopusdeploy.UsersQuery{

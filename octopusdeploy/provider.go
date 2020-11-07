@@ -22,7 +22,7 @@ func Provider() *schema.Provider {
 			constOctopusDeployProject:            dataProject(),
 			constOctopusDeploySpace:              dataSpace(),
 			constOctopusDeployTokenAccount:       dataSourceTokenAccount(),
-			constOctopusDeployUser:               dataUser(),
+			constOctopusDeployUser:               dataSourceUser(),
 			constOctopusDeployVariable:           dataVariable(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
