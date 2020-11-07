@@ -25,8 +25,8 @@ func resourceLibraryVariableSet() *schema.Resource {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		constTemplates: {
-			Computed: true,
+		constTemplate: {
+			Optional: true,
 			Elem: &schema.Resource{
 				Schema: getTemplateSchema(),
 			},
@@ -102,7 +102,7 @@ func buildLibraryVariableSetResource(d *schema.ResourceData) *octopusdeploy.Libr
 		libraryVariableSet.Description = v.(string)
 	}
 
-	if attr, ok := d.GetOk(constTemplates); ok {
+	if attr, ok := d.GetOk(constTemplate); ok {
 		tfTemplates := attr.([]interface{})
 
 		for _, tfTemplate := range tfTemplates {
@@ -117,10 +117,11 @@ func buildLibraryVariableSetResource(d *schema.ResourceData) *octopusdeploy.Libr
 func buildTemplateResource(tfTemplate map[string]interface{}) *octopusdeploy.ActionTemplateParameter {
 	actionTemplateParameter := octopusdeploy.NewActionTemplateParameter()
 
+	propertyValue := octopusdeploy.PropertyValue(tfTemplate[constDefaultValue].(string))
 	actionTemplateParameter.DefaultValue = &octopusdeploy.PropertyValueResource{
-		PropertyValue: tfTemplate[constDefaultValue].(*octopusdeploy.PropertyValue),
+		PropertyValue: &propertyValue,
 	}
-	// actionTemplateParameter.DisplaySettings = tfTemplate[constHelpText].(string)
+	actionTemplateParameter.DisplaySettings = flattenDisplaySettings(tfTemplate[constDisplaySettings].(map[string]interface{}))
 	actionTemplateParameter.HelpText = tfTemplate[constHelpText].(string)
 	actionTemplateParameter.ID = tfTemplate[constID].(string)
 	actionTemplateParameter.Label = tfTemplate[constLabel].(string)
@@ -180,12 +181,20 @@ func flattenActionTemplateParameters(actionTemplateParameters []*octopusdeploy.A
 	return flattenedActionTemplateParameters
 }
 
+func flattenDisplaySettings(displaySettings map[string]interface{}) map[string]string {
+	flattenedDisplaySettings := make(map[string]string, len(displaySettings))
+	for key, displaySetting := range displaySettings {
+		flattenedDisplaySettings[key] = displaySetting.(string)
+	}
+	return flattenedDisplaySettings
+}
+
 func flattenLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryVariableSet *octopusdeploy.LibraryVariableSet) {
 	d.Set(constDescription, libraryVariableSet.Description)
 	d.Set(constName, libraryVariableSet.Name)
 	d.Set(constSpaceID, libraryVariableSet.SpaceID)
 	d.Set(constVariableSetID, libraryVariableSet.VariableSetID)
-	d.Set(constTemplates, flattenActionTemplateParameters(libraryVariableSet.Templates))
+	d.Set(constTemplate, flattenActionTemplateParameters(libraryVariableSet.Templates))
 
 	d.SetId(libraryVariableSet.GetID())
 }

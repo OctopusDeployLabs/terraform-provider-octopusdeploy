@@ -32,6 +32,28 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 	})
 }
 
+func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := constOctopusDeployLibraryVariableSet + "." + localName
+
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckOctopusDeployLibraryVariableSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testLibraryVariableSetComplex(localName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, constName, name),
+				),
+			},
+		},
+	})
+}
+
 func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	prefix := constOctopusDeployLibraryVariableSet + "." + localName
@@ -85,6 +107,40 @@ func testAccLibraryVariableSetWithDescription(localName string, name string, des
 		name        = "%s"
 		description = "%s"
 	}`, constOctopusDeployLibraryVariableSet, localName, name, description)
+}
+
+func testLibraryVariableSetComplex(localName string, name string) string {
+	return fmt.Sprintf(`resource "%s" "%s" {
+		description     = "This is the description."
+		name            = "%s"
+		template {
+			default_value    = "Default Value???"
+			display_settings = {
+				"Octopus.ControlType" = "SingleLineText"
+			}
+			help_text        = "This is the help text"
+			label            = "Test Label"
+			name             = "Test Template"
+		}
+		template {
+			default_value    = "wjehqwjkehwqkejhqwe"
+			display_settings = {
+				"Octopus.ControlType" = "MultiLineText"
+			}
+			help_text        = "jhasdkjashdaksjhd"
+			label            = "alsdjhaldksh"
+			name             = "Another Variable???"
+		}
+		template {
+			default_value    = "qweq|qwe"
+			display_settings = {
+				"Octopus.ControlType" = "MultiLineText"
+			}
+			help_text        = "qwe"
+			label            = "qwe"
+			name             = "weq"
+		}
+	}`, constOctopusDeployLibraryVariableSet, localName, name)
 }
 
 func testAccCheckOctopusDeployLibraryVariableSetDestroy(s *terraform.State) error {
