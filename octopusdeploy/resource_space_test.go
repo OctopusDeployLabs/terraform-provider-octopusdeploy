@@ -33,14 +33,6 @@ func TestAccSpaceBasic(t *testing.T) {
 	})
 }
 
-func testUserBasic(localName string, displayName string, password string, username string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
-		display_name = "%s"
-		password = "%s"
-		username = "%s"
-	}`, constOctopusDeployUser, localName, displayName, password, username)
-}
-
 func testSpaceBasic(localName string, name string) string {
 	userLocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	userDisplayName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
