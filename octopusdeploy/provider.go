@@ -15,7 +15,7 @@ func Provider() *schema.Provider {
 			constOctopusDeployAWSAccount:         dataAwsAccount(),
 			constOctopusDeployEnvironment:        dataSourceEnvironment(),
 			constOctopusDeployFeed:               dataFeed(),
-			constOctopusDeployLibraryVariableSet: dataLibraryVariableSet(),
+			constOctopusDeployLibraryVariableSet: dataSourceLibraryVariableSet(),
 			constOctopusDeployLifecycle:          dataSourceLifecycle(),
 			constOctopusDeployMachine:            dataMachine(),
 			constOctopusDeployMachinePolicy:      dataMachinePolicy(),
