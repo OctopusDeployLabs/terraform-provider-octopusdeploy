@@ -9,52 +9,58 @@ import (
 )
 
 func resourceUser() *schema.Resource {
+	resourceUserImporter := &schema.ResourceImporter{
+		StateContext: schema.ImportStatePassthroughContext,
+	}
+	resourceUserSchema := map[string]*schema.Schema{
+		constCanPasswordBeEdited: {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		constDisplayName: {
+			Required: true,
+			Type:     schema.TypeString,
+		},
+		constEmailAddress: {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		constIdentities: {
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		constIsActive: {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		constIsRequestor: {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		constIsService: {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		constUsername: {
+			Required: true,
+			Type:     schema.TypeString,
+		},
+		constPassword: {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+	}
+
 	return &schema.Resource{
 		CreateContext: resourceUserCreate,
 		DeleteContext: resourceUserDelete,
+		Importer:      resourceUserImporter,
 		ReadContext:   resourceUserRead,
+		Schema:        resourceUserSchema,
 		UpdateContext: resourceUserUpdate,
-		Schema: map[string]*schema.Schema{
-			constCanPasswordBeEdited: {
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
-			constDisplayName: {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			constEmailAddress: {
-				Optional: true,
-				Type:     schema.TypeString,
-			},
-			constIdentities: {
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-			constIsActive: {
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
-			constIsRequestor: {
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
-			constIsService: {
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
-			constUsername: {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			constPassword: {
-				Optional: true,
-				Type:     schema.TypeString,
-			},
-		},
 	}
 }
 
