@@ -109,18 +109,18 @@ func buildRulesResource(tfRule map[string]interface{}) octopusdeploy.ChannelRule
 	return rule
 }
 
-func flattenRules(in []octopusdeploy.ChannelRule) []map[string]interface{} {
-	var flattened = make([]map[string]interface{}, len(in))
-	for i, v := range in {
+func flattenRules(channelRules []octopusdeploy.ChannelRule) []map[string]interface{} {
+	var flattenedRules = make([]map[string]interface{}, len(channelRules))
+	for key, channelRule := range channelRules {
 		m := make(map[string]interface{})
-		m[constVersionRange] = v.VersionRange
-		m[constTag] = v.Tag
-		m[constActions] = v.Actions
+		m[constVersionRange] = channelRule.VersionRange
+		m[constTag] = channelRule.Tag
+		m[constActions] = channelRule.Actions
 
-		flattened[i] = m
+		flattenedRules[key] = m
 	}
 
-	return flattened
+	return flattenedRules
 }
 
 func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
