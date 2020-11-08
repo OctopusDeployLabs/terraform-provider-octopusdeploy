@@ -13,9 +13,78 @@ func dataSourceUser() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceUserReadByName,
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"username": {
 				Required: true,
+				Type:     schema.TypeString,
+			},
+			"can_password_be_edited": {
+				Computed: true,
+				Type:     schema.TypeBool,
+			},
+			"display_name": {
+				Computed: true,
+				Type:     schema.TypeString,
+			},
+			"email_address": {
+				Computed: true,
+				Type:     schema.TypeString,
+			},
+			"identity": {
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"provider": {
+							Computed: true,
+							Type:     schema.TypeString,
+						},
+						"claim": {
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Computed: true,
+										Type:     schema.TypeString,
+									},
+									"is_identifying_claim": {
+										Computed: true,
+										Type:     schema.TypeBool,
+									},
+									"value": {
+										Computed: true,
+										Type:     schema.TypeString,
+									},
+								},
+							},
+							Type: schema.TypeSet,
+						},
+					},
+				},
+				Type: schema.TypeSet,
+			},
+			"is_active": {
+				Computed: true,
+				Type:     schema.TypeBool,
+			},
+			"is_requestor": {
+				Computed: true,
+				Type:     schema.TypeBool,
+			},
+			"is_service": {
+				Computed: true,
+				Type:     schema.TypeBool,
+			},
+			"modified_by": {
+				Computed: true,
+				Type:     schema.TypeString,
+			},
+			"modified_on": {
+				Computed: true,
+				Type:     schema.TypeString,
+			},
+			"password": {
+				Optional:  true,
+				Sensitive: true,
+				Type:      schema.TypeString,
 			},
 		},
 	}
@@ -41,20 +110,8 @@ func dataSourceUserReadByName(ctx context.Context, d *schema.ResourceData, meta 
 	// therefore, a better search criteria needs to be implemented below
 
 	for _, user := range users.Items {
-		if user.Username == constUsername {
-			logResource(constUser, meta)
-
-			d.SetId(user.GetID())
-			d.Set(constCanPasswordBeEdited, user.CanPasswordBeEdited)
-			d.Set(constDisplayName, user.DisplayName)
-			d.Set(constEmailAddress, user.EmailAddress)
-			d.Set(constIdentities, user.Identities)
-			d.Set(constIsActive, user.IsActive)
-			d.Set(constIsRequestor, user.IsRequestor)
-			d.Set(constIsService, user.IsService)
-			d.Set(constPassword, user.Password)
-			d.Set(constUsername, user.Username)
-
+		if user.Username == username {
+			flattenUser(ctx, d, user)
 			return nil
 		}
 	}
