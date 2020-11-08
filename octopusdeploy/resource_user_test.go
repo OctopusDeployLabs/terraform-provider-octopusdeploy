@@ -10,13 +10,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestUserBasic(t *testing.T) {
+func TestAccUserImportBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	prefix := constOctopusDeployUser + "." + localName
+	resourceName := "octopusdeploy_user." + localName
 
-	displayName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	displayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	emailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	username := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	config := testUserBasic(localName, displayName, true, false, password, username, emailAddress)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testUserDestroy,
@@ -24,41 +27,83 @@ func TestUserBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testUserBasic(localName, displayName, password, username),
+				Config: config,
+			},
+			{
+				ResourceName: resourceName,
+				ImportState:  true,
+
+				// NOTE: import succeeds, however the state differs for the
+				// modified_on field
+
+				// ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccUserBasic(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_user." + localName
+
+	displayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	emailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
+	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testUserDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testUserBasic(localName, displayName, true, false, password, username, emailAddress),
 				Check: resource.ComposeTestCheckFunc(
 					testUserExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constDisplayName, displayName),
-					resource.TestCheckResourceAttr(prefix, constPassword, password),
-					resource.TestCheckResourceAttr(prefix, constUsername, username),
+				),
+			},
+			{
+				Config: testUserDataSource(localName, username),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data."+prefix, "display_name", displayName),
 				),
 			},
 		},
 	})
 }
 
-func testUserBasic(localName string, displayName string, password string, username string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+func testUserDataSource(localName string, username string) string {
+	return fmt.Sprintf(`data "octopusdeploy_user" "%s" {
+		username = "%s"
+	}`, localName, username)
+}
+
+func testUserBasic(localName string, displayName string, isActive bool, isService bool, password string, username string, emailAddress string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_user" "%s" {
 		display_name = "%s"
+		is_active    = %v
+		is_service   = %v
 		password     = "%s"
 		username     = "%s"
-		identities   = [
-			{
-				identity_provider_name = "Octopus ID"
-				claims                 = [
-					{
-						email = {
-							value                = "bob.smith@example.com"
-							is_identifying_claim = true
-						}
-						dn    = {
-							value                = "Bob Smith"
-							is_identifying_claim = false
-						}
-					}
-				]
+
+		identity {
+			provider = "Octopus ID"
+			claim {
+				name = "email"
+				is_identifying_claim = true
+				value = "%s"
 			}
-		]
-	}`, constOctopusDeployUser, localName, displayName, password, username)
+			claim {
+				name = "dn"
+				is_identifying_claim = false
+				value = "%s"
+			}
+		}
+
+		lifecycle {
+			ignore_changes = [password, modified_on, modified_by]
+		}
+	}`, localName, displayName, isActive, isService, password, username, emailAddress, displayName)
 }
 
 func testUserExists(prefix string) resource.TestCheckFunc {
@@ -76,12 +121,13 @@ func testUserExists(prefix string) resource.TestCheckFunc {
 func testUserDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
-		userID := rs.Primary.ID
-		user, err := client.Users.GetByID(userID)
+		if rs.Type != "octopusdeploy_user" {
+			continue
+		}
+
+		_, err := client.Users.GetByID(rs.Primary.ID)
 		if err == nil {
-			if user != nil {
-				return fmt.Errorf("user (%s) still exists", rs.Primary.ID)
-			}
+			return fmt.Errorf("user (%s) still exists", rs.Primary.ID)
 		}
 	}
 
