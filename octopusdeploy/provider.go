@@ -20,7 +20,7 @@ func Provider() *schema.Provider {
 			constOctopusDeployMachine:            dataMachine(),
 			constOctopusDeployMachinePolicy:      dataMachinePolicy(),
 			constOctopusDeployProject:            dataProject(),
-			constOctopusDeploySpace:              dataSpace(),
+			constOctopusDeploySpace:              dataSourceSpace(),
 			constOctopusDeployTokenAccount:       dataSourceTokenAccount(),
 			constOctopusDeployUser:               dataSourceUser(),
 			constOctopusDeployVariable:           dataVariable(),
