@@ -9,81 +9,78 @@ import (
 )
 
 func resourceSpace() *schema.Resource {
+	resourceSpaceImporter := &schema.ResourceImporter{
+		StateContext: schema.ImportStatePassthroughContext,
+	}
+	resourceSpaceSchema := map[string]*schema.Schema{
+		"description": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"is_default": {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"name": {
+			Required: true,
+			Type:     schema.TypeString,
+		},
+		"space_managers_team_members": {
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"space_managers_teams": {
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"task_queue_stopped": {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+	}
+
 	return &schema.Resource{
 		CreateContext: resourceSpaceCreate,
 		DeleteContext: resourceSpaceDelete,
+		Importer:      resourceSpaceImporter,
 		ReadContext:   resourceSpaceRead,
+		Schema:        resourceSpaceSchema,
 		UpdateContext: resourceSpaceUpdate,
-
-		Schema: map[string]*schema.Schema{
-			constDescription: {
-				Optional: true,
-				Type:     schema.TypeString,
-			},
-			constID: {
-				Computed: true,
-				Optional: true,
-				Type:     schema.TypeString,
-			},
-			constIsDefault: {
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
-			constName: {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			constSpaceManagersTeamMembers: {
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-			constSpaceManagersTeams: {
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-				Type:     schema.TypeList,
-			},
-			constTaskQueueStopped: {
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
-		},
 	}
 }
 
 func buildSpace(d *schema.ResourceData) *octopusdeploy.Space {
 	var name string
-	if v, ok := d.GetOk(constName); ok {
+	if v, ok := d.GetOk("name"); ok {
 		name = v.(string)
 	}
 
 	space := octopusdeploy.NewSpace(name)
+	space.ID = d.Id()
 
-	if v, ok := d.GetOk(constDescription); ok {
+	if v, ok := d.GetOk("description"); ok {
 		space.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk(constID); ok {
-		space.ID = v.(string)
-	}
-
-	if v, ok := d.GetOk(constIsDefault); ok {
+	if v, ok := d.GetOk("is_default"); ok {
 		space.IsDefault = v.(bool)
 	}
 
-	if v, ok := d.GetOk(constSpaceManagersTeamMembers); ok {
+	if v, ok := d.GetOk("space_managers_team_members"); ok {
 		space.SpaceManagersTeamMembers = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk(constSpaceManagersTeams); ok {
+	if v, ok := d.GetOk("space_managers_teams"); ok {
 		space.SpaceManagersTeams = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk(constTaskQueueStopped); ok {
+	if v, ok := d.GetOk("task_queue_stopped"); ok {
 		space.TaskQueueStopped = v.(bool)
 	}
 
@@ -94,13 +91,12 @@ func resourceSpaceCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	space := buildSpace(d)
 
 	client := m.(*octopusdeploy.Client)
-	space, err := client.Spaces.Add(space)
+	createdSpace, err := client.Spaces.Add(space)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(space.GetID())
-
+	flattenSpace(ctx, d, createdSpace)
 	return nil
 }
 
@@ -111,19 +107,12 @@ func resourceSpaceRead(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
-	d.Set(constDescription, space.Description)
-	d.Set(constIsDefault, space.IsDefault)
-	d.Set(constName, space.Name)
-	d.Set(constSpaceManagersTeamMembers, space.SpaceManagersTeamMembers)
-	d.Set(constSpaceManagersTeams, space.SpaceManagersTeams)
-	d.Set(constTaskQueueStopped, space.TaskQueueStopped)
-
+	flattenSpace(ctx, d, space)
 	return nil
 }
 
 func resourceSpaceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	space := buildSpace(d)
-	space.ID = d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	updatedSpace, err := client.Spaces.Update(space)
@@ -131,8 +120,7 @@ func resourceSpaceUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	d.SetId(updatedSpace.GetID())
-
+	flattenSpace(ctx, d, updatedSpace)
 	return nil
 }
 
@@ -151,7 +139,17 @@ func resourceSpaceDelete(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
-
+	d.SetId("")
 	return nil
+}
+
+func flattenSpace(ctx context.Context, d *schema.ResourceData, space *octopusdeploy.Space) {
+	d.Set("description", space.Description)
+	d.Set("is_default", space.IsDefault)
+	d.Set("name", space.Name)
+	d.Set("space_managers_team_members", space.SpaceManagersTeamMembers)
+	d.Set("space_managers_teams", space.SpaceManagersTeams)
+	d.Set("task_queue_stopped", space.TaskQueueStopped)
+
+	d.SetId(space.GetID())
 }

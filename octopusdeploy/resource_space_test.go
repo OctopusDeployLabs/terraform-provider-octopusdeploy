@@ -10,9 +10,34 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func TestAccSpaceImportBasic(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	resourceName := "octopusdeploy_space." + localName
+
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+
+	config := testSpaceBasic(localName, name)
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testSpaceDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccSpaceBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	prefix := constOctopusDeploySpace + "." + localName
+	prefix := "octopusdeploy_space." + localName
 
 	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
@@ -24,26 +49,46 @@ func TestAccSpaceBasic(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testSpaceExists(prefix),
-					resource.TestCheckResourceAttrSet(prefix, constID),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttrSet(prefix, "id"),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 				Config: testSpaceBasic(localName, name),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(prefix, "id"),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr("data."+prefix, "name", name),
+				),
+				Config: testSpaceDataSource(localName, name),
 			},
 		},
 	})
 }
 
+func testSpaceDataSource(localName string, name string) string {
+	return fmt.Sprintf(testSpaceBasic(localName, name)+"\n"+
+		`data "octopusdeploy_space" "%s" {
+			name = "%s"
+		}`, localName, name)
+}
+
 func testSpaceBasic(localName string, name string) string {
 	userLocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	userDisplayName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	userEmailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
 	userPassword := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	userUsername := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
-	return fmt.Sprintf(testUserBasic(userLocalName, userDisplayName, userPassword, userUsername)+"\n"+
-		`resource "%s" "%s" {
+	return fmt.Sprintf(testUserBasic(userLocalName, userDisplayName, true, false, userPassword, userUsername, userEmailAddress)+"\n"+
+		`resource "octopusdeploy_space" "%s" {
 			name = "%s"
 			space_managers_team_members = ["${%s.%s.id}"]
-		}`, constOctopusDeploySpace, localName, name, constOctopusDeployUser, userLocalName)
+
+			lifecycle {
+				ignore_changes = [space_managers_teams]
+			}
+		}`, localName, name, constOctopusDeployUser, userLocalName)
 }
 
 func testSpaceExists(prefix string) resource.TestCheckFunc {
