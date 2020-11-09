@@ -31,6 +31,17 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	return nil
 }
 
+func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	err := client.Projects.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
+}
+
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	project, err := client.Projects.GetByID(d.Id())
@@ -52,16 +63,5 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	flattenProject(ctx, d, updatedProject)
-	return nil
-}
-
-func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
-	err := client.Projects.DeleteByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId("")
 	return nil
 }
