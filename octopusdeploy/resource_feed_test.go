@@ -11,10 +11,10 @@ import (
 )
 
 func TestAccOctopusDeployFeedBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployFeed + "." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	const feedType = "NuGet"
 	const feedURI = "http://test.com"
 	const enhancedMode = constTrue
@@ -30,7 +30,7 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 				Config: testFeedtBasic(localName, name, feedType, feedURI, feedUsername, feedPassword, enhancedMode),
 				Check: resource.ComposeTestCheckFunc(
 					testFeedExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, constFeedType, feedType),
 					resource.TestCheckResourceAttr(prefix, constFeedURI, feedURI),
 					resource.TestCheckResourceAttr(prefix, constUsername, feedUsername),

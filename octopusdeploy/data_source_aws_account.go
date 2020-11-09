@@ -8,14 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceTokenAccount() *schema.Resource {
+func dataSourceAmazonWebServicesAccount() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceTokenAccountRead,
-		Schema:      getTokenAccountDataSchema(),
+		ReadContext: dataSourceAmazonWebServicesAccountReadByName,
+		Schema:      getAmazonWebServicesAccountDataSchema(),
 	}
 }
 
-func dataSourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceAmazonWebServicesAccountReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	name := d.Get("name").(string)
 	query := octopusdeploy.AccountsQuery{
@@ -32,8 +32,8 @@ func dataSourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m i
 		return diag.Errorf("unable to retrieve account (partial name: %s)", name)
 	}
 
-	tokenAccount := accounts.Items[0].(*octopusdeploy.TokenAccount)
+	amazonWebServicesAccount := accounts.Items[0].(*octopusdeploy.AmazonWebServicesAccount)
 
-	flattenTokenAccount(ctx, d, tokenAccount)
+	flattenAmazonWebServicesAccount(ctx, d, amazonWebServicesAccount)
 	return nil
 }

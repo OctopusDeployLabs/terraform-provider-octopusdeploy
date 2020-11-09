@@ -1,49 +1,52 @@
 package octopusdeploy
 
 import (
+	"context"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataCertificate() *schema.Resource {
+func dataSourceCertificate() *schema.Resource {
 	return &schema.Resource{
-		Read: dataCertificateReadByName,
+		ReadContext: dataSourceCertificateReadByName,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
-			},
-			constNotes: {
 				Type:     schema.TypeString,
-				Optional: true,
 			},
-			constCertificateData: {
+			"notes": {
+				Optional: true,
+				Type:     schema.TypeString,
+			},
+			"certificate_data": {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
 			},
-			constPassword: {
+			"password": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
 			},
-			"Certificate_ids": {
+			"certificate_ids": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
-			constTenantIDs: {
+			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+			"tenant_ids": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			constTenantTags: {
+			"tenant_tags": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -54,19 +57,17 @@ func dataCertificate() *schema.Resource {
 	}
 }
 
-func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(constName).(string)
+func dataSourceCertificateReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)
 	resourceList, err := client.Certificates.GetByPartialName(name)
 	if err != nil {
-		return createResourceOperationError(errorReadingCertificate, name, err)
+		return diag.FromErr(err)
 	}
 	if len(resourceList) == 0 {
 		return nil
 	}
-
-	logResource(constCertificate, m)
 
 	// NOTE: two or more certificates could have the same name in Octopus and
 	// therefore, a better search criteria needs to be implemented below
@@ -76,7 +77,7 @@ func dataCertificateReadByName(d *schema.ResourceData, m interface{}) error {
 			logResource(constCertificate, m)
 
 			d.SetId(resource.GetID())
-			d.Set(constName, resource.Name)
+			d.Set("name", resource.Name)
 
 			return nil
 		}

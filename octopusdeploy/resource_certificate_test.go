@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccOctopusDeployCertificateBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployCertificate + "." + localName
 
 	const certName = "Testing one two three"
@@ -36,7 +36,7 @@ func TestAccOctopusDeployCertificateBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, constName, certName),
 					resource.TestCheckResourceAttr(prefix, constNotes, certNotes),
 					resource.TestCheckResourceAttr(prefix, "tenant_tags.0", tenantTags),
-					resource.TestCheckResourceAttr(prefix, constTenantedDeploymentParticipation, tenantedDeploymentParticipation),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", tenantedDeploymentParticipation),
 				),
 			},
 		},

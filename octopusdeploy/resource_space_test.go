@@ -11,12 +11,10 @@ import (
 )
 
 func TestAccSpaceImportBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_space." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-
-	config := testSpaceBasic(localName, name)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testSpaceDestroy,
@@ -24,7 +22,7 @@ func TestAccSpaceImportBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: config,
+				Config: testSpaceBasic(localName, name),
 			},
 			{
 				ResourceName:      resourceName,
@@ -36,10 +34,10 @@ func TestAccSpaceImportBasic(t *testing.T) {
 }
 
 func TestAccSpaceBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_space." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testSpaceDestroy,
@@ -74,11 +72,11 @@ func testSpaceDataSource(localName string, name string) string {
 }
 
 func testSpaceBasic(localName string, name string) string {
-	userLocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	userDisplayName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	userLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	userDisplayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	userEmailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
 	userPassword := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	userUsername := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	userUsername := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	return fmt.Sprintf(testUserBasic(userLocalName, userDisplayName, true, false, userPassword, userUsername, userEmailAddress)+"\n"+
 		`resource "octopusdeploy_space" "%s" {

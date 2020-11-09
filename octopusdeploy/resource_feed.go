@@ -10,7 +10,7 @@ import (
 
 func resourceFeed() *schema.Resource {
 	schemaMap := map[string]*schema.Schema{
-		constName: {
+		"name": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
@@ -81,7 +81,7 @@ func resourceFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}
 }
 
 func buildFeedResource(d *schema.ResourceData) *octopusdeploy.FeedResource {
-	name := d.Get(constName).(string)
+	name := d.Get("name").(string)
 
 	var feedType octopusdeploy.FeedType
 	feedTypeInterface, ok := d.GetOk(constFeedType)
@@ -164,7 +164,6 @@ func resourceFeedDelete(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
-
+	d.SetId("")
 	return nil
 }

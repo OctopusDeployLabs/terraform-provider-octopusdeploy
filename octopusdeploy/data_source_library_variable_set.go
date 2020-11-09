@@ -1,29 +1,32 @@
 package octopusdeploy
 
 import (
+	"context"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceLibraryVariableSet() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceLibraryVariableSetReadByName,
+		ReadContext: dataSourceLibraryVariableSetReadByName,
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
 		},
 	}
 }
 
-func dataSourceLibraryVariableSetReadByName(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(constName).(string)
+func dataSourceLibraryVariableSetReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)
 	resourceList, err := client.LibraryVariableSets.GetByPartialName(name)
 	if err != nil {
-		return createResourceOperationError(errorReadingLibraryVariableSet, name, err)
+		return diag.FromErr(err)
 	}
 	if len(resourceList) == 0 {
 		return nil
@@ -39,8 +42,8 @@ func dataSourceLibraryVariableSetReadByName(d *schema.ResourceData, m interface{
 			logResource(constLibraryVariableSet, m)
 
 			d.SetId(resource.GetID())
-			d.Set(constName, resource.Name)
-			d.Set(constDescription, resource.Description)
+			d.Set("name", resource.Name)
+			d.Set("description", resource.Description)
 			d.Set(constVariableSetID, resource.VariableSetID)
 
 			return nil

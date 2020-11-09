@@ -1,11 +1,13 @@
 package octopusdeploy
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -14,25 +16,25 @@ var mutex = &sync.Mutex{}
 
 func resourceVariable() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVariableCreate,
-		Read:   resourceVariableRead,
-		Update: resourceVariableUpdate,
-		Delete: resourceVariableDelete,
+		CreateContext: resourceVariableCreate,
+		ReadContext:   resourceVariableRead,
+		UpdateContext: resourceVariableUpdate,
+		DeleteContext: resourceVariableDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceVariableImport,
 		},
 		Schema: map[string]*schema.Schema{
-			constProjectID: {
-				Type:     schema.TypeString,
+			"project_id": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
-			constType: {
-				Type:     schema.TypeString,
+			"type": {
 				Required: true,
+				Type:     schema.TypeString,
 				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
 					"String",
 					"Sensitive",
@@ -41,59 +43,59 @@ func resourceVariable() *schema.Resource {
 					"AzureAccount",
 				}, false)),
 			},
-			constValue: {
+			"value": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{constSensitiveValue},
+				ConflictsWith: []string{"sensitive_value"},
 			},
-			constSensitiveValue: {
+			"sensitive_value": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{constValue},
+				ConflictsWith: []string{"value"},
 				Sensitive:     true,
 			},
-			constDescription: {
-				Type:     schema.TypeString,
+			"description": {
 				Optional: true,
+				Type:     schema.TypeString,
 			},
-			constScope: schemaVariableScope,
-			constIsSensitive: {
+			"scope": schemaVariableScope,
+			"is_sensitive": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			constPrompt: {
+			"prompt": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						constLabel: {
+						"description": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						constDescription: {
+						"label": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						constRequired: {
+						"is_required": {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
 					},
 				},
 			},
-			constPGPKey: {
+			"pgp_key": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				ForceNew:  true,
 				Sensitive: true,
 			},
-			constKeyFingerprint: {
+			"key_fingerprint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			constEncryptedValue: {
+			"encrypted_value": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -107,30 +109,30 @@ func resourceVariableImport(d *schema.ResourceData, m interface{}) ([]*schema.Re
 		return nil, fmt.Errorf("octopusdeploy_variable import must be in the form of ProjectID:VariableID (e.g. Projects-62:0906031f-68ba-4a15-afaa-657c1564e07b")
 	}
 
-	d.Set(constProjectID, importStrings[0])
+	d.Set("project_id", importStrings[0])
 	d.SetId(importStrings[1])
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
+func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
-	projectID := d.Get(constProjectID).(string)
+	projectID := d.Get("project_id").(string)
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.Variables.GetByID(projectID, id)
 	if err != nil {
-		return createResourceOperationError(errorReadingVariable, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
-		d.SetId(constEmptyString)
+		d.SetId("")
 		return nil
 	}
 
 	logResource(constVariable, m)
 
-	d.Set(constName, resource.Name)
-	d.Set(constType, resource.Type)
+	d.Set("name", resource.Name)
+	d.Set("type", resource.Type)
 
 	isSensitive := d.Get(constIsSensitive).(bool)
 	if isSensitive {
@@ -139,7 +141,7 @@ func resourceVariableRead(d *schema.ResourceData, m interface{}) error {
 		d.Set(constValue, resource.Value)
 	}
 
-	d.Set(constDescription, resource.Description)
+	d.Set("description", resource.Description)
 
 	return nil
 }
@@ -151,7 +153,7 @@ func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 	var varDesc, varValue string
 	var varSensitive bool
 
-	if varDescInterface, ok := d.GetOk(constDescription); ok {
+	if varDescInterface, ok := d.GetOk("description"); ok {
 		varDesc = varDescInterface.(string)
 	}
 
@@ -175,9 +177,9 @@ func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 		if len(tfPromptSettings.List()) == 1 {
 			tfPromptList := tfPromptSettings.List()[0].(map[string]interface{})
 			newPrompt := octopusdeploy.VariablePromptOptions{
-				Description: tfPromptList[constDescription].(string),
-				Label:       tfPromptList[constLabel].(string),
-				Required:    tfPromptList[constRequired].(bool),
+				Description: tfPromptList["description"].(string),
+				Label:       tfPromptList["label"].(string),
+				Required:    tfPromptList["is_required"].(bool),
 			}
 			newVar.Prompt = &newPrompt
 		}
@@ -186,27 +188,27 @@ func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
 	return newVar
 }
 
-func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
+func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	mutex.Lock()
 	defer mutex.Unlock()
 	if err := validateVariable(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	projID := d.Get(constProjectID).(string)
+	projID := d.Get("project_id").(string)
 	newVariable := buildVariableResource(d)
 
 	client := m.(*octopusdeploy.Client)
 	tfVar, err := client.Variables.AddSingle(projID, newVariable)
 	if err != nil {
-		return createResourceOperationError(errorCreatingVariable, newVariable.Name, err)
+		return diag.FromErr(err)
 	}
 
 	for _, v := range tfVar.Variables {
 		if v.Name == newVariable.Name && v.Type == newVariable.Type && (v.IsSensitive || v.Value == newVariable.Value) && v.Description == newVariable.Description && v.IsSensitive == newVariable.IsSensitive {
 			scopeMatches, _, err := client.Variables.MatchesScope(v.Scope, newVariable.Scope)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 			if scopeMatches {
 				d.SetId(v.ID)
@@ -215,26 +217,26 @@ func resourceVariableCreate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	d.SetId(constEmptyString)
-	return fmt.Errorf("unable to locate variable in project %s", projID)
+	d.SetId("")
+	return diag.Errorf("unable to locate variable in project %s", projID)
 }
 
-func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	if err := validateVariable(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	tfVar := buildVariableResource(d)
 	tfVar.ID = d.Id() // set ID so Octopus API knows which variable to update
-	projID := d.Get(constProjectID).(string)
+	projID := d.Get("project_id").(string)
 
 	client := m.(*octopusdeploy.Client)
 	updatedVars, err := client.Variables.UpdateSingle(projID, tfVar)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingVariable, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	for _, v := range updatedVars.Variables {
@@ -247,24 +249,24 @@ func resourceVariableUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	d.SetId(constEmptyString)
-	return fmt.Errorf("unable to locate variable in project %s", projID)
+	d.SetId("")
+	return diag.Errorf("unable to locate variable in project %s", projID)
 }
 
-func resourceVariableDelete(d *schema.ResourceData, m interface{}) error {
+func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	projID := d.Get(constProjectID).(string)
+	projID := d.Get("project_id").(string)
 	variableID := d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	_, err := client.Variables.DeleteSingle(projID, variableID)
 	if err != nil {
-		return createResourceOperationError(errorDeletingVariable, variableID, err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
+	d.SetId("")
 	return nil
 }
 

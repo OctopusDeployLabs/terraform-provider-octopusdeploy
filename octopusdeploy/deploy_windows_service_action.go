@@ -43,7 +43,7 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 		Description: "The display name of the service (optional)",
 		Optional:    true,
 	}
-	element.Schema[constDescription] = &schema.Schema{
+	element.Schema["description"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "User-friendly description of the service (optional)",
 		Optional:    true,
@@ -112,7 +112,7 @@ func addWindowsServiceToActionResource(tfAction map[string]interface{}, action o
 		action.Properties["Octopus.Action.WindowsService.DisplayName"] = displayName.(string)
 	}
 
-	description := tfAction[constDescription]
+	description := tfAction["description"]
 	if description != nil {
 		action.Properties["Octopus.Action.WindowsService.Description"] = description.(string)
 	}

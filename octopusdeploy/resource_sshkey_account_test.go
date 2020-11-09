@@ -10,27 +10,27 @@ import (
 )
 
 func TestSSHKeyBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	prefix := constOctopusDeploySSHKeyAccount + "." + localName
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_ssh_key_account." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	passphrase := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	passphrase := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tenantedDeploymentParticipation := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
-	username := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountDestroy,
+		CheckDestroy: testAccAccountCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testSSHKeyBasic(localName, name, username, passphrase, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
-					testAccountExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					testAccAccountExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, constPassphrase, passphrase),
-					resource.TestCheckResourceAttr(prefix, constTenantedDeploymentParticipation, string(tenantedDeploymentParticipation)),
-					resource.TestCheckResourceAttr(prefix, constUsername, username),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
+					resource.TestCheckResourceAttr(prefix, "username", username),
 				),
 			},
 		},
@@ -38,10 +38,10 @@ func TestSSHKeyBasic(t *testing.T) {
 }
 
 func testSSHKeyBasic(localName string, name string, username string, passphrase string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_ssh_key_account" "%s" {
 		name = "%s"
 		passphrase = "%s"
 		tenanted_deployment_participation = "%s"
 		username = "%s"
-	}`, constOctopusDeploySSHKeyAccount, localName, name, passphrase, tenantedDeploymentParticipation, username)
+	}`, localName, name, passphrase, tenantedDeploymentParticipation, username)
 }

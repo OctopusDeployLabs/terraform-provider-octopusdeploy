@@ -11,10 +11,10 @@ import (
 )
 
 func TestAccOctopusDeployProjectGroupBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployProjectGroup + "." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -25,7 +25,7 @@ func TestAccOctopusDeployProjectGroupBasic(t *testing.T) {
 				Config: testAccProjectGroupBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testProjectGroupExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 			},
 		},
@@ -33,11 +33,11 @@ func TestAccOctopusDeployProjectGroupBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployProjectGroup + "." + localName
 
-	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -49,7 +49,7 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 				Config: testAccProjectGroupBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testProjectGroupExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 			},
 			// create update it with a description
@@ -57,8 +57,8 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 				Config: testAccProjectGroupWithDescription(localName, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testProjectGroupExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constDescription, description),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 			},
 			// update again by remove its description
@@ -66,8 +66,8 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 				Config: testAccProjectGroupBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testProjectGroupExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constDescription, ""),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "description", ""),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 			},
 		},

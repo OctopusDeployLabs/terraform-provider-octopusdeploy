@@ -8,14 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceTokenAccount() *schema.Resource {
+func dataSourceSSHKeyAccount() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceTokenAccountRead,
-		Schema:      getTokenAccountDataSchema(),
+		ReadContext: dataSourceSSHKeyAccountRead,
+		Schema:      getSSHKeyAccountDataSchema(),
 	}
 }
 
-func dataSourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	name := d.Get("name").(string)
 	query := octopusdeploy.AccountsQuery{
@@ -32,8 +32,8 @@ func dataSourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m i
 		return diag.Errorf("unable to retrieve account (partial name: %s)", name)
 	}
 
-	tokenAccount := accounts.Items[0].(*octopusdeploy.TokenAccount)
+	sshKeyAccount := accounts.Items[0].(*octopusdeploy.SSHKeyAccount)
 
-	flattenTokenAccount(ctx, d, tokenAccount)
+	flattenSSHKeyAccount(ctx, d, sshKeyAccount)
 	return nil
 }

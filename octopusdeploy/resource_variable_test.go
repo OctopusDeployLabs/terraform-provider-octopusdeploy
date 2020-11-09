@@ -11,12 +11,12 @@ import (
 )
 
 func TestAccOctopusDeployVariableBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployVariable + "." + localName
 
-	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	value := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	value := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testVariableDestroy,
@@ -27,9 +27,9 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 				Config: testVariableBasic(localName, name, description, value),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployVariableExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
-					resource.TestCheckResourceAttr(prefix, constDescription, description),
-					resource.TestCheckResourceAttr(prefix, constValue, value),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "value", value),
 				),
 			},
 		},
@@ -37,11 +37,11 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 }
 
 func testVariableBasic(localName string, name string, description string, value string) string {
-	projectDescription := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	projectLocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	projectName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	config := fmt.Sprintf(testAccProjectBasic(projectLocalName, projectName, constTrue, projectDescription)+"\n"+
+	config := fmt.Sprintf(testAccProjectBasic(projectLocalName, projectName, projectDescription)+"\n"+
 		`resource "%s" "%s" {
 			description = "%s"
 			name        = "%s"

@@ -10,27 +10,27 @@ import (
 )
 
 func TestAccAWSAccountBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployAWSAccount + "." + localName
 
 	accessKey := acctest.RandString(10)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	secretKey := acctest.RandString(10)
 	tenantedDeploymentParticipation := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountDestroy,
+		CheckDestroy: testAccAccountCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAWSAccountBasic(localName, name, accessKey, secretKey, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
-					testAccountExists(prefix),
+					testAccAccountExists(prefix),
 					resource.TestCheckResourceAttr(prefix, constAccessKey, accessKey),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, constSecretKey, secretKey),
-					resource.TestCheckResourceAttr(prefix, constTenantedDeploymentParticipation, string(tenantedDeploymentParticipation)),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 				),
 			},
 		},

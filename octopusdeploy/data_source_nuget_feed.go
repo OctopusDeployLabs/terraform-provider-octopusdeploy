@@ -1,24 +1,25 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataNuget() *schema.Resource {
+func dataSourceNuGetFeed() *schema.Resource {
 	return &schema.Resource{
-		Read: dataNugetReadByName,
+		ReadContext: dataSourceNuGetFeedReadByName,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constFeedURI: {
-				Type:     schema.TypeString,
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constEnhancedMode: {
 				Type:     schema.TypeBool,
@@ -36,8 +37,8 @@ func dataNuget() *schema.Resource {
 				Default:  10,
 			},
 			constUsername: {
-				Type:     schema.TypeString,
 				Optional: true,
+				Type:     schema.TypeString,
 			},
 			constPassword: {
 				Type:      schema.TypeString,
@@ -48,9 +49,9 @@ func dataNuget() *schema.Resource {
 	}
 }
 
-func dataNugetReadByName(d *schema.ResourceData, m interface{}) error {
+func dataSourceNuGetFeedReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	name := d.Get(constName).(string)
+	name := d.Get("name").(string)
 	query := octopusdeploy.FeedsQuery{
 		PartialName: name,
 		Take:        1,
@@ -58,13 +59,11 @@ func dataNugetReadByName(d *schema.ResourceData, m interface{}) error {
 
 	feeds, err := client.Feeds.Get(query)
 	if err != nil {
-		return createResourceOperationError(errorReadingNuGetFeed, name, err)
+		return diag.FromErr(err)
 	}
 	if feeds == nil || len(feeds.Items) == 0 {
-		return fmt.Errorf("Unabled to retrieve feed (partial name: %s)", name)
+		return diag.Errorf("unable to retrieve feed (partial name: %s)", name)
 	}
-
-	logResource(constFeed, m)
 
 	// NOTE: two or more feeds can have the same name in Octopus and
 	// therefore, a better search criteria needs to be implemented below

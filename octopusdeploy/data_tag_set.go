@@ -1,31 +1,34 @@
 package octopusdeploy
 
 import (
+	"context"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataTagSet() *schema.Resource {
 	return &schema.Resource{
-		Read: dataTagSetReadByName,
+		ReadContext: dataTagSetReadByName,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constTag: getTagSchema(),
 		},
 	}
 }
 
-func dataTagSetReadByName(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(constName).(string)
+func dataTagSetReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.TagSets.GetByName(name)
 	if err != nil {
-		return createResourceOperationError(errorReadingTagSet, name, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
 		return nil
@@ -34,7 +37,7 @@ func dataTagSetReadByName(d *schema.ResourceData, m interface{}) error {
 	logResource(constTagSet, m)
 
 	d.SetId(resource.GetID())
-	d.Set(constName, resource.Name)
+	d.Set("name", resource.Name)
 
 	return nil
 }

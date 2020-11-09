@@ -10,97 +10,97 @@ import (
 )
 
 func resourceAccount() *schema.Resource {
-	resourceAccountSchema := getCommonAccountsSchema()
-	resourceAccountSchema[constAccountType] = getAccountTypeSchema()
-	resourceAccountSchema[constAccessKey] = &schema.Schema{
-		Type:     schema.TypeString,
+	resourceAccountSchema := getAccountResourceSchema()
+	resourceAccountSchema["access_key"] = &schema.Schema{
 		Optional: true,
-	}
-	resourceAccountSchema[constUsername] = &schema.Schema{
 		Type:     schema.TypeString,
-		Optional: true,
 	}
-	resourceAccountSchema[constPassword] = &schema.Schema{
+	resourceAccountSchema["active_directory_endpoint_base_uri"] = &schema.Schema{
+		Optional: true,
 		Type:     schema.TypeString,
-		Optional: true,
 	}
-	resourceAccountSchema[constPassphrase] = &schema.Schema{
+	resourceAccountSchema["azure_environment"] = &schema.Schema{
+		Optional: true,
 		Type:     schema.TypeString,
-		Optional: true,
 	}
-	resourceAccountSchema[constSecretKey] = &schema.Schema{
-		Type:      schema.TypeString,
-		Optional:  true,
-		Sensitive: true,
-	}
-	resourceAccountSchema[constToken] = &schema.Schema{
-		Type:      schema.TypeString,
-		Optional:  true,
-		Sensitive: true,
-	}
-	resourceAccountSchema[constClientID] = &schema.Schema{
-		Type:             schema.TypeString,
+	resourceAccountSchema["client_id"] = &schema.Schema{
 		Optional:         true,
+		Type:             schema.TypeString,
 		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
 	}
-	resourceAccountSchema[constClientSecret] = &schema.Schema{
-		Type:      schema.TypeString,
+	resourceAccountSchema["client_secret"] = &schema.Schema{
 		Optional:  true,
 		Sensitive: true,
-	}
-	resourceAccountSchema[constTenantID] = &schema.Schema{
-		Type:             schema.TypeString,
-		Optional:         true,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-	}
-	resourceAccountSchema[constSubscriptionID] = &schema.Schema{
-		Type:             schema.TypeString,
-		Optional:         true,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-	}
-	resourceAccountSchema[constKey] = &schema.Schema{
 		Type:      schema.TypeString,
+	}
+	resourceAccountSchema["key"] = &schema.Schema{
 		Optional:  true,
 		Sensitive: true,
+		Type:      schema.TypeString,
 	}
-	resourceAccountSchema[constAzureEnvironment] = &schema.Schema{
+	resourceAccountSchema["password"] = &schema.Schema{
+		Optional: true,
+		Type:     schema.TypeString,
+	}
+	resourceAccountSchema["passphrase"] = &schema.Schema{
+		Optional: true,
+		Type:     schema.TypeString,
+	}
+	resourceAccountSchema["secret_key"] = &schema.Schema{
+		Optional:  true,
+		Sensitive: true,
+		Type:      schema.TypeString,
+	}
+	resourceAccountSchema["token"] = &schema.Schema{
+		Optional:  true,
+		Sensitive: true,
+		Type:      schema.TypeString,
+	}
+	resourceAccountSchema["resource_management_endpoint_base_uri"] = &schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	}
-	resourceAccountSchema[constResourceManagementEndpointBaseURI] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
+	resourceAccountSchema["subscription_id"] = &schema.Schema{
+		Optional:         true,
+		Type:             schema.TypeString,
+		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
 	}
-	resourceAccountSchema[constActiveDirectoryEndpointBaseURI] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
+	resourceAccountSchema["tenant_id"] = &schema.Schema{
+		Optional:         true,
+		Type:             schema.TypeString,
+		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
 	}
+	resourceAccountSchema["username"] = &schema.Schema{
+		Optional: true,
+		Type:     schema.TypeString,
+	}
+
 	return &schema.Resource{
 		CreateContext: resourceAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
 		ReadContext:   resourceAccountRead,
-		Schema:        resourceAccountSchema,
+		Schema:        getAccountResourceSchema(),
 		UpdateContext: resourceAccountUpdate,
 	}
 }
 
-func resourceAccountRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*octopusdeploy.Client)
+func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
 	account, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	accountResource := account.(*octopusdeploy.AccountResource)
-	flattenAccountResource(ctx, d, accountResource)
 
+	flattenAccountResource(ctx, d, accountResource)
 	return nil
 }
 
-func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	accountResource := buildAccountResource(d)
+func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	accountResource := expandAccountResource(d)
 
-	client := meta.(*octopusdeploy.Client)
+	client := m.(*octopusdeploy.Client)
 	account, err := client.Accounts.Add(accountResource)
 	if err != nil {
 		return diag.FromErr(err)
@@ -112,15 +112,13 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	flattenAccountResource(ctx, d, accountResource)
-
 	return nil
 }
 
-func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	accountResource := buildAccountResource(d)
-	accountResource.ID = d.Id()
+func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	accountResource := expandAccountResource(d)
 
-	client := meta.(*octopusdeploy.Client)
+	client := m.(*octopusdeploy.Client)
 	account, err := client.Accounts.Update(accountResource)
 	if err != nil {
 		return diag.FromErr(err)
@@ -132,6 +130,5 @@ func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	flattenAccountResource(ctx, d, accountResource)
-
 	return nil
 }

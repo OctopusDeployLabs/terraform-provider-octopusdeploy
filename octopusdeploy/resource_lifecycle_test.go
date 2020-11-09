@@ -11,10 +11,10 @@ import (
 )
 
 func TestAccOctopusDeployLifecycleBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployLifecycle + "." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -24,7 +24,7 @@ func TestAccOctopusDeployLifecycleBasic(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 				Config: testAccLifecycleBasic(localName, name),
 			},
@@ -33,11 +33,11 @@ func TestAccOctopusDeployLifecycleBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployLifecycle + "." + localName
 
-	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLifecycleDestroy,
@@ -48,7 +48,7 @@ func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 				Config: testAccLifecycleBasic(localName, name),
 			},
@@ -56,8 +56,8 @@ func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
-					resource.TestCheckResourceAttr(prefix, constDescription, description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
 				),
 				Config: testAccLifecycleWithDescription(localName, name, description),
 			},
@@ -65,8 +65,8 @@ func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
-					resource.TestCheckResourceAttr(prefix, constDescription, ""),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "description", ""),
 				),
 				Config: testAccLifecycleBasic(localName, name),
 			},
@@ -75,10 +75,10 @@ func TestAccOctopusDeployLifecycleWithUpdate(t *testing.T) {
 }
 
 func TestAccOctopusDeployLifecycleComplex(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployLifecycle + "." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccCheckOctopusDeployLifecycleDestroy,
@@ -89,7 +89,7 @@ func TestAccOctopusDeployLifecycleComplex(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLifecycleExists(prefix),
 					testAccCheckOctopusDeployLifecyclePhaseCount(name, 2),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 				Config: testAccLifecycleComplex(localName, name),
 			},
@@ -111,12 +111,12 @@ func testAccLifecycleWithDescription(localName string, name string, description 
 }
 
 func testAccLifecycleComplex(localName string, name string) string {
-	environment1LocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	environment1Name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	environment2LocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	environment2Name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	environment3LocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	environment3Name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	environment1LocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environment1Name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environment2LocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environment2Name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environment3LocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environment3Name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	return fmt.Sprintf(testEnvironmentMinimum(environment1LocalName, environment1Name)+"\n"+
 		testEnvironmentMinimum(environment2LocalName, environment2Name)+"\n"+

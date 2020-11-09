@@ -100,23 +100,6 @@ func getStringOrEmpty(tfAttr interface{}) string {
 	return tfAttr.(string)
 }
 
-func getAccountTypeSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-		Default:  "None",
-		ValidateDiagFunc: validateValueFunc([]string{
-			"None",
-			"AmazonWebServicesAccount",
-			"AzureServicePrincipal",
-			"AzureSubscription",
-			"SshKeyPair",
-			"Token",
-			"UsernamePassword",
-		}),
-	}
-}
-
 func getFeedTypeSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeString,

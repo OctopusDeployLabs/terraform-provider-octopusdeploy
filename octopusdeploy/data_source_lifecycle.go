@@ -10,7 +10,7 @@ import (
 
 func dataSourceLifecycle() *schema.Resource {
 	dataSourceLifecycleSchema := map[string]*schema.Schema{
-		constName: {
+		"name": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
@@ -23,7 +23,7 @@ func dataSourceLifecycle() *schema.Resource {
 }
 
 func dataSourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	name := d.Get(constName).(string)
+	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)
 	lifecycles, err := client.Lifecycles.GetByPartialName(name)

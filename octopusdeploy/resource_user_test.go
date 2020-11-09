@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccUserImportBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_user." + localName
 
 	displayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -22,7 +22,7 @@ func TestAccUserImportBasic(t *testing.T) {
 	config := testUserBasic(localName, displayName, true, false, password, username, emailAddress)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testUserDestroy,
+		CheckDestroy: testUserCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -30,20 +30,17 @@ func TestAccUserImportBasic(t *testing.T) {
 				Config: config,
 			},
 			{
-				ResourceName: resourceName,
-				ImportState:  true,
-
-				// NOTE: import succeeds, however the state differs for the
-				// modified_on field
-
-				// ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"modified_on", "password"},
 			},
 		},
 	})
 }
 
 func TestAccUserBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_user." + localName
 
 	displayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -52,7 +49,7 @@ func TestAccUserBasic(t *testing.T) {
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testUserDestroy,
+		CheckDestroy: testUserCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -99,10 +96,6 @@ func testUserBasic(localName string, displayName string, isActive bool, isServic
 				value = "%s"
 			}
 		}
-
-		lifecycle {
-			ignore_changes = [password, modified_on, modified_by]
-		}
 	}`, localName, displayName, isActive, isService, password, username, emailAddress, displayName)
 }
 
@@ -118,7 +111,7 @@ func testUserExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testUserDestroy(s *terraform.State) error {
+func testUserCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_user" {

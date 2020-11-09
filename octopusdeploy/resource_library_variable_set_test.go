@@ -11,10 +11,10 @@ import (
 )
 
 func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployLibraryVariableSet + "." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLibraryVariableSetDestroy,
@@ -25,7 +25,7 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 				Config: testLibraryVariableSetBasic(localName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 			},
 		},
@@ -33,10 +33,10 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployLibraryVariableSet + "." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLibraryVariableSetDestroy,
@@ -47,7 +47,7 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 				Config: testLibraryVariableSetComplex(localName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 			},
 		},
@@ -55,11 +55,11 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 }
 
 func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployLibraryVariableSet + "." + localName
 
-	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLibraryVariableSetDestroy,
@@ -70,7 +70,7 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 				Config: testLibraryVariableSetBasic(localName, name),
 			},
@@ -78,8 +78,8 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
-					resource.TestCheckResourceAttr(prefix, constDescription, description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
 				),
 				Config: testAccLibraryVariableSetWithDescription(localName, name, description),
 			},
@@ -87,8 +87,8 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
-					resource.TestCheckResourceAttr(prefix, constDescription, ""),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "description", ""),
 				),
 				Config: testLibraryVariableSetBasic(localName, name),
 			},

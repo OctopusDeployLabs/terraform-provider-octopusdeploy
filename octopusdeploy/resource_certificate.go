@@ -1,9 +1,11 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -11,19 +13,19 @@ func resourceCertificate() *schema.Resource {
 	validateSchema()
 
 	return &schema.Resource{
-		Create: resourceCertificateCreate,
-		Read:   resourceCertificateRead,
-		Update: resourceCertificateUpdate,
-		Delete: resourceCertificateDelete,
+		CreateContext: resourceCertificateCreate,
+		ReadContext:   resourceCertificateRead,
+		UpdateContext: resourceCertificateUpdate,
+		DeleteContext: resourceCertificateDelete,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constNotes: {
-				Type:     schema.TypeString,
 				Optional: true,
+				Type:     schema.TypeString,
 			},
 			constCertificateData: {
 				Type:      schema.TypeString,
@@ -42,15 +44,15 @@ func resourceCertificate() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			constTenantedDeploymentParticipation: getTenantedDeploymentSchema(),
-			constTenantIDs: {
+			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+			"tenant_ids": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			constTenantTags: {
+			"tenant_tags": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -61,33 +63,33 @@ func resourceCertificate() *schema.Resource {
 	}
 }
 
-func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.Certificates.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingCertificate, id, err)
+		diag.FromErr(err)
 	}
 	if resource == nil {
-		d.SetId(constEmptyString)
+		d.SetId("")
 		return nil
 	}
 
 	logResource(constCertificate, m)
 
-	d.Set(constName, resource.Name)
+	d.Set("name", resource.Name)
 	d.Set(constNotes, resource.Notes)
 	d.Set(constEnvironmentIDs, resource.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, resource.TenantedDeploymentMode)
-	d.Set(constTenantIDs, resource.TenantIDs)
-	d.Set(constTenantTags, resource.TenantTags)
+	d.Set("tenanted_deployment_participation", resource.TenantedDeploymentMode)
+	d.Set("tenant_ids", resource.TenantIDs)
+	d.Set("tenant_tags", resource.TenantTags)
 
 	return nil
 }
 
 func buildCertificateResource(d *schema.ResourceData) (*octopusdeploy.CertificateResource, error) {
-	name := d.Get(constName).(string)
+	name := d.Get("name").(string)
 	if isEmpty(name) {
 		log.Println("certificate name is empty; please specify a name for the certificate")
 	}
@@ -106,27 +108,27 @@ func buildCertificateResource(d *schema.ResourceData) (*octopusdeploy.Certificat
 	certificateData := octopusdeploy.NewSensitiveValue(certData)
 	certificate := octopusdeploy.NewCertificateResource(name, certificateData, pass)
 
-	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
+	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
 		certificate.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
 	}
 
-	if v, ok := d.GetOk(constTenantTags); ok {
+	if v, ok := d.GetOk("tenant_tags"); ok {
 		certificate.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
 	return certificate, nil
 }
 
-func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	certificate, err := buildCertificateResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.Certificates.Add(certificate)
 	if err != nil {
-		return createResourceOperationError(errorCreatingCertificate, certificate.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.GetID()) {
@@ -138,17 +140,17 @@ func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	certificate, err := buildCertificateResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	certificate.ID = d.Id() // set ID so Octopus API knows which certificate to update
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.Certificates.Update(*certificate)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingCertificate, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.GetID())
@@ -156,15 +158,15 @@ func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	err := client.Certificates.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingCertificate, id, err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
+	d.SetId("")
 	return nil
 }

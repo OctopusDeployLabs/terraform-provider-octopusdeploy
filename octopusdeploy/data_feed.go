@@ -1,27 +1,28 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataFeed() *schema.Resource {
 	return &schema.Resource{
-		Read: dataFeedReadByName,
+		ReadContext: dataFeedReadByName,
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
 		},
 	}
 }
 
-func dataFeedReadByName(d *schema.ResourceData, m interface{}) error {
+func dataFeedReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	name := d.Get(constName).(string)
+	name := d.Get("name").(string)
 	query := octopusdeploy.FeedsQuery{
 		PartialName: name,
 		Take:        1,
@@ -29,10 +30,10 @@ func dataFeedReadByName(d *schema.ResourceData, m interface{}) error {
 
 	feeds, err := client.Feeds.Get(query)
 	if err != nil {
-		return createResourceOperationError(errorReadingFeed, name, err)
+		return diag.FromErr(err)
 	}
 	if feeds == nil || len(feeds.Items) == 0 {
-		return fmt.Errorf("Unabled to retrieve feed (partial name: %s)", name)
+		return diag.Errorf("unable to retrieve feed (partial name: %s)", name)
 	}
 
 	logResource(constFeed, m)

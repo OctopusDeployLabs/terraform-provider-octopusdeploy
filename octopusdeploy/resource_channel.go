@@ -1,41 +1,43 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceChannel() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceChannelCreate,
-		Read:   resourceChannelRead,
-		Update: resourceChannelUpdate,
-		Delete: resourceChannelDelete,
+		CreateContext: resourceChannelCreate,
+		ReadContext:   resourceChannelRead,
+		UpdateContext: resourceChannelUpdate,
+		DeleteContext: resourceChannelDelete,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
-			},
-			constDescription: {
 				Type:     schema.TypeString,
+			},
+			"description": {
 				Optional: true,
-			},
-			constProjectID: {
 				Type:     schema.TypeString,
+			},
+			"project_id": {
 				Required: true,
-			},
-			constLifecycleID: {
 				Type:     schema.TypeString,
-				Optional: true,
 			},
-			constIsDefault: {
+			"lifecycle_id": {
+				Optional: true,
+				Type:     schema.TypeString,
+			},
+			"is_default": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			constRule: {
+			"rule": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
@@ -60,13 +62,13 @@ func resourceChannel() *schema.Resource {
 	}
 }
 
-func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
-	channel := buildChannelResource(d)
+func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	channel := expandChannelResource(d)
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.Channels.Add(channel)
 	if err != nil {
-		return createResourceOperationError(errorCreatingChannel, channel.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.GetID()) {
@@ -78,16 +80,17 @@ func resourceChannelCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
+func expandChannelResource(d *schema.ResourceData) *octopusdeploy.Channel {
 	channel := &octopusdeploy.Channel{
 		Name:        d.Get(constName).(string),
-		Description: d.Get(constDescription).(string),
-		ProjectID:   d.Get(constProjectID).(string),
-		LifecycleID: d.Get(constLifecycleID).(string),
-		IsDefault:   d.Get(constIsDefault).(bool),
+		Description: d.Get("description").(string),
+		ProjectID:   d.Get("project_id").(string),
+		LifecycleID: d.Get("lifecycle_id").(string),
+		IsDefault:   d.Get("is_default").(bool),
 	}
+	channel.ID = d.Id()
 
-	if attr, ok := d.GetOk(constRule); ok {
+	if attr, ok := d.GetOk("rule"); ok {
 		tfRules := attr.([]interface{})
 
 		for _, tfrule := range tfRules {
@@ -123,39 +126,36 @@ func flattenRules(channelRules []octopusdeploy.ChannelRule) []map[string]interfa
 	return flattenedRules
 }
 
-func resourceChannelRead(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-
+func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Channels.GetByID(id)
+	resource, err := client.Channels.GetByID(d.Id())
 	if err != nil {
-		return createResourceOperationError(errorReadingChannel, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
-		d.SetId(constEmptyString)
+		d.SetId("")
 		return nil
 	}
 
 	logResource(constChannel, m)
 
-	d.Set(constName, resource.Name)
-	d.Set(constProjectID, resource.ProjectID)
-	d.Set(constDescription, resource.Description)
-	d.Set(constLifecycleID, resource.LifecycleID)
-	d.Set(constIsDefault, resource.IsDefault)
-	d.Set(constRule, flattenRules(resource.Rules))
+	d.Set("name", resource.Name)
+	d.Set("project_id", resource.ProjectID)
+	d.Set("description", resource.Description)
+	d.Set("lifecycle_id", resource.LifecycleID)
+	d.Set("is_default", resource.IsDefault)
+	d.Set("rule", flattenRules(resource.Rules))
 
 	return nil
 }
 
-func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
-	channel := buildChannelResource(d)
-	channel.ID = d.Id() // set ID so Octopus API knows which channel to update
+func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	channel := expandChannelResource(d)
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.Channels.Update(*channel)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingChannel, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.GetID())
@@ -163,15 +163,15 @@ func resourceChannelUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceChannelDelete(d *schema.ResourceData, m interface{}) error {
+func resourceChannelDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	err := client.Channels.DeleteByID(id)
 	if err != nil {
-		return createResourceOperationError(errorDeletingChannel, id, err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
+	d.SetId("")
 	return nil
 }

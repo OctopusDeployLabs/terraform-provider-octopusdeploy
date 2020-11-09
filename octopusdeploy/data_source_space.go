@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -56,7 +55,7 @@ func dataSourceSpaceReadByName(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 	if space == nil {
-		return diag.FromErr(fmt.Errorf("Unable to retrieve space (name: %s)", name))
+		return diag.Errorf("unable to retrieve space (name: %s)", name)
 	}
 
 	flattenSpace(ctx, d, space)

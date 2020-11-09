@@ -9,23 +9,28 @@ import (
 )
 
 func resourceSSHKey() *schema.Resource {
-	schemaMap := getCommonAccountsSchema()
-	schemaMap[constUsername] = &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-	}
-	schemaMap[constPassphrase] = &schema.Schema{
-		Optional:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
 	return &schema.Resource{
 		CreateContext: resourceSSHKeyAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
 		ReadContext:   resourceSSHKeyAccountRead,
-		Schema:        schemaMap,
+		Schema:        getSSHKeyAccountSchema(),
 		UpdateContext: resourceSSHKeyAccountUpdate,
 	}
+}
+
+func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	account := expandSSHKeyAccount(d)
+
+	client := m.(*octopusdeploy.Client)
+	createdAccount, err := client.Accounts.Add(account)
+	if err != nil {
+		diag.FromErr(err)
+	}
+
+	createdSSHKeyAccount := createdAccount.(*octopusdeploy.SSHKeyAccount)
+
+	flattenSSHKeyAccount(ctx, d, createdSSHKeyAccount)
+	return nil
 }
 
 func resourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -40,82 +45,14 @@ func resourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	account := accountResource.(*octopusdeploy.SSHKeyAccount)
+	sshKeyAccount := accountResource.(*octopusdeploy.SSHKeyAccount)
 
-	d.Set(constDescription, account.Description)
-	d.Set(constEnvironments, account.EnvironmentIDs)
-	d.Set(constName, account.GetName())
-	d.Set(constTenantedDeploymentParticipation, account.TenantedDeploymentMode)
-	d.Set(constTenants, account.TenantIDs)
-	d.Set(constTenantTags, account.TenantTags)
-
-	// TODO: determine what to do here...
-	// d.Set(constPassphrase, account.PrivateKeyPassphrase)
-
-	d.SetId(account.GetID())
-
-	return nil
-}
-
-func buildSSHKeyAccount(d *schema.ResourceData) (*octopusdeploy.SSHKeyAccount, error) {
-	var name string
-	if v, ok := d.GetOk(constName); ok {
-		name = v.(string)
-	}
-
-	var username string
-	if v, ok := d.GetOk(constUsername); ok {
-		username = v.(string)
-	}
-
-	var passphrase string
-	if v, ok := d.GetOk(constPassphrase); ok {
-		passphrase = v.(string)
-	}
-
-	account, err := octopusdeploy.NewSSHKeyAccount(name, username, octopusdeploy.NewSensitiveValue(passphrase))
-	if err != nil {
-		return nil, err
-	}
-
-	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
-	}
-
-	if v, ok := d.GetOk(constTenantTags); ok {
-		account.TenantTags = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk(constTenants); ok {
-		account.TenantIDs = getSliceFromTerraformTypeList(v)
-	}
-
-	return account, nil
-}
-
-func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	account, err := buildSSHKeyAccount(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	client := m.(*octopusdeploy.Client)
-	sshKeyAccount, err := client.Accounts.Add(account)
-	if err != nil {
-		diag.FromErr(err)
-	}
-
-	d.SetId(sshKeyAccount.GetID())
-
+	flattenSSHKeyAccount(ctx, d, sshKeyAccount)
 	return nil
 }
 
 func resourceSSHKeyAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	account, err := buildSSHKeyAccount(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	account.ID = d.Id()
+	account := expandSSHKeyAccount(d)
 
 	client := m.(*octopusdeploy.Client)
 	updatedAccount, err := client.Accounts.Update(account)
@@ -123,7 +60,8 @@ func resourceSSHKeyAccountUpdate(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	d.SetId(updatedAccount.GetID())
+	updatedSSHKeyAccount := updatedAccount.(*octopusdeploy.SSHKeyAccount)
 
+	flattenSSHKeyAccount(ctx, d, updatedSSHKeyAccount)
 	return nil
 }

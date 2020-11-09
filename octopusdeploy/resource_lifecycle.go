@@ -14,7 +14,7 @@ func resourceLifecycle() *schema.Resource {
 		StateContext: schema.ImportStatePassthroughContext,
 	}
 	resourceLifecycleSchema := map[string]*schema.Schema{
-		constDescription: &schema.Schema{
+		"description": &schema.Schema{
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -103,7 +103,7 @@ func phaseSchema() *schema.Resource {
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
-		constName: {
+		"name": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
@@ -145,7 +145,7 @@ func buildLifecycleResource(d *schema.ResourceData) *octopusdeploy.Lifecycle {
 
 	lifecycle := octopusdeploy.NewLifecycle(name)
 
-	if v, ok := d.GetOk(constDescription); ok {
+	if v, ok := d.GetOk("description"); ok {
 		lifecycle.Description = v.(string)
 	}
 
@@ -244,7 +244,7 @@ func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
+	d.SetId("")
 	return nil
 }
 
@@ -261,7 +261,7 @@ func flattenPhases(phases []octopusdeploy.Phase) []interface{} {
 	for _, phase := range phases {
 		p := make(map[string]interface{})
 		p[constAutomaticDeploymentTargets] = flattenStringArray(phase.AutomaticDeploymentTargets)
-		p[constID] = phase.ID
+		p["id"] = phase.ID
 		p[constIsOptionalPhase] = phase.IsOptionalPhase
 		p[constMinimumEnvironmentsBeforePromotion] = int(phase.MinimumEnvironmentsBeforePromotion)
 		p[constName] = phase.Name
@@ -279,17 +279,17 @@ func flattenPhases(phases []octopusdeploy.Phase) []interface{} {
 
 func flattenRetentionPeriod(r octopusdeploy.RetentionPeriod) []interface{} {
 	retentionPeriod := make(map[string]interface{})
-	retentionPeriod[constUnit] = r.Unit
-	retentionPeriod[constQuantityToKeep] = int(r.QuantityToKeep)
-	retentionPeriod[constShouldKeepForever] = r.ShouldKeepForever
+	retentionPeriod["unit"] = r.Unit
+	retentionPeriod["quantity_to_keep"] = int(r.QuantityToKeep)
+	retentionPeriod["should_keep_forever"] = r.ShouldKeepForever
 	return []interface{}{retentionPeriod}
 }
 
 func flattenLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *octopusdeploy.Lifecycle) {
-	d.Set(constDescription, lifecycle.Description)
-	d.Set(constName, lifecycle.Name)
-	d.Set(constPhase, flattenPhases(lifecycle.Phases))
-	d.Set(constSpaceID, lifecycle.SpaceID)
+	d.Set("description", lifecycle.Description)
+	d.Set("name", lifecycle.Name)
+	d.Set("phase", flattenPhases(lifecycle.Phases))
+	d.Set("space_id", lifecycle.SpaceID)
 	d.Set(constReleaseRetentionPolicy, flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy))
 	d.Set(constTentacleRetentionPolicy, flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy))
 

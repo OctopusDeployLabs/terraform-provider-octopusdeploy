@@ -2,35 +2,22 @@ package octopusdeploy
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func fetchAndReadAccount(d *schema.ResourceData, m interface{}) (octopusdeploy.IAccount, error) {
-	id := d.Id()
-
+func fetchAndReadAccount(ctx context.Context, d *schema.ResourceData, m interface{}) (octopusdeploy.IAccount, diag.Diagnostics) {
 	client := m.(*octopusdeploy.Client)
-	account, err := client.Accounts.GetByID(id)
+	account, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		return nil, createResourceOperationError(errorReadingAccount, id, err)
-	}
-	if account == nil {
-		d.SetId(constEmptyString)
-		return nil, fmt.Errorf(errorAccountNotFound, id)
+		return nil, diag.FromErr(err)
 	}
 
 	accountResource := account.(*octopusdeploy.AccountResource)
 
-	d.Set(constName, accountResource.GetName())
-	d.Set(constDescription, accountResource.Description)
-	d.Set(constEnvironments, accountResource.EnvironmentIDs)
-	d.Set(constTenantedDeploymentParticipation, accountResource.TenantedDeploymentMode)
-	d.Set(constTenants, accountResource.TenantIDs)
-	d.Set(constTenantTags, accountResource.EnvironmentIDs)
-
+	flattenAccountResource(ctx, d, accountResource)
 	return accountResource, nil
 }
 
@@ -41,14 +28,14 @@ func resourceAccountCreateCommon(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	d.SetId(createdAccount.GetID())
+	createdAccountResource := createdAccount.(*octopusdeploy.AccountResource)
 
+	flattenAccountResource(ctx, d, createdAccountResource)
 	return nil
 }
 
 func resourceAccountUpdateCommon(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	accountResource := buildAccountResource(d)
-	accountResource.ID = d.Id()
+	accountResource := expandAccountResource(d)
 
 	client := m.(*octopusdeploy.Client)
 	updatedAccount, err := client.Accounts.Update(accountResource)
@@ -56,8 +43,9 @@ func resourceAccountUpdateCommon(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	d.SetId(updatedAccount.GetID())
+	updatedAccountResource := updatedAccount.(*octopusdeploy.AccountResource)
 
+	flattenAccountResource(ctx, d, updatedAccountResource)
 	return nil
 }
 
@@ -68,7 +56,6 @@ func resourceAccountDeleteCommon(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
-
+	d.SetId("")
 	return nil
 }

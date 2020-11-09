@@ -26,7 +26,7 @@ func getDeploymentActionSchema() *schema.Schema {
 func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 	element := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			constName: {
+			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the action",
 				Required:    true,
@@ -67,7 +67,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 					Type: schema.TypeString,
 				},
 			},
-			constTenantTags: {
+			"tenant_tags": {
 				Description: "The tags for the tenants that this step applies to",
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -121,7 +121,7 @@ func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeplo
 		Environments:         getSliceFromTerraformTypeList(tfAction[constEnvironments]),
 		ExcludedEnvironments: getSliceFromTerraformTypeList(tfAction[constExcludedEnvironments]),
 		Channels:             getSliceFromTerraformTypeList(tfAction[constChannels]),
-		TenantTags:           getSliceFromTerraformTypeList(tfAction[constTenantTags]),
+		TenantTags:           getSliceFromTerraformTypeList(tfAction["tenant_tags"]),
 		Properties:           map[string]string{},
 	}
 

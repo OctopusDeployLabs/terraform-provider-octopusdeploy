@@ -1,27 +1,29 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceNugetFeed() *schema.Resource {
+func resourceNuGetFeed() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNugetFeedCreate,
-		Read:   resourceNugetFeedRead,
-		Update: resourceNugetFeedUpdate,
-		Delete: resourceNugetFeedDelete,
+		CreateContext: resourceNuGetFeedCreate,
+		ReadContext:   resourceNuGetFeedRead,
+		UpdateContext: resourceNuGetFeedUpdate,
+		DeleteContext: resourceNuGetFeedDelete,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constFeedURI: {
-				Type:     schema.TypeString,
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constEnhancedMode: {
 				Type:     schema.TypeBool,
@@ -39,8 +41,8 @@ func resourceNugetFeed() *schema.Resource {
 				Default:  10,
 			},
 			constUsername: {
-				Type:     schema.TypeString,
 				Optional: true,
+				Type:     schema.TypeString,
 			},
 			constPassword: {
 				Type:      schema.TypeString,
@@ -51,16 +53,16 @@ func resourceNugetFeed() *schema.Resource {
 	}
 }
 
-func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
+func resourceNuGetFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	feedResource, err := client.Feeds.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingFeed, id, err)
+		return diag.FromErr(err)
 	}
 	if feedResource == nil {
-		d.SetId(constEmptyString)
+		d.SetId("")
 		return nil
 	}
 
@@ -79,7 +81,7 @@ func resourceNugetFeedRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func buildNugetFeedResource(d *schema.ResourceData) *octopusdeploy.NuGetFeed {
+func buildNuGetFeedResource(d *schema.ResourceData) *octopusdeploy.NuGetFeed {
 	feedName := d.Get(constName).(string)
 
 	var feedURI string
@@ -129,13 +131,13 @@ func buildNugetFeedResource(d *schema.ResourceData) *octopusdeploy.NuGetFeed {
 	return feed
 }
 
-func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
-	feed := buildNugetFeedResource(d)
+func resourceNuGetFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	feed := buildNuGetFeedResource(d)
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.Feeds.Add(feed)
 	if err != nil {
-		return createResourceOperationError(errorCreatingNuGetFeed, feed.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.GetID()) {
@@ -147,14 +149,14 @@ func resourceNugetFeedCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
-	feed := buildNugetFeedResource(d)
+func resourceNuGetFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	feed := buildNuGetFeedResource(d)
 	feed.ID = d.Id() // set ID so Octopus API knows which feed to update
 
 	client := m.(*octopusdeploy.Client)
 	updatedFeed, err := client.Feeds.Update(feed)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingNuGetFeed, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(updatedFeed.GetID())
@@ -162,16 +164,13 @@ func resourceNugetFeedUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNugetFeedDelete(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-
+func resourceNuGetFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	err := client.Feeds.DeleteByID(id)
+	err := client.Feeds.DeleteByID(d.Id())
 	if err != nil {
-		return createResourceOperationError(errorDeletingNuGetFeed, id, err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
-
+	d.SetId("")
 	return nil
 }

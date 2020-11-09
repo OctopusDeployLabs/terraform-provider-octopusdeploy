@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -14,8 +13,9 @@ func dataSourceUser() *schema.Resource {
 		ReadContext: dataSourceUserReadByName,
 		Schema: map[string]*schema.Schema{
 			"username": {
-				Required: true,
-				Type:     schema.TypeString,
+				Required:  true,
+				Sensitive: true,
+				Type:      schema.TypeString,
 			},
 			"can_password_be_edited": {
 				Computed: true,
@@ -82,7 +82,7 @@ func dataSourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 			},
 			"password": {
-				Optional:  true,
+				Computed:  true,
 				Sensitive: true,
 				Type:      schema.TypeString,
 			},
@@ -92,7 +92,7 @@ func dataSourceUser() *schema.Resource {
 
 func dataSourceUserReadByName(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*octopusdeploy.Client)
-	username := d.Get(constUsername).(string)
+	username := d.Get("username").(string)
 	query := octopusdeploy.UsersQuery{
 		Filter: username,
 		Take:   1,
@@ -103,7 +103,7 @@ func dataSourceUserReadByName(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 	if users == nil || len(users.Items) == 0 {
-		return diag.FromErr(fmt.Errorf("Unabled to retrieve user (filter: %s)", username))
+		return diag.Errorf("unable to retrieve user (filter: %s)", username)
 	}
 
 	// NOTE: two or more users can have the same name in Octopus and

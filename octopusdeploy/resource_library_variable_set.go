@@ -13,11 +13,11 @@ func resourceLibraryVariableSet() *schema.Resource {
 		StateContext: schema.ImportStatePassthroughContext,
 	}
 	resourceLibraryVariableSetSchema := map[string]*schema.Schema{
-		constDescription: {
+		"description": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		constName: {
+		"name": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
@@ -70,7 +70,7 @@ func getTemplateSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		constName: {
+		"name": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
@@ -98,7 +98,7 @@ func buildLibraryVariableSetResource(d *schema.ResourceData) *octopusdeploy.Libr
 
 	libraryVariableSet := octopusdeploy.NewLibraryVariableSet(name)
 
-	if v, ok := d.GetOk(constDescription); ok {
+	if v, ok := d.GetOk("description"); ok {
 		libraryVariableSet.Description = v.(string)
 	}
 
@@ -162,7 +162,7 @@ func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
+	d.SetId("")
 	return nil
 }
 
@@ -190,7 +190,7 @@ func flattenDisplaySettings(displaySettings map[string]interface{}) map[string]s
 }
 
 func flattenLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryVariableSet *octopusdeploy.LibraryVariableSet) {
-	d.Set(constDescription, libraryVariableSet.Description)
+	d.Set("description", libraryVariableSet.Description)
 	d.Set(constName, libraryVariableSet.Name)
 	d.Set(constSpaceID, libraryVariableSet.SpaceID)
 	d.Set(constVariableSetID, libraryVariableSet.VariableSetID)

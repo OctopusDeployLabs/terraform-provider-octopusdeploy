@@ -44,7 +44,7 @@ func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 
 func testNugetFeedBasic(name, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
 	return fmt.Sprintf(`
-		resource octopusdeploy_nuget_feed "foo" {
+		resource "octopusdeploy_nuget_feed" "foo" {
 			name          = "%s"
 			feed_uri      = "%s"
 			username = "%s"

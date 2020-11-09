@@ -11,12 +11,11 @@ import (
 )
 
 func TestAccOctopusDeployProjectBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployProject + "." + localName
 
-	allowDeploymentsToNoTargets := constTrue
-	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -24,12 +23,11 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 		CheckDestroy: testProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(localName, name, allowDeploymentsToNoTargets, description),
+				Config: testAccProjectBasic(localName, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constAllowDeploymentsToNoTargets, allowDeploymentsToNoTargets),
-					resource.TestCheckResourceAttr(prefix, constDescription, description),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 			},
 		},
@@ -37,12 +35,11 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployProject + "." + localName
 
-	allowDeploymentsToNoTargets := constTrue
-	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testProjectDestroy,
@@ -50,21 +47,19 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(localName, name, allowDeploymentsToNoTargets, description),
+				Config: testAccProjectBasic(localName, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constAllowDeploymentsToNoTargets, allowDeploymentsToNoTargets),
-					resource.TestCheckResourceAttr(prefix, constDescription, description),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 			},
 			{
-				Config: testAccProjectBasic(localName, name, allowDeploymentsToNoTargets, description),
+				Config: testAccProjectBasic(localName, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constAllowDeploymentsToNoTargets, allowDeploymentsToNoTargets),
-					resource.TestCheckResourceAttr(prefix, constDescription, description),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.0.step_name"),
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.1.step_name"),
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.iis_website.0.step_name"),
@@ -74,24 +69,23 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	})
 }
 
-func testAccProjectBasic(localName string, name string, allowDeploymentsToNoTargets string, description string) string {
-	lifecycleLocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	lifecycleName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	projectGroupLocalName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	projectGroupName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+func testAccProjectBasic(localName string, name string, description string) string {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	lifecycleID := "${" + constOctopusDeployLifecycle + "." + lifecycleLocalName + ".id}"
 	projectGroupID := "${" + constOctopusDeployProjectGroup + "." + projectGroupLocalName + ".id}"
 
 	return fmt.Sprintf(testAccLifecycleBasic(lifecycleLocalName, lifecycleName)+"\n"+
 		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
-		`resource "%s" "%s" {
-			allow_deployments_to_no_targets = "%s"
+		`resource "octopusdeploy_project" "%s" {
 			description                     = "%s"
 			lifecycle_id                    = "%s"
 			name                            = "%s"
 			project_group_id                = "%s"
-		}`, constOctopusDeployProject, localName, allowDeploymentsToNoTargets, description, lifecycleID, name, projectGroupID)
+		}`, localName, description, lifecycleID, name, projectGroupID)
 }
 
 func testProjectDestroy(s *terraform.State) error {

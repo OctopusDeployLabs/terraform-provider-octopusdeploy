@@ -8,14 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceTokenAccount() *schema.Resource {
+func dataSourceAzureSubscriptionAccount() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceTokenAccountRead,
-		Schema:      getTokenAccountDataSchema(),
+		ReadContext: dataSourceAzureSubscriptionAccountRead,
+		Schema:      getAzureSubscriptionAccountDataSchema(),
 	}
 }
 
-func dataSourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceAzureSubscriptionAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	name := d.Get("name").(string)
 	query := octopusdeploy.AccountsQuery{
@@ -32,8 +32,8 @@ func dataSourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m i
 		return diag.Errorf("unable to retrieve account (partial name: %s)", name)
 	}
 
-	tokenAccount := accounts.Items[0].(*octopusdeploy.TokenAccount)
+	azureSubscriptionAccount := accounts.Items[0].(*octopusdeploy.AzureSubscriptionAccount)
 
-	flattenTokenAccount(ctx, d, tokenAccount)
+	flattenAzureSubscriptionAccount(ctx, d, azureSubscriptionAccount)
 	return nil
 }

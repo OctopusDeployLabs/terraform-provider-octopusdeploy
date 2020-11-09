@@ -10,7 +10,7 @@ import (
 
 func dataSourceEnvironment() *schema.Resource {
 	dataSourceEnvironmentSchema := map[string]*schema.Schema{
-		constName: {
+		"name": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
@@ -23,7 +23,7 @@ func dataSourceEnvironment() *schema.Resource {
 }
 
 func dataSourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	name := d.Get(constName).(string)
+	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)
 	environments, err := client.Environments.GetByName(name)
@@ -33,7 +33,6 @@ func dataSourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m in
 
 	environment := environments[0]
 
-	updateEnvironmentState(ctx, d, environment)
-
+	flattenEnvironment(ctx, d, environment)
 	return nil
 }

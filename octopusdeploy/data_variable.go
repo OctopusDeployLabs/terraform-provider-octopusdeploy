@@ -1,23 +1,24 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataVariable() *schema.Resource {
 	return &schema.Resource{
-		Read: dataVariableReadByName,
+		ReadContext: dataVariableReadByName,
 		Schema: map[string]*schema.Schema{
-			constProjectID: {
-				Type:     schema.TypeString,
+			"project_id": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constType: {
 				Type:     schema.TypeString,
@@ -27,7 +28,7 @@ func dataVariable() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			constDescription: {
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -55,7 +56,7 @@ var schemaVariableScope = &schema.Schema{
 			constActions:      schemaVariableScopeValue,
 			constRoles:        schemaVariableScopeValue,
 			constChannels:     schemaVariableScopeValue,
-			constTenantTags:   schemaVariableScopeValue,
+			"tenant_tags":     schemaVariableScopeValue,
 		},
 	},
 }
@@ -85,33 +86,33 @@ func tfVariableScopetoODVariableScope(d *schema.ResourceData) *octopusdeploy.Var
 	newScope.Role = getSliceFromTerraformTypeList(tfSchemaList[constRoles])
 	newScope.Channel = getSliceFromTerraformTypeList(tfSchemaList[constChannels])
 	newScope.Machine = getSliceFromTerraformTypeList(tfSchemaList[constMachines])
-	newScope.TenantTag = getSliceFromTerraformTypeList(tfSchemaList[constTenantTags])
+	newScope.TenantTag = getSliceFromTerraformTypeList(tfSchemaList["tenant_tags"])
 
 	return &newScope
 }
 
-func dataVariableReadByName(d *schema.ResourceData, m interface{}) error {
-	projectID := d.Get(constProjectID)
+func dataVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	projectID := d.Get("project_id")
 	name := d.Get(constName)
 	scope := tfVariableScopetoODVariableScope(d)
 
 	client := m.(*octopusdeploy.Client)
 	variables, err := client.Variables.GetByName(projectID.(string), name.(string), scope)
 	if err != nil {
-		return fmt.Errorf("error reading variable from project %s with name %s: %s", projectID, name, err.Error())
+		return diag.Errorf("error reading variable from project %s with name %s: %s", projectID, name, err.Error())
 	}
 	if variables == nil {
 		return nil
 	}
 	if len(variables) > 1 {
-		return fmt.Errorf("found %v variables for project %s with name %s, should match exactly 1", len(variables), projectID, name)
+		return diag.Errorf("found %v variables for project %s with name %s, should match exactly 1", len(variables), projectID, name)
 	}
 
 	d.SetId(variables[0].ID)
 	d.Set(constName, variables[0].Name)
 	d.Set(constType, variables[0].Type)
 	d.Set(constValue, variables[0].Value)
-	d.Set(constDescription, variables[0].Description)
+	d.Set("description", variables[0].Description)
 
 	return nil
 }

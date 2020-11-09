@@ -16,7 +16,7 @@ func resourceTagSet() *schema.Resource {
 		UpdateContext: resourceTagSetUpdate,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
+			"name": {
 				Required: true,
 				Type:     schema.TypeString,
 			},
@@ -39,11 +39,11 @@ func getTagSchema() *schema.Schema {
 					Required: true,
 					Type:     schema.TypeString,
 				},
-				constDescription: {
+				"description": {
 					Optional: true,
 					Type:     schema.TypeString,
 				},
-				constName: {
+				"name": {
 					Required: true,
 					Type:     schema.TypeString,
 				},
@@ -93,7 +93,7 @@ func buildTagResource(tfTag map[string]interface{}) octopusdeploy.Tag {
 	tag := octopusdeploy.Tag{
 		CanonicalTagName: tfTag[constCanonicalTagName].(string),
 		Color:            tfTag[constColor].(string),
-		Description:      tfTag[constDescription].(string),
+		Description:      tfTag["description"].(string),
 		Name:             tfTag[constName].(string),
 		SortOrder:        tfTag[constSortOrder].(int),
 	}
@@ -137,7 +137,6 @@ func resourceTagSetDelete(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
-
+	d.SetId("")
 	return nil
 }

@@ -12,12 +12,12 @@ import (
 )
 
 func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployEnvironment + "." + localName
 
 	allowDynamicInfrastructure := false
-	description := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	useGuidedFailure := false
 
 	resource.Test(t, resource.TestCase{
@@ -28,10 +28,10 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testEnvironmentExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constAllowDynamicInfrastructure, strconv.FormatBool(allowDynamicInfrastructure)),
-					resource.TestCheckResourceAttr(prefix, constDescription, description),
-					resource.TestCheckResourceAttr(prefix, constName, name),
-					resource.TestCheckResourceAttr(prefix, constUseGuidedFailure, strconv.FormatBool(useGuidedFailure)),
+					resource.TestCheckResourceAttr(prefix, "allow_dynamic_infrastructure", strconv.FormatBool(allowDynamicInfrastructure)),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "use_guided_failure", strconv.FormatBool(useGuidedFailure)),
 				),
 				Config: testEnvironmentBasic(localName, name, description, allowDynamicInfrastructure, useGuidedFailure),
 			},

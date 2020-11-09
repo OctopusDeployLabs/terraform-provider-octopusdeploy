@@ -1,38 +1,39 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataChannel() *schema.Resource {
+func dataSourceChannel() *schema.Resource {
 	return &schema.Resource{
-		Read: dataChannelReadByName,
+		ReadContext: dataSourceChannelReadByName,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
-			},
-			constDescription: {
 				Type:     schema.TypeString,
+			},
+			"description": {
 				Optional: true,
-			},
-			constProjectID: {
 				Type:     schema.TypeString,
+			},
+			"project_id": {
 				Required: true,
-			},
-			constLifecycleID: {
 				Type:     schema.TypeString,
-				Optional: true,
 			},
-			constIsDefault: {
+			"lifecycle_id": {
+				Optional: true,
+				Type:     schema.TypeString,
+			},
+			"is_default": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			constRule: {
+			"rule": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
@@ -57,9 +58,9 @@ func dataChannel() *schema.Resource {
 	}
 }
 
-func dataChannelReadByName(d *schema.ResourceData, m interface{}) error {
+func dataSourceChannelReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	name := d.Get(constName).(string)
+	name := d.Get("name").(string)
 	query := octopusdeploy.ChannelsQuery{
 		PartialName: name,
 		Take:        1,
@@ -67,13 +68,11 @@ func dataChannelReadByName(d *schema.ResourceData, m interface{}) error {
 
 	channels, err := client.Channels.Get(query)
 	if err != nil {
-		return createResourceOperationError(errorReadingChannel, name, err)
+		return diag.FromErr(err)
 	}
 	if channels == nil || len(channels.Items) == 0 {
-		return fmt.Errorf("Unabled to retrieve channel (partial name: %s)", name)
+		return diag.Errorf("unable to retrieve channel (partial name: %s)", name)
 	}
-
-	logResource(constChannel, m)
 
 	// NOTE: two or more channels can have the same name in Octopus and
 	// therefore, a better search criteria needs to be implemented below
@@ -84,7 +83,7 @@ func dataChannelReadByName(d *schema.ResourceData, m interface{}) error {
 
 			d.SetId(channel.ID)
 			d.Set(constName, channel.Name)
-			d.Set(constDescription, channel.Description)
+			d.Set("description", channel.Description)
 
 			return nil
 		}

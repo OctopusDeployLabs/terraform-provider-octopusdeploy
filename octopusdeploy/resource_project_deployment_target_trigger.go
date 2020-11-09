@@ -1,27 +1,29 @@
 package octopusdeploy
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectDeploymentTargetTriggerCreate,
-		Read:   resourceProjectDeploymentTargetTriggerRead,
-		Update: resourceProjectDeploymentTargetTriggerUpdate,
-		Delete: resourceProjectDeploymentTargetTriggerDelete,
+		CreateContext: resourceProjectDeploymentTargetTriggerCreate,
+		ReadContext:   resourceProjectDeploymentTargetTriggerRead,
+		UpdateContext: resourceProjectDeploymentTargetTriggerUpdate,
+		DeleteContext: resourceProjectDeploymentTargetTriggerDelete,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
+			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The name of the trigger.",
 			},
-			constProjectID: {
+			"project_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The project_id of the Project to attach the trigger to.",
@@ -69,8 +71,8 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 }
 
 func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octopusdeploy.ProjectTrigger, error) {
-	name := d.Get(constName).(string)
-	projectID := d.Get(constProjectID).(string)
+	name := d.Get("name").(string)
+	projectID := d.Get("project_id").(string)
 	shouldRedeploy := d.Get(constShouldRedeploy).(bool)
 
 	deploymentTargetTrigger := octopusdeploy.NewProjectDeploymentTargetTrigger(name, projectID, shouldRedeploy, nil, nil, nil)
@@ -128,16 +130,16 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 	return deploymentTargetTrigger, nil
 }
 
-func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.ProjectTriggers.Add(projectTrigger)
 	if err != nil {
-		return createResourceOperationError(errorCreatingProjectTrigger, projectTrigger.Name, err)
+		return diag.FromErr(err)
 	}
 
 	if isEmpty(resource.GetID()) {
@@ -149,22 +151,22 @@ func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m inte
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.ProjectTriggers.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingProjectTrigger, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
-		d.SetId(constEmptyString)
+		d.SetId("")
 		return nil
 	}
 
 	logResource(constProjectTrigger, m)
 
-	d.Set(constName, resource.Name)
+	d.Set("name", resource.Name)
 	d.Set(constShouldRedeploy, resource.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
 	d.Set(constEventGroups, resource.Filter.EventGroups)
 	d.Set(constEventCategories, resource.Filter.EventCategories)
@@ -174,17 +176,17 @@ func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interf
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	projectTrigger.ID = d.Id() // set ID so Octopus API knows which project trigger to update
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.ProjectTriggers.Update(*projectTrigger)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingProjectTrigger, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.GetID())
@@ -192,16 +194,13 @@ func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m inte
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerDelete(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-
+func resourceProjectDeploymentTargetTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	err := client.ProjectTriggers.DeleteByID(id)
+	err := client.ProjectTriggers.DeleteByID(d.Id())
 	if err != nil {
-		return createResourceOperationError(errorDeletingProjectTrigger, id, err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
-
+	d.SetId("")
 	return nil
 }

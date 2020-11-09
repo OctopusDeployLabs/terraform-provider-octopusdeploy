@@ -12,13 +12,13 @@ import (
 )
 
 func TestAccOctopusDeployTagSetBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployTagSet + "." + localName
 
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tagColor := "#6e6e6e"
-	tagDescription := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	tagName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	tagDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tagName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tagSortOrder := acctest.RandIntRange(0, 10)
 
 	resource.Test(t, resource.TestCase{
@@ -29,14 +29,14 @@ func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testTagSetExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 				Config: testTagSetMinimal(localName, name),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testTagSetExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "tag.0.color", tagColor),
 					resource.TestCheckResourceAttr(prefix, "tag.0.description", tagDescription),
 					resource.TestCheckResourceAttr(prefix, "tag.0.name", tagName),

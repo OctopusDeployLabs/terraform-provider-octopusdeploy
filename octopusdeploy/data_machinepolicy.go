@@ -1,20 +1,23 @@
 package octopusdeploy
 
 import (
+	"context"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataMachinePolicy() *schema.Resource {
 	return &schema.Resource{
-		Read: dataMachinePolicyReadByName,
+		ReadContext: dataMachinePolicyReadByName,
 
 		Schema: map[string]*schema.Schema{
-			constName: {
-				Type:     schema.TypeString,
+			"name": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
-			constDescription: {
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -26,29 +29,25 @@ func dataMachinePolicy() *schema.Resource {
 	}
 }
 
-func dataMachinePolicyReadByName(d *schema.ResourceData, m interface{}) error {
-	name := d.Get(constName).(string)
+func dataMachinePolicyReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)
 	resourceList, err := client.MachinePolicies.GetAll()
 	if err != nil {
-		return createResourceOperationError(errorReadingMachinePolicy, name, err)
+		return diag.FromErr(err)
 	}
 	if len(resourceList) == 0 {
 		return nil
 	}
-
-	logResource(constMachinePolicy, m)
 
 	// NOTE: two or more machine policies could have the same name in Octopus
 	// and therefore, a better search criteria needs to be implemented below
 
 	for _, resource := range resourceList {
 		if resource.Name == name {
-			logResource(constMachinePolicy, m)
-
 			d.SetId(resource.GetID())
-			d.Set(constDescription, resource.Description)
+			d.Set("description", resource.Description)
 			d.Set("isdefault", resource.IsDefault)
 
 			return nil

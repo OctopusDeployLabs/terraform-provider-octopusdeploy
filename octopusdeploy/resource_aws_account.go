@@ -8,28 +8,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceAWSAccount() *schema.Resource {
-	validateSchema()
-	resourceAWSAccountSchema := getCommonAccountsSchema()
-	resourceAWSAccountSchema[constAccessKey] = &schema.Schema{
-		Type:     schema.TypeString,
-		Required: true,
-	}
-	resourceAWSAccountSchema[constSecretKey] = &schema.Schema{
-		Type:      schema.TypeString,
-		Required:  true,
-		Sensitive: true,
-	}
+func resourceAmazonWebServicesAccount() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceAWSAccountCreate,
+		CreateContext: resourceAmazonWebServicesAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
-		ReadContext:   resourceAWSAccountRead,
-		Schema:        resourceAWSAccountSchema,
-		UpdateContext: resourceAWSAccountUpdate,
+		ReadContext:   resourceAmazonWebServicesAccountRead,
+		Schema:        getAmazonWebServicesAccountSchema(),
+		UpdateContext: resourceAmazonWebServicesAccountUpdate,
 	}
 }
 
-func resourceAWSAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	account := expandAmazonWebServicesAccount(d)
+
+	client := m.(*octopusdeploy.Client)
+	createdAccount, err := client.Accounts.Add(account)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	createdAmazonWebServicesAccount := createdAccount.(*octopusdeploy.AmazonWebServicesAccount)
+
+	flattenAmazonWebServicesAccount(ctx, d, createdAmazonWebServicesAccount)
+	return nil
+}
+
+func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
@@ -41,62 +45,14 @@ func resourceAWSAccountRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	account := accountResource.(*octopusdeploy.AmazonWebServicesAccount)
-	flattenAWSAccount(ctx, d, account)
+	amazonWebServicesAccount := accountResource.(*octopusdeploy.AmazonWebServicesAccount)
 
+	flattenAmazonWebServicesAccount(ctx, d, amazonWebServicesAccount)
 	return nil
 }
 
-func buildAWSAccountResource(d *schema.ResourceData) (*octopusdeploy.AmazonWebServicesAccount, error) {
-	name := d.Get(constName).(string)
-	accessKey := d.Get(constAccessKey).(string)
-	password := d.Get(constSecretKey).(string)
-	secretKey := octopusdeploy.NewSensitiveValue(password)
-
-	account, err := octopusdeploy.NewAmazonWebServicesAccount(name, accessKey, secretKey)
-	if err != nil {
-		return nil, err
-	}
-
-	if v, ok := d.GetOk(constTenantedDeploymentParticipation); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
-	}
-
-	if v, ok := d.GetOk(constTenantTags); ok {
-		account.TenantTags = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk(constTenants); ok {
-		account.TenantIDs = getSliceFromTerraformTypeList(v)
-	}
-
-	return account, nil
-}
-
-func resourceAWSAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	account, err := buildAWSAccountResource(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	client := m.(*octopusdeploy.Client)
-	createdAccount, err := client.Accounts.Add(account)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	account = createdAccount.(*octopusdeploy.AmazonWebServicesAccount)
-	flattenAWSAccount(ctx, d, account)
-
-	return nil
-}
-
-func resourceAWSAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	account, err := buildAWSAccountResource(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	account.ID = d.Id()
+func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	account := expandAmazonWebServicesAccount(d)
 
 	client := m.(*octopusdeploy.Client)
 	updatedAccount, err := client.Accounts.Update(account)
@@ -104,8 +60,8 @@ func resourceAWSAccountUpdate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	account = updatedAccount.(*octopusdeploy.AmazonWebServicesAccount)
-	flattenAWSAccount(ctx, d, account)
+	updatedAmazonWebServicesAccount := updatedAccount.(*octopusdeploy.AmazonWebServicesAccount)
 
+	flattenAmazonWebServicesAccount(ctx, d, updatedAmazonWebServicesAccount)
 	return nil
 }

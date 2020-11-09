@@ -14,7 +14,7 @@ func getDeploymentStepSchema() *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				constName: {
+				"name": {
 					Type:        schema.TypeString,
 					Description: "The name of the step",
 					Required:    true,

@@ -13,34 +13,34 @@ import (
 )
 
 func TestAccAccountBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := constOctopusDeployAccount + "." + localName
 
-	accessKey := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	accessKey := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountType := octopusdeploy.AccountTypeAzureServicePrincipal
 	clientID := uuid.New()
-	clientSecret := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	secretKey := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	clientSecret := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	secretKey := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	subscriptionID := uuid.New()
 	tenantedDeploymentMode := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
 	tenantID := uuid.New()
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountDestroy,
+		CheckDestroy: testAccAccountCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testAccountExists(prefix),
+					testAccAccountExists(prefix),
 					resource.TestCheckResourceAttr(prefix, constAccountType, string(accountType)),
 					resource.TestCheckResourceAttr(prefix, constClientID, clientID.String()),
 					resource.TestCheckResourceAttr(prefix, constClientSecret, clientSecret),
-					resource.TestCheckResourceAttr(prefix, constName, name),
+					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, constSubscriptionID, subscriptionID.String()),
 					resource.TestCheckResourceAttr(prefix, constTenantID, tenantID.String()),
-					resource.TestCheckResourceAttr(prefix, constTenantedDeploymentParticipation, string(tenantedDeploymentMode)),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
 				),
 				Config: testAccountBasic(localName, name, accountType, clientID, tenantID, subscriptionID, clientSecret, accessKey, secretKey, tenantedDeploymentMode),
 			},
@@ -61,7 +61,7 @@ func testAccountBasic(localName string, name string, accountType octopusdeploy.A
 	}`, constOctopusDeployAccount, localName, accountType, clientID, clientSecret, name, subscriptionID, tenantID, tenantedDeploymentParticipation)
 }
 
-func testAccountExists(prefix string) resource.TestCheckFunc {
+func testAccAccountExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		accountID := s.RootModule().Resources[prefix].Primary.ID
@@ -73,7 +73,7 @@ func testAccountExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testAccountDestroy(s *terraform.State) error {
+func testAccAccountCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
 		accountID := rs.Primary.ID

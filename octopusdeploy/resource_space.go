@@ -100,6 +100,25 @@ func resourceSpaceCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	return nil
 }
 
+func resourceSpaceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	space := buildSpace(d)
+	space.TaskQueueStopped = true
+
+	client := m.(*octopusdeploy.Client)
+	updatedSpace, err := client.Spaces.Update(space)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = client.Spaces.DeleteByID(updatedSpace.GetID())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
+}
+
 func resourceSpaceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	space, err := client.Spaces.GetByID(d.Id())
@@ -121,25 +140,6 @@ func resourceSpaceUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	flattenSpace(ctx, d, updatedSpace)
-	return nil
-}
-
-func resourceSpaceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	space := buildSpace(d)
-	space.TaskQueueStopped = true
-
-	client := m.(*octopusdeploy.Client)
-	updatedSpace, err := client.Spaces.Update(space)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = client.Spaces.DeleteByID(updatedSpace.GetID())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId("")
 	return nil
 }
 

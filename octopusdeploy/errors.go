@@ -11,7 +11,3 @@ func createInvalidParameterError(methodName string, parameterName string) error 
 func createResourceOperationError(text string, resourceID string, err error) error {
 	return fmt.Errorf(text, resourceID, err)
 }
-
-func nameIsNil(methodName string) error {
-	return fmt.Errorf("%s: name is nil", methodName)
-}

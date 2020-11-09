@@ -25,7 +25,7 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, channelDescription),
+						terraformNamePrefix, "description", channelDescription),
 				),
 			},
 		},
@@ -48,7 +48,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, "this is funky"),
+						terraformNamePrefix, "description", "this is funky"),
 				),
 			},
 			// update channel with a new description
@@ -59,7 +59,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, "funky it is"),
+						terraformNamePrefix, "description", "funky it is"),
 				),
 			},
 		},
@@ -84,7 +84,7 @@ func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, channelDescription),
+						terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "rule.0.version_range", versionRange),
 					resource.TestCheckResourceAttr(
@@ -117,7 +117,7 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, channelDescription),
+						terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "rule.0.version_range", versionRange),
 					resource.TestCheckResourceAttr(
@@ -131,7 +131,7 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constName, updatedChannelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, updatedChannelDescription),
+						terraformNamePrefix, "description", updatedChannelDescription),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "rule.0.version_range", updatedVersionRange),
 					resource.TestCheckResourceAttr(
@@ -162,7 +162,7 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constName, channelName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constDescription, channelDescription),
+						terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "rule.0.version_range", versionRange1),
 					resource.TestCheckResourceAttr(

@@ -1,41 +1,43 @@
 package octopusdeploy
 
 import (
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDeploymentProcess() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDeploymentProcessCreate,
-		Read:   resourceDeploymentProcessRead,
-		Update: resourceDeploymentProcessUpdate,
-		Delete: resourceDeploymentProcessDelete,
+		CreateContext: resourceDeploymentProcessCreate,
+		ReadContext:   resourceDeploymentProcessRead,
+		UpdateContext: resourceDeploymentProcessUpdate,
+		DeleteContext: resourceDeploymentProcessDelete,
 
 		Schema: map[string]*schema.Schema{
-			constProjectID: {
-				Type:     schema.TypeString,
+			"project_id": {
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			constStep: getDeploymentStepSchema(),
 		},
 	}
 }
 
-func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) error {
+func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	deploymentProcess := buildDeploymentProcessResource(d)
 
 	client := m.(*octopusdeploy.Client)
 	project, err := client.Projects.GetByID(deploymentProcess.ProjectID)
 	if err != nil {
-		return createResourceOperationError(errorReadingProject, project.Name, err)
+		diag.FromErr(err)
 	}
 
 	current, err := client.DeploymentProcesses.GetByID(project.DeploymentProcessID)
 	if err != nil {
-		return createResourceOperationError(errorReadingDeploymentProcess, project.DeploymentProcessID, err)
+		diag.FromErr(err)
 	}
 
 	deploymentProcess.ID = current.ID
@@ -43,7 +45,7 @@ func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) erro
 
 	resource, err := client.DeploymentProcesses.Update(*deploymentProcess)
 	if err != nil {
-		return createResourceOperationError(errorCreatingDeploymentProcess, deploymentProcess.ID, err)
+		diag.FromErr(err)
 	}
 
 	if isEmpty(resource.GetID()) {
@@ -56,7 +58,7 @@ func resourceDeploymentProcessCreate(d *schema.ResourceData, m interface{}) erro
 }
 
 func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.DeploymentProcess {
-	deploymentProcess := octopusdeploy.NewDeploymentProcess(d.Get(constProjectID).(string))
+	deploymentProcess := octopusdeploy.NewDeploymentProcess(d.Get("project_id").(string))
 
 	if attr, ok := d.GetOk(constStep); ok {
 		tfSteps := attr.([]interface{})
@@ -70,16 +72,16 @@ func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.Deplo
 	return deploymentProcess
 }
 
-func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error {
+func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	client := m.(*octopusdeploy.Client)
 	resource, err := client.DeploymentProcesses.GetByID(id)
 	if err != nil {
-		return createResourceOperationError(errorReadingDeploymentProcess, id, err)
+		return diag.FromErr(err)
 	}
 	if resource == nil {
-		d.SetId(constEmptyString)
+		d.SetId("")
 		return nil
 	}
 
@@ -88,20 +90,20 @@ func resourceDeploymentProcessRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	deploymentProcess := buildDeploymentProcessResource(d)
 	deploymentProcess.ID = d.Id() // set ID so Octopus API knows which deployment process to update
 
 	client := m.(*octopusdeploy.Client)
 	current, err := client.DeploymentProcesses.GetByID(deploymentProcess.ID)
 	if err != nil {
-		return createResourceOperationError(errorReadingDeploymentProcess, deploymentProcess.ID, err)
+		return diag.FromErr(err)
 	}
 
 	deploymentProcess.Version = current.Version
 	resource, err := client.DeploymentProcesses.Update(*deploymentProcess)
 	if err != nil {
-		return createResourceOperationError(errorUpdatingDeploymentProcess, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.GetID())
@@ -109,11 +111,11 @@ func resourceDeploymentProcessUpdate(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	current, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err != nil {
-		return createResourceOperationError(errorReadingDeploymentProcess, d.Id(), err)
+		return diag.FromErr(err)
 	}
 
 	deploymentProcess := &octopusdeploy.DeploymentProcess{
@@ -123,9 +125,9 @@ func resourceDeploymentProcessDelete(d *schema.ResourceData, m interface{}) erro
 
 	deploymentProcess, err = client.DeploymentProcesses.Update(*deploymentProcess)
 	if err != nil {
-		return createResourceOperationError(errorDeletingDeploymentProcess, deploymentProcess.ID, err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(constEmptyString)
+	d.SetId("")
 	return nil
 }
