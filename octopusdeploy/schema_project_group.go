@@ -40,10 +40,29 @@ func flattenProjectGroup(ctx context.Context, d *schema.ResourceData, projectGro
 
 func getProjectGroupDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": &schema.Schema{
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
+		"ids": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"partial_name": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"skip": {
+			Default:  0,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"take": {
+			Default:  1,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"project_groups": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: getProjectGroupSchema()},
+			Type:     schema.TypeList,
 		},
 	}
 }
@@ -60,6 +79,10 @@ func getProjectGroupSchema() map[string]*schema.Schema {
 				Type: schema.TypeString,
 			},
 			Type: schema.TypeList,
+		},
+		"id": {
+			Computed: true,
+			Type:     schema.TypeString,
 		},
 		"name": &schema.Schema{
 			Required:     true,
