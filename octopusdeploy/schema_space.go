@@ -48,6 +48,78 @@ func flattenSpace(ctx context.Context, d *schema.ResourceData, space *octopusdep
 	d.SetId(space.GetID())
 }
 
+func getSpaceDataSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"ids": {
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"partial_name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"skip": {
+			Default:  0,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"take": {
+			Default:  1,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"spaces": {
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"description": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"is_default": {
+						Optional: true,
+						Type:     schema.TypeBool,
+					},
+					"id": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"name": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"space_managers_team_members": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"space_managers_teams": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"task_queue_stopped": {
+						Optional: true,
+						Type:     schema.TypeBool,
+					},
+				},
+			},
+			Type: schema.TypeList,
+		},
+	}
+}
+
 func getSpaceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"description": {
