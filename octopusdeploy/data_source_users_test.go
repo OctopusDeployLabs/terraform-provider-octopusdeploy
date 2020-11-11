@@ -21,7 +21,7 @@ func TestAccDataSourceUsers(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCDataSourceUsersConfig(localName, username),
+				Config: testAccDataSourceUsersConfig(localName, username),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUsersDataSourceID(name),
 					resource.TestCheckResourceAttr(name, "users.#", "30"),
@@ -45,7 +45,7 @@ func testAccCheckUsersDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCDataSourceUsersConfig(localName string, username string) string {
+func testAccDataSourceUsersConfig(localName string, username string) string {
 	return fmt.Sprintf(`data "octopusdeploy_users" "%s" {
 		filter = "%s"
 	}`, localName, username)

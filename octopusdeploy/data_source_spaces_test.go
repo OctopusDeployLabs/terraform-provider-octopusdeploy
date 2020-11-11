@@ -21,7 +21,7 @@ func TestAccDataSourceSpaces(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCDataSourceSpacesConfig(localName, take),
+				Config: testAccDataSourceSpacesConfig(localName, take),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSpacesDataSourceID(name),
 				)},
@@ -44,7 +44,7 @@ func testAccCheckSpacesDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCDataSourceSpacesConfig(localName string, take int) string {
+func testAccDataSourceSpacesConfig(localName string, take int) string {
 	return fmt.Sprintf(`data "octopusdeploy_spaces" "%s" {
 		take = %v
 	}`, localName, take)

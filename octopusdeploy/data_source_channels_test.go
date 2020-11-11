@@ -21,7 +21,7 @@ func TestAccDataSourceChannels(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCDataSourceChannelsConfig(localName, take),
+				Config: testAccDataSourceChannelsConfig(localName, take),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckChannelsDataSourceID(name),
 				)},
@@ -44,7 +44,7 @@ func testAccCheckChannelsDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCDataSourceChannelsConfig(localName string, take int) string {
+func testAccDataSourceChannelsConfig(localName string, take int) string {
 	return fmt.Sprintf(`data "octopusdeploy_channels" "%s" {
 		take = %v
 	}`, localName, take)

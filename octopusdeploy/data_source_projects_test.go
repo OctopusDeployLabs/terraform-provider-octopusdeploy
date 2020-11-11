@@ -21,7 +21,7 @@ func TestAccDataSourceProjects(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCDataSourceProjectsConfig(localName, take),
+				Config: testAccDataSourceProjectsConfig(localName, take),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectsDataSourceID(name),
 				)},
@@ -44,7 +44,7 @@ func testAccCheckProjectsDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCDataSourceProjectsConfig(localName string, take int) string {
+func testAccDataSourceProjectsConfig(localName string, take int) string {
 	return fmt.Sprintf(`data "octopusdeploy_projects" "%s" {
 		take = %v
 	}`, localName, take)
