@@ -2,33 +2,48 @@ package octopusdeploy
 
 import (
 	"context"
+	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceProjectGroup() *schema.Resource {
+func dataSourceProjectGroups() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceProjectGroupReadByName,
+		ReadContext: dataSourceProjectGroupsRead,
 		Schema:      getProjectGroupDataSchema(),
 	}
 }
 
-func dataSourceProjectGroupReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceProjectGroupsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	query := octopusdeploy.ProjectGroupsQuery{
+		IDs:         expandArray(d.Get("ids").([]interface{})),
+		PartialName: d.Get("partial_name").(string),
+		Skip:        d.Get("skip").(int),
+		Take:        d.Get("take").(int),
+	}
+
 	client := m.(*octopusdeploy.Client)
-	name := d.Get("name").(string)
-	projectGroups, err := client.ProjectGroups.GetByPartialName(name)
+	projectGroups, err := client.ProjectGroups.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if len(projectGroups) == 0 {
-		d.SetId("")
-		return diag.Errorf("unable to retrieve project group (partial name: %s)", name)
+
+	flattenedProjectGroups := []interface{}{}
+	for _, projectGroup := range projectGroups.Items {
+		flattenedProjectGroup := map[string]interface{}{
+			"description":         projectGroup.Description,
+			"environments":        projectGroup.EnvironmentIDs,
+			"id":                  projectGroup.GetID(),
+			"name":                projectGroup.Name,
+			"retention_policy_id": projectGroup.RetentionPolicyID,
+		}
+		flattenedProjectGroups = append(flattenedProjectGroups, flattenedProjectGroup)
 	}
 
-	projectGroup := projectGroups[0]
+	d.Set("project_groups", flattenedProjectGroups)
+	d.SetId("ProjectGroups " + time.Now().UTC().String())
 
-	flattenProjectGroup(ctx, d, projectGroup)
 	return nil
 }
