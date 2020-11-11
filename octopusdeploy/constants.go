@@ -69,7 +69,6 @@ const (
 	constSpaceID                            string = "space_id"
 	constStartMode                          string = "start_mode"
 	constSubscriptionID                     string = "subscription_id"
-	constTag                                string = "tag"
 	constTrue                               string = "true"
 	constType                               string = "type"
 	constUnit                               string = "unit"
