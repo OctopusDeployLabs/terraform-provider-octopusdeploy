@@ -26,9 +26,7 @@ func dataSourceAccounts() *schema.Resource {
 				}),
 			},
 			"ids": {
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 				Type:     schema.TypeList,
 			},
