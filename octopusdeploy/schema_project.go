@@ -100,7 +100,6 @@ func flattenProject(ctx context.Context, d *schema.ResourceData, project *octopu
 	d.Set("deployment_changes_template", project.DeploymentChangesTemplate)
 	d.Set("deployment_process_id", project.DeploymentProcessID)
 	d.Set("description", project.Description)
-	d.Set("is_discrete_channel_release", project.IsDiscreteChannelRelease)
 	d.Set("extension_settings", project.ExtensionSettings)
 	d.Set("included_library_variable_sets", project.IncludedLibraryVariableSets)
 	d.Set("is_disabled", project.IsDisabled)
@@ -170,198 +169,248 @@ func flattenVersioningStrategy(versioningStrategy octopusdeploy.VersioningStrate
 
 func getProjectDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": &schema.Schema{
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"auto_create_release": {
-			Computed: true,
-			Type:     schema.TypeBool,
-		},
-		"auto_deploy_release_overrides": {
-			Computed: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Type: schema.TypeList,
-		},
 		"cloned_from_project_id": {
-			Computed: true,
+			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"default_guided_failure_mode": {
-			Computed: true,
-			Type:     schema.TypeString,
+		"ids": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
 		},
-		"default_to_skip_if_already_installed": {
-			Computed: true,
+		"is_clone": {
+			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"deployment_changes_template": {
-			Computed: true,
+		"partial_name": {
+			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"deployment_process_id": {
-			Computed: true,
+		"name": {
+			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"description": {
-			Computed: true,
-			Type:     schema.TypeString,
+		"skip": {
+			Default:  0,
+			Type:     schema.TypeInt,
+			Optional: true,
 		},
-		"extension_settings": {
+		"take": {
+			Default:  1,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"projects": {
 			Computed: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"extension_id": {
-						Computed: true,
-						Type:     schema.TypeString,
+					"name": &schema.Schema{
+						Required:     true,
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringIsNotEmpty,
 					},
-					"values": {
-						Computed: true,
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
-						Type: schema.TypeList,
-					},
-				},
-			},
-			Type: schema.TypeSet,
-		},
-		"included_library_variable_sets": {
-			Computed: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Type: schema.TypeList,
-		},
-		"is_disabled": {
-			Computed: true,
-			Type:     schema.TypeBool,
-		},
-		"is_discrete_channel_release": {
-			Computed:    true,
-			Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
-			Type:        schema.TypeBool,
-		},
-		"is_version_controlled": {
-			Computed: true,
-			Type:     schema.TypeBool,
-		},
-		"lifecycle_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"project_connectivity_policy": {
-			Computed: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"allow_deployments_to_no_targets": {
+					"auto_create_release": {
 						Computed: true,
 						Type:     schema.TypeBool,
 					},
-					"skip_machine_behavior": {
+					"auto_deploy_release_overrides": {
 						Computed: true,
-						Type:     schema.TypeString,
-					},
-					"target_roles": {
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
-						Computed: true,
+						Elem:     &schema.Schema{Type: schema.TypeString},
 						Type:     schema.TypeList,
 					},
-				},
-			},
-			Type: schema.TypeSet,
-		},
-		"project_group_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"release_creation_strategy": {
-			Computed: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Type: schema.TypeList,
-		},
-		"release_notes_template": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"slug": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"templates": {
-			Computed: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Type: schema.TypeList,
-		},
-		"tenanted_deployment_participation": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"variable_set_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"version_control_settings": {
-			Computed: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"default_branch": {
+					"cloned_from_project_id": {
 						Computed: true,
 						Type:     schema.TypeString,
 					},
-					"password": {
-						Computed:  true,
-						Sensitive: true,
-						Type:      schema.TypeString,
-					},
-					"url": {
+					"default_guided_failure_mode": {
 						Computed: true,
 						Type:     schema.TypeString,
 					},
-					"username": {
-						Computed:  true,
-						Sensitive: true,
-						Type:      schema.TypeString,
-					},
-				},
-			},
-			Type: schema.TypeSet,
-		},
-		"versioning_strategy": {
-			Computed: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"donor_package": {
+					"default_to_skip_if_already_installed": {
 						Computed: true,
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
+						Type:     schema.TypeBool,
+					},
+					"deployment_changes_template": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"deployment_process_id": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"description": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"extension_settings": {
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"extension_id": {
+									Computed: true,
+									Type:     schema.TypeString,
+								},
+								"values": {
+									Computed: true,
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
+									Type: schema.TypeList,
+								},
+							},
 						},
-						Type: schema.TypeList,
+						Type: schema.TypeSet,
 					},
-					"donor_package_step_id": {
+					"included_library_variable_sets": {
+						Computed: true,
+						Elem:     &schema.Schema{Type: schema.TypeString},
+						Type:     schema.TypeList,
+					},
+					"id": {
 						Computed: true,
 						Type:     schema.TypeString,
 					},
-					"template": {
+					"is_disabled": {
+						Computed: true,
+						Type:     schema.TypeBool,
+					},
+					"is_discrete_channel_release": {
+						Computed:    true,
+						Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
+						Type:        schema.TypeBool,
+					},
+					"is_version_controlled": {
+						Computed: true,
+						Type:     schema.TypeBool,
+					},
+					"lifecycle_id": {
 						Computed: true,
 						Type:     schema.TypeString,
+					},
+					"project_connectivity_policy": {
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"allow_deployments_to_no_targets": {
+									Computed: true,
+									Type:     schema.TypeBool,
+								},
+								"skip_machine_behavior": {
+									Computed: true,
+									Type:     schema.TypeString,
+								},
+								"target_roles": {
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
+									Computed: true,
+									Type:     schema.TypeList,
+								},
+							},
+						},
+						Type: schema.TypeSet,
+					},
+					"project_group_id": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"release_creation_strategy": {
+						Optional: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"channel_id": {
+									Optional: true,
+									Type:     schema.TypeString,
+								},
+								"release_creation_package": {
+									Optional: true,
+									Type:     schema.TypeString,
+								},
+								"release_creation_package_step_id": {
+									Optional: true,
+									Type:     schema.TypeString,
+								},
+							},
+						},
+						Type: schema.TypeSet,
+					},
+					"release_notes_template": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"slug": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"space_id": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"templates": {
+						Computed: true,
+						Elem:     &schema.Schema{Type: schema.TypeString},
+						Type:     schema.TypeList,
+					},
+					"tenanted_deployment_participation": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"variable_set_id": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"version_control_settings": {
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"default_branch": {
+									Computed: true,
+									Type:     schema.TypeString,
+								},
+								"password": {
+									Computed:  true,
+									Sensitive: true,
+									Type:      schema.TypeString,
+								},
+								"url": {
+									Computed: true,
+									Type:     schema.TypeString,
+								},
+								"username": {
+									Computed:  true,
+									Sensitive: true,
+									Type:      schema.TypeString,
+								},
+							},
+						},
+						Type: schema.TypeSet,
+					},
+					"versioning_strategy": {
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"donor_package": {
+									Computed: true,
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
+									Type: schema.TypeList,
+								},
+								"donor_package_step_id": {
+									Computed: true,
+									Type:     schema.TypeString,
+								},
+								"template": {
+									Computed: true,
+									Type:     schema.TypeString,
+								},
+							},
+						},
+						Type: schema.TypeSet,
 					},
 				},
 			},
-			Type: schema.TypeSet,
+			Type: schema.TypeList,
 		},
 	}
 }
@@ -429,10 +478,8 @@ func getProjectSchema() map[string]*schema.Schema {
 					},
 					"values": {
 						Optional: true,
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
-						Type: schema.TypeList,
+						Elem:     &schema.Schema{Type: schema.TypeString},
+						Type:     schema.TypeList,
 					},
 				},
 			},
@@ -480,9 +527,7 @@ func getProjectSchema() map[string]*schema.Schema {
 						}, false)),
 					},
 					"target_roles": {
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
+						Elem:     &schema.Schema{Type: schema.TypeString},
 						Optional: true,
 						Type:     schema.TypeList,
 					},
@@ -570,10 +615,8 @@ func getProjectSchema() map[string]*schema.Schema {
 				Schema: map[string]*schema.Schema{
 					"donor_package": {
 						Optional: true,
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
-						Type: schema.TypeList,
+						Elem:     &schema.Schema{Type: schema.TypeString},
+						Type:     schema.TypeList,
 					},
 					"donor_package_step_id": {
 						Optional: true,
