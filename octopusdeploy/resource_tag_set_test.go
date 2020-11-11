@@ -13,7 +13,7 @@ import (
 
 func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployTagSet + "." + localName
+	prefix := "octopusdeploy_tag_set." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tagColor := "#6e6e6e"
@@ -49,13 +49,13 @@ func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 }
 
 func testTagSetMinimal(localName string, name string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_tag_set" "%s" {
 		name = "%s"
-	}`, constOctopusDeployTagSet, localName, name)
+	}`, localName, name)
 }
 
 func testTagSetComplete(localName string, name string, tagColor string, tagDescription string, tagName string, tagSortOrder int) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_tag_set" "%s" {
 		name = "%s"
 		tag {
 			color = "%s"
@@ -63,7 +63,7 @@ func testTagSetComplete(localName string, name string, tagColor string, tagDescr
 			name = "%s"
 			sort_order = "%v"
 		}
-	}`, constOctopusDeployTagSet, localName, name, tagColor, tagDescription, tagName, tagSortOrder)
+	}`, localName, name, tagColor, tagDescription, tagName, tagSortOrder)
 }
 
 func testTagSetExists(prefix string) resource.TestCheckFunc {

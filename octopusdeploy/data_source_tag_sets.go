@@ -8,10 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataTagSet() *schema.Resource {
+func dataSourceTagSet() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataTagSetReadByName,
-
+		ReadContext: dataSourceTagSetReadByName,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Required: true,
@@ -22,7 +21,7 @@ func dataTagSet() *schema.Resource {
 	}
 }
 
-func dataTagSetReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceTagSetReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)

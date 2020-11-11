@@ -12,6 +12,7 @@ func resourceSSHKey() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceSSHKeyAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
+		Importer:      getImporter(),
 		ReadContext:   resourceSSHKeyAccountRead,
 		Schema:        getSSHKeyAccountSchema(),
 		UpdateContext: resourceSSHKeyAccountUpdate,
@@ -39,6 +40,10 @@ func resourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m in
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if accountResource == nil {
+		d.SetId("")
+		return nil
+	}
 
 	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
 	if err != nil {
@@ -55,12 +60,17 @@ func resourceSSHKeyAccountUpdate(ctx context.Context, d *schema.ResourceData, m 
 	account := expandSSHKeyAccount(d)
 
 	client := m.(*octopusdeploy.Client)
-	updatedAccount, err := client.Accounts.Update(account)
+	accountResource, err := client.Accounts.Update(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	updatedSSHKeyAccount := updatedAccount.(*octopusdeploy.SSHKeyAccount)
+	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	updatedSSHKeyAccount := accountResource.(*octopusdeploy.SSHKeyAccount)
 
 	flattenSSHKeyAccount(ctx, d, updatedSSHKeyAccount)
 	return nil

@@ -30,8 +30,6 @@ func TestTokenAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "account_type", "Token"),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
-					resource.TestCheckResourceAttrSet(resourceName, "modified_by"),
-					resource.TestCheckResourceAttrSet(resourceName, "modified_on"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttrSet(resourceName, "space_id"),
 					resource.TestCheckResourceAttr(resourceName, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),

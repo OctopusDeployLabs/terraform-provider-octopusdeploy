@@ -12,22 +12,16 @@ import (
 func resourceDeploymentProcess() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDeploymentProcessCreate,
-		ReadContext:   resourceDeploymentProcessRead,
-		UpdateContext: resourceDeploymentProcessUpdate,
 		DeleteContext: resourceDeploymentProcessDelete,
-
-		Schema: map[string]*schema.Schema{
-			"project_id": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			constStep: getDeploymentStepSchema(),
-		},
+		Importer:      getImporter(),
+		ReadContext:   resourceDeploymentProcessRead,
+		Schema:        getDeploymentProcessSchema(),
+		UpdateContext: resourceDeploymentProcessUpdate,
 	}
 }
 
 func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	deploymentProcess := buildDeploymentProcessResource(d)
+	deploymentProcess := expandDeploymentProcess(d)
 
 	client := m.(*octopusdeploy.Client)
 	project, err := client.Projects.GetByID(deploymentProcess.ProjectID)
@@ -57,26 +51,9 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func buildDeploymentProcessResource(d *schema.ResourceData) *octopusdeploy.DeploymentProcess {
-	deploymentProcess := octopusdeploy.NewDeploymentProcess(d.Get("project_id").(string))
-
-	if attr, ok := d.GetOk(constStep); ok {
-		tfSteps := attr.([]interface{})
-
-		for _, tfStep := range tfSteps {
-			step := buildDeploymentStepResource(tfStep.(map[string]interface{}))
-			deploymentProcess.Steps = append(deploymentProcess.Steps, step)
-		}
-	}
-
-	return deploymentProcess
-}
-
 func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id := d.Id()
-
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.DeploymentProcesses.GetByID(id)
+	resource, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -91,8 +68,7 @@ func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	deploymentProcess := buildDeploymentProcessResource(d)
-	deploymentProcess.ID = d.Id() // set ID so Octopus API knows which deployment process to update
+	deploymentProcess := expandDeploymentProcess(d)
 
 	client := m.(*octopusdeploy.Client)
 	current, err := client.DeploymentProcesses.GetByID(deploymentProcess.ID)

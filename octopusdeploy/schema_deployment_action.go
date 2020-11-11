@@ -89,7 +89,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 }
 
 func addExecutionLocationSchema(element *schema.Resource) {
-	element.Schema[constRunOnServer] = &schema.Schema{
+	element.Schema["run_on_server"] = &schema.Schema{
 		Type:        schema.TypeBool,
 		Description: "Whether this step runs on a worker or on the target",
 		Optional:    true,
@@ -98,7 +98,7 @@ func addExecutionLocationSchema(element *schema.Resource) {
 }
 
 func addActionTypeSchema(element *schema.Resource) {
-	element.Schema[constActionType] = &schema.Schema{
+	element.Schema["action_type"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "The type of action",
 		Required:    true,
@@ -106,7 +106,7 @@ func addActionTypeSchema(element *schema.Resource) {
 }
 
 func addWorkerPoolSchema(element *schema.Resource) {
-	element.Schema[constWorkerPoolID] = &schema.Schema{
+	element.Schema["worker_pool_id"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "Which worker pool to run on",
 		Optional:    true,
@@ -115,14 +115,14 @@ func addWorkerPoolSchema(element *schema.Resource) {
 
 func buildDeploymentActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	action := octopusdeploy.DeploymentAction{
-		Name:                 tfAction[constName].(string),
-		IsDisabled:           tfAction["disabled"].(bool),
-		IsRequired:           tfAction[constRequired].(bool),
+		Channels:             getSliceFromTerraformTypeList(tfAction[constChannels]),
 		Environments:         getSliceFromTerraformTypeList(tfAction[constEnvironments]),
 		ExcludedEnvironments: getSliceFromTerraformTypeList(tfAction[constExcludedEnvironments]),
-		Channels:             getSliceFromTerraformTypeList(tfAction[constChannels]),
-		TenantTags:           getSliceFromTerraformTypeList(tfAction["tenant_tags"]),
+		IsDisabled:           tfAction["disabled"].(bool),
+		IsRequired:           tfAction[constRequired].(bool),
+		Name:                 tfAction["name"].(string),
 		Properties:           map[string]string{},
+		TenantTags:           getSliceFromTerraformTypeList(tfAction["tenant_tags"]),
 	}
 
 	actionType := tfAction[constActionType]

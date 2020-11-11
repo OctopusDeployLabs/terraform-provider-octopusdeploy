@@ -9,8 +9,8 @@ import (
 
 func expandAmazonWebServicesAccount(d *schema.ResourceData) *octopusdeploy.AmazonWebServicesAccount {
 	name := d.Get("name").(string)
-	accessKey := d.Get(constAccessKey).(string)
-	password := d.Get(constSecretKey).(string)
+	accessKey := d.Get("access_key").(string)
+	password := d.Get("secret_key").(string)
 	secretKey := octopusdeploy.NewSensitiveValue(password)
 
 	account, _ := octopusdeploy.NewAmazonWebServicesAccount(name, accessKey, secretKey)
@@ -24,7 +24,7 @@ func expandAmazonWebServicesAccount(d *schema.ResourceData) *octopusdeploy.Amazo
 		account.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk(constTenants); ok {
+	if v, ok := d.GetOk("tenants"); ok {
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
@@ -39,26 +39,6 @@ func flattenAmazonWebServicesAccount(ctx context.Context, d *schema.ResourceData
 	d.Set("secret_key", account.SecretKey)
 
 	d.SetId(account.GetID())
-}
-
-func getAmazonWebServicesAccountDataSchema() map[string]*schema.Schema {
-	schemaMap := getAccountDataSchema()
-	schemaMap["access_key"] = &schema.Schema{
-		Optional:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "AmazonWebServicesAccount",
-		Type:     schema.TypeString,
-	}
-	schemaMap["secret_key"] = &schema.Schema{
-		Optional:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	return schemaMap
 }
 
 func getAmazonWebServicesAccountSchema() map[string]*schema.Schema {

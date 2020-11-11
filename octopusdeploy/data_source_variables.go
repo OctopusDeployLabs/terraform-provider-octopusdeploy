@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataVariable() *schema.Resource {
+func dataSourceVariable() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataVariableReadByName,
+		ReadContext: dataSourceVariableReadByName,
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Required: true,
@@ -91,9 +91,9 @@ func tfVariableScopetoODVariableScope(d *schema.ResourceData) *octopusdeploy.Var
 	return &newScope
 }
 
-func dataVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectID := d.Get("project_id")
-	name := d.Get(constName)
+	name := d.Get("name")
 	scope := tfVariableScopetoODVariableScope(d)
 
 	client := m.(*octopusdeploy.Client)
@@ -109,9 +109,9 @@ func dataVariableReadByName(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	d.SetId(variables[0].ID)
-	d.Set(constName, variables[0].Name)
-	d.Set(constType, variables[0].Type)
-	d.Set(constValue, variables[0].Value)
+	d.Set("name", variables[0].Name)
+	d.Set("type", variables[0].Type)
+	d.Set("value", variables[0].Value)
 	d.Set("description", variables[0].Description)
 
 	return nil

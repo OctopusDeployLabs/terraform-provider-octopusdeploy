@@ -12,7 +12,7 @@ import (
 
 func TestAccOctopusDeployProjectGroupBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployProjectGroup + "." + localName
+	prefix := "octopusdeploy_project_group." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
@@ -34,7 +34,7 @@ func TestAccOctopusDeployProjectGroupBasic(t *testing.T) {
 
 func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployProjectGroup + "." + localName
+	prefix := "octopusdeploy_project_group." + localName
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -75,16 +75,16 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 }
 
 func testAccProjectGroupBasic(localName string, name string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_project_group" "%s" {
 		name = "%s"
-	}`, constOctopusDeployProjectGroup, localName, name)
+	}`, localName, name)
 }
 
 func testAccProjectGroupWithDescription(localName string, name string, description string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_project_group" "%s" {
 		name        = "%s"
 		description = "%s"
-	}`, constOctopusDeployProjectGroup, localName, name, description)
+	}`, localName, name, description)
 }
 
 func testProjectGroupDestroy(s *terraform.State) error {
@@ -117,7 +117,7 @@ func testProjectGroupExists(prefix string) resource.TestCheckFunc {
 func destroyHelperProjectGroup(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if _, err := client.ProjectGroups.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving projectgroup %s", err)
+			return fmt.Errorf("error retrieving projectgroup %s", err)
 		}
 		return fmt.Errorf("projectgroup still exists")
 	}

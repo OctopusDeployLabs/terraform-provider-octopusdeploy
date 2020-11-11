@@ -8,6 +8,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+func expandExtensionSettingsValues(extensionSettingsValues []interface{}) []*octopusdeploy.ExtensionSettingsValues {
+	expandedExtensionSettingsValues := make([]*octopusdeploy.ExtensionSettingsValues, len(extensionSettingsValues))
+	for _, extensionSettingsValue := range extensionSettingsValues {
+		extensionSettingsValueMap := extensionSettingsValue.(map[string]interface{})
+		expandedExtensionSettingsValues = append(expandedExtensionSettingsValues, &octopusdeploy.ExtensionSettingsValues{
+			ExtensionID: extensionSettingsValueMap["extension_id"].(string),
+			Values:      extensionSettingsValueMap["values"].([]interface{}),
+		})
+	}
+	return expandedExtensionSettingsValues
+}
+
 func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	name := d.Get("name").(string)
 	lifecycleID := d.Get("lifecycle_id").(string)
@@ -15,6 +27,18 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 
 	project := octopusdeploy.NewProject(name, lifecycleID, projectGroupID)
 	project.ID = d.Id()
+
+	if v, ok := d.GetOk("auto_create_release"); ok {
+		project.AutoCreateRelease = v.(bool)
+	}
+
+	if v, ok := d.GetOk("auto_deploy_release_overrides"); ok {
+		project.AutoDeployReleaseOverrides = v.([]*octopusdeploy.AutoDeployReleaseOverride)
+	}
+
+	if v, ok := d.GetOk("cloned_from_project_id"); ok {
+		project.DefaultGuidedFailureMode = v.(string)
+	}
 
 	if v, ok := d.GetOk("default_guided_failure_mode"); ok {
 		project.DefaultGuidedFailureMode = v.(string)
@@ -24,16 +48,40 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 		project.DefaultToSkipIfAlreadyInstalled = v.(bool)
 	}
 
+	if v, ok := d.GetOk("deployment_changes_template"); ok {
+		project.DeploymentChangesTemplate = v.(string)
+	}
+
+	if v, ok := d.GetOk("deployment_process_id"); ok {
+		project.DeploymentProcessID = v.(string)
+	}
+
 	if v, ok := d.GetOk("description"); ok {
 		project.Description = v.(string)
+	}
+
+	if v, ok := d.GetOk("extension_settings"); ok {
+		project.ExtensionSettings = expandExtensionSettingsValues(v.(*schema.Set).List())
+	}
+
+	if v, ok := d.GetOk("included_library_variable_sets"); ok {
+		project.IncludedLibraryVariableSets = getSliceFromTerraformTypeList(v)
+	}
+
+	if v, ok := d.GetOk("is_disabled"); ok {
+		project.IsDisabled = v.(bool)
 	}
 
 	if v, ok := d.GetOk("is_discrete_channel_release"); ok {
 		project.IsDiscreteChannelRelease = v.(bool)
 	}
 
-	if v, ok := d.GetOk("included_library_variable_sets"); ok {
-		project.IncludedLibraryVariableSets = getSliceFromTerraformTypeList(v)
+	if v, ok := d.GetOk("is_version_controlled"); ok {
+		project.IsVersionControlled = v.(bool)
+	}
+
+	if v, ok := d.GetOk("lifecycle_id"); ok {
+		project.LifecycleID = v.(string)
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
@@ -122,9 +170,10 @@ func flattenVersioningStrategy(versioningStrategy octopusdeploy.VersioningStrate
 
 func getProjectDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
+		"name": &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
 		},
 		"auto_create_release": {
 			Computed: true,
@@ -163,10 +212,22 @@ func getProjectDataSchema() map[string]*schema.Schema {
 		},
 		"extension_settings": {
 			Computed: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"extension_id": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"values": {
+						Computed: true,
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Type: schema.TypeList,
+					},
+				},
 			},
-			Type: schema.TypeList,
+			Type: schema.TypeSet,
 		},
 		"included_library_variable_sets": {
 			Computed: true,
@@ -307,9 +368,10 @@ func getProjectDataSchema() map[string]*schema.Schema {
 
 func getProjectSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
+		"name": &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
 		},
 		"auto_create_release": {
 			Optional: true,
@@ -345,7 +407,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"deployment_process_id": {
-			Optional: true,
+			Computed: true,
 			Type:     schema.TypeString,
 		},
 		"description": {
@@ -358,11 +420,23 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"extension_settings": {
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
 			Optional: true,
-			Type:     schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"extension_id": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"values": {
+						Optional: true,
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Type: schema.TypeList,
+					},
+				},
+			},
+			Type: schema.TypeSet,
 		},
 		"included_library_variable_sets": {
 			Elem: &schema.Schema{
@@ -445,7 +519,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"slug": {
-			Optional: true,
+			Computed: true,
 			Type:     schema.TypeString,
 		},
 		"space_id": {
@@ -461,7 +535,7 @@ func getProjectSchema() map[string]*schema.Schema {
 		},
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
 		"variable_set_id": {
-			Optional: true,
+			Computed: true,
 			Type:     schema.TypeString,
 		},
 		"version_control_settings": {

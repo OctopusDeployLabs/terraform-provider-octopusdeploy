@@ -25,7 +25,7 @@ func TestAccOctopusDeployDeploymentTargetTriggerAddDelete(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectTriggerExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constName, deployTargetTriggerName),
+						terraformNamePrefix, "name", deployTargetTriggerName),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, constShouldRedeploy, constTrue),
 					resource.TestCheckResourceAttr(
@@ -145,7 +145,7 @@ func testAccProjectTriggerExists(resourceName string) resource.TestCheckFunc {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 		if _, err := client.ProjectTriggers.GetByID(rs.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving project trigger %s", err)
+			return fmt.Errorf("error retrieving project trigger %s", err)
 		}
 
 		return nil

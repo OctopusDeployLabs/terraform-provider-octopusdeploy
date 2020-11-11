@@ -13,7 +13,7 @@ import (
 
 func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployEnvironment + "." + localName
+	prefix := "octopusdeploy_environment." + localName
 
 	allowDynamicInfrastructure := false
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -40,18 +40,18 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 }
 
 func testEnvironmentMinimum(localName string, name string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
 		name = "%s"
-	}`, constOctopusDeployEnvironment, localName, name)
+	}`, localName, name)
 }
 
 func testEnvironmentBasic(localName string, name string, description string, allowDynamicInfrastructure bool, useGuidedFailure bool) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
 		allow_dynamic_infrastructure = "%v"
 		description                  = "%s"
 		name                         = "%s"
 		use_guided_failure           = "%v"
-	}`, constOctopusDeployEnvironment, localName, allowDynamicInfrastructure, description, name, useGuidedFailure)
+	}`, localName, allowDynamicInfrastructure, description, name, useGuidedFailure)
 }
 
 func testEnvironmentExists(prefix string) resource.TestCheckFunc {

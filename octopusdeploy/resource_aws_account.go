@@ -12,6 +12,7 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAmazonWebServicesAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
+		Importer:      getImporter(),
 		ReadContext:   resourceAmazonWebServicesAccountRead,
 		Schema:        getAmazonWebServicesAccountSchema(),
 		UpdateContext: resourceAmazonWebServicesAccountUpdate,
@@ -38,6 +39,10 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if accountResource == nil {
+		d.SetId("")
+		return nil
 	}
 
 	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))

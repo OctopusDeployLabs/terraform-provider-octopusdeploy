@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -12,86 +11,48 @@ import (
 func resourceProjectGroup() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectGroupCreate,
-		ReadContext:   resourceProjectGroupRead,
-		UpdateContext: resourceProjectGroupUpdate,
 		DeleteContext: resourceProjectGroupDelete,
-
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			"description": {
-				Optional: true,
-				Type:     schema.TypeString,
-			},
-		},
+		Importer:      getImporter(),
+		ReadContext:   resourceProjectGroupRead,
+		Schema:        getProjectGroupSchema(),
+		UpdateContext: resourceProjectGroupUpdate,
 	}
-}
-
-func buildProjectGroupResource(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
-	name := d.Get("name").(string)
-
-	projectGroup := octopusdeploy.NewProjectGroup(name)
-
-	if attr, ok := d.GetOk("description"); ok {
-		projectGroup.Description = attr.(string)
-	}
-
-	return projectGroup
 }
 
 func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectGroup := buildProjectGroupResource(d)
+	projectGroup := expandProjectGroup(d)
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.ProjectGroups.Add(projectGroup)
+	createdProjectGroup, err := client.ProjectGroups.Add(projectGroup)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if isEmpty(resource.GetID()) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.GetID())
-	}
-
+	flattenProjectGroup(ctx, d, createdProjectGroup)
 	return nil
 }
 
 func resourceProjectGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id := d.Id()
-
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.ProjectGroups.GetByID(id)
+	projectGroup, err := client.ProjectGroups.GetByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if resource == nil {
-		d.SetId("")
-		return nil
-	}
 
-	logResource(constProjectGroup, m)
-
-	d.Set("name", resource.Name)
-	d.Set("description", resource.Description)
-
+	flattenProjectGroup(ctx, d, projectGroup)
 	return nil
 }
 
 func resourceProjectGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectGroup := buildProjectGroupResource(d)
-	projectGroup.ID = d.Id() // set ID so Octopus API knows which project group to update
+	projectGroup := expandProjectGroup(d)
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.ProjectGroups.Update(*projectGroup)
+	updatedProjectGroup, err := client.ProjectGroups.Update(*projectGroup)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(resource.GetID())
-
+	flattenProjectGroup(ctx, d, updatedProjectGroup)
 	return nil
 }
 

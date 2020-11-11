@@ -9,13 +9,10 @@ import (
 )
 
 func resourceEnvironment() *schema.Resource {
-	resourceEnvironmentImporter := &schema.ResourceImporter{
-		StateContext: schema.ImportStatePassthroughContext,
-	}
 	return &schema.Resource{
 		CreateContext: resourceEnvironmentCreate,
 		DeleteContext: resourceEnvironmentDelete,
-		Importer:      resourceEnvironmentImporter,
+		Importer:      getImporter(),
 		ReadContext:   resourceEnvironmentRead,
 		Schema:        getEnvironmentSchema(),
 		UpdateContext: resourceEnvironmentUpdate,

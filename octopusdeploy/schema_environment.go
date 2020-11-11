@@ -14,7 +14,7 @@ func expandEnvironment(d *schema.ResourceData) *octopusdeploy.Environment {
 	environment := octopusdeploy.NewEnvironment(name)
 	environment.ID = d.Id()
 
-	if v, ok := d.GetOk(constAllowDynamicInfrastructure); ok {
+	if v, ok := d.GetOk("allow_dynamic_infrastructure"); ok {
 		environment.AllowDynamicInfrastructure = v.(bool)
 	}
 
@@ -22,11 +22,11 @@ func expandEnvironment(d *schema.ResourceData) *octopusdeploy.Environment {
 		environment.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk(constSortOrder); ok {
+	if v, ok := d.GetOk("sort_order"); ok {
 		environment.SortOrder = v.(int)
 	}
 
-	if v, ok := d.GetOk(constUseGuidedFailure); ok {
+	if v, ok := d.GetOk("use_guided_failure"); ok {
 		environment.UseGuidedFailure = v.(bool)
 	}
 

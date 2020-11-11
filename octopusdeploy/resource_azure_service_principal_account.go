@@ -12,6 +12,7 @@ func resourceAzureServicePrincipalAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAzureServicePrincipalAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
+		Importer:      getImporter(),
 		ReadContext:   resourceAzureServicePrincipalAccountRead,
 		Schema:        getAzureServicePrincipalAccountSchema(),
 		UpdateContext: resourceAzureServicePrincipalAccountUpdate,
@@ -38,6 +39,10 @@ func resourceAzureServicePrincipalAccountRead(ctx context.Context, d *schema.Res
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if accountResource == nil {
+		d.SetId("")
+		return nil
 	}
 
 	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))

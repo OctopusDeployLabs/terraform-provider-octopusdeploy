@@ -7,7 +7,3 @@ import (
 func createInvalidParameterError(methodName string, parameterName string) error {
 	return fmt.Errorf("%s: invalid input parameter, %s", methodName, parameterName)
 }
-
-func createResourceOperationError(text string, resourceID string, err error) error {
-	return fmt.Errorf(text, resourceID, err)
-}

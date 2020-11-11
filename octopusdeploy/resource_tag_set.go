@@ -12,6 +12,7 @@ func resourceTagSet() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceTagSetCreate,
 		DeleteContext: resourceTagSetDelete,
+		Importer:      getImporter(),
 		ReadContext:   resourceTagSetRead,
 		UpdateContext: resourceTagSetUpdate,
 
@@ -63,7 +64,7 @@ func resourceTagSetRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	d.Set(constName, tagSet.Name)
+	d.Set("name", tagSet.Name)
 	d.SetId(tagSet.GetID())
 
 	return nil
@@ -71,7 +72,7 @@ func resourceTagSetRead(ctx context.Context, d *schema.ResourceData, m interface
 
 func buildTagSetResource(d *schema.ResourceData) *octopusdeploy.TagSet {
 	var name string
-	if v, ok := d.GetOk(constName); ok {
+	if v, ok := d.GetOk("name"); ok {
 		name = v.(string)
 	}
 
@@ -94,7 +95,7 @@ func buildTagResource(tfTag map[string]interface{}) octopusdeploy.Tag {
 		CanonicalTagName: tfTag[constCanonicalTagName].(string),
 		Color:            tfTag[constColor].(string),
 		Description:      tfTag["description"].(string),
-		Name:             tfTag[constName].(string),
+		Name:             tfTag["name"].(string),
 		SortOrder:        tfTag[constSortOrder].(int),
 	}
 

@@ -9,16 +9,9 @@ import (
 )
 
 func dataSourceLifecycle() *schema.Resource {
-	dataSourceLifecycleSchema := map[string]*schema.Schema{
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
-	}
-
 	return &schema.Resource{
 		ReadContext: dataSourceLifecycleRead,
-		Schema:      dataSourceLifecycleSchema,
+		Schema:      getLifecycleDataSchema(),
 	}
 }
 
@@ -39,10 +32,7 @@ func dataSourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	for _, lifecycle := range lifecycles {
 		if lifecycle.Name == name {
-			logResource(constLifecycle, m)
-
 			flattenLifecycle(ctx, d, lifecycle)
-
 			return nil
 		}
 	}

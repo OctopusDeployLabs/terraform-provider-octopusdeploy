@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	uuid "github.com/google/uuid"
@@ -39,15 +38,6 @@ func expandAzureSubscriptionAccount(d *schema.ResourceData) *octopusdeploy.Azure
 
 	if v, ok := d.GetOk("management_endpoint"); ok {
 		account.ManagementEndpoint = v.(string)
-	}
-
-	if v, ok := d.GetOk("modified_by"); ok {
-		account.ModifiedBy = v.(string)
-	}
-
-	if v, ok := d.GetOk("modified_on"); ok {
-		modifiedOnTime, _ := time.Parse(time.RFC3339, v.(string))
-		account.ModifiedOn = &modifiedOnTime
 	}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -94,39 +84,6 @@ func flattenAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData
 	d.Set("subscription_id", account.SubscriptionID.String())
 
 	d.SetId(account.GetID())
-}
-
-func getAzureSubscriptionAccountDataSchema() map[string]*schema.Schema {
-	schemaMap := getAccountDataSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "AzureSubscription",
-		Type:     schema.TypeString,
-	}
-	schemaMap["azure_environment"] = getAzureEnvironmentDataSchema()
-	schemaMap["certificate"] = &schema.Schema{
-		Computed:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["certificate_thumbprint"] = &schema.Schema{
-		Computed:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["management_endpoint"] = &schema.Schema{
-		Computed: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["storage_endpoint_suffix"] = &schema.Schema{
-		Computed: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["subscription_id"] = &schema.Schema{
-		Computed: true,
-		Type:     schema.TypeString,
-	}
-	return schemaMap
 }
 
 func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {

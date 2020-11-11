@@ -23,7 +23,7 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 
 	packageElementSchema := element.Schema[constPackage].Elem.(*schema.Resource).Schema
 
-	packageElementSchema[constName] = &schema.Schema{
+	packageElementSchema["name"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "The name of the package",
 		Required:    true,
@@ -70,7 +70,7 @@ func getPackageSchema(required bool) *schema.Schema {
 
 func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
 	pkg := octopusdeploy.PackageReference{
-		Name:                getStringOrEmpty(tfPkg[constName]),
+		Name:                getStringOrEmpty(tfPkg["name"]),
 		PackageID:           tfPkg[constPackageID].(string),
 		FeedID:              tfPkg[constFeedID].(string),
 		AcquisitionLocation: tfPkg[constAcquisitionLocation].(string),

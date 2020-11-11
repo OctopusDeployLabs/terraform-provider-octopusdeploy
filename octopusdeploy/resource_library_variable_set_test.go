@@ -12,7 +12,7 @@ import (
 
 func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployLibraryVariableSet + "." + localName
+	prefix := "octopusdeploy_library_variable_set." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
@@ -34,7 +34,7 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 
 func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployLibraryVariableSet + "." + localName
+	prefix := "octopusdeploy_library_variable_set." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
@@ -56,7 +56,7 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 
 func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployLibraryVariableSet + "." + localName
+	prefix := "octopusdeploy_library_variable_set." + localName
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -97,20 +97,20 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 }
 
 func testLibraryVariableSetBasic(localName string, name string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_library_variable_set" "%s" {
 		name = "%s"
-	}`, constOctopusDeployLibraryVariableSet, localName, name)
+	}`, localName, name)
 }
 
 func testAccLibraryVariableSetWithDescription(localName string, name string, description string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_library_variable_set" "%s" {
 		name        = "%s"
 		description = "%s"
-	}`, constOctopusDeployLibraryVariableSet, localName, name, description)
+	}`, localName, name, description)
 }
 
 func testLibraryVariableSetComplex(localName string, name string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_library_variable_set" "%s" {
 		description     = "This is the description."
 		name            = "%s"
 		template {
@@ -140,7 +140,7 @@ func testLibraryVariableSetComplex(localName string, name string) string {
 			label            = "qwe"
 			name             = "weq"
 		}
-	}`, constOctopusDeployLibraryVariableSet, localName, name)
+	}`, localName, name)
 }
 
 func testLibraryVariableSetDestroy(s *terraform.State) error {
@@ -177,9 +177,9 @@ func destroyHelperLibraryVariableSet(s *terraform.State) error {
 
 func existsHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if r.Type == constOctopusDeployLibraryVariableSet {
+		if r.Type == "octopusdeploy_library_variable_set" {
 			if _, err := client.LibraryVariableSets.GetByID(r.Primary.ID); err != nil {
-				return fmt.Errorf("received an error retrieving library variable set %s", err)
+				return fmt.Errorf("error retrieving library variable set %s", err)
 			}
 		}
 	}

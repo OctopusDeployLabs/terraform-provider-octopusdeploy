@@ -24,16 +24,9 @@ func dataSourceProjectReadByName(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 	if project == nil {
-		return nil
+		return diag.Errorf("unable to retrieve project (name: %s)", name)
 	}
 
-	d.SetId(project.GetID())
-	d.Set("name", project.Name)
-	d.Set("description", project.Description)
-	d.Set("lifecycle_id", project.LifecycleID)
-	d.Set(constProjectGroupID, project.ProjectGroupID)
-	d.Set(constDefaultFailureMode, project.DefaultGuidedFailureMode)
-	d.Set(constSkipMachineBehavior, project.ProjectConnectivityPolicy.SkipMachineBehavior)
-
+	flattenProject(ctx, d, project)
 	return nil
 }

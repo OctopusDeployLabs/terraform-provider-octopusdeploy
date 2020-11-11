@@ -78,23 +78,11 @@ func resourceAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
+		Importer:      getImporter(),
 		ReadContext:   resourceAccountRead,
 		Schema:        getAccountResourceSchema(),
 		UpdateContext: resourceAccountUpdate,
 	}
-}
-
-func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
-	account, err := client.Accounts.GetByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	accountResource := account.(*octopusdeploy.AccountResource)
-
-	flattenAccountResource(ctx, d, accountResource)
-	return nil
 }
 
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -110,6 +98,23 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	flattenAccountResource(ctx, d, accountResource)
+	return nil
+}
+
+func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	account, err := client.Accounts.GetByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if account == nil {
+		d.SetId("")
+		return nil
+	}
+
+	accountResource := account.(*octopusdeploy.AccountResource)
 
 	flattenAccountResource(ctx, d, accountResource)
 	return nil

@@ -13,9 +13,10 @@ import (
 func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectDeploymentTargetTriggerCreate,
+		DeleteContext: resourceProjectDeploymentTargetTriggerDelete,
+		Importer:      getImporter(),
 		ReadContext:   resourceProjectDeploymentTargetTriggerRead,
 		UpdateContext: resourceProjectDeploymentTargetTriggerUpdate,
-		DeleteContext: resourceProjectDeploymentTargetTriggerDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {

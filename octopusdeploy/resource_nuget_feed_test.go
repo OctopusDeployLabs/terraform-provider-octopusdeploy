@@ -26,16 +26,11 @@ func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 				Config: testNugetFeedBasic(feedName, feedURI, feedUsername, feedPassword, enhancedMode),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployNugetFeedExists(feedPrefix),
-					resource.TestCheckResourceAttr(
-						feedPrefix, constName, feedName),
-					resource.TestCheckResourceAttr(
-						feedPrefix, constFeedURI, feedURI),
-					resource.TestCheckResourceAttr(
-						feedPrefix, constUsername, feedUsername),
-					resource.TestCheckResourceAttr(
-						feedPrefix, constPassword, feedPassword),
-					resource.TestCheckResourceAttr(
-						feedPrefix, constEnhancedMode, enhancedMode),
+					resource.TestCheckResourceAttr(feedPrefix, "name", feedName),
+					resource.TestCheckResourceAttr(feedPrefix, constFeedURI, feedURI),
+					resource.TestCheckResourceAttr(feedPrefix, constUsername, feedUsername),
+					resource.TestCheckResourceAttr(feedPrefix, constPassword, feedPassword),
+					resource.TestCheckResourceAttr(feedPrefix, constEnhancedMode, enhancedMode),
 				),
 			},
 		},

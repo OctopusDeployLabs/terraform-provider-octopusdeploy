@@ -12,7 +12,7 @@ import (
 
 func TestAccOctopusDeployVariableBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployVariable + "." + localName
+	prefix := "octopusdeploy_variable." + localName
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -42,13 +42,13 @@ func testVariableBasic(localName string, name string, description string, value 
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	config := fmt.Sprintf(testAccProjectBasic(projectLocalName, projectName, projectDescription)+"\n"+
-		`resource "%s" "%s" {
+		`resource "octopusdeploy_variable" "%s" {
 			description = "%s"
 			name        = "%s"
-			project_id  = "${%s.%s.id}"
+			project_id  = "${octopusdeploy_project.%s.id}"
 			type        = "String"
 			value       = "%s"
-		}`, constOctopusDeployVariable, localName, description, name, constOctopusDeployProject, projectLocalName, value)
+		}`, localName, description, name, projectLocalName, value)
 	return config
 }
 
@@ -58,18 +58,18 @@ func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
 		var variableID string
 
 		for _, r := range s.RootModule().Resources {
-			if r.Type == constOctopusDeployProject {
+			if r.Type == "octopusdeploy_project" {
 				projectID = r.Primary.ID
 			}
 
-			if r.Type == constOctopusDeployVariable {
+			if r.Type == "octopusdeploy_variable" {
 				variableID = r.Primary.ID
 			}
 		}
 
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		if _, err := client.Variables.GetByID(projectID, variableID); err != nil {
-			return fmt.Errorf("Received an error retrieving variable %s", err)
+			return fmt.Errorf("error retrieving variable %s", err)
 		}
 
 		return nil
@@ -81,11 +81,11 @@ func testVariableDestroy(s *terraform.State) error {
 	var variableID string
 
 	for _, r := range s.RootModule().Resources {
-		if r.Type == constOctopusDeployProject {
+		if r.Type == "octopusdeploy_project" {
 			projectID = r.Primary.ID
 		}
 
-		if r.Type == constOctopusDeployVariable {
+		if r.Type == "octopusdeploy_variable" {
 			variableID = r.Primary.ID
 		}
 	}

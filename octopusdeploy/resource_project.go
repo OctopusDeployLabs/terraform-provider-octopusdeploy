@@ -12,6 +12,7 @@ func resourceProject() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectCreate,
 		DeleteContext: resourceProjectDelete,
+		Importer:      getImporter(),
 		ReadContext:   resourceProjectRead,
 		Schema:        getProjectSchema(),
 		UpdateContext: resourceProjectUpdate,

@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -19,21 +20,19 @@ func TestAccUserImportBasic(t *testing.T) {
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	config := testUserBasic(localName, displayName, true, false, password, username, emailAddress)
-
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testUserCheckDestroy,
+		CheckDestroy: testAccUserCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: config,
+				Config: testAccUserBasic(localName, displayName, true, false, password, username, emailAddress),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"modified_on", "password"},
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
 	})
@@ -41,47 +40,54 @@ func TestAccUserImportBasic(t *testing.T) {
 
 func TestAccUserBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := "octopusdeploy_user." + localName
+	resourceName := "octopusdeploy_user." + localName
 
+	isActive := true
+	isService := false
 	displayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	emailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testUserCheckDestroy,
+		CheckDestroy: testAccUserCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testUserBasic(localName, displayName, true, false, password, username, emailAddress),
 				Check: resource.ComposeTestCheckFunc(
-					testUserExists(prefix),
+					testUserExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "display_name", displayName),
+					resource.TestCheckResourceAttr(resourceName, "email_address", emailAddress),
+					resource.TestCheckResourceAttr(resourceName, "is_active", strconv.FormatBool(isActive)),
+					resource.TestCheckResourceAttr(resourceName, "is_service", strconv.FormatBool(isService)),
+					resource.TestCheckResourceAttr(resourceName, "username", username),
 				),
+				Config: testAccUserBasic(localName, displayName, isActive, isService, password, username, emailAddress),
 			},
 			{
-				Config: testUserDataSource(localName, username),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data."+prefix, "display_name", displayName),
-				),
+				Config:                  testAccUserImport(localName, username),
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
 			},
 		},
 	})
 }
 
-func testUserDataSource(localName string, username string) string {
-	return fmt.Sprintf(`data "octopusdeploy_user" "%s" {
-		username = "%s"
-	}`, localName, username)
+func testAccUserImport(localName string, username string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_user" "%s" {}`, localName)
 }
 
-func testUserBasic(localName string, displayName string, isActive bool, isService bool, password string, username string, emailAddress string) string {
+func testAccUserBasic(localName string, displayName string, isActive bool, isService bool, password string, username string, emailAddress string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_user" "%s" {
-		display_name = "%s"
-		is_active    = %v
-		is_service   = %v
-		password     = "%s"
-		username     = "%s"
+		display_name  = "%s"
+		email_address = "%s"
+		is_active     = %v
+		is_service    = %v
+		password      = "%s"
+		username      = "%s"
 
 		identity {
 			provider = "Octopus ID"
@@ -96,7 +102,7 @@ func testUserBasic(localName string, displayName string, isActive bool, isServic
 				value = "%s"
 			}
 		}
-	}`, localName, displayName, isActive, isService, password, username, emailAddress, displayName)
+	}`, localName, displayName, emailAddress, isActive, isService, password, username, emailAddress, displayName)
 }
 
 func testUserExists(prefix string) resource.TestCheckFunc {
@@ -111,7 +117,7 @@ func testUserExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testUserCheckDestroy(s *terraform.State) error {
+func testAccUserCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_user" {

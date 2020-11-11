@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,15 +20,6 @@ func expandTokenAccount(d *schema.ResourceData) *octopusdeploy.TokenAccount {
 
 	if v, ok := d.GetOk("environments"); ok {
 		account.EnvironmentIDs = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk("modified_by"); ok {
-		account.ModifiedBy = v.(string)
-	}
-
-	if v, ok := d.GetOk("modified_on"); ok {
-		modifiedOnTime, _ := time.Parse(time.RFC3339, v.(string))
-		account.ModifiedOn = &modifiedOnTime
 	}
 
 	if v, ok := d.GetOk("space_id"); ok {
@@ -58,21 +48,6 @@ func flattenTokenAccount(ctx context.Context, d *schema.ResourceData, account *o
 	d.Set("token", account.Token.NewValue)
 
 	d.SetId(account.GetID())
-}
-
-func getTokenAccountDataSchema() map[string]*schema.Schema {
-	schemaMap := getAccountDataSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "Token",
-		Type:     schema.TypeString,
-	}
-	schemaMap["token"] = &schema.Schema{
-		Computed:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	return schemaMap
 }
 
 func getTokenAccountSchema() map[string]*schema.Schema {

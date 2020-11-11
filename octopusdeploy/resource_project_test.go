@@ -12,18 +12,20 @@ import (
 
 func TestAccOctopusDeployProjectBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployProject + "." + localName
+	prefix := "octopusdeploy_project." + localName
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
+	config := testAccProjectBasic(localName, name, description)
+
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccProjectCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(localName, name, description),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "description", description),
@@ -36,18 +38,20 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 
 func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployProject + "." + localName
+	prefix := "octopusdeploy_project." + localName
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
+	config := testAccProjectBasic(localName, name, description)
+
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testProjectDestroy,
+		CheckDestroy: testAccProjectCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(localName, name, description),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "description", description),
@@ -75,8 +79,8 @@ func testAccProjectBasic(localName string, name string, description string) stri
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	lifecycleID := "${" + constOctopusDeployLifecycle + "." + lifecycleLocalName + ".id}"
-	projectGroupID := "${" + constOctopusDeployProjectGroup + "." + projectGroupLocalName + ".id}"
+	lifecycleID := "${octopusdeploy_lifecycle." + lifecycleLocalName + ".id}"
+	projectGroupID := "${octopusdeploy_project_group." + projectGroupLocalName + ".id}"
 
 	return fmt.Sprintf(testAccLifecycleBasic(lifecycleLocalName, lifecycleName)+"\n"+
 		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
@@ -85,10 +89,15 @@ func testAccProjectBasic(localName string, name string, description string) stri
 			lifecycle_id                    = "%s"
 			name                            = "%s"
 			project_group_id                = "%s"
+
+			project_connectivity_policy {
+				allow_deployments_to_no_targets = true
+				skip_machine_behavior           = false
+			}
 		}`, localName, description, lifecycleID, name, projectGroupID)
 }
 
-func testProjectDestroy(s *terraform.State) error {
+func testAccProjectCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
 		projectID := rs.Primary.ID
@@ -125,18 +134,18 @@ func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving project %s", err)
+			return fmt.Errorf("error retrieving project %s", err)
 		}
-		return fmt.Errorf("Project still exists")
+		return fmt.Errorf("project still exists")
 	}
 	return nil
 }
 
 func existsHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if r.Type == constOctopusDeployProject {
+		if r.Type == "octopusdeploy_project" {
 			if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {
-				return fmt.Errorf("Received an error retrieving project with ID %s: %s", r.Primary.ID, err)
+				return fmt.Errorf("error retrieving project with ID %s: %s", r.Primary.ID, err)
 			}
 		}
 	}

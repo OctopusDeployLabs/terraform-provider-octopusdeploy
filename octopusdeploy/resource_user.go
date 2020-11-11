@@ -9,14 +9,10 @@ import (
 )
 
 func resourceUser() *schema.Resource {
-	resourceUserImporter := &schema.ResourceImporter{
-		StateContext: schema.ImportStatePassthroughContext,
-	}
-
 	return &schema.Resource{
 		CreateContext: resourceUserCreate,
 		DeleteContext: resourceUserDelete,
-		Importer:      resourceUserImporter,
+		Importer:      getImporter(),
 		ReadContext:   resourceUserRead,
 		Schema:        getUserSchema(),
 		UpdateContext: resourceUserUpdate,
@@ -39,12 +35,12 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	client := m.(*octopusdeploy.Client)
 	createdUser, err := client.Users.Add(user)
-	if err != nil {
-		return diag.FromErr(err)
+	if createdUser != nil && err == nil {
+		d.SetId(createdUser.GetID())
+		return nil
 	}
 
-	flattenUser(ctx, d, createdUser)
-	return nil
+	return diag.FromErr(err)
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -52,12 +48,12 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 
 	client := m.(*octopusdeploy.Client)
 	updatedUser, err := client.Users.Update(user)
-	if err != nil {
-		return diag.FromErr(err)
+	if updatedUser != nil && err == nil {
+		d.SetId(updatedUser.GetID())
+		return nil
 	}
 
-	flattenUser(ctx, d, updatedUser)
-	return nil
+	return diag.FromErr(err)
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

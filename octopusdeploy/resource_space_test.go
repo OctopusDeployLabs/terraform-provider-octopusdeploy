@@ -17,7 +17,7 @@ func TestAccSpaceImportBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testSpaceDestroy,
+		CheckDestroy: testAccSpaceCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -40,7 +40,7 @@ func TestAccSpaceBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testSpaceDestroy,
+		CheckDestroy: testAccSpaceCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -78,15 +78,15 @@ func testSpaceBasic(localName string, name string) string {
 	userPassword := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	userUsername := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	return fmt.Sprintf(testUserBasic(userLocalName, userDisplayName, true, false, userPassword, userUsername, userEmailAddress)+"\n"+
+	return fmt.Sprintf(testAccUserBasic(userLocalName, userDisplayName, true, false, userPassword, userUsername, userEmailAddress)+"\n"+
 		`resource "octopusdeploy_space" "%s" {
 			name = "%s"
-			space_managers_team_members = ["${%s.%s.id}"]
+			space_managers_team_members = ["${octopusdeploy_user.%s.id}"]
 
 			lifecycle {
 				ignore_changes = [space_managers_teams]
 			}
-		}`, localName, name, constOctopusDeployUser, userLocalName)
+		}`, localName, name, userLocalName)
 }
 
 func testSpaceExists(prefix string) resource.TestCheckFunc {
@@ -101,7 +101,7 @@ func testSpaceExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testSpaceDestroy(s *terraform.State) error {
+func testAccSpaceCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
 		spaceID := rs.Primary.ID

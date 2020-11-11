@@ -14,7 +14,7 @@ import (
 
 func TestAccAccountBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployAccount + "." + localName
+	prefix := "octopusdeploy_account." + localName
 
 	accessKey := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountType := octopusdeploy.AccountTypeAzureServicePrincipal
@@ -39,7 +39,7 @@ func TestAccAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, constClientSecret, clientSecret),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, constSubscriptionID, subscriptionID.String()),
-					resource.TestCheckResourceAttr(prefix, constTenantID, tenantID.String()),
+					resource.TestCheckResourceAttr(prefix, "tenant_id", tenantID.String()),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
 				),
 				Config: testAccountBasic(localName, name, accountType, clientID, tenantID, subscriptionID, clientSecret, accessKey, secretKey, tenantedDeploymentMode),
@@ -49,7 +49,7 @@ func TestAccAccountBasic(t *testing.T) {
 }
 
 func testAccountBasic(localName string, name string, accountType octopusdeploy.AccountType, clientID uuid.UUID, tenantID uuid.UUID, subscriptionID uuid.UUID, clientSecret string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_account" "%s" {
 		account_type = "%s"
 		client_id = "%s"
 		client_secret = "%s"
@@ -58,7 +58,7 @@ func testAccountBasic(localName string, name string, accountType octopusdeploy.A
 		tenant_id = "%s"
 		tenant_tags = ["Hosted Instances/Active"]
 		tenanted_deployment_participation = "%s"
-	}`, constOctopusDeployAccount, localName, accountType, clientID, clientSecret, name, subscriptionID, tenantID, tenantedDeploymentParticipation)
+	}`, localName, accountType, clientID, clientSecret, name, subscriptionID, tenantID, tenantedDeploymentParticipation)
 }
 
 func testAccAccountExists(prefix string) resource.TestCheckFunc {

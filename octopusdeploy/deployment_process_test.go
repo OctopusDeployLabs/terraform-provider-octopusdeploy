@@ -27,21 +27,21 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 
 func testAccDeploymentProcessBasic() string {
 	return `
-		resource octopusdeploy_lifecycle "test" {
+		resource "octopusdeploy_lifecycle" "test" {
 			name = "Test Lifecycle"
 		}
 
-		resource octopusdeploy_project_group "test" {
+		resource "octopusdeploy_project_group" "test" {
 			name = "Test Group"
 		}
 
-		resource octopusdeploy_project "test" {
+		resource "octopusdeploy_project" "test" {
 			name             = "Test Project"
 			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
 			project_group_id = "${octopusdeploy_project_group.test.id}"
 		}
 
-		resource octopusdeploy_deployment_process "test" {
+		resource "octopusdeploy_deployment_process" "test" {
 			project_id = "${octopusdeploy_project.test.id}"
 
 			step {
@@ -132,21 +132,21 @@ func testAccDeploymentProcessBasic() string {
 
 func testAccBuildTestAction(action string) string {
 	return fmt.Sprintf(`
-		resource octopusdeploy_lifecycle "test" {
+		resource "octopusdeploy_lifecycle" "test" {
 			name = "Test Lifecycle"
 		}
 
-		resource octopusdeploy_project_group "test" {
+		resource "octopusdeploy_project_group" "test" {
 			name = "Test Group"
 		}
 
-		resource octopusdeploy_project "test" {
+		resource "octopusdeploy_project" "test" {
 			name             = "Test Project"
 			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
 			project_group_id = "${octopusdeploy_project_group.test.id}"
 		}
 
-		resource octopusdeploy_deployment_process "test" {
+		resource "octopusdeploy_deployment_process" "test" {
 			project_id = "${octopusdeploy_project.test.id}"
 
 			step {
@@ -199,7 +199,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 
 func getDeploymentProcess(s *terraform.State, client *octopusdeploy.Client) (*octopusdeploy.DeploymentProcess, error) {
 	for _, r := range s.RootModule().Resources {
-		if r.Type == constOctopusDeployDeploymentProcess {
+		if r.Type == "octopusdeploy_deployment_process" {
 			return client.DeploymentProcesses.GetByID(r.Primary.ID)
 		}
 	}

@@ -41,26 +41,6 @@ func flattenSSHKeyAccount(ctx context.Context, d *schema.ResourceData, account *
 	d.SetId(account.GetID())
 }
 
-func getSSHKeyAccountDataSchema() map[string]*schema.Schema {
-	schemaMap := getAccountDataSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "SshKeyPair",
-		Type:     schema.TypeString,
-	}
-	schemaMap["username"] = &schema.Schema{
-		Computed:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["passphrase"] = &schema.Schema{
-		Computed:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	return schemaMap
-}
-
 func getSSHKeyAccountSchema() map[string]*schema.Schema {
 	schemaMap := getAccountSchema()
 	schemaMap["account_type"] = &schema.Schema{

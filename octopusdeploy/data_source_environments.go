@@ -6,13 +6,15 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceEnvironment() *schema.Resource {
 	dataSourceEnvironmentSchema := map[string]*schema.Schema{
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
+		"name": &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
 		},
 	}
 

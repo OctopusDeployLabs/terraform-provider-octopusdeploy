@@ -8,10 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataMachinePolicy() *schema.Resource {
+func dataSourceMachinePolicy() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataMachinePolicyReadByName,
-
+		ReadContext: dataSourceMachinePolicyReadByName,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Required: true,
@@ -29,7 +28,7 @@ func dataMachinePolicy() *schema.Resource {
 	}
 }
 
-func dataMachinePolicyReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceMachinePolicyReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)

@@ -9,7 +9,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var mutex = &sync.Mutex{}
@@ -17,89 +16,13 @@ var mutex = &sync.Mutex{}
 func resourceVariable() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVariableCreate,
-		ReadContext:   resourceVariableRead,
-		UpdateContext: resourceVariableUpdate,
 		DeleteContext: resourceVariableDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceVariableImport,
 		},
-		Schema: map[string]*schema.Schema{
-			"project_id": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			"name": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			"type": {
-				Required: true,
-				Type:     schema.TypeString,
-				ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-					"String",
-					"Sensitive",
-					"Certificate",
-					"AmazonWebServicesAccount",
-					"AzureAccount",
-				}, false)),
-			},
-			"value": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"sensitive_value"},
-			},
-			"sensitive_value": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"value"},
-				Sensitive:     true,
-			},
-			"description": {
-				Optional: true,
-				Type:     schema.TypeString,
-			},
-			"scope": schemaVariableScope,
-			"is_sensitive": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"prompt": {
-				Type:     schema.TypeSet,
-				MaxItems: 1,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"label": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"is_required": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-					},
-				},
-			},
-			"pgp_key": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				ForceNew:  true,
-				Sensitive: true,
-			},
-			"key_fingerprint": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"encrypted_value": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-		},
+		ReadContext:   resourceVariableRead,
+		Schema:        getVariableSchema(),
+		UpdateContext: resourceVariableUpdate,
 	}
 }
 
@@ -120,72 +43,30 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 	projectID := d.Get("project_id").(string)
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Variables.GetByID(projectID, id)
+	variable, err := client.Variables.GetByID(projectID, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if resource == nil {
+	if variable == nil {
 		d.SetId("")
 		return nil
 	}
 
 	logResource(constVariable, m)
 
-	d.Set("name", resource.Name)
-	d.Set("type", resource.Type)
+	d.Set("name", variable.Name)
+	d.Set("type", variable.Type)
 
 	isSensitive := d.Get(constIsSensitive).(bool)
 	if isSensitive {
 		d.Set(constValue, nil)
 	} else {
-		d.Set(constValue, resource.Value)
+		d.Set(constValue, variable.Value)
 	}
 
-	d.Set("description", resource.Description)
+	d.Set("description", variable.Description)
 
 	return nil
-}
-
-func buildVariableResource(d *schema.ResourceData) *octopusdeploy.Variable {
-	varName := d.Get(constName).(string)
-	varType := d.Get(constType).(string)
-
-	var varDesc, varValue string
-	var varSensitive bool
-
-	if varDescInterface, ok := d.GetOk("description"); ok {
-		varDesc = varDescInterface.(string)
-	}
-
-	if varSensitiveInterface, ok := d.GetOk(constIsSensitive); ok {
-		varSensitive = varSensitiveInterface.(bool)
-	}
-
-	if varSensitive {
-		varValue = d.Get(constSensitiveValue).(string)
-	} else {
-		varValue = d.Get(constValue).(string)
-	}
-
-	varScopeInterface := tfVariableScopetoODVariableScope(d)
-
-	newVar := octopusdeploy.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
-
-	varPrompt, ok := d.GetOk(constPrompt)
-	if ok {
-		tfPromptSettings := varPrompt.(*schema.Set)
-		if len(tfPromptSettings.List()) == 1 {
-			tfPromptList := tfPromptSettings.List()[0].(map[string]interface{})
-			newPrompt := octopusdeploy.VariablePromptOptions{
-				Description: tfPromptList["description"].(string),
-				Label:       tfPromptList["label"].(string),
-				Required:    tfPromptList["is_required"].(bool),
-			}
-			newVar.Prompt = &newPrompt
-		}
-	}
-
-	return newVar
 }
 
 func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -196,7 +77,7 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	projID := d.Get("project_id").(string)
-	newVariable := buildVariableResource(d)
+	newVariable := expandVariable(d)
 
 	client := m.(*octopusdeploy.Client)
 	tfVar, err := client.Variables.AddSingle(projID, newVariable)
@@ -229,8 +110,7 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	tfVar := buildVariableResource(d)
-	tfVar.ID = d.Id() // set ID so Octopus API knows which variable to update
+	tfVar := expandVariable(d)
 	projID := d.Get("project_id").(string)
 
 	client := m.(*octopusdeploy.Client)
@@ -258,10 +138,9 @@ func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m inter
 	defer mutex.Unlock()
 
 	projID := d.Get("project_id").(string)
-	variableID := d.Id()
 
 	client := m.(*octopusdeploy.Client)
-	_, err := client.Variables.DeleteSingle(projID, variableID)
+	_, err := client.Variables.DeleteSingle(projID, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

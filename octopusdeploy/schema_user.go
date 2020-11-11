@@ -2,29 +2,17 @@ package octopusdeploy
 
 import (
 	"context"
-	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandUser(d *schema.ResourceData) *octopusdeploy.User {
-	var username string
-	if v, ok := d.GetOk("username"); ok {
-		username = v.(string)
-	}
-
-	var displayName string
-	if v, ok := d.GetOk("display_name"); ok {
-		displayName = v.(string)
-	}
+	username := d.Get("username").(string)
+	displayName := d.Get("display_name").(string)
 
 	user := octopusdeploy.NewUser(username, displayName)
 	user.ID = d.Id()
-
-	if v, ok := d.GetOk("can_password_be_edited"); ok {
-		user.CanPasswordBeEdited = v.(bool)
-	}
 
 	if v, ok := d.GetOk("email_address"); ok {
 		user.EmailAddress = v.(string)
@@ -44,15 +32,6 @@ func expandUser(d *schema.ResourceData) *octopusdeploy.User {
 
 	if v, ok := d.GetOk("is_service"); ok {
 		user.IsService = v.(bool)
-	}
-
-	if v, ok := d.GetOk("modified_by"); ok {
-		user.ModifiedBy = v.(string)
-	}
-
-	if v, ok := d.GetOk("modified_on"); ok {
-		modifiedOnTime, _ := time.Parse(time.RFC3339, v.(string))
-		user.ModifiedOn = &modifiedOnTime
 	}
 
 	if v, ok := d.GetOk("password"); ok {
@@ -144,13 +123,6 @@ func flattenUser(ctx context.Context, d *schema.ResourceData, user *octopusdeplo
 	d.Set("is_active", user.IsActive)
 	d.Set("is_requestor", user.IsRequestor)
 	d.Set("is_service", user.IsService)
-	d.Set("modified_by", user.ModifiedBy)
-
-	if user.ModifiedOn != nil {
-		d.Set("modified_on", user.ModifiedOn.Format(time.RFC3339))
-	}
-
-	d.Set("password", user.Password)
 	d.Set("username", user.Username)
 
 	d.SetId(user.GetID())
@@ -213,14 +185,6 @@ func getUserSchema() map[string]*schema.Schema {
 		"is_service": {
 			Optional: true,
 			Type:     schema.TypeBool,
-		},
-		"modified_by": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"modified_on": {
-			Computed: true,
-			Type:     schema.TypeString,
 		},
 		"username": {
 			Required:  true,

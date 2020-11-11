@@ -12,7 +12,7 @@ import (
 
 func TestAccOctopusDeployFeedBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployFeed + "." + localName
+	prefix := "octopusdeploy_feed." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	const feedType = "NuGet"
@@ -43,14 +43,14 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 }
 
 func testFeedtBasic(localName string, name string, feedType string, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_feed" "%s" {
 		name          = "%s"
 		feed_type     = "%s"
 		feed_uri      = "%s"
 		username      = "%s"
 		password      = "%s"
 		enhanced_mode = "%s"
-	}`, constOctopusDeployFeed, localName, name, feedType, feedURI, feedUsername, feedPassword, enhancedMode)
+	}`, localName, name, feedType, feedURI, feedUsername, feedPassword, enhancedMode)
 }
 
 func testFeedExists(prefix string) resource.TestCheckFunc {

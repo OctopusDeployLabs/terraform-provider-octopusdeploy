@@ -11,7 +11,7 @@ import (
 
 func TestAccAWSAccountBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := constOctopusDeployAWSAccount + "." + localName
+	prefix := "octopusdeploy_aws_account." + localName
 
 	accessKey := acctest.RandString(10)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -27,9 +27,9 @@ func TestAccAWSAccountBasic(t *testing.T) {
 				Config: testAWSAccountBasic(localName, name, accessKey, secretKey, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
 					testAccAccountExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constAccessKey, accessKey),
+					resource.TestCheckResourceAttr(prefix, "access_key", accessKey),
 					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr(prefix, constSecretKey, secretKey),
+					resource.TestCheckResourceAttr(prefix, "secret_key", secretKey),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 				),
 			},
@@ -38,10 +38,10 @@ func TestAccAWSAccountBasic(t *testing.T) {
 }
 
 func testAWSAccountBasic(localName string, name string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
-	return fmt.Sprintf(`resource "%s" "%s" {
+	return fmt.Sprintf(`resource "octopusdeploy_aws_account" "%s" {
 		access_key = "%s"
 		name = "%s"
 		secret_key = "%s"
 		tenanted_deployment_participation = "%s"
-	}`, constOctopusDeployAWSAccount, localName, accessKey, name, secretKey, tenantedDeploymentParticipation)
+	}`, localName, accessKey, name, secretKey, tenantedDeploymentParticipation)
 }

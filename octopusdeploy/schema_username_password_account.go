@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,15 +22,6 @@ func expandUsernamePasswordAccount(d *schema.ResourceData) *octopusdeploy.Userna
 
 	if v, ok := d.GetOk("environments"); ok {
 		account.EnvironmentIDs = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk("modified_by"); ok {
-		account.ModifiedBy = v.(string)
-	}
-
-	if v, ok := d.GetOk("modified_on"); ok {
-		modifiedOnTime, _ := time.Parse(time.RFC3339, v.(string))
-		account.ModifiedOn = &modifiedOnTime
 	}
 
 	if v, ok := d.GetOk("space_id"); ok {
@@ -65,26 +55,6 @@ func flattenUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData,
 	d.Set("password", account.Password.NewValue)
 
 	d.SetId(account.GetID())
-}
-
-func getUsernamePasswordAccountDataSchema() map[string]*schema.Schema {
-	schemaMap := getAccountDataSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "UsernamePassword",
-		Type:     schema.TypeString,
-	}
-	schemaMap["password"] = &schema.Schema{
-		Computed:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["username"] = &schema.Schema{
-		Computed:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	return schemaMap
 }
 
 func getUsernamePasswordAccountSchema() map[string]*schema.Schema {

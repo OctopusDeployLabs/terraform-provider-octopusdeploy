@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	uuid "github.com/google/uuid"
@@ -32,15 +31,6 @@ func expandAzureServicePrincipalAccount(d *schema.ResourceData) *octopusdeploy.A
 
 	if v, ok := d.GetOk("environments"); ok {
 		account.EnvironmentIDs = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk("modified_by"); ok {
-		account.ModifiedBy = v.(string)
-	}
-
-	if v, ok := d.GetOk("modified_on"); ok {
-		modifiedOnTime, _ := time.Parse(time.RFC3339, v.(string))
-		account.ModifiedOn = &modifiedOnTime
 	}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -87,42 +77,6 @@ func flattenAzureServicePrincipalAccount(ctx context.Context, d *schema.Resource
 	d.Set("tenant_id", account.TenantID.String())
 
 	d.SetId(account.GetID())
-}
-
-func getAzureServicePrincipalAccountDataSchema() map[string]*schema.Schema {
-	schemaMap := getAccountDataSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "AzureServicePrincipal",
-		Type:     schema.TypeString,
-	}
-	schemaMap["application_id"] = &schema.Schema{
-		Computed: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["application_password"] = &schema.Schema{
-		Computed:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["authentication_endpoint"] = &schema.Schema{
-		Computed: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["azure_environment"] = getAzureEnvironmentDataSchema()
-	schemaMap["resource_manager_endpoint"] = &schema.Schema{
-		Computed: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["subscription_id"] = &schema.Schema{
-		Computed: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["tenant_id"] = &schema.Schema{
-		Computed: true,
-		Type:     schema.TypeString,
-	}
-	return schemaMap
 }
 
 func getAzureServicePrincipalAccountSchema() map[string]*schema.Schema {

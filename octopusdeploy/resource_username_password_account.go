@@ -12,6 +12,7 @@ func resourceUsernamePassword() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceUsernamePasswordCreate,
 		DeleteContext: resourceAccountDeleteCommon,
+		Importer:      getImporter(),
 		ReadContext:   resourceUsernamePasswordRead,
 		Schema:        getUsernamePasswordAccountSchema(),
 		UpdateContext: resourceUsernamePasswordUpdate,
@@ -39,6 +40,15 @@ func resourceUsernamePasswordRead(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if accountResource == nil {
+		d.SetId("")
+		return nil
+	}
+
+	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	usernamePasswordAccount := accountResource.(*octopusdeploy.UsernamePasswordAccount)
 
@@ -50,12 +60,17 @@ func resourceUsernamePasswordUpdate(ctx context.Context, d *schema.ResourceData,
 	account := expandUsernamePasswordAccount(d)
 
 	client := m.(*octopusdeploy.Client)
-	updatedAccount, err := client.Accounts.Update(account)
+	accountResource, err := client.Accounts.Update(account)
 	if err != nil {
 		diag.FromErr(err)
 	}
 
-	updatedUsernamePasswordAccount := updatedAccount.(*octopusdeploy.UsernamePasswordAccount)
+	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	updatedUsernamePasswordAccount := accountResource.(*octopusdeploy.UsernamePasswordAccount)
 
 	flattenUsernamePasswordAccount(ctx, d, updatedUsernamePasswordAccount)
 	return nil
