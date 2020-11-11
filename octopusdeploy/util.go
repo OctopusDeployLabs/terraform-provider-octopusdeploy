@@ -12,6 +12,28 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func getImporter() *schema.ResourceImporter {
+	return &schema.ResourceImporter{
+		StateContext: schema.ImportStatePassthroughContext,
+	}
+}
+
+func expandArray(values []interface{}) []string {
+	s := make([]string, len(values))
+	for i, v := range values {
+		s[i] = v.(string)
+	}
+	return s
+}
+
+func flattenArray(values []string) []interface{} {
+	s := make([]interface{}, len(values))
+	for i, v := range values {
+		s[i] = v
+	}
+	return s
+}
+
 // wrapper function to be removed
 func validateDiagFunc(validateFunc func(interface{}, string) ([]string, []error)) schema.SchemaValidateDiagFunc {
 	return func(i interface{}, path cty.Path) diag.Diagnostics {
@@ -100,25 +122,6 @@ func getStringOrEmpty(tfAttr interface{}) string {
 	return tfAttr.(string)
 }
 
-func getFeedTypeSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeString,
-		Optional: true,
-		Default:  "None",
-		ValidateDiagFunc: validateValueFunc([]string{
-			"None",
-			"AwsElasticContainerRegistry",
-			"BuiltIn",
-			"Docker",
-			"GitHub",
-			"Helm",
-			"Maven",
-			"NuGet",
-			"OctopusProject",
-		}),
-	}
-}
-
 func getTenantedDeploymentSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeString,
@@ -135,7 +138,7 @@ func getTenantedDeploymentSchema() *schema.Schema {
 func destroyFeedHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if _, err := client.Feeds.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving feed %s", err)
+			return fmt.Errorf("error retrieving feed %s", err)
 		}
 		return fmt.Errorf("Feed still exists")
 	}
@@ -145,7 +148,7 @@ func destroyFeedHelper(s *terraform.State, client *octopusdeploy.Client) error {
 func feedExistsHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if _, err := client.Feeds.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving feed %s", err)
+			return fmt.Errorf("error retrieving feed %s", err)
 		}
 	}
 	return nil
