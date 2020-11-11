@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -138,8 +137,6 @@ func dataSourceUsersRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	d.Set("users", flattenedUsers)
 	d.SetId("Users " + time.Now().UTC().String())
-
-	log.Println(flattenedUsers)
 
 	return nil
 }
