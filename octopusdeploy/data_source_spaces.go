@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -54,8 +53,6 @@ func dataSourceSpacesRead(ctx context.Context, d *schema.ResourceData, m interfa
 
 	d.Set("spaces", flattenedSpaces)
 	d.SetId("Spaces " + time.Now().UTC().String())
-
-	log.Println(flattenedSpaces)
 
 	return nil
 }
