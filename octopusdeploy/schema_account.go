@@ -19,6 +19,131 @@ func flattenAccount(ctx context.Context, d *schema.ResourceData, account octopus
 	d.Set("tenant_tags", account.GetTenantTags())
 }
 
+func getAccountDataSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"account_type": {
+			Optional: true,
+			Type:     schema.TypeString,
+			ValidateDiagFunc: validateValueFunc([]string{
+				"AmazonWebServicesAccount",
+				"AzureServicePrincipal",
+				"AzureSubscription",
+				"SshKeyPair",
+				"Token",
+				"UsernamePassword",
+			}),
+		},
+		"ids": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"partial_name": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"skip": {
+			Default:  0,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"take": {
+			Default:  1,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"accounts": {
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"access_key": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"account_type": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"application_id": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"authentication_endpoint": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"azure_environment": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"certificate_thumbprint": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"description": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"environments": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"id": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"name": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"space_id": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"resource_management_endpoint": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"subscription_id": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"tenant_id": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"tenant_tags": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"tenanted_deployment_participation": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+					"tenants": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"username": {
+						Optional: true,
+						Type:     schema.TypeString,
+					},
+				},
+			},
+			Type: schema.TypeList,
+		},
+	}
+}
+
 func getAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"account_type": {
