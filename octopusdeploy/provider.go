@@ -23,9 +23,9 @@ func Provider() *schema.Provider {
 			"octopusdeploy_project_groups":        dataSourceProjectGroup(),
 			"octopusdeploy_projects":              dataSourceProjects(),
 			"octopusdeploy_spaces":                dataSourceSpaces(),
-			// "octopusdeploy_tag_sets":              dataSourceTagSets(),
-			"octopusdeploy_users":     dataSourceUsers(),
-			"octopusdeploy_variables": dataSourceVariable(),
+			"octopusdeploy_tag_sets":              dataSourceTagSets(),
+			"octopusdeploy_users":                 dataSourceUsers(),
+			"octopusdeploy_variables":             dataSourceVariable(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_account":                           resourceAccount(),
