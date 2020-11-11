@@ -2,41 +2,45 @@ package octopusdeploy
 
 import (
 	"context"
+	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceTagSet() *schema.Resource {
+func dataSourceTagSets() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceTagSetReadByName,
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			constTag: getTagSchema(),
-		},
+		ReadContext: dataSourceTagSetsRead,
+		Schema:      getTagSetDataSchema(),
 	}
 }
 
-func dataSourceTagSetReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	name := d.Get("name").(string)
+func dataSourceTagSetsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	query := octopusdeploy.TagSetsQuery{
+		IDs:         expandArray(d.Get("ids").([]interface{})),
+		PartialName: d.Get("partial_name").(string),
+		Skip:        d.Get("skip").(int),
+		Take:        d.Get("take").(int),
+	}
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.TagSets.GetByName(name)
+	tagSets, err := client.TagSets.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if resource == nil {
-		return nil
+
+	flattenedTagSets := []interface{}{}
+	for _, tagSet := range tagSets.Items {
+		flattenedTagSet := map[string]interface{}{
+			"id":   tagSet.GetID(),
+			"name": tagSet.Name,
+		}
+		flattenedTagSets = append(flattenedTagSets, flattenedTagSet)
 	}
 
-	logResource(constTagSet, m)
-
-	d.SetId(resource.GetID())
-	d.Set("name", resource.Name)
+	d.Set("tag_sets", flattenedTagSets)
+	d.SetId("TagSets " + time.Now().UTC().String())
 
 	return nil
 }
