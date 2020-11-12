@@ -52,7 +52,7 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 			"is_version_controlled":                project.IsVersionControlled,
 			"lifecycle_id":                         project.LifecycleID,
 			"name":                                 project.Name,
-			"project_connectivity_policy":          flattenProjectConnectivityPolicy(project.ProjectConnectivityPolicy),
+			"connectivity_policy":                  flattenProjectConnectivityPolicy(project.ConnectivityPolicy),
 			"project_group_id":                     project.ProjectGroupID,
 			"release_creation_strategy":            flattenReleaseCreationStrategy(project.ReleaseCreationStrategy),
 			"release_notes_template":               project.ReleaseNotesTemplate,
