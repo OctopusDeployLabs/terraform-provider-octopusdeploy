@@ -28,7 +28,7 @@ func resourceLifecycleCreate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	flattenLifecycle(ctx, d, createdLifecycle)
+	setLifecycle(ctx, d, createdLifecycle)
 	return nil
 }
 
@@ -39,7 +39,7 @@ func resourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	flattenLifecycle(ctx, d, lifecycle)
+	setLifecycle(ctx, d, lifecycle)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func resourceLifecycleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	flattenLifecycle(ctx, d, updatedLifecycle)
+	setLifecycle(ctx, d, updatedLifecycle)
 	return nil
 }
 

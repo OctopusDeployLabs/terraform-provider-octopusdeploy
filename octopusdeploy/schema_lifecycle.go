@@ -81,10 +81,27 @@ func expandPhase(tfPhase map[string]interface{}) octopusdeploy.Phase {
 	return phase
 }
 
-func flattenLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *octopusdeploy.Lifecycle) {
+func FlattenLifecycle(lifecycle *octopusdeploy.Lifecycle) map[string]interface{} {
+	if lifecycle == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"description":               lifecycle.Description,
+		"id":                        lifecycle.GetID(),
+		"name":                      lifecycle.Name,
+		"phases":                    lifecycle.Phases,
+		"space_id":                  lifecycle.SpaceID,
+		"release_retention_policy":  flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy),
+		"tentacle_retention_policy": flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy),
+	}
+}
+
+func setLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *octopusdeploy.Lifecycle) {
 	d.Set("description", lifecycle.Description)
+	d.Set("id", lifecycle.GetID())
 	d.Set("name", lifecycle.Name)
-	d.Set("phase", flattenPhases(lifecycle.Phases))
+	d.Set("phases", flattenPhases(lifecycle.Phases))
 	d.Set("space_id", lifecycle.SpaceID)
 	d.Set("release_retention_policy", flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy))
 	d.Set("tentacle_retention_policy", flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy))
@@ -127,34 +144,32 @@ func getLifecycleDataSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
+		"id": &schema.Schema{
+			Computed: true,
+			Type:     schema.TypeString,
+		},
 		"name": &schema.Schema{
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"phase": {
+		"phases": {
 			Computed: true,
-			Elem: &schema.Resource{
-				Schema: getPhaseDataSchema(),
-			},
-			Type: schema.TypeList,
+			Elem:     &schema.Resource{Schema: getPhaseDataSchema()},
+			Type:     schema.TypeList,
 		},
 		"release_retention_policy": {
 			Computed: true,
-			Elem: &schema.Resource{
-				Schema: getRetentionPeriodSchema(),
-			},
-			Type: schema.TypeList,
+			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
+			Type:     schema.TypeList,
 		},
 		"space_id": {
-			Type:     schema.TypeString,
 			Computed: true,
+			Type:     schema.TypeString,
 		},
 		"tentacle_retention_policy": {
 			Computed: true,
-			Elem: &schema.Resource{
-				Schema: getRetentionPeriodSchema(),
-			},
-			Type: schema.TypeList,
+			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
+			Type:     schema.TypeList,
 		},
 	}
 }
@@ -165,22 +180,22 @@ func getLifecycleSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
+		"id": &schema.Schema{
+			Computed: true,
+			Type:     schema.TypeString,
+		},
 		"name": &schema.Schema{
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"phase": {
-			Elem: &schema.Resource{
-				Schema: getPhaseSchema(),
-			},
+		"phases": {
+			Elem:     &schema.Resource{Schema: getPhaseSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"release_retention_policy": {
 			Computed: true,
-			Elem: &schema.Resource{
-				Schema: getRetentionPeriodSchema(),
-			},
+			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
@@ -190,9 +205,7 @@ func getLifecycleSchema() map[string]*schema.Schema {
 		},
 		"tentacle_retention_policy": {
 			Computed: true,
-			Elem: &schema.Resource{
-				Schema: getRetentionPeriodSchema(),
-			},
+			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
@@ -204,10 +217,8 @@ func getPhaseDataSchema() map[string]*schema.Schema {
 		"automatic_deployment_targets": {
 			Computed:    true,
 			Description: "Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase",
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Type: schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Type:        schema.TypeList,
 		},
 		"id": {
 			Computed: true,
@@ -237,17 +248,13 @@ func getPhaseDataSchema() map[string]*schema.Schema {
 		},
 		"release_retention_policy": {
 			Computed: true,
-			Elem: &schema.Resource{
-				Schema: getRetentionPeriodDataSchema(),
-			},
-			Type: schema.TypeList,
+			Elem:     &schema.Resource{Schema: getRetentionPeriodDataSchema()},
+			Type:     schema.TypeList,
 		},
 		"tentacle_retention_policy": {
 			Computed: true,
-			Elem: &schema.Resource{
-				Schema: getRetentionPeriodDataSchema(),
-			},
-			Type: schema.TypeList,
+			Elem:     &schema.Resource{Schema: getRetentionPeriodDataSchema()},
+			Type:     schema.TypeList,
 		},
 	}
 }
@@ -256,11 +263,9 @@ func getPhaseSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"automatic_deployment_targets": {
 			Description: "Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase",
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Optional: true,
-			Type:     schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"id": {
 			Type:     schema.TypeString,
@@ -285,23 +290,17 @@ func getPhaseSchema() map[string]*schema.Schema {
 		},
 		"optional_deployment_targets": {
 			Description: "Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to",
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Optional: true,
-			Type:     schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"release_retention_policy": {
-			Elem: &schema.Resource{
-				Schema: getRetentionPeriodSchema(),
-			},
+			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"tentacle_retention_policy": {
-			Elem: &schema.Resource{
-				Schema: getRetentionPeriodSchema(),
-			},
+			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
