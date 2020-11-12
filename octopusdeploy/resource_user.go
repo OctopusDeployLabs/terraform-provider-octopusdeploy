@@ -19,17 +19,6 @@ func resourceUser() *schema.Resource {
 	}
 }
 
-func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
-	user, err := client.Users.GetByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	flattenUser(ctx, d, user)
-	return nil
-}
-
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	user := expandUser(d)
 
@@ -41,6 +30,17 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 	}
 
 	return diag.FromErr(err)
+}
+
+func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	user, err := client.Users.GetByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	flattenUser(ctx, d, user)
+	return nil
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
