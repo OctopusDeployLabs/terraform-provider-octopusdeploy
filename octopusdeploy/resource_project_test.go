@@ -17,15 +17,13 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	config := testAccProjectBasic(localName, name, description)
-
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccProjectCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: config,
+				Config: testAccProjectBasic(localName, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "description", description),
@@ -85,14 +83,14 @@ func testAccProjectBasic(localName string, name string, description string) stri
 	return fmt.Sprintf(testAccLifecycleBasic(lifecycleLocalName, lifecycleName)+"\n"+
 		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
 		`resource "octopusdeploy_project" "%s" {
-			description                     = "%s"
-			lifecycle_id                    = "%s"
-			name                            = "%s"
-			project_group_id                = "%s"
+			description      = "%s"
+			lifecycle_id     = "%s"
+			name             = "%s"
+			project_group_id = "%s"
 
-			project_connectivity_policy {
+			connectivity_policy {
 				allow_deployments_to_no_targets = true
-				skip_machine_behavior           = false
+				skip_machine_behavior           = "None"
 			}
 		}`, localName, description, lifecycleID, name, projectGroupID)
 }
