@@ -235,6 +235,47 @@ func flattenVersioningStrategy(versioningStrategy octopusdeploy.VersioningStrate
 	return []interface{}{flattenedVersioningStrategy}
 }
 
+func getConnectivityPolicySchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"allow_deployments_to_no_targets": {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"exclude_unhealthy_targets": {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"skip_machine_behavior": {
+			Default:  "None",
+			Optional: true,
+			Type:     schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+				"SkipUnavailableMachines",
+				"None",
+			}, false)),
+		},
+		"target_roles": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+	}
+}
+
+func getExtensionSettingsSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"extension_id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"values": {
+			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Type:     schema.TypeList,
+		},
+	}
+}
+
 func getProjectDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"cloned_from_project_id": {
@@ -292,28 +333,8 @@ func getProjectDataSchema() map[string]*schema.Schema {
 					},
 					"connectivity_policy": {
 						Computed: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"allow_deployments_to_no_targets": {
-									Computed: true,
-									Type:     schema.TypeBool,
-								},
-								"exclude_unhealthy_targets": {
-									Computed: true,
-									Type:     schema.TypeBool,
-								},
-								"skip_machine_behavior": {
-									Computed: true,
-									Type:     schema.TypeString,
-								},
-								"target_roles": {
-									Elem:     &schema.Schema{Type: schema.TypeString},
-									Computed: true,
-									Type:     schema.TypeList,
-								},
-							},
-						},
-						Type: schema.TypeList,
+						Elem:     &schema.Resource{Schema: getConnectivityPolicySchema()},
+						Type:     schema.TypeList,
 					},
 					"default_guided_failure_mode": {
 						Computed: true,
@@ -337,22 +358,8 @@ func getProjectDataSchema() map[string]*schema.Schema {
 					},
 					"extension_settings": {
 						Computed: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"extension_id": {
-									Computed: true,
-									Type:     schema.TypeString,
-								},
-								"values": {
-									Computed: true,
-									Elem: &schema.Schema{
-										Type: schema.TypeString,
-									},
-									Type: schema.TypeList,
-								},
-							},
-						},
-						Type: schema.TypeSet,
+						Elem:     &schema.Resource{Schema: getExtensionSettingsSchema()},
+						Type:     schema.TypeSet,
 					},
 					"included_library_variable_sets": {
 						Computed: true,
@@ -386,35 +393,8 @@ func getProjectDataSchema() map[string]*schema.Schema {
 					},
 					"release_creation_strategy": {
 						Computed: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"channel_id": {
-									Optional: true,
-									Type:     schema.TypeString,
-								},
-								"release_creation_package": {
-									Computed: true,
-									Elem: &schema.Resource{
-										Schema: map[string]*schema.Schema{
-											"deployment_action": {
-												Optional: true,
-												Type:     schema.TypeString,
-											},
-											"package_reference": {
-												Optional: true,
-												Type:     schema.TypeString,
-											},
-										},
-									},
-									Type: schema.TypeList,
-								},
-								"release_creation_package_step_id": {
-									Optional: true,
-									Type:     schema.TypeString,
-								},
-							},
-						},
-						Type: schema.TypeList,
+						Elem:     &schema.Resource{Schema: getReleaseCreationStrategySchema()},
+						Type:     schema.TypeList,
 					},
 					"release_notes_template": {
 						Computed: true,
@@ -443,52 +423,13 @@ func getProjectDataSchema() map[string]*schema.Schema {
 					},
 					"version_control_settings": {
 						Computed: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"default_branch": {
-									Computed: true,
-									Type:     schema.TypeString,
-								},
-								"password": {
-									Computed:  true,
-									Sensitive: true,
-									Type:      schema.TypeString,
-								},
-								"url": {
-									Computed: true,
-									Type:     schema.TypeString,
-								},
-								"username": {
-									Computed:  true,
-									Sensitive: true,
-									Type:      schema.TypeString,
-								},
-							},
-						},
-						Type: schema.TypeSet,
+						Elem:     &schema.Resource{Schema: getVersionControlSettingsSchema()},
+						Type:     schema.TypeSet,
 					},
 					"versioning_strategy": {
 						Computed: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"donor_package": {
-									Computed: true,
-									Elem: &schema.Schema{
-										Type: schema.TypeString,
-									},
-									Type: schema.TypeList,
-								},
-								"donor_package_step_id": {
-									Computed: true,
-									Type:     schema.TypeString,
-								},
-								"template": {
-									Computed: true,
-									Type:     schema.TypeString,
-								},
-							},
-						},
-						Type: schema.TypeSet,
+						Elem:     &schema.Resource{Schema: getVersionStrategySchema()},
+						Type:     schema.TypeSet,
 					},
 				},
 			},
@@ -520,34 +461,8 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"connectivity_policy": {
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"allow_deployments_to_no_targets": {
-						Optional: true,
-						Type:     schema.TypeBool,
-					},
-					"exclude_unhealthy_targets": {
-						Computed: true,
-						Type:     schema.TypeBool,
-					},
-					"skip_machine_behavior": {
-						Default:  "None",
-						Optional: true,
-						Type:     schema.TypeString,
-						ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-							"SkipUnavailableMachines",
-							"None",
-						}, false)),
-					},
-					"target_roles": {
-						Elem:     &schema.Schema{Type: schema.TypeString},
-						Optional: true,
-						Type:     schema.TypeList,
-					},
-				},
-			},
-			MaxItems: 1,
-			Optional: true,
+			Computed: true,
+			Elem:     &schema.Resource{Schema: getConnectivityPolicySchema()},
 			Type:     schema.TypeList,
 		},
 		"default_guided_failure_mode": {
@@ -583,20 +498,8 @@ func getProjectSchema() map[string]*schema.Schema {
 		},
 		"extension_settings": {
 			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"extension_id": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-					"values": {
-						Optional: true,
-						Elem:     &schema.Schema{Type: schema.TypeString},
-						Type:     schema.TypeList,
-					},
-				},
-			},
-			Type: schema.TypeSet,
+			Elem:     &schema.Resource{Schema: getExtensionSettingsSchema()},
+			Type:     schema.TypeSet,
 		},
 		"included_library_variable_sets": {
 			Elem: &schema.Schema{
@@ -634,36 +537,7 @@ func getProjectSchema() map[string]*schema.Schema {
 		"release_creation_strategy": {
 			Computed: true,
 			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"channel_id": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-					"release_creation_package": {
-						Computed: true,
-						Optional: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"deployment_action": {
-									Optional: true,
-									Type:     schema.TypeString,
-								},
-								"package_reference": {
-									Optional: true,
-									Type:     schema.TypeString,
-								},
-							},
-						},
-						MaxItems: 1,
-						Type:     schema.TypeList,
-					},
-					"release_creation_package_step_id": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-				},
-			},
+			Elem:     &schema.Resource{Schema: getReleaseCreationStrategySchema()},
 			MaxItems: 1,
 			Type:     schema.TypeList,
 		},
@@ -681,10 +555,8 @@ func getProjectSchema() map[string]*schema.Schema {
 		},
 		"templates": {
 			Optional: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Type: schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Type:     schema.TypeList,
 		},
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
 		"variable_set_id": {
@@ -694,51 +566,88 @@ func getProjectSchema() map[string]*schema.Schema {
 		"version_control_settings": {
 			Computed: true,
 			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"default_branch": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-					"password": {
-						Optional:  true,
-						Sensitive: true,
-						Type:      schema.TypeString,
-					},
-					"url": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-					"username": {
-						Optional:  true,
-						Sensitive: true,
-						Type:      schema.TypeString,
-					},
-				},
-			},
-			Type: schema.TypeSet,
+			Elem:     &schema.Resource{Schema: getVersionControlSettingsSchema()},
+			Type:     schema.TypeSet,
 		},
 		"versioning_strategy": {
 			Computed: true,
 			Optional: true,
+			Elem:     &schema.Resource{Schema: getVersionStrategySchema()},
+			Type:     schema.TypeSet,
+		},
+	}
+}
+
+func getReleaseCreationStrategySchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"channel_id": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"release_creation_package": {
+			Computed: true,
+			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"donor_package": {
-						Optional: true,
-						Elem:     &schema.Schema{Type: schema.TypeString},
-						Type:     schema.TypeList,
-					},
-					"donor_package_step_id": {
+					"deployment_action": {
 						Optional: true,
 						Type:     schema.TypeString,
 					},
-					"template": {
+					"package_reference": {
 						Optional: true,
 						Type:     schema.TypeString,
 					},
 				},
 			},
-			Type: schema.TypeSet,
+			MaxItems: 1,
+			Type:     schema.TypeList,
+		},
+		"release_creation_package_step_id": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+	}
+}
+
+func getVersionControlSettingsSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"default_branch": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"password": {
+			Computed:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
+		},
+		"url": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"username": {
+			Computed:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
+		},
+	}
+}
+
+func getVersionStrategySchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"donor_package": {
+			Computed: true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Type: schema.TypeList,
+		},
+		"donor_package_step_id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"template": {
+			Computed: true,
+			Type:     schema.TypeString,
 		},
 	}
 }
