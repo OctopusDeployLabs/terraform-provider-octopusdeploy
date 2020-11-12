@@ -8,6 +8,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+func expandActionTemplateParameters(actionTemplateParameters []interface{}) []*octopusdeploy.ActionTemplateParameter {
+	expandedActionTemplateParameters := make([]*octopusdeploy.ActionTemplateParameter, len(actionTemplateParameters))
+	for _, actionTemplateParameter := range actionTemplateParameters {
+		actionTemplateParameterMap := actionTemplateParameter.(map[string]interface{})
+		expandedActionTemplateParameters = append(expandedActionTemplateParameters, &octopusdeploy.ActionTemplateParameter{
+			HelpText: actionTemplateParameterMap["help_text"].(string),
+			Label:    actionTemplateParameterMap["label"].(string),
+			Name:     actionTemplateParameterMap["name"].(string),
+		})
+	}
+	return expandedActionTemplateParameters
+}
+
 func expandExtensionSettingsValues(extensionSettingsValues []interface{}) []*octopusdeploy.ExtensionSettingsValues {
 	expandedExtensionSettingsValues := make([]*octopusdeploy.ExtensionSettingsValues, len(extensionSettingsValues))
 	for _, extensionSettingsValue := range extensionSettingsValues {
@@ -18,6 +31,24 @@ func expandExtensionSettingsValues(extensionSettingsValues []interface{}) []*oct
 		})
 	}
 	return expandedExtensionSettingsValues
+}
+
+func expandConnectivityPolicy(connectivityPolicy []interface{}) *octopusdeploy.ConnectivityPolicy {
+	connectivityPolicyMap := connectivityPolicy[0].(map[string]interface{})
+	return &octopusdeploy.ConnectivityPolicy{
+		AllowDeploymentsToNoTargets: connectivityPolicyMap["allow_deployments_to_no_targets"].(bool),
+		ExcludeUnhealthyTargets:     connectivityPolicyMap["exclude_unhealthy_targets"].(bool),
+		SkipMachineBehavior:         octopusdeploy.SkipMachineBehavior(connectivityPolicyMap["skip_machine_behavior"].(string)),
+		TargetRoles:                 getSliceFromTerraformTypeList(connectivityPolicyMap["target_roles"]),
+	}
+}
+
+func expandDeploymentActionPackage(deploymentActionPackage []interface{}) *octopusdeploy.DeploymentActionPackage {
+	deploymentActionPackageMap := deploymentActionPackage[0].(map[string]interface{})
+	return &octopusdeploy.DeploymentActionPackage{
+		DeploymentAction: deploymentActionPackageMap["channel_id"].(string),
+		PackageReference: deploymentActionPackageMap["package_reference"].(string),
+	}
 }
 
 func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
@@ -37,7 +68,11 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	}
 
 	if v, ok := d.GetOk("cloned_from_project_id"); ok {
-		project.DefaultGuidedFailureMode = v.(string)
+		project.ClonedFromProjectID = v.(string)
+	}
+
+	if v, ok := d.GetOk("connectivity_policy"); ok {
+		project.ConnectivityPolicy = expandConnectivityPolicy(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk("default_guided_failure_mode"); ok {
@@ -80,8 +115,20 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 		project.IsVersionControlled = v.(bool)
 	}
 
-	if v, ok := d.GetOk("lifecycle_id"); ok {
-		project.LifecycleID = v.(string)
+	if v, ok := d.GetOk("release_creation_strategy"); ok {
+		project.ReleaseCreationStrategy = expandReleaseCreationStrategy(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("release_notes_template"); ok {
+		project.ReleaseNotesTemplate = v.(string)
+	}
+
+	if v, ok := d.GetOk("slug"); ok {
+		project.Slug = v.(string)
+	}
+
+	if v, ok := d.GetOk("templates"); ok {
+		project.Templates = expandActionTemplateParameters(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
@@ -91,10 +138,31 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	return project
 }
 
+func expandReleaseCreationStrategy(releaseCreationStrategy []interface{}) *octopusdeploy.ReleaseCreationStrategy {
+	releaseCreationStrategyMap := releaseCreationStrategy[0].(map[string]interface{})
+	return &octopusdeploy.ReleaseCreationStrategy{
+		ChannelID:                    releaseCreationStrategyMap["channel_id"].(string),
+		ReleaseCreationPackage:       expandDeploymentActionPackage(releaseCreationStrategyMap["release_creation_package"].([]interface{})),
+		ReleaseCreationPackageStepID: releaseCreationStrategyMap["release_creation_package_step_id"].(*string),
+	}
+}
+
+func flattenDeploymentActionPackage(deploymentActionPackage *octopusdeploy.DeploymentActionPackage) []interface{} {
+	if deploymentActionPackage == nil {
+		return nil
+	}
+
+	flattenedDeploymentActionPackage := make(map[string]interface{})
+	flattenedDeploymentActionPackage["deployment_action"] = deploymentActionPackage.DeploymentAction
+	flattenedDeploymentActionPackage["package_reference"] = deploymentActionPackage.PackageReference
+	return []interface{}{flattenedDeploymentActionPackage}
+}
+
 func flattenProject(ctx context.Context, d *schema.ResourceData, project *octopusdeploy.Project) {
 	d.Set("auto_create_release", project.AutoCreateRelease)
 	d.Set("auto_deploy_release_overrides", project.AutoDeployReleaseOverrides)
 	d.Set("cloned_from_project_id", project.ClonedFromProjectID)
+	d.Set("connectivity_policy", flattenProjectConnectivityPolicy(project.ConnectivityPolicy))
 	d.Set("default_guided_failure_mode", project.DefaultGuidedFailureMode)
 	d.Set("default_to_skip_if_already_installed", project.DefaultToSkipIfAlreadyInstalled)
 	d.Set("deployment_changes_template", project.DeploymentChangesTemplate)
@@ -107,7 +175,6 @@ func flattenProject(ctx context.Context, d *schema.ResourceData, project *octopu
 	d.Set("is_version_controlled", project.IsVersionControlled)
 	d.Set("lifecycle_id", project.LifecycleID)
 	d.Set("name", project.Name)
-	d.Set("project_connectivity_policy", flattenProjectConnectivityPolicy(project.ProjectConnectivityPolicy))
 	d.Set("project_group_id", project.ProjectGroupID)
 	d.Set("release_creation_strategy", flattenReleaseCreationStrategy(project.ReleaseCreationStrategy))
 	d.Set("release_notes_template", project.ReleaseNotesTemplate)
@@ -122,13 +189,14 @@ func flattenProject(ctx context.Context, d *schema.ResourceData, project *octopu
 	d.SetId(project.GetID())
 }
 
-func flattenProjectConnectivityPolicy(projectConnectivityPolicy *octopusdeploy.ProjectConnectivityPolicy) []interface{} {
+func flattenProjectConnectivityPolicy(projectConnectivityPolicy *octopusdeploy.ConnectivityPolicy) []interface{} {
 	if projectConnectivityPolicy == nil {
 		return nil
 	}
 
 	flattenedProjectConnectivityPolicy := make(map[string]interface{})
 	flattenedProjectConnectivityPolicy["allow_deployments_to_no_targets"] = projectConnectivityPolicy.AllowDeploymentsToNoTargets
+	flattenedProjectConnectivityPolicy["exclude_unhealthy_targets"] = projectConnectivityPolicy.ExcludeUnhealthyTargets
 	flattenedProjectConnectivityPolicy["skip_machine_behavior"] = projectConnectivityPolicy.SkipMachineBehavior
 	flattenedProjectConnectivityPolicy["target_roles"] = projectConnectivityPolicy.TargetRoles
 	return []interface{}{flattenedProjectConnectivityPolicy}
@@ -141,7 +209,7 @@ func flattenReleaseCreationStrategy(releaseCreationStrategy *octopusdeploy.Relea
 
 	flattenedReleaseCreationStrategy := make(map[string]interface{})
 	flattenedReleaseCreationStrategy["channel_id"] = releaseCreationStrategy.ChannelID
-	flattenedReleaseCreationStrategy["release_creation_package"] = releaseCreationStrategy.ReleaseCreationPackage
+	flattenedReleaseCreationStrategy["release_creation_package"] = flattenDeploymentActionPackage(releaseCreationStrategy.ReleaseCreationPackage)
 	flattenedReleaseCreationStrategy["release_creation_package_step_id"] = releaseCreationStrategy.ReleaseCreationPackageStepID
 	return []interface{}{flattenedReleaseCreationStrategy}
 }
@@ -222,6 +290,31 @@ func getProjectDataSchema() map[string]*schema.Schema {
 						Computed: true,
 						Type:     schema.TypeString,
 					},
+					"connectivity_policy": {
+						Computed: true,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"allow_deployments_to_no_targets": {
+									Computed: true,
+									Type:     schema.TypeBool,
+								},
+								"exclude_unhealthy_targets": {
+									Computed: true,
+									Type:     schema.TypeBool,
+								},
+								"skip_machine_behavior": {
+									Computed: true,
+									Type:     schema.TypeString,
+								},
+								"target_roles": {
+									Elem:     &schema.Schema{Type: schema.TypeString},
+									Computed: true,
+									Type:     schema.TypeList,
+								},
+							},
+						},
+						Type: schema.TypeList,
+					},
 					"default_guided_failure_mode": {
 						Computed: true,
 						Type:     schema.TypeString,
@@ -287,35 +380,12 @@ func getProjectDataSchema() map[string]*schema.Schema {
 						Computed: true,
 						Type:     schema.TypeString,
 					},
-					"project_connectivity_policy": {
-						Computed: true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"allow_deployments_to_no_targets": {
-									Computed: true,
-									Type:     schema.TypeBool,
-								},
-								"skip_machine_behavior": {
-									Computed: true,
-									Type:     schema.TypeString,
-								},
-								"target_roles": {
-									Elem: &schema.Schema{
-										Type: schema.TypeString,
-									},
-									Computed: true,
-									Type:     schema.TypeList,
-								},
-							},
-						},
-						Type: schema.TypeSet,
-					},
 					"project_group_id": {
 						Computed: true,
 						Type:     schema.TypeString,
 					},
 					"release_creation_strategy": {
-						Optional: true,
+						Computed: true,
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								"channel_id": {
@@ -323,8 +393,20 @@ func getProjectDataSchema() map[string]*schema.Schema {
 									Type:     schema.TypeString,
 								},
 								"release_creation_package": {
-									Optional: true,
-									Type:     schema.TypeString,
+									Computed: true,
+									Elem: &schema.Resource{
+										Schema: map[string]*schema.Schema{
+											"deployment_action": {
+												Optional: true,
+												Type:     schema.TypeString,
+											},
+											"package_reference": {
+												Optional: true,
+												Type:     schema.TypeString,
+											},
+										},
+									},
+									Type: schema.TypeList,
 								},
 								"release_creation_package_step_id": {
 									Optional: true,
@@ -332,7 +414,7 @@ func getProjectDataSchema() map[string]*schema.Schema {
 								},
 							},
 						},
-						Type: schema.TypeSet,
+						Type: schema.TypeList,
 					},
 					"release_notes_template": {
 						Computed: true,
@@ -417,10 +499,10 @@ func getProjectDataSchema() map[string]*schema.Schema {
 
 func getProjectSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": &schema.Schema{
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
+		"allow_deployments_to_no_targets": {
+			Deprecated: "Change this please!!!",
+			Optional:   true,
+			Type:       schema.TypeBool,
 		},
 		"auto_create_release": {
 			Optional: true,
@@ -436,6 +518,37 @@ func getProjectSchema() map[string]*schema.Schema {
 		"cloned_from_project_id": {
 			Optional: true,
 			Type:     schema.TypeString,
+		},
+		"connectivity_policy": {
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"allow_deployments_to_no_targets": {
+						Optional: true,
+						Type:     schema.TypeBool,
+					},
+					"exclude_unhealthy_targets": {
+						Computed: true,
+						Type:     schema.TypeBool,
+					},
+					"skip_machine_behavior": {
+						Default:  "None",
+						Optional: true,
+						Type:     schema.TypeString,
+						ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+							"SkipUnavailableMachines",
+							"None",
+						}, false)),
+					},
+					"target_roles": {
+						Elem:     &schema.Schema{Type: schema.TypeString},
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+				},
+			},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 		"default_guided_failure_mode": {
 			Optional: true,
@@ -509,37 +622,17 @@ func getProjectSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"project_connectivity_policy": {
-			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"allow_deployments_to_no_targets": {
-						Optional: true,
-						Type:     schema.TypeBool,
-					},
-					"skip_machine_behavior": {
-						Default:  "None",
-						Optional: true,
-						Type:     schema.TypeString,
-						ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-							"SkipUnavailableMachines",
-							"None",
-						}, false)),
-					},
-					"target_roles": {
-						Elem:     &schema.Schema{Type: schema.TypeString},
-						Optional: true,
-						Type:     schema.TypeList,
-					},
-				},
-			},
-			Type: schema.TypeSet,
+		"name": &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
 		},
 		"project_group_id": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
 		"release_creation_strategy": {
+			Computed: true,
 			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
@@ -548,8 +641,22 @@ func getProjectSchema() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 					},
 					"release_creation_package": {
+						Computed: true,
 						Optional: true,
-						Type:     schema.TypeString,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"deployment_action": {
+									Optional: true,
+									Type:     schema.TypeString,
+								},
+								"package_reference": {
+									Optional: true,
+									Type:     schema.TypeString,
+								},
+							},
+						},
+						MaxItems: 1,
+						Type:     schema.TypeList,
 					},
 					"release_creation_package_step_id": {
 						Optional: true,
@@ -557,7 +664,8 @@ func getProjectSchema() map[string]*schema.Schema {
 					},
 				},
 			},
-			Type: schema.TypeSet,
+			MaxItems: 1,
+			Type:     schema.TypeList,
 		},
 		"release_notes_template": {
 			Optional: true,
@@ -584,6 +692,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"version_control_settings": {
+			Computed: true,
 			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
@@ -610,6 +719,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type: schema.TypeSet,
 		},
 		"versioning_strategy": {
+			Computed: true,
 			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
