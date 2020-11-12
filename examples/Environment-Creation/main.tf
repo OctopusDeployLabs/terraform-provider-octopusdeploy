@@ -5,5 +5,10 @@ provider "octopusdeploy" {
 }
 
 resource "octopusdeploy_environment" "newEnvironment" {
-  name            = var.environmentName
+  name = var.environmentName
+  # Optional Inputs:
+  # description                  = var.description
+  # use_guided_failure           = var.use_guided_failure
+  # allow_dynamic_infrastructure = var.allow_dynamic_infrastructure
+  # sort_order                   = var.sort_order
 }

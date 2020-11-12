@@ -29,7 +29,11 @@ The `variables.tf` configuration file contains the following variables to be use
   - apiKey: The API key to authenticate to an Octopus Deploy server.
   - space: The Octopus Deploy space to create the resource in.
   - serverURL: The server URL.
-  - environmentName: The name of the new environment
+  - environmentName: The name of the new environment.
+  - description: The environment description.
+  - use_guided_failure: Use guided failure in new environment.
+  - allow_dynamic_infrastructure: Allow dynamic infrastructure in new environment
+  - sort_order: Sort order for displaying environments
 
 ### terraform.tfvars
 
@@ -47,7 +51,7 @@ To use Terraform to create the resource:
 
 1. Clone the repository
 2. Change directory (`cd`) into the *examples* directory
-3. `cd` into the appropriate resource 
+3. `cd` into the appropriate resource
 4. Edit the `terraform.tfvars` configuration file for the appropriate values
 5. Run the following commands to initiate, plan, and apply the creation:
    - `terraform init`
