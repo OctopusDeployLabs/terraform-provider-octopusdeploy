@@ -18,7 +18,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_environments":          dataSourceEnvironment(),
 			"octopusdeploy_feeds":                 dataSourceFeed(),
 			"octopusdeploy_library_variable_sets": dataSourceLibraryVariableSet(),
-			"octopusdeploy_lifecycles":            dataSourceLifecycle(),
+			"octopusdeploy_lifecycles":            dataSourceLifecycles(),
 			"octopusdeploy_machine_policies":      dataSourceMachinePolicy(),
 			"octopusdeploy_project_groups":        dataSourceProjectGroups(),
 			"octopusdeploy_projects":              dataSourceProjects(),

@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -24,18 +23,13 @@ func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interf
 	channel := expandChannel(d)
 
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.Channels.Add(channel)
-	if err != nil {
-		return diag.FromErr(err)
+	createdChannel, err := client.Channels.Add(channel)
+	if createdChannel != nil && err == nil {
+		d.SetId(createdChannel.ID)
+		return nil
 	}
 
-	if isEmpty(resource.GetID()) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.GetID())
-	}
-
-	return nil
+	return diag.FromErr(err)
 }
 
 func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -44,12 +38,8 @@ func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if channel == nil {
-		d.SetId("")
-		return nil
-	}
 
-	flattenChannel(ctx, d, channel)
+	setChannel(ctx, d, channel)
 	return nil
 }
 
@@ -62,7 +52,7 @@ func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	flattenChannel(ctx, d, updatedChannel)
+	d.SetId(updatedChannel.GetID())
 	return nil
 }
 
