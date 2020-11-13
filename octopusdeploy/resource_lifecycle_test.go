@@ -158,21 +158,6 @@ func testAccLifecycleComplex(localName string, name string) string {
 	}`, localName, name, environment2LocalName, environment3LocalName)
 }
 
-func testAccLifecycleCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
-	for _, rs := range s.RootModule().Resources {
-		lifecycleID := rs.Primary.ID
-		space, err := client.Lifecycles.GetByID(lifecycleID)
-		if err == nil {
-			if space != nil {
-				return fmt.Errorf("lifecycle (%s) still exists", rs.Primary.ID)
-			}
-		}
-	}
-
-	return nil
-}
-
 func testAccCheckLifecycleExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
@@ -221,13 +206,13 @@ func existsHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) err
 	return nil
 }
 
-func testLifecycleDestroy(s *terraform.State) error {
+func testAccLifecycleCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
 		lifecycleID := rs.Primary.ID
-		lifecycle, err := client.Lifecycles.GetByID(lifecycleID)
+		space, err := client.Lifecycles.GetByID(lifecycleID)
 		if err == nil {
-			if lifecycle != nil {
+			if space != nil {
 				return fmt.Errorf("lifecycle (%s) still exists", rs.Primary.ID)
 			}
 		}
