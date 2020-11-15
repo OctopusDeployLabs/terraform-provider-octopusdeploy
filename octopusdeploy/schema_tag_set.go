@@ -21,54 +21,17 @@ func expandTagSet(d *schema.ResourceData) *octopusdeploy.TagSet {
 	return tagSet
 }
 
-func expandTag(tfTag map[string]interface{}) octopusdeploy.Tag {
-	tag := octopusdeploy.Tag{
-		CanonicalTagName: tfTag["canonical_tag_name"].(string),
-		Color:            tfTag["color"].(string),
-		Description:      tfTag["description"].(string),
-		Name:             tfTag["name"].(string),
-		SortOrder:        tfTag["sort_order"].(int),
-	}
-
-	return tag
-}
-
-func getTagSchema() *schema.Schema {
-	return &schema.Schema{
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"canonical_tag_name": {
-					Optional: true,
-					Type:     schema.TypeString,
-				},
-				"color": {
-					Required: true,
-					Type:     schema.TypeString,
-				},
-				"description": {
-					Optional: true,
-					Type:     schema.TypeString,
-				},
-				"id": {
-					Computed: true,
-					Type:     schema.TypeString,
-				},
-				"name": {
-					Required: true,
-					Type:     schema.TypeString,
-				},
-				"sort_order": {
-					Optional: true,
-					Type:     schema.TypeInt,
-				},
-			},
-		},
-		Optional: true,
-		Type:     schema.TypeList,
-	}
-}
-
 func getTagSetDataSchema() map[string]*schema.Schema {
+	tagSetSchema := getTagSetSchema()
+	for _, field := range tagSetSchema {
+		field.Computed = true
+		field.MaxItems = 0
+		field.Optional = false
+		field.Required = false
+		field.ValidateDiagFunc = nil
+		field.ValidateFunc = nil
+	}
+
 	return map[string]*schema.Schema{
 		"ids": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
@@ -84,15 +47,15 @@ func getTagSetDataSchema() map[string]*schema.Schema {
 			Type:     schema.TypeInt,
 			Optional: true,
 		},
+		"tag_sets": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: tagSetSchema},
+			Type:     schema.TypeList,
+		},
 		"take": {
 			Default:  1,
 			Type:     schema.TypeInt,
 			Optional: true,
-		},
-		"tag_sets": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: getTagSetSchema()},
-			Type:     schema.TypeList,
 		},
 	}
 }
@@ -107,6 +70,10 @@ func getTagSetSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"tag": getTagSchema(),
+		"tag": {
+			Elem:     &schema.Resource{Schema: getTagSchema()},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 	}
 }
