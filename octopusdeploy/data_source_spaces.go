@@ -39,16 +39,7 @@ func dataSourceSpacesRead(ctx context.Context, d *schema.ResourceData, m interfa
 
 	flattenedSpaces := []interface{}{}
 	for _, space := range spaces.Items {
-		flattenedSpace := map[string]interface{}{
-			"description":                 space.Description,
-			"id":                          space.GetID(),
-			"is_default":                  space.IsDefault,
-			"name":                        space.Name,
-			"space_managers_team_members": space.SpaceManagersTeamMembers,
-			"space_managers_teams":        space.SpaceManagersTeams,
-			"task_queue_stopped":          space.TaskQueueStopped,
-		}
-		flattenedSpaces = append(flattenedSpaces, flattenedSpace)
+		flattenedSpaces = append(flattenedSpaces, flattenSpace(space))
 	}
 
 	d.Set("spaces", flattenedSpaces)
