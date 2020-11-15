@@ -88,7 +88,7 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 }
 
 func buildDeployWindowsServiceActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	resource := buildDeploymentActionResource(tfAction)
+	resource := expandDeploymentAction(tfAction)
 	resource.ActionType = "Octopus.WindowsService"
 	addWindowsServiceToActionResource(tfAction, resource)
 	return resource

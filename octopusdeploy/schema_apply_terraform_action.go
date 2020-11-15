@@ -21,7 +21,7 @@ func getApplyTerraformActionSchema() *schema.Schema {
 }
 
 func buildApplyTerraformActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	resource := buildDeploymentActionResource(tfAction)
+	resource := expandDeploymentAction(tfAction)
 
 	resource.ActionType = "Octopus.TerraformApply"
 	resource.Properties["Octopus.Action.Terraform.AdditionalInitParams"] = tfAction[constAdditionalInitParams].(string)

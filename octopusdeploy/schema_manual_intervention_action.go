@@ -24,7 +24,7 @@ func getManualInterventionActionSchema() *schema.Schema {
 }
 
 func buildManualInterventionActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	resource := buildDeploymentActionResource(tfAction)
+	resource := expandDeploymentAction(tfAction)
 	resource.ActionType = "Octopus.Manual"
 	resource.Properties["Octopus.Action.Manual.Instructions"] = tfAction[constInstructions].(string)
 

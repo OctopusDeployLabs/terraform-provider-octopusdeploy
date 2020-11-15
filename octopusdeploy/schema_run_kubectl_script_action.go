@@ -16,10 +16,9 @@ func getRunRunKubectlScriptSchema() *schema.Schema {
 }
 
 func buildRunKubectlScriptActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	resource := buildDeploymentActionResource(tfAction)
+	resource := expandDeploymentAction(tfAction)
 
 	resource.ActionType = "Octopus.KubernetesRunScript"
-
 	resource.Properties = merge(resource.Properties, buildScriptFromPackageProperties(tfAction))
 
 	return resource
