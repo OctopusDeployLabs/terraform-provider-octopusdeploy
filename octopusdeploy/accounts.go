@@ -17,7 +17,7 @@ func fetchAndReadAccount(ctx context.Context, d *schema.ResourceData, m interfac
 
 	accountResource := account.(*octopusdeploy.AccountResource)
 
-	flattenAccountResource(ctx, d, accountResource)
+	setAccountResource(ctx, d, accountResource)
 	return accountResource, nil
 }
 
@@ -30,7 +30,7 @@ func resourceAccountCreateCommon(ctx context.Context, d *schema.ResourceData, m 
 
 	createdAccountResource := createdAccount.(*octopusdeploy.AccountResource)
 
-	flattenAccountResource(ctx, d, createdAccountResource)
+	setAccountResource(ctx, d, createdAccountResource)
 	return nil
 }
 
@@ -45,7 +45,7 @@ func resourceAccountUpdateCommon(ctx context.Context, d *schema.ResourceData, m 
 
 	updatedAccountResource := updatedAccount.(*octopusdeploy.AccountResource)
 
-	flattenAccountResource(ctx, d, updatedAccountResource)
+	setAccountResource(ctx, d, updatedAccountResource)
 	return nil
 }
 
