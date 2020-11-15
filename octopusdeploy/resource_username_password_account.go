@@ -8,18 +8,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceUsernamePassword() *schema.Resource {
+func resourceUsernamePasswordAccount() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceUsernamePasswordCreate,
+		CreateContext: resourceUsernamePasswordAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
 		Importer:      getImporter(),
-		ReadContext:   resourceUsernamePasswordRead,
+		ReadContext:   resourceUsernamePasswordAccountRead,
 		Schema:        getUsernamePasswordAccountSchema(),
-		UpdateContext: resourceUsernamePasswordUpdate,
+		UpdateContext: resourceUsernamePasswordAccountUpdate,
 	}
 }
 
-func resourceUsernamePasswordCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceUsernamePasswordAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account := expandUsernamePasswordAccount(d)
 
 	client := m.(*octopusdeploy.Client)
@@ -30,11 +30,11 @@ func resourceUsernamePasswordCreate(ctx context.Context, d *schema.ResourceData,
 
 	createdUsernamePasswordAccount := createdAccount.(*octopusdeploy.UsernamePasswordAccount)
 
-	flattenUsernamePasswordAccount(ctx, d, createdUsernamePasswordAccount)
+	setUsernamePasswordAccount(ctx, d, createdUsernamePasswordAccount)
 	return nil
 }
 
-func resourceUsernamePasswordRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceUsernamePasswordAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
@@ -52,11 +52,11 @@ func resourceUsernamePasswordRead(ctx context.Context, d *schema.ResourceData, m
 
 	usernamePasswordAccount := accountResource.(*octopusdeploy.UsernamePasswordAccount)
 
-	flattenUsernamePasswordAccount(ctx, d, usernamePasswordAccount)
+	setUsernamePasswordAccount(ctx, d, usernamePasswordAccount)
 	return nil
 }
 
-func resourceUsernamePasswordUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceUsernamePasswordAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account := expandUsernamePasswordAccount(d)
 
 	client := m.(*octopusdeploy.Client)
@@ -72,6 +72,6 @@ func resourceUsernamePasswordUpdate(ctx context.Context, d *schema.ResourceData,
 
 	updatedUsernamePasswordAccount := accountResource.(*octopusdeploy.UsernamePasswordAccount)
 
-	flattenUsernamePasswordAccount(ctx, d, updatedUsernamePasswordAccount)
+	setUsernamePasswordAccount(ctx, d, updatedUsernamePasswordAccount)
 	return nil
 }
