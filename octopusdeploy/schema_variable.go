@@ -8,7 +8,7 @@ import (
 
 func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 	varName := d.Get("name").(string)
-	varType := d.Get(constType).(string)
+	varType := d.Get("type").(string)
 
 	var varDesc, varValue string
 	var varSensitive bool
@@ -17,12 +17,12 @@ func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 		varDesc = varDescInterface.(string)
 	}
 
-	if varSensitiveInterface, ok := d.GetOk(constIsSensitive); ok {
+	if varSensitiveInterface, ok := d.GetOk("is_sensitive"); ok {
 		varSensitive = varSensitiveInterface.(bool)
 	}
 
 	if varSensitive {
-		varValue = d.Get(constSensitiveValue).(string)
+		varValue = d.Get("sensitive_value").(string)
 	} else {
 		varValue = d.Get(constValue).(string)
 	}
@@ -47,6 +47,26 @@ func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 	}
 
 	return newVar
+}
+
+func getVariableDataSchema() map[string]*schema.Schema {
+	variableSchema := getVariableSchema()
+	for _, field := range variableSchema {
+		field.Computed = true
+		field.MaxItems = 0
+		field.Optional = false
+		field.Required = false
+		field.ValidateDiagFunc = nil
+		field.ValidateFunc = nil
+	}
+
+	return map[string]*schema.Schema{
+		"variables": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: variableSchema},
+			Type:     schema.TypeList,
+		},
+	}
 }
 
 func getVariableSchema() map[string]*schema.Schema {
@@ -85,6 +105,10 @@ func getVariableSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
+		"encrypted_value": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
 		"scope": schemaVariableScope,
 		"is_sensitive": {
 			Type:     schema.TypeBool,
@@ -92,25 +116,10 @@ func getVariableSchema() map[string]*schema.Schema {
 			Default:  false,
 		},
 		"prompt": {
-			Type:     schema.TypeSet,
+			Elem:     &schema.Resource{Schema: getVariablePromptOptionsSchema()},
 			MaxItems: 1,
 			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"description": {
-						Type:     schema.TypeString,
-						Optional: true,
-					},
-					"label": {
-						Type:     schema.TypeString,
-						Optional: true,
-					},
-					"is_required": {
-						Type:     schema.TypeBool,
-						Optional: true,
-					},
-				},
-			},
+			Type:     schema.TypeSet,
 		},
 		"pgp_key": {
 			Type:      schema.TypeString,
@@ -119,10 +128,6 @@ func getVariableSchema() map[string]*schema.Schema {
 			Sensitive: true,
 		},
 		"key_fingerprint": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"encrypted_value": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
