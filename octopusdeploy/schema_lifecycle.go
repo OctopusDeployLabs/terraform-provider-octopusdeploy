@@ -81,7 +81,7 @@ func expandPhase(tfPhase map[string]interface{}) octopusdeploy.Phase {
 	return phase
 }
 
-func FlattenLifecycle(lifecycle *octopusdeploy.Lifecycle) map[string]interface{} {
+func flattenLifecycle(lifecycle *octopusdeploy.Lifecycle) map[string]interface{} {
 	if lifecycle == nil {
 		return nil
 	}
