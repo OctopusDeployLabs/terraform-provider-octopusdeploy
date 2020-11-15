@@ -48,6 +48,42 @@ func TestAccAccountBasic(t *testing.T) {
 	})
 }
 
+func TestAccOctopusCloudTest(t *testing.T) {
+	localName := "principal"
+	resourceName := "octopusdeploy_account." + localName
+
+	accessKey := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	accountType := octopusdeploy.AccountTypeAzureServicePrincipal
+	clientID := uuid.New()
+	clientSecret := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := "Principal"
+	secretKey := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	subscriptionID := uuid.New()
+	tenantedDeploymentMode := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
+	tenantID := uuid.New()
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccAccountCheckDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccAccountExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "account_type", string(accountType)),
+					resource.TestCheckResourceAttr(resourceName, "client_id", clientID.String()),
+					resource.TestCheckResourceAttr(resourceName, "client_secret", clientSecret),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "subscription_id", subscriptionID.String()),
+					resource.TestCheckResourceAttr(resourceName, "tenant_id", tenantID.String()),
+					resource.TestCheckResourceAttr(resourceName, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
+				),
+				Config: testAccountBasic(localName, name, accountType, clientID, tenantID, subscriptionID, clientSecret, accessKey, secretKey, tenantedDeploymentMode),
+			},
+		},
+	})
+}
+
 func testAccountBasic(localName string, name string, accountType octopusdeploy.AccountType, clientID uuid.UUID, tenantID uuid.UUID, subscriptionID uuid.UUID, clientSecret string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`resource "octopusdeploy_account" "%s" {
 		account_type = "%s"
