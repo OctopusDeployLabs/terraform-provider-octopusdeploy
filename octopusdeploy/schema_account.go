@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func flattenAccount(ctx context.Context, d *schema.ResourceData, account octopusdeploy.IAccount) {
+func setAccount(ctx context.Context, d *schema.ResourceData, account octopusdeploy.IAccount) {
 	d.Set("account_type", account.GetAccountType())
 	d.Set("description", account.GetDescription())
 	d.Set("environments", account.GetEnvironmentIDs())
@@ -85,9 +85,7 @@ func getAccountDataSchema() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 					},
 					"environments": {
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
+						Elem:     &schema.Schema{Type: schema.TypeString},
 						Optional: true,
 						Type:     schema.TypeList,
 					},
@@ -116,20 +114,13 @@ func getAccountDataSchema() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 					},
 					"tenant_tags": {
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
+						Elem:     &schema.Schema{Type: schema.TypeString},
 						Optional: true,
 						Type:     schema.TypeList,
 					},
-					"tenanted_deployment_participation": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
+					"tenanted_deployment_participation": getTenantedDeploymentSchema(),
 					"tenants": {
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
+						Elem:     &schema.Schema{Type: schema.TypeString},
 						Optional: true,
 						Type:     schema.TypeList,
 					},
@@ -165,11 +156,13 @@ func getAccountSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"environments": {
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
+			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Type:     schema.TypeList,
+		},
+		"id": {
+			Computed: true,
+			Type:     schema.TypeString,
 		},
 		"name": &schema.Schema{
 			Required:     true,
@@ -182,16 +175,12 @@ func getAccountSchema() map[string]*schema.Schema {
 		},
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
 		"tenants": {
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
+			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"tenant_tags": {
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
+			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
