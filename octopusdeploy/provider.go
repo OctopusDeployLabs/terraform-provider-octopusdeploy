@@ -45,11 +45,11 @@ func Provider() *schema.Provider {
 			"octopusdeploy_project_deployment_target_trigger": resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_project_group":                     resourceProjectGroup(),
 			"octopusdeploy_space":                             resourceSpace(),
-			"octopusdeploy_ssh_key_account":                   resourceSSHKey(),
+			"octopusdeploy_ssh_key_account":                   resourceSSHKeyAccount(),
 			"octopusdeploy_tag_set":                           resourceTagSet(),
 			"octopusdeploy_token_account":                     resourceTokenAccount(),
 			"octopusdeploy_user":                              resourceUser(),
-			"octopusdeploy_username_password_account":         resourceUsernamePassword(),
+			"octopusdeploy_username_password_account":         resourceUsernamePasswordAccount(),
 			"octopusdeploy_variable":                          resourceVariable(),
 		},
 		Schema: map[string]*schema.Schema{
