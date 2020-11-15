@@ -37,7 +37,7 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 	deploymentProcess.ID = current.ID
 	deploymentProcess.Version = current.Version
 
-	resource, err := client.DeploymentProcesses.Update(*deploymentProcess)
+	resource, err := client.DeploymentProcesses.Update(deploymentProcess)
 	if err != nil {
 		diag.FromErr(err)
 	}
@@ -77,7 +77,7 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	deploymentProcess.Version = current.Version
-	resource, err := client.DeploymentProcesses.Update(*deploymentProcess)
+	resource, err := client.DeploymentProcesses.Update(deploymentProcess)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -99,7 +99,7 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 	}
 	deploymentProcess.ID = d.Id()
 
-	deploymentProcess, err = client.DeploymentProcesses.Update(*deploymentProcess)
+	deploymentProcess, err = client.DeploymentProcesses.Update(deploymentProcess)
 	if err != nil {
 		return diag.FromErr(err)
 	}
