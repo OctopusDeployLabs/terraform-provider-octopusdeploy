@@ -26,6 +26,7 @@ func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interf
 	createdChannel, err := client.Channels.Add(channel)
 	if createdChannel != nil && err == nil {
 		d.SetId(createdChannel.ID)
+		setChannel(ctx, d, createdChannel)
 		return nil
 	}
 
@@ -36,6 +37,11 @@ func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interfac
 	client := m.(*octopusdeploy.Client)
 	channel, err := client.Channels.GetByID(d.Id())
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -47,12 +53,12 @@ func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	channel := expandChannel(d)
 
 	client := m.(*octopusdeploy.Client)
-	updatedChannel, err := client.Channels.Update(*channel)
+	updatedChannel, err := client.Channels.Update(channel)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(updatedChannel.GetID())
+	setChannel(ctx, d, updatedChannel)
 	return nil
 }
 
