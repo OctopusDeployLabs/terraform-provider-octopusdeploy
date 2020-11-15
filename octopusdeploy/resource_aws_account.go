@@ -30,7 +30,7 @@ func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.Resou
 
 	createdAmazonWebServicesAccount := createdAccount.(*octopusdeploy.AmazonWebServicesAccount)
 
-	flattenAmazonWebServicesAccount(ctx, d, createdAmazonWebServicesAccount)
+	setAmazonWebServicesAccount(ctx, d, createdAmazonWebServicesAccount)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 
 	amazonWebServicesAccount := accountResource.(*octopusdeploy.AmazonWebServicesAccount)
 
-	flattenAmazonWebServicesAccount(ctx, d, amazonWebServicesAccount)
+	setAmazonWebServicesAccount(ctx, d, amazonWebServicesAccount)
 	return nil
 }
 
@@ -67,6 +67,6 @@ func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.Resou
 
 	updatedAmazonWebServicesAccount := updatedAccount.(*octopusdeploy.AmazonWebServicesAccount)
 
-	flattenAmazonWebServicesAccount(ctx, d, updatedAmazonWebServicesAccount)
+	setAmazonWebServicesAccount(ctx, d, updatedAmazonWebServicesAccount)
 	return nil
 }

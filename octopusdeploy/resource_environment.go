@@ -28,7 +28,7 @@ func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	flattenEnvironment(ctx, d, createdEnvironment)
+	setEnvironment(ctx, d, createdEnvironment)
 	return nil
 }
 
@@ -39,7 +39,7 @@ func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	flattenEnvironment(ctx, d, environment)
+	setEnvironment(ctx, d, environment)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	flattenEnvironment(ctx, d, updatedEnvironment)
+	setEnvironment(ctx, d, updatedEnvironment)
 	return nil
 }
 

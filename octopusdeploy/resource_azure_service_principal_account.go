@@ -30,7 +30,7 @@ func resourceAzureServicePrincipalAccountCreate(ctx context.Context, d *schema.R
 
 	createdAzureSubscriptionAccount := accountResource.(*octopusdeploy.AzureServicePrincipalAccount)
 
-	flattenAzureServicePrincipalAccount(ctx, d, createdAzureSubscriptionAccount)
+	setAzureServicePrincipalAccount(ctx, d, createdAzureSubscriptionAccount)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func resourceAzureServicePrincipalAccountRead(ctx context.Context, d *schema.Res
 
 	azureSubscriptionAccount := accountResource.(*octopusdeploy.AzureServicePrincipalAccount)
 
-	flattenAzureServicePrincipalAccount(ctx, d, azureSubscriptionAccount)
+	setAzureServicePrincipalAccount(ctx, d, azureSubscriptionAccount)
 	return nil
 }
 
@@ -72,6 +72,6 @@ func resourceAzureServicePrincipalAccountUpdate(ctx context.Context, d *schema.R
 
 	updatedAzureSubscriptionAccount := accountResource.(*octopusdeploy.AzureServicePrincipalAccount)
 
-	flattenAzureServicePrincipalAccount(ctx, d, updatedAzureSubscriptionAccount)
+	setAzureServicePrincipalAccount(ctx, d, updatedAzureSubscriptionAccount)
 	return nil
 }

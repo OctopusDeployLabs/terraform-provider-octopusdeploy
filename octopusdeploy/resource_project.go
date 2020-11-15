@@ -28,7 +28,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	flattenProject(ctx, d, createdProject)
+	setProject(ctx, d, createdProject)
 	return nil
 }
 
@@ -50,7 +50,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	flattenProject(ctx, d, project)
+	setProject(ctx, d, project)
 	return nil
 }
 
@@ -63,6 +63,6 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	flattenProject(ctx, d, updatedProject)
+	setProject(ctx, d, updatedProject)
 	return nil
 }

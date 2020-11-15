@@ -60,8 +60,8 @@ func expandAzureServicePrincipalAccount(d *schema.ResourceData) *octopusdeploy.A
 	return account
 }
 
-func flattenAzureServicePrincipalAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureServicePrincipalAccount) {
-	flattenAccount(ctx, d, account)
+func setAzureServicePrincipalAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureServicePrincipalAccount) {
+	setAccount(ctx, d, account)
 
 	d.Set("account_type", "AzureServicePrincipal")
 	d.Set("application_id", account.ApplicationID.String())

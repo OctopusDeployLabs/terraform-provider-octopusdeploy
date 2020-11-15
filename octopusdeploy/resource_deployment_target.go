@@ -29,7 +29,7 @@ func resourceDeploymentTargetCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	flattenDeploymentTarget(ctx, d, createdDeploymentTarget)
+	setDeploymentTarget(ctx, d, createdDeploymentTarget)
 	return nil
 }
 
@@ -51,7 +51,7 @@ func resourceDeploymentTargetRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	flattenDeploymentTarget(ctx, d, deploymentTarget)
+	setDeploymentTarget(ctx, d, deploymentTarget)
 	return nil
 }
 
@@ -64,6 +64,6 @@ func resourceDeploymentTargetUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	flattenDeploymentTarget(ctx, d, updatedDeploymentTarget)
+	setDeploymentTarget(ctx, d, updatedDeploymentTarget)
 	return nil
 }

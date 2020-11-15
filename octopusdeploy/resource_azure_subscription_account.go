@@ -30,7 +30,7 @@ func resourceAzureSubscriptionAccountCreate(ctx context.Context, d *schema.Resou
 
 	createdAzureSubscriptionAccount := accountResource.(*octopusdeploy.AzureSubscriptionAccount)
 
-	flattenAzureSubscriptionAccount(ctx, d, createdAzureSubscriptionAccount)
+	setAzureSubscriptionAccount(ctx, d, createdAzureSubscriptionAccount)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func resourceAzureSubscriptionAccountRead(ctx context.Context, d *schema.Resourc
 
 	azureSubscriptionAccount := accountResource.(*octopusdeploy.AzureSubscriptionAccount)
 
-	flattenAzureSubscriptionAccount(ctx, d, azureSubscriptionAccount)
+	setAzureSubscriptionAccount(ctx, d, azureSubscriptionAccount)
 	return nil
 }
 
@@ -72,6 +72,6 @@ func resourceAzureSubscriptionAccountUpdate(ctx context.Context, d *schema.Resou
 
 	updatedAzureSubscriptionAccount := accountResource.(*octopusdeploy.AzureSubscriptionAccount)
 
-	flattenAzureSubscriptionAccount(ctx, d, updatedAzureSubscriptionAccount)
+	setAzureSubscriptionAccount(ctx, d, updatedAzureSubscriptionAccount)
 	return nil
 }

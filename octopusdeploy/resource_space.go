@@ -28,7 +28,7 @@ func resourceSpaceCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	flattenSpace(ctx, d, createdSpace)
+	setSpace(ctx, d, createdSpace)
 	return nil
 }
 
@@ -58,7 +58,7 @@ func resourceSpaceRead(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
-	flattenSpace(ctx, d, space)
+	setSpace(ctx, d, space)
 	return nil
 }
 
@@ -71,6 +71,6 @@ func resourceSpaceUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	flattenSpace(ctx, d, updatedSpace)
+	setSpace(ctx, d, updatedSpace)
 	return nil
 }

@@ -31,8 +31,8 @@ func expandAmazonWebServicesAccount(d *schema.ResourceData) *octopusdeploy.Amazo
 	return account
 }
 
-func flattenAmazonWebServicesAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AmazonWebServicesAccount) {
-	flattenAccount(ctx, d, account)
+func setAmazonWebServicesAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AmazonWebServicesAccount) {
+	setAccount(ctx, d, account)
 
 	d.Set("account_type", "AmazonWebServicesAccount")
 	d.Set("access_key", account.AccessKey)

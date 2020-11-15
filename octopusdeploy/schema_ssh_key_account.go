@@ -30,8 +30,8 @@ func expandSSHKeyAccount(d *schema.ResourceData) *octopusdeploy.SSHKeyAccount {
 	return account
 }
 
-func flattenSSHKeyAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.SSHKeyAccount) {
-	flattenAccount(ctx, d, account)
+func setSSHKeyAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.SSHKeyAccount) {
+	setAccount(ctx, d, account)
 
 	d.Set("account_type", "SshKeyPair")
 	d.Set("private_key_file", account.PrivateKeyFile)

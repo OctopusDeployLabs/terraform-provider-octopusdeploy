@@ -28,7 +28,7 @@ func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	flattenCertificate(ctx, d, createdCertificate)
+	setCertificate(ctx, d, createdCertificate)
 	return nil
 }
 
@@ -50,7 +50,7 @@ func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m inte
 		diag.FromErr(err)
 	}
 
-	flattenCertificate(ctx, d, certificate)
+	setCertificate(ctx, d, certificate)
 	return nil
 }
 
@@ -63,6 +63,6 @@ func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	flattenCertificate(ctx, d, updatedCertificate)
+	setCertificate(ctx, d, updatedCertificate)
 	return nil
 }

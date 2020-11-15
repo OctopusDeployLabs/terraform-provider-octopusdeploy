@@ -41,8 +41,8 @@ func expandTokenAccount(d *schema.ResourceData) *octopusdeploy.TokenAccount {
 	return account
 }
 
-func flattenTokenAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.TokenAccount) {
-	flattenAccount(ctx, d, account)
+func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.TokenAccount) {
+	setAccount(ctx, d, account)
 
 	d.Set("account_type", "Token")
 	d.Set("token", account.Token.NewValue)

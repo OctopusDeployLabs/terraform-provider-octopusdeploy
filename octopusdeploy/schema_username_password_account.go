@@ -47,8 +47,8 @@ func expandUsernamePasswordAccount(d *schema.ResourceData) *octopusdeploy.Userna
 	return account
 }
 
-func flattenUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.UsernamePasswordAccount) {
-	flattenAccount(ctx, d, account)
+func setUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.UsernamePasswordAccount) {
+	setAccount(ctx, d, account)
 
 	d.Set("account_type", "UsernamePassword")
 	d.Set("username", account.Username)
@@ -60,11 +60,12 @@ func flattenUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData,
 func getUsernamePasswordAccountSchema() map[string]*schema.Schema {
 	schemaMap := getAccountSchema()
 	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
 		Default:  "UsernamePassword",
+		Optional: true,
 		Type:     schema.TypeString,
 	}
 	schemaMap["password"] = &schema.Schema{
+		Sensitive:    true,
 		Optional:     true,
 		Type:         schema.TypeString,
 		ValidateFunc: validation.StringIsNotEmpty,

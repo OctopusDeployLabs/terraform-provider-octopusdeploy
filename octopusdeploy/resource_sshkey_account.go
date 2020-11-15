@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSSHKey() *schema.Resource {
+func resourceSSHKeyAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceSSHKeyAccountCreate,
 		DeleteContext: resourceAccountDeleteCommon,
@@ -30,7 +30,7 @@ func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m 
 
 	createdSSHKeyAccount := createdAccount.(*octopusdeploy.SSHKeyAccount)
 
-	flattenSSHKeyAccount(ctx, d, createdSSHKeyAccount)
+	setSSHKeyAccount(ctx, d, createdSSHKeyAccount)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func resourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m in
 
 	sshKeyAccount := accountResource.(*octopusdeploy.SSHKeyAccount)
 
-	flattenSSHKeyAccount(ctx, d, sshKeyAccount)
+	setSSHKeyAccount(ctx, d, sshKeyAccount)
 	return nil
 }
 
@@ -72,6 +72,6 @@ func resourceSSHKeyAccountUpdate(ctx context.Context, d *schema.ResourceData, m 
 
 	updatedSSHKeyAccount := accountResource.(*octopusdeploy.SSHKeyAccount)
 
-	flattenSSHKeyAccount(ctx, d, updatedSSHKeyAccount)
+	setSSHKeyAccount(ctx, d, updatedSSHKeyAccount)
 	return nil
 }

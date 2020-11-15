@@ -35,6 +35,6 @@ func dataSourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m in
 
 	environment := environments[0]
 
-	flattenEnvironment(ctx, d, environment)
+	setEnvironment(ctx, d, environment)
 	return nil
 }

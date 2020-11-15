@@ -72,8 +72,8 @@ func expandAzureSubscriptionAccount(d *schema.ResourceData) *octopusdeploy.Azure
 	return account
 }
 
-func flattenAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureSubscriptionAccount) {
-	flattenAccount(ctx, d, account)
+func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureSubscriptionAccount) {
+	setAccount(ctx, d, account)
 
 	d.Set("account_type", "AzureSubscription")
 	d.Set("azure_environment", account.AzureEnvironment)

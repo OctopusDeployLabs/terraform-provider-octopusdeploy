@@ -31,7 +31,7 @@ func resourceTokenAccountCreate(ctx context.Context, d *schema.ResourceData, m i
 	createdTokenAccount := createdAccount.(*octopusdeploy.TokenAccount)
 	createdTokenAccount.Token = account.Token
 
-	flattenTokenAccount(ctx, d, createdTokenAccount)
+	setTokenAccount(ctx, d, createdTokenAccount)
 	return nil
 }
 
@@ -53,7 +53,7 @@ func resourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m int
 
 	tokenAccount := accountResource.(*octopusdeploy.TokenAccount)
 
-	flattenTokenAccount(ctx, d, tokenAccount)
+	setTokenAccount(ctx, d, tokenAccount)
 	return nil
 }
 
@@ -74,6 +74,6 @@ func resourceTokenAccountUpdate(ctx context.Context, d *schema.ResourceData, m i
 	updatedTokenAccount := accountResource.(*octopusdeploy.TokenAccount)
 	updatedTokenAccount.Token = account.Token
 
-	flattenTokenAccount(ctx, d, updatedTokenAccount)
+	setTokenAccount(ctx, d, updatedTokenAccount)
 	return nil
 }
