@@ -88,7 +88,6 @@ func flattenIdentityClaims(identityClaims map[string]octopusdeploy.IdentityClaim
 			"name":                 key,
 			"value":                identityClaim.Value,
 		}
-
 		flattenedIdentityClaims = append(flattenedIdentityClaims, rawIdentityClaim)
 	}
 
