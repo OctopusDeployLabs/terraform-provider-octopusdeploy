@@ -20,11 +20,11 @@ func dataSourceVariable() *schema.Resource {
 				Required: true,
 				Type:     schema.TypeString,
 			},
-			constType: {
+			"type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			constValue: {
+			"value": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -32,7 +32,7 @@ func dataSourceVariable() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			constScope: schemaVariableScope,
+			"scope": schemaVariableScope,
 		},
 	}
 }

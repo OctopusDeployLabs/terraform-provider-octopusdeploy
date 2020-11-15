@@ -32,63 +32,80 @@ func expandDeploymentStep(tfStep map[string]interface{}) octopusdeploy.Deploymen
 		step.Properties["Octopus.Action.MaxParallelism"] = windowSize.(string)
 	}
 
-	if attr, ok := tfStep["action"]; ok {
-		for _, tfAction := range attr.([]interface{}) {
-			action := buildDeploymentActionResource(tfAction.(map[string]interface{}))
+	if v, ok := tfStep["action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
+			action := expandDeploymentAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["manual_intervention_action"]; ok {
-		for _, tfAction := range attr.([]interface{}) {
+	if v, ok := tfStep["manual_intervention_action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
 			action := buildManualInterventionActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["apply_terraform_action"]; ok {
-		for _, tfAction := range attr.([]interface{}) {
+	if v, ok := tfStep["apply_terraform_action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
 			action := buildApplyTerraformActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["deploy_package_action"]; ok {
-		for _, tfAction := range attr.([]interface{}) {
+	if v, ok := tfStep["deploy_package_action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
 			action := buildDeployPackageActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["deploy_windows_service_action"]; ok {
-		for _, tfAction := range attr.([]interface{}) {
+	if v, ok := tfStep["deploy_windows_service_action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
 			action := buildDeployWindowsServiceActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["run_script_action"]; ok {
-		for _, tfAction := range attr.([]interface{}) {
+	if v, ok := tfStep["run_script_action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
 			action := buildRunScriptActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["run_kubectl_script_action"]; ok {
-		for _, tfAction := range attr.([]interface{}) {
+	if v, ok := tfStep["run_kubectl_script_action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
 			action := buildRunKubectlScriptActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if attr, ok := tfStep["deploy_kubernetes_secret_action"]; ok {
-		for _, tfAction := range attr.([]interface{}) {
+	if v, ok := tfStep["deploy_kubernetes_secret_action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
 			action := buildDeployKubernetesSecretActionResource(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	return step
+}
+
+func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []map[string]interface{} {
+	var flattenedDeploymentSteps = make([]map[string]interface{}, len(deploymentSteps))
+	for key, deploymentStep := range deploymentSteps {
+		flattenedDeploymentSteps[key] = map[string]interface{}{
+			"actions":             flattenDeploymentActions(deploymentStep.Actions),
+			"condition":           deploymentStep.Condition,
+			"id":                  deploymentStep.ID,
+			"name":                deploymentStep.Name,
+			"package_requirement": deploymentStep.PackageRequirement,
+			"properties":          deploymentStep.Properties,
+			"start_trigger":       deploymentStep.StartTrigger,
+		}
+	}
+
+	return flattenedDeploymentSteps
 }
 
 func getDeploymentStepSchema() *schema.Schema {
@@ -119,7 +136,11 @@ func getDeploymentStepSchema() *schema.Schema {
 				"deploy_kubernetes_secret_action": getDeployKubernetesSecretActionSchema(),
 				"deploy_package_action":           getDeployPackageAction(),
 				"deploy_windows_service_action":   getDeployWindowsServiceActionSchema(),
-				"manual_intervention_action":      getManualInterventionActionSchema(),
+				"id": {
+					Computed: true,
+					Type:     schema.TypeString,
+				},
+				"manual_intervention_action": getManualInterventionActionSchema(),
 				"name": {
 					Description: "The name of the step",
 					Required:    true,

@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceMachinePolicy() *schema.Resource {
+func dataSourceMachinePolicies() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceMachinePolicyReadByName,
+		ReadContext: dataSourceMachinePoliciesRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Required: true,
@@ -20,7 +20,7 @@ func dataSourceMachinePolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"isdefault": {
+			"is_default": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -28,26 +28,26 @@ func dataSourceMachinePolicy() *schema.Resource {
 	}
 }
 
-func dataSourceMachinePolicyReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceMachinePoliciesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
 
 	client := m.(*octopusdeploy.Client)
-	resourceList, err := client.MachinePolicies.GetAll()
+	machinePolicies, err := client.MachinePolicies.GetAll()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if len(resourceList) == 0 {
+	if len(machinePolicies) == 0 {
 		return nil
 	}
 
 	// NOTE: two or more machine policies could have the same name in Octopus
 	// and therefore, a better search criteria needs to be implemented below
 
-	for _, resource := range resourceList {
-		if resource.Name == name {
-			d.SetId(resource.GetID())
-			d.Set("description", resource.Description)
-			d.Set("isdefault", resource.IsDefault)
+	for _, machinePolicy := range machinePolicies {
+		if machinePolicy.Name == name {
+			d.Set("description", machinePolicy.Description)
+			d.Set("is_default", machinePolicy.IsDefault)
+			d.SetId(machinePolicy.GetID())
 
 			return nil
 		}

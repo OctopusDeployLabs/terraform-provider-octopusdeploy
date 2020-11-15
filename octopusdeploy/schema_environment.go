@@ -33,16 +33,6 @@ func expandEnvironment(d *schema.ResourceData) *octopusdeploy.Environment {
 	return environment
 }
 
-func flattenEnvironment(ctx context.Context, d *schema.ResourceData, environment *octopusdeploy.Environment) {
-	d.Set("allow_dynamic_infrastructure", environment.AllowDynamicInfrastructure)
-	d.Set("description", environment.Description)
-	d.Set("name", environment.Name)
-	d.Set("sort_order", environment.SortOrder)
-	d.Set("use_guided_failure", environment.UseGuidedFailure)
-
-	d.SetId(environment.GetID())
-}
-
 func getEnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"allow_dynamic_infrastructure": &schema.Schema{
@@ -67,4 +57,14 @@ func getEnvironmentSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 	}
+}
+
+func setEnvironment(ctx context.Context, d *schema.ResourceData, environment *octopusdeploy.Environment) {
+	d.Set("allow_dynamic_infrastructure", environment.AllowDynamicInfrastructure)
+	d.Set("description", environment.Description)
+	d.Set("name", environment.Name)
+	d.Set("sort_order", environment.SortOrder)
+	d.Set("use_guided_failure", environment.UseGuidedFailure)
+
+	d.SetId(environment.GetID())
 }

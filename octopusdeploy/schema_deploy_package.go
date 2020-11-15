@@ -24,8 +24,7 @@ func getDeployPackageAction() *schema.Schema {
 }
 
 func buildDeployPackageActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-
-	action := buildDeploymentActionResource(tfAction)
+	action := expandDeploymentAction(tfAction)
 	action.ActionType = "Octopus.TentaclePackage"
 
 	if tfAction == nil {
