@@ -41,17 +41,62 @@ func expandUser(d *schema.ResourceData) *octopusdeploy.User {
 	return user
 }
 
-func flattenUser(ctx context.Context, d *schema.ResourceData, user *octopusdeploy.User) {
-	d.Set("can_password_be_edited", user.CanPasswordBeEdited)
-	d.Set("display_name", user.DisplayName)
-	d.Set("email_address", user.EmailAddress)
-	d.Set("identity", flattenIdentities(user.Identities))
-	d.Set("is_active", user.IsActive)
-	d.Set("is_requestor", user.IsRequestor)
-	d.Set("is_service", user.IsService)
-	d.Set("username", user.Username)
+func flattenUser(user *octopusdeploy.User) map[string]interface{} {
+	if user == nil {
+		return nil
+	}
 
-	d.SetId(user.GetID())
+	return map[string]interface{}{
+		"can_password_be_edited": user.CanPasswordBeEdited,
+		"display_name":           user.DisplayName,
+		"email_address":          user.EmailAddress,
+		"id":                     user.GetID(),
+		"identity":               flattenIdentities(user.Identities),
+		"is_active":              user.IsActive,
+		"is_service":             user.IsService,
+		"username":               user.Username,
+	}
+}
+
+func getUserDataSchema() map[string]*schema.Schema {
+	userSchema := getUserSchema()
+	for _, field := range userSchema {
+		field.Computed = true
+		field.Default = nil
+		field.MaxItems = 0
+		field.MinItems = 0
+		field.Optional = false
+		field.Required = false
+		field.ValidateDiagFunc = nil
+		field.ValidateFunc = nil
+	}
+
+	return map[string]*schema.Schema{
+		"filter": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"ids": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"skip": {
+			Default:  0,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"take": {
+			Default:  1,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"users": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: userSchema},
+			Type:     schema.TypeList,
+		},
+	}
 }
 
 func getUserSchema() map[string]*schema.Schema {
@@ -96,4 +141,17 @@ func getUserSchema() map[string]*schema.Schema {
 			Type:      schema.TypeString,
 		},
 	}
+}
+
+func setUser(ctx context.Context, d *schema.ResourceData, user *octopusdeploy.User) {
+	d.Set("can_password_be_edited", user.CanPasswordBeEdited)
+	d.Set("display_name", user.DisplayName)
+	d.Set("email_address", user.EmailAddress)
+	d.Set("identity", flattenIdentities(user.Identities))
+	d.Set("is_active", user.IsActive)
+	d.Set("is_requestor", user.IsRequestor)
+	d.Set("is_service", user.IsService)
+	d.Set("username", user.Username)
+
+	d.SetId(user.GetID())
 }

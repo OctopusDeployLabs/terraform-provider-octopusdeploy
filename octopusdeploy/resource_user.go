@@ -39,7 +39,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
-	flattenUser(ctx, d, user)
+	setUser(ctx, d, user)
 	return nil
 }
 
