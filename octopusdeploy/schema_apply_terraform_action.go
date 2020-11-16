@@ -27,7 +27,6 @@ func buildApplyTerraformActionResource(tfAction map[string]interface{}) octopusd
 	resource.Properties["Octopus.Action.Terraform.AdditionalInitParams"] = tfAction[constAdditionalInitParams].(string)
 	resource.Properties["Octopus.Action.Terraform.AllowPluginDownloads"] = "True"
 	resource.Properties["Octopus.Action.Terraform.ManagedAccount"] = "None"
-
 	resource.Properties["Octopus.Action.Script.ScriptSource"] = "Package"
 
 	return resource
