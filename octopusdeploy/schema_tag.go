@@ -5,16 +5,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandTag(tfTag map[string]interface{}) octopusdeploy.Tag {
-	tag := octopusdeploy.Tag{
-		CanonicalTagName: tfTag["canonical_tag_name"].(string),
-		Color:            tfTag["color"].(string),
-		Description:      tfTag["description"].(string),
-		Name:             tfTag["name"].(string),
-		SortOrder:        tfTag["sort_order"].(int),
+func expandTag(tag map[string]interface{}) octopusdeploy.Tag {
+	return octopusdeploy.Tag{
+		CanonicalTagName: tag["canonical_tag_name"].(string),
+		Color:            tag["color"].(string),
+		Description:      tag["description"].(string),
+		Name:             tag["name"].(string),
+		SortOrder:        tag["sort_order"].(int),
 	}
-
-	return tag
 }
 
 func getTagSchema() map[string]*schema.Schema {
