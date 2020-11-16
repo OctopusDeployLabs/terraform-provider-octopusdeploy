@@ -38,37 +38,7 @@ func dataSourceAccountsRead(ctx context.Context, d *schema.ResourceData, m inter
 			return diag.FromErr(err)
 		}
 
-		flattenedAccount := map[string]interface{}{
-			"access_key":                        accountResource.AccessKey,
-			"account_type":                      accountResource.AccountType,
-			"authentication_endpoint":           accountResource.AuthenticationEndpoint,
-			"azure_environment":                 accountResource.AzureEnvironment,
-			"certificate_thumbprint":            accountResource.CertificateThumbprint,
-			"description":                       accountResource.Description,
-			"environments":                      accountResource.EnvironmentIDs,
-			"id":                                accountResource.GetID(),
-			"name":                              accountResource.Name,
-			"space_id":                          accountResource.SpaceID,
-			"resource_management_endpoint":      accountResource.ResourceManagerEndpoint,
-			"tenant_tags":                       accountResource.TenantTags,
-			"tenanted_deployment_participation": accountResource.TenantedDeploymentMode,
-			"tenants":                           accountResource.TenantIDs,
-			"username":                          accountResource.Username,
-		}
-
-		if applicationID := accountResource.ApplicationID; applicationID != nil {
-			flattenedAccount["application_id"] = applicationID.String()
-		}
-
-		if subscriptionID := accountResource.SubscriptionID; subscriptionID != nil {
-			flattenedAccount["subscription_id"] = subscriptionID.String()
-		}
-
-		if tenantID := accountResource.TenantID; tenantID != nil {
-			flattenedAccount["tenant_id"] = tenantID.String()
-		}
-
-		flattenedAccounts = append(flattenedAccounts, flattenedAccount)
+		flattenedAccounts = append(flattenedAccounts, flattenAccount(accountResource))
 	}
 
 	d.Set("accounts", flattenedAccounts)

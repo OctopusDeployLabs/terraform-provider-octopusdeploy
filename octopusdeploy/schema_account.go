@@ -8,15 +8,38 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func setAccount(ctx context.Context, d *schema.ResourceData, account octopusdeploy.IAccount) {
-	d.Set("account_type", account.GetAccountType())
-	d.Set("description", account.GetDescription())
-	d.Set("environments", account.GetEnvironmentIDs())
-	d.Set("name", account.GetName())
-	d.Set("space_id", account.GetSpaceID())
-	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
-	d.Set("tenants", account.GetTenantIDs())
-	d.Set("tenant_tags", account.GetTenantTags())
+func flattenAccount(accountResource *octopusdeploy.AccountResource) map[string]interface{} {
+	flattenedAccountResource := map[string]interface{}{
+		"access_key":                        accountResource.AccessKey,
+		"account_type":                      accountResource.AccountType,
+		"authentication_endpoint":           accountResource.AuthenticationEndpoint,
+		"azure_environment":                 accountResource.AzureEnvironment,
+		"certificate_thumbprint":            accountResource.CertificateThumbprint,
+		"description":                       accountResource.Description,
+		"environments":                      accountResource.EnvironmentIDs,
+		"id":                                accountResource.GetID(),
+		"name":                              accountResource.Name,
+		"space_id":                          accountResource.SpaceID,
+		"resource_management_endpoint":      accountResource.ResourceManagerEndpoint,
+		"tenant_tags":                       accountResource.TenantTags,
+		"tenanted_deployment_participation": accountResource.TenantedDeploymentMode,
+		"tenants":                           accountResource.TenantIDs,
+		"username":                          accountResource.Username,
+	}
+
+	if applicationID := accountResource.ApplicationID; applicationID != nil {
+		flattenedAccountResource["application_id"] = applicationID.String()
+	}
+
+	if subscriptionID := accountResource.SubscriptionID; subscriptionID != nil {
+		flattenedAccountResource["subscription_id"] = subscriptionID.String()
+	}
+
+	if tenantID := accountResource.TenantID; tenantID != nil {
+		flattenedAccountResource["tenant_id"] = tenantID.String()
+	}
+
+	return flattenedAccountResource
 }
 
 func getAccountDataSchema() map[string]*schema.Schema {
@@ -185,4 +208,15 @@ func getAccountSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 	}
+}
+
+func setAccount(ctx context.Context, d *schema.ResourceData, account octopusdeploy.IAccount) {
+	d.Set("account_type", account.GetAccountType())
+	d.Set("description", account.GetDescription())
+	d.Set("environments", account.GetEnvironmentIDs())
+	d.Set("name", account.GetName())
+	d.Set("space_id", account.GetSpaceID())
+	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
+	d.Set("tenants", account.GetTenantIDs())
+	d.Set("tenant_tags", account.GetTenantTags())
 }
