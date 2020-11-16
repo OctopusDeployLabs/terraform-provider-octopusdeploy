@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -11,47 +12,31 @@ import (
 func dataSourceMachinePolicies() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceMachinePoliciesRead,
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"is_default": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-		},
+		Schema:      getMachinePolicyDataSchema(),
 	}
 }
 
 func dataSourceMachinePoliciesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	name := d.Get("name").(string)
+	query := octopusdeploy.MachinePoliciesQuery{
+		IDs:         expandArray(d.Get("ids").([]interface{})),
+		PartialName: d.Get("partial_name").(string),
+		Skip:        d.Get("skip").(int),
+		Take:        d.Get("take").(int),
+	}
 
 	client := m.(*octopusdeploy.Client)
-	machinePolicies, err := client.MachinePolicies.GetAll()
+	machinePolicies, err := client.MachinePolicies.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if len(machinePolicies) == 0 {
-		return nil
+
+	flattenedMachinePolicies := []interface{}{}
+	for _, machinePolicy := range machinePolicies.Items {
+		flattenedMachinePolicies = append(flattenedMachinePolicies, flattenMachinePolicy(machinePolicy))
 	}
 
-	// NOTE: two or more machine policies could have the same name in Octopus
-	// and therefore, a better search criteria needs to be implemented below
-
-	for _, machinePolicy := range machinePolicies {
-		if machinePolicy.Name == name {
-			d.Set("description", machinePolicy.Description)
-			d.Set("is_default", machinePolicy.IsDefault)
-			d.SetId(machinePolicy.GetID())
-
-			return nil
-		}
-	}
+	d.Set("machine_policies", flattenedMachinePolicies)
+	d.SetId("Machine Policies " + time.Now().UTC().String())
 
 	return nil
 }
