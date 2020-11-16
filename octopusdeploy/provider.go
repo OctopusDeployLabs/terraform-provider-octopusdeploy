@@ -40,6 +40,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_feed":                              resourceFeed(),
 			"octopusdeploy_library_variable_set":              resourceLibraryVariableSet(),
 			"octopusdeploy_lifecycle":                         resourceLifecycle(),
+			"octopusdeploy_machine_policy":                    resourceMachinePolicy(),
 			"octopusdeploy_nuget_feed":                        resourceNuGetFeed(),
 			"octopusdeploy_project":                           resourceProject(),
 			"octopusdeploy_project_deployment_target_trigger": resourceProjectDeploymentTargetTrigger(),
@@ -53,22 +54,22 @@ func Provider() *schema.Provider {
 			"octopusdeploy_variable":                          resourceVariable(),
 		},
 		Schema: map[string]*schema.Schema{
-			constAddress: {
+			"address": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_URL", nil),
 				Description: "The URL of the Octopus Deploy server",
 			},
-			constAPIKey: {
+			"api_key": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),
 				Description: "The API to use with the Octopus Deploy server.",
 			},
-			constSpaceID: {
+			"space_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_SPACE", constEmptyString),
+				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_SPACE", ""),
 				Description: "The name of the Space in Octopus Deploy server",
 			},
 		},
@@ -79,9 +80,9 @@ func Provider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := Config{
-		Address: d.Get(constAddress).(string),
-		APIKey:  d.Get(constAPIKey).(string),
-		Space:   d.Get(constSpaceID).(string),
+		Address: d.Get("address").(string),
+		APIKey:  d.Get("api_key").(string),
+		Space:   d.Get("space_id").(string),
 	}
 
 	return config.Client()
