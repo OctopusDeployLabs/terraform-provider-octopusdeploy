@@ -17,18 +17,11 @@ func dataSourceSpaces() *schema.Resource {
 }
 
 func dataSourceSpacesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	ids := expandArray(d.Get("ids").([]interface{}))
-	name := d.Get("name").(string)
-	partialName := d.Get("partial_name").(string)
-	skip := d.Get("skip").(int)
-	take := d.Get("take").(int)
-
 	query := octopusdeploy.SpacesQuery{
-		IDs:         ids,
-		Name:        name,
-		PartialName: partialName,
-		Skip:        skip,
-		Take:        take,
+		IDs:         expandArray(d.Get("ids").([]interface{})),
+		PartialName: d.Get("name").(string),
+		Skip:        d.Get("skip").(int),
+		Take:        d.Get("take").(int),
 	}
 
 	client := m.(*octopusdeploy.Client)
