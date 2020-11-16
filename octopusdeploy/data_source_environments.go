@@ -9,14 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceEnvironment() *schema.Resource {
+func dataSourceEnvironments() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceEnvironmentRead,
+		ReadContext: dataSourceEnvironmentsRead,
 		Schema:      getEnvironmentDataSchema(),
 	}
 }
 
-func dataSourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceEnvironmentsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	query := octopusdeploy.EnvironmentsQuery{
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		Name:        d.Get("name").(string),

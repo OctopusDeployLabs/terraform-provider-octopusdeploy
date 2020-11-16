@@ -20,7 +20,7 @@ func resourceFeed() *schema.Resource {
 }
 
 func resourceFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feedResource := expandFeedResource(d)
+	feedResource := expandFeed(d)
 
 	client := m.(*octopusdeploy.Client)
 	feed, err := client.Feeds.Add(feedResource)
@@ -33,7 +33,7 @@ func resourceFeedCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	flattenFeedResource(ctx, d, feedResource)
+	setFeed(ctx, d, feedResource)
 	return nil
 }
 
@@ -61,12 +61,12 @@ func resourceFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	feedResource := feed.(*octopusdeploy.FeedResource)
 
-	flattenFeedResource(ctx, d, feedResource)
+	setFeed(ctx, d, feedResource)
 	return nil
 }
 
 func resourceFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feedResource := expandFeedResource(d)
+	feedResource := expandFeed(d)
 
 	client := m.(*octopusdeploy.Client)
 	feed, err := client.Feeds.Update(feedResource)
@@ -79,6 +79,6 @@ func resourceFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	flattenFeedResource(ctx, d, feedResource)
+	setFeed(ctx, d, feedResource)
 	return nil
 }
