@@ -162,7 +162,9 @@ func getProjectDataSchema() map[string]*schema.Schema {
 	projectSchema := getProjectSchema()
 	for _, field := range projectSchema {
 		field.Computed = true
+		field.Default = nil
 		field.MaxItems = 0
+		field.MinItems = 0
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil

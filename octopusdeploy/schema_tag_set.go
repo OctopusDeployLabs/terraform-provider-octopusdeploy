@@ -25,7 +25,9 @@ func getTagSetDataSchema() map[string]*schema.Schema {
 	tagSetSchema := getTagSetSchema()
 	for _, field := range tagSetSchema {
 		field.Computed = true
+		field.Default = nil
 		field.MaxItems = 0
+		field.MinItems = 0
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil

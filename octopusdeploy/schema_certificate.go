@@ -192,7 +192,9 @@ func getCertificateDataSchema() map[string]*schema.Schema {
 	certificateSchema := getCertificateSchema()
 	for _, field := range certificateSchema {
 		field.Computed = true
+		field.Default = nil
 		field.MaxItems = 0
+		field.MinItems = 0
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil

@@ -57,7 +57,9 @@ func getSpaceDataSchema() map[string]*schema.Schema {
 	spaceSchema := getSpaceSchema()
 	for _, field := range spaceSchema {
 		field.Computed = true
+		field.Default = nil
 		field.MaxItems = 0
+		field.MinItems = 0
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil
