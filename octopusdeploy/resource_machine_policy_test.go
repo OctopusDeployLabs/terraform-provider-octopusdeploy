@@ -66,7 +66,7 @@ func TestAccMachinePolicyBasic(t *testing.T) {
 
 func testMachinePolicyDataSource(localName string, name string) string {
 	return fmt.Sprintf(`data "octopusdeploy_machine_policies" "%s" {
-		name = "%s"
+		partial_name = "%s"
 	}`, localName, name)
 }
 
