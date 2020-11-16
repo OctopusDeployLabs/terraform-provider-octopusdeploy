@@ -64,23 +64,13 @@ func flattenChannel(channel *octopusdeploy.Channel) map[string]interface{} {
 	}
 }
 
-func setChannel(ctx context.Context, d *schema.ResourceData, channel *octopusdeploy.Channel) {
-	d.Set("description", channel.Description)
-	d.Set("id", channel.GetID())
-	d.Set("is_default", channel.IsDefault)
-	d.Set("lifecycle_id", channel.LifecycleID)
-	d.Set("name", channel.Name)
-	d.Set("project_id", channel.ProjectID)
-	d.Set("rules", flattenChannelRules(channel.Rules))
-	d.Set("space_id", channel.SpaceID)
-	d.Set("tenant_tags", channel.TenantTags)
-}
-
 func getChannelDataSchema() map[string]*schema.Schema {
 	channelSchema := getChannelSchema()
 	for _, field := range channelSchema {
 		field.Computed = true
+		field.Default = nil
 		field.MaxItems = 0
+		field.MinItems = 0
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil
@@ -88,6 +78,11 @@ func getChannelDataSchema() map[string]*schema.Schema {
 	}
 
 	return map[string]*schema.Schema{
+		"channels": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: channelSchema},
+			Type:     schema.TypeList,
+		},
 		"ids": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
@@ -106,11 +101,6 @@ func getChannelDataSchema() map[string]*schema.Schema {
 			Default:  1,
 			Type:     schema.TypeInt,
 			Optional: true,
-		},
-		"channels": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: channelSchema},
-			Type:     schema.TypeList,
 		},
 	}
 }
@@ -157,4 +147,16 @@ func getChannelSchema() map[string]*schema.Schema {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 	}
+}
+
+func setChannel(ctx context.Context, d *schema.ResourceData, channel *octopusdeploy.Channel) {
+	d.Set("description", channel.Description)
+	d.Set("id", channel.GetID())
+	d.Set("is_default", channel.IsDefault)
+	d.Set("lifecycle_id", channel.LifecycleID)
+	d.Set("name", channel.Name)
+	d.Set("project_id", channel.ProjectID)
+	d.Set("rules", flattenChannelRules(channel.Rules))
+	d.Set("space_id", channel.SpaceID)
+	d.Set("tenant_tags", channel.TenantTags)
 }
