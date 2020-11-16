@@ -7,18 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandMachineCleanupPolicy(d *schema.ResourceData) *octopusdeploy.MachineCleanupPolicy {
-	machineCleanupPolicy := octopusdeploy.NewMachineCleanupPolicy()
+func expandMachineCleanupPolicy(values interface{}) *octopusdeploy.MachineCleanupPolicy {
+	flattenedValues := values.([]interface{})
+	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	if v, ok := d.GetOk("delete_machines_behavior"); ok {
-		machineCleanupPolicy.DeleteMachinesBehavior = v.(string)
+	return &octopusdeploy.MachineCleanupPolicy{
+		DeleteMachinesBehavior:        flattenedMap["delete_machines_behavior"].(string),
+		DeleteMachinesElapsedTimeSpan: time.Duration(flattenedMap["delete_machines_elapsed_timespan"].(int)),
 	}
-
-	if v, ok := d.GetOk("delete_machines_elapsed_timespan"); ok {
-		machineCleanupPolicy.DeleteMachinesElapsedTimeSpan = v.(time.Duration)
-	}
-
-	return machineCleanupPolicy
 }
 
 func flattenMachineCleanupPolicy(machineCleanupPolicy *octopusdeploy.MachineCleanupPolicy) []interface{} {
@@ -44,6 +40,7 @@ func getMachineCleanupPolicySchema() map[string]*schema.Schema {
 			}),
 		},
 		"delete_machines_elapsed_timespan": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},

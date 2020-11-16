@@ -1,22 +1,18 @@
 package octopusdeploy
 
 import (
-	"log"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandMachineScriptPolicy(flattenedMachineScriptPolicy interface{}) *octopusdeploy.MachineScriptPolicy {
-	flattenedMachineScriptPolicyMap := flattenedMachineScriptPolicy.([]interface{})
-	for key, value := range flattenedMachineScriptPolicyMap {
-		log.Println(key)
-		log.Println(value)
+func expandMachineScriptPolicy(values interface{}) *octopusdeploy.MachineScriptPolicy {
+	flattenedValues := values.([]interface{})
+	flattenedMap := flattenedValues[0].(map[string]interface{})
+
+	return &octopusdeploy.MachineScriptPolicy{
+		RunType:    flattenedMap["run_type"].(string),
+		ScriptBody: flattenedMap["script_body"].(*string),
 	}
-
-	machineScriptPolicy := octopusdeploy.NewMachineScriptPolicy()
-
-	return machineScriptPolicy
 }
 
 func flattenMachineScriptPolicy(machineScriptPolicy *octopusdeploy.MachineScriptPolicy) []interface{} {

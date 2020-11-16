@@ -5,6 +5,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func expandMachineUpdatePolicy(values interface{}) *octopusdeploy.MachineUpdatePolicy {
+	flattenedValues := values.([]interface{})
+	flattenedMap := flattenedValues[0].(map[string]interface{})
+
+	return &octopusdeploy.MachineUpdatePolicy{
+		CalamariUpdateBehavior:  flattenedMap["calamari_update_behavior"].(string),
+		TentacleUpdateAccountID: flattenedMap["tentacle_update_account_id"].(string),
+		TentacleUpdateBehavior:  flattenedMap["tentacle_update_behavior"].(string),
+	}
+}
+
 func flattenMachineUpdatePolicy(machineUpdatePolicy *octopusdeploy.MachineUpdatePolicy) []interface{} {
 	if machineUpdatePolicy == nil {
 		return nil

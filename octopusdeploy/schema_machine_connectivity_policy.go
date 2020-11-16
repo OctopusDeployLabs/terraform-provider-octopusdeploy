@@ -5,14 +5,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandMachineConnectivityPolicy(d *schema.ResourceData) *octopusdeploy.MachineConnectivityPolicy {
-	machineConnectivityPolicy := octopusdeploy.NewMachineConnectivityPolicy()
+func expandMachineConnectivityPolicy(values interface{}) *octopusdeploy.MachineConnectivityPolicy {
+	flattenedValues := values.([]interface{})
+	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	if v, ok := d.GetOk("machine_connectivity_behavior"); ok {
-		machineConnectivityPolicy.MachineConnectivityBehavior = v.(string)
+	return &octopusdeploy.MachineConnectivityPolicy{
+		MachineConnectivityBehavior: flattenedMap["machine_connectivity_behavior"].(string),
 	}
-
-	return machineConnectivityPolicy
 }
 
 func flattenMachineConnectivityPolicy(machineConnectivityPolicy *octopusdeploy.MachineConnectivityPolicy) []interface{} {

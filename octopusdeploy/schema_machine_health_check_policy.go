@@ -7,35 +7,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandMachineHealthCheckPolicy(d *schema.ResourceData) *octopusdeploy.MachineHealthCheckPolicy {
-	machineHealthCheckPolicy := octopusdeploy.NewMachineHealthCheckPolicy()
+func expandMachineHealthCheckPolicy(values interface{}) *octopusdeploy.MachineHealthCheckPolicy {
+	flattenedValues := values.([]interface{})
+	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	if v, ok := d.GetOk("bash_health_check_policy"); ok {
-		machineHealthCheckPolicy.BashHealthCheckPolicy = expandMachineScriptPolicy(v)
+	duration, _ := time.ParseDuration(flattenedMap["health_check_interval"].(string))
+
+	return &octopusdeploy.MachineHealthCheckPolicy{
+		BashHealthCheckPolicy:       expandMachineScriptPolicy(flattenedMap["bash_health_check_policy"]),
+		HealthCheckCron:             flattenedMap["health_check_cron"].(string),
+		HealthCheckCronTimezone:     flattenedMap["health_check_cron_timezone"].(string),
+		HealthCheckInterval:         duration,
+		HealthCheckType:             flattenedMap["health_check_type"].(string),
+		PowerShellHealthCheckPolicy: expandMachineScriptPolicy(flattenedMap["powershell_health_check_policy"]),
 	}
-
-	if v, ok := d.GetOk("health_check_cron"); ok {
-		machineHealthCheckPolicy.HealthCheckCron = v.(string)
-	}
-
-	if v, ok := d.GetOk("health_check_cron_timezone"); ok {
-		machineHealthCheckPolicy.HealthCheckCronTimezone = v.(string)
-	}
-
-	if v, ok := d.GetOk("health_check_interval"); ok {
-		duration, _ := time.ParseDuration(v.(string))
-		machineHealthCheckPolicy.HealthCheckInterval = duration
-	}
-
-	if v, ok := d.GetOk("health_check_type"); ok {
-		machineHealthCheckPolicy.HealthCheckType = v.(string)
-	}
-
-	if v, ok := d.GetOk("powershell_health_check_policy"); ok {
-		machineHealthCheckPolicy.PowerShellHealthCheckPolicy = expandMachineScriptPolicy(v)
-	}
-
-	return machineHealthCheckPolicy
 }
 
 func flattenMachineHealthCheckPolicy(machineHealthCheckPolicy *octopusdeploy.MachineHealthCheckPolicy) []interface{} {
