@@ -33,6 +33,65 @@ func expandEnvironment(d *schema.ResourceData) *octopusdeploy.Environment {
 	return environment
 }
 
+func flattenEnvironment(environment *octopusdeploy.Environment) map[string]interface{} {
+	if environment == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"allow_dynamic_infrastructure": environment.AllowDynamicInfrastructure,
+		"description":                  environment.Description,
+		"id":                           environment.GetID(),
+		"name":                         environment.Name,
+		"sort_order":                   environment.SortOrder,
+		"use_guided_failure":           environment.UseGuidedFailure,
+	}
+}
+func getEnvironmentDataSchema() map[string]*schema.Schema {
+	environmentSchema := getEnvironmentSchema()
+	for _, field := range environmentSchema {
+		field.Computed = true
+		field.Default = nil
+		field.MaxItems = 0
+		field.MinItems = 0
+		field.Optional = false
+		field.Required = false
+		field.ValidateDiagFunc = nil
+		field.ValidateFunc = nil
+	}
+
+	return map[string]*schema.Schema{
+		"environments": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: environmentSchema},
+			Type:     schema.TypeList,
+		},
+		"ids": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"name": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"partial_name": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"skip": {
+			Default:  0,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"take": {
+			Default:  1,
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+	}
+}
+
 func getEnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"allow_dynamic_infrastructure": &schema.Schema{
@@ -41,6 +100,10 @@ func getEnvironmentSchema() map[string]*schema.Schema {
 		},
 		"description": &schema.Schema{
 			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"id": {
+			Computed: true,
 			Type:     schema.TypeString,
 		},
 		"name": &schema.Schema{
