@@ -1,6 +1,10 @@
 package octopusdeploy
 
-import "github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+import (
+	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+)
 
 func expandConnectivityPolicy(connectivityPolicy []interface{}) *octopusdeploy.ConnectivityPolicy {
 	connectivityPolicyMap := connectivityPolicy[0].(map[string]interface{})
@@ -17,10 +21,37 @@ func flattenConnectivityPolicy(connectivityPolicy *octopusdeploy.ConnectivityPol
 		return nil
 	}
 
-	flattenedConnectivityPolicy := make(map[string]interface{})
-	flattenedConnectivityPolicy["allow_deployments_to_no_targets"] = connectivityPolicy.AllowDeploymentsToNoTargets
-	flattenedConnectivityPolicy["exclude_unhealthy_targets"] = connectivityPolicy.ExcludeUnhealthyTargets
-	flattenedConnectivityPolicy["skip_machine_behavior"] = connectivityPolicy.SkipMachineBehavior
-	flattenedConnectivityPolicy["target_roles"] = connectivityPolicy.TargetRoles
-	return []interface{}{flattenedConnectivityPolicy}
+	return []interface{}{map[string]interface{}{
+		"allow_deployments_to_no_targets": connectivityPolicy.AllowDeploymentsToNoTargets,
+		"exclude_unhealthy_targets":       connectivityPolicy.ExcludeUnhealthyTargets,
+		"skip_machine_behavior":           connectivityPolicy.SkipMachineBehavior,
+		"target_roles":                    connectivityPolicy.TargetRoles,
+	}}
+}
+
+func getConnectivityPolicySchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"allow_deployments_to_no_targets": {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"exclude_unhealthy_targets": {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"skip_machine_behavior": {
+			Default:  "None",
+			Optional: true,
+			Type:     schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+				"SkipUnavailableMachines",
+				"None",
+			}, false)),
+		},
+		"target_roles": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+	}
 }

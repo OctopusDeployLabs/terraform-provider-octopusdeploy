@@ -131,33 +131,6 @@ func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
 	}
 }
 
-func getConnectivityPolicySchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"allow_deployments_to_no_targets": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-		"exclude_unhealthy_targets": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-		"skip_machine_behavior": {
-			Default:  "None",
-			Optional: true,
-			Type:     schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-				"SkipUnavailableMachines",
-				"None",
-			}, false)),
-		},
-		"target_roles": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-	}
-}
-
 func getProjectDataSchema() map[string]*schema.Schema {
 	projectSchema := getProjectSchema()
 	for _, field := range projectSchema {
