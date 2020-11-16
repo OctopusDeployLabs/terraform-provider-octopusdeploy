@@ -51,9 +51,9 @@ func expandRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.Re
 		if len(retentionPeriod) == 1 {
 			tfRetentionItem := retentionPeriod[0].(map[string]interface{})
 			retention := octopusdeploy.RetentionPeriod{
-				QuantityToKeep:    int32(tfRetentionItem[constQuantityToKeep].(int)),
-				ShouldKeepForever: tfRetentionItem[constShouldKeepForever].(bool),
-				Unit:              tfRetentionItem[constUnit].(string),
+				QuantityToKeep:    int32(tfRetentionItem["quantity_to_keep"].(int)),
+				ShouldKeepForever: tfRetentionItem["should_keep_forever"].(bool),
+				Unit:              tfRetentionItem["unit"].(string),
 			}
 			return &retention
 		}
@@ -64,11 +64,11 @@ func expandRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.Re
 
 func expandPhase(tfPhase map[string]interface{}) octopusdeploy.Phase {
 	phase := octopusdeploy.Phase{
-		AutomaticDeploymentTargets:         getSliceFromTerraformTypeList(tfPhase[constAutomaticDeploymentTargets]),
-		IsOptionalPhase:                    tfPhase[constIsOptionalPhase].(bool),
-		MinimumEnvironmentsBeforePromotion: int32(tfPhase[constMinimumEnvironmentsBeforePromotion].(int)),
+		AutomaticDeploymentTargets:         getSliceFromTerraformTypeList(tfPhase["automatic_deployment_targets"]),
+		IsOptionalPhase:                    tfPhase["is_optional_phase"].(bool),
+		MinimumEnvironmentsBeforePromotion: int32(tfPhase["minimum_environments_before_promotion"].(int)),
 		Name:                               tfPhase["name"].(string),
-		OptionalDeploymentTargets:          getSliceFromTerraformTypeList(tfPhase[constOptionalDeploymentTargets]),
+		OptionalDeploymentTargets:          getSliceFromTerraformTypeList(tfPhase["optional_deployment_targets"]),
 	}
 
 	if phase.AutomaticDeploymentTargets == nil {
@@ -95,18 +95,6 @@ func flattenLifecycle(lifecycle *octopusdeploy.Lifecycle) map[string]interface{}
 		"release_retention_policy":  flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy),
 		"tentacle_retention_policy": flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy),
 	}
-}
-
-func setLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *octopusdeploy.Lifecycle) {
-	d.Set("description", lifecycle.Description)
-	d.Set("id", lifecycle.GetID())
-	d.Set("name", lifecycle.Name)
-	d.Set("phases", flattenPhases(lifecycle.Phases))
-	d.Set("space_id", lifecycle.SpaceID)
-	d.Set("release_retention_policy", flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy))
-	d.Set("tentacle_retention_policy", flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy))
-
-	d.SetId(lifecycle.GetID())
 }
 
 func flattenPhases(phases []octopusdeploy.Phase) []interface{} {
@@ -350,4 +338,16 @@ func getRetentionPeriodSchema() map[string]*schema.Schema {
 			}, false)),
 		},
 	}
+}
+
+func setLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *octopusdeploy.Lifecycle) {
+	d.Set("description", lifecycle.Description)
+	d.Set("id", lifecycle.GetID())
+	d.Set("name", lifecycle.Name)
+	d.Set("phases", flattenPhases(lifecycle.Phases))
+	d.Set("space_id", lifecycle.SpaceID)
+	d.Set("release_retention_policy", flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy))
+	d.Set("tentacle_retention_policy", flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy))
+
+	d.SetId(lifecycle.GetID())
 }

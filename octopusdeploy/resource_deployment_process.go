@@ -62,7 +62,7 @@ func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, 
 		return nil
 	}
 
-	logResource(constDeploymentProcess, m)
+	logResource("deployment_process", m)
 
 	return nil
 }

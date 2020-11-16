@@ -35,7 +35,7 @@ func getDeploymentActionSchema() *schema.Schema {
 	addExecutionLocationSchema(element)
 	addActionTypeSchema(element)
 	addExecutionLocationSchema(element)
-	element.Schema[constActionType] = &schema.Schema{
+	element.Schema["action_type"] = &schema.Schema{
 		Description: "The type of action",
 		Required:    true,
 		Type:        schema.TypeString,

@@ -95,7 +95,7 @@ func validateAllSliceItemsInSlice(givenSlice, validationSlice []string) (string,
 		}
 	}
 
-	return constEmptyString, true
+	return "", true
 }
 
 func getSliceFromTerraformTypeList(inputTypeList interface{}) []string {
@@ -117,7 +117,7 @@ func logResource(name string, resource interface{}) {
 
 func getStringOrEmpty(tfAttr interface{}) string {
 	if tfAttr == nil {
-		return constEmptyString
+		return ""
 	}
 	return tfAttr.(string)
 }

@@ -45,24 +45,24 @@ func getPackageSchema(required bool) *schema.Schema {
 		Optional:    !required,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				constPackageID: {
+				"package_id": {
 					Type:        schema.TypeString,
 					Description: "The ID of the package",
 					Required:    true,
 				},
-				constFeedID: {
+				"feed_id": {
 					Type:        schema.TypeString,
 					Description: "The feed to retrieve the package from",
 					Default:     "feeds-builtin",
 					Optional:    true,
 				},
-				constAcquisitionLocation: {
+				"acquisition_location": {
 					Type:        schema.TypeString,
 					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
 					Default:     (string)(octopusdeploy.PackageAcquisitionLocationServer),
 					Optional:    true,
 				},
-				constProperty: getPropertySchema(),
+				"property": getPropertySchema(),
 			},
 		},
 	}
@@ -71,13 +71,13 @@ func getPackageSchema(required bool) *schema.Schema {
 func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
 	pkg := octopusdeploy.PackageReference{
 		Name:                getStringOrEmpty(tfPkg["name"]),
-		PackageID:           tfPkg[constPackageID].(string),
-		FeedID:              tfPkg[constFeedID].(string),
-		AcquisitionLocation: tfPkg[constAcquisitionLocation].(string),
+		PackageID:           tfPkg["package_id"].(string),
+		FeedID:              tfPkg["feed_id"].(string),
+		AcquisitionLocation: tfPkg["acquisition_location"].(string),
 		Properties:          buildPropertiesMap(tfPkg[constProperty]),
 	}
 
-	extract := tfPkg[constExtractDuringDeployment]
+	extract := tfPkg["extract_during_deployment"]
 	if extract != nil {
 		pkg.Properties["Extract"] = extract.(string)
 	}

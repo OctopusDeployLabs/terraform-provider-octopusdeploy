@@ -34,11 +34,11 @@ func TestAccAccountBasic(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccAccountExists(prefix),
-					resource.TestCheckResourceAttr(prefix, constAccountType, string(accountType)),
-					resource.TestCheckResourceAttr(prefix, constClientID, clientID.String()),
-					resource.TestCheckResourceAttr(prefix, constClientSecret, clientSecret),
+					resource.TestCheckResourceAttr(prefix, "account_type", string(accountType)),
+					resource.TestCheckResourceAttr(prefix, "client_id", clientID.String()),
+					resource.TestCheckResourceAttr(prefix, "client_secret", clientSecret),
 					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr(prefix, constSubscriptionID, subscriptionID.String()),
+					resource.TestCheckResourceAttr(prefix, "subscription_id", subscriptionID.String()),
 					resource.TestCheckResourceAttr(prefix, "tenant_id", tenantID.String()),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
 				),
