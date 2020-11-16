@@ -10,7 +10,7 @@ func expandTagSet(d *schema.ResourceData) *octopusdeploy.TagSet {
 
 	var tagSet = octopusdeploy.NewTagSet(name)
 
-	if v, ok := d.GetOk("tag"); ok {
+	if v, ok := d.GetOk("tags"); ok {
 		tags := v.([]interface{})
 		for _, t := range tags {
 			tag := expandTag(t.(map[string]interface{}))
@@ -19,6 +19,18 @@ func expandTagSet(d *schema.ResourceData) *octopusdeploy.TagSet {
 	}
 
 	return tagSet
+}
+
+func flattenTagSet(tagSet *octopusdeploy.TagSet) map[string]interface{} {
+	if tagSet == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"id":   tagSet.GetID(),
+		"name": tagSet.Name,
+		"tags": flattenTags(tagSet.Tags),
+	}
 }
 
 func getTagSetDataSchema() map[string]*schema.Schema {
@@ -72,8 +84,8 @@ func getTagSetSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"tag": {
-			Elem:     &schema.Resource{Schema: getTagSchema()},
+		"tags": {
+			Elem:     &schema.Resource{Schema: getTagsSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
