@@ -218,26 +218,7 @@ func getEndpointSchema() map[string]*schema.Schema {
 		},
 		"tentacle_version_details": {
 			Computed: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"upgrade_locked": {
-						Optional: true,
-						Type:     schema.TypeBool,
-					},
-					"upgrade_required": {
-						Optional: true,
-						Type:     schema.TypeBool,
-					},
-					"upgrade_suggested": {
-						Optional: true,
-						Type:     schema.TypeBool,
-					},
-					"version": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-				},
-			},
+			Elem:     &schema.Resource{Schema: getTentacleVersionDetailsSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
