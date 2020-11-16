@@ -15,7 +15,23 @@ func expandTag(tag map[string]interface{}) octopusdeploy.Tag {
 	}
 }
 
-func getTagSchema() map[string]*schema.Schema {
+func flattenTags(tags []octopusdeploy.Tag) []map[string]interface{} {
+	var flattenedTags = make([]map[string]interface{}, len(tags))
+	for key, tag := range tags {
+		flattenedTags[key] = map[string]interface{}{
+			"canonical_tag_name": tag.CanonicalTagName,
+			"color":              tag.Color,
+			"description":        tag.Description,
+			"id":                 tag.ID,
+			"name":               tag.Name,
+			"sort_order":         tag.SortOrder,
+		}
+	}
+
+	return flattenedTags
+}
+
+func getTagsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"canonical_tag_name": {
 			Optional: true,
