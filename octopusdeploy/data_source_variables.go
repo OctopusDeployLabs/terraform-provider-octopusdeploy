@@ -51,12 +51,12 @@ var schemaVariableScope = &schema.Schema{
 	Optional: true,
 	Elem: &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			constEnvironments: schemaVariableScopeValue,
-			constMachines:     schemaVariableScopeValue,
-			constActions:      schemaVariableScopeValue,
-			constRoles:        schemaVariableScopeValue,
-			constChannels:     schemaVariableScopeValue,
-			"tenant_tags":     schemaVariableScopeValue,
+			"environments": schemaVariableScopeValue,
+			"machines":     schemaVariableScopeValue,
+			"actions":      schemaVariableScopeValue,
+			"roles":        schemaVariableScopeValue,
+			"channels":     schemaVariableScopeValue,
+			"tenant_tags":  schemaVariableScopeValue,
 		},
 	},
 }
@@ -81,11 +81,11 @@ func tfVariableScopetoODVariableScope(d *schema.ResourceData) *octopusdeploy.Var
 	// Use the getSliceFromTerraformTypeList helper to convert the data from the map into []string and
 	// assign as the variable scopes we need
 	var newScope octopusdeploy.VariableScope
-	newScope.Environment = getSliceFromTerraformTypeList(tfSchemaList[constEnvironments])
-	newScope.Action = getSliceFromTerraformTypeList(tfSchemaList[constActions])
-	newScope.Role = getSliceFromTerraformTypeList(tfSchemaList[constRoles])
-	newScope.Channel = getSliceFromTerraformTypeList(tfSchemaList[constChannels])
-	newScope.Machine = getSliceFromTerraformTypeList(tfSchemaList[constMachines])
+	newScope.Environment = getSliceFromTerraformTypeList(tfSchemaList["environments"])
+	newScope.Action = getSliceFromTerraformTypeList(tfSchemaList["actions"])
+	newScope.Role = getSliceFromTerraformTypeList(tfSchemaList["roles"])
+	newScope.Channel = getSliceFromTerraformTypeList(tfSchemaList["channels"])
+	newScope.Machine = getSliceFromTerraformTypeList(tfSchemaList["machines"])
 	newScope.TenantTag = getSliceFromTerraformTypeList(tfSchemaList["tenant_tags"])
 
 	return &newScope
