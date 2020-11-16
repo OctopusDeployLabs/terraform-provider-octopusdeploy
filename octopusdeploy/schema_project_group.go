@@ -29,16 +29,33 @@ func expandProjectGroup(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
 	return projectGroup
 }
 
-func flattenProjectGroup(ctx context.Context, d *schema.ResourceData, projectGroup *octopusdeploy.ProjectGroup) {
-	d.Set("description", projectGroup.Description)
-	d.Set("environments", projectGroup.EnvironmentIDs)
-	d.Set("name", projectGroup.Name)
-	d.Set("retention_policy_id", projectGroup.RetentionPolicyID)
+func flattenProjectGroup(projectGroup *octopusdeploy.ProjectGroup) map[string]interface{} {
+	if projectGroup == nil {
+		return nil
+	}
 
-	d.SetId(projectGroup.GetID())
+	return map[string]interface{}{
+		"description":         projectGroup.Description,
+		"environments":        projectGroup.EnvironmentIDs,
+		"id":                  projectGroup.GetID(),
+		"name":                projectGroup.Name,
+		"retention_policy_id": projectGroup.RetentionPolicyID,
+	}
 }
 
 func getProjectGroupDataSchema() map[string]*schema.Schema {
+	projectGroupSchema := getProjectGroupSchema()
+	for _, field := range projectGroupSchema {
+		field.Computed = true
+		field.Default = nil
+		field.MaxItems = 0
+		field.MinItems = 0
+		field.Optional = false
+		field.Required = false
+		field.ValidateDiagFunc = nil
+		field.ValidateFunc = nil
+	}
+
 	return map[string]*schema.Schema{
 		"ids": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
@@ -49,6 +66,11 @@ func getProjectGroupDataSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
+		"project_groups": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: projectGroupSchema},
+			Type:     schema.TypeList,
+		},
 		"skip": {
 			Default:  0,
 			Type:     schema.TypeInt,
@@ -58,11 +80,6 @@ func getProjectGroupDataSchema() map[string]*schema.Schema {
 			Default:  1,
 			Type:     schema.TypeInt,
 			Optional: true,
-		},
-		"project_groups": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: getProjectGroupSchema()},
-			Type:     schema.TypeList,
 		},
 	}
 }
@@ -94,4 +111,13 @@ func getProjectGroupSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 	}
+}
+
+func setProjectGroup(ctx context.Context, d *schema.ResourceData, projectGroup *octopusdeploy.ProjectGroup) {
+	d.Set("description", projectGroup.Description)
+	d.Set("environments", projectGroup.EnvironmentIDs)
+	d.Set("name", projectGroup.Name)
+	d.Set("retention_policy_id", projectGroup.RetentionPolicyID)
+
+	d.SetId(projectGroup.GetID())
 }

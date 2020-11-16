@@ -28,7 +28,7 @@ func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	flattenProjectGroup(ctx, d, createdProjectGroup)
+	setProjectGroup(ctx, d, createdProjectGroup)
 	return nil
 }
 
@@ -39,7 +39,7 @@ func resourceProjectGroupRead(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	flattenProjectGroup(ctx, d, projectGroup)
+	setProjectGroup(ctx, d, projectGroup)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func resourceProjectGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	flattenProjectGroup(ctx, d, updatedProjectGroup)
+	setProjectGroup(ctx, d, updatedProjectGroup)
 	return nil
 }
 
