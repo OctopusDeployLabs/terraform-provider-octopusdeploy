@@ -237,8 +237,8 @@ func getAccountResourceSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"tenant_id": {
+			Optional:         true,
 			Type:             schema.TypeString,
-			Required:         true,
 			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
 		},
 		"tenant_tags": {
@@ -264,7 +264,6 @@ func setAccountResource(ctx context.Context, d *schema.ResourceData, account *oc
 	d.Set("active_directory_endpoint_base_uri", account.AuthenticationEndpoint)
 	d.Set("azure_environment", account.AzureEnvironment)
 	d.Set("certificate_thumbprint", account.CertificateThumbprint)
-	d.Set("client_id", account.ApplicationID.String())
 	d.Set("description", account.GetDescription())
 	d.Set("environments", account.GetEnvironmentIDs())
 	d.Set("name", account.GetName())
@@ -273,12 +272,22 @@ func setAccountResource(ctx context.Context, d *schema.ResourceData, account *oc
 	d.Set("service_management_endpoint_base_uri", account.ManagementEndpoint)
 	d.Set("service_management_endpoint_suffix", account.StorageEndpointSuffix)
 	d.Set("space_id", account.GetSpaceID())
-	d.Set("subscription_id", account.SubscriptionID.String())
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
 	d.Set("tenants", account.GetTenantIDs())
-	d.Set("tenant_id", account.TenantID.String())
 	d.Set("tenant_tags", account.GetTenantTags())
 	d.Set("username", account.Username)
+
+	if account.ApplicationID != nil {
+		d.Set("client_id", account.ApplicationID.String())
+	}
+
+	if account.SubscriptionID != nil {
+		d.Set("subscription_id", account.SubscriptionID.String())
+	}
+
+	if account.TenantID != nil {
+		d.Set("tenant_id", account.TenantID.String())
+	}
 
 	d.SetId(account.GetID())
 }
