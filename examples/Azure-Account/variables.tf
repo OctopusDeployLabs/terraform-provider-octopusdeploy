@@ -1,27 +1,31 @@
 variable "apiKey" {
-    type = string
+  type = string
 }
 
-variable "client_id" {
-    type = string
+variable "application_id" {
+  type = string
 }
 
-variable "tenant_id" {
-    type = string
-}
-
-variable "subscription_number" {
-    type = string
+variable "application_password" {
+  type = string
 }
 
 variable "key" {
-    type = string
-}
-
-variable "space" {
-    type = string
+  type = string
 }
 
 variable "serverURL" {
+  type = string
+}
+
+variable "space" {
+  type = string
+}
+
+variable "subscription_id" {
+  type = string
+}
+
+variable "tenant_id" {
   type = string
 }
