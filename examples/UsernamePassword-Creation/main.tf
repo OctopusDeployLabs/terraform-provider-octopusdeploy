@@ -1,11 +1,11 @@
 provider "octopusdeploy" {
-  address = var.serverURL
-  apikey  = var.apiKey
-  space_id   = var.space
+  address  = var.serverURL
+  apikey   = var.apiKey
+  space_id = var.space
 }
 
-resource "octopusdeploy_usernamepassword_account" "username" {
-    name = "newuser"
-    username = "testing"
-    password = "testing123!@#"
+resource "octopusdeploy_username_password_account" "username" {
+  name     = "newuser"
+  username = "testing"
+  password = "testing123!@#"
 }

@@ -1,10 +1,10 @@
 provider "octopusdeploy" {
-    address = var.serverURL
-    apikey  = var.apiKey
-    space_id   = var.space
+  address  = var.serverURL
+  apikey   = var.apiKey
+  space_id = var.space
 }
 
 resource "octopusdeploy_project_group" "DevOpsProject" {
-    name = "testProject"
-    description = "my test project group"
+  description = "my test project group"
+  name        = "testProject"
 }

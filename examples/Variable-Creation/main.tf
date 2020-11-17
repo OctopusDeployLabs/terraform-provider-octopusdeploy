@@ -1,7 +1,7 @@
 provider "octopusdeploy" {
-  address = var.serverURL
-  apikey  = var.apiKey
-  space_id   = var.space
+  address  = var.serverURL
+  apikey   = var.apiKey
+  space_id = var.space
 }
 
 resource "octopusdeploy_variable" "newVariable" {

@@ -1,10 +1,10 @@
 provider "octopusdeploy" {
-  address = var.serverURL
-  apikey  = var.apiKey
-  space_id   = var.space
+  address  = var.serverURL
+  apikey   = var.apiKey
+  space_id = var.space
 }
 
 resource "octopusdeploy_library_variable_set" "newaccount" {
-  name            = var.variableSetName
-  description     = var.description
+  description = var.description
+  name        = var.variableSetName
 }
