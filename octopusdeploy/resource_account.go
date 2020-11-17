@@ -11,7 +11,7 @@ import (
 func resourceAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext:      resourceAccountCreate,
-		DeleteContext:      resourceAccountDeleteCommon,
+		DeleteContext:      resourceAccountDelete,
 		DeprecationMessage: "use account-specific resource instead (i.e. octopusdeploy_aws_account, octopusdeploy_azure_service_principal, octopusdeploy_azure_subscription_account, octopusdeploy_ssh_key_account, octopusdeploy_token_account, octopusdeploy_username_password_account)",
 		Importer:           getImporter(),
 		ReadContext:        resourceAccountRead,
@@ -19,7 +19,6 @@ func resourceAccount() *schema.Resource {
 		UpdateContext:      resourceAccountUpdate,
 	}
 }
-
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	accountResource := expandAccountResource(d)
 
@@ -35,6 +34,17 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	setAccountResource(ctx, d, accountResource)
+	return nil
+}
+
+func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	err := client.Accounts.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
 	return nil
 }
 
