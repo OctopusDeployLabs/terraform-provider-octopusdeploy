@@ -19,6 +19,7 @@ func resourceAccount() *schema.Resource {
 		UpdateContext:      resourceAccountUpdate,
 	}
 }
+
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	accountResource := expandAccountResource(d)
 
