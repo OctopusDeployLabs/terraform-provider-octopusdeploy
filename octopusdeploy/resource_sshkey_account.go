@@ -11,7 +11,7 @@ import (
 func resourceSSHKeyAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceSSHKeyAccountCreate,
-		DeleteContext: resourceAccountDeleteCommon,
+		DeleteContext: resourceSSHKeyAccountDelete,
 		Importer:      getImporter(),
 		ReadContext:   resourceSSHKeyAccountRead,
 		Schema:        getSSHKeyAccountSchema(),
@@ -31,6 +31,17 @@ func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m 
 	createdSSHKeyAccount := createdAccount.(*octopusdeploy.SSHKeyAccount)
 
 	setSSHKeyAccount(ctx, d, createdSSHKeyAccount)
+	return nil
+}
+
+func resourceSSHKeyAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	err := client.Accounts.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
 	return nil
 }
 

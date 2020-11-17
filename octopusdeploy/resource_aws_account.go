@@ -11,7 +11,7 @@ import (
 func resourceAmazonWebServicesAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAmazonWebServicesAccountCreate,
-		DeleteContext: resourceAccountDeleteCommon,
+		DeleteContext: resourceAmazonWebServicesAccountDelete,
 		Importer:      getImporter(),
 		ReadContext:   resourceAmazonWebServicesAccountRead,
 		Schema:        getAmazonWebServicesAccountSchema(),
@@ -31,6 +31,17 @@ func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.Resou
 	createdAmazonWebServicesAccount := createdAccount.(*octopusdeploy.AmazonWebServicesAccount)
 
 	setAmazonWebServicesAccount(ctx, d, createdAmazonWebServicesAccount)
+	return nil
+}
+
+func resourceAmazonWebServicesAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	err := client.Accounts.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
 	return nil
 }
 

@@ -11,7 +11,7 @@ import (
 func resourceTokenAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceTokenAccountCreate,
-		DeleteContext: resourceAccountDeleteCommon,
+		DeleteContext: resourceTokenAccountDelete,
 		Importer:      getImporter(),
 		ReadContext:   resourceTokenAccountRead,
 		Schema:        getTokenAccountSchema(),
@@ -30,6 +30,17 @@ func resourceTokenAccountCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	d.SetId(createdAccount.GetID())
 	return resourceTokenAccountRead(ctx, d, m)
+}
+
+func resourceTokenAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	err := client.Accounts.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func resourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

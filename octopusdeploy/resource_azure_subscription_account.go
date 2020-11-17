@@ -11,7 +11,7 @@ import (
 func resourceAzureSubscriptionAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAzureSubscriptionAccountCreate,
-		DeleteContext: resourceAccountDeleteCommon,
+		DeleteContext: resourceAzureSubscriptionAccountDelete,
 		Importer:      getImporter(),
 		ReadContext:   resourceAzureSubscriptionAccountRead,
 		Schema:        getAzureSubscriptionAccountSchema(),
@@ -31,6 +31,17 @@ func resourceAzureSubscriptionAccountCreate(ctx context.Context, d *schema.Resou
 	createdAzureSubscriptionAccount := accountResource.(*octopusdeploy.AzureSubscriptionAccount)
 
 	setAzureSubscriptionAccount(ctx, d, createdAzureSubscriptionAccount)
+	return nil
+}
+
+func resourceAzureSubscriptionAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	err := client.Accounts.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
 	return nil
 }
 

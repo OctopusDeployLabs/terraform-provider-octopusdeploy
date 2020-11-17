@@ -11,7 +11,7 @@ import (
 func resourceUsernamePasswordAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceUsernamePasswordAccountCreate,
-		DeleteContext: resourceAccountDeleteCommon,
+		DeleteContext: resourceUsernamePasswordAccountDelete,
 		Importer:      getImporter(),
 		ReadContext:   resourceUsernamePasswordAccountRead,
 		Schema:        getUsernamePasswordAccountSchema(),
@@ -31,6 +31,17 @@ func resourceUsernamePasswordAccountCreate(ctx context.Context, d *schema.Resour
 	createdUsernamePasswordAccount := createdAccount.(*octopusdeploy.UsernamePasswordAccount)
 
 	setUsernamePasswordAccount(ctx, d, createdUsernamePasswordAccount)
+	return nil
+}
+
+func resourceUsernamePasswordAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	err := client.Accounts.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
 	return nil
 }
 
