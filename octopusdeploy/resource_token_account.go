@@ -28,22 +28,20 @@ func resourceTokenAccountCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	createdTokenAccount := createdAccount.(*octopusdeploy.TokenAccount)
-	createdTokenAccount.Token = account.Token
-
-	setTokenAccount(ctx, d, createdTokenAccount)
-	return nil
+	d.SetId(createdAccount.GetID())
+	return resourceTokenAccountRead(ctx, d, m)
 }
 
 func resourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
-	}
-	if accountResource == nil {
-		d.SetId("")
-		return nil
 	}
 
 	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
@@ -61,19 +59,10 @@ func resourceTokenAccountUpdate(ctx context.Context, d *schema.ResourceData, m i
 	account := expandTokenAccount(d)
 
 	client := m.(*octopusdeploy.Client)
-	accountResource, err := client.Accounts.Update(account)
+	_, err := client.Accounts.Update(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	updatedTokenAccount := accountResource.(*octopusdeploy.TokenAccount)
-	updatedTokenAccount.Token = account.Token
-
-	setTokenAccount(ctx, d, updatedTokenAccount)
-	return nil
+	return resourceTokenAccountRead(ctx, d, m)
 }

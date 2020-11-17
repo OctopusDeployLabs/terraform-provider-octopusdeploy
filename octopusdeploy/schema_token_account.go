@@ -5,6 +5,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandTokenAccount(d *schema.ResourceData) *octopusdeploy.TokenAccount {
@@ -41,26 +42,58 @@ func expandTokenAccount(d *schema.ResourceData) *octopusdeploy.TokenAccount {
 	return account
 }
 
-func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.TokenAccount) {
-	setAccount(ctx, d, account)
-
-	d.Set("account_type", "Token")
-	d.Set("token", account.Token.NewValue)
-
-	d.SetId(account.GetID())
+func getTokenAccountSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"description": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"environments": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"name": &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
+		},
+		"space_id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+		"tenants": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"tenant_tags": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"token": {
+			Required:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
+		},
+	}
 }
 
-func getTokenAccountSchema() map[string]*schema.Schema {
-	schemaMap := getAccountSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "Token",
-		Type:     schema.TypeString,
-	}
-	schemaMap["token"] = &schema.Schema{
-		Required:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	return schemaMap
+func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.TokenAccount) {
+	d.Set("description", account.GetDescription())
+	d.Set("environments", account.GetEnvironmentIDs())
+	d.Set("id", account.GetID())
+	d.Set("name", account.GetName())
+	d.Set("space_id", account.GetSpaceID())
+	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
+	d.Set("tenants", account.GetTenantIDs())
+	d.Set("tenant_tags", account.GetTenantTags())
+
+	d.SetId(account.GetID())
 }

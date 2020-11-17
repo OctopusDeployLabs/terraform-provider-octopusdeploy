@@ -60,60 +60,88 @@ func expandAzureServicePrincipalAccount(d *schema.ResourceData) *octopusdeploy.A
 	return account
 }
 
-func setAzureServicePrincipalAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureServicePrincipalAccount) {
-	setAccount(ctx, d, account)
-
-	d.Set("account_type", "AzureServicePrincipal")
-	d.Set("application_id", account.ApplicationID.String())
-
-	if account.ApplicationPassword != nil {
-		d.Set("application_password", account.ApplicationPassword.NewValue)
+func getAzureServicePrincipalAccountSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"application_id": {
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
+		},
+		"application_password": {
+			Required:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
+		},
+		"authentication_endpoint": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"azure_environment": getAzureEnvironmentSchema(),
+		"description": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"environments": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"name": &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
+		},
+		"resource_manager_endpoint": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"space_id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"subscription_id": {
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
+		},
+		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+		"tenants": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"tenant_id": {
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
+		},
+		"tenant_tags": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 	}
-
-	d.Set("authentication_endpoint", account.AuthenticationEndpoint)
-	d.Set("azure_environment", account.AzureEnvironment)
-	d.Set("resource_manager_endpoint", account.ResourceManagerEndpoint)
-	d.Set("subscription_id", account.SubscriptionID.String())
-	d.Set("tenant_id", account.TenantID.String())
-
-	d.SetId(account.GetID())
 }
 
-func getAzureServicePrincipalAccountSchema() map[string]*schema.Schema {
-	schemaMap := getAccountSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "AzureServicePrincipal",
-		Type:     schema.TypeString,
-	}
-	schemaMap["application_id"] = &schema.Schema{
-		Required:         true,
-		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-	}
-	schemaMap["application_password"] = &schema.Schema{
-		Required:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["authentication_endpoint"] = &schema.Schema{
-		Optional: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["azure_environment"] = getAzureEnvironmentSchema()
-	schemaMap["resource_manager_endpoint"] = &schema.Schema{
-		Optional: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["subscription_id"] = &schema.Schema{
-		Required:         true,
-		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-	}
-	schemaMap["tenant_id"] = &schema.Schema{
-		Required:         true,
-		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-	}
-	return schemaMap
+func setAzureServicePrincipalAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureServicePrincipalAccount) {
+	d.Set("application_id", account.ApplicationID.String())
+	d.Set("authentication_endpoint", account.AuthenticationEndpoint)
+	d.Set("azure_environment", account.AzureEnvironment)
+	d.Set("description", account.GetDescription())
+	d.Set("environments", account.GetEnvironmentIDs())
+	d.Set("id", account.GetID())
+	d.Set("name", account.GetName())
+	d.Set("resource_manager_endpoint", account.ResourceManagerEndpoint)
+	d.Set("space_id", account.GetSpaceID())
+	d.Set("subscription_id", account.SubscriptionID.String())
+	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
+	d.Set("tenants", account.GetTenantIDs())
+	d.Set("tenant_id", account.TenantID.String())
+	d.Set("tenant_tags", account.GetTenantTags())
+
+	d.SetId(account.GetID())
 }

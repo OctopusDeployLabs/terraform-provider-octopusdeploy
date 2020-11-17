@@ -48,31 +48,65 @@ func expandUsernamePasswordAccount(d *schema.ResourceData) *octopusdeploy.Userna
 }
 
 func setUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.UsernamePasswordAccount) {
-	setAccount(ctx, d, account)
-
-	d.Set("account_type", "UsernamePassword")
+	d.Set("description", account.GetDescription())
+	d.Set("environments", account.GetEnvironmentIDs())
+	d.Set("id", account.GetID())
+	d.Set("name", account.GetName())
+	d.Set("space_id", account.GetSpaceID())
+	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
+	d.Set("tenants", account.GetTenantIDs())
+	d.Set("tenant_tags", account.GetTenantTags())
 	d.Set("username", account.Username)
-	d.Set("password", account.Password.NewValue)
 
 	d.SetId(account.GetID())
 }
 
 func getUsernamePasswordAccountSchema() map[string]*schema.Schema {
-	schemaMap := getAccountSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Default:  "UsernamePassword",
-		Optional: true,
-		Type:     schema.TypeString,
+	return map[string]*schema.Schema{
+		"description": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"environments": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"name": &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
+		},
+		"password": {
+			Optional:     true,
+			Sensitive:    true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
+		},
+		"space_id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+		"tenants": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"tenant_tags": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"username": {
+			Required:     true,
+			Sensitive:    true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
+		},
 	}
-	schemaMap["password"] = &schema.Schema{
-		Sensitive:    true,
-		Optional:     true,
-		Type:         schema.TypeString,
-		ValidateFunc: validation.StringIsNotEmpty,
-	}
-	schemaMap["username"] = &schema.Schema{
-		Optional: true,
-		Type:     schema.TypeString,
-	}
-	return schemaMap
 }

@@ -72,50 +72,83 @@ func expandAzureSubscriptionAccount(d *schema.ResourceData) *octopusdeploy.Azure
 	return account
 }
 
-func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureSubscriptionAccount) {
-	setAccount(ctx, d, account)
+func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"azure_environment": getAzureEnvironmentSchema(),
+		"certificate": {
+			Optional:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
+		},
+		"certificate_thumbprint": {
+			Optional:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
+		},
+		"description": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"environments": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"management_endpoint": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"name": &schema.Schema{
+			Required:     true,
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringIsNotEmpty,
+		},
+		"space_id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"storage_endpoint_suffix": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"subscription_id": {
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
+		},
+		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+		"tenants": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"tenant_tags": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+	}
+}
 
-	d.Set("account_type", "AzureSubscription")
+func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureSubscriptionAccount) {
 	d.Set("azure_environment", account.AzureEnvironment)
 	d.Set("certificate", account.CertificateBytes)
 	d.Set("certificate_thumbprint", account.CertificateThumbprint)
+	d.Set("description", account.GetDescription())
+	d.Set("environments", account.GetEnvironmentIDs())
+	d.Set("id", account.GetID())
 	d.Set("management_endpoint", account.ManagementEndpoint)
+	d.Set("name", account.GetName())
+	d.Set("space_id", account.GetSpaceID())
 	d.Set("storage_endpoint_suffix", account.StorageEndpointSuffix)
 	d.Set("subscription_id", account.SubscriptionID.String())
+	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
+	d.Set("tenants", account.GetTenantIDs())
+	d.Set("tenant_tags", account.GetTenantTags())
 
 	d.SetId(account.GetID())
-}
-
-func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
-	schemaMap := getAccountSchema()
-	schemaMap["account_type"] = &schema.Schema{
-		Optional: true,
-		Default:  "AzureSubscription",
-		Type:     schema.TypeString,
-	}
-	schemaMap["azure_environment"] = getAzureEnvironmentSchema()
-	schemaMap["certificate"] = &schema.Schema{
-		Optional:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["certificate_thumbprint"] = &schema.Schema{
-		Optional:  true,
-		Sensitive: true,
-		Type:      schema.TypeString,
-	}
-	schemaMap["management_endpoint"] = &schema.Schema{
-		Optional: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["storage_endpoint_suffix"] = &schema.Schema{
-		Optional: true,
-		Type:     schema.TypeString,
-	}
-	schemaMap["subscription_id"] = &schema.Schema{
-		Required:         true,
-		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-	}
-	return schemaMap
 }
