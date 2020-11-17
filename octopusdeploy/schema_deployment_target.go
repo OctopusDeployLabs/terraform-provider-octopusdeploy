@@ -68,21 +68,6 @@ func expandDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTar
 	deploymentTarget.Thumbprint = tfSchemaList["thumbprint"].(string)
 	deploymentTarget.URI = tfSchemaList["uri"].(string)
 
-	tfAuthenticationSchemaSetInterface, ok := tfSchemaList["authentication"]
-	if ok {
-		tfAuthenticationSchemaSet := tfAuthenticationSchemaSetInterface.(*schema.Set)
-		if len(tfAuthenticationSchemaSet.List()) == 1 {
-			// Get the first element in the list, which is a map of the interfaces
-			// tfAuthenticationSchemaList := tfAuthenticationSchemaSet.List()[0].(map[string]interface{})
-
-			// deploymentTarget.Endpoint.Authentication = &octopusdeploy.DeploymentTargetEndpointAuthentication{
-			// 	AccountID:          tfAuthenticationSchemaList["account_id"].(string),
-			// 	ClientCertificate:  tfAuthenticationSchemaList["client_certificate"].(string),
-			// 	AuthenticationType: tfAuthenticationSchemaList["authentication_type"].(string),
-			// }
-		}
-	}
-
 	return deploymentTarget
 }
 
@@ -139,57 +124,6 @@ func flattenDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) m
 	}
 
 	return flattenedDeploymentTarget
-}
-
-func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
-	if err != nil {
-		return
-	}
-
-	switch deploymentTarget.Endpoint.GetCommunicationStyle() {
-	case "AzureCloudService":
-		d.Set("azure_cloud_service", flattenAzureCloudService(deploymentTarget.Endpoint.(*octopusdeploy.AzureCloudServiceEndpoint)))
-	case "AzureServiceFabricCluster":
-		d.Set("azure_service_fabric_cluster", flattenAzureServiceFabricCluster(deploymentTarget.Endpoint.(*octopusdeploy.AzureServiceFabricEndpoint)))
-	case "AzureWebApp":
-		d.Set("azure_web_app", flattenAzureWebApp(deploymentTarget.Endpoint.(*octopusdeploy.AzureWebAppEndpoint)))
-	case "Kubernetes":
-		d.Set("kubernetes_cluster", flattenKubernetesCluster(deploymentTarget.Endpoint.(*octopusdeploy.KubernetesEndpoint)))
-	case "None":
-		d.Set("cloud_region", flattenCloudRegion(deploymentTarget.Endpoint.(*octopusdeploy.CloudRegionEndpoint)))
-	case "OfflineDrop":
-		d.Set("offline_drop", flattenOfflineDrop(deploymentTarget.Endpoint.(*octopusdeploy.OfflineDropEndpoint)))
-	case "Ssh":
-		d.Set("ssh_connection", flattenSSHConnection(deploymentTarget.Endpoint.(*octopusdeploy.SSHEndpoint)))
-	case "TentacleActive":
-		d.Set("polling_tentacle", flattenPollingTentacle(deploymentTarget.Endpoint.(*octopusdeploy.PollingTentacleEndpoint)))
-	case "TentaclePassive":
-		d.Set("listening_tentacle", flattenListeningTentacle(deploymentTarget.Endpoint.(*octopusdeploy.ListeningTentacleEndpoint)))
-	}
-
-	d.Set("endpoint", flattenEndpoint(endpointResource))
-	d.Set("environments", deploymentTarget.EnvironmentIDs)
-	d.Set("has_latest_calamari", deploymentTarget.HasLatestCalamari)
-	d.Set("health_status", deploymentTarget.HealthStatus)
-	d.Set("is_disabled", deploymentTarget.IsDisabled)
-	d.Set("is_in_process", deploymentTarget.IsInProcess)
-	d.Set("machine_policy_id", deploymentTarget.MachinePolicyID)
-	d.Set("name", deploymentTarget.Name)
-	d.Set("operating_system", deploymentTarget.OperatingSystem)
-	d.Set("roles", deploymentTarget.Roles)
-	d.Set("shell_name", deploymentTarget.ShellName)
-	d.Set("shell_version", deploymentTarget.ShellVersion)
-	d.Set("space_id", deploymentTarget.SpaceID)
-	d.Set("status", deploymentTarget.Status)
-	d.Set("status_summary", deploymentTarget.StatusSummary)
-	d.Set("tenanted_deployment_participation", deploymentTarget.TenantedDeploymentMode)
-	d.Set("tenants", deploymentTarget.TenantIDs)
-	d.Set("tenant_tags", deploymentTarget.TenantTags)
-	d.Set("thumbprint", deploymentTarget.Thumbprint)
-	d.Set("uri", deploymentTarget.URI)
-
-	d.SetId(deploymentTarget.GetID())
 }
 
 func getDeploymentTargetDataSchema() map[string]*schema.Schema {
@@ -315,10 +249,11 @@ func getDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"endpoint": {
-			Elem:     &schema.Resource{Schema: getEndpointSchema()},
-			MaxItems: 1,
-			Optional: true,
-			Type:     schema.TypeList,
+			Deprecated: "use endpoint-specific attribute instead (i.e. azure_cloud_service, azure_service_fabric_cluster, azure_web_app, cloud_region, kubernetes_cluster, offline_drop, ssh_connection, polling_tentacle, listening_tentacle)",
+			Elem:       &schema.Resource{Schema: getEndpointSchema()},
+			MaxItems:   1,
+			Optional:   true,
+			Type:       schema.TypeList,
 		},
 		"environments": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
@@ -454,4 +389,55 @@ func getDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 	}
+}
+
+func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
+	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	if err != nil {
+		return
+	}
+
+	switch deploymentTarget.Endpoint.GetCommunicationStyle() {
+	case "AzureCloudService":
+		d.Set("azure_cloud_service", flattenAzureCloudService(deploymentTarget.Endpoint.(*octopusdeploy.AzureCloudServiceEndpoint)))
+	case "AzureServiceFabricCluster":
+		d.Set("azure_service_fabric_cluster", flattenAzureServiceFabricCluster(deploymentTarget.Endpoint.(*octopusdeploy.AzureServiceFabricEndpoint)))
+	case "AzureWebApp":
+		d.Set("azure_web_app", flattenAzureWebApp(deploymentTarget.Endpoint.(*octopusdeploy.AzureWebAppEndpoint)))
+	case "Kubernetes":
+		d.Set("kubernetes_cluster", flattenKubernetesCluster(deploymentTarget.Endpoint.(*octopusdeploy.KubernetesEndpoint)))
+	case "None":
+		d.Set("cloud_region", flattenCloudRegion(deploymentTarget.Endpoint.(*octopusdeploy.CloudRegionEndpoint)))
+	case "OfflineDrop":
+		d.Set("offline_drop", flattenOfflineDrop(deploymentTarget.Endpoint.(*octopusdeploy.OfflineDropEndpoint)))
+	case "Ssh":
+		d.Set("ssh_connection", flattenSSHConnection(deploymentTarget.Endpoint.(*octopusdeploy.SSHEndpoint)))
+	case "TentacleActive":
+		d.Set("polling_tentacle", flattenPollingTentacle(deploymentTarget.Endpoint.(*octopusdeploy.PollingTentacleEndpoint)))
+	case "TentaclePassive":
+		d.Set("listening_tentacle", flattenListeningTentacle(deploymentTarget.Endpoint.(*octopusdeploy.ListeningTentacleEndpoint)))
+	}
+
+	d.Set("endpoint", flattenEndpoint(endpointResource))
+	d.Set("environments", deploymentTarget.EnvironmentIDs)
+	d.Set("has_latest_calamari", deploymentTarget.HasLatestCalamari)
+	d.Set("health_status", deploymentTarget.HealthStatus)
+	d.Set("is_disabled", deploymentTarget.IsDisabled)
+	d.Set("is_in_process", deploymentTarget.IsInProcess)
+	d.Set("machine_policy_id", deploymentTarget.MachinePolicyID)
+	d.Set("name", deploymentTarget.Name)
+	d.Set("operating_system", deploymentTarget.OperatingSystem)
+	d.Set("roles", deploymentTarget.Roles)
+	d.Set("shell_name", deploymentTarget.ShellName)
+	d.Set("shell_version", deploymentTarget.ShellVersion)
+	d.Set("space_id", deploymentTarget.SpaceID)
+	d.Set("status", deploymentTarget.Status)
+	d.Set("status_summary", deploymentTarget.StatusSummary)
+	d.Set("tenanted_deployment_participation", deploymentTarget.TenantedDeploymentMode)
+	d.Set("tenants", deploymentTarget.TenantIDs)
+	d.Set("tenant_tags", deploymentTarget.TenantTags)
+	d.Set("thumbprint", deploymentTarget.Thumbprint)
+	d.Set("uri", deploymentTarget.URI)
+
+	d.SetId(deploymentTarget.GetID())
 }
