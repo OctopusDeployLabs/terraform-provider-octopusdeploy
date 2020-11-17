@@ -73,49 +73,36 @@ func getVariableDataSchema() map[string]*schema.Schema {
 
 func getVariableSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"project_id": {
-			Required: true,
+		"description": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"encrypted_value": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"is_sensitive": {
+			Default:  false,
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"key_fingerprint": {
+			Computed: true,
 			Type:     schema.TypeString,
 		},
 		"name": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"type": {
+		"pgp_key": {
+			ForceNew:  true,
+			Optional:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
+		},
+		"project_id": {
 			Required: true,
 			Type:     schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-				"String",
-				"Sensitive",
-				"Certificate",
-				"AmazonWebServicesAccount",
-				"AzureAccount",
-			}, false)),
-		},
-		"value": {
-			ConflictsWith: []string{"sensitive_value"},
-			Optional:      true,
-			Type:          schema.TypeString,
-		},
-		"sensitive_value": {
-			ConflictsWith: []string{"value"},
-			Optional:      true,
-			Sensitive:     true,
-			Type:          schema.TypeString,
-		},
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"encrypted_value": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"scope": schemaVariableScope,
-		"is_sensitive": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
 		},
 		"prompt": {
 			Elem:     &schema.Resource{Schema: getVariablePromptOptionsSchema()},
@@ -123,15 +110,28 @@ func getVariableSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
-		"pgp_key": {
-			Type:      schema.TypeString,
-			Optional:  true,
-			ForceNew:  true,
-			Sensitive: true,
+		"scope": schemaVariableScope,
+		"sensitive_value": {
+			ConflictsWith: []string{"value"},
+			Optional:      true,
+			Sensitive:     true,
+			Type:          schema.TypeString,
 		},
-		"key_fingerprint": {
+		"type": {
+			Required: true,
 			Type:     schema.TypeString,
-			Computed: true,
+			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+				"AmazonWebServicesAccount",
+				"Certificate",
+				"AzureAccount",
+				"Sensitive",
+				"String",
+			}, false)),
+		},
+		"value": {
+			ConflictsWith: []string{"sensitive_value"},
+			Optional:      true,
+			Type:          schema.TypeString,
 		},
 	}
 }
