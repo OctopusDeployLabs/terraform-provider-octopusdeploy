@@ -30,7 +30,7 @@ func resourceNuGetFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	createdNuGetFeed := createdFeed.(*octopusdeploy.NuGetFeed)
 
-	flattenNuGetFeed(ctx, d, createdNuGetFeed)
+	setNuGetFeed(ctx, d, createdNuGetFeed)
 	return nil
 }
 
@@ -52,7 +52,7 @@ func resourceNuGetFeedRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	nuGetFeed := feedResource.(*octopusdeploy.NuGetFeed)
 
-	flattenNuGetFeed(ctx, d, nuGetFeed)
+	setNuGetFeed(ctx, d, nuGetFeed)
 	return nil
 }
 
@@ -83,6 +83,6 @@ func resourceNuGetFeedUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	updatedNuGetFeed := feedResource.(*octopusdeploy.NuGetFeed)
 
-	flattenNuGetFeed(ctx, d, updatedNuGetFeed)
+	setNuGetFeed(ctx, d, updatedNuGetFeed)
 	return nil
 }
