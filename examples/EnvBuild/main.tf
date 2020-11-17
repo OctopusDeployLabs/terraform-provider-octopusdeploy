@@ -1,17 +1,18 @@
 provider "octopusdeploy" {
-  address = var.serverURL
-  apikey  = var.apiKey
-  space_id   = var.space
+  address  = var.serverURL
+  apikey   = var.apiKey
+  space_id = var.space
 }
 
 resource "octopusdeploy_environment" "newEnvironment" {
-  name        = var.environmentName
   description = "test environment"
+  name        = var.environmentName
 }
 
 resource "octopusdeploy_lifecycle" "newLifecycle" {
-  name        = var.lifecycleName
   description = "test description"
+  name        = var.lifecycleName
+
   release_retention_policy {
     quantity_to_keep = 30
     unit             = "Days"
@@ -21,8 +22,8 @@ resource "octopusdeploy_lifecycle" "newLifecycle" {
 }
 
 resource "octopusdeploy_project_group" "DevOpsProject" {
-  name        = var.projectGroupName
   description = "my test project group"
+  name        = var.projectGroupName
 }
 
 resource "octopusdeploy_project" "DevOpsProject" {
@@ -41,25 +42,25 @@ resource "octopusdeploy_aws_account" "aw" {
 }
 
 resource "octopusdeploy_azure_service_principal" "Azure" {
-  name                = "terratesttest"
   client_id           = var.client_id
-  tenant_id           = var.tenant_id
-  subscription_number = var.subscription_number
   key                 = var.key
+  name                = "terratesttest"
+  subscription_number = var.subscription_number
+  tenant_id           = var.tenant_id
 }
 
 resource "octopusdeploy_channel" "newChannel" {
-  name         = var.channelName
   description  = "test channel"
   lifecycle_id = octopusdeploy_lifecycle.newLifecycle.id
+  name         = var.channelName
   project_id   = octopusdeploy_project.DevOpsProject.id
 }
 
 resource "octopusdeploy_variable" "newVariable" {
   name       = var.varName
-  value      = "testing123!@#"
   project_id = octopusdeploy_project.DevOpsProject.id
   type       = "String"
+  value      = "testing123!@#"
 }
 
 output "octopus_deploy_environment" {
