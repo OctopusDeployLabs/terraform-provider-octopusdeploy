@@ -10,12 +10,13 @@ import (
 
 func resourceAccount() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceAccountCreate,
-		DeleteContext: resourceAccountDeleteCommon,
-		Importer:      getImporter(),
-		ReadContext:   resourceAccountRead,
-		Schema:        getAccountResourceSchema(),
-		UpdateContext: resourceAccountUpdate,
+		CreateContext:      resourceAccountCreate,
+		DeleteContext:      resourceAccountDeleteCommon,
+		DeprecationMessage: "use account-specific resource instead (i.e. octopusdeploy_aws_account, octopusdeploy_azure_service_principal, octopusdeploy_azure_subscription_account, octopusdeploy_ssh_key_account, octopusdeploy_token_account, octopusdeploy_username_password_account)",
+		Importer:           getImporter(),
+		ReadContext:        resourceAccountRead,
+		Schema:             getAccountResourceSchema(),
+		UpdateContext:      resourceAccountUpdate,
 	}
 }
 
@@ -41,11 +42,12 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interfac
 	client := m.(*octopusdeploy.Client)
 	account, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
-	}
-	if account == nil {
-		d.SetId("")
-		return nil
 	}
 
 	accountResource := account.(*octopusdeploy.AccountResource)
