@@ -1,13 +1,14 @@
 provider "octopusdeploy" {
-  address = var.serverURL
-  apikey  = var.apiKey
-  space_id   = var.space
+  address  = var.serverURL
+  apikey   = var.apiKey
+  space_id = var.space
 }
 
-resource "octopusdeploy_azure_service_principal" "Azure" {
-  name = "terratesttest"
-  client_id = var.client_id
-  tenant_id = var.tenant_id
-  subscription_number = var.subscription_number
-  key = var.key
+resource "octopusdeploy_azure_service_principal" "azure_service_principal" {
+  application_id       = var.application_id
+  application_password = var.application_password
+  key                  = var.key
+  name                 = "azure account"
+  subscription_id      = var.subscription_id
+  tenant_id            = var.tenant_id
 }
