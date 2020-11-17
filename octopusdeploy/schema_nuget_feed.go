@@ -37,18 +37,6 @@ func expandNuGetFeed(d *schema.ResourceData) *octopusdeploy.NuGetFeed {
 	return feed
 }
 
-func flattenNuGetFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.NuGetFeed) {
-	d.Set("download_attempts", feed.DownloadAttempts)
-	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
-	d.Set("feed_uri", feed.FeedURI)
-	d.Set("is_enhanced_mode", feed.EnhancedMode)
-	d.Set("name", feed.Name)
-	// d.Set("password", feed.Password)
-	d.Set("username", feed.Username)
-
-	d.SetId(feed.GetID())
-}
-
 func getNuGetFeedDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
@@ -94,4 +82,15 @@ func getNuGetFeedSchema() map[string]*schema.Schema {
 			Type:      schema.TypeString,
 		},
 	}
+}
+
+func setNuGetFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.NuGetFeed) {
+	d.Set("download_attempts", feed.DownloadAttempts)
+	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
+	d.Set("feed_uri", feed.FeedURI)
+	d.Set("is_enhanced_mode", feed.EnhancedMode)
+	d.Set("name", feed.Name)
+	d.Set("username", feed.Username)
+
+	d.SetId(feed.GetID())
 }
