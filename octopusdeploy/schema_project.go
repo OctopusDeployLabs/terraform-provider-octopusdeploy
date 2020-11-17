@@ -245,6 +245,10 @@ func getProjectSchema() map[string]*schema.Schema {
 			Elem:     &schema.Resource{Schema: getExtensionSettingsSchema()},
 			Type:     schema.TypeSet,
 		},
+		"id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
 		"included_library_variable_sets": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
