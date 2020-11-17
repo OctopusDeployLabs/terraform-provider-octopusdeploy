@@ -99,7 +99,7 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 	}
 	deploymentProcess.ID = d.Id()
 
-	deploymentProcess, err = client.DeploymentProcesses.Update(deploymentProcess)
+	_, err = client.DeploymentProcesses.Update(deploymentProcess)
 	if err != nil {
 		return diag.FromErr(err)
 	}
