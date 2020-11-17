@@ -7,11 +7,11 @@ import (
 
 func expandDeploymentActionContainer(values interface{}) octopusdeploy.DeploymentActionContainer {
 	flattenedValues := values.([]interface{})
-	flattenedDeploymentActionContainer := flattenedValues[0].(map[string]interface{})
+	flattenedMap := flattenedValues[0].(map[string]interface{})
 
 	return octopusdeploy.DeploymentActionContainer{
-		FeedID: flattenedDeploymentActionContainer["feed_id"].(*string),
-		Image:  flattenedDeploymentActionContainer["image"].(*string),
+		FeedID: flattenedMap["feed_id"].(*string),
+		Image:  flattenedMap["image"].(*string),
 	}
 }
 
