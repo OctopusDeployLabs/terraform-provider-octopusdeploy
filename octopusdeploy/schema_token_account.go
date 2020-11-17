@@ -64,6 +64,7 @@ func getTokenAccountSchema() map[string]*schema.Schema {
 		},
 		"space_id": {
 			Computed: true,
+			Optional: true,
 			Type:     schema.TypeString,
 		},
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
