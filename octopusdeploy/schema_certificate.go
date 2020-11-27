@@ -198,7 +198,6 @@ func getCertificateDataSchema() map[string]*schema.Schema {
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil
-		field.ValidateFunc = nil
 	}
 
 	return map[string]*schema.Schema{
@@ -256,10 +255,10 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"certificate_data": {
-			Required:     true,
-			Sensitive:    true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
+			Required:         true,
+			Sensitive:        true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
 		},
 		"certificate_data_format": {
 			Optional: true,
@@ -295,9 +294,9 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
 		},
 		"not_after": {
 			Optional: true,
@@ -312,10 +311,10 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"password": {
-			Required:     true,
-			Sensitive:    true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
+			Required:         true,
+			Sensitive:        true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
 		},
 		"replaced_by": {
 			Optional: true,

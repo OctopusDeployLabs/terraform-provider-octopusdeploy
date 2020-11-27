@@ -53,7 +53,6 @@ func getProjectGroupDataSchema() map[string]*schema.Schema {
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil
-		field.ValidateFunc = nil
 	}
 
 	return map[string]*schema.Schema{
@@ -102,9 +101,9 @@ func getProjectGroupSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
 		},
 		"retention_policy_id": {
 			Optional: true,

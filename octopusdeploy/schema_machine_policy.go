@@ -108,7 +108,6 @@ func getMachinePolicyDataSchema() map[string]*schema.Schema {
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil
-		field.ValidateFunc = nil
 	}
 
 	return map[string]*schema.Schema{

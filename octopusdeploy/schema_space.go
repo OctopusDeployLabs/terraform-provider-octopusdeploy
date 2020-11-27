@@ -63,7 +63,6 @@ func getSpaceDataSchema() map[string]*schema.Schema {
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil
-		field.ValidateFunc = nil
 	}
 
 	return map[string]*schema.Schema{
@@ -109,9 +108,9 @@ func getSpaceSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
 		},
 		"space_managers_team_members": {
 			Elem: &schema.Schema{
