@@ -25,6 +25,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_spaces":                dataSourceSpaces(),
 			"octopusdeploy_tag_sets":              dataSourceTagSets(),
 			"octopusdeploy_users":                 dataSourceUsers(),
+			"octopusdeploy_user_roles":            dataSourceUserRoles(),
 			"octopusdeploy_variables":             dataSourceVariable(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -50,6 +51,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_tag_set":                           resourceTagSet(),
 			"octopusdeploy_token_account":                     resourceTokenAccount(),
 			"octopusdeploy_user":                              resourceUser(),
+			"octopusdeploy_user_role":                         resourceUserRole(),
 			"octopusdeploy_username_password_account":         resourceUsernamePasswordAccount(),
 			"octopusdeploy_variable":                          resourceVariable(),
 		},
@@ -58,19 +60,19 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_URL", nil),
-				Description: "The URL of the Octopus Deploy server",
+				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),
-				Description: "The API to use with the Octopus Deploy server.",
+				Description: "The API key to use with the Octopus REST API",
 			},
 			"space_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_SPACE", ""),
-				Description: "The name of the Space in Octopus Deploy server",
+				Description: "The space ID to target",
 			},
 		},
 
