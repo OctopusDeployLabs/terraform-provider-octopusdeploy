@@ -7,20 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandPollingTentacle(d *schema.ResourceData) *octopusdeploy.PollingTentacleEndpoint {
-	octopusURL, _ := url.Parse(d.Get("octopus_url").(string))
-	thumbprint := d.Get("thumbprint").(string)
+func expandPollingTentacle(flattenedMap map[string]interface{}) *octopusdeploy.PollingTentacleEndpoint {
+	octopusURL, _ := url.Parse(flattenedMap["octopus_url"].(string))
+	thumbprint := flattenedMap["thumbprint"].(string)
 
 	endpoint := octopusdeploy.NewPollingTentacleEndpoint(octopusURL, thumbprint)
-	endpoint.ID = d.Id()
-
-	if v, ok := d.GetOk("certificate_signature_algorithm"); ok {
-		endpoint.CertificateSignatureAlgorithm = v.(string)
-	}
-
-	if v, ok := d.GetOk("tentacle_version_details"); ok {
-		endpoint.TentacleVersionDetails = expandTentacleVersionDetails(v)
-	}
+	endpoint.CertificateSignatureAlgorithm = flattenedMap["certificate_signature_algorithm"].(string)
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.TentacleVersionDetails = expandTentacleVersionDetails(flattenedMap["tentacle_version_details"])
 
 	return endpoint
 }

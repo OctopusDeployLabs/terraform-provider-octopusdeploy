@@ -7,30 +7,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandSSHConnection(d *schema.ResourceData) *octopusdeploy.SSHEndpoint {
-	host := d.Get("host").(string)
-	port := d.Get("port").(int)
-	fingerprint := d.Get("fingerprint").(string)
+func expandSSHConnection(flattenedMap map[string]interface{}) *octopusdeploy.SSHEndpoint {
+	host := flattenedMap["host"].(string)
+	port := flattenedMap["port"].(int)
+	fingerprint := flattenedMap["fingerprint"].(string)
 
 	endpoint := octopusdeploy.NewSSHEndpoint(host, port, fingerprint)
-	endpoint.ID = d.Id()
+	endpoint.AccountID = flattenedMap["account_id"].(string)
+	endpoint.DotNetCorePlatform = flattenedMap["dot_net_core_platform"].(string)
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.ProxyID = flattenedMap["proxy_id"].(string)
 
-	if v, ok := d.GetOk("account_id"); ok {
-		endpoint.AccountID = v.(string)
-	}
-
-	if v, ok := d.GetOk("dot_net_core_platform"); ok {
-		endpoint.DotNetCorePlatform = v.(string)
-	}
-
-	if v, ok := d.GetOk("proxy_id"); ok {
-		endpoint.ProxyID = v.(string)
-	}
-
-	if v, ok := d.GetOk("uri"); ok {
-		endpointURI, _ := url.Parse(v.(string))
-		endpoint.URI = endpointURI
-	}
+	endpointURI, _ := url.Parse(flattenedMap["uri"].(string))
+	endpoint.URI = endpointURI
 
 	return endpoint
 }

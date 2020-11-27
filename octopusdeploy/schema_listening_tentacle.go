@@ -7,24 +7,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandListeningTentacle(d *schema.ResourceData) *octopusdeploy.ListeningTentacleEndpoint {
-	tentacleURL, _ := url.Parse(d.Get("tentacle_url").(string))
-	thumbprint := d.Get("thumbprint").(string)
+func expandListeningTentacle(flattenedMap map[string]interface{}) *octopusdeploy.ListeningTentacleEndpoint {
+	tentacleURL, _ := url.Parse(flattenedMap["tentacle_url"].(string))
+	thumbprint := flattenedMap["thumbprint"].(string)
 
 	endpoint := octopusdeploy.NewListeningTentacleEndpoint(tentacleURL, thumbprint)
-	endpoint.ID = d.Id()
-
-	if v, ok := d.GetOk("certificate_signature_algorithm"); ok {
-		endpoint.CertificateSignatureAlgorithm = v.(string)
-	}
-
-	if v, ok := d.GetOk("proxy_id"); ok {
-		endpoint.ProxyID = v.(string)
-	}
-
-	if v, ok := d.GetOk("tentacle_version_details"); ok {
-		endpoint.TentacleVersionDetails = expandTentacleVersionDetails(v)
-	}
+	endpoint.CertificateSignatureAlgorithm = flattenedMap["certificate_signature_algorithm"].(string)
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.ProxyID = flattenedMap["proxy_id"].(string)
+	endpoint.TentacleVersionDetails = expandTentacleVersionDetails(flattenedMap["tentacle_version_details"])
 
 	return endpoint
 }
@@ -70,11 +61,11 @@ func getListeningTentacleSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"tentacle_url": {
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeString,
 		},
 		"thumbprint": {
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeString,
 		},
 	}

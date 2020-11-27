@@ -5,25 +5,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandOfflineDrop(d *schema.ResourceData) *octopusdeploy.OfflineDropEndpoint {
+func expandOfflineDrop(flattenedMap map[string]interface{}) *octopusdeploy.OfflineDropEndpoint {
 	endpoint := octopusdeploy.NewOfflineDropEndpoint()
-	endpoint.ID = d.Id()
-
-	if v, ok := d.GetOk("applications_directory"); ok {
-		endpoint.ApplicationsDirectory = v.(string)
-	}
-
-	if v, ok := d.GetOk("destination"); ok {
-		endpoint.Destination = expandOfflineDropDestination(v)
-	}
-
-	if v, ok := d.GetOk("sensitive_variables_encryption_password"); ok {
-		endpoint.SensitiveVariablesEncryptionPassword = octopusdeploy.NewSensitiveValue(v.(string))
-	}
-
-	if v, ok := d.GetOk("working_directory"); ok {
-		endpoint.SensitiveVariablesEncryptionPassword = octopusdeploy.NewSensitiveValue(v.(string))
-	}
+	endpoint.ApplicationsDirectory = flattenedMap["applications_directory"].(string)
+	endpoint.Destination = expandOfflineDropDestination(flattenedMap["destination"])
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.SensitiveVariablesEncryptionPassword = octopusdeploy.NewSensitiveValue(flattenedMap["sensitive_variables_encryption_password"].(string))
+	endpoint.WorkingDirectory = flattenedMap["working_directory"].(string)
 
 	return endpoint
 }
