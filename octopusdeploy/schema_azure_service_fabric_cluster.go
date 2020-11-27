@@ -5,49 +5,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAzureServiceFabricCluster(d *schema.ResourceData) *octopusdeploy.AzureServiceFabricEndpoint {
+func expandAzureServiceFabricCluster(flattenedMap map[string]interface{}) *octopusdeploy.AzureServiceFabricEndpoint {
 	endpoint := octopusdeploy.NewAzureServiceFabricEndpoint()
-	endpoint.ID = d.Id()
-
-	if v, ok := d.GetOk("aad_client_credential_secret"); ok {
-		endpoint.AadClientCredentialSecret = v.(string)
-	}
-
-	if v, ok := d.GetOk("aad_credential_type"); ok {
-		endpoint.AadCredentialType = v.(string)
-	}
-
-	if v, ok := d.GetOk("aad_user_credential_password"); ok {
-		endpoint.AadUserCredentialPassword = octopusdeploy.NewSensitiveValue(v.(string))
-	}
-
-	if v, ok := d.GetOk("aad_user_credential_username"); ok {
-		endpoint.AadUserCredentialUsername = v.(string)
-	}
-
-	if v, ok := d.GetOk("certificate_store_location"); ok {
-		endpoint.CertificateStoreLocation = v.(string)
-	}
-
-	if v, ok := d.GetOk("certificate_store_name"); ok {
-		endpoint.CertificateStoreName = v.(string)
-	}
-
-	if v, ok := d.GetOk("client_certificate_variable"); ok {
-		endpoint.ClientCertificateVariable = v.(string)
-	}
-
-	if v, ok := d.GetOk("connection_endpoint"); ok {
-		endpoint.ConnectionEndpoint = v.(string)
-	}
-
-	if v, ok := d.GetOk("security_mode"); ok {
-		endpoint.SecurityMode = v.(string)
-	}
-
-	if v, ok := d.GetOk("server_certificate_thumbprint"); ok {
-		endpoint.ServerCertificateThumbprint = v.(string)
-	}
+	endpoint.AadClientCredentialSecret = flattenedMap["aad_client_credential_secret"].(string)
+	endpoint.AadCredentialType = flattenedMap["aad_credential_type"].(string)
+	endpoint.AadUserCredentialPassword = octopusdeploy.NewSensitiveValue(flattenedMap["aad_user_credential_password"].(string))
+	endpoint.AadUserCredentialUsername = flattenedMap["aad_user_credential_username"].(string)
+	endpoint.CertificateStoreLocation = flattenedMap["certificate_store_location"].(string)
+	endpoint.CertificateStoreName = flattenedMap["certificate_store_name"].(string)
+	endpoint.ClientCertificateVariable = flattenedMap["client_certificate_variable"].(string)
+	endpoint.ConnectionEndpoint = flattenedMap["connection_endpoint"].(string)
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.SecurityMode = flattenedMap["security_mode"].(string)
+	endpoint.ServerCertificateThumbprint = flattenedMap["server_certificate_thumbprint"].(string)
 
 	return endpoint
 }

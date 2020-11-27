@@ -5,13 +5,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandCloudRegion(d *schema.ResourceData) *octopusdeploy.CloudRegionEndpoint {
+func expandCloudRegion(flattenedMap map[string]interface{}) *octopusdeploy.CloudRegionEndpoint {
 	endpoint := octopusdeploy.NewCloudRegionEndpoint()
-	endpoint.ID = d.Id()
-
-	if v, ok := d.GetOk("default_worker_pool_id"); ok {
-		endpoint.DefaultWorkerPoolID = v.(string)
-	}
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.DefaultWorkerPoolID = flattenedMap["default_worker_pool_id"].(string)
 
 	return endpoint
 }

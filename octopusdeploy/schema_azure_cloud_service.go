@@ -5,25 +5,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAzureCloudService(d *schema.ResourceData) *octopusdeploy.AzureCloudServiceEndpoint {
+func expandAzureCloudService(flattenedMap map[string]interface{}) *octopusdeploy.AzureCloudServiceEndpoint {
 	endpoint := octopusdeploy.NewAzureCloudServiceEndpoint()
-	endpoint.ID = d.Id()
-
-	if v, ok := d.GetOk("account_id"); ok {
-		endpoint.AccountID = v.(string)
-	}
-
-	if v, ok := d.GetOk("cloud_service_name"); ok {
-		endpoint.CloudServiceName = v.(string)
-	}
-
-	if v, ok := d.GetOk("default_worker_pool_id"); ok {
-		endpoint.DefaultWorkerPoolID = v.(string)
-	}
-
-	if v, ok := d.GetOk("use_current_instance_count"); ok {
-		endpoint.UseCurrentInstanceCount = v.(bool)
-	}
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.AccountID = flattenedMap["account_id"].(string)
+	endpoint.CloudServiceName = flattenedMap["cloud_service_name"].(string)
+	endpoint.DefaultWorkerPoolID = flattenedMap["default_worker_pool_id"].(string)
+	endpoint.UseCurrentInstanceCount = flattenedMap["use_current_instance_count"].(bool)
 
 	return endpoint
 }

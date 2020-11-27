@@ -5,21 +5,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAzureWebApp(d *schema.ResourceData) *octopusdeploy.AzureWebAppEndpoint {
+func expandAzureWebApp(flattenedMap map[string]interface{}) *octopusdeploy.AzureWebAppEndpoint {
 	endpoint := octopusdeploy.NewAzureWebAppEndpoint()
-	endpoint.ID = d.Id()
-
-	if v, ok := d.GetOk("resource_group_name"); ok {
-		endpoint.ResourceGroupName = v.(string)
-	}
-
-	if v, ok := d.GetOk("web_app_name"); ok {
-		endpoint.WebAppName = v.(string)
-	}
-
-	if v, ok := d.GetOk("web_app_slot_name"); ok {
-		endpoint.WebAppSlotName = v.(int)
-	}
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.ResourceGroupName = flattenedMap["resource_group_name"].(string)
+	endpoint.WebAppName = flattenedMap["web_app_name"].(string)
+	endpoint.WebAppSlotName = flattenedMap["web_app_slot_name"].(int)
 
 	return endpoint
 }
