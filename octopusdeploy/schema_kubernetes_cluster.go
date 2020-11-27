@@ -7,43 +7,60 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandKubernetesCluster(d *schema.ResourceData) *octopusdeploy.KubernetesEndpoint {
-	clusterURL, _ := url.Parse(d.Get("cluster_url").(string))
+func expandKubernetesCluster(flattenedMap map[string]interface{}) *octopusdeploy.KubernetesEndpoint {
+	clusterURL, _ := url.Parse(flattenedMap["cluster_url"].(string))
 
 	endpoint := octopusdeploy.NewKubernetesEndpoint(clusterURL)
-	endpoint.ID = d.Id()
+	endpoint.Authentication = expandKubernetesAuthentication(flattenedMap["authentication"])
+	endpoint.ClusterCertificate = flattenedMap["cluster_certificate"].(string)
+	endpoint.Container = expandDeploymentActionContainer(flattenedMap["container"])
+	endpoint.DefaultWorkerPoolID = flattenedMap["default_worker_pool_id"].(string)
+	endpoint.ID = flattenedMap["id"].(string)
+	endpoint.Namespace = flattenedMap["namespace"].(string)
+	endpoint.ProxyID = flattenedMap["proxy_id"].(string)
+	endpoint.RunningInContainer = flattenedMap["running_in_container"].(bool)
+	endpoint.SkipTLSVerification = flattenedMap["skip_tls_verification"].(bool)
 
-	if v, ok := d.GetOk("authentication"); ok {
-		endpoint.Authentication = expandEndpointAuthentication(v)
-	}
+	// tfSchemaSetInterface, ok := d.GetOk("endpoint")
+	// if !ok {
+	// 	return nil
+	// }
+	// tfSchemaSet := tfSchemaSetInterface.([]interface{})
+	// if len(tfSchemaSet) == 0 {
+	// 	return nil
+	// }
+	// // Get the first element in the list, which is a map of the interfaces
+	// tfSchemaList := tfSchemaSet[0].(map[string]interface{})
 
-	if v, ok := d.GetOk("cluster_certificate"); ok {
-		endpoint.ClusterCertificate = v.(string)
-	}
+	// authenticationType := octopusdeploy.CommunicationStyle(tfSchemaList["authentication_type"].(string))
 
-	if v, ok := d.GetOk("container"); ok {
-		endpoint.Container = expandDeploymentActionContainer(v)
-	}
+	// var kubernetesAuthentication octopusdeploy.IKubernetesAuthentication
+	// switch authenticationType {
+	// case "KubernetesAws":
+	// 	kubernetesAuthentication = expandKubernetesAwsAuthentication(d)
+	// case "KubernetesAzure":
+	// 	kubernetesAuthentication = expandKubernetesAzureAuthentication(d)
+	// case "KubernetesCertificate":
+	// 	kubernetesAuthentication = expandKubernetesCertificateAuthentication(d)
+	// case "KubernetesStandard":
+	// 	kubernetesAuthentication = expandKubernetesStandardAuthentication(d)
+	// case "None":
+	// 	kubernetesAuthentication = expandKubernetesStandardAuthentication(d)
+	// }
 
-	if v, ok := d.GetOk("default_worker_pool_id"); ok {
-		endpoint.DefaultWorkerPoolID = v.(string)
-	}
+	// endpoint.Authentication = kubernetesAuthentication
 
-	if v, ok := d.GetOk("namespace"); ok {
-		endpoint.Namespace = v.(string)
-	}
+	// if v, ok := d.GetOk("aws_account_authentication"); ok {
+	// 	endpoint.Authentication = expandKubernetesAwsAuthentication(v)
+	// }
 
-	if v, ok := d.GetOk("proxy_id"); ok {
-		endpoint.ProxyID = v.(string)
-	}
+	// if v, ok := d.GetOk("azure_service_principal_authentication"); ok {
+	// 	endpoint.Authentication = expandKubernetesAzureAuthentication(v)
+	// }
 
-	if v, ok := d.GetOk("running_in_container"); ok {
-		endpoint.RunningInContainer = v.(bool)
-	}
-
-	if v, ok := d.GetOk("skip_tls_verification"); ok {
-		endpoint.SkipTLSVerification = v.(bool)
-	}
+	// if v, ok := d.GetOk("certificate_authentication"); ok {
+	// 	endpoint.Authentication = expandKubernetesCertificateAuthentication(v)
+	// }
 
 	return endpoint
 }
@@ -53,8 +70,7 @@ func flattenKubernetesCluster(endpoint *octopusdeploy.KubernetesEndpoint) []inte
 		return nil
 	}
 
-	rawEndpoint := map[string]interface{}{
-		"authentication":         flattenEndpointAuthentication(endpoint.Authentication),
+	flattenedEndpoint := map[string]interface{}{
 		"cluster_certificate":    endpoint.ClusterCertificate,
 		"container":              flattenDeploymentActionContainer(endpoint.Container),
 		"default_worker_pool_id": endpoint.DefaultWorkerPoolID,
@@ -66,17 +82,54 @@ func flattenKubernetesCluster(endpoint *octopusdeploy.KubernetesEndpoint) []inte
 	}
 
 	if endpoint.ClusterURL != nil {
-		rawEndpoint["cluster_url"] = endpoint.ClusterURL.String()
+		flattenedEndpoint["cluster_url"] = endpoint.ClusterURL.String()
 	}
 
-	return []interface{}{rawEndpoint}
+	switch endpoint.Authentication.GetAuthenticationType() {
+	case "KubernetesAws":
+		flattenedEndpoint["aws_account_authentication"] = flattenKubernetesAwsAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesAwsAuthentication))
+	case "KubernetesAzure":
+		flattenedEndpoint["azure_service_principal_authentication"] = flattenKubernetesAzureAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesAzureAuthentication))
+	case "KubernetesCertificate":
+		flattenedEndpoint["certificate_authentication"] = flattenKubernetesCertificateAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesCertificateAuthentication))
+	case "KubernetesStandard":
+		flattenedEndpoint["authentication"] = flattenKubernetesStandardAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))
+	case "None":
+		flattenedEndpoint["authentication"] = flattenKubernetesStandardAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))
+	}
+
+	return []interface{}{flattenedEndpoint}
 }
 
 func getKubernetesClusterSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"authentication": {
 			Computed: true,
-			Elem:     &schema.Resource{Schema: getEndpointAuthenticationSchema()},
+			Elem:     &schema.Resource{Schema: getKubernetesAuthenticationSchema()},
+			MaxItems: 1,
+			MinItems: 0,
+			Optional: true,
+			Type:     schema.TypeSet,
+		},
+		"aws_account_authentication": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: getKubernetesAwsAuthenticationSchema()},
+			MaxItems: 1,
+			MinItems: 0,
+			Optional: true,
+			Type:     schema.TypeSet,
+		},
+		"azure_service_principal_authentication": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: getKubernetesAzureAuthenticationSchema()},
+			MaxItems: 1,
+			MinItems: 0,
+			Optional: true,
+			Type:     schema.TypeSet,
+		},
+		"certificate_authentication": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: getKubernetesCertificateAuthenticationSchema()},
 			MaxItems: 1,
 			MinItems: 0,
 			Optional: true,
@@ -119,6 +172,22 @@ func getKubernetesClusterSchema() map[string]*schema.Schema {
 		"skip_tls_verification": {
 			Optional: true,
 			Type:     schema.TypeBool,
+		},
+		"token_authentication": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: getKubernetesStandardAuthenticationSchema()},
+			MaxItems: 1,
+			MinItems: 0,
+			Optional: true,
+			Type:     schema.TypeSet,
+		},
+		"username_password_authentication": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: getKubernetesStandardAuthenticationSchema()},
+			MaxItems: 1,
+			MinItems: 0,
+			Optional: true,
+			Type:     schema.TypeSet,
 		},
 	}
 }
