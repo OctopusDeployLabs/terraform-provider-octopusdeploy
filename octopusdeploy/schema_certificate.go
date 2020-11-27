@@ -282,28 +282,28 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"issuer_common_name": &schema.Schema{
+		"issuer_common_name": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"issuer_distinguished_name": &schema.Schema{
+		"issuer_distinguished_name": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"issuer_organization": &schema.Schema{
+		"issuer_organization": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Required:     true,
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringIsNotEmpty,
 		},
-		"not_after": &schema.Schema{
+		"not_after": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"not_before": &schema.Schema{
+		"not_before": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -317,19 +317,19 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringIsNotEmpty,
 		},
-		"replaced_by": &schema.Schema{
+		"replaced_by": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"self_signed": &schema.Schema{
+		"self_signed": {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"serial_number": &schema.Schema{
+		"serial_number": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"signature_algorithm_name": &schema.Schema{
+		"signature_algorithm_name": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -338,15 +338,15 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Optional: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
-		"subject_common_name": &schema.Schema{
+		"subject_common_name": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"subject_distinguished_name": &schema.Schema{
+		"subject_distinguished_name": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"subject_organization": &schema.Schema{
+		"subject_organization": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -361,11 +361,11 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Optional: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
-		"thumbprint": &schema.Schema{
+		"thumbprint": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"version": &schema.Schema{
+		"version": {
 			Optional: true,
 			Type:     schema.TypeInt,
 		},

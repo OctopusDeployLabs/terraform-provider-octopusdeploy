@@ -94,11 +94,11 @@ func getEnvironmentDataSchema() map[string]*schema.Schema {
 
 func getEnvironmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"allow_dynamic_infrastructure": &schema.Schema{
+		"allow_dynamic_infrastructure": {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"description": &schema.Schema{
+		"description": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -106,16 +106,16 @@ func getEnvironmentSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Required:     true,
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringIsNotEmpty,
 		},
-		"sort_order": &schema.Schema{
+		"sort_order": {
 			Computed: true,
 			Type:     schema.TypeInt,
 		},
-		"use_guided_failure": &schema.Schema{
+		"use_guided_failure": {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},

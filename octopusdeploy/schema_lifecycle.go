@@ -128,15 +128,15 @@ func flattenRetentionPeriod(r octopusdeploy.RetentionPeriod) []interface{} {
 
 func getLifecycleDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": &schema.Schema{
+		"description": {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"id": &schema.Schema{
+		"id": {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
@@ -164,15 +164,15 @@ func getLifecycleDataSchema() map[string]*schema.Schema {
 
 func getLifecycleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": &schema.Schema{
+		"description": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"id": &schema.Schema{
+		"id": {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
@@ -271,7 +271,7 @@ func getPhaseSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Required:     true,
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringIsNotEmpty,
