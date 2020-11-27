@@ -69,7 +69,7 @@ func flattenDisplaySettings(displaySettings map[string]interface{}) map[string]s
 	return flattenedDisplaySettings
 }
 
-func flattenLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryVariableSet *octopusdeploy.LibraryVariableSet) {
+func setLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryVariableSet *octopusdeploy.LibraryVariableSet) {
 	d.Set("description", libraryVariableSet.Description)
 	d.Set("name", libraryVariableSet.Name)
 	d.Set("space_id", libraryVariableSet.SpaceID)
@@ -81,7 +81,7 @@ func flattenLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libr
 
 func getLibraryVariableSetDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": &schema.Schema{
+		"name": {
 			Required:     true,
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringIsNotEmpty,
@@ -95,7 +95,7 @@ func getLibraryVariableSetSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Required:     true,
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringIsNotEmpty,
@@ -128,7 +128,7 @@ func getLibraryVariableSetSchema() map[string]*schema.Schema {
 						Optional: true,
 						Type:     schema.TypeString,
 					},
-					"name": &schema.Schema{
+					"name": {
 						Required:     true,
 						Type:         schema.TypeString,
 						ValidateFunc: validation.StringIsNotEmpty,
