@@ -28,10 +28,8 @@ func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	createdAmazonWebServicesAccount := createdAccount.(*octopusdeploy.AmazonWebServicesAccount)
-
-	setAmazonWebServicesAccount(ctx, d, createdAmazonWebServicesAccount)
-	return nil
+	d.SetId(createdAccount.GetID())
+	return resourceAmazonWebServicesAccountRead(ctx, d, m)
 }
 
 func resourceAmazonWebServicesAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -49,11 +47,12 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
-	}
-	if accountResource == nil {
-		d.SetId("")
-		return nil
 	}
 
 	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
@@ -71,13 +70,10 @@ func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.Resou
 	account := expandAmazonWebServicesAccount(d)
 
 	client := m.(*octopusdeploy.Client)
-	updatedAccount, err := client.Accounts.Update(account)
+	_, err := client.Accounts.Update(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	updatedAmazonWebServicesAccount := updatedAccount.(*octopusdeploy.AmazonWebServicesAccount)
-
-	setAmazonWebServicesAccount(ctx, d, updatedAmazonWebServicesAccount)
-	return nil
+	return resourceAmazonWebServicesAccountRead(ctx, d, m)
 }

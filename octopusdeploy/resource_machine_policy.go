@@ -24,13 +24,23 @@ func resourceMachinePolicyCreate(ctx context.Context, d *schema.ResourceData, m 
 
 	client := m.(*octopusdeploy.Client)
 	createdMachinePolicy, err := client.MachinePolicies.Add(machinePolicy)
-	if createdMachinePolicy != nil && err == nil {
-		d.SetId(createdMachinePolicy.ID)
-		setMachinePolicy(ctx, d, createdMachinePolicy)
-		return nil
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	return diag.FromErr(err)
+	d.SetId(createdMachinePolicy.ID)
+	return resourceMachinePolicyRead(ctx, d, m)
+}
+
+func resourceMachinePolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	err := client.MachinePolicies.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func resourceMachinePolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -53,22 +63,10 @@ func resourceMachinePolicyUpdate(ctx context.Context, d *schema.ResourceData, m 
 	machinePolicy := expandMachinePolicy(d)
 
 	client := m.(*octopusdeploy.Client)
-	updatedMachinePolicy, err := client.MachinePolicies.Update(machinePolicy)
+	_, err := client.MachinePolicies.Update(machinePolicy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setMachinePolicy(ctx, d, updatedMachinePolicy)
-	return nil
-}
-
-func resourceMachinePolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
-	err := client.MachinePolicies.DeleteByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId("")
-	return nil
+	return resourceMachinePolicyRead(ctx, d, m)
 }

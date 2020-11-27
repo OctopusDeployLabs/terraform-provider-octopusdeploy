@@ -28,32 +28,8 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	flattenLibraryVariableSet(ctx, d, createdLibraryVariableSet)
-	return nil
-}
-
-func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
-	libraryVariableSet, err := client.LibraryVariableSets.GetByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	flattenLibraryVariableSet(ctx, d, libraryVariableSet)
-	return nil
-}
-
-func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	libraryVariableSet := expandLibraryVariableSet(d)
-
-	client := m.(*octopusdeploy.Client)
-	updatedLibraryVariableSet, err := client.LibraryVariableSets.Update(libraryVariableSet)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	flattenLibraryVariableSet(ctx, d, updatedLibraryVariableSet)
-	return nil
+	d.SetId(createdLibraryVariableSet.GetID())
+	return resourceLibraryVariableSetRead(ctx, d, m)
 }
 
 func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -65,4 +41,32 @@ func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId("")
 	return nil
+}
+
+func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	libraryVariableSet, err := client.LibraryVariableSets.GetByID(d.Id())
+	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
+	setLibraryVariableSet(ctx, d, libraryVariableSet)
+	return nil
+}
+
+func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	libraryVariableSet := expandLibraryVariableSet(d)
+
+	client := m.(*octopusdeploy.Client)
+	_, err := client.LibraryVariableSets.Update(libraryVariableSet)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceLibraryVariableSetRead(ctx, d, m)
 }

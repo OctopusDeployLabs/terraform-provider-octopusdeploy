@@ -23,18 +23,13 @@ func resourceFeedCreate(ctx context.Context, d *schema.ResourceData, m interface
 	feedResource := expandFeed(d)
 
 	client := m.(*octopusdeploy.Client)
-	feed, err := client.Feeds.Add(feedResource)
+	createdFeed, err := client.Feeds.Add(feedResource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	feedResource, err = octopusdeploy.ToFeedResource(feed)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	setFeed(ctx, d, feedResource)
-	return nil
+	d.SetId(createdFeed.GetID())
+	return resourceFeedRead(ctx, d, m)
 }
 
 func resourceFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -52,11 +47,12 @@ func resourceFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	client := m.(*octopusdeploy.Client)
 	feed, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
-	}
-	if feed == nil {
-		d.SetId("")
-		return nil
 	}
 
 	feedResource := feed.(*octopusdeploy.FeedResource)
@@ -69,16 +65,10 @@ func resourceFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	feedResource := expandFeed(d)
 
 	client := m.(*octopusdeploy.Client)
-	feed, err := client.Feeds.Update(feedResource)
+	_, err := client.Feeds.Update(feedResource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	feedResource, err = octopusdeploy.ToFeedResource(feed)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	setFeed(ctx, d, feedResource)
-	return nil
+	return resourceFeedRead(ctx, d, m)
 }

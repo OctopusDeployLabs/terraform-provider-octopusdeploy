@@ -28,32 +28,8 @@ func resourceNuGetFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	createdNuGetFeed := createdFeed.(*octopusdeploy.NuGetFeed)
-
-	setNuGetFeed(ctx, d, createdNuGetFeed)
-	return nil
-}
-
-func resourceNuGetFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
-	feedResource, err := client.Feeds.GetByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	if feedResource == nil {
-		d.SetId("")
-		return nil
-	}
-
-	feedResource, err = octopusdeploy.ToFeed(feedResource.(*octopusdeploy.FeedResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	nuGetFeed := feedResource.(*octopusdeploy.NuGetFeed)
-
-	setNuGetFeed(ctx, d, nuGetFeed)
-	return nil
+	d.SetId(createdFeed.GetID())
+	return resourceNuGetFeedRead(ctx, d, m)
 }
 
 func resourceNuGetFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -67,12 +43,15 @@ func resourceNuGetFeedDelete(ctx context.Context, d *schema.ResourceData, m inte
 	return nil
 }
 
-func resourceNuGetFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandNuGetFeed(d)
-
+func resourceNuGetFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-	feedResource, err := client.Feeds.Update(feed)
+	feedResource, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
@@ -81,8 +60,20 @@ func resourceNuGetFeedUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	updatedNuGetFeed := feedResource.(*octopusdeploy.NuGetFeed)
+	nuGetFeed := feedResource.(*octopusdeploy.NuGetFeed)
 
-	setNuGetFeed(ctx, d, updatedNuGetFeed)
+	setNuGetFeed(ctx, d, nuGetFeed)
 	return nil
+}
+
+func resourceNuGetFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	feed := expandNuGetFeed(d)
+
+	client := m.(*octopusdeploy.Client)
+	_, err := client.Feeds.Update(feed)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceNuGetFeedRead(ctx, d, m)
 }

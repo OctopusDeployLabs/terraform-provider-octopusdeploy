@@ -28,32 +28,8 @@ func resourceLifecycleCreate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	setLifecycle(ctx, d, createdLifecycle)
-	return nil
-}
-
-func resourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
-	lifecycle, err := client.Lifecycles.GetByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	setLifecycle(ctx, d, lifecycle)
-	return nil
-}
-
-func resourceLifecycleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	lifecycle := expandLifecycle(d)
-
-	client := m.(*octopusdeploy.Client)
-	updatedLifecycle, err := client.Lifecycles.Update(lifecycle)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	setLifecycle(ctx, d, updatedLifecycle)
-	return nil
+	d.SetId(createdLifecycle.GetID())
+	return resourceLifecycleRead(ctx, d, m)
 }
 
 func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -65,4 +41,32 @@ func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m inte
 
 	d.SetId("")
 	return nil
+}
+
+func resourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	lifecycle, err := client.Lifecycles.GetByID(d.Id())
+	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
+	setLifecycle(ctx, d, lifecycle)
+	return nil
+}
+
+func resourceLifecycleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	lifecycle := expandLifecycle(d)
+
+	client := m.(*octopusdeploy.Client)
+	_, err := client.Lifecycles.Update(lifecycle)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceLifecycleRead(ctx, d, m)
 }

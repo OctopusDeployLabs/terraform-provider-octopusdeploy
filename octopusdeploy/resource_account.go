@@ -34,8 +34,8 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	setAccountResource(ctx, d, accountResource)
-	return nil
+	d.SetId(accountResource.GetID())
+	return resourceAccountRead(ctx, d, m)
 }
 
 func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -71,16 +71,10 @@ func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	accountResource := expandAccountResource(d)
 
 	client := m.(*octopusdeploy.Client)
-	account, err := client.Accounts.Update(accountResource)
+	_, err := client.Accounts.Update(accountResource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccountResource(account)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	setAccountResource(ctx, d, accountResource)
-	return nil
+	return resourceAccountRead(ctx, d, m)
 }

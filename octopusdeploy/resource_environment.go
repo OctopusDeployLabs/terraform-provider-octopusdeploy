@@ -28,32 +28,8 @@ func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	setEnvironment(ctx, d, createdEnvironment)
-	return nil
-}
-
-func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
-	environment, err := client.Environments.GetByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	setEnvironment(ctx, d, environment)
-	return nil
-}
-
-func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	environment := expandEnvironment(d)
-
-	client := m.(*octopusdeploy.Client)
-	updatedEnvironment, err := client.Environments.Update(environment)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	setEnvironment(ctx, d, updatedEnvironment)
-	return nil
+	d.SetId(createdEnvironment.GetID())
+	return resourceEnvironmentRead(ctx, d, m)
 }
 
 func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -65,4 +41,32 @@ func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m in
 
 	d.SetId("")
 	return nil
+}
+
+func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*octopusdeploy.Client)
+	environment, err := client.Environments.GetByID(d.Id())
+	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
+	setEnvironment(ctx, d, environment)
+	return nil
+}
+
+func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	environment := expandEnvironment(d)
+
+	client := m.(*octopusdeploy.Client)
+	_, err := client.Environments.Update(environment)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceEnvironmentRead(ctx, d, m)
 }

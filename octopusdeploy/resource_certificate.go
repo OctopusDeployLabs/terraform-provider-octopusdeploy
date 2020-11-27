@@ -28,8 +28,8 @@ func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	setCertificate(ctx, d, createdCertificate)
-	return nil
+	d.SetId(createdCertificate.GetID())
+	return resourceCertificateRead(ctx, d, m)
 }
 
 func resourceCertificateDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -47,7 +47,12 @@ func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m inte
 	client := m.(*octopusdeploy.Client)
 	certificate, err := client.Certificates.GetByID(d.Id())
 	if err != nil {
-		diag.FromErr(err)
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	setCertificate(ctx, d, certificate)
@@ -58,11 +63,10 @@ func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m in
 	certificate := expandCertificate(d)
 
 	client := m.(*octopusdeploy.Client)
-	updatedCertificate, err := client.Certificates.Update(*certificate)
+	_, err := client.Certificates.Update(*certificate)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setCertificate(ctx, d, updatedCertificate)
-	return nil
+	return resourceCertificateRead(ctx, d, m)
 }
