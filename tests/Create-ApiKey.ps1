@@ -22,4 +22,4 @@ $ApiObj = $repository.Users.CreateApiKey($UserObj, "Terraform tests")
 #Save the API key so we can use it later
 Set-Content -Path tests\octopus_api.txt -Value $ApiObj.ApiKey
 
-Write-Host "::set-env name=OCTOPUS_APIKEY::$($ApiObj.ApiKey)"
+echo "OCTOPUS_APIKEY=$($ApiObj.ApiKey)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
