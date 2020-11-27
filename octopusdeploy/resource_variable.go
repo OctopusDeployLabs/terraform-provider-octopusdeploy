@@ -45,11 +45,12 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 	client := m.(*octopusdeploy.Client)
 	variable, err := client.Variables.GetByID(projectID, id)
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
-	}
-	if variable == nil {
-		d.SetId("")
-		return nil
 	}
 
 	logResource(constVariable, m)
