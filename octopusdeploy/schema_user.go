@@ -146,6 +146,7 @@ func setUser(ctx context.Context, d *schema.ResourceData, user *octopusdeploy.Us
 	d.Set("can_password_be_edited", user.CanPasswordBeEdited)
 	d.Set("display_name", user.DisplayName)
 	d.Set("email_address", user.EmailAddress)
+	d.Set("id", user.GetID())
 	d.Set("identity", flattenIdentities(user.Identities))
 	d.Set("is_active", user.IsActive)
 	d.Set("is_requestor", user.IsRequestor)
