@@ -65,25 +65,6 @@ func flattenFeed(feed *octopusdeploy.FeedResource) map[string]interface{} {
 	}
 }
 
-func setFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.FeedResource) {
-	d.Set("access_key", feed.AccessKey)
-	d.Set("api_version", feed.APIVersion)
-	d.Set("delete_unreleased_packages_after_days", feed.DeleteUnreleasedPackagesAfterDays)
-	d.Set("download_attempts", feed.DownloadAttempts)
-	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
-	d.Set("feed_type", feed.FeedType)
-	d.Set("feed_uri", feed.FeedURI)
-	d.Set("is_enhanced_mode", feed.EnhancedMode)
-	d.Set("name", feed.Name)
-	d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions)
-	d.Set("region", feed.Region)
-	d.Set("registry_path", feed.RegistryPath)
-	d.Set("space_id", feed.SpaceID)
-	d.Set("username", feed.Username)
-
-	d.SetId(feed.GetID())
-}
-
 func getFeedDataSchema() map[string]*schema.Schema {
 	feedSchema := getFeedSchema()
 	for _, field := range feedSchema {
@@ -218,4 +199,23 @@ func getFeedSchema() map[string]*schema.Schema {
 			Type:      schema.TypeString,
 		},
 	}
+}
+
+func setFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.FeedResource) {
+	d.Set("access_key", feed.AccessKey)
+	d.Set("api_version", feed.APIVersion)
+	d.Set("delete_unreleased_packages_after_days", feed.DeleteUnreleasedPackagesAfterDays)
+	d.Set("download_attempts", feed.DownloadAttempts)
+	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
+	d.Set("feed_type", feed.FeedType)
+	d.Set("feed_uri", feed.FeedURI)
+	d.Set("is_enhanced_mode", feed.EnhancedMode)
+	d.Set("name", feed.Name)
+	d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions)
+	d.Set("region", feed.Region)
+	d.Set("registry_path", feed.RegistryPath)
+	d.Set("space_id", feed.SpaceID)
+	d.Set("username", feed.Username)
+
+	d.SetId(feed.GetID())
 }
