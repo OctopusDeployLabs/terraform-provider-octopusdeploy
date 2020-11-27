@@ -96,7 +96,6 @@ func flattenMachinePolicy(machinePolicy *octopusdeploy.MachinePolicy) map[string
 		"polling_request_queue_timeout":                      machinePolicy.PollingRequestMaximumMessageProcessingTimeout,
 		"space_id":                                           machinePolicy.SpaceID,
 	}
-
 }
 
 func getMachinePolicyDataSchema() map[string]*schema.Schema {
