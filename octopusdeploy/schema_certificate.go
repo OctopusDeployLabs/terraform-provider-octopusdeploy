@@ -215,17 +215,19 @@ func getCertificateDataSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"ids": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "Query and/or search by a list of IDs",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"order_by": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
 		"partial_name": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "Query and/or search by partial name",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"search": {
 			Optional: true,

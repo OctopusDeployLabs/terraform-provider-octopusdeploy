@@ -78,23 +78,26 @@ func getUserRoleDataSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"ids": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "Query and/or search by a list of IDs",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"partial_name": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
 		"skip": {
-			Default:  0,
-			Type:     schema.TypeInt,
-			Optional: true,
+			Default:     0,
+			Description: "Indicates the number of items to skip in the response",
+			Type:        schema.TypeInt,
+			Optional:    true,
 		},
 		"take": {
-			Default:  1,
-			Type:     schema.TypeInt,
-			Optional: true,
+			Default:     1,
+			Description: "Indicates the number of items to take (or return) in the response",
+			Type:        schema.TypeInt,
+			Optional:    true,
 		},
 		"user_roles": {
 			Computed: true,

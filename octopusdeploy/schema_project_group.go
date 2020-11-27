@@ -57,13 +57,15 @@ func getProjectGroupDataSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"ids": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "Query and/or search by a list of IDs",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"partial_name": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "Query and/or search by partial name",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"project_groups": {
 			Computed: true,
@@ -71,14 +73,16 @@ func getProjectGroupDataSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"skip": {
-			Default:  0,
-			Type:     schema.TypeInt,
-			Optional: true,
+			Default:     0,
+			Description: "Indicates the number of items to skip in the response",
+			Type:        schema.TypeInt,
+			Optional:    true,
 		},
 		"take": {
-			Default:  1,
-			Type:     schema.TypeInt,
-			Optional: true,
+			Default:     1,
+			Description: "Indicates the number of items to take (or return) in the response",
+			Type:        schema.TypeInt,
+			Optional:    true,
 		},
 	}
 }
