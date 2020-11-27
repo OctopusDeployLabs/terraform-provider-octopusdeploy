@@ -16,43 +16,48 @@ func expandDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTar
 	tenantIDs := getSliceFromTerraformTypeList(d.Get("tenants"))
 	tenantTags := getSliceFromTerraformTypeList(d.Get("tenant_tags"))
 
-	tfSchemaSetInterface, ok := d.GetOk("endpoint")
-	if !ok {
-		return nil
-	}
-	tfSchemaSet := tfSchemaSetInterface.([]interface{})
-	if len(tfSchemaSet) == 0 {
-		return nil
-	}
-	// Get the first element in the list, which is a map of the interfaces
-	tfSchemaList := tfSchemaSet[0].(map[string]interface{})
+	endpoint := expandEndpoint(d.Get("endpoint"))
 
-	communicationStyle := octopusdeploy.CommunicationStyle(tfSchemaList["communication_style"].(string))
+	// tfSchemaSetInterface, ok := d.GetOk("endpoint")
+	// if !ok {
+	// 	return nil
+	// }
+	// tfSchemaSet := tfSchemaSetInterface.([]interface{})
+	// if len(tfSchemaSet) == 0 {
+	// 	return nil
+	// }
+	// // Get the first element in the list, which is a map of the interfaces
+	// tfSchemaList := tfSchemaSet[0].(map[string]interface{})
 
-	var endpoint octopusdeploy.IEndpoint
-	switch communicationStyle {
-	case "AzureCloudService":
-		endpoint = expandAzureCloudService(d)
-	case "AzureServiceFabricCluster":
-		endpoint = expandAzureServiceFabricCluster(d)
-	case "AzureWebApp":
-		endpoint = expandAzureWebApp(d)
-	case "Kubernetes":
-		endpoint = expandKubernetesCluster(d)
-	case "None":
-		endpoint = expandCloudRegion(d)
-	case "OfflineDrop":
-		endpoint = expandOfflineDrop(d)
-	case "Ssh":
-		endpoint = expandSSHConnection(d)
-	case "TentacleActive":
-		endpoint = expandPollingTentacle(d)
-	case "TentaclePassive":
-		endpoint = expandListeningTentacle(d)
-	}
+	// communicationStyle := octopusdeploy.CommunicationStyle(tfSchemaList["communication_style"].(string))
+
+	// var endpoint octopusdeploy.IEndpoint
+	// switch communicationStyle {
+	// case "AzureCloudService":
+	// 	endpoint = expandAzureCloudService(d)
+	// case "AzureServiceFabricCluster":
+	// 	endpoint = expandAzureServiceFabricCluster(d)
+	// case "AzureWebApp":
+	// 	endpoint = expandAzureWebApp(d)
+	// case "Kubernetes":
+	// 	endpoint = expandKubernetesCluster(d)
+	// case "None":
+	// 	endpoint = expandCloudRegion(d)
+	// case "OfflineDrop":
+	// 	endpoint = expandOfflineDrop(d)
+	// case "Ssh":
+	// 	endpoint = expandSSHConnection(d)
+	// case "TentacleActive":
+	// 	endpoint = expandPollingTentacle(d)
+	// case "TentaclePassive":
+	// 	endpoint = expandListeningTentacle(d)
+	// }
 
 	deploymentTarget := octopusdeploy.NewDeploymentTarget(name, endpoint, environments, roles)
 	deploymentTarget.ID = d.Id()
+	deploymentTarget.TenantedDeploymentMode = deploymentMode
+	deploymentTarget.TenantIDs = tenantIDs
+	deploymentTarget.TenantTags = tenantTags
 
 	if v, ok := d.GetOk("machine_policy_id"); ok {
 		deploymentTarget.MachinePolicyID = v.(string)
@@ -62,11 +67,13 @@ func expandDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTar
 		deploymentTarget.IsDisabled = v.(bool)
 	}
 
-	deploymentTarget.TenantedDeploymentMode = deploymentMode
-	deploymentTarget.TenantIDs = tenantIDs
-	deploymentTarget.TenantTags = tenantTags
-	deploymentTarget.Thumbprint = tfSchemaList["thumbprint"].(string)
-	deploymentTarget.URI = tfSchemaList["uri"].(string)
+	if v, ok := d.GetOk("thumbprint"); ok {
+		deploymentTarget.Thumbprint = v.(string)
+	}
+
+	if v, ok := d.GetOk("uri"); ok {
+		deploymentTarget.URI = v.(string)
+	}
 
 	return deploymentTarget
 }
@@ -76,10 +83,10 @@ func flattenDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) m
 		return nil
 	}
 
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	// endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 
 	flattenedDeploymentTarget := map[string]interface{}{
-		"endpoint":                          flattenEndpoint(endpointResource),
+		// "endpoint":                          flattenEndpoint(endpointResource),
 		"environments":                      deploymentTarget.EnvironmentIDs,
 		"has_latest_calamari":               deploymentTarget.HasLatestCalamari,
 		"health_status":                     deploymentTarget.HealthStatus,
@@ -141,55 +148,66 @@ func getDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"communication_styles": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "A list of deployment target communication styles to be matched",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"deployment_id": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "A deployment ID to be matched",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"deployment_targets": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: deploymentTargetsSchema},
-			Type:     schema.TypeList,
+			Computed:    true,
+			Description: "A computed list of deployment targets that are matched based on the criteria set for this data source",
+			Elem:        &schema.Resource{Schema: deploymentTargetsSchema},
+			Type:        schema.TypeList,
 		},
 		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "A list of environments to be matched",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"health_statuses": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "A list of deployment target health statuses to be matched",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"ids": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "A list of deployment target IDs to be matched",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"is_disabled": {
-			Optional: true,
-			Type:     schema.TypeBool,
+			Description: "The state of deployment targets to be matched",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"name": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "The name of the deployment target to be matched",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"partial_name": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "The partial name of a deployment target to be matched",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"roles": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "A list of role IDs to be matched",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"shell_names": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "A list of shell names to be matched",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"skip": {
 			Default:  0,
@@ -308,7 +326,7 @@ func getDeploymentTargetSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Required:     true,
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringIsNotEmpty,

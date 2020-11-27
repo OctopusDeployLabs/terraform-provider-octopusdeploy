@@ -6,6 +6,35 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+func expandEndpoint(values interface{}) octopusdeploy.IEndpoint {
+	flattenedValues := values.([]interface{})
+	flattenedEndpoint := flattenedValues[0].(map[string]interface{})
+
+	communicationStyle := flattenedEndpoint["communication_style"].(string)
+	switch communicationStyle {
+	case "AzureCloudService":
+		return expandAzureCloudService(flattenedEndpoint)
+	case "AzureServiceFabricCluster":
+		return expandAzureServiceFabricCluster(flattenedEndpoint)
+	case "AzureWebApp":
+		return expandAzureWebApp(flattenedEndpoint)
+	case "Kubernetes":
+		return expandKubernetesCluster(flattenedEndpoint)
+	case "None":
+		return expandCloudRegion(flattenedEndpoint)
+	case "OfflineDrop":
+		return expandOfflineDrop(flattenedEndpoint)
+	case "Ssh":
+		return expandSSHConnection(flattenedEndpoint)
+	case "TentacleActive":
+		return expandPollingTentacle(flattenedEndpoint)
+	case "TentaclePassive":
+		return expandListeningTentacle(flattenedEndpoint)
+	}
+
+	return nil
+}
+
 func flattenEndpoint(endpoint *octopusdeploy.EndpointResource) []interface{} {
 	if endpoint == nil {
 		return nil
@@ -17,7 +46,7 @@ func flattenEndpoint(endpoint *octopusdeploy.EndpointResource) []interface{} {
 		"aad_user_credential_username":    endpoint.AadUserCredentialUsername,
 		"account_id":                      endpoint.AccountID,
 		"applications_directory":          endpoint.ApplicationsDirectory,
-		"authentication":                  flattenEndpointAuthentication(endpoint.Authentication),
+		"authentication":                  flattenKubernetesAuthentication(endpoint.Authentication),
 		"certificate_signature_algorithm": endpoint.CertificateSignatureAlgorithm,
 		"certificate_store_location":      endpoint.CertificateStoreLocation,
 		"certificate_store_name":          endpoint.CertificateStoreName,
@@ -87,7 +116,7 @@ func getEndpointSchema() map[string]*schema.Schema {
 		},
 		"authentication": {
 			Computed: true,
-			Elem:     &schema.Resource{Schema: getEndpointAuthenticationSchema()},
+			Elem:     &schema.Resource{Schema: getKubernetesAuthenticationSchema()},
 			MaxItems: 1,
 			MinItems: 0,
 			Optional: true,
