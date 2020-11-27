@@ -76,7 +76,7 @@ func testAccDeploymentTargetBasic(localName string, name string) string {
 	useGuidedFailure := false
 
 	return fmt.Sprintf(`data "octopusdeploy_machine_policies" "default" {
-		name = "Default Machine Policy"
+		partial_name = "Default Machine Policy"
 	}`+"\n"+
 		testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, useGuidedFailure)+"\n"+`
 	resource "octopusdeploy_deployment_target" "%s" {
