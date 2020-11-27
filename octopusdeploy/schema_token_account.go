@@ -57,7 +57,7 @@ func getTokenAccountSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"name": &schema.Schema{
+		"name": {
 			Required:     true,
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringIsNotEmpty,
@@ -95,6 +95,4 @@ func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *octop
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
 	d.Set("tenants", account.GetTenantIDs())
 	d.Set("tenant_tags", account.GetTenantTags())
-
-	d.SetId(account.GetID())
 }
