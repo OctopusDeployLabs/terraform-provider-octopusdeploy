@@ -152,7 +152,7 @@ func getLifecycleDataSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"phases": {
+		"phase": {
 			Computed: true,
 			Elem:     &schema.Resource{Schema: getPhaseDataSchema()},
 			Type:     schema.TypeList,
@@ -188,7 +188,7 @@ func getLifecycleSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"phases": {
+		"phase": {
 			Elem:     &schema.Resource{Schema: getPhaseSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
