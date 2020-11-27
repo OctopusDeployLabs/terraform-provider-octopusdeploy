@@ -1,12 +1,11 @@
 module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20201116031605-c35cc6d40357
+	github.com/OctopusDeploy/go-octopusdeploy v1.6.1-0.20201118065000-b7e50fdc1301
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.34.13 // indirect
 	github.com/fatih/color v1.10.0 // indirect
-	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/gruntwork-io/terratest v0.29.0
@@ -32,7 +31,6 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20201103154000-415bd0cd5df6 // indirect
 	google.golang.org/grpc v1.33.1 // indirect
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
