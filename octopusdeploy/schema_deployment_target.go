@@ -273,9 +273,10 @@ func getDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:       schema.TypeList,
 		},
 		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Required: true,
-			Type:     schema.TypeList,
+			Description: "A list of environment IDs to associate with this deployment target (i.e. Environments-123)",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Required:    true,
+			Type:        schema.TypeList,
 		},
 		"has_latest_calamari": {
 			Computed: true,
