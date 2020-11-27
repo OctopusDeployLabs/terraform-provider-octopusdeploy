@@ -47,6 +47,11 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	client := m.(*octopusdeploy.Client)
 	project, err := client.Projects.GetByID(d.Id())
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 
