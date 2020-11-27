@@ -4,12 +4,12 @@ require (
 	github.com/OctopusDeploy/go-octopusdeploy v1.7.1
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
-	github.com/aws/aws-sdk-go v1.34.13 // indirect
+	github.com/aws/aws-sdk-go v1.35.35 // indirect
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/google/uuid v1.1.2
-	github.com/gruntwork-io/terratest v0.29.0
+	github.com/gruntwork-io/terratest v0.30.23
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-hclog v0.15.0 // indirect
@@ -26,7 +26,6 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/zclconf/go-cty v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392 // indirect
-	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
 	golang.org/x/sys v0.0.0-20201126233918-771906719818 // indirect
 	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/tools v0.0.0-20200918232735-d647fc253266 // indirect
