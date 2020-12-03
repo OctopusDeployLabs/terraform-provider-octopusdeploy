@@ -11,6 +11,7 @@ import (
 
 func dataSourceLifecycles() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing lifecycles.",
 		ReadContext: dataSourceLifecyclesRead,
 		Schema:      getLifecycleDataSchema(),
 	}

@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandOfflineDropDestination(values interface{}) *octopusdeploy.OfflineDropDestination {
+func expandOfflinePackageDropDestination(values interface{}) *octopusdeploy.OfflinePackageDropDestination {
 	if values == nil {
 		return nil
 	}
@@ -13,13 +13,13 @@ func expandOfflineDropDestination(values interface{}) *octopusdeploy.OfflineDrop
 	flattenedValues := values.([]interface{})
 	flattenedEndpoint := flattenedValues[0].(map[string]interface{})
 
-	return &octopusdeploy.OfflineDropDestination{
+	return &octopusdeploy.OfflinePackageDropDestination{
 		DestinationType: flattenedEndpoint["destination_type"].(string),
 		DropFolderPath:  flattenedEndpoint["drop_folder_path"].(string),
 	}
 }
 
-func flattenOfflineDropDestination(offlineDropDestination *octopusdeploy.OfflineDropDestination) []interface{} {
+func flattenOfflinePackageDropDestination(offlineDropDestination *octopusdeploy.OfflinePackageDropDestination) []interface{} {
 	if offlineDropDestination == nil {
 		return nil
 	}
@@ -30,7 +30,7 @@ func flattenOfflineDropDestination(offlineDropDestination *octopusdeploy.Offline
 	}}
 }
 
-func getOfflineDropDestinationSchema() map[string]*schema.Schema {
+func getOfflinePackageDropDestinationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"destination_type": {
 			Optional: true,

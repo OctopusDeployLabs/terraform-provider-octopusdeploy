@@ -12,6 +12,7 @@ func resourceSpace() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceSpaceCreate,
 		DeleteContext: resourceSpaceDelete,
+		Description:   "This resource manages spaces in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceSpaceRead,
 		Schema:        getSpaceSchema(),
@@ -28,8 +29,8 @@ func resourceSpaceCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	setSpace(ctx, d, createdSpace)
-	return nil
+	d.SetId(createdSpace.GetID())
+	return resourceSpaceRead(ctx, d, m)
 }
 
 func resourceSpaceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -71,11 +72,10 @@ func resourceSpaceUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	space := expandSpace(d)
 
 	client := m.(*octopusdeploy.Client)
-	updatedSpace, err := client.Spaces.Update(space)
+	_, err := client.Spaces.Update(space)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setSpace(ctx, d, updatedSpace)
-	return nil
+	return resourceChannelRead(ctx, d, m)
 }

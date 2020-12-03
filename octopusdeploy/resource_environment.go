@@ -12,6 +12,7 @@ func resourceEnvironment() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceEnvironmentCreate,
 		DeleteContext: resourceEnvironmentDelete,
+		Description:   "This resource manages environments in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceEnvironmentRead,
 		Schema:        getEnvironmentSchema(),

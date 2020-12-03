@@ -35,10 +35,7 @@ func getChannelRuleSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
-		"id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"tag": {
 			Optional: true,
 			Type:     schema.TypeString,

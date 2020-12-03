@@ -5,7 +5,6 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandChannel(d *schema.ResourceData) *octopusdeploy.Channel {
@@ -65,90 +64,52 @@ func flattenChannel(channel *octopusdeploy.Channel) map[string]interface{} {
 }
 
 func getChannelDataSchema() map[string]*schema.Schema {
-	channelSchema := getChannelSchema()
-	for _, field := range channelSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getChannelSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"channels": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: channelSchema},
-			Type:     schema.TypeList,
-		},
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+		"channel": {
+			Computed:    true,
+			Description: "A channel that matches the specified filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"partial_name": {
-			Description: "Query and/or search by partial name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
+		"ids":          getIDsQuery(),
+		"partial_name": getPartialNameQuery(),
+		"skip":         getSkipQuery(),
+		"take":         getTakeQuery(),
 	}
 }
 
 func getChannelSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"description": getDescriptionSchema(),
+		"id":          getIDSchema(),
 		"is_default": {
-			Optional: true,
-			Type:     schema.TypeBool,
+			Description: "Indicates if this is the default channel for the associated project.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"lifecycle_id": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "The lifecycle ID associated with this channel.",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
-		"name": {
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
-		},
+		"name": getNameSchema(true),
 		"project_id": {
-			Required: true,
-			Type:     schema.TypeString,
+			Description: "The project ID associated with this channel.",
+			Required:    true,
+			Type:        schema.TypeString,
 		},
 		"rules": {
-			Elem:     &schema.Resource{Schema: getChannelRuleSchema()},
-			Optional: true,
-			Type:     schema.TypeList,
+			Description: "A list of rules associated with this channel.",
+			Elem:        &schema.Resource{Schema: getChannelRuleSchema()},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
-		"space_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"tenant_tags": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
+		"space_id":    getSpaceIDSchema(),
+		"tenant_tags": getTenantTagsSchema(),
 	}
 }
 

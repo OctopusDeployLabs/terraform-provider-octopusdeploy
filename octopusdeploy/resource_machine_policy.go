@@ -12,6 +12,7 @@ func resourceMachinePolicy() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceMachinePolicyCreate,
 		DeleteContext: resourceMachinePolicyDelete,
+		Description:   "This resource manages machine policies in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceMachinePolicyRead,
 		Schema:        getMachinePolicySchema(),

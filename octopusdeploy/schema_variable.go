@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
@@ -50,49 +49,34 @@ func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 }
 
 func getVariableDataSchema() map[string]*schema.Schema {
-	variableSchema := getVariableSchema()
-	for _, field := range variableSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getVariableSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
+		"id": getIDDataSchema(),
 		"variables": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: variableSchema},
-			Type:     schema.TypeList,
+			Computed:    true,
+			Description: "A list of variables that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 	}
 }
 
 func getVariableSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"description": getDescriptionSchema(),
 		"encrypted_value": {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"is_sensitive": {
-			Default:  false,
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
+		"is_sensitive": getIsSensitiveSchema(),
 		"key_fingerprint": {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
+		"name": getNameSchema(true),
 		"pgp_key": {
 			ForceNew:  true,
 			Optional:  true,
@@ -109,24 +93,14 @@ func getVariableSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
-		"scope": schemaVariableScope,
+		"scope": getVariableScopeSchema(),
 		"sensitive_value": {
 			ConflictsWith: []string{"value"},
 			Optional:      true,
 			Sensitive:     true,
 			Type:          schema.TypeString,
 		},
-		"type": {
-			Required: true,
-			Type:     schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
-				"AmazonWebServicesAccount",
-				"Certificate",
-				"AzureAccount",
-				"Sensitive",
-				"String",
-			}, false)),
-		},
+		"type": getVariableTypeSchema(),
 		"value": {
 			ConflictsWith: []string{"sensitive_value"},
 			Optional:      true,

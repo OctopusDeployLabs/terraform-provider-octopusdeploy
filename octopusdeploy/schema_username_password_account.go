@@ -5,7 +5,6 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandUsernamePasswordAccount(d *schema.ResourceData) *octopusdeploy.UsernamePasswordAccount {
@@ -63,50 +62,15 @@ func setUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData, acc
 
 func getUsernamePasswordAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"password": {
-			Optional:     true,
-			Sensitive:    true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"description":                       getDescriptionSchema(),
+		"environments":                      getEnvironmentsSchema(),
+		"id":                                getIDSchema(),
+		"name":                              getNameSchema(true),
+		"password":                          getPasswordSchema(false),
+		"space_id":                          getSpaceIDSchema(),
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"tenant_tags": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"username": {
-			Required:     true,
-			Sensitive:    true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
+		"tenants":                           getTenantsSchema(),
+		"tenant_tags":                       getTenantTagsSchema(),
+		"username":                          getUsernameSchema(true),
 	}
 }

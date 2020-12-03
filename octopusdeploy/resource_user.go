@@ -12,6 +12,7 @@ func resourceUser() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceUserCreate,
 		DeleteContext: resourceUserDelete,
+		Description:   "This resource manages users in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceUserRead,
 		Schema:        getUserSchema(),

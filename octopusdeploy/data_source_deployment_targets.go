@@ -11,6 +11,7 @@ import (
 
 func dataSourceDeploymentTargets() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing deployment targets.",
 		ReadContext: dataSourceDeploymentTargetsRead,
 		Schema:      getDeploymentTargetDataSchema(),
 	}
@@ -42,11 +43,28 @@ func dataSourceDeploymentTargetsRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	flattenedDeploymentTargets := []interface{}{}
+	flattenedListeningTentacleDeploymentTargets := []interface{}{}
+	flattenedOfflinePackageDropDeploymentTargets := []interface{}{}
+	flattenedPollingTentacleDeploymentTargets := []interface{}{}
+
 	for _, deploymentTarget := range deploymentTargets.Items {
-		flattenedDeploymentTargets = append(flattenedDeploymentTargets, flattenDeploymentTarget(deploymentTarget))
+		switch deploymentTarget.Endpoint.GetCommunicationStyle() {
+		case "OfflineDrop":
+			flattenedOfflinePackageDropDeploymentTargets = append(flattenedOfflinePackageDropDeploymentTargets, flattenOfflinePackageDropDeploymentTarget(deploymentTarget))
+		case "TentacleActive":
+			flattenedPollingTentacleDeploymentTargets = append(flattenedPollingTentacleDeploymentTargets, flattenPollingTentacleDeploymentTarget(deploymentTarget))
+		case "TentaclePassive":
+			flattenedListeningTentacleDeploymentTargets = append(flattenedListeningTentacleDeploymentTargets, flattenListeningTentacleDeploymentTarget(deploymentTarget))
+		default:
+			flattenedDeploymentTargets = append(flattenedDeploymentTargets, flattenDeploymentTarget(deploymentTarget))
+		}
 	}
 
 	d.Set("deployment_targets", flattenedDeploymentTargets)
+	d.Set("listening_tentacles", flattenedListeningTentacleDeploymentTargets)
+	d.Set("offline_package_drops", flattenedOfflinePackageDropDeploymentTargets)
+	d.Set("polling_tentacles", flattenedPollingTentacleDeploymentTargets)
+
 	d.SetId("DeploymentTargets " + time.Now().UTC().String())
 
 	return nil

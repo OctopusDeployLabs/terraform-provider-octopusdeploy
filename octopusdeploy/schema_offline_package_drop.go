@@ -5,10 +5,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandOfflineDrop(flattenedMap map[string]interface{}) *octopusdeploy.OfflineDropEndpoint {
-	endpoint := octopusdeploy.NewOfflineDropEndpoint()
+func expandOfflinePackageDrop(flattenedMap map[string]interface{}) *octopusdeploy.OfflinePackageDropEndpoint {
+	endpoint := octopusdeploy.NewOfflinePackageDropEndpoint()
 	endpoint.ApplicationsDirectory = flattenedMap["applications_directory"].(string)
-	endpoint.Destination = expandOfflineDropDestination(flattenedMap["destination"])
+	endpoint.Destination = expandOfflinePackageDropDestination(flattenedMap["destination"])
 	endpoint.ID = flattenedMap["id"].(string)
 	endpoint.SensitiveVariablesEncryptionPassword = octopusdeploy.NewSensitiveValue(flattenedMap["sensitive_variables_encryption_password"].(string))
 	endpoint.WorkingDirectory = flattenedMap["working_directory"].(string)
@@ -16,14 +16,14 @@ func expandOfflineDrop(flattenedMap map[string]interface{}) *octopusdeploy.Offli
 	return endpoint
 }
 
-func flattenOfflineDrop(endpoint *octopusdeploy.OfflineDropEndpoint) []interface{} {
+func flattenOfflinePackageDrop(endpoint *octopusdeploy.OfflinePackageDropEndpoint) []interface{} {
 	if endpoint == nil {
 		return nil
 	}
 
 	rawEndpoint := map[string]interface{}{
 		"applications_directory": endpoint.ApplicationsDirectory,
-		"destination":            flattenOfflineDropDestination(endpoint.Destination),
+		"destination":            flattenOfflinePackageDropDestination(endpoint.Destination),
 		"id":                     endpoint.GetID(),
 		"working_directory":      endpoint.WorkingDirectory,
 	}
@@ -31,7 +31,7 @@ func flattenOfflineDrop(endpoint *octopusdeploy.OfflineDropEndpoint) []interface
 	return []interface{}{rawEndpoint}
 }
 
-func getOfflineDropSchema() map[string]*schema.Schema {
+func getOfflinePackageDropSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"applications_directory": {
 			Optional: true,
@@ -39,14 +39,11 @@ func getOfflineDropSchema() map[string]*schema.Schema {
 		},
 		"destination": {
 			Computed: true,
-			Elem:     &schema.Resource{Schema: getOfflineDropDestinationSchema()},
+			Elem:     &schema.Resource{Schema: getOfflinePackageDropDestinationSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"working_directory": {
 			Optional: true,
 			Type:     schema.TypeString,

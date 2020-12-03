@@ -6,7 +6,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandAzureSubscriptionAccount(d *schema.ResourceData) *octopusdeploy.AzureSubscriptionAccount {
@@ -85,52 +84,23 @@ func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"description":  getDescriptionSchema(),
+		"environments": getEnvironmentsSchema(),
+		"id":           getIDSchema(),
 		"management_endpoint": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"name":     getNameSchema(true),
+		"space_id": getSpaceIDSchema(),
 		"storage_endpoint_suffix": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"subscription_id": {
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-		},
+		"subscription_id":                   getSubscriptionIDSchema(true),
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"tenant_tags": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
+		"tenants":                           getTenantsSchema(),
+		"tenant_tags":                       getTenantTagsSchema(),
 	}
 }
 

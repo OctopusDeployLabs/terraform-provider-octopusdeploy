@@ -154,6 +154,163 @@ func flattenCertificate(certificate *octopusdeploy.CertificateResource) map[stri
 	}
 }
 
+func getCertificateDataSchema() map[string]*schema.Schema {
+	dataSchema := getCertificateSchema()
+	setDataSchema(&dataSchema)
+
+	return map[string]*schema.Schema{
+		"archived": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"certificates": {
+			Computed:    true,
+			Description: "A list of certificates that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
+		"first_result": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"id":  getIDDataSchema(),
+		"ids": getIDsQuery(),
+		"order_by": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"partial_name": getPartialNameQuery(),
+		"search": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"skip": getSkipQuery(),
+		"take": getTakeQuery(),
+		"tenant": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+	}
+}
+
+func getCertificateSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"archived": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"certificate_data": {
+			Description:      "The encoded data of the certificate.",
+			Required:         true,
+			Sensitive:        true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+		},
+		"certificate_data_format": getCertificateDataFormatSchema(),
+		"environments":            getEnvironmentsSchema(),
+		"has_private_key": {
+			Computed:    true,
+			Description: "Indicates if the certificate has a private key.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
+		"id": getIDSchema(),
+		"is_expired": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"issuer_common_name": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"issuer_distinguished_name": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"issuer_organization": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"name": getNameSchema(true),
+		"not_after": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"not_before": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"notes": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"password": getPasswordSchema(true),
+		"replaced_by": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"self_signed": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"serial_number": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"signature_algorithm_name": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"subject_alternative_names": {
+			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"subject_common_name": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"subject_distinguished_name": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"subject_organization": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+		"tenants":                           getTenantsSchema(),
+		"tenant_tags":                       getTenantTagsSchema(),
+		"thumbprint": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"version": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeInt,
+		},
+	}
+}
+
 func setCertificate(ctx context.Context, d *schema.ResourceData, certificate *octopusdeploy.CertificateResource) {
 	// NOTE: certificate fields like certificate_data and password are not
 	// present here because they are sensitive values are can only be created
@@ -186,189 +343,4 @@ func setCertificate(ctx context.Context, d *schema.ResourceData, certificate *oc
 	d.Set("version", certificate.Version)
 
 	d.SetId(certificate.GetID())
-}
-
-func getCertificateDataSchema() map[string]*schema.Schema {
-	certificateSchema := getCertificateSchema()
-	for _, field := range certificateSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
-
-	return map[string]*schema.Schema{
-		"archived": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"certificates": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: certificateSchema},
-			Type:     schema.TypeList,
-		},
-		"first_result": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"order_by": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"partial_name": {
-			Description: "Query and/or search by partial name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"search": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"skip": {
-			Default:  0,
-			Optional: true,
-			Type:     schema.TypeInt,
-		},
-		"take": {
-			Default:  1,
-			Optional: true,
-			Type:     schema.TypeInt,
-		},
-		"tenant": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-	}
-}
-
-func getCertificateSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"archived": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"certificate_data": {
-			Required:         true,
-			Sensitive:        true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
-		},
-		"certificate_data_format": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"has_private_key": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"is_expired": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-		"issuer_common_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"issuer_distinguished_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"issuer_organization": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
-		},
-		"not_after": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"not_before": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"notes": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"password": {
-			Required:         true,
-			Sensitive:        true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
-		},
-		"replaced_by": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"self_signed": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-		"serial_number": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"signature_algorithm_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"subject_alternative_names": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"subject_common_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"subject_distinguished_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"subject_organization": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"tenant_tags": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"thumbprint": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"version": {
-			Optional: true,
-			Type:     schema.TypeInt,
-		},
-	}
 }

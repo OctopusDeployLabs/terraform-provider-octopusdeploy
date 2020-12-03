@@ -23,7 +23,7 @@ func expandEndpoint(values interface{}) octopusdeploy.IEndpoint {
 	case "None":
 		return expandCloudRegion(flattenedEndpoint)
 	case "OfflineDrop":
-		return expandOfflineDrop(flattenedEndpoint)
+		return expandOfflinePackageDrop(flattenedEndpoint)
 	case "Ssh":
 		return expandSSHConnection(flattenedEndpoint)
 	case "TentacleActive":
@@ -57,7 +57,7 @@ func flattenEndpoint(endpoint *octopusdeploy.EndpointResource) []interface{} {
 		"connection_endpoint":             endpoint.ConnectionEndpoint,
 		"container":                       flattenDeploymentActionContainer(endpoint.Container),
 		"default_worker_pool_id":          endpoint.DefaultWorkerPoolID,
-		"destination":                     flattenOfflineDropDestination(endpoint.Destination),
+		"destination":                     flattenOfflinePackageDropDestination(endpoint.Destination),
 		"dot_net_core_platform":           endpoint.DotNetCorePlatform,
 		"fingerprint":                     endpoint.Fingerprint,
 		"host":                            endpoint.Host,
@@ -75,7 +75,7 @@ func flattenEndpoint(endpoint *octopusdeploy.EndpointResource) []interface{} {
 		"swap_if_possible":                endpoint.SwapIfPossible,
 		"tentacle_version_details":        flattenTentacleVersionDetails(endpoint.TentacleVersionDetails),
 		"thumbprint":                      endpoint.Thumbprint,
-		"octopus_working_directory":       endpoint.OctopusWorkingDirectory,
+		"working_directory":               endpoint.WorkingDirectory,
 		"use_current_instance_count":      endpoint.UseCurrentInstanceCount,
 		"web_app_name":                    endpoint.WebAppName,
 		"web_app_slot_name":               endpoint.WebAppSlotName,
@@ -181,7 +181,7 @@ func getEndpointSchema() map[string]*schema.Schema {
 		},
 		"destination": {
 			Computed: true,
-			Elem:     &schema.Resource{Schema: getOfflineDropDestinationSchema()},
+			Elem:     &schema.Resource{Schema: getOfflinePackageDropDestinationSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
@@ -197,10 +197,7 @@ func getEndpointSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"namespace": {
 			Optional: true,
 			Type:     schema.TypeString,
@@ -255,7 +252,7 @@ func getEndpointSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"octopus_working_directory": {
+		"working_directory": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -273,7 +270,7 @@ func getEndpointSchema() map[string]*schema.Schema {
 		},
 		"web_app_slot_name": {
 			Optional: true,
-			Type:     schema.TypeInt,
+			Type:     schema.TypeString,
 		},
 	}
 }

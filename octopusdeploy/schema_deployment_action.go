@@ -73,24 +73,15 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 				Optional:    true,
 				Type:        schema.TypeList,
 			},
-			"name": {
-				Description: "The name of the action",
-				Required:    true,
-				Type:        schema.TypeString,
-			},
+			"name": getNameSchema(true),
 			"required": {
 				Default:     false,
 				Description: "Whether this step is required and cannot be skipped",
 				Optional:    true,
 				Type:        schema.TypeBool,
 			},
-			"property": getPropertySchema(),
-			"tenant_tags": {
-				Description: "The tags for the tenants that this step applies to",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
-				Type:        schema.TypeList,
-			},
+			"property":    getPropertySchema(),
+			"tenant_tags": getTenantTagsSchema(),
 		},
 	}
 

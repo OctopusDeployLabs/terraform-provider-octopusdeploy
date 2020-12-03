@@ -10,8 +10,8 @@ func expandDeploymentActionContainer(values interface{}) octopusdeploy.Deploymen
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
 	return octopusdeploy.DeploymentActionContainer{
-		FeedID: flattenedMap["feed_id"].(*string),
-		Image:  flattenedMap["image"].(*string),
+		FeedID: flattenedMap["feed_id"].(string),
+		Image:  flattenedMap["image"].(string),
 	}
 }
 

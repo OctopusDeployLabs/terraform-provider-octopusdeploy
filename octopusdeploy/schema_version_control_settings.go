@@ -24,19 +24,11 @@ func getVersionControlSettingsSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"password": {
-			Computed:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
+		"password": getPasswordSchema(false),
 		"url": {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"username": {
-			Computed:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
+		"username": getUsernameSchema(false),
 	}
 }

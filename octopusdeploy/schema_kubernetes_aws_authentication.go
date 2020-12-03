@@ -9,19 +9,16 @@ func expandKubernetesAwsAuthentication(values interface{}) *octopusdeploy.Kubern
 	flattenedValues := values.([]interface{})
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
-	authentication := &octopusdeploy.KubernetesAwsAuthentication{
-		AssumedRoleARN:            flattenedAuthentication["assumed_role_arn"].(string),
-		AssumedRoleSession:        flattenedAuthentication["assumed_role_session"].(string),
-		AssumeRole:                flattenedAuthentication["assume_role"].(bool),
-		AssumeRoleExternalID:      flattenedAuthentication["assume_role_external_id"].(string),
-		AssumeRoleSessionDuration: flattenedAuthentication["assume_role_session_duration"].(int),
-		ClusterName:               flattenedAuthentication["cluster_name"].(string),
-		UseInstanceRole:           flattenedAuthentication["use_instance_role"].(bool),
-	}
-
+	authentication := octopusdeploy.NewKubernetesAwsAuthentication()
 	authentication.AccountID = flattenedAuthentication["account_id"].(string)
+	authentication.AssumedRoleARN = flattenedAuthentication["assumed_role_arn"].(string)
+	authentication.AssumedRoleSession = flattenedAuthentication["assumed_role_session"].(string)
+	authentication.AssumeRole = flattenedAuthentication["assume_role"].(bool)
+	authentication.AssumeRoleExternalID = flattenedAuthentication["assume_role_external_id"].(string)
+	authentication.AssumeRoleSessionDuration = flattenedAuthentication["assume_role_session_duration"].(int)
 	authentication.AuthenticationType = "KubernetesAws"
-
+	authentication.ClusterName = flattenedAuthentication["cluster_name"].(string)
+	authentication.UseInstanceRole = flattenedAuthentication["use_instance_role"].(bool)
 	return authentication
 }
 
@@ -45,7 +42,7 @@ func flattenKubernetesAwsAuthentication(kubernetesAwsAuthentication *octopusdepl
 func getKubernetesAwsAuthenticationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"account_id": {
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeString,
 		},
 		"assumed_role_arn": {
@@ -69,7 +66,7 @@ func getKubernetesAwsAuthenticationSchema() map[string]*schema.Schema {
 			Type:     schema.TypeInt,
 		},
 		"cluster_name": {
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeString,
 		},
 		"use_instance_role": {

@@ -35,10 +35,7 @@ func flattenDeploymentProcess(deploymentProcess *octopusdeploy.DeploymentProcess
 
 func getDeploymentProcessSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"last_snapshot_id": {
 			Optional: true,
 			Type:     schema.TypeString,

@@ -34,59 +34,28 @@ func flattenTagSet(tagSet *octopusdeploy.TagSet) map[string]interface{} {
 }
 
 func getTagSetDataSchema() map[string]*schema.Schema {
-	tagSetSchema := getTagSetSchema()
-	for _, field := range tagSetSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getTagSetSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+		"ids":          getIDsQuery(),
+		"partial_name": getPartialNameQuery(),
+		"skip":         getSkipQuery(),
+		"tag_sets": {
+			Computed:    true,
+			Description: "A list of tag sets that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"partial_name": {
-			Description: "Query and/or search by partial name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"tag_sets": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: tagSetSchema},
-			Type:     schema.TypeList,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
+		"take": getTakeQuery(),
 	}
 }
 
 func getTagSetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
+		"id":   getIDSchema(),
+		"name": getNameSchema(true),
 		"tags": {
 			Elem:     &schema.Resource{Schema: getTagsSchema()},
 			Optional: true,

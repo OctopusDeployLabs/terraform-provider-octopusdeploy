@@ -12,6 +12,7 @@ func resourceProject() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectCreate,
 		DeleteContext: resourceProjectDelete,
+		Description:   "This resource manages projects in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceProjectRead,
 		Schema:        getProjectSchema(),
@@ -28,8 +29,8 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	setProject(ctx, d, createdProject)
-	return nil
+	d.SetId(createdProject.GetID())
+	return resourceProjectRead(ctx, d, m)
 }
 
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -63,11 +64,10 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	project := expandProject(d)
 
 	client := m.(*octopusdeploy.Client)
-	updatedProject, err := client.Projects.Update(project)
+	_, err := client.Projects.Update(project)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	setProject(ctx, d, updatedProject)
-	return nil
+	return resourceProjectRead(ctx, d, m)
 }

@@ -33,24 +33,10 @@ func expandSSHKeyAccount(d *schema.ResourceData) *octopusdeploy.SSHKeyAccount {
 
 func getSSHKeyAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
+		"description":  getDescriptionSchema(),
+		"environments": getEnvironmentsSchema(),
+		"id":           getIDSchema(),
+		"name":         getNameSchema(true),
 		"private_key_file": {
 			Required:     true,
 			Sensitive:    true,
@@ -62,27 +48,11 @@ func getSSHKeyAccountSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"space_id":                          getSpaceIDSchema(),
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"tenant_tags": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"username": {
-			Required:     true,
-			Sensitive:    true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
+		"tenants":                           getTenantsSchema(),
+		"tenant_tags":                       getTenantTagsSchema(),
+		"username":                          getUsernameSchema(true),
 	}
 }
 

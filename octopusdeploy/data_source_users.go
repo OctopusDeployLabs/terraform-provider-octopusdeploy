@@ -11,6 +11,7 @@ import (
 
 func dataSourceUsers() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing users.",
 		ReadContext: dataSourceUsersRead,
 		Schema:      getUserDataSchema(),
 	}

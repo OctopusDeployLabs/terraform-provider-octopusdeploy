@@ -11,6 +11,7 @@ import (
 
 func dataSourceMachinePolicies() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing machine policies.",
 		ReadContext: dataSourceMachinePoliciesRead,
 		Schema:      getMachinePolicyDataSchema(),
 	}

@@ -12,6 +12,7 @@ func resourceChannel() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceChannelCreate,
 		DeleteContext: resourceChannelDelete,
+		Description:   "This resource manages channels in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceChannelRead,
 		Schema:        getChannelSchema(),

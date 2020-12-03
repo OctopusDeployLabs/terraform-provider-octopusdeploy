@@ -11,6 +11,7 @@ import (
 
 func dataSourceSpaces() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing spaces.",
 		ReadContext: dataSourceSpacesRead,
 		Schema:      getSpaceDataSchema(),
 	}

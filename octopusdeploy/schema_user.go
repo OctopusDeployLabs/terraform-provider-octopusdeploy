@@ -59,44 +59,21 @@ func flattenUser(user *octopusdeploy.User) map[string]interface{} {
 }
 
 func getUserDataSchema() map[string]*schema.Schema {
-	userSchema := getUserSchema()
-	for _, field := range userSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getUserSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"filter": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+		"filter": getFilterQuery(),
+		"id":     getIDDataSchema(),
+		"ids":    getIDsQuery(),
+		"skip":   getSkipQuery(),
+		"take":   getTakeQuery(),
+		"users": {
+			Computed:    true,
+			Description: "A list of users that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"users": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: userSchema},
-			Type:     schema.TypeList,
 		},
 	}
 }
@@ -107,14 +84,8 @@ func getUserSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeBool,
 		},
-		"display_name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
-		"email_address": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"display_name":  getDisplayNameSchema(true),
+		"email_address": getEmailAddressSchema(false),
 		"identity": {
 			Optional: true,
 			Elem:     &schema.Resource{Schema: getIdentitySchema()},
@@ -132,16 +103,8 @@ func getUserSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"username": {
-			Required:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
-		"password": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
+		"username": getUsernameSchema(true),
+		"password": getPasswordSchema(false),
 	}
 }
 

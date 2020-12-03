@@ -11,6 +11,7 @@ import (
 func resourceUserRole() *schema.Resource {
 	return &schema.Resource{
 		DeleteContext: resourceUserRoleDelete,
+		Description:   "This resource manages user roles in Octopus Deploy.",
 		Importer:      getImporter(),
 		Schema:        getUserRoleSchema(),
 	}

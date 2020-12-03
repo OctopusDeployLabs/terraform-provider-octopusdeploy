@@ -122,19 +122,6 @@ func getStringOrEmpty(tfAttr interface{}) string {
 	return tfAttr.(string)
 }
 
-func getTenantedDeploymentSchema() *schema.Schema {
-	return &schema.Schema{
-		Default:  "Untenanted",
-		Optional: true,
-		Type:     schema.TypeString,
-		ValidateDiagFunc: validateValueFunc([]string{
-			"Untenanted",
-			"TenantedOrUntenanted",
-			"Tenanted",
-		}),
-	}
-}
-
 func destroyFeedHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if _, err := client.Feeds.GetByID(r.Primary.ID); err != nil {

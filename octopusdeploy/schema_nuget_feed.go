@@ -39,10 +39,7 @@ func expandNuGetFeed(d *schema.ResourceData) *octopusdeploy.NuGetFeed {
 
 func getNuGetFeedDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
+		"name": getNameSchema(true),
 	}
 }
 
@@ -67,20 +64,9 @@ func getNuGetFeedSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
-		"password": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
-		"username": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
+		"name":     getNameSchema(true),
+		"password": getPasswordSchema(false),
+		"username": getUsernameSchema(false),
 	}
 }
 

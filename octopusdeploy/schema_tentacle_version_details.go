@@ -13,11 +13,13 @@ func expandTentacleVersionDetails(values interface{}) *octopusdeploy.TentacleVer
 	flattenedValues := values.([]interface{})
 	flattenedTentacleVersionDetails := flattenedValues[0].(map[string]interface{})
 
+	version := flattenedTentacleVersionDetails["version"].(string)
+
 	return &octopusdeploy.TentacleVersionDetails{
 		UpgradeLocked:    flattenedTentacleVersionDetails["upgrade_locked"].(bool),
 		UpgradeRequired:  flattenedTentacleVersionDetails["upgrade_required"].(bool),
 		UpgradeSuggested: flattenedTentacleVersionDetails["upgrade_suggested"].(bool),
-		Version:          flattenedTentacleVersionDetails["version"].(*string),
+		Version:          &version,
 	}
 }
 
@@ -37,18 +39,22 @@ func flattenTentacleVersionDetails(tentacleVersionDetails *octopusdeploy.Tentacl
 func getTentacleVersionDetailsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"upgrade_locked": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
 		"upgrade_required": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
 		"upgrade_suggested": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
 		"version": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeString,
 		},

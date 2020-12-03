@@ -11,6 +11,7 @@ import (
 
 func dataSourceFeeds() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing feeds.",
 		ReadContext: dataSourceFeedsRead,
 		Schema:      getFeedDataSchema(),
 	}

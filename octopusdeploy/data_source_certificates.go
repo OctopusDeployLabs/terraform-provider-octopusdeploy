@@ -11,6 +11,7 @@ import (
 
 func dataSourceCertificates() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing certificates.",
 		ReadContext: dataSourceCertificatesRead,
 		Schema:      getCertificateDataSchema(),
 	}

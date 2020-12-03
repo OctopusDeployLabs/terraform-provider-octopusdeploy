@@ -66,50 +66,25 @@ func flattenFeed(feed *octopusdeploy.FeedResource) map[string]interface{} {
 }
 
 func getFeedDataSchema() map[string]*schema.Schema {
-	feedSchema := getFeedSchema()
-	for _, field := range feedSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getFeedSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
 		"feeds": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: feedSchema},
-			Type:     schema.TypeList,
+			Computed:    true,
+			Description: "A list of feeds that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"feed_type": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"partial_name": {
-			Description: "Query and/or search by partial name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
+		"ids":          getIDsQuery(),
+		"partial_name": getPartialNameQuery(),
+		"skip":         getSkipQuery(),
+		"take":         getTakeQuery(),
 	}
 }
 
@@ -157,24 +132,14 @@ func getFeedSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"is_enhanced_mode": {
 			Default:  true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
-		"password": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
+		"name":     getNameSchema(true),
+		"password": getPasswordSchema(false),
 		"package_acquisition_location_options": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Required: true,
@@ -193,15 +158,8 @@ func getFeedSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"space_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"username": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
+		"space_id": getSpaceIDSchema(),
+		"username": getUsernameSchema(false),
 	}
 }
 

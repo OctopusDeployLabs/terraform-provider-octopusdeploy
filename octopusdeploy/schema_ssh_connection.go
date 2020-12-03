@@ -64,10 +64,7 @@ func getSSHConnectionSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"port": {
 			Required: true,
 			Type:     schema.TypeInt,

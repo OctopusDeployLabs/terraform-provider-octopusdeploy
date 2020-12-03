@@ -10,7 +10,7 @@ func expandAzureWebApp(flattenedMap map[string]interface{}) *octopusdeploy.Azure
 	endpoint.ID = flattenedMap["id"].(string)
 	endpoint.ResourceGroupName = flattenedMap["resource_group_name"].(string)
 	endpoint.WebAppName = flattenedMap["web_app_name"].(string)
-	endpoint.WebAppSlotName = flattenedMap["web_app_slot_name"].(int)
+	endpoint.WebAppSlotName = flattenedMap["web_app_slot_name"].(string)
 
 	return endpoint
 }
@@ -30,10 +30,7 @@ func flattenAzureWebApp(endpoint *octopusdeploy.AzureWebAppEndpoint) []interface
 
 func getAzureWebAppSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"resource_group_name": {
 			Optional: true,
 			Type:     schema.TypeString,
@@ -44,7 +41,7 @@ func getAzureWebAppSchema() map[string]*schema.Schema {
 		},
 		"web_app_slot_name": {
 			Optional: true,
-			Type:     schema.TypeInt,
+			Type:     schema.TypeString,
 		},
 	}
 }

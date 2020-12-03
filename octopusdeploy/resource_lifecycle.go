@@ -12,6 +12,7 @@ func resourceLifecycle() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceLifecycleCreate,
 		DeleteContext: resourceLifecycleDelete,
+		Description:   "This resource manages lifecycles in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceLifecycleRead,
 		Schema:        getLifecycleSchema(),

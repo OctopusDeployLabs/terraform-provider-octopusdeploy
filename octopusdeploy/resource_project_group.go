@@ -12,6 +12,7 @@ func resourceProjectGroup() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectGroupCreate,
 		DeleteContext: resourceProjectGroupDelete,
+		Description:   "This resource manages project groups in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceProjectGroupRead,
 		Schema:        getProjectGroupSchema(),

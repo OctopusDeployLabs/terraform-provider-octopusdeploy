@@ -19,11 +19,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 		UpdateContext: resourceProjectDeploymentTargetTriggerUpdate,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The name of the trigger.",
-			},
+			"name": getNameSchema(true),
 			"project_id": {
 				Type:        schema.TypeString,
 				Required:    true,

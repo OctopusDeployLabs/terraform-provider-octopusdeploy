@@ -12,6 +12,7 @@ func resourceTagSet() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceTagSetCreate,
 		DeleteContext: resourceTagSetDelete,
+		Description:   "This resource manages tag sets in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceTagSetRead,
 		Schema:        getTagSetSchema(),

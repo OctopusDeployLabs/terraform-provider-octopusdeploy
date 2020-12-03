@@ -11,6 +11,7 @@ import (
 
 func dataSourceTagSets() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing tag sets.",
 		ReadContext: dataSourceTagSetsRead,
 		Schema:      getTagSetDataSchema(),
 	}

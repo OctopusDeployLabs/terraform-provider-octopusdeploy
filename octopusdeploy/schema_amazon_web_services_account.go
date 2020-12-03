@@ -5,14 +5,12 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandAmazonWebServicesAccount(d *schema.ResourceData) *octopusdeploy.AmazonWebServicesAccount {
 	name := d.Get("name").(string)
 	accessKey := d.Get("access_key").(string)
-	password := d.Get("secret_key").(string)
-	secretKey := octopusdeploy.NewSensitiveValue(password)
+	secretKey := octopusdeploy.NewSensitiveValue(d.Get("secret_key").(string))
 
 	account, _ := octopusdeploy.NewAmazonWebServicesAccount(name, accessKey, secretKey)
 	account.ID = d.Id()
@@ -34,49 +32,16 @@ func expandAmazonWebServicesAccount(d *schema.ResourceData) *octopusdeploy.Amazo
 
 func getAmazonWebServicesAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"access_key": {
-			Required:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"secret_key": {
-			Required:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"access_key":                        getAccessKeySchema(true),
+		"description":                       getDescriptionSchema(),
+		"environments":                      getEnvironmentsSchema(),
+		"id":                                getIDSchema(),
+		"name":                              getNameSchema(true),
+		"secret_key":                        getSecretKeySchema(true),
+		"space_id":                          getSpaceIDSchema(),
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"tenant_tags": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
+		"tenants":                           getTenantsSchema(),
+		"tenant_tags":                       getTenantTagsSchema(),
 	}
 }
 

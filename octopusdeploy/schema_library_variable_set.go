@@ -5,7 +5,6 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandLibraryVariableSet(d *schema.ResourceData) *octopusdeploy.LibraryVariableSet {
@@ -81,61 +80,19 @@ func setLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryV
 
 func getLibraryVariableSetDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
+		"name": getNameSchema(true),
 	}
 }
 
 func getLibraryVariableSetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"description": getDescriptionSchema(),
+		"name":        getNameSchema(true),
+		"space_id":    getSpaceIDSchema(),
 		"template": {
 			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"default_value": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-					"display_settings": {
-						Optional: true,
-						Type:     schema.TypeMap,
-					},
-					"help_text": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-					"id": {
-						Computed: true,
-						Type:     schema.TypeString,
-					},
-					"label": {
-						Optional: true,
-						Type:     schema.TypeString,
-					},
-					"name": {
-						Required:     true,
-						Type:         schema.TypeString,
-						ValidateFunc: validation.StringIsNotEmpty,
-					},
-				},
-			},
-			Type: schema.TypeList,
+			Elem:     &schema.Resource{Schema: getActionTemplateParameterSchema()},
+			Type:     schema.TypeList,
 		},
 		"variable_set_id": {
 			Computed: true,

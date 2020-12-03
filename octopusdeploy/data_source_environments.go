@@ -11,6 +11,7 @@ import (
 
 func dataSourceEnvironments() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing environments.",
 		ReadContext: dataSourceEnvironmentsRead,
 		Schema:      getEnvironmentDataSchema(),
 	}

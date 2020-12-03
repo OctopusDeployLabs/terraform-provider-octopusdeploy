@@ -5,7 +5,6 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandProjectGroup(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
@@ -44,71 +43,31 @@ func flattenProjectGroup(projectGroup *octopusdeploy.ProjectGroup) map[string]in
 }
 
 func getProjectGroupDataSchema() map[string]*schema.Schema {
-	projectGroupSchema := getProjectGroupSchema()
-	for _, field := range projectGroupSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getProjectGroupSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+		"id":           getIDDataSchema(),
+		"ids":          getIDsQuery(),
+		"partial_name": getPartialNameQuery(),
+		"project_groups": {
+			Computed:    true,
+			Description: "A list of project groups that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"partial_name": {
-			Description: "Query and/or search by partial name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"project_groups": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: projectGroupSchema},
-			Type:     schema.TypeList,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
+		"skip": getSkipQuery(),
+		"take": getTakeQuery(),
 	}
 }
 
 func getProjectGroupSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"environments": {
-			Computed: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Type: schema.TypeList,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
-		},
+		"description":  getDescriptionSchema(),
+		"environments": getEnvironmentsSchema(),
+		"id":           getIDSchema(),
+		"name":         getNameSchema(true),
 		"retention_policy_id": {
 			Optional: true,
 			Type:     schema.TypeString,

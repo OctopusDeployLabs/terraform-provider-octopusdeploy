@@ -10,55 +10,10 @@ import (
 
 func dataSourceVariable() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing variables.",
 		ReadContext: dataSourceVariableReadByName,
-		Schema: map[string]*schema.Schema{
-			"project_id": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			"name": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			"type": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"value": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"scope": schemaVariableScope,
-		},
+		Schema:      getVariableDataSchema(),
 	}
-}
-
-var schemaVariableScopeValue = &schema.Schema{
-	Type: schema.TypeList,
-	Elem: &schema.Schema{
-		Type: schema.TypeString,
-	},
-	Optional: true,
-}
-
-var schemaVariableScope = &schema.Schema{
-	Type:     schema.TypeSet,
-	MaxItems: 1,
-	Optional: true,
-	Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"environments": schemaVariableScopeValue,
-			"machines":     schemaVariableScopeValue,
-			"actions":      schemaVariableScopeValue,
-			"roles":        schemaVariableScopeValue,
-			"channels":     schemaVariableScopeValue,
-			"tenant_tags":  schemaVariableScopeValue,
-		},
-	},
 }
 
 // tfVariableScopetoODVariableScope converts a Terraform ResourceData into an OctopusDeploy VariableScope
@@ -81,13 +36,12 @@ func tfVariableScopetoODVariableScope(d *schema.ResourceData) *octopusdeploy.Var
 	// Use the getSliceFromTerraformTypeList helper to convert the data from the map into []string and
 	// assign as the variable scopes we need
 	var newScope octopusdeploy.VariableScope
-	newScope.Environment = getSliceFromTerraformTypeList(tfSchemaList["environments"])
 	newScope.Action = getSliceFromTerraformTypeList(tfSchemaList["actions"])
-	newScope.Role = getSliceFromTerraformTypeList(tfSchemaList["roles"])
 	newScope.Channel = getSliceFromTerraformTypeList(tfSchemaList["channels"])
+	newScope.Environment = getSliceFromTerraformTypeList(tfSchemaList["environments"])
 	newScope.Machine = getSliceFromTerraformTypeList(tfSchemaList["machines"])
+	newScope.Role = getSliceFromTerraformTypeList(tfSchemaList["roles"])
 	newScope.TenantTag = getSliceFromTerraformTypeList(tfSchemaList["tenant_tags"])
-
 	return &newScope
 }
 

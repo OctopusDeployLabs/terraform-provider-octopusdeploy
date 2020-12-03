@@ -6,12 +6,11 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandAzureServicePrincipalAccount(d *schema.ResourceData) *octopusdeploy.AzureServicePrincipalAccount {
 	name := d.Get("name").(string)
-	password := d.Get("application_password").(string)
+	password := d.Get("password").(string)
 	secretKey := octopusdeploy.NewSensitiveValue(password)
 
 	applicationID, _ := uuid.Parse(d.Get("application_id").(string))
@@ -62,68 +61,21 @@ func expandAzureServicePrincipalAccount(d *schema.ResourceData) *octopusdeploy.A
 
 func getAzureServicePrincipalAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"application_id": {
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-		},
-		"application_password": {
-			Required:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
-		"authentication_endpoint": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"azure_environment": getAzureEnvironmentSchema(),
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"resource_manager_endpoint": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"subscription_id": {
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-		},
+		"application_id":                    getApplicationIDSchema(true),
+		"authentication_endpoint":           getAuthenticationEndpointSchema(false),
+		"azure_environment":                 getAzureEnvironmentSchema(),
+		"description":                       getDescriptionSchema(),
+		"environments":                      getEnvironmentsSchema(),
+		"id":                                getIDSchema(),
+		"name":                              getNameSchema(true),
+		"password":                          getPasswordSchema(true),
+		"resource_manager_endpoint":         getResourceManagerEndpointSchema(false),
+		"space_id":                          getSpaceIDSchema(),
+		"subscription_id":                   getSubscriptionIDSchema(true),
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"tenant_id": {
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-		},
-		"tenant_tags": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
+		"tenants":                           getTenantsSchema(),
+		"tenant_id":                         getTenantIDSchema(true),
+		"tenant_tags":                       getTenantTagsSchema(),
 	}
 }
 

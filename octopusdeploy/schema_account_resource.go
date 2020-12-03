@@ -122,35 +122,71 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	return accountResource
 }
 
+func flattenAccountResource(accountResource *octopusdeploy.AccountResource) map[string]interface{} {
+	flattenedAccountResource := map[string]interface{}{
+		"access_key":                        accountResource.AccessKey,
+		"account_type":                      accountResource.AccountType,
+		"authentication_endpoint":           accountResource.AuthenticationEndpoint,
+		"azure_environment":                 accountResource.AzureEnvironment,
+		"certificate_thumbprint":            accountResource.CertificateThumbprint,
+		"description":                       accountResource.Description,
+		"environments":                      accountResource.EnvironmentIDs,
+		"id":                                accountResource.GetID(),
+		"name":                              accountResource.Name,
+		"space_id":                          accountResource.SpaceID,
+		"resource_manager_endpoint":         accountResource.ResourceManagerEndpoint,
+		"tenant_tags":                       accountResource.TenantTags,
+		"tenanted_deployment_participation": accountResource.TenantedDeploymentMode,
+		"tenants":                           accountResource.TenantIDs,
+		"username":                          accountResource.Username,
+	}
+
+	if applicationID := accountResource.ApplicationID; applicationID != nil {
+		flattenedAccountResource["application_id"] = applicationID.String()
+	}
+
+	if subscriptionID := accountResource.SubscriptionID; subscriptionID != nil {
+		flattenedAccountResource["subscription_id"] = subscriptionID.String()
+	}
+
+	if tenantID := accountResource.TenantID; tenantID != nil {
+		flattenedAccountResource["tenant_id"] = tenantID.String()
+	}
+
+	return flattenedAccountResource
+}
+
+func getAccountResourceDataSchema() map[string]*schema.Schema {
+	dataSchema := getAccountResourceSchema()
+	setDataSchema(&dataSchema)
+
+	return map[string]*schema.Schema{
+		"account_type": getAccountTypeQuery(),
+		"accounts": {
+			Computed:    true,
+			Description: "A list of accounts that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
+			Type:        schema.TypeList,
+		},
+		"id":           getIDDataSchema(),
+		"ids":          getIDsQuery(),
+		"partial_name": getPartialNameQuery(),
+		"skip":         getSkipQuery(),
+		"take":         getTakeQuery(),
+	}
+}
+
 func getAccountResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"access_key": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"account_type": {
-			Default:  "None",
-			Optional: true,
-			Type:     schema.TypeString,
-			ValidateDiagFunc: validateValueFunc([]string{
-				"AmazonWebServicesAccount",
-				"AmazonWebServicesRoleAccount",
-				"AzureServicePrincipal",
-				"AzureSubscription",
-				"None",
-				"SshKeyPair",
-				"Token",
-				"UsernamePassword",
-			}),
-		},
+		"access_key":   getAccessKeySchema(false),
+		"account_type": getAccountTypeSchema(),
 		"active_directory_endpoint_base_uri": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"azure_environment": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"application_id":          getApplicationIDSchema(false),
+		"authentication_endpoint": getAuthenticationEndpointSchema(false),
+		"azure_environment":       getAzureEnvironmentSchema(),
 		"certificate_data": {
 			Optional:  true,
 			Sensitive: true,
@@ -171,33 +207,12 @@ func getAccountResourceSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"environments": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required:     true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"password": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
-		"resource_management_endpoint_base_uri": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"description":               getDescriptionSchema(),
+		"environments":              getEnvironmentsSchema(),
+		"id":                        getIDSchema(),
+		"name":                      getNameSchema(true),
+		"password":                  getPasswordSchema(false),
+		"resource_manager_endpoint": getResourceManagerEndpointSchema(false),
 		"private_key_file": {
 			Optional:  true,
 			Sensitive: true,
@@ -208,11 +223,7 @@ func getAccountResourceSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"secret_key": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
+		"secret_key": getSecretKeySchema(false),
 		"service_management_endpoint_base_uri": {
 			Optional: true,
 			Type:     schema.TypeString,
@@ -221,40 +232,14 @@ func getAccountResourceSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"subscription_id": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-		},
+		"space_id":                          getSpaceIDSchema(),
+		"subscription_id":                   getSubscriptionIDSchema(false),
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"tenant_id": {
-			Optional:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-		},
-		"tenant_tags": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"token": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
-		"username": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"tenants":                           getTenantsSchema(),
+		"tenant_id":                         getTenantIDSchema(false),
+		"tenant_tags":                       getTenantTagsSchema(),
+		"token":                             getTokenSchema(false),
+		"username":                          getUsernameSchema(false),
 	}
 }
 
@@ -267,7 +252,7 @@ func setAccountResource(ctx context.Context, d *schema.ResourceData, account *oc
 	d.Set("description", account.GetDescription())
 	d.Set("environments", account.GetEnvironmentIDs())
 	d.Set("name", account.GetName())
-	d.Set("resource_management_endpoint_base_uri", account.ResourceManagerEndpoint)
+	d.Set("resource_manager_endpoint", account.ResourceManagerEndpoint)
 	d.Set("secret_key", account.SecretKey)
 	d.Set("service_management_endpoint_base_uri", account.ManagementEndpoint)
 	d.Set("service_management_endpoint_suffix", account.StorageEndpointSuffix)

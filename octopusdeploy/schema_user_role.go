@@ -65,44 +65,21 @@ func flattenUserRole(userRole *octopusdeploy.UserRole) map[string]interface{} {
 }
 
 func getUserRoleDataSchema() map[string]*schema.Schema {
-	userRoleSchema := getUserRoleSchema()
-	for _, field := range userRoleSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getUserRoleSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+		"id":           getIDDataSchema(),
+		"ids":          getIDsQuery(),
+		"partial_name": getPartialNameQuery(),
+		"skip":         getSkipQuery(),
+		"take":         getTakeQuery(),
+		"user_roles": {
+			Computed:    true,
+			Description: "A list of user roles that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
-		},
-		"partial_name": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"user_roles": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: userRoleSchema},
-			Type:     schema.TypeList,
 		},
 	}
 }
@@ -113,10 +90,7 @@ func getUserRoleSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"description": getDescriptionSchema(),
 		"granted_space_permissions": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
@@ -127,14 +101,8 @@ func getUserRoleSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"id":   getIDSchema(),
+		"name": getNameSchema(true),
 		"space_permission_descriptions": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,

@@ -123,7 +123,7 @@ func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
 		"release_notes_template":               project.ReleaseNotesTemplate,
 		"slug":                                 project.Slug,
 		"space_id":                             project.SpaceID,
-		"templates":                            project.Templates,
+		"templates":                            flattenActionTemplateParameters(project.Templates),
 		"tenanted_deployment_participation":    project.TenantedDeploymentMode,
 		"variable_set_id":                      project.VariableSetID,
 		"version_control_settings":             flattenVersionControlSettings(project.VersionControlSettings),
@@ -132,58 +132,25 @@ func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
 }
 
 func getProjectDataSchema() map[string]*schema.Schema {
-	projectSchema := getProjectSchema()
-	for _, field := range projectSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getProjectSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"cloned_from_project_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+		"cloned_from_project_id": getClonedFromProjectIDQuery(),
+		"id":                     getIDDataSchema(),
+		"ids":                    getIDsQuery(),
+		"is_clone":               getIsCloneQuery(),
+		"name":                   getNameQuery(),
+		"partial_name":           getPartialNameQuery(),
+		"projects": {
+			Computed:    true,
+			Description: "A list of projects that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"is_clone": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-		"name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"partial_name": {
-			Description: "Query and/or search by partial name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"projects": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: projectSchema},
-			Type:     schema.TypeList,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
+		"skip": getSkipQuery(),
+		"take": getTakeQuery(),
 	}
 }
 
@@ -209,6 +176,7 @@ func getProjectSchema() map[string]*schema.Schema {
 		},
 		"connectivity_policy": {
 			Computed: true,
+			Optional: true,
 			Elem:     &schema.Resource{Schema: getConnectivityPolicySchema()},
 			Type:     schema.TypeList,
 		},
@@ -234,10 +202,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"description": getDescriptionSchema(),
 		"discrete_channel_release": {
 			Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
 			Optional:    true,
@@ -248,10 +213,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Elem:     &schema.Resource{Schema: getExtensionSettingsSchema()},
 			Type:     schema.TypeSet,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"included_library_variable_sets": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
@@ -274,20 +236,16 @@ func getProjectSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"name": {
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
-		},
+		"name": getNameSchema(true),
 		"project_group_id": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
 		"release_creation_strategy": {
 			Computed: true,
-			Optional: true,
 			Elem:     &schema.Resource{Schema: getReleaseCreationStrategySchema()},
 			MaxItems: 1,
+			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"release_notes_template": {
@@ -298,13 +256,10 @@ func getProjectSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"space_id": getSpaceIDSchema(),
 		"templates": {
+			Elem:     &schema.Resource{Schema: getActionTemplateParameterSchema()},
 			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
 			Type:     schema.TypeList,
 		},
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
@@ -314,14 +269,14 @@ func getProjectSchema() map[string]*schema.Schema {
 		},
 		"version_control_settings": {
 			Computed: true,
-			Optional: true,
 			Elem:     &schema.Resource{Schema: getVersionControlSettingsSchema()},
+			Optional: true,
 			Type:     schema.TypeSet,
 		},
 		"versioning_strategy": {
 			Computed: true,
-			Optional: true,
 			Elem:     &schema.Resource{Schema: getVersionStrategySchema()},
+			Optional: true,
 			Type:     schema.TypeSet,
 		},
 	}
@@ -338,6 +293,7 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdep
 	d.Set("deployment_process_id", project.DeploymentProcessID)
 	d.Set("description", project.Description)
 	d.Set("extension_settings", project.ExtensionSettings)
+	d.Set("id", project.GetID())
 	d.Set("included_library_variable_sets", project.IncludedLibraryVariableSets)
 	d.Set("is_disabled", project.IsDisabled)
 	d.Set("is_discrete_channel_release", project.IsDiscreteChannelRelease)
@@ -354,6 +310,4 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdep
 	d.Set("variable_set_id", project.VariableSetID)
 	d.Set("version_control_settings", flattenVersionControlSettings(project.VersionControlSettings))
 	d.Set("versioning_strategy", flattenVersioningStrategy(project.VersioningStrategy))
-
-	d.SetId(project.GetID())
 }

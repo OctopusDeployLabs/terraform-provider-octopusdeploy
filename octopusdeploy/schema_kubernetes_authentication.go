@@ -19,6 +19,7 @@ func expandKubernetesAuthentication(values interface{}) octopusdeploy.IKubernete
 	case "KubernetesCertificate":
 		return expandKubernetesCertificateAuthentication(flattenedMap)
 	case "KubernetesStandard":
+		return expandKubernetesStandardAuthentication(flattenedMap)
 	case "None":
 		return expandKubernetesStandardAuthentication(flattenedMap)
 	}

@@ -46,10 +46,7 @@ func getListeningTentacleSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"proxy_id": {
 			Optional: true,
 			Type:     schema.TypeString,

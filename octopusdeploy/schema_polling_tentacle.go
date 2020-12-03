@@ -44,10 +44,7 @@ func getPollingTentacleSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"octopus_url": {
 			Optional: true,
 			Type:     schema.TypeString,

@@ -5,15 +5,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func expandActionTemplateParameter(values interface{}) *octopusdeploy.ActionTemplateParameter {
+	flattenedValues := values.([]interface{})
+	flattenedMap := flattenedValues[0].(map[string]interface{})
+
+	return &octopusdeploy.ActionTemplateParameter{
+		HelpText: flattenedMap["help_text"].(string),
+		Label:    flattenedMap["label"].(string),
+		Name:     flattenedMap["name"].(string),
+	}
+}
+
 func expandActionTemplateParameters(actionTemplateParameters []interface{}) []*octopusdeploy.ActionTemplateParameter {
 	expandedActionTemplateParameters := make([]*octopusdeploy.ActionTemplateParameter, len(actionTemplateParameters))
 	for _, actionTemplateParameter := range actionTemplateParameters {
 		actionTemplateParameterMap := actionTemplateParameter.(map[string]interface{})
-		expandedActionTemplateParameters = append(expandedActionTemplateParameters, &octopusdeploy.ActionTemplateParameter{
-			HelpText: actionTemplateParameterMap["help_text"].(string),
-			Label:    actionTemplateParameterMap["label"].(string),
-			Name:     actionTemplateParameterMap["name"].(string),
-		})
+		expandedActionTemplateParameters = append(expandedActionTemplateParameters, expandActionTemplateParameter(actionTemplateParameterMap))
 	}
 	return expandedActionTemplateParameters
 }
@@ -26,19 +33,17 @@ func getActionTemplateParameterSchema() map[string]*schema.Schema {
 		},
 		"display_settings": {
 			Optional: true,
-			Type:     schema.TypeString,
+			Type:     schema.TypeMap,
 		},
 		"help_text": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
+		"id": getIDSchema(),
 		"label": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"name": getNameSchema(true),
 	}
 }

@@ -11,6 +11,7 @@ import (
 
 func dataSourceUserRoles() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing user roles.",
 		ReadContext: dataSourceUserRolesRead,
 		Schema:      getUserRoleDataSchema(),
 	}

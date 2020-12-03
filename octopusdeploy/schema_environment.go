@@ -5,7 +5,6 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandEnvironment(d *schema.ResourceData) *octopusdeploy.Environment {
@@ -48,51 +47,23 @@ func flattenEnvironment(environment *octopusdeploy.Environment) map[string]inter
 	}
 }
 func getEnvironmentDataSchema() map[string]*schema.Schema {
-	environmentSchema := getEnvironmentSchema()
-	for _, field := range environmentSchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getEnvironmentSchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
 		"environments": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: environmentSchema},
-			Type:     schema.TypeList,
-		},
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+			Computed:    true,
+			Description: "A list of environments that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"name": {
-			Description: "Query and/or search by name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"partial_name": {
-			Description: "Query and/or search by partial name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
+		"id":           getIDDataSchema(),
+		"ids":          getIDsQuery(),
+		"name":         getNameQuery(),
+		"partial_name": getPartialNameQuery(),
+		"skip":         getSkipQuery(),
+		"take":         getTakeQuery(),
 	}
 }
 
@@ -102,22 +73,9 @@ func getEnvironmentSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"description": {
-			Description: "Description of the environment",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"id": {
-			Description: "ID of the environment",
-			Computed:    true,
-			Type:        schema.TypeString,
-		},
-		"name": {
-			Description:      "Name of the environment",
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
-		},
+		"description": getDescriptionSchema(),
+		"id":          getIDSchema(),
+		"name":        getNameSchema(true),
 		"sort_order": {
 			Computed: true,
 			Type:     schema.TypeInt,

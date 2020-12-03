@@ -12,6 +12,7 @@ func resourceCertificate() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCertificateCreate,
 		DeleteContext: resourceCertificateDelete,
+		Description:   "This resource manages certificates in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceCertificateRead,
 		Schema:        getCertificateSchema(),

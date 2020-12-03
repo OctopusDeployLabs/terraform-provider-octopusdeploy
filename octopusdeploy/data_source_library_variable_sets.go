@@ -10,6 +10,7 @@ import (
 
 func dataSourceLibraryVariableSet() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing library variable sets.",
 		ReadContext: dataSourceLibraryVariableSetReadByName,
 		Schema:      getLibraryVariableSetDataSchema(),
 	}

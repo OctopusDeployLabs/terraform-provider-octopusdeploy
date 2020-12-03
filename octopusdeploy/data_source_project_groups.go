@@ -11,6 +11,7 @@ import (
 
 func dataSourceProjectGroups() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing project groups.",
 		ReadContext: dataSourceProjectGroupsRead,
 		Schema:      getProjectGroupDataSchema(),
 	}

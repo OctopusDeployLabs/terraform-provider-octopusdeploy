@@ -76,10 +76,7 @@ func getAzureServiceFabricClusterSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"id": getIDSchema(),
 		"security_mode": {
 			Optional: true,
 			Type:     schema.TypeString,

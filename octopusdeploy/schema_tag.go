@@ -41,18 +41,9 @@ func getTagsSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
+		"description": getDescriptionSchema(),
+		"id":          getIDSchema(),
+		"name":        getNameSchema(true),
 		"sort_order": {
 			Optional: true,
 			Type:     schema.TypeInt,

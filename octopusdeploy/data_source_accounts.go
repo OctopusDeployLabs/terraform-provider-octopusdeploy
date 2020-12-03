@@ -11,8 +11,9 @@ import (
 
 func dataSourceAccounts() *schema.Resource {
 	return &schema.Resource{
+		Description: "Provides information about existing accounts.",
 		ReadContext: dataSourceAccountsRead,
-		Schema:      getAccountDataSchema(),
+		Schema:      getAccountResourceDataSchema(),
 	}
 }
 
@@ -38,7 +39,7 @@ func dataSourceAccountsRead(ctx context.Context, d *schema.ResourceData, m inter
 			return diag.FromErr(err)
 		}
 
-		flattenedAccounts = append(flattenedAccounts, flattenAccount(accountResource))
+		flattenedAccounts = append(flattenedAccounts, flattenAccountResource(accountResource))
 	}
 
 	d.Set("accounts", flattenedAccounts)

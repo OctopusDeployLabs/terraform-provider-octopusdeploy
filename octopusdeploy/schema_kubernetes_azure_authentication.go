@@ -9,14 +9,11 @@ func expandKubernetesAzureAuthentication(values interface{}) *octopusdeploy.Kube
 	flattenedValues := values.([]interface{})
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
-	authentication := &octopusdeploy.KubernetesAzureAuthentication{
-		ClusterName:          flattenedAuthentication["cluster_name"].(string),
-		ClusterResourceGroup: flattenedAuthentication["cluster_resource_group"].(string),
-	}
-
+	authentication := octopusdeploy.NewKubernetesAzureAuthentication()
 	authentication.AccountID = flattenedAuthentication["account_id"].(string)
 	authentication.AuthenticationType = "KubernetesAzure"
-
+	authentication.ClusterName = flattenedAuthentication["cluster_name"].(string)
+	authentication.ClusterResourceGroup = flattenedAuthentication["cluster_resource_group"].(string)
 	return authentication
 }
 
@@ -35,15 +32,15 @@ func flattenKubernetesAzureAuthentication(kubernetesAzureAuthentication *octopus
 func getKubernetesAzureAuthenticationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"account_id": {
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeString,
 		},
 		"cluster_name": {
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeString,
 		},
 		"cluster_resource_group": {
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeString,
 		},
 	}

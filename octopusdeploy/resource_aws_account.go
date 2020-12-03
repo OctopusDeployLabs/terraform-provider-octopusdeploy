@@ -12,6 +12,7 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAmazonWebServicesAccountCreate,
 		DeleteContext: resourceAmazonWebServicesAccountDelete,
+		Description:   "This resource manages AWS accounts in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceAmazonWebServicesAccountRead,
 		Schema:        getAmazonWebServicesAccountSchema(),

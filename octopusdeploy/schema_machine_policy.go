@@ -99,46 +99,21 @@ func flattenMachinePolicy(machinePolicy *octopusdeploy.MachinePolicy) map[string
 }
 
 func getMachinePolicyDataSchema() map[string]*schema.Schema {
-	machinePolicySchema := getMachinePolicySchema()
-	for _, field := range machinePolicySchema {
-		field.Computed = true
-		field.Default = nil
-		field.MaxItems = 0
-		field.MinItems = 0
-		field.Optional = false
-		field.Required = false
-		field.ValidateDiagFunc = nil
-	}
+	dataSchema := getMachinePolicySchema()
+	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"ids": {
-			Description: "Query and/or search by a list of IDs",
-			Elem:        &schema.Schema{Type: schema.TypeString},
+		"ids": getIDsQuery(),
+		"machine_policies": {
+			Computed:    true,
+			Description: "A list of machine policies that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"machine_policies": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: machinePolicySchema},
-			Type:     schema.TypeList,
-		},
-		"partial_name": {
-			Description: "Query and/or search by partial name",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
-		"skip": {
-			Default:     0,
-			Description: "Indicates the number of items to skip in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
-		"take": {
-			Default:     1,
-			Description: "Indicates the number of items to take (or return) in the response",
-			Type:        schema.TypeInt,
-			Optional:    true,
-		},
+		"partial_name": getPartialNameQuery(),
+		"skip":         getSkipQuery(),
+		"take":         getTakeQuery(),
 	}
 }
 
@@ -164,14 +139,8 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
-		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"description": getDescriptionSchema(),
+		"id":          getIDSchema(),
 		"is_default": {
 			Computed: true,
 			Type:     schema.TypeBool,
@@ -204,10 +173,7 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
+		"name": getNameSchema(true),
 		"polling_request_maximum_message_processing_timeout": {
 			Computed: true,
 			Optional: true,
@@ -218,10 +184,7 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
-		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
-		},
+		"space_id": getSpaceIDSchema(),
 	}
 }
 

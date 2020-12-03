@@ -136,16 +136,9 @@ func getDeploymentStepSchema() *schema.Schema {
 				"deploy_kubernetes_secret_action": getDeployKubernetesSecretActionSchema(),
 				"deploy_package_action":           getDeployPackageAction(),
 				"deploy_windows_service_action":   getDeployWindowsServiceActionSchema(),
-				"id": {
-					Computed: true,
-					Type:     schema.TypeString,
-				},
-				"manual_intervention_action": getManualInterventionActionSchema(),
-				"name": {
-					Description: "The name of the step",
-					Required:    true,
-					Type:        schema.TypeString,
-				},
+				"id":                              getIDSchema(),
+				"manual_intervention_action":      getManualInterventionActionSchema(),
+				"name":                            getNameSchema(true),
 				"package_requirement": {
 					Default:     "LetOctopusDecide",
 					Description: "Whether to run this step before or after package acquisition (if possible)",
@@ -157,7 +150,7 @@ func getDeploymentStepSchema() *schema.Schema {
 						"LetOctopusDecide",
 					}, false)),
 				},
-				"run_kubectl_script_action": getRunRunKubectlScriptSchema(),
+				"run_kubectl_script_action": getRunKubectlScriptSchema(),
 				"run_script_action":         getRunScriptActionSchema(),
 				"start_trigger": {
 					Default:     "StartAfterPrevious",

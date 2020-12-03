@@ -39,10 +39,7 @@ func flattenIdentityClaims(identityClaims map[string]octopusdeploy.IdentityClaim
 
 func getIdentityClaimSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
+		"name": getNameSchema(true),
 		"is_identifying_claim": {
 			Required: true,
 			Type:     schema.TypeBool,
