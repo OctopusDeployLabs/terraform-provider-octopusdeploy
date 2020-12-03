@@ -1,0 +1,128 @@
+---
+page_title: "octopusdeploy_lifecycle Resource - terraform-provider-octopusdeploy"
+subcategory: ""
+description: |-
+  This resource manages lifecycles in Octopus Deploy.
+---
+
+# Resource `octopusdeploy_lifecycle`
+
+This resource manages lifecycles in Octopus Deploy.
+
+## Example Usage
+
+```terraform
+resource "octopusdeploy_lifecycle" "example" {
+  description = "This is the default lifecycle."
+  name        = "Test Lifecycle (OK to Delete)"
+
+  release_retention_policy {
+    quantity_to_keep    = 1
+    should_keep_forever = true
+    unit                = "Days"
+  }
+
+  tentacle_retention_policy {
+    quantity_to_keep    = 30
+    should_keep_forever = false
+    unit                = "Items"
+  }
+
+  phase {
+    automatic_deployment_targets = ["Environments-321"]
+    name                         = "foo"
+
+    release_retention_policy {
+      quantity_to_keep    = 1
+      should_keep_forever = true
+      unit                = "Days"
+    }
+
+    tentacle_retention_policy {
+      quantity_to_keep    = 30
+      should_keep_forever = false
+      unit                = "Items"
+    }
+  }
+
+  phase {
+    is_optional_phase           = true
+    name                        = "bar"
+    optional_deployment_targets = ["Environments-321"]
+  }
+}
+```
+
+## Schema
+
+### Required
+
+- **name** (String, Required) The name of this resource.
+
+### Optional
+
+- **description** (String, Optional) The description of this resource.
+- **id** (String, Optional) The unique identifier for this resource.
+- **phase** (Block List) (see [below for nested schema](#nestedblock--phase))
+- **release_retention_policy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--release_retention_policy))
+- **space_id** (String, Optional) The space identifier associated with this resource.
+- **tentacle_retention_policy** (Block List) (see [below for nested schema](#nestedblock--tentacle_retention_policy))
+
+<a id="nestedblock--phase"></a>
+### Nested Schema for `phase`
+
+Required:
+
+- **name** (String, Required) The name of this resource.
+
+Optional:
+
+- **automatic_deployment_targets** (List of String, Optional) Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase
+- **id** (String, Optional) The unique identifier for this resource.
+- **is_optional_phase** (Boolean, Optional) If false a release must be deployed to this phase before it can be deployed to the next phase.
+- **minimum_environments_before_promotion** (Number, Optional) The number of units required before a release can enter the next phase. If 0, all environments are required.
+- **optional_deployment_targets** (List of String, Optional) Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to
+- **release_retention_policy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--phase--release_retention_policy))
+- **tentacle_retention_policy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--phase--tentacle_retention_policy))
+
+<a id="nestedblock--phase--release_retention_policy"></a>
+### Nested Schema for `phase.release_retention_policy`
+
+Optional:
+
+- **quantity_to_keep** (Number, Optional) The number of days/releases to keep. The default value is `30`. If `0` then all are kept.
+- **should_keep_forever** (Boolean, Optional) Indicates if items should never be deleted. The default value is `false`.
+- **unit** (String, Optional) The unit of quantity to keep. Valid units are `Days` or `Items`. The default value is `Days`.
+
+
+<a id="nestedblock--phase--tentacle_retention_policy"></a>
+### Nested Schema for `phase.tentacle_retention_policy`
+
+Optional:
+
+- **quantity_to_keep** (Number, Optional) The number of days/releases to keep. The default value is `30`. If `0` then all are kept.
+- **should_keep_forever** (Boolean, Optional) Indicates if items should never be deleted. The default value is `false`.
+- **unit** (String, Optional) The unit of quantity to keep. Valid units are `Days` or `Items`. The default value is `Days`.
+
+
+
+<a id="nestedblock--release_retention_policy"></a>
+### Nested Schema for `release_retention_policy`
+
+Optional:
+
+- **quantity_to_keep** (Number, Optional) The number of days/releases to keep. The default value is `30`. If `0` then all are kept.
+- **should_keep_forever** (Boolean, Optional) Indicates if items should never be deleted. The default value is `false`.
+- **unit** (String, Optional) The unit of quantity to keep. Valid units are `Days` or `Items`. The default value is `Days`.
+
+
+<a id="nestedblock--tentacle_retention_policy"></a>
+### Nested Schema for `tentacle_retention_policy`
+
+Optional:
+
+- **quantity_to_keep** (Number, Optional) The number of days/releases to keep. The default value is `30`. If `0` then all are kept.
+- **should_keep_forever** (Boolean, Optional) Indicates if items should never be deleted. The default value is `false`.
+- **unit** (String, Optional) The unit of quantity to keep. Valid units are `Days` or `Items`. The default value is `Days`.
+
+
