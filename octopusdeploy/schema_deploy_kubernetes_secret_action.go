@@ -11,24 +11,24 @@ func getDeployKubernetesSecretActionSchema() *schema.Schema {
 
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
-	element.Schema[constSecretName] = &schema.Schema{
-		Type:        schema.TypeString,
+	element.Schema["secret_name"] = &schema.Schema{
 		Description: "The name of the secret resource",
 		Required:    true,
+		Type:        schema.TypeString,
 	}
 
-	element.Schema[constSecretValues] = &schema.Schema{
+	element.Schema["secret_values"] = &schema.Schema{
 		Type:     schema.TypeList,
 		Required: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				constKey: {
-					Type:     schema.TypeString,
+				"key": {
 					Required: true,
+					Type:     schema.TypeString,
 				},
-				constValue: {
-					Type:     schema.TypeString,
+				"value": {
 					Required: true,
+					Type:     schema.TypeString,
 				},
 			},
 		},
@@ -41,14 +41,14 @@ func buildDeployKubernetesSecretActionResource(tfAction map[string]interface{}) 
 	resource := expandDeploymentAction(tfAction)
 
 	resource.ActionType = "Octopus.KubernetesDeploySecret"
-	resource.Properties["Octopus.Action.KubernetesContainers.SecretName"] = tfAction[constSecretValues].(string)
+	resource.Properties["Octopus.Action.KubernetesContainers.SecretName"] = tfAction["secret_values"].(string)
 
-	if tfSecretValues, ok := tfAction[constSecretValues]; ok {
+	if tfSecretValues, ok := tfAction["secret_values"]; ok {
 		secretValues := make(map[string]string)
 
 		for _, tfSecretValue := range tfSecretValues.([]interface{}) {
 			tfSecretValueTyped := tfSecretValue.(map[string]interface{})
-			secretValues[tfSecretValueTyped[constKey].(string)] = tfSecretValueTyped[constValue].(string)
+			secretValues[tfSecretValueTyped["key"].(string)] = tfSecretValueTyped["value"].(string)
 		}
 
 		j, _ := json.Marshal(secretValues)

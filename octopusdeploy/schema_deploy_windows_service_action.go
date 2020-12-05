@@ -23,12 +23,12 @@ func addWindowsServiceFeature(parent *schema.Resource) {
 		Schema: map[string]*schema.Schema{},
 	}
 	addDeployWindowsServiceSchema(element)
-	parent.Schema[constWindowsService] = &schema.Schema{
+	parent.Schema["windows_service"] = &schema.Schema{
 		Description: "Deploy a windows service feature",
-		Type:        schema.TypeSet,
-		Optional:    true,
-		MaxItems:    1,
 		Elem:        element,
+		MaxItems:    1,
+		Optional:    true,
+		Type:        schema.TypeSet,
 	}
 }
 
@@ -95,7 +95,7 @@ func buildDeployWindowsServiceActionResource(tfAction map[string]interface{}) oc
 }
 
 func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
-	if windowsServiceList, ok := tfAction[constWindowsService]; ok {
+	if windowsServiceList, ok := tfAction["windows_service"]; ok {
 		tfWindowsService := windowsServiceList.(*schema.Set).List()
 		if len(tfWindowsService) > 0 {
 			addWindowsServiceToActionResource(tfWindowsService[0].(map[string]interface{}), action)
@@ -105,9 +105,9 @@ func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, a
 
 func addWindowsServiceToActionResource(tfAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
 	action.Properties["Octopus.Action.WindowsService.CreateOrUpdateService"] = "True"
-	action.Properties["Octopus.Action.WindowsService.ServiceName"] = tfAction[constServiceName].(string)
+	action.Properties["Octopus.Action.WindowsService.ServiceName"] = tfAction["service_name"].(string)
 
-	displayName := tfAction[constDisplayName]
+	displayName := tfAction["display_name"]
 	if displayName != nil {
 		action.Properties["Octopus.Action.WindowsService.DisplayName"] = displayName.(string)
 	}
@@ -117,14 +117,14 @@ func addWindowsServiceToActionResource(tfAction map[string]interface{}, action o
 		action.Properties["Octopus.Action.WindowsService.Description"] = description.(string)
 	}
 
-	action.Properties["Octopus.Action.WindowsService.ExecutablePath"] = tfAction[constExecutablePath].(string)
+	action.Properties["Octopus.Action.WindowsService.ExecutablePath"] = tfAction["executable_path"].(string)
 
 	args := tfAction["arguments"]
 	if args != nil {
 		action.Properties["Octopus.Action.WindowsService.Arguments"] = args.(string)
 	}
 
-	action.Properties["Octopus.Action.WindowsService.ServiceAccount"] = tfAction[constServiceAccount].(string)
+	action.Properties["Octopus.Action.WindowsService.ServiceAccount"] = tfAction["service_account"].(string)
 
 	accountName := tfAction["custom_account_name"]
 	if accountName != nil {
@@ -136,7 +136,7 @@ func addWindowsServiceToActionResource(tfAction map[string]interface{}, action o
 		action.Properties["Octopus.Action.WindowsService.CustomAccountPassword"] = accountPassword.(string)
 	}
 
-	action.Properties["Octopus.Action.WindowsService.StartMode"] = tfAction[constStartMode].(string)
+	action.Properties["Octopus.Action.WindowsService.StartMode"] = tfAction["start_mode"].(string)
 
 	dependencies := tfAction["dependencies"]
 	if dependencies != nil {

@@ -23,7 +23,7 @@ func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 	if varSensitive {
 		varValue = d.Get("sensitive_value").(string)
 	} else {
-		varValue = d.Get(constValue).(string)
+		varValue = d.Get("value").(string)
 	}
 
 	varScopeInterface := tfVariableScopetoODVariableScope(d)
@@ -31,7 +31,7 @@ func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 	newVar := octopusdeploy.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
 	newVar.ID = d.Id()
 
-	varPrompt, ok := d.GetOk(constPrompt)
+	varPrompt, ok := d.GetOk("prompt")
 	if ok {
 		tfPromptSettings := varPrompt.(*schema.Set)
 		if len(tfPromptSettings.List()) == 1 {
@@ -53,8 +53,8 @@ func getVariableDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id": getIDDataSchema(),
-		"variables": {
+		"id": getDataSchemaID(),
+		"variable": {
 			Computed:    true,
 			Description: "A list of variables that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

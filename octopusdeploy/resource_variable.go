@@ -53,16 +53,16 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	logResource(constVariable, m)
+	logResource("variable", m)
 
 	d.Set("name", variable.Name)
 	d.Set("type", variable.Type)
 
-	isSensitive := d.Get(constIsSensitive).(bool)
+	isSensitive := d.Get("is_sensitive").(bool)
 	if isSensitive {
-		d.Set(constValue, nil)
+		d.Set("value", nil)
 	} else {
-		d.Set(constValue, variable.Value)
+		d.Set("value", variable.Value)
 	}
 
 	d.Set("description", variable.Description)
@@ -154,8 +154,8 @@ func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m inter
 // schema has been parsed, which as far as I can tell we can't do in a normal validation
 // function.
 func validateVariable(d *schema.ResourceData) error {
-	tfSensitive := d.Get(constIsSensitive).(bool)
-	tfType := d.Get(constType).(string)
+	tfSensitive := d.Get("is_sensitive").(bool)
+	tfType := d.Get("type").(string)
 
 	if tfSensitive && tfType != "Sensitive" {
 		return fmt.Errorf("when is_sensitive is set to true, type needs to be 'Sensitive'")

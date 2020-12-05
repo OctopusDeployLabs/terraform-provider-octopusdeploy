@@ -189,7 +189,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 			return fmt.Errorf("Deployment process has %d steps instead of the expected %d", numberOfSteps, expectedNumberOfSteps)
 		}
 
-		if process.Steps[0].Actions[0].Properties["Octopus.Action.RunOnServer"] != constTrue {
+		if process.Steps[0].Actions[0].Properties["Octopus.Action.RunOnServer"] != "true" {
 			return fmt.Errorf("The RunOnServer property has not been set to true on the deployment process")
 		}
 

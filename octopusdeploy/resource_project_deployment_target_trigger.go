@@ -25,13 +25,13 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Required:    true,
 				Description: "The project_id of the Project to attach the trigger to.",
 			},
-			constShouldRedeploy: {
+			"should_redeploy": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 				Description: "Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.",
 			},
-			constEventGroups: {
+			"event_groups": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -39,7 +39,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event group filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			constEventCategories: {
+			"event_categories": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -47,7 +47,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event category filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			constRoles: {
+			"roles": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -55,7 +55,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 				Optional:    true,
 				Description: "Apply event role filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
 			},
-			constEnvironmentIDs: {
+			"environment_ids": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -70,11 +70,11 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octopusdeploy.ProjectTrigger, error) {
 	name := d.Get("name").(string)
 	projectID := d.Get("project_id").(string)
-	shouldRedeploy := d.Get(constShouldRedeploy).(bool)
+	shouldRedeploy := d.Get("should_redeploy").(bool)
 
 	deploymentTargetTrigger := octopusdeploy.NewProjectDeploymentTargetTrigger(name, projectID, shouldRedeploy, nil, nil, nil)
 
-	if attr, ok := d.GetOk(constEventGroups); ok {
+	if attr, ok := d.GetOk("event_groups"); ok {
 		eventGroups := getSliceFromTerraformTypeList(attr)
 
 		// need to validate here "ValidateFunc is not yet supported on lists or sets."
@@ -93,7 +93,7 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 		deploymentTargetTrigger.AddEventGroups(eventGroups)
 	}
 
-	if attr, ok := d.GetOk(constEventCategories); ok {
+	if attr, ok := d.GetOk("event_categories"); ok {
 		eventCategories := getSliceFromTerraformTypeList(attr)
 
 		// need to validate here "ValidateFunc is not yet supported on lists or sets."
@@ -116,11 +116,11 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 		deploymentTargetTrigger.AddEventCategories(eventCategories)
 	}
 
-	if attr, ok := d.GetOk(constRoles); ok {
+	if attr, ok := d.GetOk("roles"); ok {
 		deploymentTargetTrigger.Filter.Roles = getSliceFromTerraformTypeList(attr)
 	}
 
-	if attr, ok := d.GetOk(constEnvironmentIDs); ok {
+	if attr, ok := d.GetOk("environment_ids"); ok {
 		deploymentTargetTrigger.Filter.EnvironmentIDs = getSliceFromTerraformTypeList(attr)
 	}
 
@@ -161,14 +161,14 @@ func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.R
 		return nil
 	}
 
-	logResource(constProjectTrigger, m)
+	logResource("project_trigger", m)
 
+	d.Set("environment_ids", resource.Filter.EnvironmentIDs)
+	d.Set("event_groups", resource.Filter.EventGroups)
+	d.Set("event_categories", resource.Filter.EventCategories)
 	d.Set("name", resource.Name)
-	d.Set(constShouldRedeploy, resource.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
-	d.Set(constEventGroups, resource.Filter.EventGroups)
-	d.Set(constEventCategories, resource.Filter.EventCategories)
-	d.Set(constRoles, resource.Filter.Roles)
-	d.Set(constEnvironmentIDs, resource.Filter.EnvironmentIDs)
+	d.Set("roles", resource.Filter.Roles)
+	d.Set("should_redeploy", resource.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
 
 	return nil
 }

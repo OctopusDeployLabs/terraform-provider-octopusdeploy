@@ -20,7 +20,7 @@ func dataSourceVariable() *schema.Resource {
 func tfVariableScopetoODVariableScope(d *schema.ResourceData) *octopusdeploy.VariableScope {
 	// Get the schema set. We specify a MaxItems of 1, so we will only ever have zero or one items
 	// in our list.
-	tfSchemaSetInterface, ok := d.GetOk(constScope)
+	tfSchemaSetInterface, ok := d.GetOk("scope")
 	if !ok {
 		return nil
 	}

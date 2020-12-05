@@ -36,8 +36,8 @@ func merge(map1 map[string]string, map2 map[string]string) map[string]string {
 
 func buildScriptFromPackageProperties(tfAction map[string]interface{}) map[string]string {
 	properties := make(map[string]string)
-	properties["Octopus.Action.Script.ScriptFileName"] = tfAction[constScriptFileName].(string)
-	properties["Octopus.Action.Script.ScriptParameters"] = tfAction[constScriptParameters].(string)
+	properties["Octopus.Action.Script.ScriptFileName"] = tfAction["script_file_name"].(string)
+	properties["Octopus.Action.Script.ScriptParameters"] = tfAction["script_parameters"].(string)
 	properties["Octopus.Action.Script.ScriptSource"] = "Package"
 	return properties
 }

@@ -21,12 +21,12 @@ func getRunScriptActionSchema() *schema.Schema {
 }
 
 func addScriptFromPackageSchema(element *schema.Resource) {
-	element.Schema[constScriptFileName] = &schema.Schema{
+	element.Schema["script_file_name"] = &schema.Schema{
 		Description: "The script file name in the package",
 		Optional:    true,
 		Type:        schema.TypeString,
 	}
-	element.Schema[constScriptParameters] = &schema.Schema{
+	element.Schema["script_parameters"] = &schema.Schema{
 		Description: "Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS",
 		Optional:    true,
 		Type:        schema.TypeString,
@@ -38,7 +38,7 @@ func buildRunScriptActionResource(tfAction map[string]interface{}) octopusdeploy
 	resource.ActionType = "Octopus.Script"
 	resource.Properties = merge(resource.Properties, buildRunScriptFromPackageActionResource(tfAction))
 
-	variableSubstitutionInFiles := tfAction[constVariableSubstitutionInFiles].(string)
+	variableSubstitutionInFiles := tfAction["variable_substitution_in_files"].(string)
 	if variableSubstitutionInFiles != "" {
 		resource.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles
 		resource.Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"

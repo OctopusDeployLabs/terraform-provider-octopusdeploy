@@ -17,9 +17,9 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	const feedType = "NuGet"
 	const feedURI = "http://test.com"
-	const enhancedMode = constTrue
-	const feedUsername = constUsername
-	const feedPassword = constPassword
+	const enhancedMode = "true"
+	const feedUsername = "username"
+	const feedPassword = "password"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -31,11 +31,11 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testFeedExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr(prefix, constFeedType, feedType),
-					resource.TestCheckResourceAttr(prefix, constFeedURI, feedURI),
-					resource.TestCheckResourceAttr(prefix, constUsername, feedUsername),
-					resource.TestCheckResourceAttr(prefix, constPassword, feedPassword),
-					resource.TestCheckResourceAttr(prefix, constEnhancedMode, enhancedMode),
+					resource.TestCheckResourceAttr(prefix, "feed_type", feedType),
+					resource.TestCheckResourceAttr(prefix, "feed_uri", feedURI),
+					resource.TestCheckResourceAttr(prefix, "username", feedUsername),
+					resource.TestCheckResourceAttr(prefix, "password", feedPassword),
+					resource.TestCheckResourceAttr(prefix, "enhanced_mode", enhancedMode),
 				),
 			},
 		},

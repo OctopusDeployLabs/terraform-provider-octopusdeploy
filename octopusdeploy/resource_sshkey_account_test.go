@@ -28,7 +28,7 @@ func TestSSHKeyBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccAccountExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr(prefix, constPassphrase, passphrase),
+					resource.TestCheckResourceAttr(prefix, "passphrase", passphrase),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 					resource.TestCheckResourceAttr(prefix, "username", username),
 				),

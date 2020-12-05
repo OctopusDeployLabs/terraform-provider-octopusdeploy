@@ -10,8 +10,8 @@ func addPrimaryPackageSchema(element *schema.Resource, required bool) error {
 		return createInvalidParameterError("addPrimaryPackageSchema", "element")
 	}
 
-	element.Schema[constPrimaryPackage] = getPackageSchema(required)
-	element.Schema[constPrimaryPackage].MaxItems = 1
+	element.Schema["primary_package"] = getPackageSchema(required)
+	element.Schema["primary_package"].MaxItems = 1
 
 	return nil
 }
@@ -19,62 +19,62 @@ func addPrimaryPackageSchema(element *schema.Resource, required bool) error {
 func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 	addPrimaryPackageSchema(element, primaryIsRequired)
 
-	element.Schema[constPackage] = getPackageSchema(false)
+	element.Schema["package"] = getPackageSchema(false)
 
-	packageElementSchema := element.Schema[constPackage].Elem.(*schema.Resource).Schema
+	packageElementSchema := element.Schema["package"].Elem.(*schema.Resource).Schema
 
 	packageElementSchema["name"] = &schema.Schema{
-		Type:        schema.TypeString,
 		Description: "The name of the package",
 		Required:    true,
+		Type:        schema.TypeString,
 	}
 
-	packageElementSchema[constExtractDuringDeployment] = &schema.Schema{
-		Type:        schema.TypeString,
+	packageElementSchema["extract_during_deployment"] = &schema.Schema{
+		Default:     "true",
 		Description: "Whether to extract the package during deployment",
 		Optional:    true,
-		Default:     constTrue,
+		Type:        schema.TypeString,
 	}
 }
 
 func getPackageSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Description: "The primary package for the action",
-		Type:        schema.TypeSet,
-		Required:    required,
-		Optional:    !required,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"package_id": {
-					Type:        schema.TypeString,
 					Description: "The ID of the package",
 					Required:    true,
+					Type:        schema.TypeString,
 				},
 				"feed_id": {
-					Type:        schema.TypeString,
-					Description: "The feed to retrieve the package from",
 					Default:     "feeds-builtin",
+					Description: "The feed to retrieve the package from",
 					Optional:    true,
+					Type:        schema.TypeString,
 				},
 				"acquisition_location": {
-					Type:        schema.TypeString,
-					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
 					Default:     (string)(octopusdeploy.PackageAcquisitionLocationServer),
+					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
 					Optional:    true,
+					Type:        schema.TypeString,
 				},
 				"property": getPropertySchema(),
 			},
 		},
+		Optional: !required,
+		Required: required,
+		Type:     schema.TypeSet,
 	}
 }
 
 func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
 	pkg := octopusdeploy.PackageReference{
+		AcquisitionLocation: tfPkg["acquisition_location"].(string),
+		FeedID:              tfPkg["feed_id"].(string),
 		Name:                getStringOrEmpty(tfPkg["name"]),
 		PackageID:           tfPkg["package_id"].(string),
-		FeedID:              tfPkg["feed_id"].(string),
-		AcquisitionLocation: tfPkg["acquisition_location"].(string),
-		Properties:          buildPropertiesMap(tfPkg[constProperty]),
+		Properties:          buildPropertiesMap(tfPkg["property"]),
 	}
 
 	extract := tfPkg["extract_during_deployment"]

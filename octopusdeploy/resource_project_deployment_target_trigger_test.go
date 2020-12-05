@@ -27,7 +27,7 @@ func TestAccOctopusDeployDeploymentTargetTriggerAddDelete(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "name", deployTargetTriggerName),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constShouldRedeploy, constTrue),
+						terraformNamePrefix, "should_redeploy", "true"),
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "event_groups.0", "Machine"),
 					resource.TestCheckResourceAttr(
@@ -57,7 +57,7 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constShouldRedeploy, constTrue),
+						terraformNamePrefix, "should_redeploy", "true"),
 				),
 			},
 			{
@@ -71,7 +71,7 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						terraformNamePrefix, "event_categories.0", "MachineHealthy"),
 					resource.TestCheckResourceAttr(
-						terraformNamePrefix, constShouldRedeploy, "false"),
+						terraformNamePrefix, "should_redeploy", "false"),
 				),
 			},
 		},
