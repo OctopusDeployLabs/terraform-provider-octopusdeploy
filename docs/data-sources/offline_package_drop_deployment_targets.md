@@ -17,9 +17,9 @@ Provides information about existing offline package drop deployment targets.
 
 - **deployment_id** (String, Optional) A filter to search by deployment ID.
 - **environments** (List of String, Optional) A filter to search by a list of environment IDs.
-- **health_statuses** (List of String, Optional) A list of deployment target health statuses to match in the query and/or search
+- **health_statuses** (List of String, Optional) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **ids** (List of String, Optional) A filter to search by a list of IDs.
-- **is_disabled** (Boolean, Optional) The state of deployment targets to match in the query and/or search
+- **is_disabled** (Boolean, Optional) A filter to search by the disabled status of a resource.
 - **name** (String, Optional) A filter to search by name.
 - **partial_name** (String, Optional) A filter to search by the partial match of a name.
 - **roles** (List of String, Optional) A filter to search by a list of role IDs.

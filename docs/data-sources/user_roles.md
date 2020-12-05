@@ -32,10 +32,10 @@ data "octopusdeploy_user_roles" "example" {
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **user_roles** (Block List) A list of user roles that match the filter(s). (see [below for nested schema](#nestedblock--user_roles))
+- **user_role** (Block List) A list of user roles that match the filter(s). (see [below for nested schema](#nestedblock--user_role))
 
-<a id="nestedblock--user_roles"></a>
-### Nested Schema for `user_roles`
+<a id="nestedblock--user_role"></a>
+### Nested Schema for `user_role`
 
 Read-only:
 

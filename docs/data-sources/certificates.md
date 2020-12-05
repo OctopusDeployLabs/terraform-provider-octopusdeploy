@@ -25,23 +25,23 @@ data "octopusdeploy_certificates" "example" {
 
 ### Optional
 
-- **archived** (String, Optional)
-- **first_result** (String, Optional)
+- **archived** (String, Optional) A filter to search for resources that have been archived.
+- **first_result** (String, Optional) A filter to define the first result.
 - **ids** (List of String, Optional) A filter to search by a list of IDs.
-- **order_by** (String, Optional)
+- **order_by** (String, Optional) A filter used to order the search results.
 - **partial_name** (String, Optional) A filter to search by the partial match of a name.
-- **search** (String, Optional)
+- **search** (String, Optional) A filter of terms used the search operation.
 - **skip** (Number, Optional) A filter to specify the number of items to skip in the response.
 - **take** (Number, Optional) A filter to specify the number of items to take (or return) in the response.
-- **tenant** (String, Optional)
+- **tenant** (String, Optional) A filter to search by a tenant ID.
 
 ### Read-only
 
-- **certificates** (Block List) A list of certificates that match the filter(s). (see [below for nested schema](#nestedblock--certificates))
+- **certificate** (Block List) A list of certificates that match the filter(s). (see [below for nested schema](#nestedblock--certificate))
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
 
-<a id="nestedblock--certificates"></a>
-### Nested Schema for `certificates`
+<a id="nestedblock--certificate"></a>
+### Nested Schema for `certificate`
 
 Read-only:
 

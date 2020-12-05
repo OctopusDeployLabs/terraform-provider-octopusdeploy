@@ -17,9 +17,9 @@ Provides information about existing cloud region deployment targets.
 
 - **deployment_id** (String, Optional) A filter to search by deployment ID.
 - **environments** (List of String, Optional) A filter to search by a list of environment IDs.
-- **health_statuses** (List of String, Optional) A list of deployment target health statuses to match in the query and/or search
+- **health_statuses** (List of String, Optional) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **ids** (List of String, Optional) A filter to search by a list of IDs.
-- **is_disabled** (Boolean, Optional) The state of deployment targets to match in the query and/or search
+- **is_disabled** (Boolean, Optional) A filter to search by the disabled status of a resource.
 - **name** (String, Optional) A filter to search by name.
 - **partial_name** (String, Optional) A filter to search by the partial match of a name.
 - **roles** (List of String, Optional) A filter to search by a list of role IDs.
@@ -32,11 +32,11 @@ Provides information about existing cloud region deployment targets.
 
 ### Read-only
 
-- **cloud_regions** (Block List) A list of cloud region deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--cloud_regions))
+- **cloud_region_deployment_target** (Block List) A list of cloud region deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--cloud_region_deployment_target))
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
 
-<a id="nestedblock--cloud_regions"></a>
-### Nested Schema for `cloud_regions`
+<a id="nestedblock--cloud_region_deployment_target"></a>
+### Nested Schema for `cloud_region_deployment_target`
 
 Read-only:
 

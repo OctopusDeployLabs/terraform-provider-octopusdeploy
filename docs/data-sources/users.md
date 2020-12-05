@@ -31,31 +31,31 @@ data "octopusdeploy_users" "example" {
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **users** (Block List) A list of users that match the filter(s). (see [below for nested schema](#nestedblock--users))
+- **user** (Block List) A list of users that match the filter(s). (see [below for nested schema](#nestedblock--user))
 
-<a id="nestedblock--users"></a>
-### Nested Schema for `users`
+<a id="nestedblock--user"></a>
+### Nested Schema for `user`
 
 Read-only:
 
 - **can_password_be_edited** (Boolean, Read-only)
 - **display_name** (String, Read-only) The display name of this resource.
 - **email_address** (String, Read-only) The email address of this resource.
-- **identity** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--users--identity))
+- **identity** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--user--identity))
 - **is_active** (Boolean, Read-only)
 - **is_requestor** (Boolean, Read-only)
 - **is_service** (Boolean, Read-only)
 - **password** (String, Read-only) The password associated with this resource.
 - **username** (String, Read-only) The username associated with this resource.
 
-<a id="nestedatt--users--identity"></a>
-### Nested Schema for `users.identity`
+<a id="nestedatt--user--identity"></a>
+### Nested Schema for `user.identity`
 
-- **claim** (Set of Object) (see [below for nested schema](#nestedobjatt--users--identity--claim))
+- **claim** (Set of Object) (see [below for nested schema](#nestedobjatt--user--identity--claim))
 - **provider** (String)
 
-<a id="nestedobjatt--users--identity--claim"></a>
-### Nested Schema for `users.identity.claim`
+<a id="nestedobjatt--user--identity--claim"></a>
+### Nested Schema for `user.identity.claim`
 
 - **is_identifying_claim** (Boolean)
 - **name** (String)

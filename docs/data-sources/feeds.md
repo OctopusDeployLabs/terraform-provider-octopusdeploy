@@ -15,7 +15,7 @@ Provides information about existing feeds.
 
 ### Optional
 
-- **feed_type** (String, Optional)
+- **feed_type** (String, Optional) A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, or `OctopusProject`.
 - **id** (String, Optional) The ID of this resource.
 - **ids** (List of String, Optional) A filter to search by a list of IDs.
 - **partial_name** (String, Optional) A filter to search by the partial match of a name.

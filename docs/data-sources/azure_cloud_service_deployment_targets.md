@@ -22,9 +22,9 @@ data "octopusdeploy_azure_cloud_service_deployment_targets" "example" {
 
 - **deployment_id** (String, Optional) A filter to search by deployment ID.
 - **environments** (List of String, Optional) A filter to search by a list of environment IDs.
-- **health_statuses** (List of String, Optional) A list of deployment target health statuses to match in the query and/or search
+- **health_statuses** (List of String, Optional) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **ids** (List of String, Optional) A filter to search by a list of IDs.
-- **is_disabled** (Boolean, Optional) The state of deployment targets to match in the query and/or search
+- **is_disabled** (Boolean, Optional) A filter to search by the disabled status of a resource.
 - **name** (String, Optional) A filter to search by name.
 - **partial_name** (String, Optional) A filter to search by the partial match of a name.
 - **roles** (List of String, Optional) A filter to search by a list of role IDs.
@@ -37,11 +37,11 @@ data "octopusdeploy_azure_cloud_service_deployment_targets" "example" {
 
 ### Read-only
 
-- **azure_cloud_services** (Block List) A list of Azure cloud service deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--azure_cloud_services))
+- **azure_cloud_service_deployment_target** (Block List) A list of Azure cloud service deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--azure_cloud_service_deployment_target))
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
 
-<a id="nestedblock--azure_cloud_services"></a>
-### Nested Schema for `azure_cloud_services`
+<a id="nestedblock--azure_cloud_service_deployment_target"></a>
+### Nested Schema for `azure_cloud_service_deployment_target`
 
 Read-only:
 
