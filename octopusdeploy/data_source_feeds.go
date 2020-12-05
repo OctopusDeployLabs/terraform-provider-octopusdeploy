@@ -42,7 +42,7 @@ func dataSourceFeedsRead(ctx context.Context, d *schema.ResourceData, m interfac
 		flattenedFeeds = append(flattenedFeeds, flattenFeed(feedResource))
 	}
 
-	d.Set("feeds", flattenedFeeds)
+	d.Set("feed", flattenedFeeds)
 	d.SetId("Feeds " + time.Now().UTC().String())
 
 	return nil

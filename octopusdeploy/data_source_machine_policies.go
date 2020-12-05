@@ -36,7 +36,7 @@ func dataSourceMachinePoliciesRead(ctx context.Context, d *schema.ResourceData, 
 		flattenedMachinePolicies = append(flattenedMachinePolicies, flattenMachinePolicy(machinePolicy))
 	}
 
-	d.Set("machine_policies", flattenedMachinePolicies)
+	d.Set("machine_policy", flattenedMachinePolicies)
 	d.SetId("Machine Policies " + time.Now().UTC().String())
 
 	return nil

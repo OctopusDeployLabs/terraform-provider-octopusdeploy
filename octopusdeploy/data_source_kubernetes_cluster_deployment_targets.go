@@ -47,7 +47,7 @@ func dataSourceKubernetesClusterDeploymentTargetsRead(ctx context.Context, d *sc
 		flattenedKubernetesClusterDeploymentTargets = append(flattenedKubernetesClusterDeploymentTargets, flattenKubernetesClusterDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("kubernetes_clusters", flattenedKubernetesClusterDeploymentTargets)
+	d.Set("kubernetes_cluster_deployment_target", flattenedKubernetesClusterDeploymentTargets)
 	d.SetId("KubernetesClusterDeploymentTargets " + time.Now().UTC().String())
 
 	return nil

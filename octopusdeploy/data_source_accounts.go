@@ -42,7 +42,7 @@ func dataSourceAccountsRead(ctx context.Context, d *schema.ResourceData, m inter
 		flattenedAccounts = append(flattenedAccounts, flattenAccountResource(accountResource))
 	}
 
-	d.Set("accounts", flattenedAccounts)
+	d.Set("account", flattenedAccounts)
 	d.SetId("Accounts " + time.Now().UTC().String())
 
 	return nil

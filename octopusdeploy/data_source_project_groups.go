@@ -36,7 +36,7 @@ func dataSourceProjectGroupsRead(ctx context.Context, d *schema.ResourceData, m 
 		flattenedProjectGroups = append(flattenedProjectGroups, flattenProjectGroup(projectGroup))
 	}
 
-	d.Set("project_groups", flattenedProjectGroups)
+	d.Set("project_group", flattenedProjectGroups)
 	d.SetId("ProjectGroups " + time.Now().UTC().String())
 
 	return nil

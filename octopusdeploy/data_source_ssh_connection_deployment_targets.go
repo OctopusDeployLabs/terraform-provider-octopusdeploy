@@ -47,7 +47,7 @@ func dataSourceSSHConnectionDeploymentTargetsRead(ctx context.Context, d *schema
 		flattenedSSHConnectionDeploymentTargets = append(flattenedSSHConnectionDeploymentTargets, flattenSSHConnectionDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("ssh_connections", flattenedSSHConnectionDeploymentTargets)
+	d.Set("ssh_connection_deployment_target", flattenedSSHConnectionDeploymentTargets)
 	d.SetId("SSHConnectionDeploymentTargets " + time.Now().UTC().String())
 
 	return nil

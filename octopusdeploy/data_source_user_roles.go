@@ -36,7 +36,7 @@ func dataSourceUserRolesRead(ctx context.Context, d *schema.ResourceData, meta i
 		flattenedUserRoles = append(flattenedUserRoles, flattenUserRole(user))
 	}
 
-	d.Set("user_roles", flattenedUserRoles)
+	d.Set("user_role", flattenedUserRoles)
 	d.SetId("UserRoles " + time.Now().UTC().String())
 
 	return nil

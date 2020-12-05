@@ -47,7 +47,7 @@ func dataSourceOfflinePackageDropDeploymentTargetsRead(ctx context.Context, d *s
 		flattenedOfflinePackageDropDeploymentTargets = append(flattenedOfflinePackageDropDeploymentTargets, flattenOfflinePackageDropDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("offline_package_drops", flattenedOfflinePackageDropDeploymentTargets)
+	d.Set("offline_package_drop_deployment_target", flattenedOfflinePackageDropDeploymentTargets)
 	d.SetId("OfflinePackageDropDeploymentTargets " + time.Now().UTC().String())
 
 	return nil

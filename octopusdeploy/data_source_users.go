@@ -36,7 +36,7 @@ func dataSourceUsersRead(ctx context.Context, d *schema.ResourceData, meta inter
 		flattenedUsers = append(flattenedUsers, flattenUser(user))
 	}
 
-	d.Set("users", flattenedUsers)
+	d.Set("user", flattenedUsers)
 	d.SetId("Users " + time.Now().UTC().String())
 
 	return nil

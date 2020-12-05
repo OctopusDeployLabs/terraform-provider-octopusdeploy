@@ -47,7 +47,7 @@ func dataSourceListeningTentacleDeploymentTargetsRead(ctx context.Context, d *sc
 		flattenedListeningTentacleDeploymentTargets = append(flattenedListeningTentacleDeploymentTargets, flattenListeningTentacleDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("listening_tentacles", flattenedListeningTentacleDeploymentTargets)
+	d.Set("listening_tentacle_deployment_target", flattenedListeningTentacleDeploymentTargets)
 	d.SetId("ListeningTentacleDeploymentTargets " + time.Now().UTC().String())
 
 	return nil

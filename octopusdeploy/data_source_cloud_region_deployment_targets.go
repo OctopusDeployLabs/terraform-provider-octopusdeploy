@@ -47,7 +47,7 @@ func dataSourceCloudRegionDeploymentTargetsRead(ctx context.Context, d *schema.R
 		flattenedCloudRegionDeploymentTargets = append(flattenedCloudRegionDeploymentTargets, flattenCloudRegionDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("cloud_regions", flattenedCloudRegionDeploymentTargets)
+	d.Set("cloud_region_deployment_target", flattenedCloudRegionDeploymentTargets)
 	d.SetId("CloudRegionDeploymentTargets " + time.Now().UTC().String())
 
 	return nil
