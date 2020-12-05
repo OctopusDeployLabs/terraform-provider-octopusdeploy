@@ -33,10 +33,10 @@ Provides information about existing SSH connection deployment targets.
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **ssh_connections** (Block List) A list of SSH connection deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--ssh_connections))
+- **ssh_connection_deployment_target** (Block List) A list of SSH connection deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--ssh_connection_deployment_target))
 
-<a id="nestedblock--ssh_connections"></a>
-### Nested Schema for `ssh_connections`
+<a id="nestedblock--ssh_connection_deployment_target"></a>
+### Nested Schema for `ssh_connection_deployment_target`
 
 Read-only:
 

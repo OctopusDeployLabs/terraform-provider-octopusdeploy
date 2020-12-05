@@ -21,10 +21,10 @@ data "octopusdeploy_variables" "example" {
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **variables** (Block List) A list of variables that match the filter(s). (see [below for nested schema](#nestedblock--variables))
+- **variable** (Block List) A list of variables that match the filter(s). (see [below for nested schema](#nestedblock--variable))
 
-<a id="nestedblock--variables"></a>
-### Nested Schema for `variables`
+<a id="nestedblock--variable"></a>
+### Nested Schema for `variable`
 
 Read-only:
 
@@ -35,22 +35,22 @@ Read-only:
 - **name** (String, Read-only) The name of this resource.
 - **pgp_key** (String, Read-only)
 - **project_id** (String, Read-only)
-- **prompt** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--variables--prompt))
-- **scope** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--variables--scope))
+- **prompt** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--variable--prompt))
+- **scope** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--variable--scope))
 - **sensitive_value** (String, Read-only)
 - **type** (String, Read-only) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
 - **value** (String, Read-only)
 
-<a id="nestedatt--variables--prompt"></a>
-### Nested Schema for `variables.prompt`
+<a id="nestedatt--variable--prompt"></a>
+### Nested Schema for `variable.prompt`
 
 - **description** (String)
 - **is_required** (Boolean)
 - **label** (String)
 
 
-<a id="nestedatt--variables--scope"></a>
-### Nested Schema for `variables.scope`
+<a id="nestedatt--variable--scope"></a>
+### Nested Schema for `variable.scope`
 
 - **actions** (List of String)
 - **channels** (List of String)

@@ -34,10 +34,10 @@ data "octopusdeploy_spaces" "spaces" {
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **spaces** (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--spaces))
+- **space** (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--space))
 
-<a id="nestedblock--spaces"></a>
-### Nested Schema for `spaces`
+<a id="nestedblock--space"></a>
+### Nested Schema for `space`
 
 Read-only:
 

@@ -23,19 +23,19 @@ Provides information about existing tag sets.
 
 ### Read-only
 
-- **tag_sets** (Block List) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedblock--tag_sets))
+- **tag_set** (Block List) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedblock--tag_set))
 
-<a id="nestedblock--tag_sets"></a>
-### Nested Schema for `tag_sets`
+<a id="nestedblock--tag_set"></a>
+### Nested Schema for `tag_set`
 
 Read-only:
 
 - **id** (String, Read-only) The unique identifier for this resource.
 - **name** (String, Read-only) The name of this resource.
-- **tags** (List of Object, Read-only) (see [below for nested schema](#nestedatt--tag_sets--tags))
+- **tags** (List of Object, Read-only) (see [below for nested schema](#nestedatt--tag_set--tags))
 
-<a id="nestedatt--tag_sets--tags"></a>
-### Nested Schema for `tag_sets.tags`
+<a id="nestedatt--tag_set--tags"></a>
+### Nested Schema for `tag_set.tags`
 
 - **canonical_tag_name** (String)
 - **color** (String)

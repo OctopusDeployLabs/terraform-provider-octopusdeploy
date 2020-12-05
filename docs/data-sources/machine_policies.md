@@ -23,10 +23,10 @@ Provides information about existing machine policies.
 
 ### Read-only
 
-- **machine_policies** (Block List) A list of machine policies that match the filter(s). (see [below for nested schema](#nestedblock--machine_policies))
+- **machine_policy** (Block List) A list of machine policies that match the filter(s). (see [below for nested schema](#nestedblock--machine_policy))
 
-<a id="nestedblock--machine_policies"></a>
-### Nested Schema for `machine_policies`
+<a id="nestedblock--machine_policy"></a>
+### Nested Schema for `machine_policy`
 
 Read-only:
 
@@ -37,55 +37,55 @@ Read-only:
 - **description** (String, Read-only) The description of this resource.
 - **id** (String, Read-only) The unique identifier for this resource.
 - **is_default** (Boolean, Read-only)
-- **machine_cleanup_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policies--machine_cleanup_policy))
-- **machine_connectivity_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policies--machine_connectivity_policy))
-- **machine_health_check_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policies--machine_health_check_policy))
-- **machine_update_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policies--machine_update_policy))
+- **machine_cleanup_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policy--machine_cleanup_policy))
+- **machine_connectivity_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policy--machine_connectivity_policy))
+- **machine_health_check_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policy--machine_health_check_policy))
+- **machine_update_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policy--machine_update_policy))
 - **name** (String, Read-only) The name of this resource.
 - **polling_request_maximum_message_processing_timeout** (Number, Read-only)
 - **polling_request_queue_timeout** (Number, Read-only)
 - **space_id** (String, Read-only) The space identifier associated with this resource.
 
-<a id="nestedatt--machine_policies--machine_cleanup_policy"></a>
-### Nested Schema for `machine_policies.machine_cleanup_policy`
+<a id="nestedatt--machine_policy--machine_cleanup_policy"></a>
+### Nested Schema for `machine_policy.machine_cleanup_policy`
 
 - **delete_machines_behavior** (String)
 - **delete_machines_elapsed_timespan** (Number)
 
 
-<a id="nestedatt--machine_policies--machine_connectivity_policy"></a>
-### Nested Schema for `machine_policies.machine_connectivity_policy`
+<a id="nestedatt--machine_policy--machine_connectivity_policy"></a>
+### Nested Schema for `machine_policy.machine_connectivity_policy`
 
 - **machine_connectivity_behavior** (String)
 
 
-<a id="nestedatt--machine_policies--machine_health_check_policy"></a>
-### Nested Schema for `machine_policies.machine_health_check_policy`
+<a id="nestedatt--machine_policy--machine_health_check_policy"></a>
+### Nested Schema for `machine_policy.machine_health_check_policy`
 
-- **bash_health_check_policy** (List of Object) (see [below for nested schema](#nestedobjatt--machine_policies--machine_health_check_policy--bash_health_check_policy))
+- **bash_health_check_policy** (List of Object) (see [below for nested schema](#nestedobjatt--machine_policy--machine_health_check_policy--bash_health_check_policy))
 - **health_check_cron** (String)
 - **health_check_cron_timezone** (String)
 - **health_check_interval** (Number)
 - **health_check_type** (String)
-- **powershell_health_check_policy** (List of Object) (see [below for nested schema](#nestedobjatt--machine_policies--machine_health_check_policy--powershell_health_check_policy))
+- **powershell_health_check_policy** (List of Object) (see [below for nested schema](#nestedobjatt--machine_policy--machine_health_check_policy--powershell_health_check_policy))
 
-<a id="nestedobjatt--machine_policies--machine_health_check_policy--bash_health_check_policy"></a>
-### Nested Schema for `machine_policies.machine_health_check_policy.bash_health_check_policy`
-
-- **run_type** (String)
-- **script_body** (String)
-
-
-<a id="nestedobjatt--machine_policies--machine_health_check_policy--powershell_health_check_policy"></a>
-### Nested Schema for `machine_policies.machine_health_check_policy.powershell_health_check_policy`
+<a id="nestedobjatt--machine_policy--machine_health_check_policy--bash_health_check_policy"></a>
+### Nested Schema for `machine_policy.machine_health_check_policy.bash_health_check_policy`
 
 - **run_type** (String)
 - **script_body** (String)
 
 
+<a id="nestedobjatt--machine_policy--machine_health_check_policy--powershell_health_check_policy"></a>
+### Nested Schema for `machine_policy.machine_health_check_policy.powershell_health_check_policy`
 
-<a id="nestedatt--machine_policies--machine_update_policy"></a>
-### Nested Schema for `machine_policies.machine_update_policy`
+- **run_type** (String)
+- **script_body** (String)
+
+
+
+<a id="nestedatt--machine_policy--machine_update_policy"></a>
+### Nested Schema for `machine_policy.machine_update_policy`
 
 - **calamari_update_behavior** (String)
 - **tentacle_update_account_id** (String)

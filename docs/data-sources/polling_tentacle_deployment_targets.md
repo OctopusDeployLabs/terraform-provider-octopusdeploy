@@ -33,10 +33,10 @@ Provides information about existing polling tentacle deployment targets.
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **polling_tentacles** (Block List) A list of polling tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--polling_tentacles))
+- **polling_tentacle_deployment_target** (Block List) A list of polling tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--polling_tentacle_deployment_target))
 
-<a id="nestedblock--polling_tentacles"></a>
-### Nested Schema for `polling_tentacles`
+<a id="nestedblock--polling_tentacle_deployment_target"></a>
+### Nested Schema for `polling_tentacle_deployment_target`
 
 Read-only:
 
@@ -60,12 +60,12 @@ Read-only:
 - **tenanted_deployment_participation** (String, Read-only) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **tenants** (List of String, Read-only) A list of tenant IDs associated with this resource.
 - **tentacle_url** (String, Read-only)
-- **tentacle_version_details** (List of Object, Read-only) (see [below for nested schema](#nestedatt--polling_tentacles--tentacle_version_details))
+- **tentacle_version_details** (List of Object, Read-only) (see [below for nested schema](#nestedatt--polling_tentacle_deployment_target--tentacle_version_details))
 - **thumbprint** (String, Read-only)
 - **uri** (String, Read-only)
 
-<a id="nestedatt--polling_tentacles--tentacle_version_details"></a>
-### Nested Schema for `polling_tentacles.tentacle_version_details`
+<a id="nestedatt--polling_tentacle_deployment_target--tentacle_version_details"></a>
+### Nested Schema for `polling_tentacle_deployment_target.tentacle_version_details`
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)

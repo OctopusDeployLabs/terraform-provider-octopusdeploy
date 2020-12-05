@@ -33,15 +33,15 @@ Provides information about existing offline package drop deployment targets.
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **offline_package_drops** (Block List) A list of offline package drop deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--offline_package_drops))
+- **offline_package_drop_deployment_target** (Block List) A list of offline package drop deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--offline_package_drop_deployment_target))
 
-<a id="nestedblock--offline_package_drops"></a>
-### Nested Schema for `offline_package_drops`
+<a id="nestedblock--offline_package_drop_deployment_target"></a>
+### Nested Schema for `offline_package_drop_deployment_target`
 
 Read-only:
 
 - **applications_directory** (String, Read-only)
-- **destination** (List of Object, Read-only) (see [below for nested schema](#nestedatt--offline_package_drops--destination))
+- **destination** (List of Object, Read-only) (see [below for nested schema](#nestedatt--offline_package_drop_deployment_target--destination))
 - **environments** (List of String, Read-only) A list of environment IDs associated with this resource.
 - **has_latest_calamari** (Boolean, Read-only)
 - **health_status** (String, Read-only) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
@@ -64,8 +64,8 @@ Read-only:
 - **uri** (String, Read-only)
 - **working_directory** (String, Read-only)
 
-<a id="nestedatt--offline_package_drops--destination"></a>
-### Nested Schema for `offline_package_drops.destination`
+<a id="nestedatt--offline_package_drop_deployment_target--destination"></a>
+### Nested Schema for `offline_package_drop_deployment_target.destination`
 
 - **destination_type** (String)
 - **drop_folder_path** (String)

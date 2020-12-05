@@ -52,10 +52,10 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **listening_tentacles** (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacles))
+- **listening_tentacle_deployment_target** (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacle_deployment_target))
 
-<a id="nestedblock--listening_tentacles"></a>
-### Nested Schema for `listening_tentacles`
+<a id="nestedblock--listening_tentacle_deployment_target"></a>
+### Nested Schema for `listening_tentacle_deployment_target`
 
 Read-only:
 
@@ -80,12 +80,12 @@ Read-only:
 - **tenanted_deployment_participation** (String, Read-only) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **tenants** (List of String, Read-only) A list of tenant IDs associated with this resource.
 - **tentacle_url** (String, Read-only)
-- **tentacle_version_details** (List of Object, Read-only) (see [below for nested schema](#nestedatt--listening_tentacles--tentacle_version_details))
+- **tentacle_version_details** (List of Object, Read-only) (see [below for nested schema](#nestedatt--listening_tentacle_deployment_target--tentacle_version_details))
 - **thumbprint** (String, Read-only)
 - **uri** (String, Read-only)
 
-<a id="nestedatt--listening_tentacles--tentacle_version_details"></a>
-### Nested Schema for `listening_tentacles.tentacle_version_details`
+<a id="nestedatt--listening_tentacle_deployment_target--tentacle_version_details"></a>
+### Nested Schema for `listening_tentacle_deployment_target.tentacle_version_details`
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)
