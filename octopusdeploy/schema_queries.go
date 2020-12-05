@@ -1,8 +1,10 @@
 package octopusdeploy
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
-func getAccountTypeQuery() *schema.Schema {
+func getQueryAccountType() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of account types.  Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
 		Optional:    true,
@@ -20,7 +22,15 @@ func getAccountTypeQuery() *schema.Schema {
 	}
 }
 
-func getClonedFromProjectIDQuery() *schema.Schema {
+func getQueryArchived() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search for resources that have been archived.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
+func getQueryClonedFromProjectID() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search for cloned resources by a project ID.",
 		Optional:    true,
@@ -28,7 +38,7 @@ func getClonedFromProjectIDQuery() *schema.Schema {
 	}
 }
 
-func getCommunicationStylesQuery() *schema.Schema {
+func getQueryCommunicationStyles() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of communication styles. Valid communication styles are `AzureCloudService`, `AzureServiceFabricCluster`, `AzureWebApp`, `Ftp`, `Kubernetes`, `None`, `OfflineDrop`, `Ssh`, `TentacleActive`, or `TentaclePassive`.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
@@ -49,7 +59,7 @@ func getCommunicationStylesQuery() *schema.Schema {
 	}
 }
 
-func getDeploymentIDQuery() *schema.Schema {
+func getQueryDeploymentID() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by deployment ID.",
 		Optional:    true,
@@ -57,7 +67,7 @@ func getDeploymentIDQuery() *schema.Schema {
 	}
 }
 
-func getEnvironmentsQuery() *schema.Schema {
+func getQueryEnvironments() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of environment IDs.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
@@ -66,7 +76,15 @@ func getEnvironmentsQuery() *schema.Schema {
 	}
 }
 
-func getFilterQuery() *schema.Schema {
+func getQueryFeedType() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, or `OctopusProject`.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
+func getQueryFilter() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter with which to search.",
 		Optional:    true,
@@ -74,7 +92,31 @@ func getFilterQuery() *schema.Schema {
 	}
 }
 
-func getIDDataSchema() *schema.Schema {
+func getQueryFirstResult() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to define the first result.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
+func getQueryHealthStatuses() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Type:        schema.TypeList,
+		ValidateDiagFunc: validateValueFunc([]string{
+			"HasWarnings",
+			"Healthy",
+			"Unavailable",
+			"Unhealthy",
+			"Unknown",
+		}),
+	}
+}
+
+func getDataSchemaID() *schema.Schema {
 	return &schema.Schema{
 		Computed:    true,
 		Description: "A auto-generated identifier that includes the timestamp when this data source was last modified.",
@@ -82,7 +124,16 @@ func getIDDataSchema() *schema.Schema {
 	}
 }
 
-func getIDsQuery() *schema.Schema {
+func getQueryShellNames() *schema.Schema {
+	return &schema.Schema{
+		Description: "A list of shell names to match in the query and/or search",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Type:        schema.TypeList,
+	}
+}
+
+func getQueryIDs() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of IDs.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
@@ -91,7 +142,7 @@ func getIDsQuery() *schema.Schema {
 	}
 }
 
-func getIsCloneQuery() *schema.Schema {
+func getQueryIsClone() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search for cloned resources.",
 		Optional:    true,
@@ -99,7 +150,15 @@ func getIsCloneQuery() *schema.Schema {
 	}
 }
 
-func getNameQuery() *schema.Schema {
+func getQueryIsDisabled() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by the disabled status of a resource.",
+		Optional:    true,
+		Type:        schema.TypeBool,
+	}
+}
+
+func getQueryName() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by name.",
 		Optional:    true,
@@ -107,7 +166,15 @@ func getNameQuery() *schema.Schema {
 	}
 }
 
-func getPartialNameQuery() *schema.Schema {
+func getQueryOrderBy() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter used to order the search results.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
+func getQueryPartialName() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by the partial match of a name.",
 		Optional:    true,
@@ -115,7 +182,7 @@ func getPartialNameQuery() *schema.Schema {
 	}
 }
 
-func getRolesQuery() *schema.Schema {
+func getQueryRoles() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of role IDs.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
@@ -124,7 +191,15 @@ func getRolesQuery() *schema.Schema {
 	}
 }
 
-func getSkipQuery() *schema.Schema {
+func getQuerySearch() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter of terms used the search operation.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
+func getQuerySkip() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to specify the number of items to skip in the response.",
 		Optional:    true,
@@ -132,7 +207,7 @@ func getSkipQuery() *schema.Schema {
 	}
 }
 
-func getTakeQuery() *schema.Schema {
+func getQueryTake() *schema.Schema {
 	return &schema.Schema{
 		Default:     1,
 		Description: "A filter to specify the number of items to take (or return) in the response.",
@@ -141,7 +216,15 @@ func getTakeQuery() *schema.Schema {
 	}
 }
 
-func getTenantsQuery() *schema.Schema {
+func getQueryTenant() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by a tenant ID.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
+func getQueryTenants() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of tenant IDs.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
@@ -150,11 +233,19 @@ func getTenantsQuery() *schema.Schema {
 	}
 }
 
-func getTenantTagsQuery() *schema.Schema {
+func getQueryTenantTags() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of tenant tags.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
 		Type:        schema.TypeList,
+	}
+}
+
+func getQueryThumbprint() *schema.Schema {
+	return &schema.Schema{
+		Description: "The thumbprint of the deployment target to match in the query and/or search",
+		Optional:    true,
+		Type:        schema.TypeString,
 	}
 }

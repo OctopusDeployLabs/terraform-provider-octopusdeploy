@@ -29,7 +29,7 @@ func expandSpace(d *schema.ResourceData) *octopusdeploy.Space {
 		space.SpaceManagersTeams = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := d.GetOk("task_queue_stopped"); ok {
+	if v, ok := d.GetOk("is_task_queue_stopped"); ok {
 		space.TaskQueueStopped = v.(bool)
 	}
 
@@ -45,10 +45,10 @@ func flattenSpace(space *octopusdeploy.Space) map[string]interface{} {
 		"description":                 space.Description,
 		"id":                          space.GetID(),
 		"is_default":                  space.IsDefault,
+		"is_task_queue_stopped":       space.TaskQueueStopped,
 		"name":                        space.Name,
 		"space_managers_team_members": space.SpaceManagersTeamMembers,
 		"space_managers_teams":        space.SpaceManagersTeams,
-		"task_queue_stopped":          space.TaskQueueStopped,
 	}
 }
 
@@ -57,19 +57,19 @@ func getSpaceDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id":           getIDDataSchema(),
-		"ids":          getIDsQuery(),
-		"name":         getNameQuery(),
-		"partial_name": getPartialNameQuery(),
-		"skip":         getSkipQuery(),
-		"spaces": {
+		"id":           getDataSchemaID(),
+		"ids":          getQueryIDs(),
+		"name":         getQueryName(),
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"space": {
 			Computed:    true,
 			Description: "A list of spaces that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"take": getTakeQuery(),
+		"take": getQueryTake(),
 	}
 }
 
@@ -97,7 +97,7 @@ func getSpaceSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"task_queue_stopped": {
+		"is_task_queue_stopped": {
 			Description: "Specifies the status of the task queue for this space.",
 			Optional:    true,
 			Type:        schema.TypeBool,
@@ -112,5 +112,5 @@ func setSpace(ctx context.Context, d *schema.ResourceData, space *octopusdeploy.
 	d.Set("name", space.Name)
 	d.Set("space_managers_team_members", space.SpaceManagersTeamMembers)
 	d.Set("space_managers_teams", space.SpaceManagersTeams)
-	d.Set("task_queue_stopped", space.TaskQueueStopped)
+	d.Set("is_task_queue_stopped", space.TaskQueueStopped)
 }

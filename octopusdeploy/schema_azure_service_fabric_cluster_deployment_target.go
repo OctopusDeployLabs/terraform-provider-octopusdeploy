@@ -80,7 +80,7 @@ func getAzureServiceFabricClusterDeploymentTargetDataSchema() map[string]*schema
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["azure_service_fabric_clusters"] = &schema.Schema{
+	deploymentTargetDataSchema["azure_service_fabric_cluster_deployment_target"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of Azure service fabric cluster deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -90,7 +90,7 @@ func getAzureServiceFabricClusterDeploymentTargetDataSchema() map[string]*schema
 
 	delete(deploymentTargetDataSchema, "communication_styles")
 	delete(deploymentTargetDataSchema, "deployment_targets")
-	deploymentTargetDataSchema["id"] = getIDDataSchema()
+	deploymentTargetDataSchema["id"] = getDataSchemaID()
 
 	return deploymentTargetDataSchema
 }

@@ -47,18 +47,18 @@ func getProjectGroupDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id":           getIDDataSchema(),
-		"ids":          getIDsQuery(),
-		"partial_name": getPartialNameQuery(),
-		"project_groups": {
+		"id":           getDataSchemaID(),
+		"ids":          getQueryIDs(),
+		"partial_name": getQueryPartialName(),
+		"project_group": {
 			Computed:    true,
 			Description: "A list of project groups that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"skip": getSkipQuery(),
-		"take": getTakeQuery(),
+		"skip": getQuerySkip(),
+		"take": getQueryTake(),
 	}
 }
 

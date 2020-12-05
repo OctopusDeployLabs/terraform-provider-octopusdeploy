@@ -46,7 +46,7 @@ func getOfflinePackageDropDeploymentTargetDataSchema() map[string]*schema.Schema
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["offline_package_drops"] = &schema.Schema{
+	deploymentTargetDataSchema["offline_package_drop_deployment_target"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of offline package drop deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -56,7 +56,7 @@ func getOfflinePackageDropDeploymentTargetDataSchema() map[string]*schema.Schema
 
 	delete(deploymentTargetDataSchema, "communication_styles")
 	delete(deploymentTargetDataSchema, "deployment_targets")
-	deploymentTargetDataSchema["id"] = getIDDataSchema()
+	deploymentTargetDataSchema["id"] = getDataSchemaID()
 
 	return deploymentTargetDataSchema
 }

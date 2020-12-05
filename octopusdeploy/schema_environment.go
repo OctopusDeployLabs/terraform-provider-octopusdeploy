@@ -51,19 +51,19 @@ func getEnvironmentDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"environments": {
+		"environment": {
 			Computed:    true,
 			Description: "A list of environments that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"id":           getIDDataSchema(),
-		"ids":          getIDsQuery(),
-		"name":         getNameQuery(),
-		"partial_name": getPartialNameQuery(),
-		"skip":         getSkipQuery(),
-		"take":         getTakeQuery(),
+		"id":           getDataSchemaID(),
+		"ids":          getQueryIDs(),
+		"name":         getQueryName(),
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
 	}
 }
 

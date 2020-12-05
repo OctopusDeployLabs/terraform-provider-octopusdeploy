@@ -75,10 +75,10 @@ func getChannelDataSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"ids":          getIDsQuery(),
-		"partial_name": getPartialNameQuery(),
-		"skip":         getSkipQuery(),
-		"take":         getTakeQuery(),
+		"ids":          getQueryIDs(),
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
 	}
 }
 

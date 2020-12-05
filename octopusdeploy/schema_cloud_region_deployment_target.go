@@ -36,7 +36,7 @@ func getCloudRegionDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["cloud_regions"] = &schema.Schema{
+	deploymentTargetDataSchema["cloud_region_deployment_target"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of cloud region deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -46,7 +46,7 @@ func getCloudRegionDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	delete(deploymentTargetDataSchema, "communication_styles")
 	delete(deploymentTargetDataSchema, "deployment_targets")
-	deploymentTargetDataSchema["id"] = getIDDataSchema()
+	deploymentTargetDataSchema["id"] = getDataSchemaID()
 
 	return deploymentTargetDataSchema
 }

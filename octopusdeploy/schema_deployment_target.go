@@ -74,8 +74,8 @@ func getDeploymentTargetDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"communication_styles": getCommunicationStylesQuery(),
-		"deployment_id":        getDeploymentIDQuery(),
+		"communication_styles": getQueryCommunicationStyles(),
+		"deployment_id":        getQueryDeploymentID(),
 		"deployment_targets": {
 			Computed:    true,
 			Description: "A list of deployment targets that match the filter(s).",
@@ -83,37 +83,19 @@ func getDeploymentTargetDataSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"environments": getEnvironmentsQuery(),
-		"health_statuses": {
-			Description: "A list of deployment target health statuses to match in the query and/or search",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"ids": getIDsQuery(),
-		"is_disabled": {
-			Description: "The state of deployment targets to match in the query and/or search",
-			Optional:    true,
-			Type:        schema.TypeBool,
-		},
-		"name":         getNameQuery(),
-		"partial_name": getPartialNameQuery(),
-		"roles":        getRolesQuery(),
-		"shell_names": {
-			Description: "A list of shell names to match in the query and/or search",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"skip":        getSkipQuery(),
-		"take":        getTakeQuery(),
-		"tenants":     getTenantsQuery(),
-		"tenant_tags": getTenantTagsQuery(),
-		"thumbprint": {
-			Description: "The thumbprint of the deployment target to match in the query and/or search",
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
+		"environments":    getQueryEnvironments(),
+		"health_statuses": getQueryHealthStatuses(),
+		"ids":             getQueryIDs(),
+		"is_disabled":     getQueryIsDisabled(),
+		"name":            getQueryName(),
+		"partial_name":    getQueryPartialName(),
+		"roles":           getQueryRoles(),
+		"shell_names":     getQueryShellNames(),
+		"skip":            getQuerySkip(),
+		"take":            getQueryTake(),
+		"tenants":         getQueryTenants(),
+		"tenant_tags":     getQueryTenantTags(),
+		"thumbprint":      getQueryThumbprint(),
 	}
 }
 

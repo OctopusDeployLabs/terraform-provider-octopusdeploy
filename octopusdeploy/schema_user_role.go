@@ -69,12 +69,12 @@ func getUserRoleDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id":           getIDDataSchema(),
-		"ids":          getIDsQuery(),
-		"partial_name": getPartialNameQuery(),
-		"skip":         getSkipQuery(),
-		"take":         getTakeQuery(),
-		"user_roles": {
+		"id":           getDataSchemaID(),
+		"ids":          getQueryIDs(),
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
+		"user_role": {
 			Computed:    true,
 			Description: "A list of user roles that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

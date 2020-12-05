@@ -136,21 +136,21 @@ func getProjectDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"cloned_from_project_id": getClonedFromProjectIDQuery(),
-		"id":                     getIDDataSchema(),
-		"ids":                    getIDsQuery(),
-		"is_clone":               getIsCloneQuery(),
-		"name":                   getNameQuery(),
-		"partial_name":           getPartialNameQuery(),
-		"projects": {
+		"cloned_from_project_id": getQueryClonedFromProjectID(),
+		"id":                     getDataSchemaID(),
+		"ids":                    getQueryIDs(),
+		"is_clone":               getQueryIsClone(),
+		"name":                   getQueryName(),
+		"partial_name":           getQueryPartialName(),
+		"project": {
 			Computed:    true,
 			Description: "A list of projects that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"skip": getSkipQuery(),
-		"take": getTakeQuery(),
+		"skip": getQuerySkip(),
+		"take": getQueryTake(),
 	}
 }
 

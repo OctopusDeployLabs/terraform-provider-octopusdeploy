@@ -77,14 +77,11 @@ func getFeedDataSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"feed_type": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"ids":          getIDsQuery(),
-		"partial_name": getPartialNameQuery(),
-		"skip":         getSkipQuery(),
-		"take":         getTakeQuery(),
+		"feed_type":    getQueryFeedType(),
+		"ids":          getQueryIDs(),
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
 	}
 }
 

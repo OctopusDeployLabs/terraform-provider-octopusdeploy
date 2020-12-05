@@ -46,7 +46,7 @@ func getPollingTentacleDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["polling_tentacles"] = &schema.Schema{
+	deploymentTargetDataSchema["polling_tentacle_deployment_target"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of polling tentacle deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -56,7 +56,7 @@ func getPollingTentacleDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	delete(deploymentTargetDataSchema, "communication_styles")
 	delete(deploymentTargetDataSchema, "deployment_targets")
-	deploymentTargetDataSchema["id"] = getIDDataSchema()
+	deploymentTargetDataSchema["id"] = getDataSchemaID()
 
 	return deploymentTargetDataSchema
 }

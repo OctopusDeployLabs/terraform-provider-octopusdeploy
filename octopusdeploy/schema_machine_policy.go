@@ -103,17 +103,17 @@ func getMachinePolicyDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"ids": getIDsQuery(),
-		"machine_policies": {
+		"ids": getQueryIDs(),
+		"machine_policy": {
 			Computed:    true,
 			Description: "A list of machine policies that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"partial_name": getPartialNameQuery(),
-		"skip":         getSkipQuery(),
-		"take":         getTakeQuery(),
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
 	}
 }
 

@@ -159,38 +159,23 @@ func getCertificateDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"archived": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"certificates": {
+		"archived": getQueryArchived(),
+		"certificate": {
 			Computed:    true,
 			Description: "A list of certificates that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"first_result": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id":  getIDDataSchema(),
-		"ids": getIDsQuery(),
-		"order_by": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"partial_name": getPartialNameQuery(),
-		"search": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"skip": getSkipQuery(),
-		"take": getTakeQuery(),
-		"tenant": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
+		"first_result": getQueryFirstResult(),
+		"id":           getDataSchemaID(),
+		"ids":          getQueryIDs(),
+		"order_by":     getQueryOrderBy(),
+		"partial_name": getQueryPartialName(),
+		"search":       getQuerySearch(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
+		"tenant":       getQueryTenant(),
 	}
 }
 

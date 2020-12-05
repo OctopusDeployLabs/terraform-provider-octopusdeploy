@@ -161,18 +161,18 @@ func getAccountResourceDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"account_type": getAccountTypeQuery(),
+		"account_type": getQueryAccountType(),
 		"accounts": {
 			Computed:    true,
 			Description: "A list of accounts that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Type:        schema.TypeList,
 		},
-		"id":           getIDDataSchema(),
-		"ids":          getIDsQuery(),
-		"partial_name": getPartialNameQuery(),
-		"skip":         getSkipQuery(),
-		"take":         getTakeQuery(),
+		"id":           getDataSchemaID(),
+		"ids":          getQueryIDs(),
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
 	}
 }
 

@@ -51,7 +51,7 @@ func getAzureWebAppDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["azure_web_apps"] = &schema.Schema{
+	deploymentTargetDataSchema["azure_web_app_deployment_target"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of Azure web app deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -61,7 +61,7 @@ func getAzureWebAppDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	delete(deploymentTargetDataSchema, "communication_styles")
 	delete(deploymentTargetDataSchema, "deployment_targets")
-	deploymentTargetDataSchema["id"] = getIDDataSchema()
+	deploymentTargetDataSchema["id"] = getDataSchemaID()
 
 	return deploymentTargetDataSchema
 }
