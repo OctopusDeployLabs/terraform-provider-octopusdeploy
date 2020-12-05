@@ -25,6 +25,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_library_variable_sets":                           dataSourceLibraryVariableSet(),
 			"octopusdeploy_lifecycles":                                      dataSourceLifecycles(),
 			"octopusdeploy_listening_tentacle_deployment_targets":           dataSourceListeningTentacleDeploymentTargets(),
+			"octopusdeploy_machine":                                         dataMachine(),
 			"octopusdeploy_machine_policies":                                dataSourceMachinePolicies(),
 			"octopusdeploy_offline_package_drop_deployment_targets":         dataSourceOfflinePackageDropDeploymentTargets(),
 			"octopusdeploy_polling_tentacle_deployment_targets":             dataSourcePollingTentacleDeploymentTargets(),
