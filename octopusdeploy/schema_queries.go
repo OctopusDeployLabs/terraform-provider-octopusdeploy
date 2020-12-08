@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func getQueryAccountType() *schema.Schema {
@@ -41,21 +42,23 @@ func getQueryClonedFromProjectID() *schema.Schema {
 func getQueryCommunicationStyles() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of communication styles. Valid communication styles are `AzureCloudService`, `AzureServiceFabricCluster`, `AzureWebApp`, `Ftp`, `Kubernetes`, `None`, `OfflineDrop`, `Ssh`, `TentacleActive`, or `TentaclePassive`.",
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Optional:    true,
-		Type:        schema.TypeList,
-		ValidateDiagFunc: validateValueFunc([]string{
-			"AzureCloudService",
-			"AzureServiceFabricCluster",
-			"AzureWebApp",
-			"Ftp",
-			"Kubernetes",
-			"None",
-			"OfflineDrop",
-			"Ssh",
-			"TentacleActive",
-			"TentaclePassive",
-		}),
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+				"AzureCloudService",
+				"AzureServiceFabricCluster",
+				"AzureWebApp",
+				"Ftp",
+				"Kubernetes",
+				"None",
+				"OfflineDrop",
+				"Ssh",
+				"TentacleActive",
+				"TentaclePassive",
+			}, false)),
+		},
+		Optional: true,
+		Type:     schema.TypeList,
 	}
 }
 
@@ -81,6 +84,16 @@ func getQueryFeedType() *schema.Schema {
 		Description: "A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, or `OctopusProject`.",
 		Optional:    true,
 		Type:        schema.TypeString,
+		ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+			"AwsElasticContainerRegistry",
+			"BuiltIn",
+			"Docker",
+			"GitHub",
+			"Helm",
+			"Maven",
+			"NuGet",
+			"OctopusProject",
+		}, false)),
 	}
 }
 
@@ -103,16 +116,18 @@ func getQueryFirstResult() *schema.Schema {
 func getQueryHealthStatuses() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.",
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Optional:    true,
-		Type:        schema.TypeList,
-		ValidateDiagFunc: validateValueFunc([]string{
-			"HasWarnings",
-			"Healthy",
-			"Unavailable",
-			"Unhealthy",
-			"Unknown",
-		}),
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+				"HasWarnings",
+				"Healthy",
+				"Unavailable",
+				"Unhealthy",
+				"Unknown",
+			}, false)),
+		},
+		Optional: true,
+		Type:     schema.TypeList,
 	}
 }
 
