@@ -11,9 +11,10 @@ import (
 
 func dataSourceAccounts() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides information about existing accounts.",
-		ReadContext: dataSourceAccountsRead,
-		Schema:      getAccountResourceDataSchema(),
+		DeprecationMessage: "Use an account-specific resource instead (i.e. octopusdeploy_aws_account, octopusdeploy_azure_service_principal, octopusdeploy_azure_subscription_account, octopusdeploy_ssh_key_account, octopusdeploy_token_account, octopusdeploy_username_password_account).",
+		Description:        "Provides information about existing accounts.",
+		ReadContext:        dataSourceAccountsRead,
+		Schema:             getAccountResourceDataSchema(),
 	}
 }
 
@@ -42,7 +43,7 @@ func dataSourceAccountsRead(ctx context.Context, d *schema.ResourceData, m inter
 		flattenedAccounts = append(flattenedAccounts, flattenAccountResource(accountResource))
 	}
 
-	d.Set("account", flattenedAccounts)
+	d.Set("accounts", flattenedAccounts)
 	d.SetId("Accounts " + time.Now().UTC().String())
 
 	return nil
