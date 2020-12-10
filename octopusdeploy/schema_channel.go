@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -52,7 +53,6 @@ func flattenChannel(channel *octopusdeploy.Channel) map[string]interface{} {
 
 	return map[string]interface{}{
 		"description":  channel.Description,
-		"id":           channel.GetID(),
 		"is_default":   channel.IsDefault,
 		"lifecycle_id": channel.LifecycleID,
 		"name":         channel.Name,
@@ -113,14 +113,21 @@ func getChannelSchema() map[string]*schema.Schema {
 	}
 }
 
-func setChannel(ctx context.Context, d *schema.ResourceData, channel *octopusdeploy.Channel) {
+func setChannel(ctx context.Context, d *schema.ResourceData, channel *octopusdeploy.Channel) error {
 	d.Set("description", channel.Description)
-	d.Set("id", channel.GetID())
 	d.Set("is_default", channel.IsDefault)
 	d.Set("lifecycle_id", channel.LifecycleID)
 	d.Set("name", channel.Name)
 	d.Set("project_id", channel.ProjectID)
-	d.Set("rules", flattenChannelRules(channel.Rules))
 	d.Set("space_id", channel.SpaceID)
-	d.Set("tenant_tags", channel.TenantTags)
+
+	if err := d.Set("rules", flattenChannelRules(channel.Rules)); err != nil {
+		return fmt.Errorf("error setting rules: %s", err)
+	}
+
+	if err := d.Set("tenant_tags", channel.TenantTags); err != nil {
+		return fmt.Errorf("error setting tenant_tags: %s", err)
+	}
+
+	return nil
 }

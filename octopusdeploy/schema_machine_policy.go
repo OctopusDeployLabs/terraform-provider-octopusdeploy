@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -188,11 +189,7 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 	}
 }
 
-func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy *octopusdeploy.MachinePolicy) {
-	if d == nil || machinePolicy == nil {
-		return
-	}
-
+func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy *octopusdeploy.MachinePolicy) error {
 	d.Set("connection_connect_timeout", machinePolicy.ConnectionConnectTimeout)
 	d.Set("connection_retry_count_limit", machinePolicy.ConnectionRetryCountLimit)
 	d.Set("connection_retry_sleep_interval", machinePolicy.ConnectionRetrySleepInterval)
@@ -200,12 +197,27 @@ func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy
 	d.Set("description", machinePolicy.Description)
 	d.Set("id", machinePolicy.GetID())
 	d.Set("is_default", machinePolicy.IsDefault)
-	d.Set("machine_cleanup_policy", flattenMachineCleanupPolicy(machinePolicy.MachineCleanupPolicy))
-	d.Set("machine_connectivity_policy", flattenMachineConnectivityPolicy(machinePolicy.MachineConnectivityPolicy))
-	d.Set("machine_health_check_policy", flattenMachineHealthCheckPolicy(machinePolicy.MachineHealthCheckPolicy))
-	d.Set("machine_update_policy", flattenMachineUpdatePolicy(machinePolicy.MachineUpdatePolicy))
+
+	if err := d.Set("machine_cleanup_policy", flattenMachineCleanupPolicy(machinePolicy.MachineCleanupPolicy)); err != nil {
+		return fmt.Errorf("error setting machine_cleanup_policy: %s", err)
+	}
+
+	if err := d.Set("machine_connectivity_policy", flattenMachineConnectivityPolicy(machinePolicy.MachineConnectivityPolicy)); err != nil {
+		return fmt.Errorf("error setting machine_connectivity_policy: %s", err)
+	}
+
+	if err := d.Set("machine_health_check_policy", flattenMachineHealthCheckPolicy(machinePolicy.MachineHealthCheckPolicy)); err != nil {
+		return fmt.Errorf("error setting machine_health_check_policy: %s", err)
+	}
+
+	if err := d.Set("machine_update_policy", flattenMachineUpdatePolicy(machinePolicy.MachineUpdatePolicy)); err != nil {
+		return fmt.Errorf("error setting machine_update_policy: %s", err)
+	}
+
 	d.Set("name", machinePolicy.Name)
 	d.Set("polling_request_maximum_message_processing_timeout", machinePolicy.PollingRequestMaximumMessageProcessingTimeout)
 	d.Set("polling_request_queue_timeout", machinePolicy.PollingRequestMaximumMessageProcessingTimeout)
 	d.Set("space_id", machinePolicy.SpaceID)
+
+	return nil
 }

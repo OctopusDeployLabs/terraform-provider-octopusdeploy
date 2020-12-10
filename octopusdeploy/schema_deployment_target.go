@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -163,8 +164,7 @@ func getDeploymentTargetSchema() map[string]*schema.Schema {
 	}
 }
 
-func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	d.Set("environments", deploymentTarget.EnvironmentIDs)
+func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	d.Set("has_latest_calamari", deploymentTarget.HasLatestCalamari)
 	d.Set("health_status", deploymentTarget.HealthStatus)
 	d.Set("is_disabled", deploymentTarget.IsDisabled)
@@ -172,17 +172,32 @@ func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deployment
 	d.Set("machine_policy_id", deploymentTarget.MachinePolicyID)
 	d.Set("name", deploymentTarget.Name)
 	d.Set("operating_system", deploymentTarget.OperatingSystem)
-	d.Set("roles", deploymentTarget.Roles)
 	d.Set("shell_name", deploymentTarget.ShellName)
 	d.Set("shell_version", deploymentTarget.ShellVersion)
 	d.Set("space_id", deploymentTarget.SpaceID)
 	d.Set("status", deploymentTarget.Status)
 	d.Set("status_summary", deploymentTarget.StatusSummary)
 	d.Set("tenanted_deployment_participation", deploymentTarget.TenantedDeploymentMode)
-	d.Set("tenants", deploymentTarget.TenantIDs)
-	d.Set("tenant_tags", deploymentTarget.TenantTags)
 	d.Set("thumbprint", deploymentTarget.Thumbprint)
 	d.Set("uri", deploymentTarget.URI)
 
+	if err := d.Set("environments", deploymentTarget.EnvironmentIDs); err != nil {
+		return fmt.Errorf("error setting environments: %s", err)
+	}
+
+	if err := d.Set("roles", deploymentTarget.Roles); err != nil {
+		return fmt.Errorf("error setting roles: %s", err)
+	}
+
+	if err := d.Set("tenants", deploymentTarget.TenantIDs); err != nil {
+		return fmt.Errorf("error setting tenants: %s", err)
+	}
+
+	if err := d.Set("tenant_tags", deploymentTarget.TenantTags); err != nil {
+		return fmt.Errorf("error setting tenant_tags: %s", err)
+	}
+
 	d.SetId(deploymentTarget.GetID())
+
+	return nil
 }

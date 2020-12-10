@@ -87,7 +87,7 @@ func getEnvironmentSchema() map[string]*schema.Schema {
 	}
 }
 
-func setEnvironment(ctx context.Context, d *schema.ResourceData, environment *octopusdeploy.Environment) {
+func setEnvironment(ctx context.Context, d *schema.ResourceData, environment *octopusdeploy.Environment) error {
 	d.Set("allow_dynamic_infrastructure", environment.AllowDynamicInfrastructure)
 	d.Set("description", environment.Description)
 	d.Set("name", environment.Name)
@@ -95,4 +95,6 @@ func setEnvironment(ctx context.Context, d *schema.ResourceData, environment *oc
 	d.Set("use_guided_failure", environment.UseGuidedFailure)
 
 	d.SetId(environment.GetID())
+
+	return nil
 }

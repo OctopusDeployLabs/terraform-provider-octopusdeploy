@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -86,6 +87,7 @@ func getUserSchema() map[string]*schema.Schema {
 		},
 		"display_name":  getDisplayNameSchema(true),
 		"email_address": getEmailAddressSchema(false),
+		"id":            getIDSchema(),
 		"identity": {
 			Optional: true,
 			Elem:     &schema.Resource{Schema: getIdentitySchema()},
@@ -108,16 +110,22 @@ func getUserSchema() map[string]*schema.Schema {
 	}
 }
 
-func setUser(ctx context.Context, d *schema.ResourceData, user *octopusdeploy.User) {
+func setUser(ctx context.Context, d *schema.ResourceData, user *octopusdeploy.User) error {
 	d.Set("can_password_be_edited", user.CanPasswordBeEdited)
 	d.Set("display_name", user.DisplayName)
 	d.Set("email_address", user.EmailAddress)
 	d.Set("id", user.GetID())
-	d.Set("identity", flattenIdentities(user.Identities))
+
+	if err := d.Set("identity", flattenIdentities(user.Identities)); err != nil {
+		return fmt.Errorf("error setting identity: %s", err)
+	}
+
 	d.Set("is_active", user.IsActive)
 	d.Set("is_requestor", user.IsRequestor)
 	d.Set("is_service", user.IsService)
 	d.Set("username", user.Username)
 
 	d.SetId(user.GetID())
+
+	return nil
 }

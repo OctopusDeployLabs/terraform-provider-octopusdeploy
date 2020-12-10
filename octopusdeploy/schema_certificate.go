@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -203,9 +204,10 @@ func getCertificateSchema() map[string]*schema.Schema {
 		},
 		"id": getIDSchema(),
 		"is_expired": {
-			Computed: true,
-			Optional: true,
-			Type:     schema.TypeBool,
+			Computed:    true,
+			Description: "Indicates if the certificate has expired.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"issuer_common_name": {
 			Computed: true,
@@ -296,14 +298,9 @@ func getCertificateSchema() map[string]*schema.Schema {
 	}
 }
 
-func setCertificate(ctx context.Context, d *schema.ResourceData, certificate *octopusdeploy.CertificateResource) {
-	// NOTE: certificate fields like certificate_data and password are not
-	// present here because they are sensitive values are can only be created
-	// or updated; never read
-
+func setCertificate(ctx context.Context, d *schema.ResourceData, certificate *octopusdeploy.CertificateResource) error {
 	d.Set("archived", certificate.Archived)
 	d.Set("certificate_data_format", certificate.CertificateDataFormat)
-	d.Set("environments", certificate.EnvironmentIDs)
 	d.Set("has_private_key", certificate.HasPrivateKey)
 	d.Set("is_expired", certificate.IsExpired)
 	d.Set("issuer_common_name", certificate.IssuerCommonName)
@@ -316,16 +313,29 @@ func setCertificate(ctx context.Context, d *schema.ResourceData, certificate *oc
 	d.Set("replaced_by", certificate.ReplacedBy)
 	d.Set("serial_number", certificate.SerialNumber)
 	d.Set("signature_algorithm_name", certificate.SignatureAlgorithmName)
-	d.Set("subject_alternative_names", certificate.SubjectAlternativeNames)
 	d.Set("subject_common_name", certificate.SubjectCommonName)
 	d.Set("subject_distinguished_name", certificate.SubjectDistinguishedName)
 	d.Set("subject_organization", certificate.SubjectOrganization)
 	d.Set("self_signed", certificate.SelfSigned)
 	d.Set("tenanted_deployment_participation", certificate.TenantedDeploymentMode)
-	d.Set("tenants", certificate.TenantIDs)
-	d.Set("tenant_tags", certificate.TenantTags)
 	d.Set("thumbprint", certificate.Thumbprint)
 	d.Set("version", certificate.Version)
 
-	d.SetId(certificate.GetID())
+	if err := d.Set("environments", certificate.EnvironmentIDs); err != nil {
+		return fmt.Errorf("error setting environments: %s", err)
+	}
+
+	if err := d.Set("subject_alternative_names", certificate.SubjectAlternativeNames); err != nil {
+		return fmt.Errorf("error setting subject_alternative_names: %s", err)
+	}
+
+	if err := d.Set("tenants", certificate.TenantIDs); err != nil {
+		return fmt.Errorf("error setting tenants: %s", err)
+	}
+
+	if err := d.Set("tenant_tags", certificate.TenantTags); err != nil {
+		return fmt.Errorf("error setting tenant_tags: %s", err)
+	}
+
+	return nil
 }

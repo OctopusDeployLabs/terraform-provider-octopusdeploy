@@ -70,7 +70,7 @@ func getNuGetFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setNuGetFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.NuGetFeed) {
+func setNuGetFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.NuGetFeed) error {
 	d.Set("download_attempts", feed.DownloadAttempts)
 	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
 	d.Set("feed_uri", feed.FeedURI)
@@ -79,4 +79,6 @@ func setNuGetFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdepl
 	d.Set("username", feed.Username)
 
 	d.SetId(feed.GetID())
+
+	return nil
 }

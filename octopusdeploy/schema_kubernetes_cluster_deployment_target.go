@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -96,7 +97,7 @@ func getKubernetesClusterDeploymentTargetDataSchema() map[string]*schema.Schema 
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["kubernetes_cluster_deployment_target"] = &schema.Schema{
+	deploymentTargetDataSchema["kubernetes_cluster_deployment_targets"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of Kubernetes cluster deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -209,18 +210,18 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	return kubernetesClusterDeploymentTargetSchema
 }
 
-func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	if deploymentTarget == nil {
-		return
-	}
-
+func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
-		return
+		return err
 	}
 
 	d.Set("cluster_certificate", endpointResource.ClusterCertificate)
-	d.Set("container", flattenDeploymentActionContainer(endpointResource.Container))
+
+	if err := d.Set("container", flattenDeploymentActionContainer(endpointResource.Container)); err != nil {
+		return fmt.Errorf("error setting container: %s", err)
+	}
+
 	d.Set("default_worker_pool_id", endpointResource.DefaultWorkerPoolID)
 	d.Set("namespace", endpointResource.Namespace)
 	d.Set("proxy_id", endpointResource.ProxyID)
@@ -233,16 +234,26 @@ func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.Resourc
 
 	switch endpointResource.Authentication.GetAuthenticationType() {
 	case "KubernetesAws":
-		d.Set("aws_account_authentication", flattenKubernetesAwsAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAwsAuthentication)))
+		if err := d.Set("aws_account_authentication", flattenKubernetesAwsAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAwsAuthentication))); err != nil {
+			return fmt.Errorf("error setting aws_account_authentication: %s", err)
+		}
 	case "KubernetesAzure":
-		d.Set("azure_service_principal_authentication", flattenKubernetesAzureAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAzureAuthentication)))
+		if err := d.Set("azure_service_principal_authentication", flattenKubernetesAzureAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAzureAuthentication))); err != nil {
+			return fmt.Errorf("error setting azure_service_principal_authentication: %s", err)
+		}
 	case "KubernetesCertificate":
-		d.Set("certificate_authentication", flattenKubernetesCertificateAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesCertificateAuthentication)))
+		if err := d.Set("certificate_authentication", flattenKubernetesCertificateAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesCertificateAuthentication))); err != nil {
+			return fmt.Errorf("error setting certificate_authentication: %s", err)
+		}
 	case "KubernetesStandard":
-		d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication)))
+		if err := d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))); err != nil {
+			return fmt.Errorf("error setting authentication: %s", err)
+		}
 	case "None":
-		d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication)))
+		if err := d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))); err != nil {
+			return fmt.Errorf("error setting authentication: %s", err)
+		}
 	}
 
-	setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(ctx, d, deploymentTarget)
 }

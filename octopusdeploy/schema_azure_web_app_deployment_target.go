@@ -51,7 +51,7 @@ func getAzureWebAppDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["azure_web_app_deployment_target"] = &schema.Schema{
+	deploymentTargetDataSchema["azure_web_app_deployment_targets"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of Azure web app deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -92,14 +92,10 @@ func getAzureWebAppDeploymentTargetSchema() map[string]*schema.Schema {
 	return azureWebAppDeploymentTargetSchema
 }
 
-func setAzureWebAppDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	if deploymentTarget == nil {
-		return
-	}
-
+func setAzureWebAppDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
-		return
+		return err
 	}
 
 	d.Set("account_id", endpointResource.AccountID)
@@ -107,5 +103,5 @@ func setAzureWebAppDeploymentTarget(ctx context.Context, d *schema.ResourceData,
 	d.Set("web_app_name", endpointResource.WebAppName)
 	d.Set("web_app_slot_name", endpointResource.WebAppSlotName)
 
-	setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(ctx, d, deploymentTarget)
 }

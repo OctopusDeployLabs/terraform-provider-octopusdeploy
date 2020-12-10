@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	uuid "github.com/google/uuid"
@@ -104,12 +105,11 @@ func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
 	}
 }
 
-func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureSubscriptionAccount) {
+func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureSubscriptionAccount) error {
 	d.Set("azure_environment", account.AzureEnvironment)
 	d.Set("certificate", account.CertificateBytes)
 	d.Set("certificate_thumbprint", account.CertificateThumbprint)
 	d.Set("description", account.GetDescription())
-	d.Set("environments", account.GetEnvironmentIDs())
 	d.Set("id", account.GetID())
 	d.Set("management_endpoint", account.ManagementEndpoint)
 	d.Set("name", account.GetName())
@@ -117,8 +117,20 @@ func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, ac
 	d.Set("storage_endpoint_suffix", account.StorageEndpointSuffix)
 	d.Set("subscription_id", account.SubscriptionID.String())
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
-	d.Set("tenants", account.GetTenantIDs())
-	d.Set("tenant_tags", account.GetTenantTags())
+
+	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {
+		return fmt.Errorf("error setting environments: %s", err)
+	}
+
+	if err := d.Set("tenants", account.GetTenantIDs()); err != nil {
+		return fmt.Errorf("error setting tenants: %s", err)
+	}
+
+	if err := d.Set("tenant_tags", account.TenantTags); err != nil {
+		return fmt.Errorf("error setting tenant_tags: %s", err)
+	}
 
 	d.SetId(account.GetID())
+
+	return nil
 }

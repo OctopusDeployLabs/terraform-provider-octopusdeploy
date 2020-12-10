@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -121,16 +122,34 @@ func getUserRoleSchema() map[string]*schema.Schema {
 	}
 }
 
-func setUserRole(ctx context.Context, d *schema.ResourceData, userRole *octopusdeploy.UserRole) {
+func setUserRole(ctx context.Context, d *schema.ResourceData, userRole *octopusdeploy.UserRole) error {
 	d.Set("can_be_deleted", userRole.CanBeDeleted)
 	d.Set("description", userRole.Description)
 	d.Set("id", userRole.GetID())
-	d.Set("granted_space_permissions", userRole.GrantedSpacePermissions)
-	d.Set("granted_system_permissions", userRole.GrantedSystemPermissions)
+
+	if err := d.Set("granted_space_permissions", userRole.GrantedSpacePermissions); err != nil {
+		return fmt.Errorf("error setting granted_space_permissions: %s", err)
+	}
+
+	if err := d.Set("granted_system_permissions", userRole.GrantedSystemPermissions); err != nil {
+		return fmt.Errorf("error setting granted_system_permissions: %s", err)
+	}
+
 	d.Set("name", userRole.Name)
-	d.Set("space_permission_descriptions", userRole.SpacePermissionDescriptions)
-	d.Set("supported_restrictions", userRole.SupportedRestrictions)
-	d.Set("system_permission_descriptions", userRole.SystemPermissionDescriptions)
+
+	if err := d.Set("space_permission_descriptions", userRole.SpacePermissionDescriptions); err != nil {
+		return fmt.Errorf("error setting space_permission_descriptions: %s", err)
+	}
+
+	if err := d.Set("supported_restrictions", userRole.SupportedRestrictions); err != nil {
+		return fmt.Errorf("error setting supported_restrictions: %s", err)
+	}
+
+	if err := d.Set("system_permission_descriptions", userRole.SystemPermissionDescriptions); err != nil {
+		return fmt.Errorf("error setting system_permission_descriptions: %s", err)
+	}
 
 	d.SetId(userRole.GetID())
+
+	return nil
 }

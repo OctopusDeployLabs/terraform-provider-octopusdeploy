@@ -80,7 +80,7 @@ func getAzureServiceFabricClusterDeploymentTargetDataSchema() map[string]*schema
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["azure_service_fabric_cluster_deployment_target"] = &schema.Schema{
+	deploymentTargetDataSchema["azure_service_fabric_cluster_deployment_targets"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of Azure service fabric cluster deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -160,14 +160,10 @@ func getAzureServiceFabricClusterDeploymentTargetSchema() map[string]*schema.Sch
 	return azureServiceFabricClusterDeploymentTargetSchema
 }
 
-func setAzureServiceFabricClusterDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	if deploymentTarget == nil {
-		return
-	}
-
+func setAzureServiceFabricClusterDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
-		return
+		return err
 	}
 
 	d.Set("aad_client_credential_secret", endpointResource.AadClientCredentialSecret)
@@ -180,5 +176,5 @@ func setAzureServiceFabricClusterDeploymentTarget(ctx context.Context, d *schema
 	d.Set("security_mode", endpointResource.SecurityMode)
 	d.Set("server_certificate_thumbprint", endpointResource.ServerCertificateThumbprint)
 
-	setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(ctx, d, deploymentTarget)
 }

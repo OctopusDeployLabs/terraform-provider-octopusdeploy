@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -105,12 +106,21 @@ func getSpaceSchema() map[string]*schema.Schema {
 	}
 }
 
-func setSpace(ctx context.Context, d *schema.ResourceData, space *octopusdeploy.Space) {
+func setSpace(ctx context.Context, d *schema.ResourceData, space *octopusdeploy.Space) error {
 	d.Set("description", space.Description)
 	d.Set("id", space.GetID())
 	d.Set("is_default", space.IsDefault)
 	d.Set("name", space.Name)
-	d.Set("space_managers_team_members", space.SpaceManagersTeamMembers)
-	d.Set("space_managers_teams", space.SpaceManagersTeams)
+
+	if err := d.Set("space_managers_team_members", space.SpaceManagersTeamMembers); err != nil {
+		return fmt.Errorf("error setting space_managers_team_members: %s", err)
+	}
+
+	if err := d.Set("space_managers_teams", space.SpaceManagersTeams); err != nil {
+		return fmt.Errorf("error setting space_managers_teams: %s", err)
+	}
+
 	d.Set("is_task_queue_stopped", space.TaskQueueStopped)
+
+	return nil
 }

@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -55,13 +56,25 @@ func getTokenAccountSchema() map[string]*schema.Schema {
 	}
 }
 
-func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.TokenAccount) {
+func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.TokenAccount) error {
 	d.Set("description", account.GetDescription())
-	d.Set("environments", account.GetEnvironmentIDs())
+
+	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {
+		return fmt.Errorf("error setting environments: %s", err)
+	}
+
 	d.Set("id", account.GetID())
 	d.Set("name", account.GetName())
 	d.Set("space_id", account.GetSpaceID())
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
-	d.Set("tenants", account.GetTenantIDs())
-	d.Set("tenant_tags", account.GetTenantTags())
+
+	if err := d.Set("tenants", account.GetTenantIDs()); err != nil {
+		return fmt.Errorf("error setting tenants: %s", err)
+	}
+
+	if err := d.Set("tenant_tags", account.TenantTags); err != nil {
+		return fmt.Errorf("error setting tenant_tags: %s", err)
+	}
+
+	return nil
 }

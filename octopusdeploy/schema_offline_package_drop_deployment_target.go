@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -46,7 +47,7 @@ func getOfflinePackageDropDeploymentTargetDataSchema() map[string]*schema.Schema
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["offline_package_drop_deployment_target"] = &schema.Schema{
+	deploymentTargetDataSchema["offline_package_drop_deployment_targets"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of offline package drop deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -85,19 +86,19 @@ func getOfflinePackageDropDeploymentTargetSchema() map[string]*schema.Schema {
 	return offlinePackageDropDeploymentTargetSchema
 }
 
-func setOfflinePackageDropDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	if deploymentTarget == nil {
-		return
-	}
-
+func setOfflinePackageDropDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
-		return
+		return err
 	}
 
 	d.Set("applications_directory", endpointResource.ApplicationsDirectory)
-	d.Set("destination", flattenOfflinePackageDropDestination(endpointResource.Destination))
+
+	if err := d.Set("destination", flattenOfflinePackageDropDestination(endpointResource.Destination)); err != nil {
+		return fmt.Errorf("error setting destination: %s", err)
+	}
+
 	d.Set("working_directory", endpointResource.WorkingDirectory)
 
-	setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(ctx, d, deploymentTarget)
 }

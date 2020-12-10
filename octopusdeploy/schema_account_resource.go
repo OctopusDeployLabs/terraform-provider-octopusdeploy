@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	uuid "github.com/google/uuid"
@@ -243,36 +244,51 @@ func getAccountResourceSchema() map[string]*schema.Schema {
 	}
 }
 
-func setAccountResource(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AccountResource) {
+func setAccountResource(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AccountResource) error {
 	d.Set("access_key", account.AccessKey)
 	d.Set("account_type", account.GetAccountType())
 	d.Set("active_directory_endpoint_base_uri", account.AuthenticationEndpoint)
 	d.Set("azure_environment", account.AzureEnvironment)
 	d.Set("certificate_thumbprint", account.CertificateThumbprint)
+
+	if account.ApplicationID != nil {
+		d.Set("client_id", account.ApplicationID.String())
+	}
+
 	d.Set("description", account.GetDescription())
-	d.Set("environments", account.GetEnvironmentIDs())
+
+	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {
+		return fmt.Errorf("error setting environments: %s", err)
+	}
+
 	d.Set("name", account.GetName())
 	d.Set("resource_manager_endpoint", account.ResourceManagerEndpoint)
 	d.Set("secret_key", account.SecretKey)
 	d.Set("service_management_endpoint_base_uri", account.ManagementEndpoint)
 	d.Set("service_management_endpoint_suffix", account.StorageEndpointSuffix)
 	d.Set("space_id", account.GetSpaceID())
-	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
-	d.Set("tenants", account.GetTenantIDs())
-	d.Set("tenant_tags", account.GetTenantTags())
-	d.Set("username", account.Username)
-
-	if account.ApplicationID != nil {
-		d.Set("client_id", account.ApplicationID.String())
-	}
 
 	if account.SubscriptionID != nil {
 		d.Set("subscription_id", account.SubscriptionID.String())
 	}
 
+	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
+
 	if account.TenantID != nil {
 		d.Set("tenant_id", account.TenantID.String())
 	}
 
+	if err := d.Set("tenants", account.GetTenantIDs()); err != nil {
+		return fmt.Errorf("error setting tenants: %s", err)
+	}
+
+	if err := d.Set("tenant_tags", account.TenantTags); err != nil {
+		return fmt.Errorf("error setting tenant_tags: %s", err)
+	}
+
+	d.Set("username", account.Username)
+
 	d.SetId(account.GetID())
+
+	return nil
 }

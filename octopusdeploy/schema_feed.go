@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -160,7 +161,7 @@ func getFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.FeedResource) {
+func setFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.FeedResource) error {
 	d.Set("access_key", feed.AccessKey)
 	d.Set("api_version", feed.APIVersion)
 	d.Set("delete_unreleased_packages_after_days", feed.DeleteUnreleasedPackagesAfterDays)
@@ -170,11 +171,16 @@ func setFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.Fe
 	d.Set("feed_uri", feed.FeedURI)
 	d.Set("is_enhanced_mode", feed.EnhancedMode)
 	d.Set("name", feed.Name)
-	d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions)
 	d.Set("region", feed.Region)
 	d.Set("registry_path", feed.RegistryPath)
 	d.Set("space_id", feed.SpaceID)
 	d.Set("username", feed.Username)
 
+	if err := d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions); err != nil {
+		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)
+	}
+
 	d.SetId(feed.GetID())
+
+	return nil
 }

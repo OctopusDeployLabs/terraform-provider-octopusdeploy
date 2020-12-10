@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -46,7 +47,7 @@ func getPollingTentacleDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["polling_tentacle_deployment_target"] = &schema.Schema{
+	deploymentTargetDataSchema["polling_tentacle_deployment_targets"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of polling tentacle deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -84,19 +85,19 @@ func getPollingTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 	return pollingTentacleDeploymentTargetSchema
 }
 
-func setPollingTentacleDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	if deploymentTarget == nil {
-		return
-	}
-
+func setPollingTentacleDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
-		return
+		return err
 	}
 
 	d.Set("certificate_signature_algorithm", endpointResource.CertificateSignatureAlgorithm)
-	d.Set("tentacle_version_details", flattenTentacleVersionDetails(endpointResource.TentacleVersionDetails))
+
+	if err := d.Set("tentacle_version_details", flattenTentacleVersionDetails(endpointResource.TentacleVersionDetails)); err != nil {
+		return fmt.Errorf("error setting tentacle_version_details: %s", err)
+	}
+
 	d.Set("tentacle_url", endpointResource.URI.String())
 
-	setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(ctx, d, deploymentTarget)
 }

@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -282,32 +283,64 @@ func getProjectSchema() map[string]*schema.Schema {
 	}
 }
 
-func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdeploy.Project) {
+func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdeploy.Project) error {
 	d.Set("auto_create_release", project.AutoCreateRelease)
-	d.Set("auto_deploy_release_overrides", project.AutoDeployReleaseOverrides)
+
+	if err := d.Set("auto_deploy_release_overrides", project.AutoDeployReleaseOverrides); err != nil {
+		return fmt.Errorf("error setting auto_deploy_release_overrides: %s", err)
+	}
+
 	d.Set("cloned_from_project_id", project.ClonedFromProjectID)
-	d.Set("connectivity_policy", flattenConnectivityPolicy(project.ConnectivityPolicy))
+
+	if err := d.Set("connectivity_policy", flattenConnectivityPolicy(project.ConnectivityPolicy)); err != nil {
+		return fmt.Errorf("error setting connectivity_policy: %s", err)
+	}
+
 	d.Set("default_guided_failure_mode", project.DefaultGuidedFailureMode)
 	d.Set("default_to_skip_if_already_installed", project.DefaultToSkipIfAlreadyInstalled)
 	d.Set("deployment_changes_template", project.DeploymentChangesTemplate)
 	d.Set("deployment_process_id", project.DeploymentProcessID)
 	d.Set("description", project.Description)
-	d.Set("extension_settings", project.ExtensionSettings)
+
+	if err := d.Set("extension_settings", project.ExtensionSettings); err != nil {
+		return fmt.Errorf("error setting extension_settings: %s", err)
+	}
+
 	d.Set("id", project.GetID())
-	d.Set("included_library_variable_sets", project.IncludedLibraryVariableSets)
+
+	if err := d.Set("included_library_variable_sets", project.IncludedLibraryVariableSets); err != nil {
+		return fmt.Errorf("error setting included_library_variable_sets: %s", err)
+	}
+
 	d.Set("is_disabled", project.IsDisabled)
 	d.Set("is_discrete_channel_release", project.IsDiscreteChannelRelease)
 	d.Set("is_version_controlled", project.IsVersionControlled)
 	d.Set("lifecycle_id", project.LifecycleID)
 	d.Set("name", project.Name)
 	d.Set("project_group_id", project.ProjectGroupID)
-	d.Set("release_creation_strategy", flattenReleaseCreationStrategy(project.ReleaseCreationStrategy))
+
+	if err := d.Set("release_creation_strategy", flattenReleaseCreationStrategy(project.ReleaseCreationStrategy)); err != nil {
+		return fmt.Errorf("error setting release_creation_strategy: %s", err)
+	}
+
 	d.Set("release_notes_template", project.ReleaseNotesTemplate)
 	d.Set("slug", project.Slug)
 	d.Set("space_id", project.SpaceID)
-	d.Set("templates", project.Templates)
+
+	if err := d.Set("templates", project.Templates); err != nil {
+		return fmt.Errorf("error setting templates: %s", err)
+	}
+
 	d.Set("tenanted_deployment_participation", project.TenantedDeploymentMode)
 	d.Set("variable_set_id", project.VariableSetID)
-	d.Set("version_control_settings", flattenVersionControlSettings(project.VersionControlSettings))
-	d.Set("versioning_strategy", flattenVersioningStrategy(project.VersioningStrategy))
+
+	if err := d.Set("version_control_settings", flattenVersionControlSettings(project.VersionControlSettings)); err != nil {
+		return fmt.Errorf("error setting version_control_settings: %s", err)
+	}
+
+	if err := d.Set("versioning_strategy", flattenVersioningStrategy(project.VersioningStrategy)); err != nil {
+		return fmt.Errorf("error setting versioning_strategy: %s", err)
+	}
+
+	return nil
 }

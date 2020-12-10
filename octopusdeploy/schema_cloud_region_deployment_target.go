@@ -36,7 +36,7 @@ func getCloudRegionDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["cloud_region_deployment_target"] = &schema.Schema{
+	deploymentTargetDataSchema["cloud_region_deployment_targets"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of cloud region deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -62,17 +62,13 @@ func getCloudRegionDeploymentTargetSchema() map[string]*schema.Schema {
 	return cloudRegionDeploymentTargetSchema
 }
 
-func setCloudRegionDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	if deploymentTarget == nil {
-		return
-	}
-
+func setCloudRegionDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
-		return
+		return err
 	}
 
 	d.Set("default_worker_pool_id", endpointResource.DefaultWorkerPoolID)
 
-	setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(ctx, d, deploymentTarget)
 }

@@ -53,7 +53,7 @@ func getSSHConnectionDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
 
-	deploymentTargetDataSchema["ssh_connection_deployment_target"] = &schema.Schema{
+	deploymentTargetDataSchema["ssh_connection_deployment_targets"] = &schema.Schema{
 		Computed:    true,
 		Description: "A list of SSH connection deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
@@ -105,14 +105,10 @@ func getSSHConnectionDeploymentTargetSchema() map[string]*schema.Schema {
 	return sshConnectionDeploymentTargetSchema
 }
 
-func setSSHConnectionDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) {
-	if deploymentTarget == nil {
-		return
-	}
-
+func setSSHConnectionDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
-		return
+		return err
 	}
 
 	d.Set("account_id", endpointResource.AccountID)
@@ -122,5 +118,5 @@ func setSSHConnectionDeploymentTarget(ctx context.Context, d *schema.ResourceDat
 	d.Set("port", endpointResource.Port)
 	d.Set("proxy_id", endpointResource.ProxyID)
 
-	setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(ctx, d, deploymentTarget)
 }

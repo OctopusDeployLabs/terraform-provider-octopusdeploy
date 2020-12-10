@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -75,11 +76,17 @@ func getProjectGroupSchema() map[string]*schema.Schema {
 	}
 }
 
-func setProjectGroup(ctx context.Context, d *schema.ResourceData, projectGroup *octopusdeploy.ProjectGroup) {
+func setProjectGroup(ctx context.Context, d *schema.ResourceData, projectGroup *octopusdeploy.ProjectGroup) error {
 	d.Set("description", projectGroup.Description)
-	d.Set("environments", projectGroup.EnvironmentIDs)
+
+	if err := d.Set("environments", projectGroup.EnvironmentIDs); err != nil {
+		return fmt.Errorf("error setting environments: %s", err)
+	}
+
 	d.Set("name", projectGroup.Name)
 	d.Set("retention_policy_id", projectGroup.RetentionPolicyID)
 
 	d.SetId(projectGroup.GetID())
+
+	return nil
 }
