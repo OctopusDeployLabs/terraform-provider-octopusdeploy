@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -23,51 +24,75 @@ func resourceChannel() *schema.Resource {
 func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	channel := expandChannel(d)
 
+	log.Printf("[INFO] creating channel: %#v", channel)
+
 	client := m.(*octopusdeploy.Client)
 	createdChannel, err := client.Channels.Add(channel)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
+	if err := setChannel(ctx, d, createdChannel); err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId(createdChannel.GetID())
-	return resourceChannelRead(ctx, d, m)
+
+	log.Printf("[INFO] channel created (%s)", d.Id())
+	return nil
 }
 
 func resourceChannelDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] deleting channel (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
-	err := client.Channels.DeleteByID(d.Id())
-	if err != nil {
+	if err := client.Channels.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId("")
+
+	log.Printf("[INFO] channel deleted")
 	return nil
 }
 
 func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading channel (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
 	channel, err := client.Channels.GetByID(d.Id())
 	if err != nil {
 		apiError := err.(*octopusdeploy.APIError)
 		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] channel (%s) not found; deleting from state", d.Id())
 			d.SetId("")
 			return nil
 		}
 		return diag.FromErr(err)
 	}
 
-	setChannel(ctx, d, channel)
+	if err := setChannel(ctx, d, channel); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] channel read (%s)", d.Id())
 	return nil
 }
 
 func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	channel := expandChannel(d)
+	log.Printf("[INFO] updating channel (%s)", d.Id())
 
+	channel := expandChannel(d)
 	client := m.(*octopusdeploy.Client)
-	_, err := client.Channels.Update(channel)
+	updatedChannel, err := client.Channels.Update(channel)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	return resourceChannelRead(ctx, d, m)
+	if err := setChannel(ctx, d, updatedChannel); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] channel updated (%s)", d.Id())
+	return nil
 }
