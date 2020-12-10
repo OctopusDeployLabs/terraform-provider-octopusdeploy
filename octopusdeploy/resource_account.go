@@ -12,7 +12,7 @@ func resourceAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext:      resourceAccountCreate,
 		DeleteContext:      resourceAccountDelete,
-		DeprecationMessage: "use account-specific resource instead (i.e. octopusdeploy_aws_account, octopusdeploy_azure_service_principal, octopusdeploy_azure_subscription_account, octopusdeploy_ssh_key_account, octopusdeploy_token_account, octopusdeploy_username_password_account)",
+		DeprecationMessage: "Use an account-specific resource instead (i.e. octopusdeploy_aws_account, octopusdeploy_azure_service_principal, octopusdeploy_azure_subscription_account, octopusdeploy_ssh_key_account, octopusdeploy_token_account, octopusdeploy_username_password_account).",
 		Description:        "This resource manages accounts in Octopus Deploy.",
 		Importer:           getImporter(),
 		ReadContext:        resourceAccountRead,
