@@ -18,7 +18,7 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployChannelDestroy,
+		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccChannelBasic(name, description),
@@ -26,6 +26,7 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", name),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "description", description),
+					resource.TestCheckResourceAttrSet(terraformNamePrefix, "project_id"),
 				),
 			},
 		},
@@ -38,7 +39,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployChannelDestroy,
+		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			// create baseline channel
 			{
@@ -71,7 +72,7 @@ func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployChannelDestroy,
+		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{ // create channel with one rule
 				Config: testAccChannelWithOneRule(channelName, channelDescription, versionRange, actionName),
@@ -100,7 +101,7 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployChannelDestroy,
+		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{ // create baseline channel
 				Config: testAccChannelWithOneRule(channelName, channelDescription, versionRange, actionName),
@@ -137,7 +138,7 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployChannelDestroy,
+		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{ // create channel with two rules
 				Config: testAccChannelWithtwoRules(channelName, channelDescription, versionRange1, actionName1, versionRange2, actionName2),
@@ -313,7 +314,7 @@ func existsHelperChannel(s *terraform.State, client *octopusdeploy.Client) error
 	return nil
 }
 
-func testAccCheckOctopusDeployChannelDestroy(s *terraform.State) error {
+func testAccChannelCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 
 	if err := destroyHelperChannel(s, client); err != nil {
