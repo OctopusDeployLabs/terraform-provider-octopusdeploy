@@ -47,7 +47,7 @@ func dataSourceAzureServiceFabricClusterDeploymentTargetsRead(ctx context.Contex
 		flattenedAzureServiceFabricClusterDeploymentTargets = append(flattenedAzureServiceFabricClusterDeploymentTargets, flattenAzureServiceFabricClusterDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("azure_service_fabric_cluster_deployment_target", flattenedAzureServiceFabricClusterDeploymentTargets)
+	d.Set("azure_service_fabric_cluster_deployment_targets", flattenedAzureServiceFabricClusterDeploymentTargets)
 	d.SetId("AzureServiceFabricClusterDeploymentTargets " + time.Now().UTC().String())
 
 	return nil

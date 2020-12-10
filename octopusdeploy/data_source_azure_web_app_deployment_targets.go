@@ -47,7 +47,7 @@ func dataSourceAzureWebAppDeploymentTargetsRead(ctx context.Context, d *schema.R
 		flattenedAzureWebAppDeploymentTargets = append(flattenedAzureWebAppDeploymentTargets, flattenAzureWebAppDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("azure_web_app_deployment_target", flattenedAzureWebAppDeploymentTargets)
+	d.Set("azure_web_app_deployment_targets", flattenedAzureWebAppDeploymentTargets)
 	d.SetId("AzureWebAppDeploymentTargets " + time.Now().UTC().String())
 
 	return nil

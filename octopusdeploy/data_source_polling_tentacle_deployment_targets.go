@@ -47,7 +47,7 @@ func dataSourcePollingTentacleDeploymentTargetsRead(ctx context.Context, d *sche
 		flattenedPollingTentacleDeploymentTargets = append(flattenedPollingTentacleDeploymentTargets, flattenPollingTentacleDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("polling_tentacle_deployment_target", flattenedPollingTentacleDeploymentTargets)
+	d.Set("polling_tentacle_deployment_targets", flattenedPollingTentacleDeploymentTargets)
 	d.SetId("PollingTentacleDeploymentTargets " + time.Now().UTC().String())
 
 	return nil

@@ -47,7 +47,7 @@ func dataSourceAzureCloudServiceDeploymentTargetsRead(ctx context.Context, d *sc
 		flattenedAzureCloudServiceDeploymentTargets = append(flattenedAzureCloudServiceDeploymentTargets, flattenAzureCloudServiceDeploymentTarget(deploymentTarget))
 	}
 
-	d.Set("azure_cloud_service_deployment_target", flattenedAzureCloudServiceDeploymentTargets)
+	d.Set("azure_cloud_service_deployment_targets", flattenedAzureCloudServiceDeploymentTargets)
 	d.SetId("AzureCloudServiceDeploymentTargets " + time.Now().UTC().String())
 
 	return nil
