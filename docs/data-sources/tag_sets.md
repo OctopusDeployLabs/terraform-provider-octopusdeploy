@@ -30,7 +30,7 @@ Provides information about existing tag sets.
 
 Read-only:
 
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **name** (String, Read-only) The name of this resource.
 - **tags** (List of Object, Read-only) (see [below for nested schema](#nestedatt--tag_set--tags))
 

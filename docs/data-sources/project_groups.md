@@ -41,7 +41,7 @@ Read-only:
 
 - **description** (String, Read-only) The description of this resource.
 - **environments** (List of String, Read-only) A list of environment IDs associated with this resource.
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **name** (String, Read-only) The name of this resource.
 - **retention_policy_id** (String, Read-only)
 

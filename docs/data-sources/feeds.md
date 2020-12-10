@@ -38,7 +38,7 @@ Read-only:
 - **download_retry_backoff_seconds** (Number, Read-only)
 - **feed_type** (String, Read-only)
 - **feed_uri** (String, Read-only)
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **is_enhanced_mode** (Boolean, Read-only)
 - **name** (String, Read-only) The name of this resource.
 - **package_acquisition_location_options** (List of String, Read-only)
@@ -46,7 +46,7 @@ Read-only:
 - **region** (String, Read-only)
 - **registry_path** (String, Read-only)
 - **secret_key** (String, Read-only)
-- **space_id** (String, Read-only) The space identifier associated with this resource.
+- **space_id** (String, Read-only) The space ID associated with this resource.
 - **username** (String, Read-only) The username associated with this resource.
 
 

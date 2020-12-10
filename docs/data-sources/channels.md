@@ -40,13 +40,13 @@ data "octopusdeploy_channels" "example" {
 Read-only:
 
 - **description** (String, Read-only) The description of this resource.
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **is_default** (Boolean, Read-only) Indicates if this is the default channel for the associated project.
 - **lifecycle_id** (String, Read-only) The lifecycle ID associated with this channel.
 - **name** (String, Read-only) The name of this resource.
 - **project_id** (String, Read-only) The project ID associated with this channel.
 - **rules** (List of Object, Read-only) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channel--rules))
-- **space_id** (String, Read-only) The space identifier associated with this resource.
+- **space_id** (String, Read-only) The space ID associated with this resource.
 - **tenant_tags** (List of String, Read-only) A list of tenant tags associated with this resource.
 
 <a id="nestedatt--channel--rules"></a>

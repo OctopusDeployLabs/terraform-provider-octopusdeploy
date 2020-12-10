@@ -33,10 +33,10 @@ Provides information about existing SSH connection deployment targets.
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **ssh_connection_deployment_target** (Block List) A list of SSH connection deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--ssh_connection_deployment_target))
+- **ssh_connection_deployment_targets** (Block List) A list of SSH connection deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--ssh_connection_deployment_targets))
 
-<a id="nestedblock--ssh_connection_deployment_target"></a>
-### Nested Schema for `ssh_connection_deployment_target`
+<a id="nestedblock--ssh_connection_deployment_targets"></a>
+### Nested Schema for `ssh_connection_deployment_targets`
 
 Read-only:
 
@@ -47,7 +47,7 @@ Read-only:
 - **has_latest_calamari** (Boolean, Read-only)
 - **health_status** (String, Read-only) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **host** (String, Read-only)
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **is_disabled** (Boolean, Read-only)
 - **is_in_process** (Boolean, Read-only)
 - **machine_policy_id** (String, Read-only)
@@ -58,7 +58,7 @@ Read-only:
 - **roles** (List of String, Read-only)
 - **shell_name** (String, Read-only)
 - **shell_version** (String, Read-only)
-- **space_id** (String, Read-only) The space identifier associated with this resource.
+- **space_id** (String, Read-only) The space ID associated with this resource.
 - **status** (String, Read-only) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
 - **status_summary** (String, Read-only) A summary elaborating on the status of this resource.
 - **tenant_tags** (List of String, Read-only) A list of tenant tags associated with this resource.

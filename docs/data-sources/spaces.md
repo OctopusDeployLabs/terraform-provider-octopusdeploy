@@ -42,7 +42,7 @@ data "octopusdeploy_spaces" "spaces" {
 Read-only:
 
 - **description** (String, Read-only) The description of this resource.
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **is_default** (Boolean, Read-only) Specifies if this space is the default space in Octopus.
 - **is_task_queue_stopped** (Boolean, Read-only) Specifies the status of the task queue for this space.
 - **name** (String, Read-only) The name of this resource.

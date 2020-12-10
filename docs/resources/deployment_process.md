@@ -19,7 +19,7 @@ This resource manages deployment processes in Octopus Deploy.
 
 ### Optional
 
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **last_snapshot_id** (String, Optional)
 - **step** (Block List) (see [below for nested schema](#nestedblock--step))
 - **version** (Number, Optional)
@@ -40,7 +40,7 @@ Optional:
 - **deploy_kubernetes_secret_action** (Block List) (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action))
 - **deploy_package_action** (Block List) (see [below for nested schema](#nestedblock--step--deploy_package_action))
 - **deploy_windows_service_action** (Block List) (see [below for nested schema](#nestedblock--step--deploy_windows_service_action))
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **manual_intervention_action** (Block List) (see [below for nested schema](#nestedblock--step--manual_intervention_action))
 - **package_requirement** (String, Optional) Whether to run this step before or after package acquisition (if possible)
 - **run_kubectl_script_action** (Block List) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action))

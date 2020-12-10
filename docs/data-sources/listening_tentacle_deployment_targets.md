@@ -34,6 +34,7 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 
 ### Optional
 
+- **communication_styles** (List of String, Optional) A filter to search by a list of communication styles. Valid communication styles are `AzureCloudService`, `AzureServiceFabricCluster`, `AzureWebApp`, `Ftp`, `Kubernetes`, `None`, `OfflineDrop`, `Ssh`, `TentacleActive`, or `TentaclePassive`.
 - **deployment_id** (String, Optional) A filter to search by deployment ID.
 - **environments** (List of String, Optional) A filter to search by a list of environment IDs.
 - **health_statuses** (List of String, Optional) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
@@ -51,11 +52,39 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 
 ### Read-only
 
+- **deployment_targets** (Block List) A list of deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--deployment_targets))
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **listening_tentacle_deployment_target** (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacle_deployment_target))
+- **listening_tentacle_deployment_targets** (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacle_deployment_targets))
 
-<a id="nestedblock--listening_tentacle_deployment_target"></a>
-### Nested Schema for `listening_tentacle_deployment_target`
+<a id="nestedblock--deployment_targets"></a>
+### Nested Schema for `deployment_targets`
+
+Read-only:
+
+- **environments** (List of String, Read-only) A list of environment IDs associated with this resource.
+- **has_latest_calamari** (Boolean, Read-only)
+- **health_status** (String, Read-only) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- **id** (String, Read-only) The unique ID for this resource.
+- **is_disabled** (Boolean, Read-only)
+- **is_in_process** (Boolean, Read-only)
+- **machine_policy_id** (String, Read-only)
+- **name** (String, Read-only) The name of this resource.
+- **operating_system** (String, Read-only)
+- **roles** (List of String, Read-only)
+- **shell_name** (String, Read-only)
+- **shell_version** (String, Read-only)
+- **space_id** (String, Read-only) The space ID associated with this resource.
+- **status** (String, Read-only) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
+- **status_summary** (String, Read-only) A summary elaborating on the status of this resource.
+- **tenant_tags** (List of String, Read-only) A list of tenant tags associated with this resource.
+- **tenanted_deployment_participation** (String, Read-only) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- **tenants** (List of String, Read-only) A list of tenant IDs associated with this resource.
+- **thumbprint** (String, Read-only)
+- **uri** (String, Read-only)
+
+
+<a id="nestedblock--listening_tentacle_deployment_targets"></a>
+### Nested Schema for `listening_tentacle_deployment_targets`
 
 Read-only:
 
@@ -63,29 +92,29 @@ Read-only:
 - **environments** (List of String, Read-only) A list of environment IDs associated with this resource.
 - **has_latest_calamari** (Boolean, Read-only)
 - **health_status** (String, Read-only) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **id** (String, Read-only) The unique identifier for this resource.
-- **is_disabled** (Boolean, Read-only)
-- **is_in_process** (Boolean, Read-only)
-- **machine_policy_id** (String, Read-only)
+- **id** (String, Read-only) The unique ID for this resource.
+- **is_disabled** (Boolean, Read-only) Represents the disabled status of this deployment target.
+- **is_in_process** (Boolean, Read-only) Represents the in-process status of this deployment target.
+- **machine_policy_id** (String, Read-only) The machine policy ID that is associated with this deployment target.
 - **name** (String, Read-only) The name of this resource.
-- **operating_system** (String, Read-only)
-- **proxy_id** (String, Read-only)
-- **roles** (List of String, Read-only)
-- **shell_name** (String, Read-only)
-- **shell_version** (String, Read-only)
-- **space_id** (String, Read-only) The space identifier associated with this resource.
+- **operating_system** (String, Read-only) The operating system that is associated with this deployment target.
+- **proxy_id** (String, Read-only) The proxy ID that is associated with this deployment target.
+- **roles** (List of String, Read-only) A list of role IDs that are associated with this deployment target.
+- **shell_name** (String, Read-only) The shell name associated with this deployment target.
+- **shell_version** (String, Read-only) The shell version associated with this deployment target.
+- **space_id** (String, Read-only) The space ID associated with this resource.
 - **status** (String, Read-only) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
 - **status_summary** (String, Read-only) A summary elaborating on the status of this resource.
 - **tenant_tags** (List of String, Read-only) A list of tenant tags associated with this resource.
 - **tenanted_deployment_participation** (String, Read-only) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **tenants** (List of String, Read-only) A list of tenant IDs associated with this resource.
-- **tentacle_url** (String, Read-only)
-- **tentacle_version_details** (List of Object, Read-only) (see [below for nested schema](#nestedatt--listening_tentacle_deployment_target--tentacle_version_details))
-- **thumbprint** (String, Read-only)
-- **uri** (String, Read-only)
+- **tentacle_url** (String, Read-only) The tenant URL of this deployment target.
+- **tentacle_version_details** (List of Object, Read-only) (see [below for nested schema](#nestedatt--listening_tentacle_deployment_targets--tentacle_version_details))
+- **thumbprint** (String, Read-only) The thumbprint of this deployment target.
+- **uri** (String, Read-only) The URI of this deployment target.
 
-<a id="nestedatt--listening_tentacle_deployment_target--tentacle_version_details"></a>
-### Nested Schema for `listening_tentacle_deployment_target.tentacle_version_details`
+<a id="nestedatt--listening_tentacle_deployment_targets--tentacle_version_details"></a>
+### Nested Schema for `listening_tentacle_deployment_targets.tentacle_version_details`
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)

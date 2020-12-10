@@ -23,7 +23,7 @@ This resource manages user roles in Octopus Deploy.
 - **description** (String, Optional) The description of this resource.
 - **granted_space_permissions** (List of String, Optional)
 - **granted_system_permissions** (List of String, Optional)
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **space_permission_descriptions** (List of String, Optional)
 - **supported_restrictions** (List of String, Optional)
 - **system_permission_descriptions** (List of String, Optional)

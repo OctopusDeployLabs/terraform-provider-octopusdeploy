@@ -21,7 +21,7 @@ This resource manages environments in Octopus Deploy.
 
 - **allow_dynamic_infrastructure** (Boolean, Optional)
 - **description** (String, Optional) The description of this resource.
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **use_guided_failure** (Boolean, Optional)
 
 ### Read-only

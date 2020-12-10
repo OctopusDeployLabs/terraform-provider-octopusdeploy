@@ -33,8 +33,8 @@ resource "octopusdeploy_certificate" "example" {
 - **certificate_data_format** (String, Optional) Specifies the archive file format used for storing cryptography objects in the certificate. Valid formats are `Der`, `Pem`, `Pkcs12`, or `Unknown`.
 - **environments** (List of String, Optional) A list of environment IDs associated with this resource.
 - **has_private_key** (Boolean, Optional) Indicates if the certificate has a private key.
-- **id** (String, Optional) The unique identifier for this resource.
-- **is_expired** (Boolean, Optional)
+- **id** (String, Optional) The unique ID for this resource.
+- **is_expired** (Boolean, Optional) Indicates if the certificate has expired.
 - **issuer_common_name** (String, Optional)
 - **issuer_distinguished_name** (String, Optional)
 - **issuer_organization** (String, Optional)

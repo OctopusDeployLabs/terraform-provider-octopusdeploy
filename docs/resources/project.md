@@ -29,7 +29,7 @@ This resource manages projects in Octopus Deploy.
 - **deployment_changes_template** (String, Optional)
 - **description** (String, Optional) The description of this resource.
 - **discrete_channel_release** (Boolean, Optional) Treats releases of different channels to the same environment as a separate deployment dimension
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **included_library_variable_sets** (List of String, Optional)
 - **is_disabled** (Boolean, Optional)
 - **is_discrete_channel_release** (Boolean, Optional) Treats releases of different channels to the same environment as a separate deployment dimension
@@ -38,7 +38,7 @@ This resource manages projects in Octopus Deploy.
 - **project_group_id** (String, Optional)
 - **release_creation_strategy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--release_creation_strategy))
 - **release_notes_template** (String, Optional)
-- **space_id** (String, Optional) The space identifier associated with this resource.
+- **space_id** (String, Optional) The space ID associated with this resource.
 - **templates** (Block List) (see [below for nested schema](#nestedblock--templates))
 - **tenanted_deployment_participation** (String, Optional) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **version_control_settings** (Block Set) (see [below for nested schema](#nestedblock--version_control_settings))
@@ -86,15 +86,15 @@ Optional:
 
 Required:
 
-- **name** (String, Required) The name of this resource.
+- **name** (String, Required) The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`.
 
 Optional:
 
-- **default_value** (String, Optional)
-- **display_settings** (Map of String, Optional)
-- **help_text** (String, Optional)
-- **id** (String, Optional) The unique identifier for this resource.
-- **label** (String, Optional)
+- **default_value** (String, Optional) A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.
+- **display_settings** (Map of String, Optional) The display settings for the parameter.
+- **help_text** (String, Optional) The help presented alongside the parameter input.
+- **id** (String, Optional) The unique ID for this resource.
+- **label** (String, Optional) The label shown beside the parameter when presented in the deployment process. Example: `Server name`.
 
 
 <a id="nestedblock--version_control_settings"></a>

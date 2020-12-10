@@ -50,8 +50,8 @@ Read-only:
 - **certificate_data_format** (String, Read-only) Specifies the archive file format used for storing cryptography objects in the certificate. Valid formats are `Der`, `Pem`, `Pkcs12`, or `Unknown`.
 - **environments** (List of String, Read-only) A list of environment IDs associated with this resource.
 - **has_private_key** (Boolean, Read-only) Indicates if the certificate has a private key.
-- **id** (String, Read-only) The unique identifier for this resource.
-- **is_expired** (Boolean, Read-only)
+- **id** (String, Read-only) The unique ID for this resource.
+- **is_expired** (Boolean, Read-only) Indicates if the certificate has expired.
 - **issuer_common_name** (String, Read-only)
 - **issuer_distinguished_name** (String, Read-only)
 - **issuer_organization** (String, Read-only)

@@ -62,10 +62,10 @@ resource "octopusdeploy_lifecycle" "example" {
 ### Optional
 
 - **description** (String, Optional) The description of this resource.
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **phase** (Block List) (see [below for nested schema](#nestedblock--phase))
 - **release_retention_policy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--release_retention_policy))
-- **space_id** (String, Optional) The space identifier associated with this resource.
+- **space_id** (String, Optional) The space ID associated with this resource.
 - **tentacle_retention_policy** (Block List) (see [below for nested schema](#nestedblock--tentacle_retention_policy))
 
 <a id="nestedblock--phase"></a>
@@ -78,7 +78,7 @@ Required:
 Optional:
 
 - **automatic_deployment_targets** (List of String, Optional) Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **is_optional_phase** (Boolean, Optional) If false a release must be deployed to this phase before it can be deployed to the next phase.
 - **minimum_environments_before_promotion** (Number, Optional) The number of units required before a release can enter the next phase. If 0, all environments are required.
 - **optional_deployment_targets** (List of String, Optional) Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to

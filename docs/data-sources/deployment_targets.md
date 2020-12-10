@@ -1,13 +1,13 @@
 ---
-page_title: "octopusdeploy_polling_tentacle_deployment_targets Data Source - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_deployment_targets Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  Provides information about existing polling tentacle deployment targets.
+  Provides information about existing deployment targets.
 ---
 
-# Data Source `octopusdeploy_polling_tentacle_deployment_targets`
+# Data Source `octopusdeploy_deployment_targets`
 
-Provides information about existing polling tentacle deployment targets.
+Provides information about existing deployment targets.
 
 
 
@@ -15,9 +15,11 @@ Provides information about existing polling tentacle deployment targets.
 
 ### Optional
 
+- **communication_styles** (List of String, Optional) A filter to search by a list of communication styles. Valid communication styles are `AzureCloudService`, `AzureServiceFabricCluster`, `AzureWebApp`, `Ftp`, `Kubernetes`, `None`, `OfflineDrop`, `Ssh`, `TentacleActive`, or `TentaclePassive`.
 - **deployment_id** (String, Optional) A filter to search by deployment ID.
 - **environments** (List of String, Optional) A filter to search by a list of environment IDs.
 - **health_statuses** (List of String, Optional) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- **id** (String, Optional) The ID of this resource.
 - **ids** (List of String, Optional) A filter to search by a list of IDs.
 - **is_disabled** (Boolean, Optional) A filter to search by the disabled status of a resource.
 - **name** (String, Optional) A filter to search by name.
@@ -32,15 +34,13 @@ Provides information about existing polling tentacle deployment targets.
 
 ### Read-only
 
-- **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **polling_tentacle_deployment_targets** (Block List) A list of polling tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--polling_tentacle_deployment_targets))
+- **deployment_targets** (Block List) A list of deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--deployment_targets))
 
-<a id="nestedblock--polling_tentacle_deployment_targets"></a>
-### Nested Schema for `polling_tentacle_deployment_targets`
+<a id="nestedblock--deployment_targets"></a>
+### Nested Schema for `deployment_targets`
 
 Read-only:
 
-- **certificate_signature_algorithm** (String, Read-only)
 - **environments** (List of String, Read-only) A list of environment IDs associated with this resource.
 - **has_latest_calamari** (Boolean, Read-only)
 - **health_status** (String, Read-only) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
@@ -59,17 +59,7 @@ Read-only:
 - **tenant_tags** (List of String, Read-only) A list of tenant tags associated with this resource.
 - **tenanted_deployment_participation** (String, Read-only) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **tenants** (List of String, Read-only) A list of tenant IDs associated with this resource.
-- **tentacle_url** (String, Read-only)
-- **tentacle_version_details** (List of Object, Read-only) (see [below for nested schema](#nestedatt--polling_tentacle_deployment_targets--tentacle_version_details))
 - **thumbprint** (String, Read-only)
 - **uri** (String, Read-only)
-
-<a id="nestedatt--polling_tentacle_deployment_targets--tentacle_version_details"></a>
-### Nested Schema for `polling_tentacle_deployment_targets.tentacle_version_details`
-
-- **upgrade_locked** (Boolean)
-- **upgrade_required** (Boolean)
-- **upgrade_suggested** (Boolean)
-- **version** (String)
 
 

@@ -35,7 +35,7 @@ Read-only:
 - **connection_retry_sleep_interval** (Number, Read-only)
 - **connection_retry_time_limit** (Number, Read-only)
 - **description** (String, Read-only) The description of this resource.
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **is_default** (Boolean, Read-only)
 - **machine_cleanup_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policy--machine_cleanup_policy))
 - **machine_connectivity_policy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--machine_policy--machine_connectivity_policy))
@@ -44,7 +44,7 @@ Read-only:
 - **name** (String, Read-only) The name of this resource.
 - **polling_request_maximum_message_processing_timeout** (Number, Read-only)
 - **polling_request_queue_timeout** (Number, Read-only)
-- **space_id** (String, Read-only) The space identifier associated with this resource.
+- **space_id** (String, Read-only) The space ID associated with this resource.
 
 <a id="nestedatt--machine_policy--machine_cleanup_policy"></a>
 ### Nested Schema for `machine_policy.machine_cleanup_policy`

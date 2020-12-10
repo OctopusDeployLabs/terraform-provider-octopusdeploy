@@ -43,7 +43,7 @@ Read-only:
 - **description** (String, Read-only) The description of this resource.
 - **granted_space_permissions** (List of String, Read-only)
 - **granted_system_permissions** (List of String, Read-only)
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **name** (String, Read-only) The name of this resource.
 - **space_permission_descriptions** (List of String, Read-only)
 - **supported_restrictions** (List of String, Read-only)

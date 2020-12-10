@@ -13,10 +13,13 @@ func TestAccAWSAccountBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_aws_account." + localName
 
-	accessKey := acctest.RandString(10)
-	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	secretKey := acctest.RandString(10)
+	accessKey := acctest.RandString(acctest.RandIntRange(20, 255))
+	description := acctest.RandString(acctest.RandIntRange(20, 255))
+	name := acctest.RandStringFromCharSet(acctest.RandIntRange(20, 200), acctest.CharSetAlpha)
+	secretKey := acctest.RandString(acctest.RandIntRange(20, 3000))
 	tenantedDeploymentParticipation := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
+
+	newAccessKey := acctest.RandString(acctest.RandIntRange(20, 3000))
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccAccountCheckDestroy,
@@ -24,24 +27,37 @@ func TestAccAWSAccountBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAWSAccountBasic(localName, name, accessKey, secretKey, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
 					testAccAccountExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "access_key", accessKey),
+					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "secret_key", secretKey),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 				),
+				Config: testAWSAccountBasic(localName, name, description, accessKey, secretKey, tenantedDeploymentParticipation),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccAccountExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "access_key", newAccessKey),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "secret_key", secretKey),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
+				),
+				Config: testAWSAccountBasic(localName, name, description, newAccessKey, secretKey, tenantedDeploymentParticipation),
 			},
 		},
 	})
 }
 
-func testAWSAccountBasic(localName string, name string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+func testAWSAccountBasic(localName string, name string, description string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`resource "octopusdeploy_aws_account" "%s" {
 		access_key = "%s"
+		description = "%s"
 		name = "%s"
 		secret_key = "%s"
 		tenanted_deployment_participation = "%s"
-	}`, localName, accessKey, name, secretKey, tenantedDeploymentParticipation)
+	}`, localName, accessKey, description, name, secretKey, tenantedDeploymentParticipation)
 }

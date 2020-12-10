@@ -24,14 +24,14 @@ This resource manages machine policies in Octopus Deploy.
 - **connection_retry_sleep_interval** (Number, Optional)
 - **connection_retry_time_limit** (Number, Optional)
 - **description** (String, Optional) The description of this resource.
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **machine_cleanup_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_cleanup_policy))
 - **machine_connectivity_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_connectivity_policy))
 - **machine_health_check_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy))
 - **machine_update_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_update_policy))
 - **polling_request_maximum_message_processing_timeout** (Number, Optional)
 - **polling_request_queue_timeout** (Number, Optional)
-- **space_id** (String, Optional) The space identifier associated with this resource.
+- **space_id** (String, Optional) The space ID associated with this resource.
 
 ### Read-only
 

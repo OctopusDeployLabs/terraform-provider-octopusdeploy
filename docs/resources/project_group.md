@@ -21,7 +21,7 @@ This resource manages project groups in Octopus Deploy.
 
 - **description** (String, Optional) The description of this resource.
 - **environments** (List of String, Optional) A list of environment IDs associated with this resource.
-- **id** (String, Optional) The unique identifier for this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **retention_policy_id** (String, Optional)
 
 

@@ -43,7 +43,7 @@ Read-only:
 
 - **allow_dynamic_infrastructure** (Boolean, Read-only)
 - **description** (String, Read-only) The description of this resource.
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **name** (String, Read-only) The name of this resource.
 - **sort_order** (Number, Read-only)
 - **use_guided_failure** (Boolean, Read-only)

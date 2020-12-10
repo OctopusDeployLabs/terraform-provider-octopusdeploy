@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -23,51 +24,75 @@ func resourceMachinePolicy() *schema.Resource {
 func resourceMachinePolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	machinePolicy := expandMachinePolicy(d)
 
+	log.Printf("[INFO] creating machine policy: %#v", machinePolicy)
+
 	client := m.(*octopusdeploy.Client)
 	createdMachinePolicy, err := client.MachinePolicies.Add(machinePolicy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(createdMachinePolicy.ID)
-	return resourceMachinePolicyRead(ctx, d, m)
+	if err := setMachinePolicy(ctx, d, createdMachinePolicy); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(createdMachinePolicy.GetID())
+
+	log.Printf("[INFO] machine policy created (%s)", d.Id())
+	return nil
 }
 
 func resourceMachinePolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] deleting machine policy (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
-	err := client.MachinePolicies.DeleteByID(d.Id())
-	if err != nil {
+	if err := client.MachinePolicies.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId("")
+
+	log.Printf("[INFO] machine policy deleted")
 	return nil
 }
 
 func resourceMachinePolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading machine policy (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
 	machinePolicy, err := client.MachinePolicies.GetByID(d.Id())
 	if err != nil {
 		apiError := err.(*octopusdeploy.APIError)
 		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] machine policy (%s) not found; deleting from state", d.Id())
 			d.SetId("")
 			return nil
 		}
 		return diag.FromErr(err)
 	}
 
-	setMachinePolicy(ctx, d, machinePolicy)
+	if err := setMachinePolicy(ctx, d, machinePolicy); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] machine policy read (%s)", d.Id())
 	return nil
 }
 
 func resourceMachinePolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	machinePolicy := expandMachinePolicy(d)
+	log.Printf("[INFO] updating machine policy (%s)", d.Id())
 
+	machinePolicy := expandMachinePolicy(d)
 	client := m.(*octopusdeploy.Client)
-	_, err := client.MachinePolicies.Update(machinePolicy)
+	updatedMachinePolicy, err := client.MachinePolicies.Update(machinePolicy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	return resourceMachinePolicyRead(ctx, d, m)
+	if err := setMachinePolicy(ctx, d, updatedMachinePolicy); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] machine policy updated (%s)", d.Id())
+	return nil
 }

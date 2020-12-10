@@ -16,11 +16,11 @@ Provides information about existing lifecycles.
 ### Read-only
 
 - **description** (String, Read-only) The description of this resource.
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **name** (String, Read-only) The name of this resource.
 - **phase** (List of Object, Read-only) (see [below for nested schema](#nestedatt--phase))
 - **release_retention_policy** (List of Object, Read-only) (see [below for nested schema](#nestedatt--release_retention_policy))
-- **space_id** (String, Read-only) The space identifier associated with this resource.
+- **space_id** (String, Read-only) The space ID associated with this resource.
 - **tentacle_retention_policy** (List of Object, Read-only) (see [below for nested schema](#nestedatt--tentacle_retention_policy))
 
 <a id="nestedatt--phase"></a>

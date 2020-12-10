@@ -33,19 +33,19 @@ Provides information about existing offline package drop deployment targets.
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **offline_package_drop_deployment_target** (Block List) A list of offline package drop deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--offline_package_drop_deployment_target))
+- **offline_package_drop_deployment_targets** (Block List) A list of offline package drop deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--offline_package_drop_deployment_targets))
 
-<a id="nestedblock--offline_package_drop_deployment_target"></a>
-### Nested Schema for `offline_package_drop_deployment_target`
+<a id="nestedblock--offline_package_drop_deployment_targets"></a>
+### Nested Schema for `offline_package_drop_deployment_targets`
 
 Read-only:
 
 - **applications_directory** (String, Read-only)
-- **destination** (List of Object, Read-only) (see [below for nested schema](#nestedatt--offline_package_drop_deployment_target--destination))
+- **destination** (List of Object, Read-only) (see [below for nested schema](#nestedatt--offline_package_drop_deployment_targets--destination))
 - **environments** (List of String, Read-only) A list of environment IDs associated with this resource.
 - **has_latest_calamari** (Boolean, Read-only)
 - **health_status** (String, Read-only) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **is_disabled** (Boolean, Read-only)
 - **is_in_process** (Boolean, Read-only)
 - **machine_policy_id** (String, Read-only)
@@ -54,7 +54,7 @@ Read-only:
 - **roles** (List of String, Read-only)
 - **shell_name** (String, Read-only)
 - **shell_version** (String, Read-only)
-- **space_id** (String, Read-only) The space identifier associated with this resource.
+- **space_id** (String, Read-only) The space ID associated with this resource.
 - **status** (String, Read-only) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
 - **status_summary** (String, Read-only) A summary elaborating on the status of this resource.
 - **tenant_tags** (List of String, Read-only) A list of tenant tags associated with this resource.
@@ -64,8 +64,8 @@ Read-only:
 - **uri** (String, Read-only)
 - **working_directory** (String, Read-only)
 
-<a id="nestedatt--offline_package_drop_deployment_target--destination"></a>
-### Nested Schema for `offline_package_drop_deployment_target.destination`
+<a id="nestedatt--offline_package_drop_deployment_targets--destination"></a>
+### Nested Schema for `offline_package_drop_deployment_targets.destination`
 
 - **destination_type** (String)
 - **drop_folder_path** (String)

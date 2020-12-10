@@ -57,7 +57,7 @@ Read-only:
 - **description** (String, Read-only) The description of this resource.
 - **discrete_channel_release** (Boolean, Read-only) Treats releases of different channels to the same environment as a separate deployment dimension
 - **extension_settings** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--project--extension_settings))
-- **id** (String, Read-only) The unique identifier for this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **included_library_variable_sets** (List of String, Read-only)
 - **is_disabled** (Boolean, Read-only)
 - **is_discrete_channel_release** (Boolean, Read-only) Treats releases of different channels to the same environment as a separate deployment dimension
@@ -68,7 +68,7 @@ Read-only:
 - **release_creation_strategy** (List of Object, Read-only) (see [below for nested schema](#nestedatt--project--release_creation_strategy))
 - **release_notes_template** (String, Read-only)
 - **slug** (String, Read-only)
-- **space_id** (String, Read-only) The space identifier associated with this resource.
+- **space_id** (String, Read-only) The space ID associated with this resource.
 - **templates** (List of Object, Read-only) (see [below for nested schema](#nestedatt--project--templates))
 - **tenanted_deployment_participation** (String, Read-only) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **variable_set_id** (String, Read-only)
