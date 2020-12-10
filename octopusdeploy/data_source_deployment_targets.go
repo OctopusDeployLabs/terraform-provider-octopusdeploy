@@ -43,27 +43,27 @@ func dataSourceDeploymentTargetsRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	flattenedDeploymentTargets := []interface{}{}
-	flattenedListeningTentacleDeploymentTargets := []interface{}{}
-	flattenedOfflinePackageDropDeploymentTargets := []interface{}{}
-	flattenedPollingTentacleDeploymentTargets := []interface{}{}
+	// flattenedListeningTentacleDeploymentTargets := []interface{}{}
+	// flattenedOfflinePackageDropDeploymentTargets := []interface{}{}
+	// flattenedPollingTentacleDeploymentTargets := []interface{}{}
 
 	for _, deploymentTarget := range deploymentTargets.Items {
-		switch deploymentTarget.Endpoint.GetCommunicationStyle() {
-		case "OfflineDrop":
-			flattenedOfflinePackageDropDeploymentTargets = append(flattenedOfflinePackageDropDeploymentTargets, flattenOfflinePackageDropDeploymentTarget(deploymentTarget))
-		case "TentacleActive":
-			flattenedPollingTentacleDeploymentTargets = append(flattenedPollingTentacleDeploymentTargets, flattenPollingTentacleDeploymentTarget(deploymentTarget))
-		case "TentaclePassive":
-			flattenedListeningTentacleDeploymentTargets = append(flattenedListeningTentacleDeploymentTargets, flattenListeningTentacleDeploymentTarget(deploymentTarget))
-		default:
-			flattenedDeploymentTargets = append(flattenedDeploymentTargets, flattenDeploymentTarget(deploymentTarget))
-		}
+		// 	switch deploymentTarget.Endpoint.GetCommunicationStyle() {
+		// 	case "OfflineDrop":
+		// 		flattenedOfflinePackageDropDeploymentTargets = append(flattenedOfflinePackageDropDeploymentTargets, flattenOfflinePackageDropDeploymentTarget(deploymentTarget))
+		// 	case "TentacleActive":
+		// 		flattenedPollingTentacleDeploymentTargets = append(flattenedPollingTentacleDeploymentTargets, flattenPollingTentacleDeploymentTarget(deploymentTarget))
+		// 	case "TentaclePassive":
+		// 		flattenedListeningTentacleDeploymentTargets = append(flattenedListeningTentacleDeploymentTargets, flattenListeningTentacleDeploymentTarget(deploymentTarget))
+		// 	default:
+		flattenedDeploymentTargets = append(flattenedDeploymentTargets, flattenDeploymentTarget(deploymentTarget))
+		// 	}
 	}
 
 	d.Set("deployment_targets", flattenedDeploymentTargets)
-	d.Set("listening_tentacles", flattenedListeningTentacleDeploymentTargets)
-	d.Set("offline_package_drops", flattenedOfflinePackageDropDeploymentTargets)
-	d.Set("polling_tentacles", flattenedPollingTentacleDeploymentTargets)
+	// d.Set("listening_tentacle_deployment_targets", flattenedListeningTentacleDeploymentTargets)
+	// d.Set("offline_package_drop_deployment_targets", flattenedOfflinePackageDropDeploymentTargets)
+	// d.Set("polling_tentacle_deployment_targets", flattenedPollingTentacleDeploymentTargets)
 
 	d.SetId("DeploymentTargets " + time.Now().UTC().String())
 
