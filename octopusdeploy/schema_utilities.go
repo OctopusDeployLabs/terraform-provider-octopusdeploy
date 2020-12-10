@@ -73,7 +73,8 @@ func getAuthenticationEndpointSchema(isRequired bool) *schema.Schema {
 
 func getAzureEnvironmentSchema() *schema.Schema {
 	return &schema.Schema{
-		Default:     "AzureCloud",
+		Computed: true,
+		//Default:     "AzureCloud",
 		Description: "The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.",
 		Optional:    true,
 		Type:        schema.TypeString,
@@ -168,7 +169,7 @@ func getHealthStatusSchema() *schema.Schema {
 func getIDSchema() *schema.Schema {
 	return &schema.Schema{
 		Computed:    true,
-		Description: "The unique identifier for this resource.",
+		Description: "The unique ID for this resource.",
 		Optional:    true,
 		Type:        schema.TypeString,
 	}
@@ -248,27 +249,10 @@ func getSecretKeySchema(isRequired bool) *schema.Schema {
 	return schema
 }
 
-func getTokenSchema(isRequired bool) *schema.Schema {
-	schema := &schema.Schema{
-		Description:      "The token of this resource.",
-		Sensitive:        true,
-		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
-	}
-
-	if isRequired {
-		schema.Required = true
-	} else {
-		schema.Optional = true
-	}
-
-	return schema
-}
-
 func getSpaceIDSchema() *schema.Schema {
 	return &schema.Schema{
 		Computed:    true,
-		Description: "The space identifier associated with this resource.",
+		Description: "The space ID associated with this resource.",
 		Optional:    true,
 		Type:        schema.TypeString,
 	}
@@ -364,6 +348,23 @@ func getTenantTagsSchema() *schema.Schema {
 	}
 }
 
+func getTokenSchema(isRequired bool) *schema.Schema {
+	schema := &schema.Schema{
+		Description:      "The token of this resource.",
+		Sensitive:        true,
+		Type:             schema.TypeString,
+		ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+	}
+
+	if isRequired {
+		schema.Required = true
+	} else {
+		schema.Optional = true
+	}
+
+	return schema
+}
+
 func getUsernameSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
 		Description:      "The username associated with this resource.",
@@ -428,6 +429,7 @@ func setDataSchema(schema *map[string]*schema.Schema) {
 	for _, field := range *schema {
 		field.Computed = true
 		field.Default = nil
+		field.DefaultFunc = nil
 		field.AtLeastOneOf = nil
 		field.ConflictsWith = nil
 		field.ExactlyOneOf = nil
