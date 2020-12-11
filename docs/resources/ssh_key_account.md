@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_ssh_key_account Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages SSH key accounts in Octopus Deploy.
 ---
 
 # Resource `octopusdeploy_ssh_key_account`
 
-
+This resource manages SSH key accounts in Octopus Deploy.
 
 
 

@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_azure_service_principal Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages Azure service principal accounts in Octopus Deploy.
 ---
 
 # Resource `octopusdeploy_azure_service_principal`
 
-
+This resource manages Azure service principal accounts in Octopus Deploy.
 
 
 

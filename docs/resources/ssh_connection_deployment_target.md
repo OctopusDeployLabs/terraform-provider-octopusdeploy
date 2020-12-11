@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_ssh_connection_deployment_target Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages SSH connection deployment targets in Octopus Deploy.
 ---
 
 # Resource `octopusdeploy_ssh_connection_deployment_target`
 
-
+This resource manages SSH connection deployment targets in Octopus Deploy.
 
 
 

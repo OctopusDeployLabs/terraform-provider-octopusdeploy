@@ -41,6 +41,7 @@ Read-only:
 - **can_password_be_edited** (Boolean, Read-only)
 - **display_name** (String, Read-only) The display name of this resource.
 - **email_address** (String, Read-only) The email address of this resource.
+- **id** (String, Read-only) The unique ID for this resource.
 - **identity** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--user--identity))
 - **is_active** (Boolean, Read-only)
 - **is_requestor** (Boolean, Read-only)

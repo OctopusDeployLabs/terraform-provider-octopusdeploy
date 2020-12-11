@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_listening_tentacle_deployment_target Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages listening tentacle deployment targets in Octopus Deploy.
 ---
 
 # Resource `octopusdeploy_listening_tentacle_deployment_target`
 
-
+This resource manages listening tentacle deployment targets in Octopus Deploy.
 
 
 

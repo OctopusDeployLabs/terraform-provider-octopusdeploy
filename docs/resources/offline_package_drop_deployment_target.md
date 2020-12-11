@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_offline_package_drop_deployment_target Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages offline package drop deployment targets in Octopus Deploy.
 ---
 
 # Resource `octopusdeploy_offline_package_drop_deployment_target`
 
-
+This resource manages offline package drop deployment targets in Octopus Deploy.
 
 
 

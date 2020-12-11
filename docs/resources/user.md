@@ -21,7 +21,7 @@ This resource manages users in Octopus Deploy.
 ### Optional
 
 - **email_address** (String, Optional) The email address of this resource.
-- **id** (String, Optional) The ID of this resource.
+- **id** (String, Optional) The unique ID for this resource.
 - **identity** (Block Set) (see [below for nested schema](#nestedblock--identity))
 - **is_active** (Boolean, Optional)
 - **is_service** (Boolean, Optional)
