@@ -76,11 +76,13 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	if err := setAmazonWebServicesAccount(ctx, d, accountResource.(*octopusdeploy.AmazonWebServicesAccount)); err != nil {
+	amazonWebServicesAccount := accountResource.(*octopusdeploy.AmazonWebServicesAccount)
+
+	if err := setAmazonWebServicesAccount(ctx, d, amazonWebServicesAccount); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] AWS account read: %#v", accountResource.(*octopusdeploy.AmazonWebServicesAccount))
+	log.Printf("[INFO] AWS account read: %#v", amazonWebServicesAccount)
 	return nil
 }
 

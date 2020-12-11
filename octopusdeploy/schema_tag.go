@@ -10,6 +10,7 @@ func expandTag(tag map[string]interface{}) octopusdeploy.Tag {
 		CanonicalTagName: tag["canonical_tag_name"].(string),
 		Color:            tag["color"].(string),
 		Description:      tag["description"].(string),
+		ID:               tag["id"].(string),
 		Name:             tag["name"].(string),
 		SortOrder:        tag["sort_order"].(int),
 	}

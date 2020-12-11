@@ -30,12 +30,15 @@ Provides information about existing tag sets.
 
 Read-only:
 
+- **description** (String, Read-only) The description of this resource.
 - **id** (String, Read-only) The unique ID for this resource.
 - **name** (String, Read-only) The name of this resource.
-- **tags** (List of Object, Read-only) (see [below for nested schema](#nestedatt--tag_set--tags))
+- **sort_order** (Number, Read-only) The sort order associated with this resource.
+- **space_id** (String, Read-only) The space ID associated with this resource.
+- **tag** (List of Object, Read-only) A list of tags. (see [below for nested schema](#nestedatt--tag_set--tag))
 
-<a id="nestedatt--tag_set--tags"></a>
-### Nested Schema for `tag_set.tags`
+<a id="nestedatt--tag_set--tag"></a>
+### Nested Schema for `tag_set.tag`
 
 - **canonical_tag_name** (String)
 - **color** (String)

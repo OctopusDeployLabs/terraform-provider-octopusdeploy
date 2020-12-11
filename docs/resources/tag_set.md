@@ -19,11 +19,14 @@ This resource manages tag sets in Octopus Deploy.
 
 ### Optional
 
+- **description** (String, Optional) The description of this resource.
 - **id** (String, Optional) The unique ID for this resource.
-- **tags** (Block List) (see [below for nested schema](#nestedblock--tags))
+- **sort_order** (Number, Optional) The sort order associated with this resource.
+- **space_id** (String, Optional) The space ID associated with this resource.
+- **tag** (Block List) A list of tags. (see [below for nested schema](#nestedblock--tag))
 
-<a id="nestedblock--tags"></a>
-### Nested Schema for `tags`
+<a id="nestedblock--tag"></a>
+### Nested Schema for `tag`
 
 Required:
 
