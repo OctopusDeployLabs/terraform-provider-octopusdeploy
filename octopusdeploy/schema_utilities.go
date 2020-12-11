@@ -249,6 +249,15 @@ func getSecretKeySchema(isRequired bool) *schema.Schema {
 	return schema
 }
 
+func getSortOrderSchema() *schema.Schema {
+	return &schema.Schema{
+		Computed:    true,
+		Description: "The sort order associated with this resource.",
+		Optional:    true,
+		Type:        schema.TypeInt,
+	}
+}
+
 func getSpaceIDSchema() *schema.Schema {
 	return &schema.Schema{
 		Computed:    true,
