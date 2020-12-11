@@ -92,7 +92,6 @@ func testAccountBasic(localName string, name string, accountType octopusdeploy.A
 		name = "%s"
 		subscription_id = "%s"
 		tenant_id = "%s"
-		tenant_tags = ["Hosted Instances/Active"]
 		tenanted_deployment_participation = "%s"
 	}`, localName, accountType, clientID, clientSecret, name, subscriptionID, tenantID, tenantedDeploymentParticipation)
 }
