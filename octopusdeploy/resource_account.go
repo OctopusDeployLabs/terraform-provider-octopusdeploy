@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -24,38 +25,52 @@ func resourceAccount() *schema.Resource {
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	accountResource := expandAccountResource(d)
 
+	log.Printf("[INFO] creating account: %#v", accountResource)
+
 	client := m.(*octopusdeploy.Client)
-	account, err := client.Accounts.Add(accountResource)
+	createdAccount, err := client.Accounts.Add(accountResource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccountResource(account)
+	accountResource, err = octopusdeploy.ToAccountResource(createdAccount)
 	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := setAccountResource(ctx, d, accountResource); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(accountResource.GetID())
-	return resourceAccountRead(ctx, d, m)
+
+	log.Printf("[INFO] account created (%s)", d.Id())
+	return nil
 }
 
 func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] deleting account (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
-	err := client.Accounts.DeleteByID(d.Id())
-	if err != nil {
+	if err := client.Accounts.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId("")
+
+	log.Printf("[INFO] account deleted")
 	return nil
 }
 
 func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading account (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
 	account, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
 		apiError := err.(*octopusdeploy.APIError)
 		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] account (%s) not found; deleting from state", d.Id())
 			d.SetId("")
 			return nil
 		}
@@ -64,18 +79,30 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 	accountResource := account.(*octopusdeploy.AccountResource)
 
-	setAccountResource(ctx, d, accountResource)
+	if err := setAccountResource(ctx, d, accountResource); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] account read (%s)", d.Id())
 	return nil
 }
 
 func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	accountResource := expandAccountResource(d)
+	log.Printf("[INFO] updating account (%s)", d.Id())
 
+	accountResource := expandAccountResource(d)
 	client := m.(*octopusdeploy.Client)
-	_, err := client.Accounts.Update(accountResource)
+	updatedAccount, err := client.Accounts.Update(accountResource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	return resourceAccountRead(ctx, d, m)
+	updatedAccountResource := updatedAccount.(*octopusdeploy.AccountResource)
+
+	if err := setAccountResource(ctx, d, updatedAccountResource); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] account updated (%s)", d.Id())
+	return nil
 }
