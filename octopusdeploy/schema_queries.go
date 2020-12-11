@@ -39,6 +39,14 @@ func getQueryClonedFromProjectID() *schema.Schema {
 	}
 }
 
+func getQueryClonedFromTenantID() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search for a cloned tenant by its ID.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
 func getQueryCommunicationStyles() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of communication styles. Valid communication styles are `AzureCloudService`, `AzureServiceFabricCluster`, `AzureWebApp`, `Ftp`, `Kubernetes`, `None`, `OfflineDrop`, `Ssh`, `TentacleActive`, or `TentaclePassive`.",
@@ -197,6 +205,14 @@ func getQueryPartialName() *schema.Schema {
 	}
 }
 
+func getQueryProjectID() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by a project ID.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
 func getQueryRoles() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by a list of role IDs.",
@@ -219,6 +235,15 @@ func getQuerySkip() *schema.Schema {
 		Description: "A filter to specify the number of items to skip in the response.",
 		Optional:    true,
 		Type:        schema.TypeInt,
+	}
+}
+
+func getQueryTags() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by a list of tags.",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Type:        schema.TypeList,
 	}
 }
 

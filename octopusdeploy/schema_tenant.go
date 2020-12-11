@@ -58,12 +58,16 @@ func getTenantDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id":           getDataSchemaID(),
-		"ids":          getQueryIDs(),
-		"name":         getQueryName(),
-		"partial_name": getQueryPartialName(),
-		"skip":         getQuerySkip(),
-		"tenant": {
+		"cloned_from_tenant_id": getQueryClonedFromTenantID(),
+		"id":                    getDataSchemaID(),
+		"ids":                   getQueryIDs(),
+		"is_clone":              getQueryIsClone(),
+		"name":                  getQueryName(),
+		"partial_name":          getQueryPartialName(),
+		"project_id":            getQueryProjectID(),
+		"skip":                  getQuerySkip(),
+		"tags":                  getQueryTags(),
+		"tenants": {
 			Computed:    true,
 			Description: "A list of tenants that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
@@ -76,6 +80,11 @@ func getTenantDataSchema() map[string]*schema.Schema {
 
 func getTenantSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"cloned_from_tenant_id": {
+			Description: "The ID of the tenant from which this tenant was cloned.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
 		"description": getDescriptionSchema(),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
@@ -98,16 +107,25 @@ func getTenantSchema() map[string]*schema.Schema {
 			},
 			Type: schema.TypeSet,
 		},
+		"space_id":    getSpaceIDSchema(),
+		"tenant_tags": getTenantTagsSchema(),
 	}
 }
 
 func setTenant(ctx context.Context, d *schema.ResourceData, tenant *octopusdeploy.Tenant) error {
+	d.Set("cloned_from_tenant_id", tenant.ClonedFromTenantID)
 	d.Set("description", tenant.Description)
 	d.Set("id", tenant.GetID())
 	d.Set("name", tenant.Name)
 
 	if err := d.Set("project_environment", flattenProjectEnvironments(tenant.ProjectEnvironments)); err != nil {
 		return fmt.Errorf("error setting project_environment: %s", err)
+	}
+
+	d.Set("space_id", tenant.SpaceID)
+
+	if err := d.Set("tenant_tags", tenant.TenantTags); err != nil {
+		return fmt.Errorf("error setting tenant_tags: %s", err)
 	}
 
 	return nil

@@ -35,6 +35,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_spaces":                                          dataSourceSpaces(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
 			"octopusdeploy_tag_sets":                                        dataSourceTagSets(),
+			"octopusdeploy_tenants":                                         dataSourceTenants(),
 			"octopusdeploy_users":                                           dataSourceUsers(),
 			"octopusdeploy_user_roles":                                      dataSourceUserRoles(),
 			"octopusdeploy_variables":                                       dataSourceVariable(),
