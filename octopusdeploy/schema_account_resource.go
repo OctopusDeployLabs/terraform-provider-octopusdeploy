@@ -7,7 +7,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResource {
@@ -29,6 +28,11 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 		accountResource.AuthenticationEndpoint = v.(string)
 	}
 
+	if v, ok := d.GetOk("application_id"); ok {
+		clientID := uuid.MustParse(v.(string))
+		accountResource.ApplicationID = &clientID
+	}
+
 	if v, ok := d.GetOk("azure_environment"); ok {
 		accountResource.AzureEnvironment = v.(string)
 	}
@@ -39,11 +43,6 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 
 	if v, ok := d.GetOk("certificate_thumbprint"); ok {
 		accountResource.CertificateThumbprint = v.(string)
-	}
-
-	if v, ok := d.GetOk("client_id"); ok {
-		clientID := uuid.MustParse(v.(string))
-		accountResource.ApplicationID = &clientID
 	}
 
 	if v, ok := d.GetOk("client_secret"); ok {
@@ -198,11 +197,6 @@ func getAccountResourceSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"client_id": {
-			Optional:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
-		},
 		"client_secret": {
 			Optional:  true,
 			Sensitive: true,
@@ -248,13 +242,13 @@ func setAccountResource(ctx context.Context, d *schema.ResourceData, account *oc
 	d.Set("access_key", account.AccessKey)
 	d.Set("account_type", account.GetAccountType())
 	d.Set("active_directory_endpoint_base_uri", account.AuthenticationEndpoint)
-	d.Set("azure_environment", account.AzureEnvironment)
-	d.Set("certificate_thumbprint", account.CertificateThumbprint)
 
 	if account.ApplicationID != nil {
-		d.Set("client_id", account.ApplicationID.String())
+		d.Set("application_id", account.ApplicationID.String())
 	}
 
+	d.Set("azure_environment", account.AzureEnvironment)
+	d.Set("certificate_thumbprint", account.CertificateThumbprint)
 	d.Set("description", account.GetDescription())
 
 	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {
@@ -263,7 +257,6 @@ func setAccountResource(ctx context.Context, d *schema.ResourceData, account *oc
 
 	d.Set("name", account.GetName())
 	d.Set("resource_manager_endpoint", account.ResourceManagerEndpoint)
-	d.Set("secret_key", account.SecretKey)
 	d.Set("service_management_endpoint_base_uri", account.ManagementEndpoint)
 	d.Set("service_management_endpoint_suffix", account.StorageEndpointSuffix)
 	d.Set("space_id", account.GetSpaceID())
