@@ -9,6 +9,7 @@ func getAccountTypeSchema() *schema.Schema {
 	return &schema.Schema{
 		Computed:    true,
 		Description: "Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
+		ForceNew:    true,
 		Optional:    true,
 		Type:        schema.TypeString,
 		ValidateDiagFunc: validateValueFunc([]string{
