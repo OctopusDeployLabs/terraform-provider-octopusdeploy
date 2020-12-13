@@ -37,7 +37,6 @@ Provides information about existing accounts.
 - **azure_environment** (String)
 - **certificate_data** (String)
 - **certificate_thumbprint** (String)
-- **client_id** (String)
 - **client_secret** (String)
 - **description** (String)
 - **environments** (List of String)

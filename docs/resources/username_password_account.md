@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_username_password_account Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages username-password accounts in Octopus Deploy.
 ---
 
 # Resource `octopusdeploy_username_password_account`
 
-
+This resource manages username-password accounts in Octopus Deploy.
 
 
 
