@@ -9,7 +9,14 @@ description: |-
 
 This resource manages projects in Octopus Deploy.
 
+## Example Usage
 
+```terraform
+resource "octopusdeploy_project" "example" {
+  description = "The development project."
+  name        = "Development Project (OK to Delete)"
+}
+```
 
 ## Schema
 
