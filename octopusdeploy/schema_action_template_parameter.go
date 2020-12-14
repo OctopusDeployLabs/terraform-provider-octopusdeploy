@@ -23,6 +23,10 @@ func expandActionTemplateParameter(tfTemplate map[string]interface{}) *octopusde
 }
 
 func expandActionTemplateParameters(actionTemplateParameters []interface{}) []*octopusdeploy.ActionTemplateParameter {
+	if len(actionTemplateParameters) == 0 {
+		return nil
+	}
+
 	expandedActionTemplateParameters := make([]*octopusdeploy.ActionTemplateParameter, len(actionTemplateParameters))
 	for _, actionTemplateParameter := range actionTemplateParameters {
 		actionTemplateParameterMap := actionTemplateParameter.(map[string]interface{})
