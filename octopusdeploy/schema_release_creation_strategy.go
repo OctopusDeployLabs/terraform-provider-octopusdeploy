@@ -6,11 +6,15 @@ import (
 )
 
 func expandReleaseCreationStrategy(releaseCreationStrategy []interface{}) *octopusdeploy.ReleaseCreationStrategy {
+	if len(releaseCreationStrategy) == 0 {
+		return nil
+	}
+
 	releaseCreationStrategyMap := releaseCreationStrategy[0].(map[string]interface{})
 	return &octopusdeploy.ReleaseCreationStrategy{
 		ChannelID:                    releaseCreationStrategyMap["channel_id"].(string),
 		ReleaseCreationPackage:       expandDeploymentActionPackage(releaseCreationStrategyMap["release_creation_package"].([]interface{})),
-		ReleaseCreationPackageStepID: releaseCreationStrategyMap["release_creation_package_step_id"].(*string),
+		ReleaseCreationPackageStepID: releaseCreationStrategyMap["release_creation_package_step_id"].(string),
 	}
 }
 

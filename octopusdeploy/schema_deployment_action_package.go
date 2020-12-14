@@ -6,6 +6,10 @@ import (
 )
 
 func expandDeploymentActionPackage(deploymentActionPackage []interface{}) *octopusdeploy.DeploymentActionPackage {
+	if len(deploymentActionPackage) == 0 {
+		return nil
+	}
+
 	flattenedMap := deploymentActionPackage[0].(map[string]interface{})
 	return &octopusdeploy.DeploymentActionPackage{
 		DeploymentAction: flattenedMap["deployment_action"].(string),
