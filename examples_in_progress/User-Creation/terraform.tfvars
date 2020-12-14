@@ -1,5 +1,0 @@
-serverURL   = "https://mikelevanoctopus.octopus.app"
-space       = "Default"
-displayName = "testDisplayName"
-userName    = "testUserName"
-apiKey  = "APIKEY"
