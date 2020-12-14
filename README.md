@@ -7,8 +7,7 @@ It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopu
 
 ## Testing
 
-A GitHub action has been added to this project which initializes an instance of Octopus Deploy and runs the tests
-against it. These same tests can be run in a forked repository.
+A GitHub action has been added to this project which initializes an instance of Octopus Deploy and runs the tests against it. These same tests can be run in a forked repository.
 
 ## Downloading & Installing
 
@@ -22,7 +21,7 @@ To use it, extract the binary for your platform into the same folder as your `.t
 
 ### Default Space
 
-```hcl
+```terraform
 # main.tf
 
 provider "octopusdeploy" {
@@ -37,7 +36,7 @@ Simply provide the _name_ of the space (not the space ID)
 
 **Note:** System level resources such as Teams are not support on a Space-scoped provider.
 
-```hcl
+```terraform
 # main.tf
 
 provider "octopusdeploy" {
@@ -51,7 +50,7 @@ provider "octopusdeploy" {
 
 To manage resources in multiple spaces you currently must use multiple instances of the provider with [aliases](https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances) like so:
 
-```hcl
+```terraform
 # main.tf
 
 provider "octopusdeploy" {
