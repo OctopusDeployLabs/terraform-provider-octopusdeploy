@@ -40,6 +40,7 @@ Provides information about existing Kubernetes cluster deployment targets.
 
 Read-only:
 
+- **authentication** (List of Object, Read-only) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--authentication))
 - **aws_account_authentication** (List of Object, Read-only) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--aws_account_authentication))
 - **azure_service_principal_authentication** (List of Object, Read-only) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--azure_service_principal_authentication))
 - **certificate_authentication** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--certificate_authentication))
@@ -70,9 +71,13 @@ Read-only:
 - **tenanted_deployment_participation** (String, Read-only) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **tenants** (List of String, Read-only) A list of tenant IDs associated with this resource.
 - **thumbprint** (String, Read-only)
-- **token_authentication** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--token_authentication))
 - **uri** (String, Read-only)
-- **username_password_authentication** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--username_password_authentication))
+
+<a id="nestedatt--kubernetes_cluster_deployment_targets--authentication"></a>
+### Nested Schema for `kubernetes_cluster_deployment_targets.authentication`
+
+- **account_id** (String)
+
 
 <a id="nestedatt--kubernetes_cluster_deployment_targets--aws_account_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.aws_account_authentication`
@@ -106,17 +111,5 @@ Read-only:
 
 - **feed_id** (String)
 - **image** (String)
-
-
-<a id="nestedatt--kubernetes_cluster_deployment_targets--token_authentication"></a>
-### Nested Schema for `kubernetes_cluster_deployment_targets.token_authentication`
-
-- **account_id** (String)
-
-
-<a id="nestedatt--kubernetes_cluster_deployment_targets--username_password_authentication"></a>
-### Nested Schema for `kubernetes_cluster_deployment_targets.username_password_authentication`
-
-- **account_id** (String)
 
 

@@ -14,6 +14,10 @@ func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *octopusdep
 
 	endpoint := octopusdeploy.NewKubernetesEndpoint(clusterURL)
 
+	if v, ok := d.GetOk("authentication"); ok {
+		endpoint.Authentication = expandKubernetesStandardAuthentication(v)
+	}
+
 	if v, ok := d.GetOk("aws_account_authentication"); ok {
 		endpoint.Authentication = expandKubernetesAwsAuthentication(v)
 	}
@@ -115,10 +119,20 @@ func getKubernetesClusterDeploymentTargetDataSchema() map[string]*schema.Schema 
 func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema := getDeploymentTargetSchema()
 
+	kubernetesClusterDeploymentTargetSchema["authentication"] = &schema.Schema{
+		Computed:     true,
+		Elem:         &schema.Resource{Schema: getKubernetesStandardAuthenticationSchema()},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
+		MaxItems:     1,
+		MinItems:     0,
+		Optional:     true,
+		Type:         schema.TypeList,
+	}
+
 	kubernetesClusterDeploymentTargetSchema["aws_account_authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesAwsAuthenticationSchema()},
-		ExactlyOneOf: []string{"aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "token_authentication", "username_password_authentication"},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -128,7 +142,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["azure_service_principal_authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesAzureAuthenticationSchema()},
-		ExactlyOneOf: []string{"aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "token_authentication", "username_password_authentication"},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -138,7 +152,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["certificate_authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesCertificateAuthenticationSchema()},
-		ExactlyOneOf: []string{"aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "token_authentication", "username_password_authentication"},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -185,26 +199,6 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["skip_tls_verification"] = &schema.Schema{
 		Optional: true,
 		Type:     schema.TypeBool,
-	}
-
-	kubernetesClusterDeploymentTargetSchema["token_authentication"] = &schema.Schema{
-		Computed:     true,
-		Elem:         &schema.Resource{Schema: getKubernetesStandardAuthenticationSchema()},
-		ExactlyOneOf: []string{"aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "token_authentication", "username_password_authentication"},
-		MaxItems:     1,
-		MinItems:     0,
-		Optional:     true,
-		Type:         schema.TypeSet,
-	}
-
-	kubernetesClusterDeploymentTargetSchema["username_password_authentication"] = &schema.Schema{
-		Computed:     true,
-		Elem:         &schema.Resource{Schema: getKubernetesStandardAuthenticationSchema()},
-		ExactlyOneOf: []string{"aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "token_authentication", "username_password_authentication"},
-		MaxItems:     1,
-		MinItems:     0,
-		Optional:     true,
-		Type:         schema.TypeSet,
 	}
 
 	return kubernetesClusterDeploymentTargetSchema
