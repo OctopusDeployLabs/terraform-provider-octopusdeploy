@@ -9,7 +9,14 @@ description: |-
 
 This resource manages channels in Octopus Deploy.
 
+## Example Usage
 
+```terraform
+resource "octopusdeploy_channel" "example" {
+  name       = "Development Channel (OK to Delete)"
+  project_id = "Projects-123"
+}
+```
 
 ## Schema
 

@@ -1,5 +1,0 @@
-application_id = "app_regstration_client_id"
-application_password = "application_password"
-key = "app_regstration_password"
-subscription_id = "azure_subscription_id"
-tenant_id = "app_regstration_tenant_id"
