@@ -64,12 +64,12 @@ resource "octopusdeploy_account" "token_account" {
 
 ### Required
 
+- **account_type** (String, Required) Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.
 - **name** (String, Required) The name of this resource.
 
 ### Optional
 
 - **access_key** (String, Optional) The access key associated with this resource.
-- **account_type** (String, Optional) Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.
 - **active_directory_endpoint_base_uri** (String, Optional)
 - **application_id** (String, Optional) The application ID of this resource.
 - **authentication_endpoint** (String, Optional) The authentication endpoint URI for this resource.

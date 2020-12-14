@@ -179,7 +179,7 @@ func getAccountResourceDataSchema() map[string]*schema.Schema {
 func getAccountResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"access_key":   getAccessKeySchema(false),
-		"account_type": getAccountTypeSchema(),
+		"account_type": getAccountTypeSchema(true),
 		"active_directory_endpoint_base_uri": {
 			Optional: true,
 			Type:     schema.TypeString,

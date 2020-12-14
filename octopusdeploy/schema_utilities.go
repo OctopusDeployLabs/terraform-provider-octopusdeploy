@@ -5,12 +5,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func getAccountTypeSchema() *schema.Schema {
-	return &schema.Schema{
-		Computed:    true,
+func getAccountTypeSchema(isRequired bool) *schema.Schema {
+	schema := &schema.Schema{
 		Description: "Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
 		ForceNew:    true,
-		Optional:    true,
 		Type:        schema.TypeString,
 		ValidateDiagFunc: validateValueFunc([]string{
 			"AmazonWebServicesAccount",
@@ -23,6 +21,14 @@ func getAccountTypeSchema() *schema.Schema {
 			"UsernamePassword",
 		}),
 	}
+
+	if isRequired {
+		schema.Required = true
+	} else {
+		schema.Optional = true
+	}
+
+	return schema
 }
 
 func getAccessKeySchema(isRequired bool) *schema.Schema {
