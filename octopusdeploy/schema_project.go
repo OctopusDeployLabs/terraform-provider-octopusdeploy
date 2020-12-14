@@ -158,7 +158,7 @@ func getProjectDataSchema() map[string]*schema.Schema {
 func getProjectSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"allow_deployments_to_no_targets": {
-			Deprecated: "Change this please!!!",
+			Deprecated: "This value is only valid for an associated connectivity policy and should not be specified here.",
 			Optional:   true,
 			Type:       schema.TypeBool,
 		},
