@@ -9,7 +9,15 @@ description: |-
 
 This resource manages username-password accounts in Octopus Deploy.
 
+## Example Usage
 
+```terraform
+resource "octopusdeploy_account" "username_password_account" {
+  account_type     = "UsernamePassword"
+  name             = "Username-Password Account (OK to Delete)"
+  username         = "[username]"
+}
+```
 
 ## Schema
 

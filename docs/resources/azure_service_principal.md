@@ -9,7 +9,18 @@ description: |-
 
 This resource manages Azure service principal accounts in Octopus Deploy.
 
+## Example Usage
 
+```terraform
+resource "octopusdeploy_account" "azure_service_principal_account" {
+  account_type    = "AzureServicePrincipal"
+  application_id  = "00000000-0000-0000-0000-000000000000"
+  name            = "Azure Service Principal Account (OK to Delete)"
+  password        = "###########" # required; get from secure environment/store
+  subscription_id = "00000000-0000-0000-0000-000000000000"
+  tenant_id       = "00000000-0000-0000-0000-000000000000"
+}
+```
 
 ## Schema
 
