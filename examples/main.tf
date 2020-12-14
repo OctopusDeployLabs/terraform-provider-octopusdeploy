@@ -10,7 +10,7 @@ resource "octopusdeploy_project_group" "finance" {
 
 resource "octopusdeploy_project_deployment_target_trigger" "auto_deploy_trigger" {
   name             = "Auto Deploy"
-  project_id       = "${octopusdeploy_project.billing_service.id}"
+  project_id       = octopusdeploy_project.billing_service.id
   event_groups     = ["Machine"]
   event_categories = ["MachineCleanupFailed"]
   should_redeploy  = true
@@ -24,7 +24,7 @@ resource "octopusdeploy_project" "billing_service" {
   description           = "Billing Frontend and Backend"
   lifecycle_id          = "Lifecycles-1"
   name                  = "Billing Service"
-  project_group_id      = "${octopusdeploy_project_group.finance.id}"
+  project_group_id      = octopusdeploy_project_group.finance.id
   skip_machine_behavior = "SkipUnavailableMachines"
 
   deployment_step {
