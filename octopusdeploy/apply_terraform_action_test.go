@@ -16,10 +16,10 @@ func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApplyTerraformAction(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplyTerraformAction(),
 				),
+				Config: testAccApplyTerraformAction(),
 			},
 		},
 	})

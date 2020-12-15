@@ -29,7 +29,7 @@ func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m 
 	client := m.(*octopusdeploy.Client)
 	createdAccount, err := client.Accounts.Add(account)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if err := setSSHKeyAccount(ctx, d, createdAccount.(*octopusdeploy.SSHKeyAccount)); err != nil {

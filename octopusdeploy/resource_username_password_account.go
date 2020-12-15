@@ -29,7 +29,7 @@ func resourceUsernamePasswordAccountCreate(ctx context.Context, d *schema.Resour
 	client := m.(*octopusdeploy.Client)
 	createdAccount, err := client.Accounts.Add(account)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	if err := setUsernamePasswordAccount(ctx, d, createdAccount.(*octopusdeploy.UsernamePasswordAccount)); err != nil {
@@ -94,7 +94,7 @@ func resourceUsernamePasswordAccountUpdate(ctx context.Context, d *schema.Resour
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.Update(account)
 	if err != nil {
-		diag.FromErr(err)
+		return diag.FromErr(err)
 	}
 
 	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
