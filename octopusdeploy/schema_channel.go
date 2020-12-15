@@ -68,7 +68,7 @@ func getChannelDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"channel": {
+		"channels": {
 			Computed:    true,
 			Description: "A channel that matches the specified filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

@@ -36,7 +36,7 @@ func dataSourceTagSetsRead(ctx context.Context, d *schema.ResourceData, m interf
 		flattenedTagSets = append(flattenedTagSets, flattenTagSet(tagSet))
 	}
 
-	d.Set("tag_set", flattenedTagSets)
+	d.Set("tag_sets", flattenedTagSets)
 	d.SetId("TagSets " + time.Now().UTC().String())
 
 	return nil

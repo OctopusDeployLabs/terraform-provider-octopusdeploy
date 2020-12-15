@@ -32,10 +32,10 @@ data "octopusdeploy_channels" "example" {
 
 ### Read-only
 
-- **channel** (Block List) A channel that matches the specified filter(s). (see [below for nested schema](#nestedblock--channel))
+- **channels** (Block List) A channel that matches the specified filter(s). (see [below for nested schema](#nestedblock--channels))
 
-<a id="nestedblock--channel"></a>
-### Nested Schema for `channel`
+<a id="nestedblock--channels"></a>
+### Nested Schema for `channels`
 
 Read-only:
 
@@ -45,12 +45,12 @@ Read-only:
 - **lifecycle_id** (String, Read-only) The lifecycle ID associated with this channel.
 - **name** (String, Read-only) The name of this resource.
 - **project_id** (String, Read-only) The project ID associated with this channel.
-- **rules** (List of Object, Read-only) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channel--rules))
+- **rules** (List of Object, Read-only) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channels--rules))
 - **space_id** (String, Read-only) The space ID associated with this resource.
 - **tenant_tags** (List of String, Read-only) A list of tenant tags associated with this resource.
 
-<a id="nestedatt--channel--rules"></a>
-### Nested Schema for `channel.rules`
+<a id="nestedatt--channels--rules"></a>
+### Nested Schema for `channels.rules`
 
 - **actions** (List of String)
 - **id** (String)

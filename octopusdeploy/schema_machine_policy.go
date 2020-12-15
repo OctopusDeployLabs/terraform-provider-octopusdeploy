@@ -105,7 +105,7 @@ func getMachinePolicyDataSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"ids": getQueryIDs(),
-		"machine_policy": {
+		"machine_policies": {
 			Computed:    true,
 			Description: "A list of machine policies that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

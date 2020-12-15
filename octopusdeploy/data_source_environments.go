@@ -37,7 +37,7 @@ func dataSourceEnvironmentsRead(ctx context.Context, d *schema.ResourceData, m i
 		flattenedEnvironments = append(flattenedEnvironments, flattenEnvironment(environment))
 	}
 
-	d.Set("environment", flattenedEnvironments)
+	d.Set("environments", flattenedEnvironments)
 	d.SetId("Environments " + time.Now().UTC().String())
 
 	return nil

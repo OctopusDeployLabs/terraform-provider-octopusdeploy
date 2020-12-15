@@ -51,7 +51,7 @@ func getEnvironmentDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"environment": {
+		"environments": {
 			Computed:    true,
 			Description: "A list of environments that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

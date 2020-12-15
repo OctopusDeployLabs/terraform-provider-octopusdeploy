@@ -36,7 +36,7 @@ func dataSourceSpacesRead(ctx context.Context, d *schema.ResourceData, m interfa
 		flattenedSpaces = append(flattenedSpaces, flattenSpace(space))
 	}
 
-	d.Set("space", flattenedSpaces)
+	d.Set("spaces", flattenedSpaces)
 	d.SetId("Spaces " + time.Now().UTC().String())
 
 	return nil

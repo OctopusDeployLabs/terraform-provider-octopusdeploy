@@ -161,7 +161,7 @@ func getCertificateDataSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"archived": getQueryArchived(),
-		"certificate": {
+		"certificates": {
 			Computed:    true,
 			Description: "A list of certificates that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

@@ -17,18 +17,18 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		CheckDestroy: testAccProjectCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectBasic(localName, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
+				Config: testAccProjectBasic(localName, name, description),
 			},
 		},
 	})
@@ -41,23 +41,20 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	config := testAccProjectBasic(localName, name, description)
-
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccProjectCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
+				Config: testAccProjectBasic(localName, name, description),
 			},
 			{
-				Config: testAccProjectBasic(localName, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployProjectExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "description", description),
@@ -66,6 +63,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.1.step_name"),
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.iis_website.0.step_name"),
 				),
+				Config: testAccProjectBasic(localName, name, description),
 			},
 		},
 	})
@@ -77,32 +75,47 @@ func testAccProjectBasic(localName string, name string, description string) stri
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	lifecycleID := "${octopusdeploy_lifecycle." + lifecycleLocalName + ".id}"
-	projectGroupID := "${octopusdeploy_project_group." + projectGroupLocalName + ".id}"
+	lifecycleID := "octopusdeploy_lifecycle." + lifecycleLocalName + ".id"
+	projectGroupID := "octopusdeploy_project_group." + projectGroupLocalName + ".id"
 
 	return fmt.Sprintf(testAccLifecycleBasic(lifecycleLocalName, lifecycleName)+"\n"+
 		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
 		`resource "octopusdeploy_project" "%s" {
-			description      = "%s"
-			lifecycle_id     = "%s"
-			name             = "%s"
-			project_group_id = "%s"
+		  description      = "%s"
+		  lifecycle_id     = %s
+		  name             = "%s"
+		  project_group_id = %s
 
-			connectivity_policy {
-				allow_deployments_to_no_targets = true
-				skip_machine_behavior           = "None"
-			}
-		}`, localName, description, lifecycleID, name, projectGroupID)
+		  connectivity_policy {
+		    allow_deployments_to_no_targets = true
+			skip_machine_behavior           = "None"
+		  }
+		}
+		
+		data "octopusdeploy_projects" "%s" {
+		  ids = [octopusdeploy_project.%s.id]
+		}`, localName, description, lifecycleID, name, projectGroupID, localName, localName)
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
-		projectID := rs.Primary.ID
-		project, err := client.Projects.GetByID(projectID)
-		if err == nil {
-			if project != nil {
-				return fmt.Errorf("project (%s) still exists", rs.Primary.ID)
+		id := rs.Primary.ID
+		switch rs.Type {
+		case "octopusdeploy_lifecycle":
+			lifecycle, err := client.Lifecycles.GetByID(id)
+			if err == nil && lifecycle != nil {
+				return fmt.Errorf("lifecycle (%s) still exists", id)
+			}
+		case "octopusdeploy_project_group":
+			projectGroup, err := client.ProjectGroups.GetByID(id)
+			if err == nil && projectGroup != nil {
+				return fmt.Errorf("project group (%s) still exists", id)
+			}
+		case "octopusdeploy_project":
+			project, err := client.Projects.GetByID(id)
+			if err == nil && project != nil {
+				return fmt.Errorf("project (%s) still exists", id)
 			}
 		}
 	}

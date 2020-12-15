@@ -36,7 +36,7 @@ func dataSourceChannelsRead(ctx context.Context, d *schema.ResourceData, m inter
 		flattenedChannels = append(flattenedChannels, flattenChannel(channel))
 	}
 
-	d.Set("channel", flattenedChannels)
+	d.Set("channels", flattenedChannels)
 	d.SetId("Channels " + time.Now().UTC().String())
 
 	return nil

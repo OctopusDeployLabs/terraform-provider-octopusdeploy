@@ -63,7 +63,7 @@ func getSpaceDataSchema() map[string]*schema.Schema {
 		"name":         getQueryName(),
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),
-		"space": {
+		"spaces": {
 			Computed:    true,
 			Description: "A list of spaces that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

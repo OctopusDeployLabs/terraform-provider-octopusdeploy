@@ -69,7 +69,7 @@ func getUserDataSchema() map[string]*schema.Schema {
 		"ids":    getQueryIDs(),
 		"skip":   getQuerySkip(),
 		"take":   getQueryTake(),
-		"user": {
+		"users": {
 			Computed:    true,
 			Description: "A list of users that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

@@ -37,11 +37,11 @@ data "octopusdeploy_certificates" "example" {
 
 ### Read-only
 
-- **certificate** (Block List) A list of certificates that match the filter(s). (see [below for nested schema](#nestedblock--certificate))
+- **certificates** (Block List) A list of certificates that match the filter(s). (see [below for nested schema](#nestedblock--certificates))
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
 
-<a id="nestedblock--certificate"></a>
-### Nested Schema for `certificate`
+<a id="nestedblock--certificates"></a>
+### Nested Schema for `certificates`
 
 Read-only:
 

@@ -38,10 +38,10 @@ data "octopusdeploy_projects" "example" {
 ### Read-only
 
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **project** (Block List) A list of projects that match the filter(s). (see [below for nested schema](#nestedblock--project))
+- **projects** (Block List) A list of projects that match the filter(s). (see [below for nested schema](#nestedblock--projects))
 
-<a id="nestedblock--project"></a>
-### Nested Schema for `project`
+<a id="nestedblock--projects"></a>
+### Nested Schema for `projects`
 
 Read-only:
 
@@ -49,14 +49,14 @@ Read-only:
 - **auto_create_release** (Boolean, Read-only)
 - **auto_deploy_release_overrides** (List of String, Read-only)
 - **cloned_from_project_id** (String, Read-only)
-- **connectivity_policy** (List of Object, Read-only) (see [below for nested schema](#nestedatt--project--connectivity_policy))
+- **connectivity_policy** (List of Object, Read-only) (see [below for nested schema](#nestedatt--projects--connectivity_policy))
 - **default_guided_failure_mode** (String, Read-only)
 - **default_to_skip_if_already_installed** (Boolean, Read-only)
 - **deployment_changes_template** (String, Read-only)
 - **deployment_process_id** (String, Read-only)
 - **description** (String, Read-only) The description of this resource.
 - **discrete_channel_release** (Boolean, Read-only) Treats releases of different channels to the same environment as a separate deployment dimension
-- **extension_settings** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--project--extension_settings))
+- **extension_settings** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--projects--extension_settings))
 - **id** (String, Read-only) The unique ID for this resource.
 - **included_library_variable_sets** (List of String, Read-only)
 - **is_disabled** (Boolean, Read-only)
@@ -65,18 +65,18 @@ Read-only:
 - **lifecycle_id** (String, Read-only)
 - **name** (String, Read-only) The name of this resource.
 - **project_group_id** (String, Read-only)
-- **release_creation_strategy** (List of Object, Read-only) (see [below for nested schema](#nestedatt--project--release_creation_strategy))
+- **release_creation_strategy** (List of Object, Read-only) (see [below for nested schema](#nestedatt--projects--release_creation_strategy))
 - **release_notes_template** (String, Read-only)
 - **slug** (String, Read-only)
 - **space_id** (String, Read-only) The space ID associated with this resource.
-- **templates** (List of Object, Read-only) (see [below for nested schema](#nestedatt--project--templates))
+- **templates** (List of Object, Read-only) (see [below for nested schema](#nestedatt--projects--templates))
 - **tenanted_deployment_participation** (String, Read-only) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **variable_set_id** (String, Read-only)
-- **version_control_settings** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--project--version_control_settings))
-- **versioning_strategy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--project--versioning_strategy))
+- **version_control_settings** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--projects--version_control_settings))
+- **versioning_strategy** (Set of Object, Read-only) (see [below for nested schema](#nestedatt--projects--versioning_strategy))
 
-<a id="nestedatt--project--connectivity_policy"></a>
-### Nested Schema for `project.connectivity_policy`
+<a id="nestedatt--projects--connectivity_policy"></a>
+### Nested Schema for `projects.connectivity_policy`
 
 - **allow_deployments_to_no_targets** (Boolean)
 - **exclude_unhealthy_targets** (Boolean)
@@ -84,30 +84,30 @@ Read-only:
 - **target_roles** (List of String)
 
 
-<a id="nestedatt--project--extension_settings"></a>
-### Nested Schema for `project.extension_settings`
+<a id="nestedatt--projects--extension_settings"></a>
+### Nested Schema for `projects.extension_settings`
 
 - **extension_id** (String)
 - **values** (List of String)
 
 
-<a id="nestedatt--project--release_creation_strategy"></a>
-### Nested Schema for `project.release_creation_strategy`
+<a id="nestedatt--projects--release_creation_strategy"></a>
+### Nested Schema for `projects.release_creation_strategy`
 
 - **channel_id** (String)
-- **release_creation_package** (List of Object) (see [below for nested schema](#nestedobjatt--project--release_creation_strategy--release_creation_package))
+- **release_creation_package** (List of Object) (see [below for nested schema](#nestedobjatt--projects--release_creation_strategy--release_creation_package))
 - **release_creation_package_step_id** (String)
 
-<a id="nestedobjatt--project--release_creation_strategy--release_creation_package"></a>
-### Nested Schema for `project.release_creation_strategy.release_creation_package`
+<a id="nestedobjatt--projects--release_creation_strategy--release_creation_package"></a>
+### Nested Schema for `projects.release_creation_strategy.release_creation_package`
 
 - **deployment_action** (String)
 - **package_reference** (String)
 
 
 
-<a id="nestedatt--project--templates"></a>
-### Nested Schema for `project.templates`
+<a id="nestedatt--projects--templates"></a>
+### Nested Schema for `projects.templates`
 
 - **default_value** (String)
 - **display_settings** (Map of String)
@@ -117,8 +117,8 @@ Read-only:
 - **name** (String)
 
 
-<a id="nestedatt--project--version_control_settings"></a>
-### Nested Schema for `project.version_control_settings`
+<a id="nestedatt--projects--version_control_settings"></a>
+### Nested Schema for `projects.version_control_settings`
 
 - **default_branch** (String)
 - **password** (String)
@@ -126,8 +126,8 @@ Read-only:
 - **username** (String)
 
 
-<a id="nestedatt--project--versioning_strategy"></a>
-### Nested Schema for `project.versioning_strategy`
+<a id="nestedatt--projects--versioning_strategy"></a>
+### Nested Schema for `projects.versioning_strategy`
 
 - **donor_package** (List of String)
 - **donor_package_step_id** (String)

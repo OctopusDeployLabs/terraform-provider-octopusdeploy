@@ -36,7 +36,7 @@ func dataSourceLifecyclesRead(ctx context.Context, d *schema.ResourceData, m int
 		flattenedLifecycles = append(flattenedLifecycles, flattenLifecycle(lifecycle))
 	}
 
-	d.Set("lifecycle", flattenedLifecycles)
+	d.Set("lifecycles", flattenedLifecycles)
 	d.SetId("Lifecycles " + time.Now().UTC().String())
 
 	return nil

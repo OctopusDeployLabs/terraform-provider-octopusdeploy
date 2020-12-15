@@ -41,7 +41,7 @@ func dataSourceCertificatesRead(ctx context.Context, d *schema.ResourceData, m i
 		flattenedCertificates = append(flattenedCertificates, flattenCertificate(certificate))
 	}
 
-	d.Set("certificate", flattenedCertificates)
+	d.Set("certificates", flattenedCertificates)
 	d.SetId("Certificates " + time.Now().UTC().String())
 
 	return nil

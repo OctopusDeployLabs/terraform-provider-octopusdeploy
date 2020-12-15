@@ -33,11 +33,11 @@ data "octopusdeploy_environments" "example" {
 
 ### Read-only
 
-- **environment** (Block List) A list of environments that match the filter(s). (see [below for nested schema](#nestedblock--environment))
+- **environments** (Block List) A list of environments that match the filter(s). (see [below for nested schema](#nestedblock--environments))
 - **id** (String, Read-only) A auto-generated identifier that includes the timestamp when this data source was last modified.
 
-<a id="nestedblock--environment"></a>
-### Nested Schema for `environment`
+<a id="nestedblock--environments"></a>
+### Nested Schema for `environments`
 
 Read-only:
 

@@ -23,10 +23,10 @@ Provides information about existing tag sets.
 
 ### Read-only
 
-- **tag_set** (Block List) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedblock--tag_set))
+- **tag_sets** (Block List) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedblock--tag_sets))
 
-<a id="nestedblock--tag_set"></a>
-### Nested Schema for `tag_set`
+<a id="nestedblock--tag_sets"></a>
+### Nested Schema for `tag_sets`
 
 Read-only:
 
@@ -35,10 +35,10 @@ Read-only:
 - **name** (String, Read-only) The name of this resource.
 - **sort_order** (Number, Read-only) The sort order associated with this resource.
 - **space_id** (String, Read-only) The space ID associated with this resource.
-- **tag** (List of Object, Read-only) A list of tags. (see [below for nested schema](#nestedatt--tag_set--tag))
+- **tag** (List of Object, Read-only) A list of tags. (see [below for nested schema](#nestedatt--tag_sets--tag))
 
-<a id="nestedatt--tag_set--tag"></a>
-### Nested Schema for `tag_set.tag`
+<a id="nestedatt--tag_sets--tag"></a>
+### Nested Schema for `tag_sets.tag`
 
 - **canonical_tag_name** (String)
 - **color** (String)

@@ -21,18 +21,14 @@ func TestAccOctopusDeployDeploymentTargetTriggerAddDelete(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectDeploymentTargetTriggerResource(t, deployTargetTriggerName, projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectTriggerExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", deployTargetTriggerName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "true"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_groups.0", "Machine"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "name", deployTargetTriggerName),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "should_redeploy", "true"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_groups.0", "Machine"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
 				),
+				Config: testAccProjectDeploymentTargetTriggerResource(t, deployTargetTriggerName, projectName),
 			},
 		},
 	})
@@ -52,26 +48,19 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 				Config: testAccProjectDeploymentTargetTriggerResource(t, deployTargetTriggerName, projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectTriggerExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_groups.0", "Machine"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "true"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_groups.0", "Machine"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "should_redeploy", "true"),
 				),
 			},
 			{
 				Config: testAccProjectDeploymentTargetTriggerResourceUpdated(t, deployTargetTriggerName, projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectTriggerExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_groups.0", "Machine"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_groups.1", "MachineCritical"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_categories.0", "MachineHealthy"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "false"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_groups.0", "Machine"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_groups.1", "MachineCritical"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_categories.0", "MachineHealthy"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "should_redeploy", "false"),
 				),
 			},
 		},

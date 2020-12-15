@@ -60,7 +60,7 @@ func getTagSetDataSchema() map[string]*schema.Schema {
 		"ids":          getQueryIDs(),
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),
-		"tag_set": {
+		"tag_sets": {
 			Computed:    true,
 			Description: "A list of tag sets that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},

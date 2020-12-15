@@ -143,7 +143,7 @@ func getProjectDataSchema() map[string]*schema.Schema {
 		"is_clone":               getQueryIsClone(),
 		"name":                   getQueryName(),
 		"partial_name":           getQueryPartialName(),
-		"project": {
+		"projects": {
 			Computed:    true,
 			Description: "A list of projects that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
