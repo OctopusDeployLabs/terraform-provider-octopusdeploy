@@ -11,8 +11,6 @@ A GitHub action has been added to this project which initializes an instance of 
 
 ## Downloading & Installing
 
-As this provider is still under development, you will need to manually download it.
-
 There are compiled binaries for most platforms in [Releases](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/releases).
 
 To use it, extract the binary for your platform into the same folder as your `.tf` file(s) will be located, then run `terraform init`.
@@ -91,13 +89,3 @@ resource "octopusdeploy_environment" "Env3" {
   name     = "TestEnv3"
 }
 ```
-
-## Data Sources
-
-* [octopusdeploy_environment](docs/provider/data_sources/environment.md)
-* [octopusdeploy_lifecycle](docs/provider/data_sources/lifecycle.md)
-
-## Provider Resources
-
-* [octopusdeploy_environment](docs/provider/resources/environment.md)
-* [octopusdeploy_lifecycle](docs/provider/resources/lifecycle.md)
