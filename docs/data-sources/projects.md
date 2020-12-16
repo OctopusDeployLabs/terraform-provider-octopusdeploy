@@ -129,8 +129,14 @@ Read-only:
 <a id="nestedatt--projects--versioning_strategy"></a>
 ### Nested Schema for `projects.versioning_strategy`
 
-- **donor_package** (List of String)
+- **donor_package** (List of Object) (see [below for nested schema](#nestedobjatt--projects--versioning_strategy--donor_package))
 - **donor_package_step_id** (String)
 - **template** (String)
+
+<a id="nestedobjatt--projects--versioning_strategy--donor_package"></a>
+### Nested Schema for `projects.versioning_strategy.donor_package`
+
+- **deployment_action** (String)
+- **package_reference** (String)
 
 

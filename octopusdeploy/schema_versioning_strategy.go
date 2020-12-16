@@ -7,7 +7,7 @@ import (
 
 func flattenVersioningStrategy(versioningStrategy octopusdeploy.VersioningStrategy) []interface{} {
 	flattenedVersioningStrategy := make(map[string]interface{})
-	flattenedVersioningStrategy["donor_package"] = versioningStrategy.DonorPackage
+	flattenedVersioningStrategy["donor_package"] = flattenDeploymentActionPackage(versioningStrategy.DonorPackage)
 	flattenedVersioningStrategy["donor_package_step_id"] = versioningStrategy.DonorPackageStepID
 	flattenedVersioningStrategy["template"] = versioningStrategy.Template
 	return []interface{}{flattenedVersioningStrategy}
@@ -17,7 +17,7 @@ func getVersionStrategySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"donor_package": {
 			Computed: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
+			Elem:     &schema.Resource{Schema: getDeploymentActionPackageSchema()},
 			Type:     schema.TypeList,
 		},
 		"donor_package_step_id": {

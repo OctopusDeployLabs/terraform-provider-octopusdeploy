@@ -148,8 +148,14 @@ Read-only:
 
 Read-only:
 
-- **donor_package** (List of String, Read-only)
+- **donor_package** (List of Object, Read-only) (see [below for nested schema](#nestedatt--versioning_strategy--donor_package))
 - **donor_package_step_id** (String, Read-only)
 - **template** (String, Read-only)
+
+<a id="nestedatt--versioning_strategy--donor_package"></a>
+### Nested Schema for `versioning_strategy.donor_package`
+
+- **deployment_action** (String)
+- **package_reference** (String)
 
 
