@@ -27,6 +27,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.4.0 // indirect
 	github.com/oklog/run v1.1.0 // indirect
+	github.com/stretchr/testify v1.6.1
 	github.com/zclconf/go-cty v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9 // indirect
 	golang.org/x/mod v0.4.0 // indirect
