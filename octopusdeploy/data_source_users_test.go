@@ -24,7 +24,7 @@ func TestAccDataSourceUsers(t *testing.T) {
 				Config: testAccDataSourceUsersConfig(localName, username),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUsersDataSourceID(name),
-					resource.TestCheckResourceAttr(name, "users.#", "30"),
+					resource.TestCheckResourceAttrSet(name, "users.#"),
 				)},
 		},
 	})
