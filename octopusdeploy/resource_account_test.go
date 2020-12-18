@@ -111,11 +111,15 @@ func testAccAccountExists(prefix string) resource.TestCheckFunc {
 func testAccAccountCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
-		accountID := rs.Primary.ID
-		account, err := client.Accounts.GetByID(accountID)
+		if rs.Type != "octopusdeploy_account" {
+			continue
+		}
+
+		id := rs.Primary.ID
+		account, err := client.Accounts.GetByID(id)
 		if err == nil {
 			if account != nil {
-				return fmt.Errorf("account (%s) still exists", rs.Primary.ID)
+				return fmt.Errorf("account (%s) still exists", id)
 			}
 		}
 	}

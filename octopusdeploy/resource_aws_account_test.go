@@ -14,9 +14,9 @@ func TestAccAWSAccountBasic(t *testing.T) {
 	prefix := "octopusdeploy_aws_account." + localName
 
 	accessKey := acctest.RandString(acctest.RandIntRange(20, 255))
-	description := acctest.RandString(acctest.RandIntRange(20, 255))
-	name := acctest.RandStringFromCharSet(acctest.RandIntRange(20, 200), acctest.CharSetAlpha)
-	secretKey := acctest.RandString(acctest.RandIntRange(20, 3000))
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	secretKey := acctest.RandString(acctest.RandIntRange(20, 255))
 	tenantedDeploymentParticipation := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
 
 	newAccessKey := acctest.RandString(acctest.RandIntRange(20, 3000))
@@ -59,5 +59,9 @@ func testAWSAccountBasic(localName string, name string, description string, acce
 		name = "%s"
 		secret_key = "%s"
 		tenanted_deployment_participation = "%s"
-	}`, localName, accessKey, description, name, secretKey, tenantedDeploymentParticipation)
+	}
+	
+	data "octopusdeploy_accounts" "test" {
+		ids = [octopusdeploy_aws_account.%s.id]
+	}`, localName, accessKey, description, name, secretKey, tenantedDeploymentParticipation, localName)
 }

@@ -8,7 +8,6 @@ import (
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployAzureServicePrincipalAccountBasic(t *testing.T) {
@@ -23,6 +22,8 @@ func TestAccOctopusDeployAzureServicePrincipalAccountBasic(t *testing.T) {
 	tenantedDeploymentMode := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
 	tenantID := uuid.New()
 
+	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccAccountCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -30,7 +31,7 @@ func TestAccOctopusDeployAzureServicePrincipalAccountBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testAzureServicePrincipalAccountExists(prefix),
+					testAccAccountExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "application_id", applicationID.String()),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
@@ -40,6 +41,19 @@ func TestAccOctopusDeployAzureServicePrincipalAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
 				),
 				Config: testAzureServicePrincipalAccountBasic(localName, name, description, applicationID, tenantID, subscriptionID, password, tenantedDeploymentMode),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccAccountExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "application_id", applicationID.String()),
+					resource.TestCheckResourceAttr(prefix, "description", newDescription),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "password", password),
+					resource.TestCheckResourceAttr(prefix, "subscription_id", subscriptionID.String()),
+					resource.TestCheckResourceAttr(prefix, "tenant_id", tenantID.String()),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
+				),
+				Config: testAzureServicePrincipalAccountBasic(localName, name, newDescription, applicationID, tenantID, subscriptionID, password, tenantedDeploymentMode),
 			},
 		},
 	})
@@ -54,17 +68,9 @@ func testAzureServicePrincipalAccountBasic(localName string, name string, descri
 		subscription_id = "%s"
 		tenant_id = "%s"
 		tenanted_deployment_participation = "%s"
-	}`, localName, applicationID, description, name, password, subscriptionID, tenantID, tenantedDeploymentParticipation)
-}
-
-func testAzureServicePrincipalAccountExists(prefix string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		accountID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Accounts.GetByID(accountID); err != nil {
-			return err
-		}
-
-		return nil
 	}
+	
+	data "octopusdeploy_accounts" "test" {
+		ids = [octopusdeploy_azure_service_principal.%s.id]
+	}`, localName, applicationID, description, name, password, subscriptionID, tenantID, tenantedDeploymentParticipation, localName)
 }

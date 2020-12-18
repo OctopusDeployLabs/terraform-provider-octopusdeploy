@@ -23,7 +23,7 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 
 func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account := expandAmazonWebServicesAccount(d)
- 
+
 	log.Printf("[INFO] creating AWS account: %#v", account)
 
 	client := m.(*octopusdeploy.Client)
@@ -77,7 +77,6 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 	}
 
 	amazonWebServicesAccount := accountResource.(*octopusdeploy.AmazonWebServicesAccount)
-
 	if err := setAmazonWebServicesAccount(ctx, d, amazonWebServicesAccount); err != nil {
 		return diag.FromErr(err)
 	}

@@ -76,27 +76,31 @@ func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"azure_environment": getAzureEnvironmentSchema(),
 		"certificate": {
+			Computed:  true,
 			Optional:  true,
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
 		"certificate_thumbprint": {
+			Computed:  true,
 			Optional:  true,
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
 		"description":  getDescriptionSchema(),
 		"environments": getEnvironmentsSchema(),
-		"id":           getIDSchema(),
 		"management_endpoint": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Required:     true,
+			Type:         schema.TypeString,
+			RequiredWith: []string{"azure_environment"},
 		},
 		"name":     getNameSchema(true),
 		"space_id": getSpaceIDSchema(),
 		"storage_endpoint_suffix": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description:  "The storage endpoint suffix associated with this Azure subscription account.",
+			Required:     true,
+			Type:         schema.TypeString,
+			RequiredWith: []string{"azure_environment"},
 		},
 		"subscription_id":                   getSubscriptionIDSchema(true),
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
@@ -107,10 +111,8 @@ func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
 
 func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureSubscriptionAccount) error {
 	d.Set("azure_environment", account.AzureEnvironment)
-	d.Set("certificate", account.CertificateBytes)
 	d.Set("certificate_thumbprint", account.CertificateThumbprint)
 	d.Set("description", account.GetDescription())
-	d.Set("id", account.GetID())
 	d.Set("management_endpoint", account.ManagementEndpoint)
 	d.Set("name", account.GetName())
 	d.Set("space_id", account.GetSpaceID())
