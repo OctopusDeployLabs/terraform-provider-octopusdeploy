@@ -90,11 +90,7 @@ func testAccProjectBasic(localName string, name string, description string) stri
 		    allow_deployments_to_no_targets = true
 			skip_machine_behavior           = "None"
 		  }
-		}
-		
-		data "octopusdeploy_projects" "%s" {
-		  ids = [octopusdeploy_project.%s.id]
-		}`, localName, description, lifecycleID, name, projectGroupID, localName, localName)
+		}`, localName, description, lifecycleID, name, projectGroupID)
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
