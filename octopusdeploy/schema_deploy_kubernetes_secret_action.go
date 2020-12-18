@@ -41,7 +41,7 @@ func buildDeployKubernetesSecretActionResource(tfAction map[string]interface{}) 
 	resource := expandDeploymentAction(tfAction)
 
 	resource.ActionType = "Octopus.KubernetesDeploySecret"
-	resource.Properties["Octopus.Action.KubernetesContainers.SecretName"] = tfAction["secret_values"].(string)
+	resource.Properties["Octopus.Action.KubernetesContainers.SecretName"] = tfAction["secret_name"].(string)
 
 	if tfSecretValues, ok := tfAction["secret_values"]; ok {
 		secretValues := make(map[string]string)
