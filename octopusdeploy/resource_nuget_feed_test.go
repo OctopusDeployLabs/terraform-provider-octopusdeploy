@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -30,7 +31,7 @@ func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(feedPrefix, "feed_uri", feedURI),
 					resource.TestCheckResourceAttr(feedPrefix, "username", feedUsername),
 					resource.TestCheckResourceAttr(feedPrefix, "password", feedPassword),
-					resource.TestCheckResourceAttr(feedPrefix, "is_enhanced_mode", enhancedMode),
+					resource.TestCheckResourceAttr(feedPrefix, "is_enhanced_mode", strconv.FormatBool(enhancedMode)),
 				),
 			},
 		},
@@ -43,7 +44,7 @@ func testNugetFeedBasic(name, feedURI string, feedUsername string, feedPassword 
 		feed_uri = "%s"
 		username = "%s"
 		password = "%s"
-		is_enhanced_mode = %s
+		is_enhanced_mode = %v
 	}`, name, feedURI, feedUsername, feedPassword, enhancedMode)
 }
 
