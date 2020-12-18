@@ -9,7 +9,7 @@ defaults:
 jobs:
   test:
     env:
-      OCTOPUS_VERSION: "2020.2.7"
+      OCTOPUS_VERSION: "2020.5"
       OCTOPUS_URL: "http://localhost:8080"
 
     runs-on: ubuntu-latest
