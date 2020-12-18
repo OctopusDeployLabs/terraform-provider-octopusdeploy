@@ -13,7 +13,7 @@ func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 	const feedPrefix = "octopusdeploy_nuget_feed.foo"
 	const feedName = "Testing Nuget one two three"
 	const feedURI = "http://test.com"
-	const enhancedMode = "true"
+	const enhancedMode = true
 	const feedUsername = "username"
 	const feedPassword = "password"
 
@@ -30,25 +30,21 @@ func TestAccOctopusDeployNugetFeedBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(feedPrefix, "feed_uri", feedURI),
 					resource.TestCheckResourceAttr(feedPrefix, "username", feedUsername),
 					resource.TestCheckResourceAttr(feedPrefix, "password", feedPassword),
-					resource.TestCheckResourceAttr(feedPrefix, "enhanced_mode", enhancedMode),
+					resource.TestCheckResourceAttr(feedPrefix, "is_enhanced_mode", enhancedMode),
 				),
 			},
 		},
 	})
 }
 
-func testNugetFeedBasic(name, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
-	return fmt.Sprintf(`
-		resource "octopusdeploy_nuget_feed" "foo" {
-			name          = "%s"
-			feed_uri      = "%s"
-			username = "%s"
-			password = "%s"
-			enhanced_mode = "%s"
-		}
-		`,
-		name, feedURI, feedUsername, feedPassword, enhancedMode,
-	)
+func testNugetFeedBasic(name, feedURI string, feedUsername string, feedPassword string, enhancedMode bool) string {
+	return fmt.Sprintf(`resource "octopusdeploy_nuget_feed" "foo" {
+		name = "%s"
+		feed_uri = "%s"
+		username = "%s"
+		password = "%s"
+		is_enhanced_mode = %s
+	}`, name, feedURI, feedUsername, feedPassword, enhancedMode)
 }
 
 func testOctopusDeployNugetFeedExists(n string) resource.TestCheckFunc {

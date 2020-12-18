@@ -30,7 +30,6 @@ func TestAccUsernamePasswordBasic(t *testing.T) {
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					testAccAccountExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "account_type", "UsernamePassword"),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
