@@ -204,7 +204,7 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 			}
 		}
 		
-		resource "octopusdeploy_project_channel" "ch" {
+		resource "octopusdeploy_channel" "ch" {
 		  depends_on  = ["octopusdeploy_deployment_process.deploy_step_template"]
 		  description = "%s"
 		  name        = "%s"
@@ -216,7 +216,7 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 		  }
 		}
 		`,
-		actionName, name, description, versionRange, actionName,
+		actionName, description, name, actionName, versionRange,
 	)
 }
 
@@ -332,9 +332,14 @@ func destroyHelperChannel(s *terraform.State, client *octopusdeploy.Client) erro
 			continue
 		}
 
-		if channel, err := client.Channels.GetByID(rs.Primary.ID); err == nil && channel != nil {
-			return fmt.Errorf("channel (%s) still exists", rs.Primary.ID)
+		if _, err := client.Channels.GetByID(rs.Primary.ID); err != nil {
+			apiError := err.(*octopusdeploy.APIError)
+			if apiError.StatusCode == 404 {
+				continue
+			}
+			return fmt.Errorf("error retrieving channel %s", err)
 		}
+		return fmt.Errorf("channel still exists")
 	}
 	return nil
 }

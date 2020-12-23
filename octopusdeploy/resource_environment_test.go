@@ -69,6 +69,10 @@ func testEnvironmentExists(prefix string) resource.TestCheckFunc {
 func testEnvironmentDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_environment" {
+			continue
+		}
+
 		environmentID := rs.Primary.ID
 		environment, err := client.Environments.GetByID(environmentID)
 		if err == nil {
