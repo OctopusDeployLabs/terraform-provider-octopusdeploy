@@ -116,10 +116,34 @@ func testProjectGroupExists(prefix string) resource.TestCheckFunc {
 
 func destroyHelperProjectGroup(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
-		if _, err := client.ProjectGroups.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("error retrieving projectgroup %s", err)
+		if r.Type != "octopusdeploy_project_group" {
+			continue
 		}
-		return fmt.Errorf("projectgroup still exists")
+
+		if _, err := client.ProjectGroups.GetByID(r.Primary.ID); err != nil {
+			apiError := err.(*octopusdeploy.APIError)
+			if apiError.StatusCode == 404 {
+				continue
+			}
+			return fmt.Errorf("error retrieving project group %s", err)
+		}
+		return fmt.Errorf("project group still exists")
 	}
+	return nil
+}
+
+func testAccProjectGroupCheckDestroy(s *terraform.State) error {
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_project_group" {
+			continue
+		}
+
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		projectGroup, err := client.ProjectGroups.GetByID(rs.Primary.ID)
+		if err == nil && projectGroup != nil {
+			return fmt.Errorf("project group (%s) still exists", rs.Primary.ID)
+		}
+	}
+
 	return nil
 }

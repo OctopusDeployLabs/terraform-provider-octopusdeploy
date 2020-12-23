@@ -1,23 +1,41 @@
 package octopusdeploy
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/stretchr/testify/require"
 )
 
-func TestFlattenAndExpandTenant(t *testing.T) {
+func TestFlattenTenant(t *testing.T) {
+	clonedFromTenantID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	id := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectEnvironments := map[string][]string{}
+	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tenantTags := []string{acctest.RandStringFromCharSet(20, acctest.CharSetAlpha), acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)}
 
-	tenant := octopusdeploy.NewTenant(name)
-	tenant.ID = "Tenants-123"
-	tenant.Description = description
-	tenant.ClonedFromTenantID = "Tenants-321"
-	tenant.ProjectEnvironments["Projects-123"] = []string{"Environments-123"}
+	expectedExpanded := octopusdeploy.NewTenant(name)
+	expectedExpanded.ClonedFromTenantID = clonedFromTenantID
+	expectedExpanded.Description = description
+	expectedExpanded.ID = id
+	expectedExpanded.ProjectEnvironments = projectEnvironments
+	expectedExpanded.SpaceID = spaceID
+	expectedExpanded.TenantTags = tenantTags
 
-	flattenedTenant := flattenTenant(tenant)
+	expectedFlattened := map[string]interface{}{
+		"cloned_from_tenant_id": clonedFromTenantID,
+		"description":           description,
+		"id":                    id,
+		"name":                  name,
+		"project_environment":   flattenProjectEnvironments(projectEnvironments),
+		"space_id":              spaceID,
+		"tenant_tags":           tenantTags,
+	}
 
-	t.Log(flattenedTenant)
+	actualFlattened := flattenTenant(expectedExpanded)
+	require.True(t, reflect.DeepEqual(expectedFlattened, actualFlattened))
 }

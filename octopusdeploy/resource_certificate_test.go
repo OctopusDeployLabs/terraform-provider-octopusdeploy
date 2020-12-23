@@ -19,7 +19,7 @@ func TestAccOctopusDeployCertificateBasic(t *testing.T) {
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testCertificateDestroy,
+		CheckDestroy: testAccCertificateCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -56,15 +56,16 @@ func testCertificateExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testCertificateDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+func testAccCertificateCheckDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		certificateID := rs.Primary.ID
-		certificate, err := client.Certificates.GetByID(certificateID)
-		if err == nil {
-			if certificate != nil {
-				return fmt.Errorf("certificate (%s) still exists", rs.Primary.ID)
-			}
+		if rs.Type != "octopusdeploy_certficate" {
+			continue
+		}
+
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		certificate, err := client.Certificates.GetByID(rs.Primary.ID)
+		if err == nil && certificate != nil {
+			return fmt.Errorf("certificate (%s) still exists", rs.Primary.ID)
 		}
 	}
 

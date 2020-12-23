@@ -115,12 +115,9 @@ func testAccAccountCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		id := rs.Primary.ID
-		account, err := client.Accounts.GetByID(id)
-		if err == nil {
-			if account != nil {
-				return fmt.Errorf("account (%s) still exists", id)
-			}
+		account, err := client.Accounts.GetByID(rs.Primary.ID)
+		if err == nil && account != nil {
+			return fmt.Errorf("account (%s) still exists", rs.Primary.ID)
 		}
 	}
 

@@ -327,11 +327,14 @@ func testAccChannelCheckDestroy(s *terraform.State) error {
 }
 
 func destroyHelperChannel(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.Channels.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("error retrieving channel %s", err)
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_channel" {
+			continue
 		}
-		return fmt.Errorf("channel still exists")
+
+		if channel, err := client.Channels.GetByID(rs.Primary.ID); err == nil && channel != nil {
+			return fmt.Errorf("channel (%s) still exists", rs.Primary.ID)
+		}
 	}
 	return nil
 }

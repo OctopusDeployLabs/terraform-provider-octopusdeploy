@@ -17,10 +17,14 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.ParallelTest(t, resource.TestCase{
-		CheckDestroy: testAccProjectCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccProjectCheckDestroy,
+			testAccProjectGroupCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -42,9 +46,12 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccProjectCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccProjectCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -94,25 +101,15 @@ func testAccProjectBasic(localName string, name string, description string) stri
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
-		id := rs.Primary.ID
-		switch rs.Type {
-		case "octopusdeploy_lifecycle":
-			lifecycle, err := client.Lifecycles.GetByID(id)
-			if err == nil && lifecycle != nil {
-				return fmt.Errorf("lifecycle (%s) still exists", id)
-			}
-		case "octopusdeploy_project_group":
-			projectGroup, err := client.ProjectGroups.GetByID(id)
-			if err == nil && projectGroup != nil {
-				return fmt.Errorf("project group (%s) still exists", id)
-			}
-		case "octopusdeploy_project":
-			project, err := client.Projects.GetByID(id)
-			if err == nil && project != nil {
-				return fmt.Errorf("project (%s) still exists", id)
-			}
+		if rs.Type != "octopusdeploy_project" {
+			continue
+		}
+
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		project, err := client.Projects.GetByID(rs.Primary.ID)
+		if err == nil && project != nil {
+			return fmt.Errorf("project (%s) still exists", rs.Primary.ID)
 		}
 	}
 
@@ -140,7 +137,15 @@ func testAccCheckOctopusDeployProjectExists(n string) resource.TestCheckFunc {
 
 func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {
+		if r.Type != "octopusdeploy_project" {
+			continue
+		}
+
 		if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {
+			apiError := err.(*octopusdeploy.APIError)
+			if apiError.StatusCode == 404 {
+				continue
+			}
 			return fmt.Errorf("error retrieving project %s", err)
 		}
 		return fmt.Errorf("project still exists")

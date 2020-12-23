@@ -27,7 +27,6 @@ func TestTokenAccountBasic(t *testing.T) {
 				Config: testTokenAccountBasic(localName, description, name, tenantedDeploymentParticipation, token),
 				Check: resource.ComposeTestCheckFunc(
 					testAccAccountExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "account_type", "Token"),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
