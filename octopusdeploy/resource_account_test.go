@@ -71,7 +71,7 @@ func TestAccOctopusCloudTest(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccAccountExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "account_type", string(accountType)),
-					resource.TestCheckResourceAttr(resourceName, "client_id", applicationID.String()),
+					resource.TestCheckResourceAttr(resourceName, "application_id", applicationID.String()),
 					resource.TestCheckResourceAttr(resourceName, "client_secret", clientSecret),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "subscription_id", subscriptionID.String()),
