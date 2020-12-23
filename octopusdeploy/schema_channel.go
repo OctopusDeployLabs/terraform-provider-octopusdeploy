@@ -57,7 +57,7 @@ func flattenChannel(channel *octopusdeploy.Channel) map[string]interface{} {
 		"lifecycle_id": channel.LifecycleID,
 		"name":         channel.Name,
 		"project_id":   channel.ProjectID,
-		"rules":        flattenChannelRules(channel.Rules),
+		"rule":         flattenChannelRules(channel.Rules),
 		"space_id":     channel.SpaceID,
 		"tenant_tags":  channel.TenantTags,
 	}
@@ -102,7 +102,7 @@ func getChannelSchema() map[string]*schema.Schema {
 			Required:    true,
 			Type:        schema.TypeString,
 		},
-		"rules": {
+		"rule": {
 			Description: "A list of rules associated with this channel.",
 			Elem:        &schema.Resource{Schema: getChannelRuleSchema()},
 			Optional:    true,
@@ -121,8 +121,8 @@ func setChannel(ctx context.Context, d *schema.ResourceData, channel *octopusdep
 	d.Set("project_id", channel.ProjectID)
 	d.Set("space_id", channel.SpaceID)
 
-	if err := d.Set("rules", flattenChannelRules(channel.Rules)); err != nil {
-		return fmt.Errorf("error setting rules: %s", err)
+	if err := d.Set("rule", flattenChannelRules(channel.Rules)); err != nil {
+		return fmt.Errorf("error setting rule: %s", err)
 	}
 
 	if err := d.Set("tenant_tags", channel.TenantTags); err != nil {
