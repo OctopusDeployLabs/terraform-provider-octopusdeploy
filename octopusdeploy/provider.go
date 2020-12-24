@@ -52,6 +52,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_channel":                                        resourceChannel(),
 			"octopusdeploy_cloud_region_deployment_target":                 resourceCloudRegionDeploymentTarget(),
 			"octopusdeploy_deployment_process":                             resourceDeploymentProcess(),
+			"octopusdeploy_deployment_target":                              resourceDeploymentTarget(),
 			"octopusdeploy_environment":                                    resourceEnvironment(),
 			"octopusdeploy_feed":                                           resourceFeed(),
 			"octopusdeploy_kubernetes_cluster_deployment_target":           resourceKubernetesClusterDeploymentTarget(),

@@ -82,7 +82,7 @@ func testAccDeploymentTargetBasic(localName string, name string) string {
 	resource "octopusdeploy_deployment_target" "%s" {
 		environments                      = ["${octopusdeploy_environment.%s.id}"]
 		is_disabled                       = true
-		machine_policy_id                 = "${data.octopusdeploy_machine_policies.default.id}"
+		machine_policy_id                 = "${data.octopusdeploy_machine_policies.default.machine_policies[0].id}"
 		name                              = "%s"
 		roles                             = ["Prod"]
 		tenanted_deployment_participation = "Untenanted"

@@ -10,13 +10,14 @@ import (
 
 func expandDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
 	deploymentMode := octopusdeploy.TenantedDeploymentMode(d.Get("tenanted_deployment_participation").(string))
+	endpoint := expandEndpoint(d.Get("endpoint"))
 	environments := getSliceFromTerraformTypeList(d.Get("environments"))
 	name := d.Get("name").(string)
 	roles := getSliceFromTerraformTypeList(d.Get("roles"))
 	tenantIDs := getSliceFromTerraformTypeList(d.Get("tenants"))
 	tenantTags := getSliceFromTerraformTypeList(d.Get("tenant_tags"))
 
-	deploymentTarget := octopusdeploy.NewDeploymentTarget(name, nil, environments, roles)
+	deploymentTarget := octopusdeploy.NewDeploymentTarget(name, endpoint, environments, roles)
 	deploymentTarget.ID = d.Id()
 	deploymentTarget.TenantedDeploymentMode = deploymentMode
 	deploymentTarget.TenantIDs = tenantIDs
@@ -46,7 +47,10 @@ func flattenDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) m
 		return nil
 	}
 
+	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+
 	return map[string]interface{}{
+		"endpoint":                          flattenEndpoint(endpointResource),
 		"environments":                      deploymentTarget.EnvironmentIDs,
 		"has_latest_calamari":               deploymentTarget.HasLatestCalamari,
 		"health_status":                     deploymentTarget.HealthStatus,
@@ -102,6 +106,13 @@ func getDeploymentTargetDataSchema() map[string]*schema.Schema {
 
 func getDeploymentTargetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"endpoint": {
+			Computed: true,
+			Elem:     &schema.Resource{Schema: getEndpointSchema()},
+			MinItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"environments": getEnvironmentsSchema(),
 		"has_latest_calamari": {
 			Computed: true,
@@ -180,6 +191,15 @@ func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deployment
 	d.Set("tenanted_deployment_participation", deploymentTarget.TenantedDeploymentMode)
 	d.Set("thumbprint", deploymentTarget.Thumbprint)
 	d.Set("uri", deploymentTarget.URI)
+
+	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	if err != nil {
+		return fmt.Errorf("error setting endpoint: %s", err)
+	}
+
+	if err := d.Set("endpoint", flattenEndpoint(endpointResource)); err != nil {
+		return fmt.Errorf("error setting endpoint: %s", err)
+	}
 
 	if err := d.Set("environments", deploymentTarget.EnvironmentIDs); err != nil {
 		return fmt.Errorf("error setting environments: %s", err)
