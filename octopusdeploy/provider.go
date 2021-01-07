@@ -79,22 +79,29 @@ func Provider() *schema.Provider {
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
-				Type:        schema.TypeString,
-				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_URL", nil),
 				Description: "The endpoint of the Octopus REST API",
+				Required:    true,
+				Type:        schema.TypeString,
 			},
 			"api_key": {
-				Type:        schema.TypeString,
-				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),
 				Description: "The API key to use with the Octopus REST API",
+				Required:    true,
+				Type:        schema.TypeString,
 			},
 			"space_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_SPACE", ""),
-				Description: "The space ID to target",
+				ConflictsWith: []string{"space_name"},
+				Description:   "The space ID to target",
+				Optional:      true,
+				Type:          schema.TypeString,
+			},
+			"space_name": {
+				ConflictsWith: []string{"space_id"},
+				DefaultFunc:   schema.EnvDefaultFunc("OCTOPUS_SPACE", ""),
+				Description:   "The space name to target",
+				Optional:      true,
+				Type:          schema.TypeString,
 			},
 		},
 
@@ -104,9 +111,10 @@ func Provider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := Config{
-		Address: d.Get("address").(string),
-		APIKey:  d.Get("api_key").(string),
-		Space:   d.Get("space_id").(string),
+		Address:   d.Get("address").(string),
+		APIKey:    d.Get("api_key").(string),
+		SpaceID:   d.Get("space_id").(string),
+		SpaceName: d.Get("space_name").(string),
 	}
 
 	return config.Client()
