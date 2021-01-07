@@ -140,7 +140,7 @@ func getFeedSchema() map[string]*schema.Schema {
 		"password": getPasswordSchema(false),
 		"package_acquisition_location_options": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
-			Required: true,
+			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"region": {
