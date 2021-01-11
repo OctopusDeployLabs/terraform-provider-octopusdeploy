@@ -27,7 +27,7 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 		CheckDestroy: testFeedDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testFeedtBasic(localName, name, feedType, feedURI, feedUsername, feedPassword, enhancedMode),
+				Config: testFeedBasic(localName, name, feedType, feedURI, feedUsername, feedPassword, enhancedMode),
 				Check: resource.ComposeTestCheckFunc(
 					testFeedExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
@@ -42,7 +42,7 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 	})
 }
 
-func testFeedtBasic(localName string, name string, feedType string, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
+func testFeedBasic(localName string, name string, feedType string, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_feed" "%s" {
 		name             = "%s"
 		feed_type        = "%s"
