@@ -64,8 +64,8 @@ func testAccTenantBasic(localName string, name string, description string) strin
 func testTenantExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		userID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Tenants.GetByID(userID); err != nil {
+		tenantID := s.RootModule().Resources[prefix].Primary.ID
+		if _, err := client.Tenants.GetByID(tenantID); err != nil {
 			return err
 		}
 
