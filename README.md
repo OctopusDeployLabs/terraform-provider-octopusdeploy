@@ -9,7 +9,7 @@ It is based on the [go-octopusdeploy](https://github.com/OctopusDeploy/go-octopu
 
 A GitHub action has been added to this project which initializes an instance of Octopus Deploy and runs the tests against it. These same tests can be run in a forked repository.
 
-## Downloading & Installing
+## Downloading and Installing
 
 There are compiled binaries for most platforms in [Releases](https://github.com/OctopusDeploy/terraform-provider-octopusdeploy/releases).
 
