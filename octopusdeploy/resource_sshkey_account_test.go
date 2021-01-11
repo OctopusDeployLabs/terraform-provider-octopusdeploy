@@ -15,6 +15,7 @@ func TestSSHKeyBasic(t *testing.T) {
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	passphrase := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	privateKeyFile := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tenantedDeploymentParticipation := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
@@ -24,11 +25,11 @@ func TestSSHKeyBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testSSHKeyBasic(localName, name, username, passphrase, tenantedDeploymentParticipation),
+				Config: testSSHKeyBasic(localName, name, privateKeyFile, username, passphrase, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
 					testAccAccountExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr(prefix, "passphrase", passphrase),
+					resource.TestCheckResourceAttr(prefix, "private_key_passphrase", passphrase),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 					resource.TestCheckResourceAttr(prefix, "username", username),
 				),
@@ -37,11 +38,12 @@ func TestSSHKeyBasic(t *testing.T) {
 	})
 }
 
-func testSSHKeyBasic(localName string, name string, username string, passphrase string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+func testSSHKeyBasic(localName string, name string, privateKeyFile string, username string, passphrase string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`resource "octopusdeploy_ssh_key_account" "%s" {
 		name = "%s"
-		passphrase = "%s"
+		private_key_file = "%s"
+		private_key_passphrase = "%s"
 		tenanted_deployment_participation = "%s"
 		username = "%s"
-	}`, localName, name, passphrase, tenantedDeploymentParticipation, username)
+	}`, localName, name, privateKeyFile, passphrase, tenantedDeploymentParticipation, username)
 }
