@@ -11,6 +11,15 @@ import (
 )
 
 func TestAccTenantBasic(t *testing.T) {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_tenant." + localName
 
@@ -30,7 +39,7 @@ func TestAccTenantBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 				),
-				Config: testAccTenantBasic(localName, name, description),
+				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, description),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -38,34 +47,36 @@ func TestAccTenantBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", newDescription),
 				),
-				Config: testAccTenantBasic(localName, name, newDescription),
+				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, newDescription),
 			},
 		},
 	})
 }
 
-func testAccTenantBasic(localName string, name string, description string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_tenant" "%s" {
+func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, localName string, name string, description string) string {
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
+		testEnvironmentMinimum(environmentLocalName, environmentName)+"\n"+`
+	resource "octopusdeploy_tenant" "%s" {
 		description = "%s"
 		name        = "%s"
 
 		project_environment {
-		  project_id   = "Projects-5521"
-		  environments = ["Environments-10124"]
+		  project_id   = "${octopusdeploy_project.%s.id}"
+		  environments = ["${octopusdeploy_environment.%s.id}"]
 		}
-
-		project_environment {
-			project_id   = "Projects-5553"
-			environments = []
-		  }
-	  }`, localName, description, name)
+	}`, localName, description, name, projectLocalName, environmentLocalName)
 }
 
 func testTenantExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		// find the corresponding state object
+		rs, ok := s.RootModule().Resources[prefix]
+		if !ok {
+			return fmt.Errorf("Not found: %s", prefix)
+		}
+
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		tenantID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Tenants.GetByID(tenantID); err != nil {
+		if _, err := client.Tenants.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
 
