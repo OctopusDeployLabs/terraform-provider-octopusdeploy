@@ -54,9 +54,8 @@ func TestAccMachinePolicyBasic(t *testing.T) {
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(prefix, "id"),
-					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr("data."+prefix, "name", name),
+					resource.TestCheckResourceAttrSet("data.octopusdeploy_machine_policies."+localName, "id"),
+					resource.TestCheckResourceAttr("data.octopusdeploy_machine_policies."+localName, "machine_policies.#", "1"),
 				),
 				Config: testMachinePolicyDataSource(localName, name),
 			},
