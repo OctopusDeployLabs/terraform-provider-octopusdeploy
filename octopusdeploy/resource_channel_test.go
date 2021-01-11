@@ -11,6 +11,14 @@ import (
 )
 
 func TestAccOctopusDeployChannelBasic(t *testing.T) {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -21,7 +29,7 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccChannelBasic(name, description),
+				Config: testAccChannelBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, name, description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", name),
@@ -34,6 +42,14 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	const channelName = "Funky Channel"
 	resource.Test(t, resource.TestCase{
@@ -43,7 +59,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			// create baseline channel
 			{
-				Config: testAccChannelBasic(channelName, "this is funky"),
+				Config: testAccChannelBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, channelName, "this is funky"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", channelName),
@@ -52,7 +68,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 			},
 			// update channel with a new description
 			{
-				Config: testAccChannelBasic(channelName, "funky it is"),
+				Config: testAccChannelBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, channelName, "funky it is"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", channelName),
@@ -135,6 +151,7 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 	const actionName1 = "Funky Action"
 	const versionRange2 = "2.0"
 	const actionName2 = "Action-2"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -156,15 +173,7 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 	})
 }
 
-func testAccChannelBasic(name string, description string) string {
-	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
+func testAccChannelBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, name string, description string) string {
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+`		
 		resource "octopusdeploy_channel" "ch" {
 			description = "%s"
