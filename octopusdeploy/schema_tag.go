@@ -35,6 +35,7 @@ func flattenTags(tags []octopusdeploy.Tag) []map[string]interface{} {
 func getTagsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"canonical_tag_name": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeString,
 		},
