@@ -157,11 +157,15 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 }
 
 func testAccChannelBasic(name string, description string) string {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	return fmt.Sprintf(testAccProjectBasic(projectLocalName, projectName, projectDescription)+"\n"+`		
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+`		
 		resource "octopusdeploy_channel" "ch" {
 			description = "%s"
 			name        = "%s"

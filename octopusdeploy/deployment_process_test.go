@@ -27,13 +27,17 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 }
 
 func testAccDeploymentProcessBasic() string {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	projectID := "octopusdeploy_project." + localName + ".id"
 
-	return fmt.Sprintf(testAccProjectBasic(localName, name, description)+"\n"+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description)+"\n"+
 		`resource "octopusdeploy_deployment_process" "test" {
 			project_id = %s
 
@@ -122,13 +126,17 @@ func testAccDeploymentProcessBasic() string {
 }
 
 func testAccBuildTestAction(action string) string {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	projectID := "octopusdeploy_project." + localName + ".id"
 
-	return fmt.Sprintf(testAccProjectBasic(localName, name, description)+"\n"+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description)+"\n"+
 		`resource "octopusdeploy_deployment_process" "test" {
 			project_id = %s
 

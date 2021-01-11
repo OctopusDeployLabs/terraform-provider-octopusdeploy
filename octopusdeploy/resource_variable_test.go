@@ -37,11 +37,15 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 }
 
 func testVariableBasic(localName string, name string, description string, value string) string {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	config := fmt.Sprintf(testAccProjectBasic(projectLocalName, projectName, projectDescription)+"\n"+
+	config := fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
 		`resource "octopusdeploy_variable" "%s" {
 			description = "%s"
 			name        = "%s"

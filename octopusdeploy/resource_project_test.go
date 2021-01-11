@@ -11,6 +11,10 @@ import (
 )
 
 func TestAccOctopusDeployProjectBasic(t *testing.T) {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_project." + localName
 
@@ -32,13 +36,17 @@ func TestAccOctopusDeployProjectBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
-				Config: testAccProjectBasic(localName, name, description),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
 			},
 		},
 	})
 }
 
 func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_project." + localName
 
@@ -59,7 +67,7 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
-				Config: testAccProjectBasic(localName, name, description),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -70,18 +78,13 @@ func TestAccOctopusDeployProjectWithUpdate(t *testing.T) {
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.1.step_name"),
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.iis_website.0.step_name"),
 				),
-				Config: testAccProjectBasic(localName, name, description),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
 			},
 		},
 	})
 }
 
-func testAccProjectBasic(localName string, name string, description string) string {
-	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
+func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string) string {
 	lifecycleID := "octopusdeploy_lifecycle." + lifecycleLocalName + ".id"
 	projectGroupID := "octopusdeploy_project_group." + projectGroupLocalName + ".id"
 
