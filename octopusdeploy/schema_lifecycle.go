@@ -87,6 +87,8 @@ func getLifecycleSchema() map[string]*schema.Schema {
 				}), nil
 			},
 			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
+			MaxItems: 1,
+			MinItems: 1,
 			Optional: true,
 			Type:     schema.TypeList,
 		},
@@ -100,6 +102,8 @@ func getLifecycleSchema() map[string]*schema.Schema {
 				}), nil
 			},
 			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
+			MaxItems: 1,
+			MinItems: 1,
 			Optional: true,
 			Type:     schema.TypeList,
 		},
