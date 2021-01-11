@@ -35,7 +35,7 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "feed_uri", feedURI),
 					resource.TestCheckResourceAttr(prefix, "username", feedUsername),
 					resource.TestCheckResourceAttr(prefix, "password", feedPassword),
-					resource.TestCheckResourceAttr(prefix, "enhanced_mode", enhancedMode),
+					resource.TestCheckResourceAttr(prefix, "is_enhanced_mode", enhancedMode),
 				),
 			},
 		},
@@ -44,12 +44,12 @@ func TestAccOctopusDeployFeedBasic(t *testing.T) {
 
 func testFeedtBasic(localName string, name string, feedType string, feedURI string, feedUsername string, feedPassword string, enhancedMode string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_feed" "%s" {
-		name          = "%s"
-		feed_type     = "%s"
-		feed_uri      = "%s"
-		username      = "%s"
-		password      = "%s"
-		enhanced_mode = "%s"
+		name             = "%s"
+		feed_type        = "%s"
+		feed_uri         = "%s"
+		username         = "%s"
+		password         = "%s"
+		is_enhanced_mode = "%s"
 	}`, localName, name, feedType, feedURI, feedUsername, feedPassword, enhancedMode)
 }
 
