@@ -149,9 +149,10 @@ func getEmailAddressSchema(isRequired bool) *schema.Schema {
 
 func getEnvironmentsSchema() *schema.Schema {
 	return &schema.Schema{
+		Computed:    true,
 		Description: "A list of environment IDs associated with this resource.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
-		Required:    true,
+		Optional:    true,
 		Type:        schema.TypeList,
 	}
 }
