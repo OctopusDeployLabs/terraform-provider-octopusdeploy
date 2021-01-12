@@ -7,8 +7,8 @@ import (
 )
 
 func expandKubernetesAuthentication(values interface{}) octopusdeploy.IKubernetesAuthentication {
-	flattenedValues := values.([]interface{})
-	flattenedMap := flattenedValues[0].(map[string]interface{})
+	flattenedValues := values.(*schema.Set)
+	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
 
 	authenticationType := flattenedMap["authentication_type"].(string)
 	switch authenticationType {
