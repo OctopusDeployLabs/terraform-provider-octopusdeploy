@@ -5,13 +5,14 @@ services:
       - "8080:8080"
       - "10943:10943"
     environment:
-      ADMIN_USERNAME: admin
+      ACCEPT_EULA: Y
       ADMIN_EMAIL: octopusguides@gmail.com
       ADMIN_PASSWORD: Password01!
-      ACCEPT_EULA: Y
-      DB_CONNECTION_STRING: Server=mssql,1433;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
+      ADMIN_USERNAME: admin
       CONNSTRING: Server=mssql,1433;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
+      DB_CONNECTION_STRING: Server=mssql,1433;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
       MASTER_KEY: 6EdU6IWsCtMEwk0kPKflQQ==
+      OCTOPUS_SERVER_BASE64_LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
     image: octopusdeploy/octopusdeploy:${OCTOPUS_VERSION}
     labels:
       autoheal: true
