@@ -17,7 +17,7 @@ jobs:
       MASTER_KEY: "6EdU6IWsCtMEwk0kPKflQQ=="
       OCTOPUS_SERVER_BASE64_LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
       OCTOPUS_SERVER_TAG: "latest"
-      OCTOPUS_URL: "http://localhost"
+      OCTOPUS_URL: "http://localhost:8080"
       SA_PASSWORD: "Password01!"
       SQL_IMAGE: "mcr.microsoft.com/mssql/server"
 

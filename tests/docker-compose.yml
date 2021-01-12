@@ -22,7 +22,7 @@ services:
       OCTOPUS_SERVER_BASE64_LICENSE: ${OCTOPUS_SERVER_BASE64_LICENSE}
     image: octopusdeploy/octopusdeploy${OCTOPUS_SERVER_REPO_SUFFIX}:${OCTOPUS_SERVER_TAG}
     ports:
-      - 80:8080
+      - 8080:8080
     depends_on:
       db:
         condition: service_healthy
