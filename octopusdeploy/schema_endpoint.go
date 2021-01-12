@@ -8,6 +8,10 @@ import (
 
 func expandEndpoint(values interface{}) octopusdeploy.IEndpoint {
 	flattenedValues := values.([]interface{})
+	if len(flattenedValues) == 0 {
+		return nil
+	}
+
 	flattenedEndpoint := flattenedValues[0].(map[string]interface{})
 
 	communicationStyle := flattenedEndpoint["communication_style"].(string)
