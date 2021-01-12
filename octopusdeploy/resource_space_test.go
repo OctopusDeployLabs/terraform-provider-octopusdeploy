@@ -56,7 +56,7 @@ func TestAccSpaceBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(prefix, "id"),
 					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr("data."+prefix, "name", name),
+					resource.TestCheckResourceAttr("data.octopusdeploy_spaces."+localName, "name", name),
 				),
 				Config: testSpaceDataSource(localName, name),
 			},
@@ -66,7 +66,7 @@ func TestAccSpaceBasic(t *testing.T) {
 
 func testSpaceDataSource(localName string, name string) string {
 	return fmt.Sprintf(testSpaceBasic(localName, name)+"\n"+
-		`data "octopusdeploy_space" "%s" {
+		`data "octopusdeploy_spaces" "%s" {
 			name = "%s"
 		}`, localName, name)
 }
