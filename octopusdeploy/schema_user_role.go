@@ -88,6 +88,7 @@ func getUserRoleDataSchema() map[string]*schema.Schema {
 func getUserRoleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"can_be_deleted": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
