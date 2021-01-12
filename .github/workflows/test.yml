@@ -9,6 +9,7 @@ defaults:
 jobs:
   test:
     env:
+      OCTOPUS_SERVER_BASE64_LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
       OCTOPUS_VERSION: "latest"
       OCTOPUS_URL: "http://localhost:8080"
 

@@ -12,7 +12,7 @@ services:
       CONNSTRING: Server=mssql,1433;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
       DB_CONNECTION_STRING: Server=mssql,1433;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
       MASTER_KEY: 6EdU6IWsCtMEwk0kPKflQQ==
-      OCTOPUS_SERVER_BASE64_LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
+      OCTOPUS_SERVER_BASE64_LICENSE: ${OCTOPUS_SERVER_BASE64_LICENSE}
     image: octopusdeploy/octopusdeploy:${OCTOPUS_VERSION}
     labels:
       autoheal: true
