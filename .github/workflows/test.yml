@@ -9,9 +9,17 @@ defaults:
 jobs:
   test:
     env:
+      ACCEPT_EULA: "Y"
+      ACCEPT_OCTOPUS_EULA: "Y"
+      ADMIN_EMAIL: "john.bristowe@octopus.com"
+      ADMIN_USERNAME: "admin"
+      DB_CONNECTION_STRING: "Server=db,1433;Database=OctopusDeploy;User=sa;Password=Password01!"
+      MASTER_KEY: "6EdU6IWsCtMEwk0kPKflQQ=="
       OCTOPUS_SERVER_BASE64_LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
-      OCTOPUS_VERSION: "latest"
+      OCTOPUS_SERVER_TAG: "latest"
       OCTOPUS_URL: "http://localhost:8080"
+      SA_PASSWORD: "Password01!"
+      SQL_IMAGE: "mcr.microsoft.com/mssql/server"
 
     runs-on: ubuntu-latest
 
