@@ -53,3 +53,10 @@ func testUsernamePasswordBasic(localName string, description string, name string
 		username                          = "%s"
 	}`, localName, description, name, password, tenantedDeploymentParticipation, username)
 }
+
+func testUsernamePasswordMinimum(localName string, name string, username string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_username_password_account" "%s" {
+		name     = "%s"
+		username = "%s"
+	}`, localName, name, username)
+}
