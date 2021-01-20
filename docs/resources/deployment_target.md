@@ -1,13 +1,13 @@
 ---
-page_title: "octopusdeploy_offline_package_drop_deployment_target Resource - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_deployment_target Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages offline package drop deployment targets in Octopus Deploy.
+  
 ---
 
-# Resource `octopusdeploy_offline_package_drop_deployment_target`
+# Resource `octopusdeploy_deployment_target`
 
-This resource manages offline package drop deployment targets in Octopus Deploy.
+
 
 
 
@@ -15,15 +15,12 @@ This resource manages offline package drop deployment targets in Octopus Deploy.
 
 ### Required
 
-- **applications_directory** (String, Required)
 - **environments** (List of String, Required) A list of environment IDs associated with this resource.
 - **name** (String, Required) The name of this resource.
 - **roles** (List of String, Required)
-- **working_directory** (String, Required)
 
 ### Optional
 
-- **destination** (Block List, Max: 1) (see [below for nested schema](#nestedblock--destination))
 - **endpoint** (Block List) (see [below for nested schema](#nestedblock--endpoint))
 - **health_status** (String, Optional) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **id** (String, Optional) The unique ID for this resource.
@@ -45,15 +42,6 @@ This resource manages offline package drop deployment targets in Octopus Deploy.
 
 - **has_latest_calamari** (Boolean, Read-only)
 - **is_in_process** (Boolean, Read-only)
-
-<a id="nestedblock--destination"></a>
-### Nested Schema for `destination`
-
-Optional:
-
-- **destination_type** (String, Optional)
-- **drop_folder_path** (String, Optional)
-
 
 <a id="nestedblock--endpoint"></a>
 ### Nested Schema for `endpoint`

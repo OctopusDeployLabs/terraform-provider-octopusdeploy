@@ -17,7 +17,6 @@ description: |-
 
 - **feed_uri** (String, Required)
 - **name** (String, Required) The name of this resource.
-- **package_acquisition_location_options** (List of String, Required)
 
 ### Optional
 
@@ -29,6 +28,7 @@ description: |-
 - **feed_type** (String, Optional)
 - **id** (String, Optional) The unique ID for this resource.
 - **is_enhanced_mode** (Boolean, Optional)
+- **package_acquisition_location_options** (List of String, Optional)
 - **password** (String, Optional) The password associated with this resource.
 - **registry_path** (String, Optional)
 - **secret_key** (String, Optional)

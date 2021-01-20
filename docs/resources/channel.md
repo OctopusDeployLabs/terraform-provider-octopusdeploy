@@ -31,12 +31,12 @@ resource "octopusdeploy_channel" "example" {
 - **id** (String, Optional) The unique ID for this resource.
 - **is_default** (Boolean, Optional) Indicates if this is the default channel for the associated project.
 - **lifecycle_id** (String, Optional) The lifecycle ID associated with this channel.
-- **rules** (Block List) A list of rules associated with this channel. (see [below for nested schema](#nestedblock--rules))
+- **rule** (Block List) A list of rules associated with this channel. (see [below for nested schema](#nestedblock--rule))
 - **space_id** (String, Optional) The space ID associated with this resource.
 - **tenant_tags** (List of String, Optional) A list of tenant tags associated with this resource.
 
-<a id="nestedblock--rules"></a>
-### Nested Schema for `rules`
+<a id="nestedblock--rule"></a>
+### Nested Schema for `rule`
 
 Optional:
 
