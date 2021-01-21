@@ -82,7 +82,7 @@ Required:
 Optional:
 
 - **acquisition_location** (String, Optional) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **extract_during_deployment** (String, Optional) Whether to extract the package during deployment
+- **extract_during_deployment** (Boolean, Optional) Whether to extract the package during deployment
 - **feed_id** (String, Optional) The feed to retrieve the package from
 - **property** (Block Set) (see [below for nested schema](#nestedblock--step--action--package--property))
 
@@ -416,7 +416,7 @@ Required:
 Optional:
 
 - **acquisition_location** (String, Optional) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **extract_during_deployment** (String, Optional) Whether to extract the package during deployment
+- **extract_during_deployment** (Boolean, Optional) Whether to extract the package during deployment
 - **feed_id** (String, Optional) The feed to retrieve the package from
 - **property** (Block Set) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package--property))
 
@@ -497,7 +497,7 @@ Required:
 Optional:
 
 - **acquisition_location** (String, Optional) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **extract_during_deployment** (String, Optional) Whether to extract the package during deployment
+- **extract_during_deployment** (Boolean, Optional) Whether to extract the package during deployment
 - **feed_id** (String, Optional) The feed to retrieve the package from
 - **property** (Block Set) (see [below for nested schema](#nestedblock--step--run_script_action--package--property))
 

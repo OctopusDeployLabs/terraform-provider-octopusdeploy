@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"strconv"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -30,10 +32,10 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 	}
 
 	packageElementSchema["extract_during_deployment"] = &schema.Schema{
-		Default:     "true",
+		Default:     true,
 		Description: "Whether to extract the package during deployment",
 		Optional:    true,
-		Type:        schema.TypeString,
+		Type:        schema.TypeBool,
 	}
 }
 
@@ -79,7 +81,7 @@ func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.P
 
 	extract := tfPkg["extract_during_deployment"]
 	if extract != nil {
-		pkg.Properties["Extract"] = extract.(string)
+		pkg.Properties["Extract"] = strconv.FormatBool(extract.(bool))
 	}
 
 	return pkg
