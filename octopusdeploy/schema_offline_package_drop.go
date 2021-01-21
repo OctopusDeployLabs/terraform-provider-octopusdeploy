@@ -16,11 +16,7 @@ func expandOfflinePackageDrop(flattenedMap map[string]interface{}) *octopusdeplo
 	return endpoint
 }
 
-func flattenOfflinePackageDrop(endpoint *octopusdeploy.OfflinePackageDropEndpoint) []interface{} {
-	if endpoint == nil {
-		return nil
-	}
-
+func flattenOfflinePackageDrop(endpoint octopusdeploy.OfflinePackageDropEndpoint) []interface{} {
 	rawEndpoint := map[string]interface{}{
 		"applications_directory": endpoint.ApplicationsDirectory,
 		"destination":            flattenOfflinePackageDropDestination(endpoint.Destination),
