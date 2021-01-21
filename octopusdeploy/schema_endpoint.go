@@ -61,7 +61,7 @@ func flattenEndpoint(endpoint *octopusdeploy.EndpointResource) []interface{} {
 		"connection_endpoint":             endpoint.ConnectionEndpoint,
 		"container":                       flattenDeploymentActionContainer(endpoint.Container),
 		"default_worker_pool_id":          endpoint.DefaultWorkerPoolID,
-		"destination":                     flattenOfflinePackageDropDestination(*endpoint.Destination),
+		"destination":                     flattenOfflinePackageDropDestination(endpoint.Destination),
 		"dot_net_core_platform":           endpoint.DotNetCorePlatform,
 		"fingerprint":                     endpoint.Fingerprint,
 		"host":                            endpoint.Host,

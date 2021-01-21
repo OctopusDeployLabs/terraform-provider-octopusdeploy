@@ -19,7 +19,7 @@ func expandOfflinePackageDrop(flattenedMap map[string]interface{}) *octopusdeplo
 func flattenOfflinePackageDrop(endpoint octopusdeploy.OfflinePackageDropEndpoint) []interface{} {
 	rawEndpoint := map[string]interface{}{
 		"applications_directory": endpoint.ApplicationsDirectory,
-		"destination":            flattenOfflinePackageDropDestination(endpoint.Destination),
+		"destination":            flattenOfflinePackageDropDestination(&endpoint.Destination),
 		"id":                     endpoint.GetID(),
 		"working_directory":      endpoint.WorkingDirectory,
 	}

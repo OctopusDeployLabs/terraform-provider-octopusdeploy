@@ -19,7 +19,11 @@ func expandOfflinePackageDropDestination(values interface{}) octopusdeploy.Offli
 	}
 }
 
-func flattenOfflinePackageDropDestination(offlineDropDestination octopusdeploy.OfflinePackageDropDestination) []interface{} {
+func flattenOfflinePackageDropDestination(offlineDropDestination *octopusdeploy.OfflinePackageDropDestination) []interface{} {
+	if offlineDropDestination == nil {
+		return nil
+	}
+
 	return []interface{}{map[string]interface{}{
 		"destination_type": offlineDropDestination.DestinationType,
 		"drop_folder_path": offlineDropDestination.DropFolderPath,

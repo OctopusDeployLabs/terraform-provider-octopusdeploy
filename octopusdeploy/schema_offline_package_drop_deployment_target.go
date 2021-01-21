@@ -36,7 +36,7 @@ func flattenOfflinePackageDropDeploymentTarget(deploymentTarget *octopusdeploy.D
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
 	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["applications_directory"] = endpointResource.ApplicationsDirectory
-	flattenedDeploymentTarget["destination"] = flattenOfflinePackageDropDestination(*endpointResource.Destination)
+	flattenedDeploymentTarget["destination"] = flattenOfflinePackageDropDestination(endpointResource.Destination)
 	flattenedDeploymentTarget["working_directory"] = endpointResource.WorkingDirectory
 	return flattenedDeploymentTarget
 }
@@ -94,7 +94,7 @@ func setOfflinePackageDropDeploymentTarget(ctx context.Context, d *schema.Resour
 
 	d.Set("applications_directory", endpointResource.ApplicationsDirectory)
 
-	if err := d.Set("destination", flattenOfflinePackageDropDestination(*endpointResource.Destination)); err != nil {
+	if err := d.Set("destination", flattenOfflinePackageDropDestination(endpointResource.Destination)); err != nil {
 		return fmt.Errorf("error setting destination: %s", err)
 	}
 
