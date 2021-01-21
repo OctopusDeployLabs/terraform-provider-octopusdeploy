@@ -5,91 +5,45 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestSSHKeyBasic(t *testing.T) {
-	const accountPrefix = "octopusdeploy_sshkey_account.foo"
-	const username = "foo"
-	const passphrase = "H3lloWorld"
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_ssh_key_account." + localName
 
-	const tagSetName = "TagSet"
-	const tagName = "Tag"
-	var tenantTags = fmt.Sprintf("%s/%s", tagSetName, tagName)
-	const tenantedDeploymentParticipation = octopusdeploy.TenantedOrUntenanted
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	passphrase := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	privateKeyFile := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tenantedDeploymentParticipation := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
+	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccAccountCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployAzureServicePrincipalDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testSSHKeyBasic(tagSetName, tagName, username, passphrase, tenantedDeploymentParticipation),
+				Config: testSSHKeyBasic(localName, name, privateKeyFile, username, passphrase, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
-					testSSHKeyExists(accountPrefix),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "username", username),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "passphrase", passphrase),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "tenant_tags.0", tenantTags),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "tenanted_deployment_participation", tenantedDeploymentParticipation.String()),
+					testAccAccountExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "private_key_passphrase", passphrase),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
+					resource.TestCheckResourceAttr(prefix, "username", username),
 				),
 			},
 		},
 	})
 }
 
-func testSSHKeyBasic(tagSetName string, tagName string, username string, passphrase string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
-	return fmt.Sprintf(`
-
-
-		resource "octopusdeploy_azure_service_principal" "foo" {
-			usernamename           = "%s"
-			passphrase = "%s"
-			tagSetName = "%s"
-			tenant_tags = ["${octopusdeploy_tag_set.testtagset.name}/%s"]
-			tenanted_deployment_participation = "%s"
-		}
-		`,
-		tagSetName, tagName, username, passphrase, tenantedDeploymentParticipation,
-	)
-}
-
-func testSSHKeyExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		return existsAzureServicePrincipalHelper(s, client)
-	}
-}
-
-func existsSSHKeyHelper(s *terraform.State, client *octopusdeploy.Client) error {
-
-	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
-
-	if _, err := client.Account.Get(accountID); err != nil {
-		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
-	}
-
-	return nil
-}
-
-func testOctopusDeploySSHKeyDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
-	return destroyAzureServicePrincipalHelper(s, client)
-}
-
-func destroySSHKeyHelper(s *terraform.State, client *octopusdeploy.Client) error {
-
-	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
-
-	if _, err := client.Account.Get(accountID); err != nil {
-		if err == octopusdeploy.ErrItemNotFound {
-			return nil
-		}
-		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
-	}
-	return fmt.Errorf("Azure Service Principal still exists")
+func testSSHKeyBasic(localName string, name string, privateKeyFile string, username string, passphrase string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+	return fmt.Sprintf(`resource "octopusdeploy_ssh_key_account" "%s" {
+		name = "%s"
+		private_key_file = "%s"
+		private_key_passphrase = "%s"
+		tenanted_deployment_participation = "%s"
+		username = "%s"
+	}`, localName, name, privateKeyFile, passphrase, tenantedDeploymentParticipation, username)
 }

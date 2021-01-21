@@ -5,95 +5,63 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAWSAccountBasic(t *testing.T) {
-	const accountPrefix = "octopusdeploy_aws_account.foo"
-	const name = "awsaccount"
-	const accessKey = "AKIA6DEJDS6OY7FC3I50"
-	const secretKey = "x81L4H3riyiWRuBEPlz1"
+func TestAccAWSAccountBasic(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_aws_account." + localName
 
-	const tagSetName = "TagSet"
-	const tagName = "Tag"
-	var tenantTags = fmt.Sprintf("%s/%s", tagSetName, tagName)
-	const tenantedDeploymentParticipation = octopusdeploy.TenantedOrUntenanted
+	accessKey := acctest.RandString(acctest.RandIntRange(20, 255))
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	secretKey := acctest.RandString(acctest.RandIntRange(20, 255))
+	tenantedDeploymentParticipation := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
+
+	newAccessKey := acctest.RandString(acctest.RandIntRange(20, 3000))
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccAccountCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployAzureServicePrincipalDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAWSAccountBasic(tagSetName, tagName, name, accessKey, secretKey, tenantedDeploymentParticipation),
 				Check: resource.ComposeTestCheckFunc(
-					testAWSAccountExists(accountPrefix),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "name", name),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "access_key", accessKey),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "secret_key", secretKey),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "tenant_tags.0", tenantTags),
-					resource.TestCheckResourceAttr(
-						accountPrefix, "tenanted_deployment_participation", tenantedDeploymentParticipation.String()),
+					testAccAccountExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "access_key", accessKey),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "secret_key", secretKey),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 				),
+				Config: testAWSAccountBasic(localName, name, description, accessKey, secretKey, tenantedDeploymentParticipation),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccAccountExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "access_key", newAccessKey),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "secret_key", secretKey),
+					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
+				),
+				Config: testAWSAccountBasic(localName, name, description, newAccessKey, secretKey, tenantedDeploymentParticipation),
 			},
 		},
 	})
 }
 
-func testAWSAccountBasic(tagSetName string, tagName string, name string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
-	return fmt.Sprintf(`
-
-
-		resource "octopusdeploy_azure_service_principal" "foo" {
-			name           = "%s"
-			access_key = "%s"
-			secret_key = "%s"
-			tagSetName = "%s"
-			tenant_tags = ["${octopusdeploy_tag_set.testtagset.name}/%s"]
-			tenanted_deployment_participation = "%s"
-		}
-		`,
-		tagSetName, tagName, name, accessKey, secretKey, tenantedDeploymentParticipation,
-	)
-}
-
-func testAWSAccountExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		return existsAzureServicePrincipalHelper(s, client)
+func testAWSAccountBasic(localName string, name string, description string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+	return fmt.Sprintf(`resource "octopusdeploy_aws_account" "%s" {
+		access_key = "%s"
+		description = "%s"
+		name = "%s"
+		secret_key = "%s"
+		tenanted_deployment_participation = "%s"
 	}
-}
-
-func existsAWSAccountHelper(s *terraform.State, client *octopusdeploy.Client) error {
-
-	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
-
-	if _, err := client.Account.Get(accountID); err != nil {
-		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
-	}
-
-	return nil
-}
-
-func testOctopusDeployAWSAccountDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
-	return destroyAzureServicePrincipalHelper(s, client)
-}
-
-func destroyAWSAccountHelper(s *terraform.State, client *octopusdeploy.Client) error {
-
-	accountID := s.RootModule().Resources["octopusdeploy_azure_service_principal.foo"].Primary.ID
-
-	if _, err := client.Account.Get(accountID); err != nil {
-		if err == octopusdeploy.ErrItemNotFound {
-			return nil
-		}
-		return fmt.Errorf("Received an error retrieving azure service principal %s", err)
-	}
-	return fmt.Errorf("Azure Service Principal still exists")
+	
+	data "octopusdeploy_accounts" "test" {
+		ids = [octopusdeploy_aws_account.%s.id]
+	}`, localName, accessKey, description, name, secretKey, tenantedDeploymentParticipation, localName)
 }

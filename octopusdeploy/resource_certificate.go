@@ -1,199 +1,98 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceCertificate() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCertificateCreate,
-		Read:   resourceCertificateRead,
-		Update: resourceCertificateUpdate,
-		Delete: resourceCertificateDelete,
-
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"notes": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"certificate_data": {
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
-			},
-			"password": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
-			},
-			"environment_ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-			"tenant_ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"tenant_tags": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-		},
+		CreateContext: resourceCertificateCreate,
+		DeleteContext: resourceCertificateDelete,
+		Description:   "This resource manages certificates in Octopus Deploy.",
+		Importer:      getImporter(),
+		ReadContext:   resourceCertificateRead,
+		Schema:        getCertificateSchema(),
+		UpdateContext: resourceCertificateUpdate,
 	}
 }
 
-func resourceCertificateRead(d *schema.ResourceData, m interface{}) error {
+func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	certificate := expandCertificate(d)
+
+	log.Printf("[INFO] creating certificate: %#v", certificate)
+
 	client := m.(*octopusdeploy.Client)
-
-	certificateID := d.Id()
-	certificate, err := client.Certificate.Get(certificateID)
-
-	if err == octopusdeploy.ErrItemNotFound {
-		d.SetId("")
-		return nil
-	}
-
+	createdCertificate, err := client.Certificates.Add(certificate)
 	if err != nil {
-		return fmt.Errorf("error reading certificate %s: %s", certificateID, err.Error())
+		return diag.FromErr(err)
 	}
 
-	d.Set("name", certificate.Name)
-	d.Set("notes", certificate.Notes)
-	d.Set("environment_ids", certificate.EnvironmentIds)
-	d.Set("tenanted_deployment_participation", certificate.TenantedDeploymentParticipation)
-	d.Set("tenant_ids", certificate.TenantIds)
-	d.Set("tenant_tags", certificate.TenantTags)
+	if err := setCertificate(ctx, d, createdCertificate); err != nil {
+		return diag.FromErr(err)
+	}
 
+	d.SetId(createdCertificate.GetID())
+
+	log.Printf("[INFO] certificate created (%s)", d.Id())
 	return nil
 }
 
-func buildCertificateResource(d *schema.ResourceData) *octopusdeploy.Certificate {
-	certificateName := d.Get("name").(string)
-
-	var notes string
-	var certificateData string
-	var password string
-	var environmentIds []string
-	var tenantedDeploymentParticipation string
-	var tenantIds []string
-	var tenantTags []string
-
-	notesInterface, ok := d.GetOk("notes")
-	if ok {
-		notes = notesInterface.(string)
-	}
-
-	certificateDataInterface, ok := d.GetOk("certificate_data")
-	if ok {
-		certificateData = certificateDataInterface.(string)
-	}
-
-	passwordInterface, ok := d.GetOk("password")
-	if ok {
-		password = passwordInterface.(string)
-	}
-
-	environmentIdsInterface, ok := d.GetOk("environment_ids")
-	if ok {
-		environmentIds = getSliceFromTerraformTypeList(environmentIdsInterface)
-	}
-
-	if environmentIds == nil {
-		environmentIds = []string{}
-	}
-
-	tenantedDeploymentParticipationInterface, ok := d.GetOk("tenanted_deployment_participation")
-	if ok {
-		tenantedDeploymentParticipation = tenantedDeploymentParticipationInterface.(string)
-	}
-
-	tenantIdsInterface, ok := d.GetOk("tenant_ids")
-	if ok {
-		tenantIds = getSliceFromTerraformTypeList(tenantIdsInterface)
-	}
-
-	if tenantIds == nil {
-		tenantIds = []string{}
-	}
-
-	tenantTagsInterface, ok := d.GetOk("tenant_tags")
-	if ok {
-		tenantTags = getSliceFromTerraformTypeList(tenantTagsInterface)
-	}
-
-	if tenantTags == nil {
-		tenantTags = []string{}
-	}
-
-	var certificate = octopusdeploy.NewCertificate(certificateName, octopusdeploy.SensitiveValue{NewValue: certificateData}, octopusdeploy.SensitiveValue{NewValue: password})
-	certificate.Notes = notes
-	certificate.EnvironmentIds = environmentIds
-	certificate.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(tenantedDeploymentParticipation)
-	certificate.TenantIds = tenantIds
-	certificate.TenantTags = tenantTags
-
-	return certificate
-}
-
-func resourceCertificateCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	newCertificate := buildCertificateResource(d)
-	certificate, err := client.Certificate.Add(newCertificate)
-
-	if err != nil {
-		return fmt.Errorf("error creating certificate %s: %s", newCertificate.Name, err.Error())
-	}
-
-	d.SetId(certificate.ID)
-
-	return nil
-}
-
-func resourceCertificateUpdate(d *schema.ResourceData, m interface{}) error {
-	certificate := buildCertificateResource(d)
-	certificate.ID = d.Id()
+func resourceCertificateDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] deleting certificate (%s)", d.Id())
 
 	client := m.(*octopusdeploy.Client)
-
-	updatedCertificate, err := client.Certificate.Update(certificate)
-
-	if err != nil {
-		return fmt.Errorf("error updating certificate id %s: %s", d.Id(), err.Error())
-	}
-
-	d.SetId(updatedCertificate.ID)
-	return nil
-}
-
-func resourceCertificateDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	certificateID := d.Id()
-
-	err := client.Certificate.Delete(certificateID)
-
-	if err != nil {
-		return fmt.Errorf("error deleting certificate id %s: %s", certificateID, err.Error())
+	if err := client.Certificates.DeleteByID(d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
+
+	log.Printf("[INFO] certificate deleted")
+	return nil
+}
+
+func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading certificate (%s)", d.Id())
+
+	client := m.(*octopusdeploy.Client)
+	certificate, err := client.Certificates.GetByID(d.Id())
+	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] certificate (%s) not found; deleting from state", d.Id())
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
+	if err := setCertificate(ctx, d, certificate); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] certificate read (%s)", d.Id())
+	return nil
+}
+
+func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] updating certificate (%s)", d.Id())
+
+	certificate := expandCertificate(d)
+	client := m.(*octopusdeploy.Client)
+	updatedCertificate, err := client.Certificates.Update(*certificate)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := setCertificate(ctx, d, updatedCertificate); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] certificate updated (%s)", d.Id())
 	return nil
 }

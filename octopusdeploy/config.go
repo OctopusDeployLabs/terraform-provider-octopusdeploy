@@ -1,41 +1,55 @@
 package octopusdeploy
 
 import (
-	"log"
-	"net/http"
+	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 // Config holds Address and the APIKey of the Octopus Deploy server
 type Config struct {
-	Address string
-	APIKey  string
-	Space   string
+	Address   string
+	APIKey    string
+	SpaceID   string
+	SpaceName string
 }
 
 // Client returns a new Octopus Deploy client
-func (c *Config) Client() (*octopusdeploy.Client, error) {
-	client := octopusdeploy.NewClient(&(http.Client{}), c.Address, c.APIKey)
-
-	if c.Space == "" {
-
-		log.Printf("[INFO] Octopus Deploy Client configured against default space")
-
-		return client, nil
-	}
-
-	log.Printf("[INFO] Octopus Deploy Client will be scoped to %s space", c.Space)
-
-	space, err := client.Space.GetByName(c.Space)
-
+func (c *Config) Client() (*octopusdeploy.Client, diag.Diagnostics) {
+	apiURL, err := url.Parse(c.Address)
 	if err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 
-	scopedClient := octopusdeploy.ForSpace(&(http.Client{}), c.Address, c.APIKey, space)
+	client, err := octopusdeploy.NewClient(nil, apiURL, c.APIKey, "")
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] Octopus Deploy Client configured against %s space", c.Space)
+	if len(c.SpaceID) > 0 {
+		space, err := client.Spaces.GetByID(c.SpaceID)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
 
-	return scopedClient, nil
+		client, err = octopusdeploy.NewClient(nil, apiURL, c.APIKey, space.GetID())
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+	}
+
+	if len(c.SpaceName) > 0 {
+		space, err := client.Spaces.GetByName(c.SpaceName)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		client, err = octopusdeploy.NewClient(nil, apiURL, c.APIKey, space.GetID())
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+	}
+
+	return client, nil
 }

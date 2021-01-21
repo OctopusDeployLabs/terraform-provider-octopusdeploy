@@ -1,29 +1,28 @@
 version: '3'
 services:
-  octopus:
+  db:
+    environment:
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      SA_PASSWORD: ${SA_PASSWORD}
+    image: ${SQL_IMAGE}
     ports:
-      - "8080:8080"
-      - "10943:10943"
+      - 1401:1433
+    healthcheck:
+      interval: 10s
+      retries: 10
+      test: [ "CMD", "/opt/mssql-tools/bin/sqlcmd", "-U", "sa", "-P", "${SA_PASSWORD}", "-Q", "select 1"]
+  octopus-server:
     environment:
-      ADMIN_USERNAME: admin
-      ADMIN_EMAIL: octopusguides@gmail.com
-      ADMIN_PASSWORD: Password01!
-      ACCEPT_EULA: Y
-      DB_CONNECTION_STRING: Server=mssql,1433;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
-      CONNSTRING: Server=mssql,1433;Database=Octopus;User Id=SA;Password=Password01!;ConnectRetryCount=6
-      MASTER_KEY: 6EdU6IWsCtMEwk0kPKflQQ==
-    image: octopusdeploy/octopusdeploy:${OCTOPUS_VERSION}
-    labels:
-      autoheal: true
+      ACCEPT_EULA: ${ACCEPT_OCTOPUS_EULA}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${SA_PASSWORD}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      DB_CONNECTION_STRING: ${DB_CONNECTION_STRING}
+      MASTER_KEY: ${MASTER_KEY}
+      OCTOPUS_SERVER_BASE64_LICENSE: ${OCTOPUS_SERVER_BASE64_LICENSE}
+    image: octopusdeploy/octopusdeploy${OCTOPUS_SERVER_REPO_SUFFIX}:${OCTOPUS_SERVER_TAG}
+    ports:
+      - 8080:8080
     depends_on:
-      - mssql
-  mssql:
-    environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: Password01!
-      MSSQL_PID: Express
-    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
-  autoheal:
-    image: willfarrell/autoheal:latest
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      db:
+        condition: service_healthy

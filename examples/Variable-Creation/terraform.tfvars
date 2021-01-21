@@ -1,4 +1,4 @@
-serverURL = "https://michaellevan.octopus.app"
-space     = "Default"
+serverURL = "https://mikelevanoctopus.octopus.app"
+space     = "Spaces-1"
 projectID = "Projects-1"
 varName   = "DevKey"

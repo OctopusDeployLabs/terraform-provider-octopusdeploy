@@ -4,110 +4,101 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataMachine() *schema.Resource {
 	return &schema.Resource{
-		Read: dataMachineReadByName,
-
+		DeprecationMessage: "use a machine-specific data resource instead",
+		Read:               dataMachineReadByName,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
 				Required: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_communicationstyle": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_id": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_proxyid": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_thumbprint": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_uri": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_tentacleversiondetails_upgradelocked": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_tentacleversiondetails_upgraderequired": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_tentacleversiondetails_upgradesuggested": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"endpoint_tentacleversiondetails_version": {
+				Computed: true,
 				Type:     schema.TypeString,
-				Computed: true,
 			},
-
 			"environments": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
 			},
 			"haslatestcalamari": {
-				Type:     schema.TypeBool,
 				Computed: true,
+				Type:     schema.TypeBool,
 			},
 			"isdisabled": {
-				Type:     schema.TypeBool,
 				Computed: true,
+				Type:     schema.TypeBool,
 			},
 			"isinprocess": {
-				Type:     schema.TypeBool,
 				Computed: true,
+				Type:     schema.TypeBool,
 			},
 			"machinepolicy": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"roles": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
 			},
 			"status": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"statussummary": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"tenanteddeploymentparticipation": {
-				Type:     schema.TypeString,
 				Computed: true,
+				Type:     schema.TypeString,
 			},
 			"tenantids": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
 			},
 			"tenanttags": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
 			},
 		},
 	}
@@ -117,7 +108,7 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
 
 	machineName := d.Get("name").(string)
-	machine, err := client.Machine.GetByName(machineName)
+	machines, err := client.Machines.GetByName(machineName)
 	if err == octopusdeploy.ErrItemNotFound {
 		return nil
 	}
@@ -125,29 +116,40 @@ func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error reading machine with name %s: %s", machineName, err.Error())
 	}
 
-	d.SetId(machine.ID)
-	d.Set("endpoint_communicationstyle", machine.Endpoint.CommunicationStyle)
-	d.Set("endpoint_id", machine.Endpoint.ID)
-	d.Set("endpoint_proxyid", machine.Endpoint.ProxyID)
-	d.Set("endpoint_tentacleversiondetails_upgradelocked", machine.Endpoint.TentacleVersionDetails.UpgradeLocked)
-	d.Set("endpoint_tentacleversiondetails_upgraderequired", machine.Endpoint.TentacleVersionDetails.UpgradeRequired)
-	d.Set("endpoint_tentacleversiondetails_upgradesuggested", machine.Endpoint.TentacleVersionDetails.UpgradeSuggested)
-	d.Set("endpoint_tentacleversiondetails_version", machine.Endpoint.TentacleVersionDetails.Version)
-	d.Set("endpoint_thumbprint", machine.Endpoint.Thumbprint)
-	d.Set("endpoint_uri", machine.Endpoint.URI)
-	d.Set("environments", machine.EnvironmentIDs)
-	d.Set("haslatestcalamari", machine.HasLatestCalamari)
-	d.Set("isdisabled", machine.IsDisabled)
-	d.Set("isinprocess", machine.IsInProcess)
-	d.Set("machinepolicy", machine.MachinePolicyID)
-	d.Set("roles", machine.Roles)
-	d.Set("status", machine.Status)
-	d.Set("statussummary", machine.StatusSummary)
-	d.Set("tenanteddeploymentparticipation", machine.TenantedDeploymentParticipation)
-	d.Set("tenantids", machine.TenantIDs)
-	d.Set("tenanttags", machine.TenantTags)
-	//d.Set("thumbprint", machine.Thumbprint)
-	//d.Set("uri", machine.URI)
+	for _, machine := range machines {
+		if machine.Name == machineName {
+			endpointResource, err := octopusdeploy.ToEndpointResource(machine.Endpoint)
+			if err != nil {
+				return err
+			}
+
+			d.Set("endpoint_communicationstyle", machine.Endpoint.GetCommunicationStyle())
+			d.Set("endpoint_id", endpointResource.GetID())
+			d.Set("endpoint_proxyid", endpointResource.ProxyID)
+			d.Set("endpoint_tentacleversiondetails_upgradelocked", endpointResource.TentacleVersionDetails.UpgradeLocked)
+			d.Set("endpoint_tentacleversiondetails_upgraderequired", endpointResource.TentacleVersionDetails.UpgradeRequired)
+			d.Set("endpoint_tentacleversiondetails_upgradesuggested", endpointResource.TentacleVersionDetails.UpgradeSuggested)
+			d.Set("endpoint_tentacleversiondetails_version", endpointResource.TentacleVersionDetails.Version)
+			d.Set("endpoint_thumbprint", endpointResource.Thumbprint)
+			d.Set("endpoint_uri", endpointResource.URI)
+			d.Set("environments", machine.EnvironmentIDs)
+			d.Set("haslatestcalamari", machine.HasLatestCalamari)
+			d.Set("isdisabled", machine.IsDisabled)
+			d.Set("isinprocess", machine.IsInProcess)
+			d.Set("machinepolicy", machine.MachinePolicyID)
+			d.Set("roles", machine.Roles)
+			d.Set("status", machine.Status)
+			d.Set("statussummary", machine.StatusSummary)
+			d.Set("tenanteddeploymentparticipation", machine.TenantedDeploymentMode)
+			d.Set("tenantids", machine.TenantIDs)
+			d.Set("tenanttags", machine.TenantTags)
+			d.Set("thumbprint", machine.Thumbprint)
+			d.Set("uri", machine.URI)
+			d.SetId(machine.GetID())
+
+			return nil
+		}
+	}
 
 	return nil
 }

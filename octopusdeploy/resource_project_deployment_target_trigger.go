@@ -1,26 +1,25 @@
 package octopusdeploy
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectDeploymentTargetTriggerCreate,
-		Read:   resourceProjectDeploymentTargetTriggerRead,
-		Update: resourceProjectDeploymentTargetTriggerUpdate,
-		Delete: resourceProjectDeploymentTargetTriggerDelete,
+		CreateContext: resourceProjectDeploymentTargetTriggerCreate,
+		DeleteContext: resourceProjectDeploymentTargetTriggerDelete,
+		Importer:      getImporter(),
+		ReadContext:   resourceProjectDeploymentTargetTriggerRead,
+		UpdateContext: resourceProjectDeploymentTargetTriggerUpdate,
 
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The name of the trigger.",
-			},
+			"name": getNameSchema(true),
 			"project_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -122,87 +121,81 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 	}
 
 	if attr, ok := d.GetOk("environment_ids"); ok {
-		deploymentTargetTrigger.Filter.EnvironmentIds = getSliceFromTerraformTypeList(attr)
+		deploymentTargetTrigger.Filter.EnvironmentIDs = getSliceFromTerraformTypeList(attr)
 	}
 
 	return deploymentTargetTrigger, nil
 }
 
-func resourceProjectDeploymentTargetTriggerCreate(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	client := m.(*octopusdeploy.Client)
-
-	deploymentTargetTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
-
+	resource, err := client.ProjectTriggers.Add(projectTrigger)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	createdProjectDeploymentTargetTrigger, err := client.ProjectTrigger.Add(deploymentTargetTrigger)
-
-	if err != nil {
-		return fmt.Errorf("error creating project deployment target trigger: %s", err.Error())
+	if isEmpty(resource.GetID()) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(resource.GetID())
 	}
 
-	d.SetId(createdProjectDeploymentTargetTrigger.ID)
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerRead(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	id := d.Id()
+
 	client := m.(*octopusdeploy.Client)
-
-	projectTriggerID := d.Id()
-
-	projectTrigger, err := client.ProjectTrigger.Get(projectTriggerID)
-
-	if err == octopusdeploy.ErrItemNotFound {
+	resource, err := client.ProjectTriggers.GetByID(id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if resource == nil {
 		d.SetId("")
 		return nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("error reading project trigger id %s: %s", projectTrigger.ID, err.Error())
-	}
+	logResource("project_trigger", m)
 
-	log.Printf("[DEBUG] project trigger: %v", m)
-	d.Set("name", projectTrigger.Name)
-	d.Set("should_redeploy", projectTrigger.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
-	d.Set("event_groups", projectTrigger.Filter.EventGroups)
-	d.Set("event_categories", projectTrigger.Filter.EventCategories)
-	d.Set("roles", projectTrigger.Filter.Roles)
-	d.Set("environment_ids", projectTrigger.Filter.EnvironmentIds)
+	d.Set("environment_ids", resource.Filter.EnvironmentIDs)
+	d.Set("event_groups", resource.Filter.EventGroups)
+	d.Set("event_categories", resource.Filter.EventCategories)
+	d.Set("name", resource.Name)
+	d.Set("roles", resource.Filter.Roles)
+	d.Set("should_redeploy", resource.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
+
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerUpdate(d *schema.ResourceData, m interface{}) error {
-	deploymentTargetTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
-
+func resourceProjectDeploymentTargetTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-
-	deploymentTargetTrigger.ID = d.Id() // set deploymenttrigger struct ID so octopus knows which to update
+	projectTrigger.ID = d.Id() // set ID so Octopus API knows which project trigger to update
 
 	client := m.(*octopusdeploy.Client)
-
-	updatedProjectTrigger, err := client.ProjectTrigger.Update(deploymentTargetTrigger)
-
+	resource, err := client.ProjectTriggers.Update(*projectTrigger)
 	if err != nil {
-		return fmt.Errorf("error updating project trigger id %s: %s", d.Id(), err.Error())
+		return diag.FromErr(err)
 	}
 
-	d.SetId(updatedProjectTrigger.ID)
+	d.SetId(resource.GetID())
+
 	return nil
 }
 
-func resourceProjectDeploymentTargetTriggerDelete(d *schema.ResourceData, m interface{}) error {
+func resourceProjectDeploymentTargetTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*octopusdeploy.Client)
-
-	projectTriggerID := d.Id()
-
-	err := client.ProjectTrigger.Delete(projectTriggerID)
-
+	err := client.ProjectTriggers.DeleteByID(d.Id())
 	if err != nil {
-		return fmt.Errorf("error deleting project trigger id %s: %s", projectTriggerID, err.Error())
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")

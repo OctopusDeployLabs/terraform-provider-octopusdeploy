@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
@@ -16,10 +16,10 @@ func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccApplyTerraformAction(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplyTerraformAction(),
 				),
+				Config: testAccApplyTerraformAction(),
 			},
 		},
 	})
@@ -30,12 +30,10 @@ func testAccApplyTerraformAction() string {
 		apply_terraform_action {
             name = "Apply Terraform"
             run_on_server = true
-			
 			primary_package {
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
 			}
-			
 			additional_init_params = "Init params"
         }
 	`)

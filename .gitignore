@@ -20,7 +20,6 @@
 OFF/
 
 # Terraform
-.terraform/
 *.tfstate
 *.tfstate.backup
 crash.log
@@ -32,8 +31,9 @@ terraform-provider-octopusdeploy.exe
 
 # Commenting the below because I wasn't able to save my main.tf configs for examples
 #main.tf
-build/
 artifacts/
+build/
+vendor/
 .release/
 *.tfplan
 

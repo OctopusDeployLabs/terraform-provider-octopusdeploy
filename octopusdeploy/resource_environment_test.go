@@ -2,86 +2,85 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
-	const envPrefix = "octopusdeploy_environment.foo"
-	const envName = "Testing one two three"
-	const envDesc = "Terraform testing module environment"
-	const envGuided = "false"
-	const envDynamic = "false"
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_environment." + localName
+
+	allowDynamicInfrastructure := false
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	useGuidedFailure := false
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testEnvironmentDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployEnvironmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testEnvironmenttBasic(envName, envDesc, envGuided, envDynamic),
 				Check: resource.ComposeTestCheckFunc(
-					testOctopusDeployEnvironmentExists(envPrefix),
-					resource.TestCheckResourceAttr(
-						envPrefix, "name", envName),
-					resource.TestCheckResourceAttr(
-						envPrefix, "description", envDesc),
-					resource.TestCheckResourceAttr(
-						envPrefix, "use_guided_failure", envGuided),
-					resource.TestCheckResourceAttr(
-						envPrefix, "allow_dynamic_infrastructure", envDynamic),
+					testEnvironmentExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "allow_dynamic_infrastructure", strconv.FormatBool(allowDynamicInfrastructure)),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "use_guided_failure", strconv.FormatBool(useGuidedFailure)),
 				),
+				Config: testEnvironmentBasic(localName, name, description, allowDynamicInfrastructure, useGuidedFailure),
 			},
 		},
 	})
 }
 
-func testEnvironmenttBasic(name, description, useguided string, dynamic string) string {
-	return fmt.Sprintf(`
-		resource "octopusdeploy_environment" "foo" {
-			name           = "%s"
-			description    = "%s"
-			use_guided_failure = "%s"
-			allow_dynamic_infrastructure = "%s"
-		}
-		`,
-		name, description, useguided, dynamic,
-	)
+func testEnvironmentMinimum(localName string, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
+		name = "%s"
+	}`, localName, name)
 }
 
-func testOctopusDeployEnvironmentExists(n string) resource.TestCheckFunc {
+func testEnvironmentBasic(localName string, name string, description string, allowDynamicInfrastructure bool, useGuidedFailure bool) string {
+	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
+		allow_dynamic_infrastructure = "%v"
+		description                  = "%s"
+		name                         = "%s"
+		use_guided_failure           = "%v"
+	}`, localName, allowDynamicInfrastructure, description, name, useGuidedFailure)
+}
+
+func testEnvironmentExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		return existsEnvHelper(s, client)
-	}
-}
-
-func existsEnvHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.Environment.Get(r.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving environment %s", err)
+		environmentID := s.RootModule().Resources[prefix].Primary.ID
+		if _, err := client.Environments.GetByID(environmentID); err != nil {
+			return err
 		}
+
+		return nil
 	}
-	return nil
 }
 
-func testOctopusDeployEnvironmentDestroy(s *terraform.State) error {
+func testEnvironmentDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
-	return destroyEnvHelper(s, client)
-}
-
-func destroyEnvHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.Environment.Get(r.Primary.ID); err != nil {
-			if err == octopusdeploy.ErrItemNotFound {
-				continue
-			}
-			return fmt.Errorf("Received an error retrieving environment %s", err)
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_environment" {
+			continue
 		}
-		return fmt.Errorf("Environment still exists")
+
+		environmentID := rs.Primary.ID
+		environment, err := client.Environments.GetByID(environmentID)
+		if err == nil {
+			if environment != nil {
+				return fmt.Errorf("environment (%s) still exists", rs.Primary.ID)
+			}
+		}
 	}
+
 	return nil
 }

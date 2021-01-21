@@ -1,127 +1,108 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceSSHKey() *schema.Resource {
+func resourceSSHKeyAccount() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSSHKeyCreate,
-		Read:   resourceSSHKeyRead,
-		Update: resourceSSHKeyUpdate,
-		Delete: resourceSSHKeyDelete,
-
-		Schema: map[string]*schema.Schema{
-			"username": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"environments": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-			},
-			"passphrase": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-		},
+		CreateContext: resourceSSHKeyAccountCreate,
+		DeleteContext: resourceSSHKeyAccountDelete,
+		Description:   "This resource manages SSH key accounts in Octopus Deploy.",
+		Importer:      getImporter(),
+		ReadContext:   resourceSSHKeyAccountRead,
+		Schema:        getSSHKeyAccountSchema(),
+		UpdateContext: resourceSSHKeyAccountUpdate,
 	}
 }
 
-func resourceSSHKeyRead(d *schema.ResourceData, m interface{}) error {
+func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	account := expandSSHKeyAccount(d)
+
+	log.Printf("[INFO] creating SSH key account: %#v", account)
+
 	client := m.(*octopusdeploy.Client)
-
-	accountID := d.Id()
-	account, err := client.Account.Get(accountID)
-
-	if err == octopusdeploy.ErrItemNotFound {
-		d.SetId("")
-		return nil
-	}
-
+	createdAccount, err := client.Accounts.Add(account)
 	if err != nil {
-		return fmt.Errorf("error reading SSH Key Pair %s: %s", accountID, err.Error())
+		return diag.FromErr(err)
 	}
 
-	d.Set("name", account.Name)
-	d.Set("passphrase", account.Password)
+	if err := setSSHKeyAccount(ctx, d, createdAccount.(*octopusdeploy.SSHKeyAccount)); err != nil {
+		return diag.FromErr(err)
+	}
 
+	d.SetId(createdAccount.GetID())
+
+	log.Printf("[INFO] SSH key account created (%s)", d.Id())
 	return nil
 }
 
-func buildSSHKeyResource(d *schema.ResourceData) *octopusdeploy.Account {
-	var account = octopusdeploy.NewAccount(d.Get("name").(string), octopusdeploy.SshKeyPair)
-
-	account.Name = d.Get("username").(string)
-	account.Password = octopusdeploy.SensitiveValue{NewValue: d.Get("password").(string)}
-
-	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(v.(string))
-	}
-
-	if v, ok := d.GetOk("tenant_tags"); ok {
-		account.TenantTags = getSliceFromTerraformTypeList(v)
-	}
-
-	return account
-}
-
-func resourceSSHKeyCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	newAccount := buildSSHKeyResource(d)
-	account, err := client.Account.Add(newAccount)
-
-	if err != nil {
-		return fmt.Errorf("error reading SSH Key Pair %s: %s", newAccount.Name, err.Error())
-	}
-
-	d.SetId(account.ID)
-
-	return nil
-}
-
-func resourceSSHKeyUpdate(d *schema.ResourceData, m interface{}) error {
-	account := buildSSHKeyResource(d)
-	account.ID = d.Id()
+func resourceSSHKeyAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] deleting SSH key account (%s)", d.Id())
 
 	client := m.(*octopusdeploy.Client)
-
-	updatedAccount, err := client.Account.Update(account)
-
-	if err != nil {
-		return fmt.Errorf("error reading SSH Key Pair %s: %s", d.Id(), err.Error())
-	}
-
-	d.SetId(updatedAccount.ID)
-	return nil
-}
-
-func resourceSSHKeyDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	accountID := d.Id()
-
-	err := client.Account.Delete(accountID)
-
-	if err != nil {
-		return fmt.Errorf("error reading SSH Key Pair id %s: %s", accountID, err.Error())
+	if err := client.Accounts.DeleteByID(d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
+
+	log.Printf("[INFO] SSH key account deleted")
+	return nil
+}
+
+func resourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading SSH key account (%s)", d.Id())
+
+	client := m.(*octopusdeploy.Client)
+	accountResource, err := client.Accounts.GetByID(d.Id())
+	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] SSH key account (%s) not found; deleting from state", d.Id())
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
+	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := setSSHKeyAccount(ctx, d, accountResource.(*octopusdeploy.SSHKeyAccount)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] SSH key account read (%s)", d.Id())
+	return nil
+}
+
+func resourceSSHKeyAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] updating SSH key account (%s)", d.Id())
+
+	account := expandSSHKeyAccount(d)
+	client := m.(*octopusdeploy.Client)
+	updatedAccount, err := client.Accounts.Update(account)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	accountResource, err := octopusdeploy.ToAccount(updatedAccount.(*octopusdeploy.AccountResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := setSSHKeyAccount(ctx, d, accountResource.(*octopusdeploy.SSHKeyAccount)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] SSH key account updated (%s)", d.Id())
 	return nil
 }

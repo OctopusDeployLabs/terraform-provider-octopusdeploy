@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
@@ -16,33 +17,29 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDeploymentProcessBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployDeploymentProcess(),
 				),
+				Config: testAccDeploymentProcessBasic(),
 			},
 		},
 	})
 }
 
 func testAccDeploymentProcessBasic() string {
-	return `
-		resource "octopusdeploy_lifecycle" "test" {
-			name = "Test Lifecycle"
-		}
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-		resource "octopusdeploy_project_group" "test" {
-			name = "Test Group"
-		}
+	projectID := "octopusdeploy_project." + localName + ".id"
 
-		resource "octopusdeploy_project" "test" {
-			name             = "Test Project"
-			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
-			project_group_id = "${octopusdeploy_project_group.test.id}"
-		}
-
-		resource "octopusdeploy_deployment_process" "test" {
-			project_id = "${octopusdeploy_project.test.id}"
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description)+"\n"+
+		`resource "octopusdeploy_deployment_process" "test" {
+			project_id = %s
 
 			step {
 				name = "Test"
@@ -52,7 +49,6 @@ func testAccDeploymentProcessBasic() string {
 				condition_expression = "#{run}"
 				start_trigger = "StartWithPrevious"
 				window_size = "5"
-				
 
 				action {
 					name = "Test"
@@ -126,28 +122,23 @@ func testAccDeploymentProcessBasic() string {
  			           }
  			       }
 			} 
-		}
-		`
+		}`, projectID)
 }
 
 func testAccBuildTestAction(action string) string {
-	return fmt.Sprintf(`
-		resource "octopusdeploy_lifecycle" "test" {
-			name = "Test Lifecycle"
-		}
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-		resource "octopusdeploy_project_group" "test" {
-			name = "Test Group"
-		}
+	projectID := "octopusdeploy_project." + localName + ".id"
 
-		resource "octopusdeploy_project" "test" {
-			name             = "Test Project"
-			lifecycle_id     = "${octopusdeploy_lifecycle.test.id}"
-			project_group_id = "${octopusdeploy_project_group.test.id}"
-		}
-
-		resource "octopusdeploy_deployment_process" "test" {
-			project_id = "${octopusdeploy_project.test.id}"
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description)+"\n"+
+		`resource "octopusdeploy_deployment_process" "test" {
+			project_id = %s
 
 			step {
 				name = "Test"
@@ -155,8 +146,7 @@ func testAccBuildTestAction(action string) string {
 
 				%s
 			}
-		}
-		`, action)
+		}`, projectID, action)
 }
 
 func testAccCheckOctopusDeployDeploymentProcessDestroy(s *terraform.State) error {
@@ -200,7 +190,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 func getDeploymentProcess(s *terraform.State, client *octopusdeploy.Client) (*octopusdeploy.DeploymentProcess, error) {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_deployment_process" {
-			return client.DeploymentProcess.Get(r.Primary.ID)
+			return client.DeploymentProcesses.GetByID(r.Primary.ID)
 		}
 	}
 	return nil, fmt.Errorf("No deployment process found in the terraform resources")

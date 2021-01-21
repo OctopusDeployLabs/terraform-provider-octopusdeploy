@@ -1,109 +1,98 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceProjectGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProjectGroupCreate,
-		Read:   resourceProjectGroupRead,
-		Update: resourceProjectGroupUpdate,
-		Delete: resourceProjectGroupDelete,
-
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-		},
+		CreateContext: resourceProjectGroupCreate,
+		DeleteContext: resourceProjectGroupDelete,
+		Description:   "This resource manages project groups in Octopus Deploy.",
+		Importer:      getImporter(),
+		ReadContext:   resourceProjectGroupRead,
+		Schema:        getProjectGroupSchema(),
+		UpdateContext: resourceProjectGroupUpdate,
 	}
 }
 
-func buildProjectGroupResource(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
-	name := d.Get("name").(string)
+func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	projectGroup := expandProjectGroup(d)
 
-	projectGroup := octopusdeploy.NewProjectGroup(name)
+	log.Printf("[INFO] creating project group: %#v", projectGroup)
 
-	if attr, ok := d.GetOk("description"); ok {
-		projectGroup.Description = attr.(string)
-	}
-
-	return projectGroup
-}
-
-func resourceProjectGroupCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*octopusdeploy.Client)
-
-	newProjectGroup := buildProjectGroupResource(d)
-
-	createdProjectGroup, err := client.ProjectGroup.Add(newProjectGroup)
-
+	createdProjectGroup, err := client.ProjectGroups.Add(projectGroup)
 	if err != nil {
-		return fmt.Errorf("error creating projectgroup: %s", err.Error())
+		return diag.FromErr(err)
 	}
 
-	d.SetId(createdProjectGroup.ID)
+	if err := setProjectGroup(ctx, d, createdProjectGroup); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(createdProjectGroup.GetID())
+
+	log.Printf("[INFO] project group created (%s)", d.Id())
 	return nil
 }
 
-func resourceProjectGroupRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	projectGroupID := d.Id()
-
-	projectGroup, err := client.ProjectGroup.Get(projectGroupID)
-
-	if err == octopusdeploy.ErrItemNotFound {
-		d.SetId("")
-		return nil
-	}
-
-	if err != nil {
-		return fmt.Errorf("error reading projectgroup id %s: %s", projectGroup.ID, err.Error())
-	}
-
-	log.Printf("[DEBUG] projectgroup: %v", m)
-	d.Set("name", projectGroup.Name)
-	d.Set("description", projectGroup.Description)
-	return nil
-}
-
-func resourceProjectGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	projectGroup := buildProjectGroupResource(d)
-	projectGroup.ID = d.Id() // set projectgroup struct ID so octopus knows which  to update
+func resourceProjectGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] deleting project group (%s)", d.Id())
 
 	client := m.(*octopusdeploy.Client)
-
-	updatedProject, err := client.ProjectGroup.Update(projectGroup)
-
-	if err != nil {
-		return fmt.Errorf("error updating projectgroup id %s: %s", d.Id(), err.Error())
-	}
-
-	d.SetId(updatedProject.ID)
-	return nil
-}
-
-func resourceProjectGroupDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	projectGroupID := d.Id()
-
-	err := client.ProjectGroup.Delete(projectGroupID)
-
-	if err != nil {
-		return fmt.Errorf("error deleting projectgroup id %s: %s", projectGroupID, err.Error())
+	if err := client.ProjectGroups.DeleteByID(d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
+
+	log.Printf("[INFO] project group deleted")
+	return nil
+}
+
+func resourceProjectGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading project group (%s)", d.Id())
+
+	client := m.(*octopusdeploy.Client)
+	projectGroup, err := client.ProjectGroups.GetByID(d.Id())
+	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] project group (%s) not found; deleting from state", d.Id())
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
+	if err := setProjectGroup(ctx, d, projectGroup); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] project group read (%s)", d.Id())
+	return nil
+}
+
+func resourceProjectGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] updating project group (%s)", d.Id())
+
+	projectGroup := expandProjectGroup(d)
+	client := m.(*octopusdeploy.Client)
+	updatedProjectGroup, err := client.ProjectGroups.Update(*projectGroup)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := setProjectGroup(ctx, d, updatedProjectGroup); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] project group updated (%s)", d.Id())
 	return nil
 }

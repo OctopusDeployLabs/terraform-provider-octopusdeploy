@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployDeploymentTargetTriggerAddDelete(t *testing.T) {
@@ -21,18 +21,14 @@ func TestAccOctopusDeployDeploymentTargetTriggerAddDelete(t *testing.T) {
 		CheckDestroy: testAccCheckOctopusDeployProjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProjectDeploymentTargetTriggerResource(t, deployTargetTriggerName, projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectTriggerExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "name", deployTargetTriggerName),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "true"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_groups.0", "Machine"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "name", deployTargetTriggerName),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "should_redeploy", "true"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_groups.0", "Machine"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
 				),
+				Config: testAccProjectDeploymentTargetTriggerResource(t, deployTargetTriggerName, projectName),
 			},
 		},
 	})
@@ -52,26 +48,19 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 				Config: testAccProjectDeploymentTargetTriggerResource(t, deployTargetTriggerName, projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectTriggerExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_groups.0", "Machine"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "true"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_groups.0", "Machine"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_categories.0", "MachineCleanupFailed"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "should_redeploy", "true"),
 				),
 			},
 			{
 				Config: testAccProjectDeploymentTargetTriggerResourceUpdated(t, deployTargetTriggerName, projectName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccProjectTriggerExists(terraformNamePrefix),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_groups.0", "Machine"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_groups.1", "MachineCritical"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "event_categories.0", "MachineHealthy"),
-					resource.TestCheckResourceAttr(
-						terraformNamePrefix, "should_redeploy", "false"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_groups.0", "Machine"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_groups.1", "MachineCritical"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "event_categories.0", "MachineHealthy"),
+					resource.TestCheckResourceAttr(terraformNamePrefix, "should_redeploy", "false"),
 				),
 			},
 		},
@@ -80,17 +69,17 @@ func TestAccOctopusDeployDeploymentTargetTriggerUpdate(t *testing.T) {
 
 func testAccProjectDeploymentTargetTriggerResource(t *testing.T, triggerName, projectName string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource octopusdeploy_project "foo" {
 			lifecycle_id          = "Lifecycles-1"
 			name                  = "%s"
 			project_group_id      = "${octopusdeploy_project_group.foo.id}"
 	  	}
 
-		resource "octopusdeploy_project_deployment_target_trigger" "foo" {
+		resource octopusdeploy_project_deployment_target_trigger "foo" {
 			name             = "%s"
 			project_id       = "${octopusdeploy_project.foo.id}"
 			event_groups     = ["Machine"]
@@ -108,17 +97,17 @@ func testAccProjectDeploymentTargetTriggerResource(t *testing.T, triggerName, pr
 
 func testAccProjectDeploymentTargetTriggerResourceUpdated(t *testing.T, triggerName, projectName string) string {
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
+		resource octopusdeploy_project_group "foo" {
 			name = "Integration Test Project Group"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource octopusdeploy_project "foo" {
 			lifecycle_id          = "Lifecycles-1"
 			name                  = "%s"
 			project_group_id      = "${octopusdeploy_project_group.foo.id}"
 	  	}
 
-		resource "octopusdeploy_project_deployment_target_trigger" "foo" {
+		resource octopusdeploy_project_deployment_target_trigger "foo" {
 			name             = "%s"
 			project_id       = "${octopusdeploy_project.foo.id}"
 			event_groups     = ["Machine", "MachineCritical"]
@@ -144,8 +133,8 @@ func testAccProjectTriggerExists(resourceName string) resource.TestCheckFunc {
 
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
-		if _, err := client.ProjectTrigger.Get(rs.Primary.ID); err != nil {
-			return fmt.Errorf("Received an error retrieving project trigger %s", err)
+		if _, err := client.ProjectTriggers.GetByID(rs.Primary.ID); err != nil {
+			return fmt.Errorf("error retrieving project trigger %s", err)
 		}
 
 		return nil

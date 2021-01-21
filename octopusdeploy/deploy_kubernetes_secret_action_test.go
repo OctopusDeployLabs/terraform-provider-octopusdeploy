@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployDeployKuberentesSecretAction(t *testing.T) {
@@ -30,17 +30,14 @@ func testAccDeployKuberentesSecretAction() string {
 		deploy_kubernetes_secret_action {
             name = "Run Script"
             run_on_server = true
-			
 			secret_name = "secret name"
-
 			secret_values {
-				key = "key"
-				value = "value"
+				key = "key-123"
+				value = "value-123"
 			}
-
 			secret_values {
-				key = "key1"
-				value = "value1"
+				key = "key-321"
+				value = "value-321"
 			}
         }
 	`)
@@ -65,7 +62,7 @@ func testAccCheckDeployKuberentesSecretAction() resource.TestCheckFunc {
 			return fmt.Errorf("SecretName is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretName"])
 		}
 
-		if action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] != `{"key":"value","key1":"value1"}` {
+		if action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] != `{"key-123":"value-123","key-321":"value-321"}` {
 			return fmt.Errorf("SecretValue is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretValues"])
 		}
 

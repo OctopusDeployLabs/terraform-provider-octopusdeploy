@@ -1,186 +1,108 @@
 package octopusdeploy
 
 import (
-	"fmt"
+	"context"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceAccount() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAccountCreate,
-		Read:   resourceAccountRead,
-		Update: resourceAccountUpdate,
-		Delete: resourceAccountDelete,
-
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"environments": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional: true,
-			},
-		},
+		CreateContext:      resourceAccountCreate,
+		DeleteContext:      resourceAccountDelete,
+		DeprecationMessage: "Use an account-specific resource instead (i.e. octopusdeploy_aws_account, octopusdeploy_azure_service_principal, octopusdeploy_azure_subscription_account, octopusdeploy_ssh_key_account, octopusdeploy_token_account, octopusdeploy_username_password_account).",
+		Description:        "This resource manages accounts in Octopus Deploy.",
+		Importer:           getImporter(),
+		ReadContext:        resourceAccountRead,
+		Schema:             getAccountResourceSchema(),
+		UpdateContext:      resourceAccountUpdate,
 	}
 }
 
-func resourceAccountRead(d *schema.ResourceData, m interface{}) error {
+func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	accountResource := expandAccountResource(d)
+
+	log.Printf("[INFO] creating account: %#v", accountResource)
+
 	client := m.(*octopusdeploy.Client)
-
-	accountID := d.Id()
-	account, err := client.Account.Get(accountID)
-
-	if err == octopusdeploy.ErrItemNotFound {
-		d.SetId("")
-		return nil
-	}
-
+	createdAccount, err := client.Accounts.Add(accountResource)
 	if err != nil {
-		return fmt.Errorf("error reading account %s: %s", accountID, err.Error())
+		return diag.FromErr(err)
 	}
 
-	d.Set("name", account.Name)
-	d.Set("environments", account.EnvironmentIDs)
-	d.Set("account_type", account.AccountType.String())
-	d.Set("client_id", account.ClientID)
-	d.Set("tenant_id", account.TenantID)
-	d.Set("subscription_id", account.SubscriptionNumber)
-	d.Set("client_secret", account.Password)
-	d.Set("tenant_tags", account.TenantTags)
-	d.Set("tenanted_deployment_participation", account.TenantedDeploymentParticipation.String())
-	d.Set("token", account.Token)
+	accountResource, err = octopusdeploy.ToAccountResource(createdAccount)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
+	if err := setAccountResource(ctx, d, accountResource); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(accountResource.GetID())
+
+	log.Printf("[INFO] account created (%s)", d.Id())
 	return nil
 }
 
-func buildAccountResource(d *schema.ResourceData) *octopusdeploy.Account {
-	accountName := d.Get("name").(string)
-
-	var environments []string
-	var accountType string
-	var clientID string
-	var tenantID string
-	var subscriptionID string
-	var clientSecret string
-	var tenantTags []string
-	var tenantedDeploymentParticipation string
-	var token string
-
-	environmentsInterface, ok := d.GetOk("environments")
-	if ok {
-		environments = getSliceFromTerraformTypeList(environmentsInterface)
-	}
-
-	accountTypeInterface, ok := d.GetOk("account_type")
-	if ok {
-		accountType = accountTypeInterface.(string)
-	}
-
-	clientIDInterface, ok := d.GetOk("client_id")
-	if ok {
-		clientID = clientIDInterface.(string)
-	}
-
-	tenantIDInterface, ok := d.GetOk("tenant_id")
-	if ok {
-		tenantID = tenantIDInterface.(string)
-	}
-
-	subscriptionIDInterface, ok := d.GetOk("subscription_id")
-	if ok {
-		subscriptionID = subscriptionIDInterface.(string)
-	}
-
-	clientSecretInterface, ok := d.GetOk("client_secret")
-	if ok {
-		clientSecret = clientSecretInterface.(string)
-	}
-
-	tenantedDeploymentParticipationInterface, ok := d.GetOk("tenanted_deployment_participation")
-	if ok {
-		tenantedDeploymentParticipation = tenantedDeploymentParticipationInterface.(string)
-	}
-
-	tenantTagsInterface, ok := d.GetOk("tenant_tags")
-	if ok {
-		tenantTags = getSliceFromTerraformTypeList(tenantTagsInterface)
-	}
-
-	if tenantTags == nil {
-		tenantTags = []string{}
-	}
-
-	tokenInterface, ok := d.GetOk("token")
-	if ok {
-		token = tokenInterface.(string)
-	}
-
-	accountTypeEnum, _ := octopusdeploy.ParseAccountType(accountType)
-	var account = octopusdeploy.NewAccount(accountName, accountTypeEnum)
-	account.EnvironmentIDs = environments
-	account.ClientID = clientID
-	account.TenantID = tenantID
-	account.Password = octopusdeploy.SensitiveValue{
-		NewValue: clientSecret,
-	}
-	account.SubscriptionNumber = subscriptionID
-	account.TenantTags = tenantTags
-	account.TenantedDeploymentParticipation, _ = octopusdeploy.ParseTenantedDeploymentMode(tenantedDeploymentParticipation)
-	account.Token = octopusdeploy.SensitiveValue{
-		NewValue: token,
-	}
-
-	return account
-}
-
-func resourceAccountCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	newAccount := buildAccountResource(d)
-	account, err := client.Account.Add(newAccount)
-
-	if err != nil {
-		return fmt.Errorf("error creating account %s: %s", newAccount.Name, err.Error())
-	}
-
-	d.SetId(account.ID)
-
-	return nil
-}
-
-func resourceAccountUpdate(d *schema.ResourceData, m interface{}) error {
-	account := buildAccountResource(d)
-	account.ID = d.Id() // set project struct ID so octopus knows which project to update
+func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] deleting account (%s)", d.Id())
 
 	client := m.(*octopusdeploy.Client)
-
-	updatedAccount, err := client.Account.Update(account)
-
-	if err != nil {
-		return fmt.Errorf("error updating account id %s: %s", d.Id(), err.Error())
-	}
-
-	d.SetId(updatedAccount.ID)
-	return nil
-}
-
-func resourceAccountDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
-
-	accountID := d.Id()
-
-	err := client.Account.Delete(accountID)
-
-	if err != nil {
-		return fmt.Errorf("error deleting account id %s: %s", accountID, err.Error())
+	if err := client.Accounts.DeleteByID(d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
+
+	log.Printf("[INFO] account deleted")
+	return nil
+}
+
+func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading account (%s)", d.Id())
+
+	client := m.(*octopusdeploy.Client)
+	account, err := client.Accounts.GetByID(d.Id())
+	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] account (%s) not found; deleting from state", d.Id())
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
+	}
+
+	accountResource := account.(*octopusdeploy.AccountResource)
+
+	if err := setAccountResource(ctx, d, accountResource); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] account read (%s)", d.Id())
+	return nil
+}
+
+func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] updating account (%s)", d.Id())
+
+	accountResource := expandAccountResource(d)
+	client := m.(*octopusdeploy.Client)
+	updatedAccount, err := client.Accounts.Update(accountResource)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	updatedAccountResource := updatedAccount.(*octopusdeploy.AccountResource)
+
+	if err := setAccountResource(ctx, d, updatedAccountResource); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] account updated (%s)", d.Id())
 	return nil
 }
