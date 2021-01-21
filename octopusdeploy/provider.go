@@ -98,7 +98,6 @@ func Provider() *schema.Provider {
 			},
 			"space_name": {
 				ConflictsWith: []string{"space_id"},
-				DefaultFunc:   schema.EnvDefaultFunc("OCTOPUS_SPACE", ""),
 				Description:   "The space name to target",
 				Optional:      true,
 				Type:          schema.TypeString,
@@ -111,10 +110,14 @@ func Provider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := Config{
-		Address:   d.Get("address").(string),
-		APIKey:    d.Get("api_key").(string),
-		SpaceID:   d.Get("space_id").(string),
-		SpaceName: d.Get("space_name").(string),
+		Address: d.Get("address").(string),
+		APIKey:  d.Get("api_key").(string),
+	}
+
+	if spaceName, ok := d.GetOk("space_name"); ok {
+		config.SpaceName = spaceName.(string)
+	} else if spaceID, ok := d.GetOk("space_id"); ok {
+		config.SpaceID = spaceID.(string)
 	}
 
 	return config.Client()
