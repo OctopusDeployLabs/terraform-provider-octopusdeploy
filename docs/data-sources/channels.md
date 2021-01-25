@@ -45,12 +45,12 @@ Read-only:
 - **lifecycle_id** (String, Read-only) The lifecycle ID associated with this channel.
 - **name** (String, Read-only) The name of this resource.
 - **project_id** (String, Read-only) The project ID associated with this channel.
-- **rules** (List of Object, Read-only) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channels--rules))
+- **rule** (List of Object, Read-only) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channels--rule))
 - **space_id** (String, Read-only) The space ID associated with this resource.
 - **tenant_tags** (List of String, Read-only) A list of tenant tags associated with this resource.
 
-<a id="nestedatt--channels--rules"></a>
-### Nested Schema for `channels.rules`
+<a id="nestedatt--channels--rule"></a>
+### Nested Schema for `channels.rule`
 
 - **actions** (List of String)
 - **id** (String)
