@@ -165,6 +165,14 @@ func getQueryIDs() *schema.Schema {
 	}
 }
 
+func getQueryIncludeSystem() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to include system teams.",
+		Optional:    true,
+		Type:        schema.TypeBool,
+	}
+}
+
 func getQueryIsClone() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search for cloned resources.",
