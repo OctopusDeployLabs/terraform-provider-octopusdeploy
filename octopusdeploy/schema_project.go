@@ -225,8 +225,8 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 		"is_discrete_channel_release": {
-			Optional:    true,
 			Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
+			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"is_version_controlled": {
@@ -234,8 +234,9 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 		"lifecycle_id": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "The lifecycle ID associated with this project.",
+			Required:    true,
+			Type:        schema.TypeString,
 		},
 		"name": getNameSchema(true),
 		"project_group_id": {
