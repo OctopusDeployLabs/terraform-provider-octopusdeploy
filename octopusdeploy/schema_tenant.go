@@ -99,7 +99,7 @@ func getTenantSchema() map[string]*schema.Schema {
 						Type:        schema.TypeList,
 					},
 					"project_id": {
-						Description: "The ID of the project associated with this tenant.",
+						Description: "The project ID associated with this tenant.",
 						Required:    true,
 						Type:        schema.TypeString,
 					},

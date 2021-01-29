@@ -41,6 +41,7 @@ func getDeploymentProcessSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"project_id": {
+			Description: "The project ID associated with this deployment process.",
 			Required: true,
 			Type:     schema.TypeString,
 		},
