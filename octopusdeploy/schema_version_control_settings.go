@@ -12,7 +12,6 @@ func flattenVersionControlSettings(versionControlSettings *octopusdeploy.Version
 
 	flattenedVersionControlSettings := make(map[string]interface{})
 	flattenedVersionControlSettings["default_branch"] = versionControlSettings.DefaultBranch
-	flattenedVersionControlSettings["password"] = versionControlSettings.Password
 	flattenedVersionControlSettings["url"] = versionControlSettings.URL
 	flattenedVersionControlSettings["username"] = versionControlSettings.Username
 	return []interface{}{flattenedVersionControlSettings}
