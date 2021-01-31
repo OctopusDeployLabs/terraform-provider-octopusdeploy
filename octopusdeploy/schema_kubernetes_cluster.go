@@ -148,10 +148,11 @@ func getKubernetesClusterSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"container": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: getDeploymentActionContainerSchema()},
-			Optional: true,
-			Type:     schema.TypeList,
+			Computed:    true,
+			Description: "The deployment action container associated with this Kubernetes cluster.",
+			Elem:        &schema.Resource{Schema: getDeploymentActionContainerSchema()},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"default_worker_pool_id": {
 			Optional: true,
