@@ -4,8 +4,6 @@ import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 func getPropertySchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"key": {
@@ -20,6 +18,8 @@ func getPropertySchema() *schema.Schema {
 				},
 			},
 		},
+		Optional: true,
+		Type:     schema.TypeSet,
 	}
 }
 
