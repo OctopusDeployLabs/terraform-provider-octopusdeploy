@@ -20,6 +20,8 @@
 OFF/
 
 # Terraform
+.terraform/
+terraform.*
 *.tfstate
 *.tfstate.backup
 crash.log
