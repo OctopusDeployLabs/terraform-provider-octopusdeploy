@@ -1,5 +1,4 @@
-resource "octopusdeploy_account" "azure_service_principal_account" {
-  account_type    = "AzureServicePrincipal"
+resource "octopusdeploy_azure_service_principal" "example" {
   application_id  = "00000000-0000-0000-0000-000000000000"
   name            = "Azure Service Principal Account (OK to Delete)"
   password        = "###########" # required; get from secure environment/store

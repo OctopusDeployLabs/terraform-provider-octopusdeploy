@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_space.<name> <space-id>

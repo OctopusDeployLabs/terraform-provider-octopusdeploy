@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_certificate.<name> <certificate-id>

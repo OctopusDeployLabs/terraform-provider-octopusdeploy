@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_azure_service_fabric_cluster_deployment_target.<name> <machine-id>

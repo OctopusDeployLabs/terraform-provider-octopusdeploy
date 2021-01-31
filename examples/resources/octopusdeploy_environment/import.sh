@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_environment.<name> <environment-id>

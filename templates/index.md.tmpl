@@ -17,21 +17,23 @@ Octopus Deploy supports the concept of a Default Space. This is the first space 
 
 ```terraform
 provider "octopusdeploy" {
-  address = "http://octopus.production.yolo"
-  api_key  = "API-XXXXXXXXXXXXX"
+  address = "https://octopus.example.com"
+  api_key = "API-XXXXXXXXXXXXX"
 }
 ```
 
 ### Scoped to a Single Space
 
-You can specify a space for the Octopus Deploy Terraform provider to use. If specified, all resources managed by the provider will be scoped to this space. To scope the provider to a space,
-simply provide the _ID_ or _name_ of the space.
+You can configure the Terraform Provider for Octopus Deploy to target a
+particular space. If this configuration is specified, resources managed by the
+provider will be scoped to this space. To scope the provider to a space, simply
+provide the _ID_ or _name_ of the space.
 
 Scoping the provider by the ID of a space is done as follows:
 
 ```terraform
 provider "octopusdeploy" {
-  address  = "http://octopus.production.yolo"
+  address  = "https://octopus.example.com"
   api_key  = "API-XXXXXXXXXXXXX"
   space_id = "Spaces-321" # the ID of the space
 }
@@ -41,7 +43,7 @@ Scoping the provider by the name of a space is done as follows:
 
 ```terraform
 provider "octopusdeploy" {
-  address    = "http://octopus.production.yolo"
+  address    = "https://octopus.example.com"
   api_key    = "API-XXXXXXXXXXXXX"
   space_name = "Support" # the name of the space
 }
@@ -55,34 +57,34 @@ To manage resources in multiple spaces you can use multiple instances of the pro
 
 ```terraform
 provider "octopusdeploy" {
-  address = "http://octopus.production.yolo"
-  api_key  = "API-XXXXXXXXXXXXX"
+  address = "https://octopus.example.com"
+  api_key = "API-XXXXXXXXXXXXX"
 }
 
 provider "octopusdeploy" {
   alias      = "space_support"
-  address    = "http://octopus.production.yolo"
+  address    = "https://octopus.example.com"
   api_key    = "API-XXXXXXXXXXXXX"
   space_name = "Support" # The name of the space
 }
 
 provider "octopusdeploy" {
-  alias      = "space_product1"
-  address    = "http://octopus.production.yolo"
+  alias      = "space_product_development"
+  address    = "https://octopus.example.com"
   api_key    = "API-XXXXXXXXXXXXX"
-  space_name = "Product1" # The name of another space
+  space_name = "Product Development" # The name of another space
 }
 
 /*
 This resource will use the default provider and the default space
 */
-resource "octopusdeploy_environment" "Env1" {
+resource "octopusdeploy_environment" "development-environment" {
   name = "TestEnv1"
 }
 
 /*
 This resource will use the provider aliased as "space_support"
-which is scoped to the space named "Support"
+which is scoped to the space with the name, "support".
 */
 resource "octopusdeploy_environment" "Env2" {
   provider = "octopusdeploy.space_support"
@@ -90,11 +92,11 @@ resource "octopusdeploy_environment" "Env2" {
 }
 
 /*
-This resource will use the provider aliased as "space_product1"
-which is scoped to the space named "Product1"
+This resource will use the provider aliased as "space_product_development"
+which is scoped to the space named "Product Development".
 */
 resource "octopusdeploy_environment" "Env3" {
-  provider = "octopusdeploy.space_product1"
+  provider = "octopusdeploy.space_product_development"
   name     = "TestEnv3"
 }
 ```

@@ -33,9 +33,9 @@ resource "octopusdeploy_account" "ssh_key_pair_account" {
 
 # create a username-password account
 resource "octopusdeploy_account" "username_password_account" {
-  account_type     = "UsernamePassword"
-  name             = "Username-Password Account (OK to Delete)"
-  username         = "[username]"
+  account_type = "UsernamePassword"
+  name         = "Username-Password Account (OK to Delete)"
+  username     = "[username]"
 }
 
 # create a token account

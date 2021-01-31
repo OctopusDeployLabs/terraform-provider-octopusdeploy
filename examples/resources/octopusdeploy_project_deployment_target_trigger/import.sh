@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_project_deployment_target_trigger.<name> <project_deployment_target_trigger-id>

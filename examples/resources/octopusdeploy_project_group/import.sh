@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_project_group.<name> <project_group-id>

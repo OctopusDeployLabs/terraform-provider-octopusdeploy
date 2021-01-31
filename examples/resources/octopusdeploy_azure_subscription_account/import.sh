@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_azure_subscription_account.<name> <account-id>

@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_azure_service_principal.<name> <account-id>
