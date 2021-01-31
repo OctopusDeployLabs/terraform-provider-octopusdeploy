@@ -1,6 +1,9 @@
 package octopusdeploy
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -28,6 +31,7 @@ func flattenDeploymentProcess(deploymentProcess *octopusdeploy.DeploymentProcess
 	return []interface{}{map[string]interface{}{
 		"last_snapshot_id": deploymentProcess.LastSnapshotID,
 		"project_id":       deploymentProcess.ProjectID,
+		"space_id":         deploymentProcess.SpaceID,
 		"step":             flattenDeploymentSteps(deploymentProcess.Steps),
 		"version":          deploymentProcess.Version,
 	}}
@@ -41,14 +45,30 @@ func getDeploymentProcessSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"project_id": {
-			Description: "The project ID associated with this deployment process.",
-			Required: true,
-			Type:     schema.TypeString,
+			Description: "The project ID associated with this d eployment process.",
+			Required:    true,
+			Type:        schema.TypeString,
 		},
-		"step": getDeploymentStepSchema(),
+		"space_id": getSpaceIDSchema(),
+		"step":     getDeploymentStepSchema(),
 		"version": {
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
 	}
+}
+
+func setDeploymentProcess(ctx context.Context, d *schema.ResourceData, deploymentProcess *octopusdeploy.DeploymentProcess) error {
+	d.Set("last_snapshot_id", deploymentProcess.LastSnapshotID)
+	d.Set("project_id", deploymentProcess.ProjectID)
+	d.Set("space_id", deploymentProcess.SpaceID)
+	d.Set("version", deploymentProcess.Version)
+
+	if err := d.Set("step", flattenDeploymentSteps(deploymentProcess.Steps)); err != nil {
+		return fmt.Errorf("error setting step: %s", err)
+	}
+
+	d.SetId(deploymentProcess.GetID())
+
+	return nil
 }

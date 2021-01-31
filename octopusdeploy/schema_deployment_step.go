@@ -91,11 +91,15 @@ func expandDeploymentStep(tfStep map[string]interface{}) octopusdeploy.Deploymen
 	return step
 }
 
-func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []map[string]interface{} {
-	var flattenedDeploymentSteps = make([]map[string]interface{}, len(deploymentSteps))
+func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []interface{} {
+	if deploymentSteps == nil {
+		return nil
+	}
+
+	var flattenedDeploymentSteps = make([]interface{}, len(deploymentSteps))
 	for key, deploymentStep := range deploymentSteps {
 		flattenedDeploymentSteps[key] = map[string]interface{}{
-			"actions":             flattenDeploymentActions(deploymentStep.Actions),
+			"action":              flattenDeploymentActions(deploymentStep.Actions),
 			"condition":           deploymentStep.Condition,
 			"id":                  deploymentStep.ID,
 			"name":                deploymentStep.Name,
@@ -110,8 +114,6 @@ func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []ma
 
 func getDeploymentStepSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"action":                 getDeploymentActionSchema(),
@@ -150,6 +152,11 @@ func getDeploymentStepSchema() *schema.Schema {
 						"LetOctopusDecide",
 					}, false)),
 				},
+				"properties": {
+					Elem:     &schema.Schema{Type: schema.TypeString},
+					Optional: true,
+					Type:     schema.TypeMap,
+				},
 				"run_kubectl_script_action": getRunKubectlScriptSchema(),
 				"run_script_action":         getRunScriptActionSchema(),
 				"start_trigger": {
@@ -177,5 +184,7 @@ func getDeploymentStepSchema() *schema.Schema {
 				},
 			},
 		},
+		Optional: true,
+		Type:     schema.TypeList,
 	}
 }

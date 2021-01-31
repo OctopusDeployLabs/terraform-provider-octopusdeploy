@@ -81,18 +81,25 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading deployment process (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
-	resource, err := client.DeploymentProcesses.GetByID(d.Id())
+	deploymentProcess, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err != nil {
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] deployment process (%s) not found; deleting from state", d.Id())
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
-	if resource == nil {
-		d.SetId("")
-		return nil
+
+	if err := setDeploymentProcess(ctx, d, deploymentProcess); err != nil {
+		return diag.FromErr(err)
 	}
 
-	logResource("deployment_process", m)
-
+	log.Printf("[INFO] deployment process read (%s)", d.Id())
 	return nil
 }
 
