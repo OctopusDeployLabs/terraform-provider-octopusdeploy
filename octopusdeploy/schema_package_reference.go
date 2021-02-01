@@ -39,29 +39,55 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 	}
 }
 
+func flattenPackageReferences(packageReferences []octopusdeploy.PackageReference) []interface{} {
+	if len(packageReferences) == 0 {
+		return nil
+	}
+
+	flattenedPackageReferences := make([]interface{}, len(packageReferences))
+	for key, packageReference := range packageReferences {
+		flattenedPackageReferences[key] = map[string]interface{}{
+			"acquisition_location": packageReference.AcquisitionLocation,
+			"feed_id":              packageReference.FeedID,
+			"id":                   packageReference.ID,
+			"name":                 packageReference.Name,
+			"package_id":           packageReference.PackageID,
+			"properties":           packageReference.Properties,
+		}
+	}
+
+	return flattenedPackageReferences
+}
+
 func getPackageSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Description: "The primary package for the action",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"package_id": {
-					Description: "The ID of the package",
-					Required:    true,
-					Type:        schema.TypeString,
-				},
-				"feed_id": {
-					Default:     "feeds-builtin",
-					Description: "The feed to retrieve the package from",
-					Optional:    true,
-					Type:        schema.TypeString,
-				},
 				"acquisition_location": {
 					Default:     (string)(octopusdeploy.PackageAcquisitionLocationServer),
 					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
-				"property": getPropertySchema(),
+				"feed_id": {
+					Default:     "feeds-builtin",
+					Description: "The feed ID associated with this package reference.",
+					Optional:    true,
+					Type:        schema.TypeString,
+				},
+				"id":   getIDSchema(),
+				"name": getNameSchema(false),
+				"package_id": {
+					Description: "The ID of the package",
+					Required:    true,
+					Type:        schema.TypeString,
+				},
+				"properties": {
+					Elem:     &schema.Schema{Type: schema.TypeString},
+					Optional: true,
+					Type:     schema.TypeMap,
+				},
 			},
 		},
 		Optional: !required,
