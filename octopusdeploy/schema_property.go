@@ -2,6 +2,18 @@ package octopusdeploy
 
 import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+func expandProperties(properties interface{}) map[string]string {
+	if properties == nil {
+		return nil
+	}
+
+	expandedProperties := make(map[string]string)
+	for k, v := range properties.(map[string]interface{}) {
+		expandedProperties[k] = v.(string)
+	}
+	return expandedProperties
+}
+
 func getPropertySchema() *schema.Schema {
 	return &schema.Schema{
 		Elem: &schema.Resource{
