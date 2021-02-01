@@ -204,14 +204,9 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 					action_type = "Octopus.TentaclePackage"
 					name 		= "%s"
 		
-					property {
-						key 	= "Octopus.Action.Package.FeedId"
-						value 	= "feeds-builtin"
-					}
-		
-					property {
-						key 	= "Octopus.Action.Package.PackageId"
-						value 	= "#{PackageName}"
+					properties = {
+						"Octopus.Action.Package.FeedId": "feeds-builtin"
+						"Octopus.Action.Package.PackageId": "#{PackageName}"
 					}
 				}
 			}
@@ -255,14 +250,9 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 					name 		= "%s"
 					action_type = "Octopus.TentaclePackage"
 		
-					property {
-						key 	= "Octopus.Action.Package.FeedId"
-						value 	= "feeds-builtin"
-					}
-		
-					property {
-						key 	= "Octopus.Action.Package.PackageId"
-						value 	= "#{PackageName}"
+					properties = {
+						"Octopus.Action.Package.FeedId": "feeds-builtin"
+						"Octopus.Action.Package.PackageId": "#{PackageName}"
 					}
 
 				}
@@ -271,14 +261,9 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 					name 		= "%s"
 					action_type = "Octopus.TentaclePackage"
 		
-					property {
-						key 	= "Octopus.Action.Package.FeedId"
-						value 	= "feeds-builtin"
-					}
-		
-					property {
-						key 	= "Octopus.Action.Package.PackageId"
-						value 	= "#{PackageName}"
+					properties = {
+						"Octopus.Action.Package.FeedId": "feeds-builtin"
+						"Octopus.Action.Package.PackageId": "#{PackageName}"
 					}
 
 				}
