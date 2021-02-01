@@ -112,7 +112,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
-			"package": getPackageSchema(true),
+			"package": getPackageSchema(false),
 			"properties": {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
