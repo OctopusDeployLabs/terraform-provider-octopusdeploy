@@ -12,6 +12,18 @@ func expandDeploymentProcess(d *schema.ResourceData) *octopusdeploy.DeploymentPr
 	deploymentProcess := octopusdeploy.NewDeploymentProcess(d.Get("project_id").(string))
 	deploymentProcess.ID = d.Id()
 
+	if v, ok := d.GetOk("last_snapshot_id"); ok {
+		deploymentProcess.LastSnapshotID = v.(string)
+	}
+
+	if v, ok := d.GetOk("space_id"); ok {
+		deploymentProcess.SpaceID = v.(string)
+	}
+
+	if v, ok := d.GetOk("version"); ok {
+		deploymentProcess.Version = v.(int32)
+	}
+
 	if v, ok := d.GetOk("step"); ok {
 		steps := v.([]interface{})
 		for _, step := range steps {
@@ -29,6 +41,7 @@ func flattenDeploymentProcess(deploymentProcess *octopusdeploy.DeploymentProcess
 	}
 
 	return []interface{}{map[string]interface{}{
+		"id":               deploymentProcess.ID,
 		"last_snapshot_id": deploymentProcess.LastSnapshotID,
 		"project_id":       deploymentProcess.ProjectID,
 		"space_id":         deploymentProcess.SpaceID,
@@ -52,6 +65,7 @@ func getDeploymentProcessSchema() map[string]*schema.Schema {
 		"space_id": getSpaceIDSchema(),
 		"step":     getDeploymentStepSchema(),
 		"version": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
