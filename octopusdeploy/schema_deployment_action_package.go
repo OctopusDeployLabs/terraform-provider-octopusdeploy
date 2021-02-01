@@ -5,12 +5,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeploymentActionPackage(deploymentActionPackage []interface{}) *octopusdeploy.DeploymentActionPackage {
-	if len(deploymentActionPackage) == 0 {
+func expandDeploymentActionPackage(values interface{}) *octopusdeploy.DeploymentActionPackage {
+	flattenedValues := values.([]interface{})
+	if len(flattenedValues) == 0 {
 		return nil
 	}
 
-	flattenedMap := deploymentActionPackage[0].(map[string]interface{})
+	flattenedMap := flattenedValues[0].(map[string]interface{})
+
 	return &octopusdeploy.DeploymentActionPackage{
 		DeploymentAction: flattenedMap["deployment_action"].(string),
 		PackageReference: flattenedMap["package_reference"].(string),

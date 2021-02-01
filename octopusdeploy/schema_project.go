@@ -97,6 +97,10 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 		project.VersionControlSettings = expandVersionControlSettings(v)
 	}
 
+	if v, ok := d.GetOk("versioning_strategy"); ok {
+		project.VersioningStrategy = expandVersioningStrategy(v)
+	}
+
 	return project
 }
 
@@ -274,7 +278,6 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"version_control_settings": {
-			Computed: true,
 			Elem:     &schema.Resource{Schema: getVersionControlSettingsSchema()},
 			MaxItems: 1,
 			Optional: true,
