@@ -173,11 +173,9 @@ func getDeploymentStepSchema() *schema.Schema {
 				},
 				"target_roles": {
 					Description: "The roles that this step run against, or runs on behalf of",
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-					Optional: true,
-					Type:     schema.TypeList,
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					Optional:    true,
+					Type:        schema.TypeList,
 				},
 				"window_size": {
 					Description: "The maximum number of targets to deploy to simultaneously",
