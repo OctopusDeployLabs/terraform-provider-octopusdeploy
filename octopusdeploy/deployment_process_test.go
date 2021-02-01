@@ -42,66 +42,58 @@ func testAccDeploymentProcessBasic() string {
 			project_id = %s
 
 			step {
-				name = "Test"
-				target_roles = ["A", "B"]
-				package_requirement = "AfterPackageAcquisition"
 				condition = "Variable"
 				condition_expression = "#{run}"
+				name = "Test"
+				package_requirement = "AfterPackageAcquisition"
 				start_trigger = "StartWithPrevious"
+				target_roles = ["A", "B"]
 				window_size = "5"
 
 				action {
-					name = "Test"
 					action_type = "Octopus.Script"
-					disabled = false
-					required = true
-					worker_pool_id = "WorkerPools-1"
+					//channels = ["Channels-1"]
 					environments = ["Environments-1"]
 					//excluded_environments = ["Environments-2"]
-					//channels = ["Channels-1"]
+					is_disabled = false
+					is_required = true
+					name = "Test"
 					//tenant_tags = ["tag/tag"]
+					worker_pool_id = "WorkerPools-1"
 					
 					primary_package {
-						package_id = "MyPackage"
-						feed_id = "feeds-builtin"
 						acquisition_location = "ExecutionTarget"
+						feed_id = "feeds-builtin"
+						package_id = "MyPackage"
 					}
 
 					package {
+						acquisition_location = "NotAcquired"
+						extract_during_deployment = true
+						feed_id = "feeds-builtin"
 						name = "ThePackage"
 						package_id = "MyPackage"
-						feed_id = "feeds-builtin"
-						acquisition_location = "NotAcquired"
-						extract_during_deployment = true
 
-						property {
-							key = "WhatIsThis"
-							value = "Dunno"
+						properties = {
+							"WhatIsThis": "Dunno"
 						}
-
 					}
 
 					package {
-						name = "ThePackage2"
-						package_id = "MyPackage2"
-						feed_id = "feeds-builtin"
 						acquisition_location = "NotAcquired"
 						extract_during_deployment = true
+						feed_id = "feeds-builtin"
+						name = "ThePackage2"
+						package_id = "MyPackage2"
 
-						property {
-							key = "WhatIsThis"
-							value = "Dunno"
+						properties = {
+							"WhatIsThis": "Dunno"
 						}
 					}
 
-					property {
-						key = "Octopus.Action.Script.ScriptFileName"
-						value = "Run.ps132"
-					}
-
-					property {
-						key = "Octopus.Action.Script.ScriptSource"
-						value = "Package"
+					properties = {
+						"Octopus.Action.Script.ScriptFileName": "Run.ps132"
+						"Octopus.Action.Script.ScriptSource": "Package"
 					}
 
 				}
@@ -116,9 +108,8 @@ func testAccDeploymentProcessBasic() string {
  			           action_type = "Octopus.Script"
  			           run_on_server = true
 			
- 			           property {
- 			               key = "Octopus.Action.Script.ScriptBody"
- 			               value = "Write-Host 'hi'"
+						properties = {
+ 			               "Octopus.Action.Script.ScriptBody": "Write-Host 'hi'"
  			           }
  			       }
 			} 

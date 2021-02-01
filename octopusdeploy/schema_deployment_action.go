@@ -27,7 +27,7 @@ func flattenDeploymentActions(deploymentActions []octopusdeploy.DeploymentAction
 			"is_required":                        deploymentAction.IsRequired,
 			"name":                               deploymentAction.Name,
 			"notes":                              deploymentAction.Notes,
-			"package":                            deploymentAction.Packages,
+			"package":                            flattenPackageReferences(deploymentAction.Packages),
 			"properties":                         deploymentAction.Properties,
 			"tenant_tags":                        deploymentAction.TenantTags,
 			"worker_pool_id":                     deploymentAction.WorkerPoolID,
@@ -57,6 +57,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 	element := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"can_be_used_for_project_versioning": {
+				Computed: true,
 				Optional: true,
 				Type:     schema.TypeBool,
 			},
@@ -67,6 +68,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 				Type:        schema.TypeList,
 			},
 			"condition": {
+				Computed:    true,
 				Description: "The condition associated with this deployment action.",
 				Optional:    true,
 				Type:        schema.TypeString,
@@ -85,6 +87,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 				Type:        schema.TypeList,
 			},
 			"environments": {
+				Computed:    true,
 				Description: "The environments within which this deployment action will run.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
@@ -111,6 +114,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 			},
 			"package": getPackageSchema(true),
 			"properties": {
+				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 				Type:     schema.TypeMap,
@@ -156,7 +160,7 @@ func addWorkerPoolSchema(element *schema.Resource) {
 func expandDeploymentAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	action := octopusdeploy.DeploymentAction{
 		Channels:             getSliceFromTerraformTypeList(tfAction["channels"]),
-		Container:            tfAction["container"].(octopusdeploy.DeploymentActionContainer),
+		Container:            expandDeploymentActionContainer(tfAction["container"]),
 		Condition:            tfAction["condition"].(string),
 		Environments:         getSliceFromTerraformTypeList(tfAction["environments"]),
 		ExcludedEnvironments: getSliceFromTerraformTypeList(tfAction["excluded_environments"]),
@@ -164,7 +168,7 @@ func expandDeploymentAction(tfAction map[string]interface{}) octopusdeploy.Deplo
 		IsRequired:           tfAction["is_required"].(bool),
 		Name:                 tfAction["name"].(string),
 		Notes:                tfAction["notes"].(string),
-		Properties:           map[string]string{},
+		Properties:           expandProperties(tfAction["properties"]),
 		TenantTags:           getSliceFromTerraformTypeList(tfAction["tenant_tags"]),
 	}
 
