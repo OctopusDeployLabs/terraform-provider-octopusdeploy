@@ -107,17 +107,9 @@ Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
 - **extract_during_deployment** (Boolean) Whether to extract the package during deployment
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--action--package--property))
-
-<a id="nestedblock--step--action--package--property"></a>
-### Nested Schema for `step.action.package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--action--primary_package"></a>
@@ -130,17 +122,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--action--primary_package--property))
-
-<a id="nestedblock--step--action--primary_package--property"></a>
-### Nested Schema for `step.action.primary_package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 
@@ -180,17 +165,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--apply_terraform_action--package--property))
-
-<a id="nestedblock--step--apply_terraform_action--package--property"></a>
-### Nested Schema for `step.apply_terraform_action.package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--apply_terraform_action--container"></a>
@@ -212,17 +190,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--apply_terraform_action--primary_package--property))
-
-<a id="nestedblock--step--apply_terraform_action--primary_package--property"></a>
-### Nested Schema for `step.apply_terraform_action.primary_package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 
@@ -262,17 +233,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package--property))
-
-<a id="nestedblock--step--deploy_kubernetes_secret_action--package--property"></a>
-### Nested Schema for `step.deploy_kubernetes_secret_action.package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--deploy_kubernetes_secret_action--secret_values"></a>
@@ -329,17 +293,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--deploy_package_action--package--property))
-
-<a id="nestedblock--step--deploy_package_action--package--property"></a>
-### Nested Schema for `step.deploy_package_action.package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--deploy_package_action--primary_package"></a>
@@ -352,17 +309,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--deploy_package_action--primary_package--property))
-
-<a id="nestedblock--step--deploy_package_action--primary_package--property"></a>
-### Nested Schema for `step.deploy_package_action.primary_package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--deploy_package_action--container"></a>
@@ -439,17 +389,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--package--property))
-
-<a id="nestedblock--step--deploy_windows_service_action--package--property"></a>
-### Nested Schema for `step.deploy_windows_service_action.package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--deploy_windows_service_action--primary_package"></a>
@@ -462,17 +405,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--primary_package--property))
-
-<a id="nestedblock--step--deploy_windows_service_action--primary_package--property"></a>
-### Nested Schema for `step.deploy_windows_service_action.primary_package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--deploy_windows_service_action--container"></a>
@@ -520,17 +456,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--manual_intervention_action--package--property))
-
-<a id="nestedblock--step--manual_intervention_action--package--property"></a>
-### Nested Schema for `step.manual_intervention_action.package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--manual_intervention_action--container"></a>
@@ -591,17 +520,9 @@ Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
 - **extract_during_deployment** (Boolean) Whether to extract the package during deployment
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package--property))
-
-<a id="nestedblock--step--run_kubectl_script_action--package--property"></a>
-### Nested Schema for `step.run_kubectl_script_action.package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--run_kubectl_script_action--primary_package"></a>
@@ -614,17 +535,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package--property))
-
-<a id="nestedblock--step--run_kubectl_script_action--primary_package--property"></a>
-### Nested Schema for `step.run_kubectl_script_action.primary_package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 
 
@@ -677,17 +591,9 @@ Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
 - **extract_during_deployment** (Boolean) Whether to extract the package during deployment
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--run_script_action--package--property))
-
-<a id="nestedblock--step--run_script_action--package--property"></a>
-### Nested Schema for `step.run_script_action.package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
-
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **properties** (Map of String)
 
 
 <a id="nestedblock--step--run_script_action--primary_package"></a>
@@ -700,16 +606,10 @@ Required:
 Optional:
 
 - **acquisition_location** (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- **feed_id** (String) The feed to retrieve the package from
-- **property** (Block Set) (see [below for nested schema](#nestedblock--step--run_script_action--primary_package--property))
-
-<a id="nestedblock--step--run_script_action--primary_package--property"></a>
-### Nested Schema for `step.run_script_action.primary_package.property`
-
-Required:
-
-- **key** (String) The name of the action
-- **value** (String) The type of action
+- **feed_id** (String) The feed ID associated with this package reference.
+- **id** (String) The unique ID for this resource.
+- **name** (String) The name of this resource.
+- **properties** (Map of String)
 
 ## Import
 
