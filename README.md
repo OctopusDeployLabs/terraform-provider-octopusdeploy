@@ -24,7 +24,7 @@ To use it, extract the binary for your platform into the same folder as your `.t
 
 provider "octopusdeploy" {
   address = "http://octopus.production.yolo"
-  apikey  = "API-XXXXXXXXXXXXX"
+  api_key  = "API-XXXXXXXXXXXXX"
 }
 ```
 
@@ -39,7 +39,7 @@ Simply provide the _name_ of the space (not the space ID)
 
 provider "octopusdeploy" {
   address = "http://octopus.production.yolo"
-  apikey  = "API-XXXXXXXXXXXXX"
+  api_key  = "API-XXXXXXXXXXXXX"
   space   = "Support" // The name of the space
 }
 ```
@@ -53,14 +53,14 @@ To manage resources in multiple spaces you currently must use multiple instances
 
 provider "octopusdeploy" {
   address = "http://octopus.production.yolo"
-  apikey  = "API-XXXXXXXXXXXXX"
+  api_key  = "API-XXXXXXXXXXXXX"
 }
 
 provider "octopusdeploy" {
   alias   = "space_support"
 
   address = "http://octopus.production.yolo"
-  apikey  = "API-XXXXXXXXXXXXX"
+  api_key  = "API-XXXXXXXXXXXXX"
   space   = "Support" // The name of the space
 }
 
@@ -68,7 +68,7 @@ provider "octopusdeploy" {
   alias   = "space_product1"
 
   address = "http://octopus.production.yolo"
-  apikey  = "API-XXXXXXXXXXXXX"
+  api_key  = "API-XXXXXXXXXXXXX"
   space   = "Product1" // The name of another space
 }
 
