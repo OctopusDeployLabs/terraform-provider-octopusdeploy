@@ -204,12 +204,5 @@ func expandDeploymentAction(tfAction map[string]interface{}) octopusdeploy.Deplo
 		}
 	}
 
-	if tfProps, ok := tfAction["property"]; ok {
-		for _, tfProp := range tfProps.(*schema.Set).List() {
-			tfPropi := tfProp.(map[string]interface{})
-			action.Properties[tfPropi["key"].(string)] = tfPropi["value"].(string)
-		}
-	}
-
 	return action
 }
