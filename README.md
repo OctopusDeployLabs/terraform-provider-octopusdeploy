@@ -40,9 +40,11 @@ Simply provide the _name_ of the space (not the space ID)
 provider "octopusdeploy" {
   address = "http://octopus.production.yolo"
   api_key  = "API-XXXXXXXXXXXXX"
-  space   = "Support" // The name of the space
+  space_name = "Support" // The name of the space
 }
 ```
+
+You may also use a `space_id` property to scope the provider to a Space.
 
 ### Multiple spaces
 
@@ -61,7 +63,7 @@ provider "octopusdeploy" {
 
   address = "http://octopus.production.yolo"
   api_key  = "API-XXXXXXXXXXXXX"
-  space   = "Support" // The name of the space
+  space_name = "Support" // The name of the space
 }
 
 provider "octopusdeploy" {
@@ -69,7 +71,7 @@ provider "octopusdeploy" {
 
   address = "http://octopus.production.yolo"
   api_key  = "API-XXXXXXXXXXXXX"
-  space   = "Product1" // The name of another space
+  space_name = "Product1" // The name of another space
 }
 
 // This resource will use the default provider and the default space
