@@ -3,7 +3,20 @@ package octopusdeploy
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
+
+func expandVersionControlSettings(versionControlSettings interface{}) *octopusdeploy.VersionControlSettings {
+	versionControlSettingsList := versionControlSettings.(*schema.Set).List()
+	versionControlSettingsMap := versionControlSettingsList[0].(map[string]interface{})
+
+	return &octopusdeploy.VersionControlSettings{
+		DefaultBranch: versionControlSettingsMap["default_branch"].(string),
+		Password:      octopusdeploy.NewSensitiveValue(versionControlSettingsMap["password"].(string)),
+		URL:           versionControlSettingsMap["url"].(string),
+		Username:      versionControlSettingsMap["username"].(string),
+	}
+}
 
 func flattenVersionControlSettings(versionControlSettings *octopusdeploy.VersionControlSettings) []interface{} {
 	if versionControlSettings == nil {
@@ -20,13 +33,23 @@ func flattenVersionControlSettings(versionControlSettings *octopusdeploy.Version
 func getVersionControlSettingsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"default_branch": {
-			Computed: true,
-			Type:     schema.TypeString,
+			Computed:    true,
+			Description: "The default branch associated with these version control settings.",
+			Type:        schema.TypeString,
+			Optional:    true,
 		},
-		"password": getPasswordSchema(false),
+		"password": {
+			Computed:         true,
+			Description:      "The password associated with these version control settings.",
+			Sensitive:        true,
+			Optional:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+		},
 		"url": {
 			Computed: true,
 			Type:     schema.TypeString,
+			Optional: true,
 		},
 		"username": getUsernameSchema(false),
 	}

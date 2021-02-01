@@ -66,7 +66,7 @@ resource "octopusdeploy_project" "example" {
 - **space_id** (String) The space ID associated with this resource.
 - **templates** (Block List) (see [below for nested schema](#nestedblock--templates))
 - **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **version_control_settings** (Block Set) (see [below for nested schema](#nestedblock--version_control_settings))
+- **version_control_settings** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--version_control_settings))
 
 ### Read-only
 
@@ -127,13 +127,10 @@ Optional:
 
 Optional:
 
-- **password** (String, Sensitive) The password associated with this resource.
-- **username** (String, Sensitive) The username associated with this resource.
-
-Read-only:
-
-- **default_branch** (String)
+- **default_branch** (String) The default branch associated with these version control settings.
+- **password** (String, Sensitive) The password associated with these version control settings.
 - **url** (String)
+- **username** (String, Sensitive) The username associated with this resource.
 
 
 <a id="nestedblock--extension_settings"></a>

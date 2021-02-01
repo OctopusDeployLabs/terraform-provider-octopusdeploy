@@ -100,6 +100,13 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 		    allow_deployments_to_no_targets = true
 			skip_machine_behavior           = "None"
 		  }
+
+		  version_control_settings {
+			default_branch = "foo"
+			password = "asdkjha"
+			url = "https://example.com/"
+			username = "bar"
+		  }
 		}`, localName, description, lifecycleID, name, projectGroupID)
 }
 

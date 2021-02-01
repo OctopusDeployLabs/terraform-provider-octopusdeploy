@@ -93,6 +93,10 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 		project.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
 	}
 
+	if v, ok := d.GetOk("version_control_settings"); ok {
+		project.VersionControlSettings = expandVersionControlSettings(v)
+	}
+
 	return project
 }
 
@@ -272,6 +276,7 @@ func getProjectSchema() map[string]*schema.Schema {
 		"version_control_settings": {
 			Computed: true,
 			Elem:     &schema.Resource{Schema: getVersionControlSettingsSchema()},
+			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
