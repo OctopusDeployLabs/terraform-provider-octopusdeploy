@@ -14,7 +14,7 @@ func expandDeploymentStep(tfStep map[string]interface{}) octopusdeploy.Deploymen
 		PackageRequirement: octopusdeploy.DeploymentStepPackageRequirement(tfStep["package_requirement"].(string)),
 		Condition:          octopusdeploy.DeploymentStepConditionType(tfStep["condition"].(string)),
 		StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(tfStep["start_trigger"].(string)),
-		Properties:         map[string]string{},
+		Properties:         expandProperties(tfStep["properties"]),
 	}
 
 	targetRoles := tfStep["target_roles"]
@@ -131,6 +131,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					}, false)),
 				},
 				"condition_expression": {
+					Computed:    true,
 					Description: "The expression to evaluate to determine whether to run this step when 'condition' is 'Variable'",
 					Optional:    true,
 					Type:        schema.TypeString,
@@ -153,6 +154,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					}, false)),
 				},
 				"properties": {
+					Computed: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 					Optional: true,
 					Type:     schema.TypeMap,
