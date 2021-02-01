@@ -33,13 +33,11 @@ func flattenVersionControlSettings(versionControlSettings *octopusdeploy.Version
 func getVersionControlSettingsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"default_branch": {
-			Computed:    true,
 			Description: "The default branch associated with these version control settings.",
 			Type:        schema.TypeString,
 			Optional:    true,
 		},
 		"password": {
-			Computed:         true,
 			Description:      "The password associated with these version control settings.",
 			Sensitive:        true,
 			Optional:         true,
@@ -47,10 +45,16 @@ func getVersionControlSettingsSchema() map[string]*schema.Schema {
 			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
 		},
 		"url": {
-			Computed: true,
-			Type:     schema.TypeString,
-			Optional: true,
+			Description: "The URL associated with these version control settings.",
+			Type:        schema.TypeString,
+			Optional:    true,
 		},
-		"username": getUsernameSchema(false),
+		"username": {
+			Description:      "The username associated with these version control settings.",
+			Optional:         true,
+			Sensitive:        true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+		},
 	}
 }

@@ -13,7 +13,7 @@ func expandReleaseCreationStrategy(releaseCreationStrategy []interface{}) *octop
 	releaseCreationStrategyMap := releaseCreationStrategy[0].(map[string]interface{})
 	return &octopusdeploy.ReleaseCreationStrategy{
 		ChannelID:                    releaseCreationStrategyMap["channel_id"].(string),
-		ReleaseCreationPackage:       expandDeploymentActionPackage(releaseCreationStrategyMap["release_creation_package"].([]interface{})),
+		ReleaseCreationPackage:       expandDeploymentActionPackage(releaseCreationStrategyMap["release_creation_package"]),
 		ReleaseCreationPackageStepID: releaseCreationStrategyMap["release_creation_package_step_id"].(string),
 	}
 }
