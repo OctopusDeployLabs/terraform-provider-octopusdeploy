@@ -103,9 +103,12 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 
 		  version_control_settings {
 			default_branch = "foo"
-			password = "asdkjha"
 			url = "https://example.com/"
 			username = "bar"
+		  }
+
+		  versioning_strategy {
+		    template = "alskdjaslkdj"
 		  }
 		}`, localName, description, lifecycleID, name, projectGroupID)
 }
