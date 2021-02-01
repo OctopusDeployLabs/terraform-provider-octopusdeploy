@@ -7,6 +7,10 @@ import (
 
 func expandDeploymentActionContainer(values interface{}) octopusdeploy.DeploymentActionContainer {
 	flattenedValues := values.([]interface{})
+	if len(flattenedValues) == 0 {
+		return octopusdeploy.DeploymentActionContainer{}
+	}
+
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
 	return octopusdeploy.DeploymentActionContainer{
