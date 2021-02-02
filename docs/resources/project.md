@@ -49,7 +49,7 @@ resource "octopusdeploy_project" "example" {
 - **auto_create_release** (Boolean)
 - **auto_deploy_release_overrides** (List of String)
 - **cloned_from_project_id** (String)
-- **connectivity_policy** (Block List) (see [below for nested schema](#nestedblock--connectivity_policy))
+- **connectivity_policy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--connectivity_policy))
 - **default_guided_failure_mode** (String)
 - **default_to_skip_if_already_installed** (Boolean)
 - **deployment_changes_template** (String)
@@ -67,6 +67,7 @@ resource "octopusdeploy_project" "example" {
 - **templates** (Block List) (see [below for nested schema](#nestedblock--templates))
 - **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **version_control_settings** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--version_control_settings))
+- **versioning_strategy** (Block Set) (see [below for nested schema](#nestedblock--versioning_strategy))
 
 ### Read-only
 
@@ -74,7 +75,6 @@ resource "octopusdeploy_project" "example" {
 - **extension_settings** (Block Set) (see [below for nested schema](#nestedblock--extension_settings))
 - **slug** (String)
 - **variable_set_id** (String)
-- **versioning_strategy** (Block Set) (see [below for nested schema](#nestedblock--versioning_strategy))
 
 <a id="nestedblock--connectivity_policy"></a>
 ### Nested Schema for `connectivity_policy`
@@ -129,8 +129,27 @@ Optional:
 
 - **default_branch** (String) The default branch associated with these version control settings.
 - **password** (String, Sensitive) The password associated with these version control settings.
-- **url** (String)
-- **username** (String, Sensitive) The username associated with this resource.
+- **url** (String) The URL associated with these version control settings.
+- **username** (String, Sensitive) The username associated with these version control settings.
+
+
+<a id="nestedblock--versioning_strategy"></a>
+### Nested Schema for `versioning_strategy`
+
+Optional:
+
+- **donor_package** (Block List, Max: 1) (see [below for nested schema](#nestedblock--versioning_strategy--donor_package))
+- **donor_package_step_id** (String)
+- **template** (String)
+
+<a id="nestedblock--versioning_strategy--donor_package"></a>
+### Nested Schema for `versioning_strategy.donor_package`
+
+Optional:
+
+- **deployment_action** (String)
+- **package_reference** (String)
+
 
 
 <a id="nestedblock--extension_settings"></a>
@@ -140,24 +159,6 @@ Read-only:
 
 - **extension_id** (String)
 - **values** (List of String)
-
-
-<a id="nestedblock--versioning_strategy"></a>
-### Nested Schema for `versioning_strategy`
-
-Read-only:
-
-- **donor_package** (List of Object) (see [below for nested schema](#nestedatt--versioning_strategy--donor_package))
-- **donor_package_step_id** (String)
-- **template** (String)
-
-<a id="nestedatt--versioning_strategy--donor_package"></a>
-### Nested Schema for `versioning_strategy.donor_package`
-
-Read-only:
-
-- **deployment_action** (String)
-- **package_reference** (String)
 
 ## Import
 
