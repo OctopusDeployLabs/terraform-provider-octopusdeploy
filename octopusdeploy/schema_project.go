@@ -175,8 +175,9 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 		"auto_deploy_release_overrides": {
-			Optional: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
+			MaxItems: 1,
+			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"cloned_from_project_id": {
@@ -185,8 +186,9 @@ func getProjectSchema() map[string]*schema.Schema {
 		},
 		"connectivity_policy": {
 			Computed: true,
-			Optional: true,
 			Elem:     &schema.Resource{Schema: getConnectivityPolicySchema()},
+			MaxItems: 1,
+			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"default_guided_failure_mode": {
