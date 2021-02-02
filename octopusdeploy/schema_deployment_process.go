@@ -21,7 +21,7 @@ func expandDeploymentProcess(d *schema.ResourceData) *octopusdeploy.DeploymentPr
 	}
 
 	if v, ok := d.GetOk("version"); ok {
-		deploymentProcess.Version = v.(int32)
+		deploymentProcess.Version = int32(v.(int))
 	}
 
 	if v, ok := d.GetOk("step"); ok {
