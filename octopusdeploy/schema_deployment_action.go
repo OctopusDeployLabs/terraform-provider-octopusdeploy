@@ -1,8 +1,6 @@
 package octopusdeploy
 
 import (
-	"strconv"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -180,10 +178,10 @@ func expandDeploymentAction(tfAction map[string]interface{}) octopusdeploy.Deplo
 
 	// Even though not all actions have these properties, we'll keep them here.
 	// They will just be ignored if the action doesn't have it
-	runOnServer := tfAction["run_on_server"]
-	if runOnServer != nil {
-		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
-	}
+	// runOnServer := tfAction["run_on_server"]
+	// if runOnServer != nil {
+	// 	action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
+	// }
 
 	workerPoolID := tfAction["worker_pool_id"]
 	if workerPoolID != nil {
