@@ -32,10 +32,12 @@ func flattenConnectivityPolicy(connectivityPolicy *octopusdeploy.ConnectivityPol
 func getConnectivityPolicySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"allow_deployments_to_no_targets": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
 		"exclude_unhealthy_targets": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
@@ -49,6 +51,7 @@ func getConnectivityPolicySchema() map[string]*schema.Schema {
 			}, false)),
 		},
 		"target_roles": {
+			Computed: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Type:     schema.TypeList,
