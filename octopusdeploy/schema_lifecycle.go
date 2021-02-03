@@ -64,7 +64,19 @@ func getLifecycleDataSchema() map[string]*schema.Schema {
 	dataSchema := getLifecycleSchema()
 	setDataSchema(&dataSchema)
 
-	return dataSchema
+	return map[string]*schema.Schema{
+		"ids": getQueryIDs(),
+		"lifecycles": {
+			Computed:    true,
+			Description: "A list of lifecycles that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
+	}
 }
 
 func getLifecycleSchema() map[string]*schema.Schema {
