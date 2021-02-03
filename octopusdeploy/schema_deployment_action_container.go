@@ -6,6 +6,10 @@ import (
 )
 
 func expandDeploymentActionContainer(values interface{}) octopusdeploy.DeploymentActionContainer {
+	if values == nil {
+		return octopusdeploy.DeploymentActionContainer{}
+	}
+
 	flattenedValues := values.([]interface{})
 	if len(flattenedValues) == 0 || flattenedValues[0] == nil {
 		return octopusdeploy.DeploymentActionContainer{}
@@ -13,10 +17,17 @@ func expandDeploymentActionContainer(values interface{}) octopusdeploy.Deploymen
 
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	return octopusdeploy.DeploymentActionContainer{
-		FeedID: flattenedMap["feed_id"].(string),
-		Image:  flattenedMap["image"].(string),
+	deploymentActionContainer := octopusdeploy.DeploymentActionContainer{}
+
+	if feedID := flattenedMap["feed_id"]; feedID != nil {
+		deploymentActionContainer.FeedID = feedID.(string)
 	}
+
+	if image := flattenedMap["image"]; image != nil {
+		deploymentActionContainer.Image = image.(string)
+	}
+
+	return deploymentActionContainer
 }
 
 func flattenDeploymentActionContainer(deploymentActionContainer octopusdeploy.DeploymentActionContainer) []interface{} {
