@@ -106,7 +106,6 @@ Optional:
 - **run_kubectl_script_action** (Block List) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action))
 - **run_script_action** (Block List) (see [below for nested schema](#nestedblock--step--run_script_action))
 - **start_trigger** (String) Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')
-- **target_roles** (List of String) The roles that this step run against, or runs on behalf of
 - **window_size** (String) The maximum number of targets to deploy to simultaneously
 
 <a id="nestedblock--step--action"></a>
