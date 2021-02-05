@@ -29,8 +29,18 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 					testOctopusDeployVariableExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttrSet(prefix, "project_id"),
+					resource.TestCheckResourceAttr(prefix, "type", "String"),
 					resource.TestCheckResourceAttr(prefix, "value", value),
+					resource.TestCheckResourceAttr(prefix, "scope.#", "1"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.%", "6"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.environments.#", "1"),
 				),
+			},
+			{
+				ResourceName:      prefix,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -44,16 +54,25 @@ func testVariableBasic(localName string, name string, description string, value 
 	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	config := fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
-		`resource "octopusdeploy_variable" "%s" {
-			description = "%s"
-			name        = "%s"
-			project_id  = "${octopusdeploy_project.%s.id}"
-			type        = "String"
-			value       = "%s"
-		}`, localName, description, name, projectLocalName, value)
-	return config
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
+		`resource "octopusdeploy_environment" "%s" {
+	      name = "%s"
+		}
+		
+		resource "octopusdeploy_variable" "%s" {
+		  description = "%s"
+		  name        = "%s"
+		  project_id  = "${octopusdeploy_project.%s.id}"
+		  type        = "String"
+		  value       = "%s"
+
+		  scope {
+		    environments = [octopusdeploy_environment.%s.id]
+		  }
+		}`, environmentLocalName, environmentName, localName, description, name, projectLocalName, value, environmentLocalName)
 }
 
 func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
