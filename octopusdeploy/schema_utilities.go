@@ -418,6 +418,7 @@ func getVariableScopeSchema() *schema.Schema {
 
 func getVariableScopeValueSchema() *schema.Schema {
 	return &schema.Schema{
+		Computed:    true,
 		Description: "The scope of the variable value.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
