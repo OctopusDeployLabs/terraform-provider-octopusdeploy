@@ -173,6 +173,7 @@ func getDeploymentStepSchema() *schema.Schema {
 				},
 				"target_roles": {
 					Description: "The roles that this step run against, or runs on behalf of",
+					Deprecated:  "Use properties instead; specifically, Octopus.Action.TargetRoles",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					Optional:    true,
 					Type:        schema.TypeList,
