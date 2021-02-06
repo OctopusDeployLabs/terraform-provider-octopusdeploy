@@ -96,20 +96,20 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 		  name             = "%s"
 		  project_group_id = %s
 
-		  connectivity_policy {
-		    allow_deployments_to_no_targets = true
-			skip_machine_behavior           = "None"
-		  }
+		//   connectivity_policy {
+		//     allow_deployments_to_no_targets = true
+		// 	skip_machine_behavior           = "None"
+		//   }
 
-		  version_control_settings {
-			default_branch = "foo"
-			url = "https://example.com/"
-			username = "bar"
-		  }
+		//   version_control_settings {
+		// 	default_branch = "foo"
+		// 	url = "https://example.com/"
+		// 	username = "bar"
+		//   }
 
-		  versioning_strategy {
-		    template = "alskdjaslkdj"
-		  }
+		//   versioning_strategy {
+		//     template = "alskdjaslkdj"
+		//   }
 		}`, localName, description, lifecycleID, name, projectGroupID)
 }
 
