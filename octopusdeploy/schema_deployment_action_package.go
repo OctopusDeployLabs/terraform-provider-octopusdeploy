@@ -6,6 +6,10 @@ import (
 )
 
 func expandDeploymentActionPackage(values interface{}) *octopusdeploy.DeploymentActionPackage {
+	if values == nil {
+		return nil
+	}
+
 	flattenedValues := values.([]interface{})
 	if len(flattenedValues) == 0 {
 		return nil
