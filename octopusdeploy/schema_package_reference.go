@@ -61,6 +61,7 @@ func flattenPackageReferences(packageReferences []octopusdeploy.PackageReference
 
 func getPackageSchema(required bool) *schema.Schema {
 	return &schema.Schema{
+		Computed:    !required,
 		Description: "The primary package for the action",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
