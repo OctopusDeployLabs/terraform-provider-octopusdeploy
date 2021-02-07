@@ -357,6 +357,7 @@ func getTenantsSchema() *schema.Schema {
 
 func getTenantTagsSchema() *schema.Schema {
 	return &schema.Schema{
+		Computed:    true,
 		Description: "A list of tenant tags associated with this resource.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,
