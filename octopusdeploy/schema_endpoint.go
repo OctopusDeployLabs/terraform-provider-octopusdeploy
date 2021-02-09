@@ -7,6 +7,10 @@ import (
 )
 
 func expandEndpoint(values interface{}) octopusdeploy.IEndpoint {
+	if values == nil {
+		return nil
+	}
+
 	flattenedValues := values.([]interface{})
 	if len(flattenedValues) == 0 {
 		return nil

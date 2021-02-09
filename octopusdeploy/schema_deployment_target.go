@@ -202,8 +202,10 @@ func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deployment
 		return fmt.Errorf("error setting endpoint: %s", err)
 	}
 
-	if err := d.Set("endpoint", flattenEndpoint(endpointResource)); err != nil {
-		return fmt.Errorf("error setting endpoint: %s", err)
+	if d.Get("endpoint") != nil {
+		if err := d.Set("endpoint", flattenEndpoint(endpointResource)); err != nil {
+			return fmt.Errorf("error setting endpoint: %s", err)
+		}
 	}
 
 	if err := d.Set("environments", deploymentTarget.EnvironmentIDs); err != nil {
