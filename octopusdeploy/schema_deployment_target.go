@@ -50,7 +50,7 @@ func flattenDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) m
 	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 
 	return map[string]interface{}{
-		"endpoint":                          flattenEndpoint(endpointResource),
+		"endpoint":                          flattenEndpointResource(endpointResource),
 		"environments":                      deploymentTarget.EnvironmentIDs,
 		"has_latest_calamari":               deploymentTarget.HasLatestCalamari,
 		"health_status":                     deploymentTarget.HealthStatus,
@@ -203,7 +203,7 @@ func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deployment
 	}
 
 	if d.Get("endpoint") != nil {
-		if err := d.Set("endpoint", flattenEndpoint(endpointResource)); err != nil {
+		if err := d.Set("endpoint", flattenEndpointResource(endpointResource)); err != nil {
 			return fmt.Errorf("error setting endpoint: %s", err)
 		}
 	}

@@ -68,6 +68,27 @@ func TestAccDeploymentTargetBasic(t *testing.T) {
 	})
 }
 
+func TestAccDeploymentTargetBasic2(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	resourceName := "octopusdeploy_deployment_target." + localName
+
+	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccDeploymentTargetCheckDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDeploymentTargetBasic2(localName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDeploymentTargetExists(resourceName),
+				),
+			},
+		},
+	})
+}
+
 func testAccDeploymentTargetBasic(localName string, name string) string {
 	allowDynamicInfrastructure := false
 	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -93,6 +114,27 @@ func testAccDeploymentTargetBasic(localName string, name string) string {
 		  uri                 = ""
 		}
 	  }`, localName, environmentLocalName, name)
+}
+
+func testAccDeploymentTargetBasic2(localName string, name string) string {
+	allowDynamicInfrastructure := false
+	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	useGuidedFailure := false
+
+	return fmt.Sprintf(`data "octopusdeploy_machine_policies" "default" {
+		partial_name = "Default Machine Policy"
+	}`+"\n"+
+		testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, useGuidedFailure)+"\n"+`
+		resource "octopusdeploy_deployment_target" "%s" {
+			environments                    = [octopusdeploy_environment.%s.id]
+			name                            = "%s"
+			roles                           = ["INFRA"]
+			endpoint {
+			  communication_style = "None"
+			}
+		  }`, localName, environmentLocalName, name)
 }
 
 func testAccDeploymentTargetExists(resourceName string) resource.TestCheckFunc {

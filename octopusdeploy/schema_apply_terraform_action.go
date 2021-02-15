@@ -20,7 +20,7 @@ func getApplyTerraformActionSchema() *schema.Schema {
 	return actionSchema
 }
 
-func buildApplyTerraformActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func expandApplyTerraformAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := expandDeploymentAction(tfAction)
 
 	resource.ActionType = "Octopus.TerraformApply"

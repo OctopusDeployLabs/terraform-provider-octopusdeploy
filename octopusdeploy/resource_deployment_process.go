@@ -45,11 +45,11 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	if isEmpty(resource.GetID()) {
-		log.Println("ID is nil")
-	} else {
-		d.SetId(resource.GetID())
+	if err := setDeploymentProcess(ctx, d, resource); err != nil {
+		return diag.FromErr(err)
 	}
+
+	d.SetId(resource.GetID())
 
 	log.Printf("[INFO] deployment process created (%s)", d.Id())
 	return nil
@@ -104,8 +104,9 @@ func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	deploymentProcess := expandDeploymentProcess(d)
+	log.Printf("[INFO] updating deployment process (%s)", d.Id())
 
+	deploymentProcess := expandDeploymentProcess(d)
 	client := m.(*octopusdeploy.Client)
 	current, err := client.DeploymentProcesses.GetByID(deploymentProcess.ID)
 	if err != nil {
@@ -113,12 +114,15 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	deploymentProcess.Version = current.Version
-	resource, err := client.DeploymentProcesses.Update(deploymentProcess)
+	updatedDeploymentProcess, err := client.DeploymentProcesses.Update(deploymentProcess)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(resource.GetID())
+	if err := setDeploymentProcess(ctx, d, updatedDeploymentProcess); err != nil {
+		return diag.FromErr(err)
+	}
 
+	log.Printf("[INFO] deployment process updated (%s)", d.Id())
 	return nil
 }

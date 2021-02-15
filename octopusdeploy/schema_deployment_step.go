@@ -8,27 +8,36 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandDeploymentStep(tfStep map[string]interface{}) octopusdeploy.DeploymentStep {
-	step := octopusdeploy.DeploymentStep{
-		Name:               tfStep["name"].(string),
-		PackageRequirement: octopusdeploy.DeploymentStepPackageRequirement(tfStep["package_requirement"].(string)),
-		Condition:          octopusdeploy.DeploymentStepConditionType(tfStep["condition"].(string)),
-		StartTrigger:       octopusdeploy.DeploymentStepStartTrigger(tfStep["start_trigger"].(string)),
-		Properties:         expandProperties(tfStep["properties"]),
+func expandDeploymentStep(tfStep map[string]interface{}) *octopusdeploy.DeploymentStep {
+	name := tfStep["name"].(string)
+	step := octopusdeploy.NewDeploymentStep(name)
+
+	// properties MUST be serialized first
+	if properties, ok := tfStep["properties"]; ok {
+		step.Properties = expandProperties(properties)
 	}
 
-	targetRoles := tfStep["target_roles"]
-	if targetRoles != nil {
-		step.Properties["Octopus.Action.TargetRoles"] = strings.Join(getSliceFromTerraformTypeList(targetRoles), ",")
+	if condition, ok := tfStep["condition"]; ok {
+		step.Condition = octopusdeploy.DeploymentStepConditionType(condition.(string))
 	}
 
-	conditionExpression := tfStep["condition_expression"]
-	if conditionExpression != nil {
+	if conditionExpression, ok := tfStep["condition_expression"]; ok {
 		step.Properties["Octopus.Step.ConditionVariableExpression"] = conditionExpression.(string)
 	}
 
-	windowSize := tfStep["window_size"]
-	if windowSize != nil {
+	if packageRequirement, ok := tfStep["package_requirement"]; ok {
+		step.PackageRequirement = octopusdeploy.DeploymentStepPackageRequirement(packageRequirement.(string))
+	}
+
+	if startTrigger, ok := tfStep["start_trigger"]; ok {
+		step.StartTrigger = octopusdeploy.DeploymentStepStartTrigger(startTrigger.(string))
+	}
+
+	if targetRoles, ok := tfStep["target_roles"]; ok {
+		step.Properties["Octopus.Action.TargetRoles"] = strings.Join(getSliceFromTerraformTypeList(targetRoles), ",")
+	}
+
+	if windowSize, ok := tfStep["window_size"]; ok {
 		step.Properties["Octopus.Action.MaxParallelism"] = windowSize.(string)
 	}
 
@@ -41,49 +50,49 @@ func expandDeploymentStep(tfStep map[string]interface{}) octopusdeploy.Deploymen
 
 	if v, ok := tfStep["manual_intervention_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := buildManualInterventionActionResource(tfAction.(map[string]interface{}))
+			action := expandManualInterventionAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if v, ok := tfStep["apply_terraform_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := buildApplyTerraformActionResource(tfAction.(map[string]interface{}))
+			action := expandApplyTerraformAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if v, ok := tfStep["deploy_package_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := buildDeployPackageActionResource(tfAction.(map[string]interface{}))
+			action := expandDeployPackageAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if v, ok := tfStep["deploy_windows_service_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := buildDeployWindowsServiceActionResource(tfAction.(map[string]interface{}))
+			action := expandDeployWindowsServiceAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if v, ok := tfStep["run_script_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := buildRunScriptActionResource(tfAction.(map[string]interface{}))
+			action := expandRunScriptAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if v, ok := tfStep["run_kubectl_script_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := buildRunKubectlScriptActionResource(tfAction.(map[string]interface{}))
+			action := expandRunKubectlScriptAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
 	if v, ok := tfStep["deploy_kubernetes_secret_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := buildDeployKubernetesSecretActionResource(tfAction.(map[string]interface{}))
+			action := expandDeployKubernetesSecretAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
@@ -91,21 +100,45 @@ func expandDeploymentStep(tfStep map[string]interface{}) octopusdeploy.Deploymen
 	return step
 }
 
-func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []interface{} {
+func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []map[string]interface{} {
 	if deploymentSteps == nil {
 		return nil
 	}
 
-	var flattenedDeploymentSteps = make([]interface{}, len(deploymentSteps))
+	var flattenedDeploymentSteps = make([]map[string]interface{}, len(deploymentSteps))
 	for key, deploymentStep := range deploymentSteps {
-		flattenedDeploymentSteps[key] = map[string]interface{}{
-			"action":              flattenDeploymentActions(deploymentStep.Actions),
-			"condition":           deploymentStep.Condition,
-			"id":                  deploymentStep.ID,
-			"name":                deploymentStep.Name,
-			"package_requirement": deploymentStep.PackageRequirement,
-			"properties":          deploymentStep.Properties,
-			"start_trigger":       deploymentStep.StartTrigger,
+		flattenedDeploymentSteps[key] = map[string]interface{}{}
+		flattenedDeploymentSteps[key]["condition"] = deploymentStep.Condition
+		flattenedDeploymentSteps[key]["id"] = deploymentStep.ID
+		flattenedDeploymentSteps[key]["name"] = deploymentStep.Name
+		flattenedDeploymentSteps[key]["package_requirement"] = deploymentStep.PackageRequirement
+		flattenedDeploymentSteps[key]["properties"] = deploymentStep.Properties
+		flattenedDeploymentSteps[key]["start_trigger"] = deploymentStep.StartTrigger
+
+		for propertyName, propertyValue := range deploymentStep.Properties {
+			switch propertyName {
+			case "Octopus.Action.TargetRoles":
+				flattenedDeploymentSteps[key]["target_roles"] = strings.Split(propertyValue, ",")
+			case "Octopus.Action.MaxParallelism":
+				flattenedDeploymentSteps[key]["window_size"] = propertyValue
+			case "Octopus.Step.ConditionVariableExpression":
+				flattenedDeploymentSteps[key]["condition_expression"] = propertyValue
+			}
+		}
+
+		for _, action := range deploymentStep.Actions {
+			switch action.ActionType {
+			case "Octopus.Manual":
+				flattenedDeploymentSteps[key]["manual_intervention_action"] = []interface{}{flattenManualInterventionAction(action)}
+			case "Octopus.Script":
+				flattenedDeploymentSteps[key]["run_script_action"] = []interface{}{flattenRunScriptAction(action)}
+			case "Octopus.TentaclePackage":
+				flattenedDeploymentSteps[key]["deploy_package_action"] = []interface{}{flattenDeployPackageAction(action)}
+			case "Octopus.WindowsService":
+				flattenedDeploymentSteps[key]["deploy_windows_service_action"] = []interface{}{flattenWindowsServiceAction(action)}
+			default:
+				flattenedDeploymentSteps[key]["action"] = []interface{}{flattenDeploymentAction(action)}
+			}
 		}
 	}
 
@@ -173,7 +206,6 @@ func getDeploymentStepSchema() *schema.Schema {
 				},
 				"target_roles": {
 					Description: "The roles that this step run against, or runs on behalf of",
-					Deprecated:  "Use properties instead; specifically, Octopus.Action.TargetRoles",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					Optional:    true,
 					Type:        schema.TypeList,

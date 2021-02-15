@@ -12,15 +12,15 @@ import (
 
 func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccDeploymentProcessBasic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployDeploymentProcess(),
 				),
-				Config: testAccDeploymentProcessBasic(),
 			},
 		},
 	})
@@ -46,20 +46,21 @@ func testAccDeploymentProcessBasic() string {
 				condition_expression = "#{run}"
 				name = "Test"
 				package_requirement = "AfterPackageAcquisition"
-				start_trigger = "StartWithPrevious"
+				start_trigger = "StartAfterPrevious"
 				target_roles = ["A", "B"]
 				window_size = "5"
 
-				action {
-					action_type = "Octopus.Script"
-					//channels = ["Channels-1"]
-					environments = ["Environments-1"]
-					//excluded_environments = ["Environments-2"]
+				run_script_action {
+					channels = ["Channels-1"]
+					// environments = ["Environments-1"]
+					// excluded_environments = ["Environments-2"]
 					is_disabled = false
 					is_required = true
 					name = "Test"
-					//tenant_tags = ["tag/tag"]
-					worker_pool_id = "WorkerPools-1"
+					run_on_server = true
+					script_file_name = "Run.ps132"
+					script_source = "Package"
+					tenant_tags = ["tag/tag"]
 					
 					primary_package {
 						acquisition_location = "ExecutionTarget"
@@ -75,7 +76,7 @@ func testAccDeploymentProcessBasic() string {
 						package_id = "MyPackage"
 
 						properties = {
-							"WhatIsThis": "Dunno"
+							"WhatIsThis" = "Dunno"
 						}
 					}
 
@@ -87,31 +88,26 @@ func testAccDeploymentProcessBasic() string {
 						package_id = "MyPackage2"
 
 						properties = {
-							"WhatIsThis": "Dunno"
+							"WhatIsThis" = "Dunno"
 						}
 					}
-
-					properties = {
-						"Octopus.Action.Script.ScriptFileName": "Run.ps132"
-						"Octopus.Action.Script.ScriptSource": "Package"
-					}
-
 				}
 			}
 
  			step {
- 			       name = "Step2"
- 			       start_trigger = "StartWithPrevious"
-			
- 			       action {
- 			           name = "Step2"
- 			           action_type = "Octopus.Script"
- 			           run_on_server = true
-			
-						properties = {
- 			               "Octopus.Action.Script.ScriptBody": "Write-Host 'hi'"
- 			           }
- 			       }
+			  name = "Step2"
+			  start_trigger = "StartWithPrevious"
+			  target_roles = ["WebServer"]
+	
+			  action {
+				name = "Step2"
+				action_type = "Octopus.Script"
+				run_on_server = true
+				
+				properties = {
+				  "Octopus.Action.Script.ScriptBody" = "Write-Host 'hi'"
+				}
+			  }
 			} 
 		}`, projectID)
 }

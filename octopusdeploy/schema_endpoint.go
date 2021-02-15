@@ -4,6 +4,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/jinzhu/copier"
 )
 
 func expandEndpoint(values interface{}) octopusdeploy.IEndpoint {
@@ -44,6 +45,102 @@ func expandEndpoint(values interface{}) octopusdeploy.IEndpoint {
 }
 
 func flattenEndpoint(endpoint *octopusdeploy.EndpointResource) []interface{} {
+	if endpoint == nil {
+		return nil
+	}
+
+	switch endpoint.CommunicationStyle {
+	case "AzureCloudService":
+		azureCloudServiceEndpoint := octopusdeploy.NewAzureCloudServiceEndpoint()
+		copier.Copy(azureCloudServiceEndpoint, endpoint)
+		return flattenAzureCloudService(azureCloudServiceEndpoint)
+	case "AzureServiceFabricCluster":
+		azureServiceFabricEndpoint := octopusdeploy.NewAzureServiceFabricEndpoint()
+		copier.Copy(azureServiceFabricEndpoint, endpoint)
+		return flattenAzureServiceFabricCluster(azureServiceFabricEndpoint)
+	case "AzureWebApp":
+		azureWebAppEndpoint := octopusdeploy.NewAzureWebAppEndpoint()
+		copier.Copy(azureWebAppEndpoint, endpoint)
+		return flattenAzureWebApp(azureWebAppEndpoint)
+	case "Kubernetes":
+		kubernetesEndpoint := octopusdeploy.NewKubernetesEndpoint(endpoint.ClusterURL)
+		copier.Copy(kubernetesEndpoint, endpoint)
+		return flattenKubernetesCluster(kubernetesEndpoint)
+	case "None":
+		cloudRegionEndpoint := octopusdeploy.NewCloudRegionEndpoint()
+		copier.Copy(cloudRegionEndpoint, endpoint)
+		return flattenCloudRegion(cloudRegionEndpoint)
+	case "OfflineDrop":
+		offlinePackageDropEndpoint := octopusdeploy.NewOfflinePackageDropEndpoint()
+		copier.Copy(offlinePackageDropEndpoint, endpoint)
+		return flattenOfflinePackageDrop(offlinePackageDropEndpoint)
+	case "Ssh":
+		sshEndpoint := octopusdeploy.NewSSHEndpoint(endpoint.Host, endpoint.Port, endpoint.Fingerprint)
+		copier.Copy(sshEndpoint, endpoint)
+		return flattenSSHConnection(sshEndpoint)
+	case "TentacleActive":
+		pollingTentacleEndpoint := octopusdeploy.NewPollingTentacleEndpoint(endpoint.URI, endpoint.Thumbprint)
+		copier.Copy(pollingTentacleEndpoint, endpoint)
+		return flattenPollingTentacle(pollingTentacleEndpoint)
+	case "TentaclePassive":
+		listeningTentacleEndpoint := octopusdeploy.NewListeningTentacleEndpoint(endpoint.URI, endpoint.Thumbprint)
+		copier.Copy(listeningTentacleEndpoint, endpoint)
+		return flattenListeningTentacle(listeningTentacleEndpoint)
+	}
+
+	rawEndpoint := map[string]interface{}{
+		"aad_client_credential_secret":    endpoint.AadClientCredentialSecret,
+		"aad_credential_type":             endpoint.AadCredentialType,
+		"aad_user_credential_username":    endpoint.AadUserCredentialUsername,
+		"account_id":                      endpoint.AccountID,
+		"applications_directory":          endpoint.ApplicationsDirectory,
+		"authentication":                  flattenKubernetesAuthentication(endpoint.Authentication),
+		"certificate_signature_algorithm": endpoint.CertificateSignatureAlgorithm,
+		"certificate_store_location":      endpoint.CertificateStoreLocation,
+		"certificate_store_name":          endpoint.CertificateStoreName,
+		"client_certificate_variable":     endpoint.ClientCertificateVariable,
+		"cloud_service_name":              endpoint.CloudServiceName,
+		"cluster_certificate":             endpoint.ClusterCertificate,
+		"communication_style":             endpoint.CommunicationStyle,
+		"connection_endpoint":             endpoint.ConnectionEndpoint,
+		"container":                       flattenDeploymentActionContainer(endpoint.Container),
+		"default_worker_pool_id":          endpoint.DefaultWorkerPoolID,
+		"destination":                     flattenOfflinePackageDropDestination(endpoint.Destination),
+		"dot_net_core_platform":           endpoint.DotNetCorePlatform,
+		"fingerprint":                     endpoint.Fingerprint,
+		"host":                            endpoint.Host,
+		"id":                              endpoint.GetID(),
+		"namespace":                       endpoint.Namespace,
+		"proxy_id":                        endpoint.ProxyID,
+		"port":                            endpoint.Port,
+		"resource_group_name":             endpoint.ResourceGroupName,
+		"running_in_container":            endpoint.RunningInContainer,
+		"security_mode":                   endpoint.SecurityMode,
+		"server_certificate_thumbprint":   endpoint.ServerCertificateThumbprint,
+		"skip_tls_verification":           endpoint.SkipTLSVerification,
+		"slot":                            endpoint.Slot,
+		"storage_account_name":            endpoint.StorageAccountName,
+		"swap_if_possible":                endpoint.SwapIfPossible,
+		"tentacle_version_details":        flattenTentacleVersionDetails(endpoint.TentacleVersionDetails),
+		"thumbprint":                      endpoint.Thumbprint,
+		"working_directory":               endpoint.WorkingDirectory,
+		"use_current_instance_count":      endpoint.UseCurrentInstanceCount,
+		"web_app_name":                    endpoint.WebAppName,
+		"web_app_slot_name":               endpoint.WebAppSlotName,
+	}
+
+	if endpoint.ClusterURL != nil {
+		rawEndpoint["cluster_url"] = endpoint.ClusterURL.String()
+	}
+
+	if endpoint.URI != nil {
+		rawEndpoint["uri"] = endpoint.URI.String()
+	}
+
+	return []interface{}{rawEndpoint}
+}
+
+func flattenEndpointResource(endpoint *octopusdeploy.EndpointResource) []interface{} {
 	if endpoint == nil {
 		return nil
 	}

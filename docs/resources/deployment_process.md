@@ -106,6 +106,7 @@ Optional:
 - **run_kubectl_script_action** (Block List) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action))
 - **run_script_action** (Block List) (see [below for nested schema](#nestedblock--step--run_script_action))
 - **start_trigger** (String) Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')
+- **target_roles** (List of String) The roles that this step run against, or runs on behalf of
 - **window_size** (String) The maximum number of targets to deploy to simultaneously
 
 <a id="nestedblock--step--action"></a>
@@ -384,8 +385,9 @@ Required:
 Optional:
 
 - **arguments** (String) The command line arguments that will be passed to the service when it starts
+- **create_or_update_service** (Boolean)
 - **custom_account_name** (String) The Windows/domain account of the custom user that the service will run under
-- **custom_account_password** (String) The password for the custom account
+- **custom_account_password** (String, Sensitive) The password for the custom account
 - **dependencies** (String) Any dependencies that the service has. Separate the names using forward slashes (/).
 - **description** (String) User-friendly description of the service (optional)
 - **display_name** (String) The display name of the service (optional)
@@ -411,8 +413,9 @@ Optional:
 - **channels** (List of String) The channels associated with this deployment action.
 - **condition** (String) The condition associated with this deployment action.
 - **container** (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--container))
+- **create_or_update_service** (Boolean)
 - **custom_account_name** (String) The Windows/domain account of the custom user that the service will run under
-- **custom_account_password** (String) The password for the custom account
+- **custom_account_password** (String, Sensitive) The password for the custom account
 - **dependencies** (String) Any dependencies that the service has. Separate the names using forward slashes (/).
 - **description** (String) User-friendly description of the service (optional)
 - **display_name** (String) The display name of the service (optional)
@@ -546,6 +549,7 @@ Optional:
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **script_file_name** (String) The script file name in the package
 - **script_parameters** (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
+- **script_source** (String)
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 
 <a id="nestedblock--step--run_kubectl_script_action--container"></a>
@@ -616,6 +620,7 @@ Optional:
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **script_file_name** (String) The script file name in the package
 - **script_parameters** (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
+- **script_source** (String)
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 - **variable_substitution_in_files** (String) A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.
 

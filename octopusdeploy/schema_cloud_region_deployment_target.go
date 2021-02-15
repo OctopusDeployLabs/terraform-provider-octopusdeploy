@@ -54,6 +54,8 @@ func getCloudRegionDeploymentTargetDataSchema() map[string]*schema.Schema {
 func getCloudRegionDeploymentTargetSchema() map[string]*schema.Schema {
 	cloudRegionDeploymentTargetSchema := getDeploymentTargetSchema()
 
+	delete(cloudRegionDeploymentTargetSchema, "endpoint")
+
 	cloudRegionDeploymentTargetSchema["default_worker_pool_id"] = &schema.Schema{
 		Optional: true,
 		Type:     schema.TypeString,

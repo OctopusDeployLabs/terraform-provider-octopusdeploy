@@ -28,7 +28,7 @@ func expandDeploymentProcess(d *schema.ResourceData) *octopusdeploy.DeploymentPr
 		steps := v.([]interface{})
 		for _, step := range steps {
 			deploymentStep := expandDeploymentStep(step.(map[string]interface{}))
-			deploymentProcess.Steps = append(deploymentProcess.Steps, deploymentStep)
+			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
 		}
 	}
 
@@ -81,8 +81,6 @@ func setDeploymentProcess(ctx context.Context, d *schema.ResourceData, deploymen
 	if err := d.Set("step", flattenDeploymentSteps(deploymentProcess.Steps)); err != nil {
 		return fmt.Errorf("error setting step: %s", err)
 	}
-
-	d.SetId(deploymentProcess.GetID())
 
 	return nil
 }

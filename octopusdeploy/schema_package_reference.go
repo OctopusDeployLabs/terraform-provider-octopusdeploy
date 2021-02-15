@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -39,6 +40,17 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 	}
 }
 
+func flattenPackageReference(packageReference octopusdeploy.PackageReference) map[string]interface{} {
+	return map[string]interface{}{
+		"acquisition_location": packageReference.AcquisitionLocation,
+		"feed_id":              packageReference.FeedID,
+		"id":                   packageReference.ID,
+		"name":                 packageReference.Name,
+		"package_id":           packageReference.PackageID,
+		"properties":           packageReference.Properties,
+	}
+}
+
 func flattenPackageReferences(packageReferences []octopusdeploy.PackageReference) []interface{} {
 	if len(packageReferences) == 0 {
 		return nil
@@ -46,14 +58,7 @@ func flattenPackageReferences(packageReferences []octopusdeploy.PackageReference
 
 	flattenedPackageReferences := make([]interface{}, len(packageReferences))
 	for key, packageReference := range packageReferences {
-		flattenedPackageReferences[key] = map[string]interface{}{
-			"acquisition_location": packageReference.AcquisitionLocation,
-			"feed_id":              packageReference.FeedID,
-			"id":                   packageReference.ID,
-			"name":                 packageReference.Name,
-			"package_id":           packageReference.PackageID,
-			"properties":           packageReference.Properties,
-		}
+		flattenedPackageReferences[key] = flattenPackageReference(packageReference)
 	}
 
 	return flattenedPackageReferences
@@ -85,7 +90,7 @@ func getPackageSchema(required bool) *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"properties": {
-					Elem:     &schema.Schema{Type: schema.TypeString},
+					Computed: true,
 					Optional: true,
 					Type:     schema.TypeMap,
 				},
@@ -97,13 +102,22 @@ func getPackageSchema(required bool) *schema.Schema {
 	}
 }
 
-func buildPackageReferenceResource(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
+func expandPackageReference(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
 	pkg := octopusdeploy.PackageReference{
 		AcquisitionLocation: tfPkg["acquisition_location"].(string),
 		FeedID:              tfPkg["feed_id"].(string),
 		Name:                getStringOrEmpty(tfPkg["name"]),
 		PackageID:           tfPkg["package_id"].(string),
-		Properties:          buildPropertiesMap(tfPkg["property"]),
+		Properties:          map[string]string{},
+	}
+
+	if properties := tfPkg["properties"]; properties != nil {
+		propertyMap := properties.(map[string]interface{})
+		if len(propertyMap) > 0 {
+			// TODO: convert propertyMap to map[string]string
+			// pkg.Properties := convertedPropertyMap
+			log.Println(propertyMap)
+		}
 	}
 
 	extract := tfPkg["extract_during_deployment"]

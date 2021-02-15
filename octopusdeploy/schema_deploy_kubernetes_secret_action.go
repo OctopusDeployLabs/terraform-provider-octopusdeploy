@@ -37,7 +37,7 @@ func getDeployKubernetesSecretActionSchema() *schema.Schema {
 	return actionSchema
 }
 
-func buildDeployKubernetesSecretActionResource(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func expandDeployKubernetesSecretAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := expandDeploymentAction(tfAction)
 
 	resource.ActionType = "Octopus.KubernetesDeploySecret"

@@ -44,22 +44,21 @@ func TestAccOctopusDeployWindowsServiceFeature(t *testing.T) {
 func testAccDeployWindowsServiceAction() string {
 	return testAccBuildTestAction(`
 		deploy_windows_service_action {
-			name = "Test"
-
-			primary_package {
-				package_id = "MyPackage"
-			}
-
-			service_name = "MyService"
-			display_name = "My Service"
-			description = "Do stuff"
-			executable_path = "MyService.exe"
 			arguments = "-arg"
-			service_account = "_CUSTOM"
 			custom_account_name = "User"
 			custom_account_password = "Password"
-			start_mode = "manual"
 			dependencies = "OtherService"
+			description = "Do stuff"
+			display_name = "My Service"
+			executable_path = "MyService.exe"
+			name = "Test"
+			service_account = "_CUSTOM"
+			service_name = "MyService"
+			start_mode = "manual"
+
+			package {
+				package_id = "MyPackage"
+			}
 		}
 	`)
 }
@@ -74,16 +73,16 @@ func testAccWindowsServiceFeature() string {
 			}
 
 			windows_service {
-				service_name = "MyService"
-				display_name = "My Service"
-				description = "Do stuff"
-				executable_path = "MyService.exe"
 				arguments = "-arg"
-				service_account = "_CUSTOM"
 				custom_account_name = "User"
 				custom_account_password = "Password"
-				start_mode = "manual"
+				description = "Do stuff"
 				dependencies = "OtherService"
+				display_name = "My Service"
+				executable_path = "MyService.exe"
+				service_account = "_CUSTOM"
+				service_name = "MyService"
+				start_mode = "manual"
 			}
 		}
 	`)
@@ -108,9 +107,9 @@ func testAccCheckDeployWindowsServiceActionOrFeature(expectedActionType string) 
 			return fmt.Errorf("No package")
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.CreateOrUpdateService"] != "True" {
-			return fmt.Errorf("Windows Service feature is not enabled")
-		}
+		// if action.Properties["Octopus.Action.WindowsService.CreateOrUpdateService"] != "True" {
+		// 	return fmt.Errorf("Windows Service feature is not enabled")
+		// }
 
 		if action.Properties["Octopus.Action.WindowsService.ServiceName"] != "MyService" {
 			return fmt.Errorf("Service Name is incorrect: %s", action.Properties["Octopus.Action.WindowsService.ServiceName"])

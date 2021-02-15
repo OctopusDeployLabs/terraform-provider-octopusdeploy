@@ -30,15 +30,15 @@ func testAccRunScriptAction() string {
 		run_script_action {
             name = "Run Script"
             run_on_server = true
-			
+			script_file_name = "Test.ps1"
+			script_parameters = "-Test 1"
+			script_source = "Package"
+			variable_substitution_in_files = "test.json"
+
 			primary_package {
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
-			}
-			
-			script_file_name = "Test.ps1"
-			script_parameters = "-Test 1"
-			variable_substitution_in_files = "test.json"
+			}			
         }
 	`)
 }

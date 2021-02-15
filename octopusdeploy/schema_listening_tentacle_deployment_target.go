@@ -60,6 +60,8 @@ func getListeningTentacleDeploymentTargetDataSchema() map[string]*schema.Schema 
 		Type:        schema.TypeList,
 	}
 
+	delete(deploymentTargetDataSchema, "communication_styles")
+	delete(deploymentTargetDataSchema, "deployment_targets")
 	deploymentTargetDataSchema["id"] = getDataSchemaID()
 
 	return deploymentTargetDataSchema

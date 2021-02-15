@@ -1,38 +1,31 @@
 package octopusdeploy
 
 import (
+	"strconv"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func flattenDeploymentActions(deploymentActions []octopusdeploy.DeploymentAction) []map[string]interface{} {
-	if deploymentActions == nil {
-		return nil
+func flattenDeploymentAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
+	return map[string]interface{}{
+		"action_type":                        deploymentAction.ActionType,
+		"can_be_used_for_project_versioning": deploymentAction.CanBeUsedForProjectVersioning,
+		"channels":                           deploymentAction.Channels,
+		"container":                          flattenDeploymentActionContainer(deploymentAction.Container),
+		"condition":                          deploymentAction.Condition,
+		"environments":                       deploymentAction.Environments,
+		"excluded_environments":              deploymentAction.ExcludedEnvironments,
+		"id":                                 deploymentAction.ID,
+		"is_disabled":                        deploymentAction.IsDisabled,
+		"is_required":                        deploymentAction.IsRequired,
+		"name":                               deploymentAction.Name,
+		"notes":                              deploymentAction.Notes,
+		"package":                            flattenPackageReferences(deploymentAction.Packages),
+		"properties":                         deploymentAction.Properties,
+		"tenant_tags":                        deploymentAction.TenantTags,
+		"worker_pool_id":                     deploymentAction.WorkerPoolID,
 	}
-
-	var flattenedDeploymentActions = make([]map[string]interface{}, len(deploymentActions))
-	for key, deploymentAction := range deploymentActions {
-		flattenedDeploymentActions[key] = map[string]interface{}{
-			"action_type":                        deploymentAction.ActionType,
-			"can_be_used_for_project_versioning": deploymentAction.CanBeUsedForProjectVersioning,
-			"channels":                           deploymentAction.Channels,
-			"container":                          flattenDeploymentActionContainer(deploymentAction.Container),
-			"condition":                          deploymentAction.Condition,
-			"environments":                       deploymentAction.Environments,
-			"excluded_environments":              deploymentAction.ExcludedEnvironments,
-			"id":                                 deploymentAction.ID,
-			"is_disabled":                        deploymentAction.IsDisabled,
-			"is_required":                        deploymentAction.IsRequired,
-			"name":                               deploymentAction.Name,
-			"notes":                              deploymentAction.Notes,
-			"package":                            flattenPackageReferences(deploymentAction.Packages),
-			"properties":                         deploymentAction.Properties,
-			"tenant_tags":                        deploymentAction.TenantTags,
-			"worker_pool_id":                     deploymentAction.WorkerPoolID,
-		}
-	}
-
-	return flattenedDeploymentActions
 }
 
 func getDeploymentActionSchema() *schema.Schema {
@@ -60,6 +53,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 				Type:     schema.TypeBool,
 			},
 			"channels": {
+				Computed:    true,
 				Description: "The channels associated with this deployment action.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
@@ -79,6 +73,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 				Type:        schema.TypeList,
 			},
 			"excluded_environments": {
+				Computed:    true,
 				Description: "The environments that this step will be skipped in",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
@@ -123,6 +118,7 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 	}
 
 	actionSchema := &schema.Schema{
+		Computed: true,
 		Elem:     element,
 		Optional: true,
 		Type:     schema.TypeList,
@@ -156,52 +152,80 @@ func addWorkerPoolSchema(element *schema.Resource) {
 	}
 }
 
-func expandDeploymentAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	action := octopusdeploy.DeploymentAction{
-		Channels:             getSliceFromTerraformTypeList(tfAction["channels"]),
-		Container:            expandDeploymentActionContainer(tfAction["container"]),
-		Condition:            tfAction["condition"].(string),
-		Environments:         getSliceFromTerraformTypeList(tfAction["environments"]),
-		ExcludedEnvironments: getSliceFromTerraformTypeList(tfAction["excluded_environments"]),
-		IsDisabled:           tfAction["is_disabled"].(bool),
-		IsRequired:           tfAction["is_required"].(bool),
-		Name:                 tfAction["name"].(string),
-		Notes:                tfAction["notes"].(string),
-		Properties:           expandProperties(tfAction["properties"]),
-		TenantTags:           getSliceFromTerraformTypeList(tfAction["tenant_tags"]),
+func expandDeploymentAction(flattenedDeploymentAction map[string]interface{}) octopusdeploy.DeploymentAction {
+	name := flattenedDeploymentAction["name"].(string)
+	action := octopusdeploy.NewDeploymentAction(name)
+
+	if v, ok := flattenedDeploymentAction["action_type"]; ok {
+		if actionType := v.(string); len(actionType) > 0 {
+			action.ActionType = actionType
+		}
 	}
 
-	actionType := tfAction["action_type"]
-	if actionType != nil {
-		action.ActionType = actionType.(string)
+	if channels, ok := flattenedDeploymentAction["channels"]; ok {
+		action.Channels = getSliceFromTerraformTypeList(channels)
+	}
+
+	if condition, ok := flattenedDeploymentAction["condition"]; ok {
+		action.Condition = condition.(string)
+	}
+
+	if container, ok := flattenedDeploymentAction["container"]; ok {
+		action.Container = expandDeploymentActionContainer(container)
+	}
+
+	if environments, ok := flattenedDeploymentAction["environments"]; ok {
+		action.Environments = getSliceFromTerraformTypeList(environments)
+	}
+
+	if excludedEnvironments, ok := flattenedDeploymentAction["excluded_environments"]; ok {
+		action.ExcludedEnvironments = getSliceFromTerraformTypeList(excludedEnvironments)
+	}
+
+	if isDisabled, ok := flattenedDeploymentAction["is_disabled"]; ok {
+		action.IsDisabled = isDisabled.(bool)
+	}
+
+	if isRequired, ok := flattenedDeploymentAction["is_required"]; ok {
+		action.IsRequired = isRequired.(bool)
+	}
+
+	if notes, ok := flattenedDeploymentAction["notes"]; ok {
+		action.Notes = notes.(string)
+	}
+
+	if properties, ok := flattenedDeploymentAction["properties"]; ok {
+		action.Properties = expandProperties(properties)
 	}
 
 	// Even though not all actions have these properties, we'll keep them here.
 	// They will just be ignored if the action doesn't have it
-	// runOnServer := tfAction["run_on_server"]
-	// if runOnServer != nil {
-	// 	action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
-	// }
+	if runOnServer, ok := flattenedDeploymentAction["run_on_server"]; ok {
+		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
+	}
 
-	workerPoolID := tfAction["worker_pool_id"]
-	if workerPoolID != nil {
+	if tenantTags, ok := flattenedDeploymentAction["tenant_tags"]; ok {
+		action.TenantTags = getSliceFromTerraformTypeList(tenantTags)
+	}
+
+	if workerPoolID, ok := flattenedDeploymentAction["worker_pool_id"]; ok {
 		action.WorkerPoolID = workerPoolID.(string)
 	}
 
-	if primaryPackage, ok := tfAction["primary_package"]; ok {
-		tfPrimaryPackage := primaryPackage.(*schema.Set).List()
+	if v, ok := flattenedDeploymentAction["primary_package"]; ok {
+		tfPrimaryPackage := v.(*schema.Set).List()
 		if len(tfPrimaryPackage) > 0 {
-			primaryPackage := buildPackageReferenceResource(tfPrimaryPackage[0].(map[string]interface{}))
+			primaryPackage := expandPackageReference(tfPrimaryPackage[0].(map[string]interface{}))
 			action.Packages = append(action.Packages, primaryPackage)
 		}
 	}
 
-	if tfPkgs, ok := tfAction["package"]; ok {
+	if tfPkgs, ok := flattenedDeploymentAction["package"]; ok {
 		for _, tfPkg := range tfPkgs.(*schema.Set).List() {
-			pkg := buildPackageReferenceResource(tfPkg.(map[string]interface{}))
+			pkg := expandPackageReference(tfPkg.(map[string]interface{}))
 			action.Packages = append(action.Packages, pkg)
 		}
 	}
 
-	return action
+	return *action
 }
