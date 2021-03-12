@@ -346,8 +346,10 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdep
 	d.Set("tenanted_deployment_participation", project.TenantedDeploymentMode)
 	d.Set("variable_set_id", project.VariableSetID)
 
-	if err := d.Set("version_control_settings", flattenVersionControlSettings(project.VersionControlSettings)); err != nil {
-		return fmt.Errorf("error setting version_control_settings: %s", err)
+	if project.IsVersionControlled {
+		if err := d.Set("version_control_settings", flattenVersionControlSettings(project.VersionControlSettings)); err != nil {
+			return fmt.Errorf("error setting version_control_settings: %s", err)
+		}
 	}
 
 	if err := d.Set("versioning_strategy", flattenVersioningStrategy(project.VersioningStrategy)); err != nil {
