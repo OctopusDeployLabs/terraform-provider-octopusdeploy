@@ -134,7 +134,9 @@ Read-only:
 
 Read-only:
 
+- **base_path** (String)
 - **default_branch** (String)
+- **has_value** (Boolean)
 - **password** (String)
 - **url** (String)
 - **username** (String)
