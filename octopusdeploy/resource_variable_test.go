@@ -15,8 +15,11 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 	prefix := "octopusdeploy_variable." + localName
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	isSensitive := false
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	newValue := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	value := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	variableType := "String"
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testVariableDestroy,
@@ -24,55 +27,79 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testVariableBasic(localName, name, description, value),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployVariableExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttrSet(prefix, "project_id"),
-					resource.TestCheckResourceAttr(prefix, "type", "String"),
+					resource.TestCheckResourceAttr(prefix, "type", variableType),
 					resource.TestCheckResourceAttr(prefix, "value", value),
 					resource.TestCheckResourceAttr(prefix, "scope.#", "1"),
-					resource.TestCheckResourceAttr(prefix, "scope.0.%", "6"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.%", "14"),
 					resource.TestCheckResourceAttr(prefix, "scope.0.environments.#", "1"),
 				),
+				Config: testVariableBasic(localName, name, description, isSensitive, value, variableType),
 			},
 			{
-				ResourceName:      prefix,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Check: resource.ComposeTestCheckFunc(
+					testOctopusDeployVariableExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttrSet(prefix, "project_id"),
+					resource.TestCheckResourceAttr(prefix, "type", variableType),
+					resource.TestCheckResourceAttr(prefix, "value", newValue),
+					resource.TestCheckResourceAttr(prefix, "scope.#", "1"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.%", "14"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.environments.#", "1"),
+				),
+				Config: testVariableBasic(localName, name, description, isSensitive, newValue, variableType),
 			},
+			// {
+			// 	ResourceName:      prefix,
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
 		},
 	})
 }
 
-func testVariableBasic(localName string, name string, description string, value string) string {
-	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
-	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
-		`resource "octopusdeploy_environment" "%s" {
-	      name = "%s"
+func testVariableBasic(localName string, name string, description string, isSensitive bool, value string, variableType string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_environment" "test-environment" {
+	      name = "Test Environment (OK to Delete)"
 		}
-		
+
+		resource "octopusdeploy_lifecycle" "test-lifecycle" {
+		  name = "Test Lifecycle (OK to Delete)"
+		}
+
+		resource "octopusdeploy_project_group" "test-project-group" {
+		  name = "Test Project Group (OK to Delete)"
+		}
+
+		resource "octopusdeploy_project" "test-project" {
+		  lifecycle_id = octopusdeploy_lifecycle.test-lifecycle.id
+		  name = "Test Project (OK to Delete)"
+		  project_group_id = octopusdeploy_project_group.test-project-group.id
+		}
+
+		resource "octopusdeploy_channel" "test-channel" {
+		  name = "Test Channel (OK to Delete)"
+		  project_id = octopusdeploy_project.test-project.id
+		}
+
 		resource "octopusdeploy_variable" "%s" {
 		  description = "%s"
-		  name        = "%s"
-		  project_id  = "${octopusdeploy_project.%s.id}"
-		  type        = "String"
-		  value       = "%s"
+		  is_sensitive = "%v"
+		  name = "%s"
+		  project_id = octopusdeploy_project.test-project.id
+		  type = "%s"
+		  value = "%s"
 
 		  scope {
-		    environments = [octopusdeploy_environment.%s.id]
+			channels = [octopusdeploy_channel.test-channel.id]
+		    environments = [octopusdeploy_environment.test-environment.id]
 		  }
-		}`, environmentLocalName, environmentName, localName, description, name, projectLocalName, value, environmentLocalName)
+		}`, localName, description, isSensitive, name, variableType, value)
 }
 
 func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
