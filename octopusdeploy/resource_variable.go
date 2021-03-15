@@ -18,9 +18,7 @@ func resourceVariable() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVariableCreate,
 		DeleteContext: resourceVariableDelete,
-		Importer: &schema.ResourceImporter{
-			State: resourceVariableImport,
-		},
+		Importer:      &schema.ResourceImporter{State: resourceVariableImport},
 		ReadContext:   resourceVariableRead,
 		Schema:        getVariableSchema(),
 		UpdateContext: resourceVariableUpdate,
@@ -50,23 +48,16 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		apiError := err.(*octopusdeploy.APIError)
 		if apiError.StatusCode == 404 {
+			log.Printf("[INFO] variable (%s) not found; deleting from state", d.Id())
 			d.SetId("")
 			return nil
 		}
 		return diag.FromErr(err)
 	}
 
-	d.Set("name", variable.Name)
-	d.Set("type", variable.Type)
-
-	isSensitive := d.Get("is_sensitive").(bool)
-	if isSensitive {
-		d.Set("value", nil)
-	} else {
-		d.Set("value", variable.Value)
+	if err := setVariable(ctx, d, variable); err != nil {
+		return diag.FromErr(err)
 	}
-
-	d.Set("description", variable.Description)
 
 	log.Printf("[INFO] variable read (%s)", d.Id())
 	return nil
