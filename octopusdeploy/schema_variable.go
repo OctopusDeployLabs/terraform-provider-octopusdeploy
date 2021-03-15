@@ -1,6 +1,9 @@
 package octopusdeploy
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +29,7 @@ func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 		varValue = d.Get("value").(string)
 	}
 
-	varScopeInterface := tfVariableScopetoODVariableScope(d)
+	varScopeInterface := expandVariableScope(d)
 
 	newVar := octopusdeploy.NewVariable(varName, varType, varValue, varDesc, varScopeInterface, varSensitive)
 	newVar.ID = d.Id()
@@ -93,7 +96,12 @@ func getVariableSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
-		"scope": getVariableScopeSchema(),
+		"scope": {
+			Elem:     &schema.Resource{Schema: getVariableScopeSchema()},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeSet,
+		},
 		"sensitive_value": {
 			ConflictsWith: []string{"value"},
 			Optional:      true,
@@ -107,4 +115,25 @@ func getVariableSchema() map[string]*schema.Schema {
 			Type:          schema.TypeString,
 		},
 	}
+}
+
+func setVariable(ctx context.Context, d *schema.ResourceData, variable *octopusdeploy.Variable) error {
+	d.Set("description", variable.Description)
+	d.Set("is_sensitive", variable.IsSensitive)
+	d.Set("name", variable.Name)
+	d.Set("type", variable.Type)
+
+	if variable.IsSensitive {
+		d.Set("value", nil)
+	} else {
+		d.Set("value", variable.Value)
+	}
+
+	if err := d.Set("scope", flattenVariableScope(variable.Scope)); err != nil {
+		return fmt.Errorf("error setting scope: %s", err)
+	}
+
+	d.SetId(variable.GetID())
+
+	return nil
 }

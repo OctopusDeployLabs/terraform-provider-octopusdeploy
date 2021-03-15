@@ -16,39 +16,10 @@ func dataSourceVariable() *schema.Resource {
 	}
 }
 
-// tfVariableScopetoODVariableScope converts a Terraform ResourceData into an OctopusDeploy VariableScope
-func tfVariableScopetoODVariableScope(d *schema.ResourceData) *octopusdeploy.VariableScope {
-	// Get the schema set. We specify a MaxItems of 1, so we will only ever have zero or one items
-	// in our list.
-	tfSchemaSetInterface, ok := d.GetOk("scope")
-	if !ok {
-		return nil
-	}
-
-	tfSchemaSet := tfSchemaSetInterface.(*schema.Set)
-	if len(tfSchemaSet.List()) == 0 {
-		return nil
-	}
-
-	// Get the first element in the list, which is a map of the interfaces
-	tfSchemaList := tfSchemaSet.List()[0].(map[string]interface{})
-
-	// Use the getSliceFromTerraformTypeList helper to convert the data from the map into []string and
-	// assign as the variable scopes we need
-	var newScope octopusdeploy.VariableScope
-	newScope.Action = getSliceFromTerraformTypeList(tfSchemaList["actions"])
-	newScope.Channel = getSliceFromTerraformTypeList(tfSchemaList["channels"])
-	newScope.Environment = getSliceFromTerraformTypeList(tfSchemaList["environments"])
-	newScope.Machine = getSliceFromTerraformTypeList(tfSchemaList["machines"])
-	newScope.Role = getSliceFromTerraformTypeList(tfSchemaList["roles"])
-	newScope.TenantTag = getSliceFromTerraformTypeList(tfSchemaList["tenant_tags"])
-	return &newScope
-}
-
 func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectID := d.Get("project_id")
 	name := d.Get("name")
-	scope := tfVariableScopetoODVariableScope(d)
+	scope := expandVariableScope(d)
 
 	client := m.(*octopusdeploy.Client)
 	variables, err := client.Variables.GetByName(projectID.(string), name.(string), scope)
