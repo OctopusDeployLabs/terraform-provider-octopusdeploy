@@ -127,7 +127,9 @@ Optional:
 
 Optional:
 
+- **base_path** (String) The base path associated with these version control settings.
 - **default_branch** (String) The default branch associated with these version control settings.
+- **has_value** (Boolean)
 - **password** (String, Sensitive) The password associated with these version control settings.
 - **url** (String) The URL associated with these version control settings.
 - **username** (String, Sensitive) The username associated with these version control settings.
