@@ -399,34 +399,6 @@ func getUsernameSchema(isRequired bool) *schema.Schema {
 	return schema
 }
 
-func getVariableScopeSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		MaxItems: 1,
-		Optional: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"actions":      getVariableScopeValueSchema(),
-				"channels":     getVariableScopeValueSchema(),
-				"environments": getVariableScopeValueSchema(),
-				"machines":     getVariableScopeValueSchema(),
-				"roles":        getVariableScopeValueSchema(),
-				"tenant_tags":  getVariableScopeValueSchema(),
-			},
-		},
-	}
-}
-
-func getVariableScopeValueSchema() *schema.Schema {
-	return &schema.Schema{
-		Computed:    true,
-		Description: "The scope of the variable value.",
-		Elem:        &schema.Schema{Type: schema.TypeString},
-		Optional:    true,
-		Type:        schema.TypeList,
-	}
-}
-
 func getVariableTypeSchema() *schema.Schema {
 	return &schema.Schema{
 		Description: "The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.",
