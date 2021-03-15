@@ -52,11 +52,19 @@ Optional:
 
 Optional:
 
-- **actions** (List of String) The scope of the variable value.
-- **channels** (List of String) The scope of the variable value.
-- **environments** (List of String) The scope of the variable value.
-- **machines** (List of String) The scope of the variable value.
-- **roles** (List of String) The scope of the variable value.
-- **tenant_tags** (List of String) The scope of the variable value.
+- **actions** (List of String) A list of actions that are scoped to this variable value.
+- **channels** (List of String) A list of channels that are scoped to this variable value.
+- **environments** (List of String) A list of environments that are scoped to this variable value.
+- **machines** (List of String) A list of machines that are scoped to this variable value.
+- **parent_deployments** (List of String) A list of parent deployments that are scoped to this variable value.
+- **private** (List of String)
+- **process_owners** (List of String) A list of process owners that are scoped to this variable value.
+- **projects** (List of String) A list of projects that are scoped to this variable value.
+- **roles** (List of String) A list of roles that are scoped to this variable value.
+- **target_roles** (List of String) A list of target roles that are scoped to this variable value.
+- **tenant_tags** (List of String) A list of tenant tags that are scoped to this variable value.
+- **tenants** (List of String) A list of tenants that are scoped to this variable value.
+- **triggers** (List of String) A list of triggers that are scoped to this variable value.
+- **users** (List of String) A list of users that are scoped to this variable value.
 
 

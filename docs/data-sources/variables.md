@@ -62,7 +62,15 @@ Read-only:
 - **channels** (List of String)
 - **environments** (List of String)
 - **machines** (List of String)
+- **parent_deployments** (List of String)
+- **private** (List of String)
+- **process_owners** (List of String)
+- **projects** (List of String)
 - **roles** (List of String)
+- **target_roles** (List of String)
 - **tenant_tags** (List of String)
+- **tenants** (List of String)
+- **triggers** (List of String)
+- **users** (List of String)
 
 
