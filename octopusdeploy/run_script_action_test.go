@@ -38,7 +38,18 @@ func testAccRunScriptAction() string {
 			primary_package {
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
-			}			
+			}
+
+			package {
+				acquisition_location = "Server"
+				feed_id = octopusdeploy_nuget_feed.testing.id
+				name = "package2"
+				package_id = "package2"
+				extract_during_deployment = false
+				properties = {
+				  "Extract" = "false"
+				}
+			}
         }
 	`)
 }

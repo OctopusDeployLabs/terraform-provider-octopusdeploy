@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -15,6 +14,8 @@ func addPrimaryPackageSchema(element *schema.Resource, required bool) error {
 
 	element.Schema["primary_package"] = getPackageSchema(required)
 	element.Schema["primary_package"].MaxItems = 1
+
+	// TODO: update name in schema to always be empty string
 
 	return nil
 }
@@ -33,7 +34,7 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 	}
 
 	packageElementSchema["extract_during_deployment"] = &schema.Schema{
-		Default:     true,
+		Computed:    true,
 		Description: "Whether to extract the package during deployment",
 		Optional:    true,
 		Type:        schema.TypeBool,
@@ -41,7 +42,7 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 }
 
 func flattenPackageReference(packageReference octopusdeploy.PackageReference) map[string]interface{} {
-	return map[string]interface{}{
+	flattenedPackageReference := map[string]interface{}{
 		"acquisition_location": packageReference.AcquisitionLocation,
 		"feed_id":              packageReference.FeedID,
 		"id":                   packageReference.ID,
@@ -49,16 +50,18 @@ func flattenPackageReference(packageReference octopusdeploy.PackageReference) ma
 		"package_id":           packageReference.PackageID,
 		"properties":           packageReference.Properties,
 	}
+
+	return flattenedPackageReference
 }
 
 func flattenPackageReferences(packageReferences []octopusdeploy.PackageReference) []interface{} {
-	if len(packageReferences) == 0 {
+	if packageReferences == nil {
 		return nil
 	}
 
-	flattenedPackageReferences := make([]interface{}, len(packageReferences))
-	for key, packageReference := range packageReferences {
-		flattenedPackageReferences[key] = flattenPackageReference(packageReference)
+	flattenedPackageReferences := []interface{}{}
+	for _, packageReference := range packageReferences {
+		flattenedPackageReferences = append(flattenedPackageReferences, flattenPackageReference(packageReference))
 	}
 
 	return flattenedPackageReferences
@@ -67,7 +70,7 @@ func flattenPackageReferences(packageReferences []octopusdeploy.PackageReference
 func getPackageSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Computed:    !required,
-		Description: "The primary package for the action",
+		Description: "The package assocated with this action.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"acquisition_location": {
@@ -85,20 +88,22 @@ func getPackageSchema(required bool) *schema.Schema {
 				"id":   getIDSchema(),
 				"name": getNameSchema(false),
 				"package_id": {
-					Description: "The ID of the package",
+					Description: "The ID of the package.",
 					Required:    true,
 					Type:        schema.TypeString,
 				},
 				"properties": {
-					Computed: true,
-					Optional: true,
-					Type:     schema.TypeMap,
+					Computed:    true,
+					Description: "A list of properties associated with this package.",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					Optional:    true,
+					Type:        schema.TypeMap,
 				},
 			},
 		},
 		Optional: !required,
 		Required: required,
-		Type:     schema.TypeSet,
+		Type:     schema.TypeList,
 	}
 }
 
@@ -111,18 +116,15 @@ func expandPackageReference(tfPkg map[string]interface{}) octopusdeploy.PackageR
 		Properties:          map[string]string{},
 	}
 
-	if properties := tfPkg["properties"]; properties != nil {
-		propertyMap := properties.(map[string]interface{})
-		if len(propertyMap) > 0 {
-			// TODO: convert propertyMap to map[string]string
-			// pkg.Properties := convertedPropertyMap
-			log.Println(propertyMap)
-		}
+	if v, ok := tfPkg["extract_during_deployment"]; ok {
+		pkg.Properties["Extract"] = strconv.FormatBool(v.(bool))
 	}
 
-	extract := tfPkg["extract_during_deployment"]
-	if extract != nil {
-		pkg.Properties["Extract"] = strconv.FormatBool(extract.(bool))
+	if properties := tfPkg["properties"]; properties != nil {
+		propertyMap := properties.(map[string]interface{})
+		for propertyKey, propertyValue := range propertyMap {
+			pkg.Properties[propertyKey] = propertyValue.(string)
+		}
 	}
 
 	return pkg

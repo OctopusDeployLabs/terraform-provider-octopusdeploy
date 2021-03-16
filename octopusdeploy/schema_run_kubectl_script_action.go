@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"strconv"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -13,31 +15,40 @@ func getRunKubectlScriptSchema() *schema.Schema {
 	return actionSchema
 }
 
-func expandRunKubectlScriptAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	resource := expandDeploymentAction(tfAction)
-	resource.ActionType = "Octopus.KubernetesRunScript"
-	resource.Properties = merge(resource.Properties, buildScriptFromPackageProperties(tfAction))
-	return resource
+func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
+	deploymentAction := expandDeploymentAction(flattenedAction)
+
+	deploymentAction.ActionType = "Octopus.KubernetesRunScript"
+	deploymentAction.Properties["Octopus.Action.Script.ScriptFileName"] = flattenedAction["script_file_name"].(string)
+	deploymentAction.Properties["Octopus.Action.Script.ScriptParameters"] = flattenedAction["script_parameters"].(string)
+	deploymentAction.Properties["Octopus.Action.Script.ScriptSource"] = "Package"
+
+	return deploymentAction
 }
 
-func merge(map1 map[string]string, map2 map[string]string) map[string]string {
-	result := make(map[string]string)
+func flattenKubernetesRunScriptAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
+	flattenedKubernetesRunScriptAction := flattenCommonDeploymentAction(deploymentAction)
 
-	for k, v := range map1 {
-		result[k] = v
+	if v, ok := deploymentAction.Properties["Octopus.Action.RunOnServer"]; ok {
+		runOnServer, _ := strconv.ParseBool(v)
+		flattenedKubernetesRunScriptAction["run_on_server"] = runOnServer
 	}
 
-	for k, v := range map2 {
-		result[k] = v
+	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
+		flattenedKubernetesRunScriptAction["script_file_name"] = v
 	}
 
-	return result
-}
+	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
+		flattenedKubernetesRunScriptAction["script_parameters"] = v
+	}
 
-func buildScriptFromPackageProperties(tfAction map[string]interface{}) map[string]string {
-	properties := make(map[string]string)
-	properties["Octopus.Action.Script.ScriptFileName"] = tfAction["script_file_name"].(string)
-	properties["Octopus.Action.Script.ScriptParameters"] = tfAction["script_parameters"].(string)
-	properties["Octopus.Action.Script.ScriptSource"] = "Package"
-	return properties
+	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptSource"]; ok {
+		flattenedKubernetesRunScriptAction["script_source"] = v
+	}
+
+	if v, ok := deploymentAction.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
+		flattenedKubernetesRunScriptAction["variable_substitution_in_files"] = v
+	}
+
+	return flattenedKubernetesRunScriptAction
 }

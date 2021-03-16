@@ -82,42 +82,50 @@ func expandRunScriptAction(flattenedRunScriptAction map[string]interface{}) octo
 }
 
 func flattenRunScriptAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
-	return map[string]interface{}{
-		"can_be_used_for_project_versioning": deploymentAction.CanBeUsedForProjectVersioning,
-		"channels":                           deploymentAction.Channels,
-		"container":                          flattenDeploymentActionContainer(deploymentAction.Container),
-		"condition":                          deploymentAction.Condition,
-		"environments":                       deploymentAction.Environments,
-		"excluded_environments":              deploymentAction.ExcludedEnvironments,
-		"id":                                 deploymentAction.ID,
-		"is_disabled":                        deploymentAction.IsDisabled,
-		"is_required":                        deploymentAction.IsRequired,
-		"name":                               deploymentAction.Name,
-		"notes":                              deploymentAction.Notes,
-		"package":                            flattenPackageReferences(deploymentAction.Packages),
-		"properties":                         flattenRunScriptActionProperties(deploymentAction),
-		"tenant_tags":                        deploymentAction.TenantTags,
-	}
-}
+	flattenedRunScriptAction := flattenCommonDeploymentAction(deploymentAction)
 
-func flattenRunScriptActionProperties(deploymentAction octopusdeploy.DeploymentAction) map[string]string {
-	flattenedRunScriptAction := map[string]string{}
-
-	if runOnServer, ok := deploymentAction.Properties["Octopus.Action.RunOnServer"]; ok {
+	if v, ok := deploymentAction.Properties["Octopus.Action.RunOnServer"]; ok {
+		runOnServer, _ := strconv.ParseBool(v)
 		flattenedRunScriptAction["run_on_server"] = runOnServer
 	}
 
-	if scriptFileName, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
-		flattenedRunScriptAction["script_file_name"] = scriptFileName
+	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
+		flattenedRunScriptAction["script_file_name"] = v
 	}
 
-	if scriptParameters, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
-		flattenedRunScriptAction["script_parameters"] = scriptParameters
+	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
+		flattenedRunScriptAction["script_parameters"] = v
 	}
 
-	if scriptSource, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptSource"]; ok {
-		flattenedRunScriptAction["script_source"] = scriptSource
+	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptSource"]; ok {
+		flattenedRunScriptAction["script_source"] = v
+	}
+
+	if v, ok := deploymentAction.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
+		flattenedRunScriptAction["variable_substitution_in_files"] = v
 	}
 
 	return flattenedRunScriptAction
+}
+
+func flattenRunScriptActionProperties(deploymentAction octopusdeploy.DeploymentAction) map[string]string {
+	flattenedRunScriptActionProperties := map[string]string{}
+
+	if runOnServer, ok := deploymentAction.Properties["Octopus.Action.RunOnServer"]; ok {
+		flattenedRunScriptActionProperties["Octopus.Action.RunOnServer"] = runOnServer
+	}
+
+	if scriptFileName, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
+		flattenedRunScriptActionProperties["Octopus.Action.Script.ScriptFileName"] = scriptFileName
+	}
+
+	if scriptParameters, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
+		flattenedRunScriptActionProperties["Octopus.Action.Script.ScriptParameters"] = scriptParameters
+	}
+
+	if scriptSource, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptSource"]; ok {
+		flattenedRunScriptActionProperties["Octopus.Action.Script.ScriptSource"] = scriptSource
+	}
+
+	return flattenedRunScriptActionProperties
 }

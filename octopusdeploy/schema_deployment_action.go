@@ -8,8 +8,16 @@ import (
 )
 
 func flattenDeploymentAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
-	return map[string]interface{}{
-		"action_type":                        deploymentAction.ActionType,
+	flattenedDeploymentAction := flattenCommonDeploymentAction(deploymentAction)
+
+	flattenedDeploymentAction["action_type"] = deploymentAction.ActionType
+	flattenedDeploymentAction["worker_pool_id"] = deploymentAction.WorkerPoolID
+
+	return flattenedDeploymentAction
+}
+
+func flattenCommonDeploymentAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
+	flattenedDeploymentAction := map[string]interface{}{
 		"can_be_used_for_project_versioning": deploymentAction.CanBeUsedForProjectVersioning,
 		"channels":                           deploymentAction.Channels,
 		"container":                          flattenDeploymentActionContainer(deploymentAction.Container),
@@ -21,11 +29,28 @@ func flattenDeploymentAction(deploymentAction octopusdeploy.DeploymentAction) ma
 		"is_required":                        deploymentAction.IsRequired,
 		"name":                               deploymentAction.Name,
 		"notes":                              deploymentAction.Notes,
-		"package":                            flattenPackageReferences(deploymentAction.Packages),
 		"properties":                         deploymentAction.Properties,
 		"tenant_tags":                        deploymentAction.TenantTags,
-		"worker_pool_id":                     deploymentAction.WorkerPoolID,
 	}
+
+	flattenedPackageReferences := []interface{}{}
+	for _, packageReference := range deploymentAction.Packages {
+		flattenedPackageReference := flattenPackageReference(packageReference)
+		if len(packageReference.Name) == 0 {
+			flattenedDeploymentAction["primary_package"] = []interface{}{flattenedPackageReference}
+			continue
+		}
+
+		if v, ok := packageReference.Properties["Extract"]; ok {
+			extractDuringDeployment, _ := strconv.ParseBool(v)
+			flattenedPackageReference["extract_during_deployment"] = extractDuringDeployment
+		}
+
+		flattenedPackageReferences = append(flattenedPackageReferences, flattenedPackageReference)
+	}
+	flattenedDeploymentAction["package"] = flattenedPackageReferences
+
+	return flattenedDeploymentAction
 }
 
 func getDeploymentActionSchema() *schema.Schema {
@@ -72,16 +97,16 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 				Optional:    true,
 				Type:        schema.TypeList,
 			},
-			"excluded_environments": {
+			"environments": {
 				Computed:    true,
-				Description: "The environments that this step will be skipped in",
+				Description: "The environments within which this deployment action will run.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 				Type:        schema.TypeList,
 			},
-			"environments": {
+			"excluded_environments": {
 				Computed:    true,
-				Description: "The environments within which this deployment action will run.",
+				Description: "The environments that this step will be skipped in",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 				Type:        schema.TypeList,
@@ -213,17 +238,16 @@ func expandDeploymentAction(flattenedDeploymentAction map[string]interface{}) oc
 	}
 
 	if v, ok := flattenedDeploymentAction["primary_package"]; ok {
-		tfPrimaryPackage := v.(*schema.Set).List()
-		if len(tfPrimaryPackage) > 0 {
-			primaryPackage := expandPackageReference(tfPrimaryPackage[0].(map[string]interface{}))
-			action.Packages = append(action.Packages, primaryPackage)
+		primaryPackages := v.([]interface{})
+		for _, primaryPackage := range primaryPackages {
+			action.Packages = append(action.Packages, expandPackageReference(primaryPackage.(map[string]interface{})))
 		}
 	}
 
-	if tfPkgs, ok := flattenedDeploymentAction["package"]; ok {
-		for _, tfPkg := range tfPkgs.(*schema.Set).List() {
-			pkg := expandPackageReference(tfPkg.(map[string]interface{}))
-			action.Packages = append(action.Packages, pkg)
+	if v, ok := flattenedDeploymentAction["package"]; ok {
+		packageReferences := v.([]interface{})
+		for _, packageReference := range packageReferences {
+			action.Packages = append(action.Packages, expandPackageReference(packageReference.(map[string]interface{})))
 		}
 	}
 

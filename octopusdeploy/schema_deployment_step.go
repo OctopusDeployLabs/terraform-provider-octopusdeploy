@@ -128,12 +128,16 @@ func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []ma
 
 		for _, action := range deploymentStep.Actions {
 			switch action.ActionType {
+			case "Octopus.KubernetesRunScript":
+				flattenedDeploymentSteps[key]["run_kubectl_script_action"] = []interface{}{flattenKubernetesRunScriptAction(action)}
 			case "Octopus.Manual":
 				flattenedDeploymentSteps[key]["manual_intervention_action"] = []interface{}{flattenManualInterventionAction(action)}
 			case "Octopus.Script":
 				flattenedDeploymentSteps[key]["run_script_action"] = []interface{}{flattenRunScriptAction(action)}
 			case "Octopus.TentaclePackage":
 				flattenedDeploymentSteps[key]["deploy_package_action"] = []interface{}{flattenDeployPackageAction(action)}
+			case "Octopus.TerraformApply":
+				flattenedDeploymentSteps[key]["apply_terraform_action"] = []interface{}{flattenApplyTerraformAction(action)}
 			case "Octopus.WindowsService":
 				flattenedDeploymentSteps[key]["deploy_windows_service_action"] = []interface{}{flattenWindowsServiceAction(action)}
 			default:

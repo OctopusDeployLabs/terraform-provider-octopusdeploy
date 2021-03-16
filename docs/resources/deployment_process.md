@@ -129,8 +129,8 @@ Optional:
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
 - **notes** (String) The notes associated with this deploymnt action.
-- **package** (Block Set) The primary package for the action (see [below for nested schema](#nestedblock--step--action--package))
-- **primary_package** (Block Set, Max: 1) The primary package for the action (see [below for nested schema](#nestedblock--step--action--primary_package))
+- **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--package))
+- **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--primary_package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
@@ -151,7 +151,7 @@ Optional:
 Required:
 
 - **name** (String) The name of the package
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -159,7 +159,7 @@ Optional:
 - **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 <a id="nestedblock--step--action--primary_package"></a>
@@ -167,7 +167,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -175,7 +175,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 
@@ -189,6 +189,7 @@ Required:
 Optional:
 
 - **additional_init_params** (String) Additional parameters passed to the init command
+- **allow_plugin_downloads** (Boolean)
 - **can_be_used_for_project_versioning** (Boolean)
 - **channels** (List of String) The channels associated with this deployment action.
 - **condition** (String) The condition associated with this deployment action.
@@ -198,9 +199,10 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
+- **managed_account** (String)
 - **notes** (String) The notes associated with this deploymnt action.
-- **package** (Block Set) The primary package for the action (see [below for nested schema](#nestedblock--step--apply_terraform_action--package))
-- **primary_package** (Block Set, Max: 1) The primary package for the action (see [below for nested schema](#nestedblock--step--apply_terraform_action--primary_package))
+- **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_action--package))
+- **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_action--primary_package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
@@ -219,7 +221,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -227,7 +229,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 <a id="nestedblock--step--apply_terraform_action--primary_package"></a>
@@ -235,7 +237,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -243,7 +245,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 
@@ -268,7 +270,7 @@ Optional:
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
 - **notes** (String) The notes associated with this deploymnt action.
-- **package** (Block Set) The primary package for the action (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package))
+- **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
@@ -296,7 +298,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -304,7 +306,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 
@@ -314,7 +316,7 @@ Optional:
 Required:
 
 - **name** (String) The name of this resource.
-- **primary_package** (Block Set, Min: 1, Max: 1) The primary package for the action (see [below for nested schema](#nestedblock--step--deploy_package_action--primary_package))
+- **primary_package** (Block List, Min: 1, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_package_action--primary_package))
 
 Optional:
 
@@ -328,7 +330,7 @@ Optional:
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
 - **notes** (String) The notes associated with this deploymnt action.
-- **package** (Block Set) The primary package for the action (see [below for nested schema](#nestedblock--step--deploy_package_action--package))
+- **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_package_action--package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 - **windows_service** (Block Set, Max: 1) Deploy a windows service feature (see [below for nested schema](#nestedblock--step--deploy_package_action--windows_service))
@@ -338,7 +340,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -346,7 +348,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 <a id="nestedblock--step--deploy_package_action--container"></a>
@@ -363,7 +365,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -371,7 +373,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 <a id="nestedblock--step--deploy_package_action--windows_service"></a>
@@ -403,7 +405,7 @@ Required:
 
 - **executable_path** (String) The path to the executable relative to the package installation directory
 - **name** (String) The name of this resource.
-- **primary_package** (Block Set, Min: 1, Max: 1) The primary package for the action (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--primary_package))
+- **primary_package** (Block List, Min: 1, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--primary_package))
 - **service_name** (String) The name of the service
 
 Optional:
@@ -425,7 +427,7 @@ Optional:
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
 - **notes** (String) The notes associated with this deploymnt action.
-- **package** (Block Set) The primary package for the action (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--package))
+- **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **service_account** (String) Which built-in account will the service run under. Can be LocalSystem, NT Authority\NetworkService, NT Authority\LocalService, _CUSTOM or an expression
 - **start_mode** (String) When will the service start. Can be auto, delayed-auto, manual, unchanged or an expression
@@ -436,7 +438,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -444,7 +446,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 <a id="nestedblock--step--deploy_windows_service_action--container"></a>
@@ -461,7 +463,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -469,7 +471,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 
@@ -493,7 +495,7 @@ Optional:
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
 - **notes** (String) The notes associated with this deploymnt action.
-- **package** (Block Set) The primary package for the action (see [below for nested schema](#nestedblock--step--manual_intervention_action--package))
+- **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--manual_intervention_action--package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **responsible_teams** (String) The teams responsible to resolve this step. If no teams are specified, all users who have permission to deploy the project can resolve it.
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
@@ -512,7 +514,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -520,7 +522,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 
@@ -543,8 +545,8 @@ Optional:
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
 - **notes** (String) The notes associated with this deploymnt action.
-- **package** (Block Set) The primary package for the action (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package))
-- **primary_package** (Block Set, Max: 1) The primary package for the action (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package))
+- **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package))
+- **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **script_file_name** (String) The script file name in the package
@@ -567,7 +569,7 @@ Optional:
 Required:
 
 - **name** (String) The name of the package
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -575,7 +577,7 @@ Optional:
 - **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 <a id="nestedblock--step--run_kubectl_script_action--primary_package"></a>
@@ -583,7 +585,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -591,7 +593,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 
@@ -614,8 +616,8 @@ Optional:
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
 - **notes** (String) The notes associated with this deploymnt action.
-- **package** (Block Set) The primary package for the action (see [below for nested schema](#nestedblock--step--run_script_action--package))
-- **primary_package** (Block Set, Max: 1) The primary package for the action (see [below for nested schema](#nestedblock--step--run_script_action--primary_package))
+- **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--package))
+- **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--primary_package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **script_file_name** (String) The script file name in the package
@@ -639,7 +641,7 @@ Optional:
 Required:
 
 - **name** (String) The name of the package
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -647,7 +649,7 @@ Optional:
 - **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 
 <a id="nestedblock--step--run_script_action--primary_package"></a>
@@ -655,7 +657,7 @@ Optional:
 
 Required:
 
-- **package_id** (String) The ID of the package
+- **package_id** (String) The ID of the package.
 
 Optional:
 
@@ -663,7 +665,7 @@ Optional:
 - **feed_id** (String) The feed ID associated with this package reference.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **properties** (Map of String)
+- **properties** (Map of String) A list of properties associated with this package.
 
 ## Import
 
