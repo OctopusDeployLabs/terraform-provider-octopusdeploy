@@ -28,13 +28,14 @@ func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
 func testAccApplyTerraformAction() string {
 	return testAccBuildTestAction(`
 		apply_terraform_action {
+			additional_init_params = "Init params"
             name = "Apply Terraform"
             run_on_server = true
+
 			primary_package {
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
 			}
-			additional_init_params = "Init params"
         }
 	`)
 }
