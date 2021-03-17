@@ -7,6 +7,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func expandDeployPackageAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
+	deploymentAction := expandDeploymentAction(tfAction)
+	deploymentAction.ActionType = "Octopus.TentaclePackage"
+
+	if tfAction == nil {
+		log.Println("Deploy Package Resource is nil. Please confirm the package resource")
+	}
+
+	addWindowsServiceFeatureToActionResource(tfAction, deploymentAction)
+	return deploymentAction
+}
+
 func flattenDeployPackageAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
 	flattenedWindowsService := map[string]interface{}{}
 	flattenWindowsService(flattenedWindowsService, deploymentAction.Properties)
@@ -32,16 +44,4 @@ func getDeployPackageAction() *schema.Schema {
 	// addIis6HomeDirectoryFeature(element)
 	// addRedGateDatabaseDeploymentFeature(element)
 	return actionSchema
-}
-
-func expandDeployPackageAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	deploymentAction := expandDeploymentAction(tfAction)
-	deploymentAction.ActionType = "Octopus.TentaclePackage"
-
-	if tfAction == nil {
-		log.Println("Deploy Package Resource is nil. Please confirm the package resource")
-	}
-
-	addWindowsServiceFeatureToActionResource(tfAction, deploymentAction)
-	return deploymentAction
 }
