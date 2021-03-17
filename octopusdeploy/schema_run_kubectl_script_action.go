@@ -16,39 +16,39 @@ func getRunKubectlScriptSchema() *schema.Schema {
 }
 
 func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	deploymentAction := expandDeploymentAction(flattenedAction)
+	action := expandDeploymentAction(flattenedAction)
+	action.ActionType = "Octopus.KubernetesRunScript"
 
-	deploymentAction.ActionType = "Octopus.KubernetesRunScript"
-	deploymentAction.Properties["Octopus.Action.Script.ScriptFileName"] = flattenedAction["script_file_name"].(string)
-	deploymentAction.Properties["Octopus.Action.Script.ScriptParameters"] = flattenedAction["script_parameters"].(string)
-	deploymentAction.Properties["Octopus.Action.Script.ScriptSource"] = "Package"
+	action.Properties["Octopus.Action.Script.ScriptFileName"] = flattenedAction["script_file_name"].(string)
+	action.Properties["Octopus.Action.Script.ScriptParameters"] = flattenedAction["script_parameters"].(string)
+	action.Properties["Octopus.Action.Script.ScriptSource"] = "Package"
 
-	return deploymentAction
+	return action
 }
 
-func flattenKubernetesRunScriptAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedKubernetesRunScriptAction := flattenCommonDeploymentAction(deploymentAction)
+func flattenKubernetesRunScriptAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+	flattenedAction := flattenCommonDeploymentAction(action)
 
-	if v, ok := deploymentAction.Properties["Octopus.Action.RunOnServer"]; ok {
+	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
 		runOnServer, _ := strconv.ParseBool(v)
-		flattenedKubernetesRunScriptAction["run_on_server"] = runOnServer
+		flattenedAction["run_on_server"] = runOnServer
 	}
 
-	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
-		flattenedKubernetesRunScriptAction["script_file_name"] = v
+	if v, ok := action.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
+		flattenedAction["script_file_name"] = v
 	}
 
-	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
-		flattenedKubernetesRunScriptAction["script_parameters"] = v
+	if v, ok := action.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
+		flattenedAction["script_parameters"] = v
 	}
 
-	if v, ok := deploymentAction.Properties["Octopus.Action.Script.ScriptSource"]; ok {
-		flattenedKubernetesRunScriptAction["script_source"] = v
+	if v, ok := action.Properties["Octopus.Action.Script.ScriptSource"]; ok {
+		flattenedAction["script_source"] = v
 	}
 
-	if v, ok := deploymentAction.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
-		flattenedKubernetesRunScriptAction["variable_substitution_in_files"] = v
+	if v, ok := action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
+		flattenedAction["variable_substitution_in_files"] = v
 	}
 
-	return flattenedKubernetesRunScriptAction
+	return flattenedAction
 }

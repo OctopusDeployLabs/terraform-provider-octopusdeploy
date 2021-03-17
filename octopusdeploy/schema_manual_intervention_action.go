@@ -16,26 +16,11 @@ func flattenManualIntervention(actionMap map[string]interface{}, properties map[
 	}
 }
 
-func flattenManualInterventionAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedWindowsServiceAction := map[string]interface{}{
-		"can_be_used_for_project_versioning": deploymentAction.CanBeUsedForProjectVersioning,
-		"channels":                           deploymentAction.Channels,
-		"condition":                          deploymentAction.Condition,
-		"container":                          flattenDeploymentActionContainer(deploymentAction.Container),
-		"environments":                       deploymentAction.Environments,
-		"excluded_environments":              deploymentAction.ExcludedEnvironments,
-		"id":                                 deploymentAction.ID,
-		"is_disabled":                        deploymentAction.IsDisabled,
-		"is_required":                        deploymentAction.IsRequired,
-		"name":                               deploymentAction.Name,
-		"notes":                              deploymentAction.Notes,
-		"properties":                         deploymentAction.Properties,
-		"tenant_tags":                        deploymentAction.TenantTags,
-	}
+func flattenManualInterventionAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+	flattenedAction := flattenCommonDeploymentAction(action)
+	flattenManualIntervention(flattenedAction, action.Properties)
 
-	flattenManualIntervention(flattenedWindowsServiceAction, deploymentAction.Properties)
-
-	return flattenedWindowsServiceAction
+	return flattenedAction
 }
 
 func getManualInterventionActionSchema() *schema.Schema {

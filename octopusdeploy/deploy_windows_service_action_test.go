@@ -56,7 +56,7 @@ func testAccDeployWindowsServiceAction() string {
 			service_name = "MyService"
 			start_mode = "manual"
 
-			package {
+			primary_package {
 				package_id = "MyPackage"
 			}
 		}

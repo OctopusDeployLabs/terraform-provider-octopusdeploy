@@ -96,11 +96,81 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 	}
 }
 
-func expandDeployWindowsServiceAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	deploymentAction := expandDeploymentAction(tfAction)
-	deploymentAction.ActionType = "Octopus.WindowsService"
-	addWindowsServiceToActionResource(tfAction, deploymentAction)
-	return deploymentAction
+func expandDeployWindowsServiceAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
+	action := expandDeploymentAction(flattenedAction)
+	action.ActionType = "Octopus.WindowsService"
+
+	addWindowsServiceToActionResource(flattenedAction, action)
+
+	return action
+}
+
+func flattenWindowsService(properties map[string]string) []interface{} {
+	flattenedWindowsService := map[string]interface{}{}
+
+	for propertyName, propertyValue := range properties {
+		switch propertyName {
+		case "Octopus.Action.WindowsService.Arguments":
+			flattenedWindowsService["arguments"] = propertyValue
+		case "Octopus.Action.WindowsService.CreateOrUpdateService":
+			createOrUpdateService, _ := strconv.ParseBool(propertyValue)
+			flattenedWindowsService["create_or_update_service"] = createOrUpdateService
+		case "Octopus.Action.WindowsService.CustomAccountName":
+			flattenedWindowsService["custom_account_name"] = propertyValue
+		case "Octopus.Action.WindowsService.CustomAccountPassword":
+			flattenedWindowsService["custom_account_password"] = propertyValue
+		case "Octopus.Action.WindowsService.Dependencies":
+			flattenedWindowsService["dependencies"] = propertyValue
+		case "Octopus.Action.WindowsService.Description":
+			flattenedWindowsService["description"] = propertyValue
+		case "Octopus.Action.WindowsService.DisplayName":
+			flattenedWindowsService["display_name"] = propertyValue
+		case "Octopus.Action.WindowsService.ExecutablePath":
+			flattenedWindowsService["executable_path"] = propertyValue
+		case "Octopus.Action.WindowsService.ServiceAccount":
+			flattenedWindowsService["service_account"] = propertyValue
+		case "Octopus.Action.WindowsService.ServiceName":
+			flattenedWindowsService["service_name"] = propertyValue
+		case "Octopus.Action.WindowsService.StartMode":
+			flattenedWindowsService["start_mode"] = propertyValue
+		}
+	}
+
+	return []interface{}{flattenedWindowsService}
+}
+
+func flattenDeployWindowsServiceAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+	flattenedAction := flattenCommonDeploymentAction(action)
+
+	for propertyName, propertyValue := range action.Properties {
+		switch propertyName {
+		case "Octopus.Action.WindowsService.Arguments":
+			flattenedAction["arguments"] = propertyValue
+		case "Octopus.Action.WindowsService.CreateOrUpdateService":
+			createOrUpdateService, _ := strconv.ParseBool(propertyValue)
+			flattenedAction["create_or_update_service"] = createOrUpdateService
+		case "Octopus.Action.WindowsService.CustomAccountName":
+			flattenedAction["custom_account_name"] = propertyValue
+		case "Octopus.Action.WindowsService.CustomAccountPassword":
+			flattenedAction["custom_account_password"] = propertyValue
+		case "Octopus.Action.WindowsService.Dependencies":
+			flattenedAction["dependencies"] = propertyValue
+		case "Octopus.Action.WindowsService.Description":
+			flattenedAction["description"] = propertyValue
+		case "Octopus.Action.WindowsService.DisplayName":
+			flattenedAction["display_name"] = propertyValue
+		case "Octopus.Action.WindowsService.ExecutablePath":
+			flattenedAction["executable_path"] = propertyValue
+		case "Octopus.Action.WindowsService.ServiceAccount":
+			flattenedAction["service_account"] = propertyValue
+		case "Octopus.Action.WindowsService.ServiceName":
+			flattenedAction["service_name"] = propertyValue
+		case "Octopus.Action.WindowsService.StartMode":
+			flattenedAction["start_mode"] = propertyValue
+		}
+	}
+
+	return flattenedAction
 }
 
 func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, action octopusdeploy.DeploymentAction) {

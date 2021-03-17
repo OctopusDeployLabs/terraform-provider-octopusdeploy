@@ -141,7 +141,7 @@ func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []ma
 			case "Octopus.TerraformApply":
 				flattenedDeploymentSteps[key]["apply_terraform_action"] = []interface{}{flattenApplyTerraformAction(action)}
 			case "Octopus.WindowsService":
-				flattenedDeploymentSteps[key]["deploy_windows_service_action"] = []interface{}{flattenWindowsServiceAction(action)}
+				flattenedDeploymentSteps[key]["deploy_windows_service_action"] = []interface{}{flattenDeployWindowsServiceAction(action)}
 			default:
 				flattenedDeploymentSteps[key]["action"] = []interface{}{flattenDeploymentAction(action)}
 			}
@@ -176,7 +176,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					Type:        schema.TypeString,
 				},
 				"deploy_kubernetes_secret_action": getDeployKubernetesSecretActionSchema(),
-				"deploy_package_action":           getDeployPackageAction(),
+				"deploy_package_action":           getDeployPackageActionSchema(),
 				"deploy_windows_service_action":   getDeployWindowsServiceActionSchema(),
 				"id":                              getIDSchema(),
 				"manual_intervention_action":      getManualInterventionActionSchema(),
