@@ -128,6 +128,8 @@ func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []ma
 
 		for _, action := range deploymentStep.Actions {
 			switch action.ActionType {
+			case "Octopus.KubernetesDeploySecret":
+				flattenedDeploymentSteps[key]["deploy_kubernetes_secret_action"] = []interface{}{flattenDeployKubernetesSecretAction(action)}
 			case "Octopus.KubernetesRunScript":
 				flattenedDeploymentSteps[key]["run_kubectl_script_action"] = []interface{}{flattenKubernetesRunScriptAction(action)}
 			case "Octopus.Manual":
