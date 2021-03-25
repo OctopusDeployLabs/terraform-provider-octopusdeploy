@@ -150,7 +150,6 @@ func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 			// ValidateDiagFunc: validateDiagFunc(validation.IsURLWithHTTPorHTTPS),
 		},
 		"thumbprint": {
-			Computed:    true,
 			Description: "The thumbprint of this deployment target.",
 			Required:    true,
 			Type:        schema.TypeString,
