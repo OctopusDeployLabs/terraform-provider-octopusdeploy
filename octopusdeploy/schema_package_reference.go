@@ -51,6 +51,10 @@ func flattenPackageReference(packageReference octopusdeploy.PackageReference) ma
 		"properties":           packageReference.Properties,
 	}
 
+	if v, ok := packageReference.Properties["Extract"]; ok {
+		flattenedPackageReference["extract_during_deployment"] = v
+	}
+
 	return flattenedPackageReference
 }
 
@@ -74,7 +78,7 @@ func getPackageSchema(required bool) *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"acquisition_location": {
-					Default:     (string)(octopusdeploy.PackageAcquisitionLocationServer),
+					Default:     "Server",
 					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
 					Optional:    true,
 					Type:        schema.TypeString,
@@ -122,8 +126,8 @@ func expandPackageReference(tfPkg map[string]interface{}) octopusdeploy.PackageR
 
 	if properties := tfPkg["properties"]; properties != nil {
 		propertyMap := properties.(map[string]interface{})
-		for propertyKey, propertyValue := range propertyMap {
-			pkg.Properties[propertyKey] = propertyValue.(string)
+		for k, v := range propertyMap {
+			pkg.Properties[k] = v.(string)
 		}
 	}
 

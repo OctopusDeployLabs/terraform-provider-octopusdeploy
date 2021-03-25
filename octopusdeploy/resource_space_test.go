@@ -35,9 +35,9 @@ func TestAccSpaceImportBasic(t *testing.T) {
 
 func TestAccSpaceBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := "octopusdeploy_space." + localName
-
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	newName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_space." + localName
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccSpaceCheckDestroy,
@@ -49,16 +49,19 @@ func TestAccSpaceBasic(t *testing.T) {
 					testSpaceExists(prefix),
 					resource.TestCheckResourceAttrSet(prefix, "id"),
 					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "space_managers_teams.#", "2"),
+					resource.TestCheckResourceAttrSet(prefix, "space_managers_teams.0"),
 				),
 				Config: testSpaceBasic(localName, name),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(prefix, "id"),
-					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr("data.octopusdeploy_spaces."+localName, "name", name),
+					resource.TestCheckResourceAttr(prefix, "name", newName),
+					resource.TestCheckResourceAttr(prefix, "space_managers_teams.#", "2"),
+					resource.TestCheckResourceAttrSet(prefix, "space_managers_teams.0"),
 				),
-				Config: testSpaceDataSource(localName, name),
+				Config: testSpaceDataSource(localName, newName),
 			},
 		},
 	})
@@ -81,12 +84,12 @@ func testSpaceBasic(localName string, name string) string {
 	return fmt.Sprintf(testAccUserBasic(userLocalName, userDisplayName, true, false, userPassword, userUsername, userEmailAddress)+"\n"+
 		`resource "octopusdeploy_space" "%s" {
 			name = "%s"
-			space_managers_team_members = ["${octopusdeploy_user.%s.id}"]
+			space_managers_teams  = ["teams-managers"]
 
 			lifecycle {
-				ignore_changes = [space_managers_teams]
+			  ignore_changes = [space_managers_teams]
 			}
-		}`, localName, name, userLocalName)
+		}`, localName, name)
 }
 
 func testSpaceExists(prefix string) resource.TestCheckFunc {

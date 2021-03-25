@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -97,7 +98,7 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 }
 
 func expandDeployWindowsServiceAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	action := expandDeploymentAction(flattenedAction)
+	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.WindowsService"
 
 	addWindowsServiceToActionResource(flattenedAction, action)
@@ -140,7 +141,7 @@ func flattenWindowsService(properties map[string]string) []interface{} {
 }
 
 func flattenDeployWindowsServiceAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedAction := flattenCommonDeploymentAction(action)
+	flattenedAction := flattenAction(action)
 
 	for propertyName, propertyValue := range action.Properties {
 		switch propertyName {
@@ -182,45 +183,51 @@ func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, a
 	}
 }
 
-func addWindowsServiceToActionResource(tfAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
-	if createOrUpdateService, ok := tfAction["create_or_update_service"]; ok {
+func addWindowsServiceToActionResource(flattenedAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
+	if len(action.Properties["Octopus.Action.EnabledFeatures"]) == 0 {
+		action.Properties["Octopus.Action.EnabledFeatures"] = "Octopus.Features.WindowsService"
+	} else if !strings.Contains(action.Properties["Octopus.Action.EnabledFeatures"], "Octopus.Features.WindowsService") {
+		action.Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.WindowsService"
+	}
+
+	if createOrUpdateService, ok := flattenedAction["create_or_update_service"]; ok {
 		action.Properties["Octopus.Action.WindowsService.CreateOrUpdateService"] = strconv.FormatBool(createOrUpdateService.(bool))
 	}
 
-	action.Properties["Octopus.Action.WindowsService.ServiceName"] = tfAction["service_name"].(string)
+	action.Properties["Octopus.Action.WindowsService.ServiceName"] = flattenedAction["service_name"].(string)
 
-	displayName := tfAction["display_name"]
+	displayName := flattenedAction["display_name"]
 	if displayName != nil {
 		action.Properties["Octopus.Action.WindowsService.DisplayName"] = displayName.(string)
 	}
 
-	description := tfAction["description"]
+	description := flattenedAction["description"]
 	if description != nil {
 		action.Properties["Octopus.Action.WindowsService.Description"] = description.(string)
 	}
 
-	action.Properties["Octopus.Action.WindowsService.ExecutablePath"] = tfAction["executable_path"].(string)
+	action.Properties["Octopus.Action.WindowsService.ExecutablePath"] = flattenedAction["executable_path"].(string)
 
-	args := tfAction["arguments"]
+	args := flattenedAction["arguments"]
 	if args != nil {
 		action.Properties["Octopus.Action.WindowsService.Arguments"] = args.(string)
 	}
 
-	action.Properties["Octopus.Action.WindowsService.ServiceAccount"] = tfAction["service_account"].(string)
+	action.Properties["Octopus.Action.WindowsService.ServiceAccount"] = flattenedAction["service_account"].(string)
 
-	accountName := tfAction["custom_account_name"]
+	accountName := flattenedAction["custom_account_name"]
 	if accountName != nil {
 		action.Properties["Octopus.Action.WindowsService.CustomAccountName"] = accountName.(string)
 	}
 
-	accountPassword := tfAction["custom_account_password"]
+	accountPassword := flattenedAction["custom_account_password"]
 	if accountPassword != nil {
 		action.Properties["Octopus.Action.WindowsService.CustomAccountPassword"] = accountPassword.(string)
 	}
 
-	action.Properties["Octopus.Action.WindowsService.StartMode"] = tfAction["start_mode"].(string)
+	action.Properties["Octopus.Action.WindowsService.StartMode"] = flattenedAction["start_mode"].(string)
 
-	dependencies := tfAction["dependencies"]
+	dependencies := flattenedAction["dependencies"]
 	if dependencies != nil {
 		action.Properties["Octopus.Action.WindowsService.Dependencies"] = dependencies.(string)
 	}

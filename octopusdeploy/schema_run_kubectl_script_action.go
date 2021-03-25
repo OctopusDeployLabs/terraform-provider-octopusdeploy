@@ -16,7 +16,7 @@ func getRunKubectlScriptSchema() *schema.Schema {
 }
 
 func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	action := expandDeploymentAction(flattenedAction)
+	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.KubernetesRunScript"
 
 	action.Properties["Octopus.Action.Script.ScriptFileName"] = flattenedAction["script_file_name"].(string)
@@ -27,7 +27,7 @@ func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) octopu
 }
 
 func flattenKubernetesRunScriptAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedAction := flattenCommonDeploymentAction(action)
+	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
 		runOnServer, _ := strconv.ParseBool(v)

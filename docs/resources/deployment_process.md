@@ -620,9 +620,11 @@ Optional:
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--primary_package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
+- **script_body** (String)
 - **script_file_name** (String) The script file name in the package
 - **script_parameters** (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
 - **script_source** (String)
+- **script_syntax** (String)
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 - **variable_substitution_in_files** (String) A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.
 

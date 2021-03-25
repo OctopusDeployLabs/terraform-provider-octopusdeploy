@@ -7,37 +7,40 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func flattenDeploymentAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedDeploymentAction := flattenCommonDeploymentAction(deploymentAction)
+func flattenDeploymentAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+	flattenedDeploymentAction := flattenAction(action)
 
-	flattenedDeploymentAction["action_type"] = deploymentAction.ActionType
-	flattenedDeploymentAction["worker_pool_id"] = deploymentAction.WorkerPoolID
+	flattenedDeploymentAction["action_type"] = action.ActionType
+	flattenedDeploymentAction["worker_pool_id"] = action.WorkerPoolID
 
 	return flattenedDeploymentAction
 }
 
-func flattenCommonDeploymentAction(deploymentAction octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedDeploymentAction := map[string]interface{}{
-		"can_be_used_for_project_versioning": deploymentAction.CanBeUsedForProjectVersioning,
-		"channels":                           deploymentAction.Channels,
-		"container":                          flattenDeploymentActionContainer(deploymentAction.Container),
-		"condition":                          deploymentAction.Condition,
-		"environments":                       deploymentAction.Environments,
-		"excluded_environments":              deploymentAction.ExcludedEnvironments,
-		"id":                                 deploymentAction.ID,
-		"is_disabled":                        deploymentAction.IsDisabled,
-		"is_required":                        deploymentAction.IsRequired,
-		"name":                               deploymentAction.Name,
-		"notes":                              deploymentAction.Notes,
-		"properties":                         deploymentAction.Properties,
-		"tenant_tags":                        deploymentAction.TenantTags,
+func flattenAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+	actionProperties := action.Properties
+
+	flattenedAction := map[string]interface{}{
+		"can_be_used_for_project_versioning": action.CanBeUsedForProjectVersioning,
+		"channels":                           action.Channels,
+		"container":                          flattenDeploymentActionContainer(action.Container),
+		"condition":                          action.Condition,
+		"environments":                       action.Environments,
+		"excluded_environments":              action.ExcludedEnvironments,
+		"id":                                 action.ID,
+		"is_disabled":                        action.IsDisabled,
+		"is_required":                        action.IsRequired,
+		"name":                               action.Name,
+		"notes":                              action.Notes,
+		"tenant_tags":                        action.TenantTags,
 	}
 
 	flattenedPackageReferences := []interface{}{}
-	for _, packageReference := range deploymentAction.Packages {
+	for _, packageReference := range action.Packages {
 		flattenedPackageReference := flattenPackageReference(packageReference)
 		if len(packageReference.Name) == 0 {
-			flattenedDeploymentAction["primary_package"] = []interface{}{flattenedPackageReference}
+			flattenedAction["primary_package"] = []interface{}{flattenedPackageReference}
+			actionProperties["Octopus.Action.Package.DownloadOnTentacle"] = packageReference.AcquisitionLocation
+			flattenedAction["properties"] = actionProperties
 			continue
 		}
 
@@ -48,9 +51,10 @@ func flattenCommonDeploymentAction(deploymentAction octopusdeploy.DeploymentActi
 
 		flattenedPackageReferences = append(flattenedPackageReferences, flattenedPackageReference)
 	}
-	flattenedDeploymentAction["package"] = flattenedPackageReferences
+	flattenedAction["package"] = flattenedPackageReferences
+	flattenedAction["properties"] = actionProperties
 
-	return flattenedDeploymentAction
+	return flattenedAction
 }
 
 func getDeploymentActionSchema() *schema.Schema {
@@ -134,7 +138,6 @@ func getCommonDeploymentActionSchema() (*schema.Schema, *schema.Resource) {
 			"properties": {
 				Computed:    true,
 				Description: "The properties associated with this deployment action.",
-				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 				Type:        schema.TypeMap,
 			},
@@ -177,74 +180,86 @@ func addWorkerPoolSchema(element *schema.Resource) {
 	}
 }
 
-func expandDeploymentAction(flattenedDeploymentAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	name := flattenedDeploymentAction["name"].(string)
+func expandAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
+	name := flattenedAction["name"].(string)
 	action := octopusdeploy.NewDeploymentAction(name)
 
-	if v, ok := flattenedDeploymentAction["action_type"]; ok {
+	if v, ok := flattenedAction["action_type"]; ok {
 		if actionType := v.(string); len(actionType) > 0 {
 			action.ActionType = actionType
 		}
 	}
 
-	if channels, ok := flattenedDeploymentAction["channels"]; ok {
-		action.Channels = getSliceFromTerraformTypeList(channels)
+	if v, ok := flattenedAction["channels"]; ok {
+		action.Channels = getSliceFromTerraformTypeList(v)
 	}
 
-	if condition, ok := flattenedDeploymentAction["condition"]; ok {
-		action.Condition = condition.(string)
+	if v, ok := flattenedAction["condition"]; ok {
+		action.Condition = v.(string)
 	}
 
-	if container, ok := flattenedDeploymentAction["container"]; ok {
-		action.Container = expandDeploymentActionContainer(container)
+	if v, ok := flattenedAction["container"]; ok {
+		action.Container = expandDeploymentActionContainer(v)
 	}
 
-	if environments, ok := flattenedDeploymentAction["environments"]; ok {
-		action.Environments = getSliceFromTerraformTypeList(environments)
+	if v, ok := flattenedAction["environments"]; ok {
+		action.Environments = getSliceFromTerraformTypeList(v)
 	}
 
-	if excludedEnvironments, ok := flattenedDeploymentAction["excluded_environments"]; ok {
-		action.ExcludedEnvironments = getSliceFromTerraformTypeList(excludedEnvironments)
+	if v, ok := flattenedAction["excluded_environments"]; ok {
+		action.ExcludedEnvironments = getSliceFromTerraformTypeList(v)
 	}
 
-	if isDisabled, ok := flattenedDeploymentAction["is_disabled"]; ok {
-		action.IsDisabled = isDisabled.(bool)
+	if v, ok := flattenedAction["is_disabled"]; ok {
+		action.IsDisabled = v.(bool)
 	}
 
-	if isRequired, ok := flattenedDeploymentAction["is_required"]; ok {
-		action.IsRequired = isRequired.(bool)
+	if v, ok := flattenedAction["is_required"]; ok {
+		action.IsRequired = v.(bool)
 	}
 
-	if notes, ok := flattenedDeploymentAction["notes"]; ok {
-		action.Notes = notes.(string)
+	if v, ok := flattenedAction["notes"]; ok {
+		action.Notes = v.(string)
 	}
 
-	if properties, ok := flattenedDeploymentAction["properties"]; ok {
-		action.Properties = expandProperties(properties)
+	if v, ok := flattenedAction["properties"]; ok {
+		action.Properties = expandProperties(v)
 	}
 
 	// Even though not all actions have these properties, we'll keep them here.
 	// They will just be ignored if the action doesn't have it
-	if runOnServer, ok := flattenedDeploymentAction["run_on_server"]; ok {
-		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(runOnServer.(bool))
+	if v, ok := flattenedAction["run_on_server"]; ok {
+		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(v.(bool))
 	}
 
-	if tenantTags, ok := flattenedDeploymentAction["tenant_tags"]; ok {
-		action.TenantTags = getSliceFromTerraformTypeList(tenantTags)
+	if v, ok := flattenedAction["tenant_tags"]; ok {
+		action.TenantTags = getSliceFromTerraformTypeList(v)
 	}
 
-	if workerPoolID, ok := flattenedDeploymentAction["worker_pool_id"]; ok {
-		action.WorkerPoolID = workerPoolID.(string)
+	if v, ok := flattenedAction["worker_pool_id"]; ok {
+		action.WorkerPoolID = v.(string)
 	}
 
-	if v, ok := flattenedDeploymentAction["primary_package"]; ok {
+	if v, ok := flattenedAction["primary_package"]; ok {
 		primaryPackages := v.([]interface{})
 		for _, primaryPackage := range primaryPackages {
-			action.Packages = append(action.Packages, expandPackageReference(primaryPackage.(map[string]interface{})))
+			primaryPackageReference := expandPackageReference(primaryPackage.(map[string]interface{}))
+
+			action.Properties["Octopus.Action.Package.DownloadOnTentacle"] = primaryPackageReference.AcquisitionLocation
+
+			if len(primaryPackageReference.PackageID) > 0 {
+				action.Properties["Octopus.Action.Package.PackageId"] = primaryPackageReference.PackageID
+			}
+
+			if len(primaryPackageReference.FeedID) > 0 {
+				action.Properties["Octopus.Action.Package.FeedId"] = primaryPackageReference.FeedID
+			}
+
+			action.Packages = append(action.Packages, primaryPackageReference)
 		}
 	}
 
-	if v, ok := flattenedDeploymentAction["package"]; ok {
+	if v, ok := flattenedAction["package"]; ok {
 		packageReferences := v.([]interface{})
 		for _, packageReference := range packageReferences {
 			action.Packages = append(action.Packages, expandPackageReference(packageReference.(map[string]interface{})))

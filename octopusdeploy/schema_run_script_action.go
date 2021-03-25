@@ -26,29 +26,36 @@ func addScriptFromPackageSchema(element *schema.Resource) {
 }
 
 func expandRunScriptAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	action := expandDeploymentAction(flattenedAction)
+	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.Script"
-	action.Properties = merge(action.Properties, flattenRunScriptActionProperties(action))
 
-	if v, ok := flattenedAction["run_on_server"]; ok {
-		action.Properties["Octopus.Action.RunOnServer"] = strconv.FormatBool(v.(bool))
+	if v, ok := flattenedAction["script_body"]; ok {
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.ScriptBody"] = s
+		}
 	}
 
 	if v, ok := flattenedAction["script_file_name"]; ok {
-		if scriptFileName := v.(string); len(scriptFileName) > 0 {
-			action.Properties["Octopus.Action.Script.ScriptFileName"] = scriptFileName
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.ScriptFileName"] = s
 		}
 	}
 
 	if v, ok := flattenedAction["script_parameters"]; ok {
-		if scriptParameters := v.(string); len(scriptParameters) > 0 {
-			action.Properties["Octopus.Action.Script.ScriptParameters"] = scriptParameters
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.ScriptParameters"] = s
 		}
 	}
 
 	if v, ok := flattenedAction["script_source"]; ok {
-		if scriptSource := v.(string); len(scriptSource) > 0 {
-			action.Properties["Octopus.Action.Script.ScriptSource"] = scriptSource
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.ScriptSource"] = s
+		}
+	}
+
+	if v, ok := flattenedAction["script_syntax"]; ok {
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.Syntax"] = s
 		}
 	}
 
@@ -67,11 +74,15 @@ func expandRunScriptAction(flattenedAction map[string]interface{}) octopusdeploy
 }
 
 func flattenRunScriptAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedAction := flattenCommonDeploymentAction(action)
+	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
 		runOnServer, _ := strconv.ParseBool(v)
 		flattenedAction["run_on_server"] = runOnServer
+	}
+
+	if v, ok := action.Properties["Octopus.Action.Script.ScriptBody"]; ok {
+		flattenedAction["script_body"] = v
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
@@ -86,6 +97,10 @@ func flattenRunScriptAction(action octopusdeploy.DeploymentAction) map[string]in
 		flattenedAction["script_source"] = v
 	}
 
+	if v, ok := action.Properties["Octopus.Action.Script.Syntax"]; ok {
+		flattenedAction["script_syntax"] = v
+	}
+
 	if v, ok := action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
 		flattenedAction["variable_substitution_in_files"] = v
 	}
@@ -93,33 +108,22 @@ func flattenRunScriptAction(action octopusdeploy.DeploymentAction) map[string]in
 	return flattenedAction
 }
 
-func flattenRunScriptActionProperties(action octopusdeploy.DeploymentAction) map[string]string {
-	flattenedProperties := map[string]string{}
-
-	if runOnServer, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
-		flattenedProperties["Octopus.Action.RunOnServer"] = runOnServer
-	}
-
-	if scriptFileName, ok := action.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
-		flattenedProperties["Octopus.Action.Script.ScriptFileName"] = scriptFileName
-	}
-
-	if scriptParameters, ok := action.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
-		flattenedProperties["Octopus.Action.Script.ScriptParameters"] = scriptParameters
-	}
-
-	if scriptSource, ok := action.Properties["Octopus.Action.Script.ScriptSource"]; ok {
-		flattenedProperties["Octopus.Action.Script.ScriptSource"] = scriptSource
-	}
-
-	return flattenedProperties
-}
-
 func getRunScriptActionSchema() *schema.Schema {
 	actionSchema, element := getCommonDeploymentActionSchema()
 	addExecutionLocationSchema(element)
 	addScriptFromPackageSchema(element)
 	addPackagesSchema(element, false)
+
+	element.Schema["script_body"] = &schema.Schema{
+		Optional: true,
+		Type:     schema.TypeString,
+	}
+
+	element.Schema["script_syntax"] = &schema.Schema{
+		Computed: true,
+		Optional: true,
+		Type:     schema.TypeString,
+	}
 
 	element.Schema["variable_substitution_in_files"] = &schema.Schema{
 		Description: "A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",

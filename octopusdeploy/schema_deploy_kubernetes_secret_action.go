@@ -9,7 +9,7 @@ import (
 )
 
 func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	action := expandDeploymentAction(flattenedAction)
+	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.KubernetesDeploySecret"
 
 	action.Properties["Octopus.Action.KubernetesContainers.SecretName"] = flattenedAction["secret_name"].(string)
@@ -30,7 +30,7 @@ func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) 
 }
 
 func flattenDeployKubernetesSecretAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedAction := flattenCommonDeploymentAction(action)
+	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
 		runOnServer, _ := strconv.ParseBool(v)

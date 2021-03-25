@@ -14,6 +14,19 @@ func expandProperties(properties interface{}) map[string]string {
 	return expandedProperties
 }
 
+func flattenProperties(properties map[string]string) map[string]interface{} {
+	if len(properties) == 0 {
+		return nil
+	}
+
+	flattenedProperties := make(map[string]interface{}, len(properties))
+	for k, v := range properties {
+		flattenedProperties[k] = v
+	}
+
+	return flattenedProperties
+}
+
 func getPropertySchema() *schema.Schema {
 	return &schema.Schema{
 		Elem: &schema.Resource{

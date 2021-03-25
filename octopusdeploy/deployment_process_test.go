@@ -51,7 +51,7 @@ func testAccDeploymentProcessBasic() string {
 				window_size = "5"
 
 				run_script_action {
-					channels = ["Channels-1"]
+					// channels = ["Channels-1"]
 					// environments = ["Environments-1"]
 					// excluded_environments = ["Environments-2"]
 					is_disabled = false
@@ -63,7 +63,7 @@ func testAccDeploymentProcessBasic() string {
 					tenant_tags = ["tag/tag"]
 					
 					primary_package {
-						acquisition_location = "ExecutionTarget"
+						acquisition_location = "Server"
 						feed_id = "feeds-builtin"
 						package_id = "MyPackage"
 					}
@@ -74,10 +74,6 @@ func testAccDeploymentProcessBasic() string {
 						feed_id = "feeds-builtin"
 						name = "ThePackage"
 						package_id = "MyPackage"
-
-						properties = {
-							"WhatIsThis" = "Dunno"
-						}
 					}
 
 					package {
@@ -86,10 +82,6 @@ func testAccDeploymentProcessBasic() string {
 						feed_id = "feeds-builtin"
 						name = "ThePackage2"
 						package_id = "MyPackage2"
-
-						properties = {
-							"WhatIsThis" = "Dunno"
-						}
 					}
 				}
 			}
@@ -99,14 +91,10 @@ func testAccDeploymentProcessBasic() string {
 			  start_trigger = "StartWithPrevious"
 			  target_roles = ["WebServer"]
 	
-			  action {
+			  run_script_action {
 				name = "Step2"
-				action_type = "Octopus.Script"
 				run_on_server = true
-				
-				properties = {
-				  "Octopus.Action.Script.ScriptBody" = "Write-Host 'hi'"
-				}
+				script_body = "Write-Host 'hi'"
 			  }
 			} 
 		}`, projectID)
@@ -124,12 +112,17 @@ func testAccBuildTestAction(action string) string {
 	projectID := "octopusdeploy_project." + localName + ".id"
 
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description)+"\n"+
-		`resource "octopusdeploy_deployment_process" "test" {
+		`resource "octopusdeploy_nuget_feed" "testing" {
+			name     = "testing"
+			feed_uri = "http://testfeed.com"
+		  }
+		
+		resource "octopusdeploy_deployment_process" "test" {
 			project_id = %s
 
 			step {
 				name = "Test"
-				target_roles = ["WebServer"]
+				target_roles = ["Foo", "Bar", "Quux"]
 
 				%s
 			}

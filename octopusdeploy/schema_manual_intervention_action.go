@@ -17,7 +17,7 @@ func flattenManualIntervention(actionMap map[string]interface{}, properties map[
 }
 
 func flattenManualInterventionAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedAction := flattenCommonDeploymentAction(action)
+	flattenedAction := flattenAction(action)
 	flattenManualIntervention(flattenedAction, action.Properties)
 
 	return flattenedAction
@@ -42,7 +42,7 @@ func getManualInterventionActionSchema() *schema.Schema {
 }
 
 func expandManualInterventionAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	resource := expandDeploymentAction(tfAction)
+	resource := expandAction(tfAction)
 	resource.ActionType = "Octopus.Manual"
 	resource.Properties["Octopus.Action.Manual.Instructions"] = tfAction["instructions"].(string)
 

@@ -8,89 +8,89 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandDeploymentStep(tfStep map[string]interface{}) *octopusdeploy.DeploymentStep {
-	name := tfStep["name"].(string)
+func expandDeploymentStep(flattenedStep map[string]interface{}) *octopusdeploy.DeploymentStep {
+	name := flattenedStep["name"].(string)
 	step := octopusdeploy.NewDeploymentStep(name)
 
 	// properties MUST be serialized first
-	if properties, ok := tfStep["properties"]; ok {
+	if properties, ok := flattenedStep["properties"]; ok {
 		step.Properties = expandProperties(properties)
 	}
 
-	if condition, ok := tfStep["condition"]; ok {
+	if condition, ok := flattenedStep["condition"]; ok {
 		step.Condition = octopusdeploy.DeploymentStepConditionType(condition.(string))
 	}
 
-	if conditionExpression, ok := tfStep["condition_expression"]; ok {
+	if conditionExpression, ok := flattenedStep["condition_expression"]; ok {
 		step.Properties["Octopus.Step.ConditionVariableExpression"] = conditionExpression.(string)
 	}
 
-	if packageRequirement, ok := tfStep["package_requirement"]; ok {
+	if packageRequirement, ok := flattenedStep["package_requirement"]; ok {
 		step.PackageRequirement = octopusdeploy.DeploymentStepPackageRequirement(packageRequirement.(string))
 	}
 
-	if startTrigger, ok := tfStep["start_trigger"]; ok {
+	if startTrigger, ok := flattenedStep["start_trigger"]; ok {
 		step.StartTrigger = octopusdeploy.DeploymentStepStartTrigger(startTrigger.(string))
 	}
 
-	if targetRoles, ok := tfStep["target_roles"]; ok {
+	if targetRoles, ok := flattenedStep["target_roles"]; ok {
 		step.Properties["Octopus.Action.TargetRoles"] = strings.Join(getSliceFromTerraformTypeList(targetRoles), ",")
 	}
 
-	if windowSize, ok := tfStep["window_size"]; ok {
+	if windowSize, ok := flattenedStep["window_size"]; ok {
 		step.Properties["Octopus.Action.MaxParallelism"] = windowSize.(string)
 	}
 
-	if v, ok := tfStep["action"]; ok {
+	if v, ok := flattenedStep["action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := expandDeploymentAction(tfAction.(map[string]interface{}))
+			action := expandAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if v, ok := tfStep["manual_intervention_action"]; ok {
+	if v, ok := flattenedStep["manual_intervention_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
 			action := expandManualInterventionAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if v, ok := tfStep["apply_terraform_action"]; ok {
+	if v, ok := flattenedStep["apply_terraform_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
 			action := expandApplyTerraformAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if v, ok := tfStep["deploy_package_action"]; ok {
+	if v, ok := flattenedStep["deploy_package_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
 			action := expandDeployPackageAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if v, ok := tfStep["deploy_windows_service_action"]; ok {
+	if v, ok := flattenedStep["deploy_windows_service_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
 			action := expandDeployWindowsServiceAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if v, ok := tfStep["run_script_action"]; ok {
+	if v, ok := flattenedStep["run_script_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
 			action := expandRunScriptAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if v, ok := tfStep["run_kubectl_script_action"]; ok {
+	if v, ok := flattenedStep["run_kubectl_script_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
 			action := expandRunKubectlScriptAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
 
-	if v, ok := tfStep["deploy_kubernetes_secret_action"]; ok {
+	if v, ok := flattenedStep["deploy_kubernetes_secret_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
 			action := expandDeployKubernetesSecretAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
@@ -194,7 +194,6 @@ func getDeploymentStepSchema() *schema.Schema {
 				},
 				"properties": {
 					Computed: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
 					Optional: true,
 					Type:     schema.TypeMap,
 				},

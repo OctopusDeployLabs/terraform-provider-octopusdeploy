@@ -152,7 +152,7 @@ func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 		"thumbprint": {
 			Computed:    true,
 			Description: "The thumbprint of this deployment target.",
-			Optional:    true,
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"uri": {

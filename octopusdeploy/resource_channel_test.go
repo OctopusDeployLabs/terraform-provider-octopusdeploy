@@ -183,30 +183,38 @@ func testAccChannelBasic(lifecycleLocalName string, lifecycleName string, projec
 }
 
 func testAccChannelWithOneRule(name, description, versionRange, actionName string) string {
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
 	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
-			name = "Integration Test Project Group"
+		resource "octopusdeploy_project_group" "test-project-group" {
+			name = "%s"
 		}
 
-		resource "octopusdeploy_project" "foo" {
+		resource "octopusdeploy_project" "test-project" {
 			allow_deployments_to_no_targets = true
-			lifecycle_id	                = "Lifecycles-1"
-			name           	                = "funky project"
-			project_group_id                = "${octopusdeploy_project_group.foo.id}" 	
+			lifecycle_id = "Lifecycles-1"
+			name = "%s"
+			project_group_id = octopusdeploy_project_group.test-project-group.id
 		}
 
 		resource "octopusdeploy_deployment_process" "deploy_step_template" {
-			project_id          = "${octopusdeploy_project.foo.id}"
+			project_id = octopusdeploy_project.test-project.id
+
 			step {
-				name            = "step-1"
-				target_roles    = ["Webserver",]
-				action {
-					action_type = "Octopus.TentaclePackage"
-					name 		= "%s"
-		
+				name = "step-1"
+				target_roles = ["Webserver",]
+
+				deploy_package_action {
+					name = "%s"
+
+					primary_package {
+						feed_id = "feeds-builtin"
+						package_id = "MyPackage"
+					}
+
 					properties = {
-						"Octopus.Action.Package.FeedId": "feeds-builtin"
-						"Octopus.Action.Package.PackageId": "#{PackageName}"
+						"Octopus.Action.EnabledFeatures" = "Octopus.Features.IISWebSite,Octopus.Features.CustomDirectory,Octopus.Features.CustomScripts,Octopus.Features.ConfigurationVariables,Octopus.Features.ConfigurationTransforms"
 					}
 				}
 			}
@@ -215,16 +223,16 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 		resource "octopusdeploy_channel" "ch" {
 		  depends_on  = ["octopusdeploy_deployment_process.deploy_step_template"]
 		  description = "%s"
-		  name        = "%s"
-		  project_id  = "${octopusdeploy_project.foo.id}"
+		  name = "%s"
+		  project_id = octopusdeploy_project.test-project.id
 
 		  rule {
-		    actions       = ["%s"] 
+		    actions = ["%s"] 
 		    version_range = "%s"
 		  }
 		}
 		`,
-		actionName, description, name, actionName, versionRange,
+		projectGroupName, projectName, actionName, description, name, actionName, versionRange,
 	)
 }
 

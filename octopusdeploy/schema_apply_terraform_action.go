@@ -8,7 +8,7 @@ import (
 )
 
 func expandApplyTerraformAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
-	action := expandDeploymentAction(flattenedAction)
+	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.TerraformApply"
 
 	action.Properties["Octopus.Action.Terraform.AdditionalInitParams"] = flattenedAction["additional_init_params"].(string)
@@ -20,7 +20,7 @@ func expandApplyTerraformAction(flattenedAction map[string]interface{}) octopusd
 }
 
 func flattenApplyTerraformAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
-	flattenedAction := flattenCommonDeploymentAction(action)
+	flattenedAction := flattenAction(action)
 	flattenApplyTerraformActionProperties(flattenedAction, action.Properties)
 
 	return flattenedAction
