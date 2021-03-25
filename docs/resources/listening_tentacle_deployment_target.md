@@ -20,6 +20,7 @@ This resource manages listening tentacle deployment targets in Octopus Deploy.
 - **name** (String) The name of this resource.
 - **roles** (List of String) A list of role IDs that are associated with this deployment target.
 - **tentacle_url** (String) The tenant URL of this deployment target.
+- **thumbprint** (String) The thumbprint of this deployment target.
 
 ### Optional
 
@@ -41,7 +42,6 @@ This resource manages listening tentacle deployment targets in Octopus Deploy.
 - **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **tenants** (List of String) A list of tenant IDs associated with this resource.
 - **tentacle_version_details** (Block List) (see [below for nested schema](#nestedblock--tentacle_version_details))
-- **thumbprint** (String) The thumbprint of this deployment target.
 - **uri** (String) The URI of this deployment target.
 
 ### Read-only
