@@ -111,7 +111,7 @@ func getKubernetesAuthenticationSchema() map[string]*schema.Schema {
 		"authentication_type": {
 			Optional: true,
 			Type:     schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"KubernetesAws",
 				"KubernetesAzure",
 				"KubernetesCertificate",

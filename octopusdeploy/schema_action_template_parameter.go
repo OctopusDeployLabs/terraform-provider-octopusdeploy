@@ -77,7 +77,7 @@ func getActionTemplateParameterSchema() map[string]*schema.Schema {
 			Description:      "The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`.",
 			Required:         true,
 			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		},
 	}
 }

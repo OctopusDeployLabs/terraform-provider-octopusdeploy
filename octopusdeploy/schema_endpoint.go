@@ -258,7 +258,7 @@ func getEndpointSchema() map[string]*schema.Schema {
 		"communication_style": {
 			Type:     schema.TypeString,
 			Required: true,
-			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"AzureCloudService",
 				"AzureWebApp",
 				"Ftp",

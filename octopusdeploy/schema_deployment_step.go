@@ -162,7 +162,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
 					Optional:    true,
 					Type:        schema.TypeString,
-					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 						"Always",
 						"Failure",
 						"Success",
@@ -186,7 +186,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "Whether to run this step before or after package acquisition (if possible)",
 					Optional:    true,
 					Type:        schema.TypeString,
-					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 						"AfterPackageAcquisition",
 						"BeforePackageAcquisition",
 						"LetOctopusDecide",
@@ -204,7 +204,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					Description: "Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')",
 					Optional:    true,
 					Type:        schema.TypeString,
-					ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 						"StartAfterPrevious",
 						"StartWithPrevious",
 					}, false)),

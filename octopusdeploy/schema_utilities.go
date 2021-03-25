@@ -50,7 +50,7 @@ func getApplicationIDSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
 		Description:      "The application ID of this resource.",
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 	}
 
 	if isRequired {
@@ -66,7 +66,7 @@ func getAuthenticationEndpointSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
 		Description:      "The authentication endpoint URI for this resource.",
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsURLWithHTTPS),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPS),
 	}
 
 	if isRequired {
@@ -100,7 +100,7 @@ func getCertificateDataFormatSchema() *schema.Schema {
 		Description: "Specifies the archive file format used for storing cryptography objects in the certificate. Valid formats are `Der`, `Pem`, `Pkcs12`, or `Unknown`.",
 		Optional:    true,
 		Type:        schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"Der",
 			"Pem",
 			"Pkcs12",
@@ -163,7 +163,7 @@ func getHealthStatusSchema() *schema.Schema {
 		Description: "Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.",
 		Optional:    true,
 		Type:        schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"HasWarnings",
 			"Healthy",
 			"Unavailable",
@@ -196,7 +196,7 @@ func getPasswordSchema(isRequired bool) *schema.Schema {
 		Description:      "The password associated with this resource.",
 		Sensitive:        true,
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 	}
 
 	if isRequired {
@@ -212,7 +212,7 @@ func getNameSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
 		Description:      "The name of this resource.",
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 	}
 
 	if isRequired {
@@ -228,7 +228,7 @@ func getResourceManagerEndpointSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
 		Description:      "The resource manager endpoint URI for this resource.",
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsURLWithHTTPS),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPS),
 	}
 
 	if isRequired {
@@ -304,7 +304,7 @@ func getSubscriptionIDSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
 		Description:      "The subscription ID of this resource.",
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 	}
 
 	if isRequired {
@@ -334,7 +334,7 @@ func getTenantIDSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
 		Description:      "The tenant ID of this resource.",
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.IsUUID),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 	}
 
 	if isRequired {
@@ -370,7 +370,7 @@ func getTokenSchema(isRequired bool) *schema.Schema {
 		Description:      "The token of this resource.",
 		Sensitive:        true,
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 	}
 
 	if isRequired {
@@ -387,7 +387,7 @@ func getUsernameSchema(isRequired bool) *schema.Schema {
 		Description:      "The username associated with this resource.",
 		Sensitive:        true,
 		Type:             schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 	}
 
 	if isRequired {
@@ -404,7 +404,7 @@ func getVariableTypeSchema() *schema.Schema {
 		Description: "The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.",
 		Required:    true,
 		Type:        schema.TypeString,
-		ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"AmazonWebServicesAccount",
 			"AzureAccount",
 			"Certificate",

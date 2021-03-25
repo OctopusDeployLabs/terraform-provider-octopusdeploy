@@ -13,7 +13,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.2 // indirect
 	github.com/go-git/go-git/v5 v5.2.0 // indirect
 	github.com/go-test/deep v1.0.7 // indirect
-	github.com/google/go-cmp v0.5.5 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/gruntwork-io/terratest v0.32.3
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -23,8 +23,8 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/hcl/v2 v2.9.1 // indirect
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.4
-	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.5.0
+	github.com/hashicorp/yamux v0.0.0-20210316155119-a95892c5f864 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/jhump/protoreflect v1.8.1 // indirect
 	github.com/jinzhu/copier v0.2.8
@@ -38,16 +38,14 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
+	github.com/zclconf/go-cty v1.8.1 // indirect
 	go.opencensus.io v0.22.6 // indirect
-	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b // indirect
-	golang.org/x/net v0.0.0-20210315170653-34ac3e1c2000 // indirect
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
+	golang.org/x/net v0.0.0-20210324205630-d1beb07c2056 // indirect
 	golang.org/x/oauth2 v0.0.0-20210201163806-010130855d6c // indirect
-	golang.org/x/sys v0.0.0-20210315160823-c6e025ad8005 // indirect
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
 	google.golang.org/api v0.39.0 // indirect
-	google.golang.org/genproto v0.0.0-20210315173758-2651cd453018 // indirect
-	google.golang.org/grpc v1.36.0 // indirect
-	google.golang.org/protobuf v1.25.1-0.20210316024112-23ccb359e1a1 // indirect
+	google.golang.org/genproto v0.0.0-20210325141258-5636347f2b14 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect

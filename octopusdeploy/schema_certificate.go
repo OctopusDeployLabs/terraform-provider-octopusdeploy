@@ -192,7 +192,7 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Required:         true,
 			Sensitive:        true,
 			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		},
 		"certificate_data_format": getCertificateDataFormatSchema(),
 		"environments":            getEnvironmentsSchema(),

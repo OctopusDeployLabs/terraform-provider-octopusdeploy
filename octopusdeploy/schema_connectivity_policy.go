@@ -45,7 +45,7 @@ func getConnectivityPolicySchema() map[string]*schema.Schema {
 			Default:  "None",
 			Optional: true,
 			Type:     schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"SkipUnavailableMachines",
 				"None",
 			}, false)),

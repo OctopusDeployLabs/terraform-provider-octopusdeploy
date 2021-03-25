@@ -59,7 +59,7 @@ func getRetentionPeriodSchema() map[string]*schema.Schema {
 			Description:      "The number of days/releases to keep. The default value is `30`. If `0` then all are kept.",
 			Optional:         true,
 			Type:             schema.TypeInt,
-			ValidateDiagFunc: validateDiagFunc(validation.IntAtLeast(0)),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 		},
 		"should_keep_forever": {
 			Default:     false,
@@ -72,7 +72,7 @@ func getRetentionPeriodSchema() map[string]*schema.Schema {
 			Description: "The unit of quantity to keep. Valid units are `Days` or `Items`. The default value is `Days`.",
 			Optional:    true,
 			Type:        schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"Days",
 				"Items",
 			}, false)),

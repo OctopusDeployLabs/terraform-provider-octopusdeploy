@@ -147,7 +147,7 @@ func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 			Description: "The tenant URL of this deployment target.",
 			Required:    true,
 			Type:        schema.TypeString,
-			// ValidateDiagFunc: validateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+			// ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
 		},
 		"thumbprint": {
 			Description: "The thumbprint of this deployment target.",
@@ -159,7 +159,7 @@ func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 			Description: "The URI of this deployment target.",
 			Optional:    true,
 			Type:        schema.TypeString,
-			// ValidateDiagFunc: validateDiagFunc(validation.IsURLWithHTTPorHTTPS),
+			// ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
 		},
 	}
 }

@@ -55,7 +55,7 @@ func getVersionControlSettingsSchema() map[string]*schema.Schema {
 			Sensitive:        true,
 			Optional:         true,
 			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		},
 		"url": {
 			Description: "The URL associated with these version control settings.",
@@ -67,7 +67,7 @@ func getVersionControlSettingsSchema() map[string]*schema.Schema {
 			Optional:         true,
 			Sensitive:        true,
 			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringIsNotEmpty),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		},
 	}
 }

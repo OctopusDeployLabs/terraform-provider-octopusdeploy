@@ -34,27 +34,6 @@ func flattenArray(values []string) []interface{} {
 	return s
 }
 
-// wrapper function to be removed
-func validateDiagFunc(validateFunc func(interface{}, string) ([]string, []error)) schema.SchemaValidateDiagFunc {
-	return func(i interface{}, path cty.Path) diag.Diagnostics {
-		warnings, errors := validateFunc(i, fmt.Sprintf("%+v", path))
-		var diags diag.Diagnostics
-		for _, warning := range warnings {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary:  warning,
-			})
-		}
-		for _, err := range errors {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  err.Error(),
-			})
-		}
-		return diags
-	}
-}
-
 // Validate a value against a set of possible values
 func validateValueFunc(values []string) schema.SchemaValidateDiagFunc {
 

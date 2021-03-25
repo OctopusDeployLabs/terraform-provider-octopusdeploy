@@ -61,7 +61,7 @@ func getAmazonWebServicesAccountSchema() map[string]*schema.Schema {
 			Description:      "The name of this AWS account.",
 			Required:         true,
 			Type:             schema.TypeString,
-			ValidateDiagFunc: validateDiagFunc(validation.StringLenBetween(1, 200)),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(1, 200)),
 		},
 		"secret_key":                        getSecretKeySchema(true),
 		"space_id":                          getSpaceIDSchema(),

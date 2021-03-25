@@ -195,7 +195,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 			Default:  "EnvironmentDefault",
-			ValidateDiagFunc: validateDiagFunc(validation.StringInSlice([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"EnvironmentDefault",
 				"Off",
 				"On",
