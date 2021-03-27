@@ -83,6 +83,8 @@ github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugX
 github.com/NYTimes/gziphandler v0.0.0-20170623195520-56545f4a5d46/go.mod h1:3wb06e3pkSAbeQ52E9H9iFoQsEEwGN64994WTCIhntQ=
 github.com/OctopusDeploy/go-octopusdeploy v1.7.13 h1:PGaDE/KB5MtVNk+q8AMCzFy93WkHNHFPuaDXxwopdYg=
 github.com/OctopusDeploy/go-octopusdeploy v1.7.13/go.mod h1:Eed6Kp00DepexXb2LTAvxFESH/MTmT6tf+wsAyntaFg=
+github.com/OctopusDeploy/go-octopusdeploy v1.7.14 h1:vIXTi1iP4tMBGIo2oBCRHpSIWx49Z/DZfwB2bK5tpnI=
+github.com/OctopusDeploy/go-octopusdeploy v1.7.14/go.mod h1:Eed6Kp00DepexXb2LTAvxFESH/MTmT6tf+wsAyntaFg=
 github.com/PuerkitoBio/purell v1.0.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20160726150825-5bd2802263f2/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=

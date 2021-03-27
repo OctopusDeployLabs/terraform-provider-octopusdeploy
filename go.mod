@@ -4,7 +4,7 @@ require (
 	cloud.google.com/go v0.76.0 // indirect
 	cloud.google.com/go/storage v1.13.0 // indirect
 	github.com/Microsoft/go-winio v0.4.16 // indirect
-	github.com/OctopusDeploy/go-octopusdeploy v1.7.13
+	github.com/OctopusDeploy/go-octopusdeploy v1.7.14
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
