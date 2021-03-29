@@ -12,6 +12,7 @@ func resourceNuGetFeed() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNuGetFeedCreate,
 		DeleteContext: resourceNuGetFeedDelete,
+		Description:   "This resource manages a NuGet feed in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceNuGetFeedRead,
 		Schema:        getNuGetFeedSchema(),

@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_github_repository_feed.<name> <feed-id>

@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_nuget_feed.<name> <feed-id>

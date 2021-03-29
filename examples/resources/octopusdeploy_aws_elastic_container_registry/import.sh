@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_aws_elastic_container_registry.<name> <feed-id>

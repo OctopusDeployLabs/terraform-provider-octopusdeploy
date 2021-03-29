@@ -1,24 +1,23 @@
 ---
-page_title: "Resource octopusdeploy_nuget_feed - terraform-provider-octopusdeploy"
+page_title: "Resource octopusdeploy_github_repository_feed - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  This resource manages a NuGet feed in Octopus Deploy.
+  This resource manages a GitHub repository feed in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_nuget_feed)
+# Resource (octopusdeploy_github_repository_feed)
 
-This resource manages a NuGet feed in Octopus Deploy.
+This resource manages a GitHub repository feed in Octopus Deploy.
 
 ## Example Usage
 
 ```terraform
-resource "octopusdeploy_nuget_feed" "example" {
+resource "octopusdeploy_github_repository_feed" "example" {
   download_attempts              = 1
   download_retry_backoff_seconds = 30
-  feed_uri                       = "https://api.nuget.org/v3/index.json"
-  is_enhanced_mode               = true
+  feed_uri                       = "https://api.github.com"
   password                       = "test-password"
-  name                           = "Test NuGet Feed (OK to Delete)"
+  name                           = "Test GitHub Repository Feed (OK to Delete)"
   username                       = "test-username"
 }
 ```
@@ -28,7 +27,7 @@ resource "octopusdeploy_nuget_feed" "example" {
 
 ### Required
 
-- **feed_uri** (String) The feed URI can be a URL or a folder path.
+- **feed_uri** (String)
 - **name** (String) A short, memorable, unique name for this feed. Example: ACME Builds.
 
 ### Optional
@@ -36,7 +35,6 @@ resource "octopusdeploy_nuget_feed" "example" {
 - **download_attempts** (Number) The number of times a deployment should attempt to download a package from this feed before failing.
 - **download_retry_backoff_seconds** (Number) The number of seconds to apply as a linear back off between download attempts.
 - **id** (String) The unique ID for this resource.
-- **is_enhanced_mode** (Boolean) This will improve performance of the NuGet feed but may not be supported by some older feeds. Disable if the operation, Create Release does not return the latest version for a package.
 - **package_acquisition_location_options** (List of String)
 - **password** (String, Sensitive) The password associated with this resource.
 - **space_id** (String) The space ID associated with this resource.
@@ -47,5 +45,5 @@ resource "octopusdeploy_nuget_feed" "example" {
 Import is supported using the following syntax:
 
 ```shell
-terraform import [options] octopusdeploy_nuget_feed.<name> <feed-id>
+terraform import [options] octopusdeploy_github_repository_feed.<name> <feed-id>
 ```

@@ -1,18 +1,18 @@
 ---
-page_title: "Resource octopusdeploy_feed - terraform-provider-octopusdeploy"
+page_title: "Resource octopusdeploy_maven_feed - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  
+  This resource manages a Maven feed in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_feed)
+# Resource (octopusdeploy_maven_feed)
 
-
+This resource manages a Maven feed in Octopus Deploy.
 
 ## Example Usage
 
 ```terraform
-resource "octopusdeploy_feed" "example" {
+resource "octopusdeploy_maven_feed" "example" {
   download_attempts                    = 10
   download_retry_backoff_seconds       = 60
   feed_uri                             = "https://repo.maven.apache.org/maven2/"
@@ -34,29 +34,18 @@ resource "octopusdeploy_feed" "example" {
 
 ### Optional
 
-- **access_key** (String)
-- **api_version** (String)
-- **delete_unreleased_packages_after_days** (Number)
 - **download_attempts** (Number) The number of times a deployment should attempt to download a package from this feed before failing.
 - **download_retry_backoff_seconds** (Number) The number of seconds to apply as a linear back off between download attempts.
-- **feed_type** (String)
 - **id** (String) The unique ID for this resource.
-- **is_enhanced_mode** (Boolean)
 - **package_acquisition_location_options** (List of String)
 - **password** (String, Sensitive) The password associated with this resource.
-- **registry_path** (String)
-- **secret_key** (String, Sensitive)
 - **space_id** (String) The space ID associated with this resource.
 - **username** (String, Sensitive) The username associated with this resource.
-
-### Read-Only
-
-- **region** (String)
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import [options] octopusdeploy_feed.<name> <feed-id>
+terraform import [options] octopusdeploy_maven_feed.<name> <feed-id>
 ```
