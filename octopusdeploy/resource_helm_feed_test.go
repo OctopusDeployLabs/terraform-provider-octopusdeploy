@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -11,47 +10,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccOctopusDeployNuGetFeedBasic(t *testing.T) {
+func TestAccOctopusDeployHelmFeed(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := "octopusdeploy_nuget_feed." + localName
+	prefix := "octopusdeploy_helm_feed." + localName
 
+	feedURI := "https://charts.helm.sh/stable"
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	feedURI := "http://test.com"
-	isEnhancedMode := true
-	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testHelmFeedCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployNuGetFeedDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testNuGetFeedBasic(localName, name, feedURI, username, password, isEnhancedMode),
 				Check: resource.ComposeTestCheckFunc(
-					testOctopusDeployNuGetFeedExists(prefix),
+					testHelmFeedExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "feed_uri", feedURI),
-					resource.TestCheckResourceAttr(prefix, "is_enhanced_mode", strconv.FormatBool(isEnhancedMode)),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "password", password),
 					resource.TestCheckResourceAttr(prefix, "username", username),
 				),
+				Config: testHelmFeedBasic(localName, feedURI, name, username, password),
 			},
 		},
 	})
 }
 
-func testNuGetFeedBasic(localName string, name string, feedURI string, username string, password string, isEnhancedMode bool) string {
-	return fmt.Sprintf(`resource "octopusdeploy_nuget_feed" "%s" {
+func testHelmFeedBasic(localName string, feedURI string, name string, username string, password string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_helm_feed" "%s" {
 		feed_uri = "%s"
-		is_enhanced_mode = %v
 		name = "%s"
 		password = "%s"
 		username = "%s"
-	}`, localName, feedURI, isEnhancedMode, name, password, username)
+	}`, localName, feedURI, name, password, username)
 }
 
-func testOctopusDeployNuGetFeedExists(prefix string) resource.TestCheckFunc {
+func testHelmFeedExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		feedID := s.RootModule().Resources[prefix].Primary.ID
@@ -63,16 +59,16 @@ func testOctopusDeployNuGetFeedExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testOctopusDeployNuGetFeedDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+func testHelmFeedCheckDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "octopusdeploy_nuget_feed" {
+		if rs.Type != "octopusdeploy_helm_feed" {
 			continue
 		}
 
-		_, err := client.Feeds.GetByID(rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("feed (%s) still exists", rs.Primary.ID)
+		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		feed, err := client.Feeds.GetByID(rs.Primary.ID)
+		if err == nil && feed != nil {
+			return fmt.Errorf("Helm feed (%s) still exists", rs.Primary.ID)
 		}
 	}
 

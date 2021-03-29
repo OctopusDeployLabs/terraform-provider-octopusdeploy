@@ -6,6 +6,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandFeed(d *schema.ResourceData) *octopusdeploy.FeedResource {
@@ -101,14 +102,16 @@ func getFeedSchema() map[string]*schema.Schema {
 			Type:     schema.TypeInt,
 		},
 		"download_attempts": {
-			Default:  5,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     5,
+			Description: "The number of times a deployment should attempt to download a package from this feed before failing.",
+			Optional:    true,
+			Type:        schema.TypeInt,
 		},
 		"download_retry_backoff_seconds": {
-			Default:  10,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     10,
+			Description: "The number of seconds to apply as a linear back off between download attempts.",
+			Optional:    true,
+			Type:        schema.TypeInt,
 		},
 		"feed_type": {
 			Default:  "None",
@@ -136,7 +139,12 @@ func getFeedSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"name":     getNameSchema(true),
+		"name": {
+			Description:      "A short, memorable, unique name for this feed. Example: ACME Builds.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+		},
 		"password": getPasswordSchema(false),
 		"package_acquisition_location_options": {
 			Computed: true,

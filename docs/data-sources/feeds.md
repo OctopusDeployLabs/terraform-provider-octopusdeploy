@@ -6,7 +6,7 @@ description: |-
   Provides information about existing feeds.
 ---
 
-# Data Source `octopusdeploy_feeds`
+# octopusdeploy_feeds (Data Source)
 
 Provides information about existing feeds.
 
@@ -24,25 +24,25 @@ Provides information about existing feeds.
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **feeds** (Block List) A list of feeds that match the filter(s). (see [below for nested schema](#nestedblock--feeds))
 
 <a id="nestedblock--feeds"></a>
 ### Nested Schema for `feeds`
 
-Read-only:
+Read-Only:
 
 - **access_key** (String)
 - **api_version** (String)
 - **delete_unreleased_packages_after_days** (Number)
-- **download_attempts** (Number)
-- **download_retry_backoff_seconds** (Number)
+- **download_attempts** (Number) The number of times a deployment should attempt to download a package from this feed before failing.
+- **download_retry_backoff_seconds** (Number) The number of seconds to apply as a linear back off between download attempts.
 - **feed_type** (String)
 - **feed_uri** (String)
 - **id** (String) The unique ID for this resource.
 - **is_enhanced_mode** (Boolean)
-- **name** (String) The name of this resource.
+- **name** (String) A short, memorable, unique name for this feed. Example: ACME Builds.
 - **package_acquisition_location_options** (List of String)
 - **password** (String, Sensitive) The password associated with this resource.
 - **region** (String)
