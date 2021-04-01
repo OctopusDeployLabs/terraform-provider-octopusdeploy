@@ -21,11 +21,11 @@ func expandUserRole(d *schema.ResourceData) *octopusdeploy.UserRole {
 	}
 
 	if v, ok := d.GetOk("granted_space_permissions"); ok {
-		userRole.GrantedSpacePermissions = v.([]string)
+		userRole.GrantedSpacePermissions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("granted_system_permissions"); ok {
-		userRole.GrantedSystemPermissions = v.([]string)
+		userRole.GrantedSystemPermissions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -33,15 +33,15 @@ func expandUserRole(d *schema.ResourceData) *octopusdeploy.UserRole {
 	}
 
 	if v, ok := d.GetOk("space_permission_descriptions"); ok {
-		userRole.SpacePermissionDescriptions = v.([]string)
+		userRole.SpacePermissionDescriptions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("supported_restrictions"); ok {
-		userRole.SupportedRestrictions = v.([]string)
+		userRole.SupportedRestrictions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("system_permission_descriptions"); ok {
-		userRole.SystemPermissionDescriptions = v.([]string)
+		userRole.SystemPermissionDescriptions = getSliceFromTerraformTypeList(v)
 	}
 
 	return userRole
@@ -106,6 +106,7 @@ func getUserRoleSchema() map[string]*schema.Schema {
 		"id":   getIDSchema(),
 		"name": getNameSchema(true),
 		"space_permission_descriptions": {
+			Computed: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Type:     schema.TypeList,
@@ -116,6 +117,7 @@ func getUserRoleSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"system_permission_descriptions": {
+			Computed: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Type:     schema.TypeList,
