@@ -118,8 +118,9 @@ func getTeamSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 		"description": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "The user-friendly description of this team.",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"external_security_groups": {
 			Optional: true,
@@ -128,12 +129,15 @@ func getTeamSchema() map[string]*schema.Schema {
 		},
 		"id": getIDSchema(),
 		"name": {
-			Required: true,
-			Type:     schema.TypeString,
+			Description: "The name of this team.",
+			Required:    true,
+			Type:        schema.TypeString,
 		},
 		"space_id": {
-			Computed: true,
-			Type:     schema.TypeString,
+			Computed:    true,
+			Description: "The space associated with this team.",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"users": {
 			Computed:    true,
