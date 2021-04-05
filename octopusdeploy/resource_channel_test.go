@@ -206,15 +206,18 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 				target_roles = ["Webserver",]
 
 				deploy_package_action {
+					features = [
+						"Octopus.Features.ConfigurationTransforms",
+						"Octopus.Features.ConfigurationVariables",
+						"Octopus.Features.CustomDirectory",
+						"Octopus.Features.CustomScripts",
+						"Octopus.Features.IISWebSite"
+					]
 					name = "%s"
 
 					primary_package {
 						feed_id = "feeds-builtin"
 						package_id = "MyPackage"
-					}
-
-					properties = {
-						"Octopus.Action.EnabledFeatures" = "Octopus.Features.IISWebSite,Octopus.Features.CustomDirectory,Octopus.Features.CustomScripts,Octopus.Features.ConfigurationVariables,Octopus.Features.ConfigurationTransforms"
 					}
 				}
 			}
