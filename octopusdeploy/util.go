@@ -86,11 +86,19 @@ func getSliceFromTerraformTypeList(list interface{}) []string {
 	if list == nil {
 		return nil
 	}
-
-	var newSlice []string
-	terraformList := list.([]interface{})
-	for _, v := range terraformList {
-		newSlice = append(newSlice, v.(string))
+	terraformList, ok := list.([]interface{})
+	if !ok {
+		terraformSet, ok := list.(*schema.Set)
+		if ok {
+			terraformList = terraformSet.List()
+		} else {
+			// It's not a list or set type
+			return nil
+		}
+	}
+	newSlice := make([]string, len(terraformList))
+	for key, item := range terraformList {
+		newSlice[key] = item.(string)
 	}
 	return newSlice
 }
