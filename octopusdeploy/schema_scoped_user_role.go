@@ -30,14 +30,13 @@ func expandScopedUserRole(d *schema.ResourceData) *octopusdeploy.ScopedUserRole 
 	}
 	return scopedUserRole
 }
-
-func flattenScopedUserRoles(scopedUserRoles []octopusdeploy.ScopedUserRole) []map[string]interface{} {
+func flattenScopedUserRoles(scopedUserRoles []*octopusdeploy.ScopedUserRole) []interface{} {
 	if scopedUserRoles == nil {
 		return nil
 	}
-	var flattenedScopedUserRoles = make([]map[string]interface{}, len(scopedUserRoles))
+	var flattenedScopedUserRoles = make([]interface{}, len(scopedUserRoles))
 	for key, scopedUserRole := range scopedUserRoles {
-		flattenedScopedUserRoles[key] = flattenScopedUserRole(&scopedUserRole)
+		flattenedScopedUserRoles[key] = flattenScopedUserRole(scopedUserRole)
 	}
 
 	return flattenedScopedUserRoles
@@ -48,12 +47,13 @@ func flattenScopedUserRole(scopedUserRole *octopusdeploy.ScopedUserRole) map[str
 		return nil
 	}
 	return map[string]interface{}{
-		"environment_ids":   scopedUserRole.EnvironmentIDs,
+		"environment_ids":   schema.NewSet(schema.HashString, flattenArray(scopedUserRole.EnvironmentIDs)),
 		"id":                scopedUserRole.ID,
-		"project_ids":       scopedUserRole.ProjectIDs,
-		"project_group_ids": scopedUserRole.ProjectGroupIDs,
+		"project_group_ids": schema.NewSet(schema.HashString, flattenArray(scopedUserRole.ProjectGroupIDs)),
+		"project_ids":       schema.NewSet(schema.HashString, flattenArray(scopedUserRole.ProjectIDs)),
+		"space_id":          scopedUserRole.SpaceID,
 		"team_id":           scopedUserRole.TeamID,
-		"tenant_ids":        scopedUserRole.TenantIDs,
+		"tenant_ids":        schema.NewSet(schema.HashString, flattenArray(scopedUserRole.TenantIDs)),
 		"user_role_id":      scopedUserRole.UserRoleID,
 	}
 }
@@ -66,12 +66,12 @@ func setScopedUserRole(ctx context.Context, d *schema.ResourceData, scopedUserRo
 	d.Set("id", scopedUserRole.ID)
 	d.SetId(scopedUserRole.GetID())
 
-	if err := d.Set("project_ids", scopedUserRole.ProjectIDs); err != nil {
-		return fmt.Errorf("error setting project_ids: %s", err)
-	}
-
 	if err := d.Set("project_group_ids", scopedUserRole.ProjectGroupIDs); err != nil {
 		return fmt.Errorf("error setting project_group_ids: %s", err)
+	}
+
+	if err := d.Set("project_ids", scopedUserRole.ProjectIDs); err != nil {
+		return fmt.Errorf("error setting project_ids: %s", err)
 	}
 
 	d.Set("team_id", scopedUserRole.TeamID)
@@ -88,7 +88,6 @@ func setScopedUserRole(ctx context.Context, d *schema.ResourceData, scopedUserRo
 func getScopedUserRoleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"environment_ids": {
-			ConfigMode: schema.SchemaConfigModeAttr,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -97,8 +96,7 @@ func getScopedUserRoleSchema() map[string]*schema.Schema {
 			Type:     schema.TypeSet,
 		},
 		"id": getIDSchema(),
-		"project_ids": {
-			ConfigMode: schema.SchemaConfigModeAttr,
+		"project_group_ids": {
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -106,8 +104,7 @@ func getScopedUserRoleSchema() map[string]*schema.Schema {
 			Set:      schema.HashString,
 			Type:     schema.TypeSet,
 		},
-		"project_group_ids": {
-			ConfigMode: schema.SchemaConfigModeAttr,
+		"project_ids": {
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
@@ -124,7 +121,6 @@ func getScopedUserRoleSchema() map[string]*schema.Schema {
 			Required: true,
 		},
 		"tenant_ids": {
-			ConfigMode: schema.SchemaConfigModeAttr,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},

@@ -39,7 +39,7 @@ func resourceScopedUserRoleCreate(ctx context.Context, d *schema.ResourceData, m
 	d.SetId(createdScopedUserRole.GetID())
 
 	log.Printf("[INFO] scoped user role created (%s)", d.Id())
-	return nil
+	return resourceScopedUserRoleRead(ctx, d, m)
 }
 
 func resourceScopedUserRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -47,7 +47,10 @@ func resourceScopedUserRoleDelete(ctx context.Context, d *schema.ResourceData, m
 
 	client := m.(*octopusdeploy.Client)
 	if err := client.ScopedUserRoles.DeleteByID(d.Id()); err != nil {
-		return diag.FromErr(err)
+		apiError := err.(*octopusdeploy.APIError)
+		if apiError.StatusCode != 404 {
+			return diag.FromErr(err)
+		}
 	}
 
 	d.SetId("")
@@ -94,5 +97,5 @@ func resourceScopedUserRoleUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	log.Printf("[INFO] scoped user role updated (%s)", d.Id())
-	return nil
+	return resourceScopedUserRoleRead(ctx, d, m)
 }

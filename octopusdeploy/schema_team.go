@@ -146,6 +146,63 @@ func getTeamSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
+		"user_role": {
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"environment_ids": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Set:      schema.HashString,
+						Type:     schema.TypeSet,
+					},
+					"id": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"project_group_ids": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Set:      schema.HashString,
+						Type:     schema.TypeSet,
+					},
+					"project_ids": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Set:      schema.HashString,
+						Type:     schema.TypeSet,
+					},
+					"space_id": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"team_id": {
+						Computed: true,
+						Type:     schema.TypeString,
+					},
+					"tenant_ids": {
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+						Optional: true,
+						Set:      schema.HashString,
+						Type:     schema.TypeSet,
+					},
+					"user_role_id": {
+						Type:     schema.TypeString,
+						Required: true,
+					}},
+			},
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeSet,
+			Set:      resourceTeamUserRoleSetHash,
+		},
 	}
 }
 
