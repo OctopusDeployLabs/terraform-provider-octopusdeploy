@@ -6,7 +6,7 @@ description: |-
   This resource manages channels in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_channel`
+# octopusdeploy_channel (Resource)
 
 This resource manages channels in Octopus Deploy.
 

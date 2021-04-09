@@ -6,7 +6,7 @@ description: |-
   This resource manages machine policies in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_machine_policy`
+# octopusdeploy_machine_policy (Resource)
 
 This resource manages machine policies in Octopus Deploy.
 
@@ -35,7 +35,7 @@ This resource manages machine policies in Octopus Deploy.
 - **polling_request_queue_timeout** (Number)
 - **space_id** (String) The space ID associated with this resource.
 
-### Read-only
+### Read-Only
 
 - **is_default** (Boolean)
 

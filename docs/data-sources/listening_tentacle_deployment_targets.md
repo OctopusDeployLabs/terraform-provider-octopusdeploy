@@ -6,7 +6,7 @@ description: |-
   Provides information about existing listening tentacle deployment targets.
 ---
 
-# Data Source `octopusdeploy_listening_tentacle_deployment_targets`
+# octopusdeploy_listening_tentacle_deployment_targets (Data Source)
 
 Provides information about existing listening tentacle deployment targets.
 
@@ -51,7 +51,7 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 - **tenants** (List of String) A filter to search by a list of tenant IDs.
 - **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **listening_tentacle_deployment_targets** (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacle_deployment_targets))
@@ -59,7 +59,7 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 <a id="nestedblock--listening_tentacle_deployment_targets"></a>
 ### Nested Schema for `listening_tentacle_deployment_targets`
 
-Read-only:
+Read-Only:
 
 - **certificate_signature_algorithm** (String)
 - **environments** (List of String) A list of environment IDs associated with this resource.
@@ -89,7 +89,7 @@ Read-only:
 <a id="nestedatt--listening_tentacle_deployment_targets--tentacle_version_details"></a>
 ### Nested Schema for `listening_tentacle_deployment_targets.tentacle_version_details`
 
-Read-only:
+Read-Only:
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)

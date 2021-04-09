@@ -13,10 +13,10 @@ This resource manages a AWS Elastic Container Registry in Octopus Deploy.
 
 ```terraform
 resource "octopusdeploy_aws_elastic_container_registry" "example" {
-  access_key = "AKIAIOSFODNN7EXAMPLE"
+  access_key = "access-key"
   name       = "Test AWS Elastic Container Registry (OK to Delete)"
   region     = "us-east-1"
-  secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  secret_key = "secret-key"
 }
 ```
 

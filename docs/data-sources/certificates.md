@@ -6,7 +6,7 @@ description: |-
   Provides information about existing certificates.
 ---
 
-# Data Source `octopusdeploy_certificates`
+# octopusdeploy_certificates (Data Source)
 
 Provides information about existing certificates.
 
@@ -37,7 +37,7 @@ data "octopusdeploy_certificates" "example" {
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 - **tenant** (String) A filter to search by a tenant ID.
 
-### Read-only
+### Read-Only
 
 - **certificates** (Block List) A list of certificates that match the filter(s). (see [below for nested schema](#nestedblock--certificates))
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
@@ -45,7 +45,7 @@ data "octopusdeploy_certificates" "example" {
 <a id="nestedblock--certificates"></a>
 ### Nested Schema for `certificates`
 
-Read-only:
+Read-Only:
 
 - **archived** (String)
 - **certificate_data** (String, Sensitive) The encoded data of the certificate.

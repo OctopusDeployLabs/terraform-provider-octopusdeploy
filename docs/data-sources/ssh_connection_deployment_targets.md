@@ -6,7 +6,7 @@ description: |-
   Provides information about existing SSH connection deployment targets.
 ---
 
-# Data Source `octopusdeploy_ssh_connection_deployment_targets`
+# octopusdeploy_ssh_connection_deployment_targets (Data Source)
 
 Provides information about existing SSH connection deployment targets.
 
@@ -32,7 +32,7 @@ Provides information about existing SSH connection deployment targets.
 - **tenants** (List of String) A filter to search by a list of tenant IDs.
 - **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **ssh_connection_deployment_targets** (Block List) A list of SSH connection deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--ssh_connection_deployment_targets))
@@ -40,7 +40,7 @@ Provides information about existing SSH connection deployment targets.
 <a id="nestedblock--ssh_connection_deployment_targets"></a>
 ### Nested Schema for `ssh_connection_deployment_targets`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **dot_net_core_platform** (String)
@@ -73,7 +73,7 @@ Read-only:
 <a id="nestedatt--ssh_connection_deployment_targets--endpoint"></a>
 ### Nested Schema for `ssh_connection_deployment_targets.endpoint`
 
-Read-only:
+Read-Only:
 
 - **aad_client_credential_secret** (String)
 - **aad_credential_type** (String)
@@ -119,7 +119,7 @@ Read-only:
 <a id="nestedobjatt--ssh_connection_deployment_targets--endpoint--authentication"></a>
 ### Nested Schema for `ssh_connection_deployment_targets.endpoint.authentication`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **admin_login** (String)
@@ -138,7 +138,7 @@ Read-only:
 <a id="nestedobjatt--ssh_connection_deployment_targets--endpoint--container"></a>
 ### Nested Schema for `ssh_connection_deployment_targets.endpoint.container`
 
-Read-only:
+Read-Only:
 
 - **feed_id** (String)
 - **image** (String)
@@ -147,7 +147,7 @@ Read-only:
 <a id="nestedobjatt--ssh_connection_deployment_targets--endpoint--destination"></a>
 ### Nested Schema for `ssh_connection_deployment_targets.endpoint.destination`
 
-Read-only:
+Read-Only:
 
 - **destination_type** (String)
 - **drop_folder_path** (String)
@@ -156,7 +156,7 @@ Read-only:
 <a id="nestedobjatt--ssh_connection_deployment_targets--endpoint--tentacle_version_details"></a>
 ### Nested Schema for `ssh_connection_deployment_targets.endpoint.tentacle_version_details`
 
-Read-only:
+Read-Only:
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)

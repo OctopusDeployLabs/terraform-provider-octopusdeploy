@@ -6,7 +6,7 @@ description: |-
   Provides information about existing tenants.
 ---
 
-# Data Source `octopusdeploy_tenants`
+# octopusdeploy_tenants (Data Source)
 
 Provides information about existing tenants.
 
@@ -27,7 +27,7 @@ Provides information about existing tenants.
 - **tags** (List of String) A filter to search by a list of tags.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **tenants** (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
@@ -35,7 +35,7 @@ Provides information about existing tenants.
 <a id="nestedblock--tenants"></a>
 ### Nested Schema for `tenants`
 
-Read-only:
+Read-Only:
 
 - **cloned_from_tenant_id** (String) The ID of the tenant from which this tenant was cloned.
 - **description** (String) The description of this resource.
@@ -48,7 +48,7 @@ Read-only:
 <a id="nestedatt--tenants--project_environment"></a>
 ### Nested Schema for `tenants.project_environment`
 
-Read-only:
+Read-Only:
 
 - **environments** (List of String)
 - **project_id** (String)

@@ -6,7 +6,7 @@ description: |-
   This resource manages listening tentacle deployment targets in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_listening_tentacle_deployment_target`
+# octopusdeploy_listening_tentacle_deployment_target (Resource)
 
 This resource manages listening tentacle deployment targets in Octopus Deploy.
 
@@ -44,7 +44,7 @@ This resource manages listening tentacle deployment targets in Octopus Deploy.
 - **tentacle_version_details** (Block List) (see [below for nested schema](#nestedblock--tentacle_version_details))
 - **uri** (String) The URI of this deployment target.
 
-### Read-only
+### Read-Only
 
 - **has_latest_calamari** (Boolean)
 

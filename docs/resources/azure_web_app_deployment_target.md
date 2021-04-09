@@ -6,7 +6,7 @@ description: |-
   This resource manages Azure web app deployment targets in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_azure_web_app_deployment_target`
+# octopusdeploy_azure_web_app_deployment_target (Resource)
 
 This resource manages Azure web app deployment targets in Octopus Deploy.
 
@@ -55,7 +55,7 @@ resource "octopusdeploy_azure_web_app_deployment_target" "example" {
 - **uri** (String)
 - **web_app_slot_name** (String)
 
-### Read-only
+### Read-Only
 
 - **has_latest_calamari** (Boolean)
 - **is_in_process** (Boolean)

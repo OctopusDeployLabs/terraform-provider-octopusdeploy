@@ -6,7 +6,7 @@ description: |-
   This resource manages Azure service principal accounts in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_azure_service_principal`
+# octopusdeploy_azure_service_principal (Resource)
 
 This resource manages Azure service principal accounts in Octopus Deploy.
 

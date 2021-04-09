@@ -6,7 +6,7 @@ description: |-
   Provides information about existing project groups.
 ---
 
-# Data Source `octopusdeploy_project_groups`
+# octopusdeploy_project_groups (Data Source)
 
 Provides information about existing project groups.
 
@@ -31,7 +31,7 @@ data "octopusdeploy_project_groups" "example" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **project_groups** (Block List) A list of project groups that match the filter(s). (see [below for nested schema](#nestedblock--project_groups))
@@ -39,7 +39,7 @@ data "octopusdeploy_project_groups" "example" {
 <a id="nestedblock--project_groups"></a>
 ### Nested Schema for `project_groups`
 
-Read-only:
+Read-Only:
 
 - **description** (String) The description of this resource.
 - **environments** (List of String) A list of environment IDs associated with this resource.

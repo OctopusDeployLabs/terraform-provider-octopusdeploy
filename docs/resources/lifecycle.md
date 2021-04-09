@@ -6,7 +6,7 @@ description: |-
   This resource manages lifecycles in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_lifecycle`
+# octopusdeploy_lifecycle (Resource)
 
 This resource manages lifecycles in Octopus Deploy.
 

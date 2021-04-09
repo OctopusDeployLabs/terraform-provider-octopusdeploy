@@ -6,7 +6,7 @@ description: |-
   This resource manages Azure service fabric cluster deployment targets in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_azure_service_fabric_cluster_deployment_target`
+# octopusdeploy_azure_service_fabric_cluster_deployment_target (Resource)
 
 This resource manages Azure service fabric cluster deployment targets in Octopus Deploy.
 
@@ -62,7 +62,7 @@ resource "octopusdeploy_azure_service_fabric_cluster_deployment_target" "example
 - **thumbprint** (String)
 - **uri** (String)
 
-### Read-only
+### Read-Only
 
 - **has_latest_calamari** (Boolean)
 - **is_in_process** (Boolean)

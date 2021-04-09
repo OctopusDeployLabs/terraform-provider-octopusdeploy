@@ -6,7 +6,7 @@ description: |-
   This resource manages users in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_user`
+# octopusdeploy_user (Resource)
 
 This resource manages users in Octopus Deploy.
 
@@ -54,7 +54,7 @@ resource "octopusdeploy_user" "example" {
 - **is_service** (Boolean)
 - **password** (String, Sensitive) The password associated with this resource.
 
-### Read-only
+### Read-Only
 
 - **can_password_be_edited** (Boolean)
 - **is_requestor** (Boolean)

@@ -6,7 +6,7 @@ description: |-
   
 ---
 
-# Resource `octopusdeploy_library_variable_set`
+# octopusdeploy_library_variable_set (Resource)
 
 
 
@@ -26,7 +26,7 @@ description: |-
 - **space_id** (String) The space ID associated with this resource.
 - **template** (Block List) (see [below for nested schema](#nestedblock--template))
 
-### Read-only
+### Read-Only
 
 - **variable_set_id** (String)
 

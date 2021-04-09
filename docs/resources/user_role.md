@@ -6,7 +6,7 @@ description: |-
   This resource manages user roles in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_user_role`
+# octopusdeploy_user_role (Resource)
 
 This resource manages user roles in Octopus Deploy.
 

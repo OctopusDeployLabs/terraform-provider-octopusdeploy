@@ -6,7 +6,7 @@ description: |-
   This resource manages username-password accounts in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_username_password_account`
+# octopusdeploy_username_password_account (Resource)
 
 This resource manages username-password accounts in Octopus Deploy.
 

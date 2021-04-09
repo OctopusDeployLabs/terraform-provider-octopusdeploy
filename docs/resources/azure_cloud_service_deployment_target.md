@@ -6,7 +6,7 @@ description: |-
   This resource manages Azure cloud service deployment targets in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_azure_cloud_service_deployment_target`
+# octopusdeploy_azure_cloud_service_deployment_target (Resource)
 
 This resource manages Azure cloud service deployment targets in Octopus Deploy.
 
@@ -59,7 +59,7 @@ resource "octopusdeploy_azure_cloud_service_deployment_target" "example" {
 - **uri** (String)
 - **use_current_instance_count** (Boolean)
 
-### Read-only
+### Read-Only
 
 - **has_latest_calamari** (Boolean)
 - **is_in_process** (Boolean)

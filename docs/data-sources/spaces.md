@@ -6,7 +6,7 @@ description: |-
   Provides information about existing spaces.
 ---
 
-# Data Source `octopusdeploy_spaces`
+# octopusdeploy_spaces (Data Source)
 
 Provides information about existing spaces.
 
@@ -33,7 +33,7 @@ data "octopusdeploy_spaces" "spaces" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **spaces** (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--spaces))
@@ -41,7 +41,7 @@ data "octopusdeploy_spaces" "spaces" {
 <a id="nestedblock--spaces"></a>
 ### Nested Schema for `spaces`
 
-Read-only:
+Read-Only:
 
 - **description** (String) The description of this resource.
 - **id** (String) The unique ID for this resource.

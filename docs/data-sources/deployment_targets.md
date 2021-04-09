@@ -6,7 +6,7 @@ description: |-
   Provides information about existing deployment targets.
 ---
 
-# Data Source `octopusdeploy_deployment_targets`
+# octopusdeploy_deployment_targets (Data Source)
 
 Provides information about existing deployment targets.
 
@@ -34,14 +34,14 @@ Provides information about existing deployment targets.
 - **tenants** (List of String) A filter to search by a list of tenant IDs.
 - **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
 
-### Read-only
+### Read-Only
 
 - **deployment_targets** (Block List) A list of deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--deployment_targets))
 
 <a id="nestedblock--deployment_targets"></a>
 ### Nested Schema for `deployment_targets`
 
-Read-only:
+Read-Only:
 
 - **endpoint** (List of Object) (see [below for nested schema](#nestedatt--deployment_targets--endpoint))
 - **environments** (List of String) A list of environment IDs associated with this resource.
@@ -68,7 +68,7 @@ Read-only:
 <a id="nestedatt--deployment_targets--endpoint"></a>
 ### Nested Schema for `deployment_targets.endpoint`
 
-Read-only:
+Read-Only:
 
 - **aad_client_credential_secret** (String)
 - **aad_credential_type** (String)
@@ -114,7 +114,7 @@ Read-only:
 <a id="nestedobjatt--deployment_targets--endpoint--authentication"></a>
 ### Nested Schema for `deployment_targets.endpoint.authentication`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **admin_login** (String)
@@ -133,7 +133,7 @@ Read-only:
 <a id="nestedobjatt--deployment_targets--endpoint--container"></a>
 ### Nested Schema for `deployment_targets.endpoint.container`
 
-Read-only:
+Read-Only:
 
 - **feed_id** (String)
 - **image** (String)
@@ -142,7 +142,7 @@ Read-only:
 <a id="nestedobjatt--deployment_targets--endpoint--destination"></a>
 ### Nested Schema for `deployment_targets.endpoint.destination`
 
-Read-only:
+Read-Only:
 
 - **destination_type** (String)
 - **drop_folder_path** (String)
@@ -151,7 +151,7 @@ Read-only:
 <a id="nestedobjatt--deployment_targets--endpoint--tentacle_version_details"></a>
 ### Nested Schema for `deployment_targets.endpoint.tentacle_version_details`
 
-Read-only:
+Read-Only:
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)

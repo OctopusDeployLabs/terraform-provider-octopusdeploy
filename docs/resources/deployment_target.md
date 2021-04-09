@@ -6,7 +6,7 @@ description: |-
   
 ---
 
-# Resource `octopusdeploy_deployment_target`
+# octopusdeploy_deployment_target (Resource)
 
 
 
@@ -40,7 +40,7 @@ description: |-
 - **thumbprint** (String)
 - **uri** (String)
 
-### Read-only
+### Read-Only
 
 - **has_latest_calamari** (Boolean)
 - **is_in_process** (Boolean)

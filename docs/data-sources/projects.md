@@ -6,7 +6,7 @@ description: |-
   Provides information about existing projects.
 ---
 
-# Data Source `octopusdeploy_projects`
+# octopusdeploy_projects (Data Source)
 
 Provides information about existing projects.
 
@@ -37,7 +37,7 @@ data "octopusdeploy_projects" "example" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **projects** (Block List) A list of projects that match the filter(s). (see [below for nested schema](#nestedblock--projects))
@@ -45,7 +45,7 @@ data "octopusdeploy_projects" "example" {
 <a id="nestedblock--projects"></a>
 ### Nested Schema for `projects`
 
-Read-only:
+Read-Only:
 
 - **allow_deployments_to_no_targets** (Boolean, Deprecated)
 - **auto_create_release** (Boolean)
@@ -80,7 +80,7 @@ Read-only:
 <a id="nestedatt--projects--connectivity_policy"></a>
 ### Nested Schema for `projects.connectivity_policy`
 
-Read-only:
+Read-Only:
 
 - **allow_deployments_to_no_targets** (Boolean)
 - **exclude_unhealthy_targets** (Boolean)
@@ -91,7 +91,7 @@ Read-only:
 <a id="nestedatt--projects--extension_settings"></a>
 ### Nested Schema for `projects.extension_settings`
 
-Read-only:
+Read-Only:
 
 - **extension_id** (String)
 - **values** (List of String)
@@ -100,7 +100,7 @@ Read-only:
 <a id="nestedatt--projects--release_creation_strategy"></a>
 ### Nested Schema for `projects.release_creation_strategy`
 
-Read-only:
+Read-Only:
 
 - **channel_id** (String)
 - **release_creation_package** (List of Object) (see [below for nested schema](#nestedobjatt--projects--release_creation_strategy--release_creation_package))
@@ -109,7 +109,7 @@ Read-only:
 <a id="nestedobjatt--projects--release_creation_strategy--release_creation_package"></a>
 ### Nested Schema for `projects.release_creation_strategy.release_creation_package`
 
-Read-only:
+Read-Only:
 
 - **deployment_action** (String)
 - **package_reference** (String)
@@ -119,7 +119,7 @@ Read-only:
 <a id="nestedatt--projects--templates"></a>
 ### Nested Schema for `projects.templates`
 
-Read-only:
+Read-Only:
 
 - **default_value** (String)
 - **display_settings** (Map of String)
@@ -132,7 +132,7 @@ Read-only:
 <a id="nestedatt--projects--version_control_settings"></a>
 ### Nested Schema for `projects.version_control_settings`
 
-Read-only:
+Read-Only:
 
 - **base_path** (String)
 - **default_branch** (String)
@@ -145,7 +145,7 @@ Read-only:
 <a id="nestedatt--projects--versioning_strategy"></a>
 ### Nested Schema for `projects.versioning_strategy`
 
-Read-only:
+Read-Only:
 
 - **donor_package** (List of Object) (see [below for nested schema](#nestedobjatt--projects--versioning_strategy--donor_package))
 - **donor_package_step_id** (String)
@@ -154,7 +154,7 @@ Read-only:
 <a id="nestedobjatt--projects--versioning_strategy--donor_package"></a>
 ### Nested Schema for `projects.versioning_strategy.donor_package`
 
-Read-only:
+Read-Only:
 
 - **deployment_action** (String)
 - **package_reference** (String)
