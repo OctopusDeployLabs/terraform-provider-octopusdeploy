@@ -8,7 +8,7 @@ import (
 )
 
 func getRunKubectlScriptSchema() *schema.Schema {
-	actionSchema, element := getCommonDeploymentActionSchema()
+	actionSchema, element := getActionSchema()
 	addExecutionLocationSchema(element)
 	addScriptFromPackageSchema(element)
 	addPackagesSchema(element, false)
@@ -19,9 +19,9 @@ func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) octopu
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.KubernetesRunScript"
 
-	action.Properties["Octopus.Action.Script.ScriptFileName"] = flattenedAction["script_file_name"].(string)
-	action.Properties["Octopus.Action.Script.ScriptParameters"] = flattenedAction["script_parameters"].(string)
-	action.Properties["Octopus.Action.Script.ScriptSource"] = "Package"
+	action.Properties["Octopus.Action.Script.ScriptFileName"] = octopusdeploy.NewPropertyValue(flattenedAction["script_file_name"].(string), false)
+	action.Properties["Octopus.Action.Script.ScriptParameters"] = octopusdeploy.NewPropertyValue(flattenedAction["script_parameters"].(string), false)
+	action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue("Package", false)
 
 	return action
 }
@@ -30,24 +30,24 @@ func flattenKubernetesRunScriptAction(action octopusdeploy.DeploymentAction) map
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
-		runOnServer, _ := strconv.ParseBool(v)
+		runOnServer, _ := strconv.ParseBool(v.Value)
 		flattenedAction["run_on_server"] = runOnServer
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
-		flattenedAction["script_file_name"] = v
+		flattenedAction["script_file_name"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
-		flattenedAction["script_parameters"] = v
+		flattenedAction["script_parameters"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptSource"]; ok {
-		flattenedAction["script_source"] = v
+		flattenedAction["script_source"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
-		flattenedAction["variable_substitution_in_files"] = v
+		flattenedAction["variable_substitution_in_files"] = v.Value
 	}
 
 	return flattenedAction

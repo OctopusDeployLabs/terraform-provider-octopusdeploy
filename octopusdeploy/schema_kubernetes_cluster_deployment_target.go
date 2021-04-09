@@ -31,7 +31,7 @@ func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *octopusdep
 	}
 
 	if v, ok := d.GetOk("container"); ok {
-		endpoint.Container = expandDeploymentActionContainer(v)
+		endpoint.Container = expandContainer(v)
 	}
 
 	if v, ok := d.GetOk("default_worker_pool_id"); ok {
@@ -68,7 +68,7 @@ func flattenKubernetesClusterDeploymentTarget(deploymentTarget *octopusdeploy.De
 	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
 
 	flattenedDeploymentTarget["cluster_certificate"] = endpointResource.ClusterCertificate
-	flattenedDeploymentTarget["container"] = flattenDeploymentActionContainer(endpointResource.Container)
+	flattenedDeploymentTarget["container"] = flattenContainer(endpointResource.Container)
 	flattenedDeploymentTarget["default_worker_pool_id"] = endpointResource.DefaultWorkerPoolID
 	flattenedDeploymentTarget["namespace"] = endpointResource.Namespace
 	flattenedDeploymentTarget["proxy_id"] = endpointResource.ProxyID
@@ -212,7 +212,7 @@ func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.Resourc
 
 	d.Set("cluster_certificate", endpointResource.ClusterCertificate)
 
-	if err := d.Set("container", flattenDeploymentActionContainer(endpointResource.Container)); err != nil {
+	if err := d.Set("container", flattenContainer(endpointResource.Container)); err != nil {
 		return fmt.Errorf("error setting container: %s", err)
 	}
 

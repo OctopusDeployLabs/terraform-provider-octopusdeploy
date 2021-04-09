@@ -22,7 +22,7 @@ func expandDeploymentStep(flattenedStep map[string]interface{}) *octopusdeploy.D
 	}
 
 	if conditionExpression, ok := flattenedStep["condition_expression"]; ok {
-		step.Properties["Octopus.Step.ConditionVariableExpression"] = conditionExpression.(string)
+		step.Properties["Octopus.Step.ConditionVariableExpression"] = octopusdeploy.NewPropertyValue(conditionExpression.(string), false)
 	}
 
 	if packageRequirement, ok := flattenedStep["package_requirement"]; ok {
@@ -34,11 +34,11 @@ func expandDeploymentStep(flattenedStep map[string]interface{}) *octopusdeploy.D
 	}
 
 	if targetRoles, ok := flattenedStep["target_roles"]; ok {
-		step.Properties["Octopus.Action.TargetRoles"] = strings.Join(getSliceFromTerraformTypeList(targetRoles), ",")
+		step.Properties["Octopus.Action.TargetRoles"] = octopusdeploy.NewPropertyValue(strings.Join(getSliceFromTerraformTypeList(targetRoles), ","), false)
 	}
 
 	if windowSize, ok := flattenedStep["window_size"]; ok {
-		step.Properties["Octopus.Action.MaxParallelism"] = windowSize.(string)
+		step.Properties["Octopus.Action.MaxParallelism"] = octopusdeploy.NewPropertyValue(windowSize.(string), false)
 	}
 
 	if v, ok := flattenedStep["action"]; ok {
@@ -55,9 +55,9 @@ func expandDeploymentStep(flattenedStep map[string]interface{}) *octopusdeploy.D
 		}
 	}
 
-	if v, ok := flattenedStep["apply_terraform_action"]; ok {
+	if v, ok := flattenedStep["apply_terraform_template_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
-			action := expandApplyTerraformAction(tfAction.(map[string]interface{}))
+			action := expandApplyTerraformTemplateAction(tfAction.(map[string]interface{}))
 			step.Actions = append(step.Actions, action)
 		}
 	}
@@ -112,17 +112,17 @@ func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []ma
 		flattenedDeploymentSteps[key]["id"] = deploymentStep.ID
 		flattenedDeploymentSteps[key]["name"] = deploymentStep.Name
 		flattenedDeploymentSteps[key]["package_requirement"] = deploymentStep.PackageRequirement
-		flattenedDeploymentSteps[key]["properties"] = deploymentStep.Properties
+		flattenedDeploymentSteps[key]["properties"] = flattenProperties(deploymentStep.Properties)
 		flattenedDeploymentSteps[key]["start_trigger"] = deploymentStep.StartTrigger
 
 		for propertyName, propertyValue := range deploymentStep.Properties {
 			switch propertyName {
 			case "Octopus.Action.TargetRoles":
-				flattenedDeploymentSteps[key]["target_roles"] = strings.Split(propertyValue, ",")
+				flattenedDeploymentSteps[key]["target_roles"] = strings.Split(propertyValue.Value, ",")
 			case "Octopus.Action.MaxParallelism":
-				flattenedDeploymentSteps[key]["window_size"] = propertyValue
+				flattenedDeploymentSteps[key]["window_size"] = propertyValue.Value
 			case "Octopus.Step.ConditionVariableExpression":
-				flattenedDeploymentSteps[key]["condition_expression"] = propertyValue
+				flattenedDeploymentSteps[key]["condition_expression"] = propertyValue.Value
 			}
 		}
 
@@ -139,7 +139,7 @@ func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []ma
 			case "Octopus.TentaclePackage":
 				flattenedDeploymentSteps[key]["deploy_package_action"] = []interface{}{flattenDeployPackageAction(action)}
 			case "Octopus.TerraformApply":
-				flattenedDeploymentSteps[key]["apply_terraform_action"] = []interface{}{flattenApplyTerraformAction(action)}
+				flattenedDeploymentSteps[key]["apply_terraform_template_action"] = []interface{}{flattenApplyTerraformTemplateAction(action)}
 			case "Octopus.WindowsService":
 				flattenedDeploymentSteps[key]["deploy_windows_service_action"] = []interface{}{flattenDeployWindowsServiceAction(action)}
 			default:
@@ -155,8 +155,8 @@ func getDeploymentStepSchema() *schema.Schema {
 	return &schema.Schema{
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"action":                 getDeploymentActionSchema(),
-				"apply_terraform_action": getApplyTerraformActionSchema(),
+				"action":                          getDeploymentActionSchema(),
+				"apply_terraform_template_action": getApplyTerraformTemplateActionSchema(),
 				"condition": {
 					Default:     "Success",
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
@@ -210,6 +210,7 @@ func getDeploymentStepSchema() *schema.Schema {
 					}, false)),
 				},
 				"target_roles": {
+					Computed:    true,
 					Description: "The roles that this step run against, or runs on behalf of",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 					Optional:    true,

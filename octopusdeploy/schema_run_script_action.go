@@ -31,42 +31,43 @@ func expandRunScriptAction(flattenedAction map[string]interface{}) octopusdeploy
 
 	if v, ok := flattenedAction["script_body"]; ok {
 		if s := v.(string); len(s) > 0 {
-			action.Properties["Octopus.Action.Script.ScriptBody"] = s
+			action.Properties["Octopus.Action.Script.ScriptBody"] = octopusdeploy.NewPropertyValue(s, false)
 		}
 	}
 
 	if v, ok := flattenedAction["script_file_name"]; ok {
 		if s := v.(string); len(s) > 0 {
-			action.Properties["Octopus.Action.Script.ScriptFileName"] = s
+			action.Properties["Octopus.Action.Script.ScriptFileName"] = octopusdeploy.NewPropertyValue(s, false)
 		}
 	}
 
 	if v, ok := flattenedAction["script_parameters"]; ok {
 		if s := v.(string); len(s) > 0 {
-			action.Properties["Octopus.Action.Script.ScriptParameters"] = s
+			action.Properties["Octopus.Action.Script.ScriptParameters"] = octopusdeploy.NewPropertyValue(s, false)
 		}
 	}
 
 	if v, ok := flattenedAction["script_source"]; ok {
 		if s := v.(string); len(s) > 0 {
-			action.Properties["Octopus.Action.Script.ScriptSource"] = s
+			action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue(s, false)
 		}
 	}
 
 	if v, ok := flattenedAction["script_syntax"]; ok {
 		if s := v.(string); len(s) > 0 {
-			action.Properties["Octopus.Action.Script.Syntax"] = s
+			action.Properties["Octopus.Action.Script.Syntax"] = octopusdeploy.NewPropertyValue(s, false)
 		}
 	}
 
 	if variableSubstitutionInFiles, ok := flattenedAction["variable_substitution_in_files"]; ok {
-		action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = variableSubstitutionInFiles.(string)
-		action.Properties["Octopus.Action.SubstituteInFiles.Enabled"] = "True"
+		action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = octopusdeploy.NewPropertyValue(variableSubstitutionInFiles.(string), false)
+		action.Properties["Octopus.Action.SubstituteInFiles.Enabled"] = octopusdeploy.NewPropertyValue("True", false)
 
-		if len(action.Properties["Octopus.Action.EnabledFeatures"]) == 0 {
-			action.Properties["Octopus.Action.EnabledFeatures"] = "Octopus.Features.SubstituteInFiles"
+		if len(action.Properties["Octopus.Action.EnabledFeatures"].Value) == 0 {
+			action.Properties["Octopus.Action.EnabledFeatures"] = octopusdeploy.NewPropertyValue("Octopus.Features.SubstituteInFiles", false)
 		} else {
-			action.Properties["Octopus.Action.EnabledFeatures"] += ",Octopus.Features.SubstituteInFiles"
+			actionProperty := action.Properties["Octopus.Action.EnabledFeatures"].Value + ",Octopus.Features.SubstituteInFiles"
+			action.Properties["Octopus.Action.EnabledFeatures"] = octopusdeploy.NewPropertyValue(actionProperty, false)
 		}
 	}
 
@@ -77,39 +78,39 @@ func flattenRunScriptAction(action octopusdeploy.DeploymentAction) map[string]in
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
-		runOnServer, _ := strconv.ParseBool(v)
+		runOnServer, _ := strconv.ParseBool(v.Value)
 		flattenedAction["run_on_server"] = runOnServer
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptBody"]; ok {
-		flattenedAction["script_body"] = v
+		flattenedAction["script_body"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
-		flattenedAction["script_file_name"] = v
+		flattenedAction["script_file_name"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
-		flattenedAction["script_parameters"] = v
+		flattenedAction["script_parameters"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptSource"]; ok {
-		flattenedAction["script_source"] = v
+		flattenedAction["script_source"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.Syntax"]; ok {
-		flattenedAction["script_syntax"] = v
+		flattenedAction["script_syntax"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"]; ok {
-		flattenedAction["variable_substitution_in_files"] = v
+		flattenedAction["variable_substitution_in_files"] = v.Value
 	}
 
 	return flattenedAction
 }
 
 func getRunScriptActionSchema() *schema.Schema {
-	actionSchema, element := getCommonDeploymentActionSchema()
+	actionSchema, element := getActionSchema()
 	addExecutionLocationSchema(element)
 	addScriptFromPackageSchema(element)
 	addPackagesSchema(element, false)

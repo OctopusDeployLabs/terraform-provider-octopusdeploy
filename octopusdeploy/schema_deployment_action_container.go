@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeploymentActionContainer(values interface{}) octopusdeploy.DeploymentActionContainer {
+func expandContainer(values interface{}) octopusdeploy.DeploymentActionContainer {
 	if values == nil {
 		return octopusdeploy.DeploymentActionContainer{}
 	}
@@ -30,7 +30,7 @@ func expandDeploymentActionContainer(values interface{}) octopusdeploy.Deploymen
 	return deploymentActionContainer
 }
 
-func flattenDeploymentActionContainer(deploymentActionContainer octopusdeploy.DeploymentActionContainer) []interface{} {
+func flattenContainer(deploymentActionContainer octopusdeploy.DeploymentActionContainer) []interface{} {
 	return []interface{}{map[string]interface{}{
 		"feed_id": deploymentActionContainer.FeedID,
 		"image":   deploymentActionContainer.Image,

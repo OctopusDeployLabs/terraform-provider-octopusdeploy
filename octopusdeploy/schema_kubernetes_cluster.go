@@ -13,7 +13,7 @@ func expandKubernetesCluster(flattenedMap map[string]interface{}) *octopusdeploy
 	endpoint := octopusdeploy.NewKubernetesEndpoint(clusterURL)
 	endpoint.Authentication = expandKubernetesAuthentication(flattenedMap["authentication"])
 	endpoint.ClusterCertificate = flattenedMap["cluster_certificate"].(string)
-	endpoint.Container = expandDeploymentActionContainer(flattenedMap["container"])
+	endpoint.Container = expandContainer(flattenedMap["container"])
 	endpoint.DefaultWorkerPoolID = flattenedMap["default_worker_pool_id"].(string)
 	endpoint.ID = flattenedMap["id"].(string)
 	endpoint.Namespace = flattenedMap["namespace"].(string)
@@ -72,7 +72,7 @@ func flattenKubernetesCluster(endpoint *octopusdeploy.KubernetesEndpoint) []inte
 
 	flattenedEndpoint := map[string]interface{}{
 		"cluster_certificate":    endpoint.ClusterCertificate,
-		"container":              flattenDeploymentActionContainer(endpoint.Container),
+		"container":              flattenContainer(endpoint.Container),
 		"default_worker_pool_id": endpoint.DefaultWorkerPoolID,
 		"id":                     endpoint.GetID(),
 		"namespace":              endpoint.Namespace,

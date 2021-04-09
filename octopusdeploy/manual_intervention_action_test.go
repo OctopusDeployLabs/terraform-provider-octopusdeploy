@@ -50,12 +50,12 @@ func testAccCheckManualInterventionAction() resource.TestCheckFunc {
 			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
 		}
 
-		if action.Properties["Octopus.Action.Manual.Instructions"] != "Approve Me" {
-			return fmt.Errorf("Instructions is incorrect: %s", action.Properties["Octopus.Action.Manual.Instructions"])
+		if action.Properties["Octopus.Action.Manual.Instructions"].Value != "Approve Me" {
+			return fmt.Errorf("Instructions is incorrect: %s", action.Properties["Octopus.Action.Manual.Instructions"].Value)
 		}
 
-		if action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"] != "A Team" {
-			return fmt.Errorf("ResponsibleTeamIds is incorrect: %s", action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"])
+		if action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"].Value != "A Team" {
+			return fmt.Errorf("ResponsibleTeamIds is incorrect: %s", action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"].Value)
 		}
 
 		return nil
