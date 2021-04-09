@@ -26,6 +26,37 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 	})
 }
 
+func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_deployment_process." + localName
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(prefix, "project_id"),
+					resource.TestCheckResourceAttr(prefix, "step.#", "1"),
+					resource.TestCheckResourceAttr(prefix, "step.0.condition", "Success"),
+					resource.TestCheckResourceAttr(prefix, "step.0.name", "Terraform - PlanV2"),
+					resource.TestCheckResourceAttr(prefix, "step.0.start_trigger", "StartAfterPrevious"),
+					resource.TestCheckResourceAttr(prefix, "step.0.action.#", "1"),
+					resource.TestCheckResourceAttr(prefix, "step.0.action.0.action_type", "Octopus.TerraformPlan"),
+					// resource.TestCheckResourceAttr(prefix, "step.0.action.0.can_be_used_for_project_versioning", "true"),
+					resource.TestCheckNoResourceAttr(prefix, "step.0.action.0.channels"),
+					resource.TestCheckNoResourceAttr(prefix, "step.0.action.0.container"),
+					resource.TestCheckResourceAttr(prefix, "step.0.action.0.condition", "Success"),
+					resource.TestCheckNoResourceAttr(prefix, "step.0.action.0.environments"),
+					resource.TestCheckResourceAttr(prefix, "step.0.action.0.run_on_server", "true"),
+				),
+				Config: testAccProcessWithActionTemplate(localName),
+			},
+		},
+	})
+}
+
 func testAccDeploymentProcessBasic() string {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -92,12 +123,50 @@ func testAccDeploymentProcessBasic() string {
 			  target_roles = ["WebServer"]
 	
 			  run_script_action {
-				name = "Step2"
-				run_on_server = true
-				script_body = "Write-Host 'hi'"
+				  name = "Step2"
+				  run_on_server = true
+				  script_body = "Write-Host 'hi'"
 			  }
 			} 
 		}`, projectID)
+}
+
+func testAccProcessWithActionTemplate(localName string) string {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	projectID := "octopusdeploy_project." + projectLocalName + ".id"
+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, name, description)+"\n"+
+		`resource "octopusdeploy_deployment_process" "%s" {
+			project_id = %s
+
+			step {
+			  condition = "Success"
+			  name = "Terraform - PlanV2"
+			  start_trigger = "StartAfterPrevious"
+
+			  action {
+			    action_type = "Octopus.Script"
+			    can_be_used_for_project_versioning = true
+				is_disabled = false
+				is_required = true
+				name = "AWS - Create a Security Group"
+				run_on_server = true
+
+				template {
+				  community_action_template_id = "CommunityActionTemplates-27"
+				  id = "ActionTemplates-281"
+				  version = 3
+				}
+			  }
+			}
+		}`, localName, projectID)
 }
 
 func testAccBuildTestAction(action string) string {
@@ -112,12 +181,7 @@ func testAccBuildTestAction(action string) string {
 	projectID := "octopusdeploy_project." + localName + ".id"
 
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description)+"\n"+
-		`resource "octopusdeploy_nuget_feed" "testing" {
-			name     = "testing"
-			feed_uri = "http://testfeed.com"
-		  }
-		
-		resource "octopusdeploy_deployment_process" "test" {
+		`resource "octopusdeploy_deployment_process" "test" {
 			project_id = %s
 
 			step {
@@ -159,7 +223,7 @@ func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 			return fmt.Errorf("Deployment process has %d steps instead of the expected %d", numberOfSteps, expectedNumberOfSteps)
 		}
 
-		if process.Steps[0].Actions[0].Properties["Octopus.Action.RunOnServer"] != "true" {
+		if process.Steps[0].Actions[0].Properties["Octopus.Action.RunOnServer"].Value != "true" {
 			return fmt.Errorf("The RunOnServer property has not been set to true on the deployment process")
 		}
 

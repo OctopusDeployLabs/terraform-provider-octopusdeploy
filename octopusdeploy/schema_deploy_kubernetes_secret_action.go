@@ -12,18 +12,13 @@ func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) 
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.KubernetesDeploySecret"
 
-	action.Properties["Octopus.Action.KubernetesContainers.SecretName"] = flattenedAction["secret_name"].(string)
+	action.Properties["Octopus.Action.KubernetesContainers.SecretName"] = octopusdeploy.NewPropertyValue(flattenedAction["secret_name"].(string), false)
 
 	if tfSecretValues, ok := flattenedAction["secret_values"]; ok {
-		secretValues := make(map[string]string)
-
-		for _, tfSecretValue := range tfSecretValues.([]interface{}) {
-			tfSecretValueTyped := tfSecretValue.(map[string]interface{})
-			secretValues[tfSecretValueTyped["key"].(string)] = tfSecretValueTyped["value"].(string)
-		}
+		secretValues := tfSecretValues.(map[string]interface{})
 
 		j, _ := json.Marshal(secretValues)
-		action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] = string(j)
+		action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] = octopusdeploy.NewPropertyValue(string(j), false)
 	}
 
 	return action
@@ -33,34 +28,26 @@ func flattenDeployKubernetesSecretAction(action octopusdeploy.DeploymentAction) 
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
-		runOnServer, _ := strconv.ParseBool(v)
+		runOnServer, _ := strconv.ParseBool(v.Value)
 		flattenedAction["run_on_server"] = runOnServer
 	}
 
 	if v, ok := action.Properties["Octopus.Action.KubernetesContainers.SecretName"]; ok {
-		flattenedAction["secret_name"] = v
+		flattenedAction["secret_name"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.KubernetesContainers.SecretValues"]; ok {
 		var secretKeyValues map[string]string
-		json.Unmarshal([]byte(v), &secretKeyValues)
+		json.Unmarshal([]byte(v.Value), &secretKeyValues)
 
-		flattenedSecretKeyValues := []interface{}{}
-		for secretKey, secretValue := range secretKeyValues {
-			flattenedSecretKeyValues = append(flattenedSecretKeyValues, map[string]interface{}{
-				"key":   secretKey,
-				"value": secretValue,
-			})
-		}
-
-		flattenedAction["secret_values"] = flattenedSecretKeyValues
+		flattenedAction["secret_values"] = secretKeyValues
 	}
 
 	return flattenedAction
 }
 
 func getDeployKubernetesSecretActionSchema() *schema.Schema {
-	actionSchema, element := getCommonDeploymentActionSchema()
+	actionSchema, element := getActionSchema()
 	addExecutionLocationSchema(element)
 	element.Schema["secret_name"] = &schema.Schema{
 		Description: "The name of the secret resource",
@@ -69,20 +56,9 @@ func getDeployKubernetesSecretActionSchema() *schema.Schema {
 	}
 
 	element.Schema["secret_values"] = &schema.Schema{
-		Type:     schema.TypeList,
+		Elem:     &schema.Schema{Type: schema.TypeString},
 		Required: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"key": {
-					Required: true,
-					Type:     schema.TypeString,
-				},
-				"value": {
-					Required: true,
-					Type:     schema.TypeString,
-				},
-			},
-		},
+		Type:     schema.TypeMap,
 	}
 
 	return actionSchema

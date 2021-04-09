@@ -9,10 +9,8 @@ import (
 func expandActionTemplateParameter(tfTemplate map[string]interface{}) *octopusdeploy.ActionTemplateParameter {
 	actionTemplateParameter := octopusdeploy.NewActionTemplateParameter()
 
-	propertyValue := octopusdeploy.PropertyValue(tfTemplate["default_value"].(string))
-	actionTemplateParameter.DefaultValue = &octopusdeploy.PropertyValueResource{
-		PropertyValue: &propertyValue,
-	}
+	propertyValue := octopusdeploy.NewPropertyValue(tfTemplate["default_value"].(string), false)
+	actionTemplateParameter.DefaultValue = &propertyValue
 	actionTemplateParameter.DisplaySettings = flattenDisplaySettings(tfTemplate["display_settings"].(map[string]interface{}))
 	actionTemplateParameter.HelpText = tfTemplate["help_text"].(string)
 	actionTemplateParameter.ID = tfTemplate["id"].(string)
@@ -39,7 +37,7 @@ func flattenActionTemplateParameters(actionTemplateParameters []*octopusdeploy.A
 	flattenedActionTemplateParameters := make([]interface{}, 0)
 	for _, actionTemplateParameter := range actionTemplateParameters {
 		a := make(map[string]interface{})
-		a["default_value"] = actionTemplateParameter.DefaultValue.PropertyValue
+		a["default_value"] = actionTemplateParameter.DefaultValue.Value
 		a["display_settings"] = actionTemplateParameter.DisplaySettings
 		a["help_text"] = actionTemplateParameter.HelpText
 		a["id"] = actionTemplateParameter.ID

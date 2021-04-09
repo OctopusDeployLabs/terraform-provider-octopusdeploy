@@ -69,16 +69,16 @@ func testAccCheckRunScriptAction() resource.TestCheckFunc {
 			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
 		}
 
-		if action.Properties["Octopus.Action.Script.ScriptFileName"] != "Test.ps1" {
-			return fmt.Errorf("ScriptFileName is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptFileName"])
+		if action.Properties["Octopus.Action.Script.ScriptFileName"].Value != "Test.ps1" {
+			return fmt.Errorf("ScriptFileName is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptFileName"].Value)
 		}
 
-		if action.Properties["Octopus.Action.Script.ScriptParameters"] != "-Test 1" {
-			return fmt.Errorf("ScriptSource is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptParameters"])
+		if action.Properties["Octopus.Action.Script.ScriptParameters"].Value != "-Test 1" {
+			return fmt.Errorf("ScriptSource is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptParameters"].Value)
 		}
 
-		if action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] != "test.json" {
-			return fmt.Errorf("TargetFiles is incorrect: %s", action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"])
+		if action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"].Value != "test.json" {
+			return fmt.Errorf("TargetFiles is incorrect: %s", action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"].Value)
 		}
 
 		return nil

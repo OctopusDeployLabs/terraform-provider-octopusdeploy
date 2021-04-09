@@ -5,13 +5,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func flattenManualIntervention(actionMap map[string]interface{}, properties map[string]string) {
+func flattenManualIntervention(actionMap map[string]interface{}, properties map[string]octopusdeploy.PropertyValue) {
 	for propertyName, propertyValue := range properties {
 		switch propertyName {
 		case "Octopus.Action.Manual.Instructions":
-			actionMap["instructions"] = propertyValue
+			actionMap["instructions"] = propertyValue.Value
 		case "Octopus.Action.Manual.ResponsibleTeamIds":
-			actionMap["responsible_teams"] = propertyValue
+			actionMap["responsible_teams"] = propertyValue.Value
 		}
 	}
 }
@@ -24,7 +24,7 @@ func flattenManualInterventionAction(action octopusdeploy.DeploymentAction) map[
 }
 
 func getManualInterventionActionSchema() *schema.Schema {
-	actionSchema, element := getCommonDeploymentActionSchema()
+	actionSchema, element := getActionSchema()
 
 	element.Schema["instructions"] = &schema.Schema{
 		Type:        schema.TypeString,
@@ -44,11 +44,11 @@ func getManualInterventionActionSchema() *schema.Schema {
 func expandManualInterventionAction(tfAction map[string]interface{}) octopusdeploy.DeploymentAction {
 	resource := expandAction(tfAction)
 	resource.ActionType = "Octopus.Manual"
-	resource.Properties["Octopus.Action.Manual.Instructions"] = tfAction["instructions"].(string)
+	resource.Properties["Octopus.Action.Manual.Instructions"] = octopusdeploy.NewPropertyValue(tfAction["instructions"].(string), false)
 
 	responsibleTeams := tfAction["responsible_teams"]
 	if responsibleTeams != nil {
-		resource.Properties["Octopus.Action.Manual.ResponsibleTeamIds"] = responsibleTeams.(string)
+		resource.Properties["Octopus.Action.Manual.ResponsibleTeamIds"] = octopusdeploy.NewPropertyValue(responsibleTeams.(string), false)
 	}
 
 	return resource

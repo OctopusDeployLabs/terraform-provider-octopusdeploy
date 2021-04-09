@@ -28,18 +28,15 @@ func TestAccOctopusDeployDeployKuberentesSecretAction(t *testing.T) {
 func testAccDeployKuberentesSecretAction() string {
 	return testAccBuildTestAction(`
 		deploy_kubernetes_secret_action {
-            name = "Run Script"
-            run_on_server = true
+      name = "Run Script"
+      run_on_server = true
 			secret_name = "secret name"
-			secret_values {
-				key = "key-123"
-				value = "value-123"
+
+			secret_values = {
+				"key-123" = "value-123",
+				"key-321" = "value-321"
 			}
-			secret_values {
-				key = "key-321"
-				value = "value-321"
-			}
-        }
+    }
 	`)
 }
 
@@ -58,12 +55,12 @@ func testAccCheckDeployKuberentesSecretAction() resource.TestCheckFunc {
 			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
 		}
 
-		if action.Properties["Octopus.Action.KubernetesContainers.SecretName"] != "secret name" {
-			return fmt.Errorf("SecretName is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretName"])
+		if action.Properties["Octopus.Action.KubernetesContainers.SecretName"].Value != "secret name" {
+			return fmt.Errorf("SecretName is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretName"].Value)
 		}
 
-		if action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] != `{"key-123":"value-123","key-321":"value-321"}` {
-			return fmt.Errorf("SecretValue is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretValues"])
+		if action.Properties["Octopus.Action.KubernetesContainers.SecretValues"].Value != `{"key-123":"value-123","key-321":"value-321"}` {
+			return fmt.Errorf("SecretValue is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretValues"].Value)
 		}
 
 		return nil

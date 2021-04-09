@@ -28,8 +28,8 @@ func TestAccOctopusDeployRunKubectlScriptAction(t *testing.T) {
 func testAccRunKubectlScriptAction() string {
 	return testAccBuildTestAction(`
 		run_kubectl_script_action {
-            name = "Run Script"
-            run_on_server = true
+      name = "Run Script"
+      run_on_server = true
 			
 			primary_package {
 				package_id = "MyPackage"
@@ -38,7 +38,7 @@ func testAccRunKubectlScriptAction() string {
 			
 			script_file_name = "Test.ps1"
 			script_parameters = "-Test 1"
-        }
+    }
 	`)
 }
 
@@ -57,12 +57,12 @@ func testAccCheckRunKubectlScriptAction() resource.TestCheckFunc {
 			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
 		}
 
-		if action.Properties["Octopus.Action.Script.ScriptFileName"] != "Test.ps1" {
-			return fmt.Errorf("ScriptFileName is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptFileName"])
+		if action.Properties["Octopus.Action.Script.ScriptFileName"].Value != "Test.ps1" {
+			return fmt.Errorf("ScriptFileName is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptFileName"].Value)
 		}
 
-		if action.Properties["Octopus.Action.Script.ScriptParameters"] != "-Test 1" {
-			return fmt.Errorf("ScriptSource is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptParameters"])
+		if action.Properties["Octopus.Action.Script.ScriptParameters"].Value != "-Test 1" {
+			return fmt.Errorf("ScriptSource is incorrect: %s", action.Properties["Octopus.Action.Script.ScriptParameters"].Value)
 		}
 
 		return nil

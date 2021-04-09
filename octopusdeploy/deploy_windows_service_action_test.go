@@ -111,44 +111,44 @@ func testAccCheckDeployWindowsServiceActionOrFeature(expectedActionType string) 
 		// 	return fmt.Errorf("Windows Service feature is not enabled")
 		// }
 
-		if action.Properties["Octopus.Action.WindowsService.ServiceName"] != "MyService" {
-			return fmt.Errorf("Service Name is incorrect: %s", action.Properties["Octopus.Action.WindowsService.ServiceName"])
+		if action.Properties["Octopus.Action.WindowsService.ServiceName"].Value != "MyService" {
+			return fmt.Errorf("Service Name is incorrect: %s", action.Properties["Octopus.Action.WindowsService.ServiceName"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.DisplayName"] != "My Service" {
-			return fmt.Errorf("Display Name is incorrect: %s", action.Properties["Octopus.Action.WindowsService.DisplayName"])
+		if action.Properties["Octopus.Action.WindowsService.DisplayName"].Value != "My Service" {
+			return fmt.Errorf("Display Name is incorrect: %s", action.Properties["Octopus.Action.WindowsService.DisplayName"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.Description"] != "Do stuff" {
-			return fmt.Errorf("Description is incorrect: %s", action.Properties["Octopus.Action.WindowsService.Description"])
+		if action.Properties["Octopus.Action.WindowsService.Description"].Value != "Do stuff" {
+			return fmt.Errorf("Description is incorrect: %s", action.Properties["Octopus.Action.WindowsService.Description"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.ExecutablePath"] != "MyService.exe" {
-			return fmt.Errorf("Executable Path is incorrect: %s", action.Properties["Octopus.Action.WindowsService.ExecutablePath"])
+		if action.Properties["Octopus.Action.WindowsService.ExecutablePath"].Value != "MyService.exe" {
+			return fmt.Errorf("Executable Path is incorrect: %s", action.Properties["Octopus.Action.WindowsService.ExecutablePath"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.Arguments"] != "-arg" {
-			return fmt.Errorf("Arguments is incorrect: %s", action.Properties["Octopus.Action.WindowsService.Arguments"])
+		if action.Properties["Octopus.Action.WindowsService.Arguments"].Value != "-arg" {
+			return fmt.Errorf("Arguments is incorrect: %s", action.Properties["Octopus.Action.WindowsService.Arguments"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.ServiceAccount"] != "_CUSTOM" {
-			return fmt.Errorf("Service Account is incorrect: %s", action.Properties["Octopus.Action.WindowsService.ServiceAccount"])
+		if action.Properties["Octopus.Action.WindowsService.ServiceAccount"].Value != "_CUSTOM" {
+			return fmt.Errorf("Service Account is incorrect: %s", action.Properties["Octopus.Action.WindowsService.ServiceAccount"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.CustomAccountName"] != "User" {
-			return fmt.Errorf("Custom Account Name is incorrect: %s", action.Properties["Octopus.Action.WindowsService.CustomAccountName"])
+		if action.Properties["Octopus.Action.WindowsService.CustomAccountName"].Value != "User" {
+			return fmt.Errorf("Custom Account Name is incorrect: %s", action.Properties["Octopus.Action.WindowsService.CustomAccountName"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.CustomAccountPassword"] != "Password" {
-			return fmt.Errorf("Custom Account Password is incorrect: %s", action.Properties["Octopus.Action.WindowsService.CustomAccountPassword"])
+		if action.Properties["Octopus.Action.WindowsService.CustomAccountPassword"].Value != "Password" {
+			return fmt.Errorf("Custom Account Password is incorrect: %s", action.Properties["Octopus.Action.WindowsService.CustomAccountPassword"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.StartMode"] != "manual" {
-			return fmt.Errorf("Start Mode is incorrect: %s", action.Properties["Octopus.Action.WindowsService.StartMode"])
+		if action.Properties["Octopus.Action.WindowsService.StartMode"].Value != "manual" {
+			return fmt.Errorf("Start Mode is incorrect: %s", action.Properties["Octopus.Action.WindowsService.StartMode"].Value)
 		}
 
-		if action.Properties["Octopus.Action.WindowsService.Dependencies"] != "OtherService" {
-			return fmt.Errorf("Dependencies is incorrect: %s", action.Properties["Octopus.Action.WindowsService.Dependencies"])
+		if action.Properties["Octopus.Action.WindowsService.Dependencies"].Value != "OtherService" {
+			return fmt.Errorf("Dependencies is incorrect: %s", action.Properties["Octopus.Action.WindowsService.Dependencies"].Value)
 		}
 
 		return nil

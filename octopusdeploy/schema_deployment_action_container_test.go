@@ -9,23 +9,23 @@ import (
 
 func TestExpandDeploymentActionContainer(t *testing.T) {
 	expected := octopusdeploy.DeploymentActionContainer{}
-	actual := expandDeploymentActionContainer(nil)
+	actual := expandContainer(nil)
 	require.Equal(t, expected, actual)
 
 	var emptyInterface interface{}
-	actual = expandDeploymentActionContainer(emptyInterface)
+	actual = expandContainer(emptyInterface)
 	require.Equal(t, expected, actual)
 
 	var emptyInterfaceArray []interface{}
-	actual = expandDeploymentActionContainer(emptyInterfaceArray)
+	actual = expandContainer(emptyInterfaceArray)
 	require.Equal(t, expected, actual)
 
 	var testMap []interface{} = make([]interface{}, 1)
-	actual = expandDeploymentActionContainer(testMap)
+	actual = expandContainer(testMap)
 	require.Equal(t, expected, actual)
 
 	testMap[0] = make(map[string]interface{}, 1)
-	actual = expandDeploymentActionContainer(testMap)
+	actual = expandContainer(testMap)
 	require.Equal(t, expected, actual)
 
 	testMap[0] = map[string]interface{}{
@@ -36,7 +36,7 @@ func TestExpandDeploymentActionContainer(t *testing.T) {
 		FeedID: "feeds-123",
 		Image:  "image-123",
 	}
-	actual = expandDeploymentActionContainer(testMap)
+	actual = expandContainer(testMap)
 
 	require.Equal(t, expected, actual)
 }

@@ -19,7 +19,7 @@ func flattenDeployPackageAction(action octopusdeploy.DeploymentAction) map[strin
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.EnabledFeatures"]; ok {
-		if strings.Contains(v, "Octopus.Features.WindowsService") {
+		if strings.Contains(v.Value, "Octopus.Features.WindowsService") {
 			flattenedAction["windows_service"] = flattenWindowsService(action.Properties)
 		}
 	}
@@ -28,7 +28,7 @@ func flattenDeployPackageAction(action octopusdeploy.DeploymentAction) map[strin
 }
 
 func getDeployPackageActionSchema() *schema.Schema {
-	actionSchema, element := getCommonDeploymentActionSchema()
+	actionSchema, element := getActionSchema()
 	addPrimaryPackageSchema(element, true)
 	// addCustomInstallationDirectoryFeature(element)
 	// addIisWebSiteAndApplicationPoolFeature(element)
