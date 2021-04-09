@@ -6,7 +6,7 @@ description: |-
   Provides information about existing library variable sets.
 ---
 
-# Data Source `octopusdeploy_library_variable_sets`
+# octopusdeploy_library_variable_sets (Data Source)
 
 Provides information about existing library variable sets.
 

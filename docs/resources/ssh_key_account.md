@@ -6,7 +6,7 @@ description: |-
   This resource manages SSH key accounts in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_ssh_key_account`
+# octopusdeploy_ssh_key_account (Resource)
 
 This resource manages SSH key accounts in Octopus Deploy.
 

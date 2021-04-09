@@ -6,7 +6,7 @@ description: |-
   This resource manages project groups in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_project_group`
+# octopusdeploy_project_group (Resource)
 
 This resource manages project groups in Octopus Deploy.
 

@@ -6,7 +6,7 @@ description: |-
   Provides information about existing user roles.
 ---
 
-# Data Source `octopusdeploy_user_roles`
+# octopusdeploy_user_roles (Data Source)
 
 Provides information about existing user roles.
 
@@ -31,7 +31,7 @@ data "octopusdeploy_user_roles" "example" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **user_roles** (Block List) A list of user roles that match the filter(s). (see [below for nested schema](#nestedblock--user_roles))
@@ -39,7 +39,7 @@ data "octopusdeploy_user_roles" "example" {
 <a id="nestedblock--user_roles"></a>
 ### Nested Schema for `user_roles`
 
-Read-only:
+Read-Only:
 
 - **can_be_deleted** (Boolean)
 - **description** (String) The description of this resource.

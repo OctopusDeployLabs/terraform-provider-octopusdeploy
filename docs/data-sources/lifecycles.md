@@ -6,7 +6,7 @@ description: |-
   Provides information about existing lifecycles.
 ---
 
-# Data Source `octopusdeploy_lifecycles`
+# octopusdeploy_lifecycles (Data Source)
 
 Provides information about existing lifecycles.
 
@@ -32,14 +32,14 @@ data "octopusdeploy_lifecycles" "example" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **lifecycles** (Block List) A list of lifecycles that match the filter(s). (see [below for nested schema](#nestedblock--lifecycles))
 
 <a id="nestedblock--lifecycles"></a>
 ### Nested Schema for `lifecycles`
 
-Read-only:
+Read-Only:
 
 - **description** (String) The description of this resource.
 - **id** (String) The unique ID for this resource.
@@ -52,7 +52,7 @@ Read-only:
 <a id="nestedatt--lifecycles--phase"></a>
 ### Nested Schema for `lifecycles.phase`
 
-Read-only:
+Read-Only:
 
 - **automatic_deployment_targets** (List of String)
 - **id** (String)
@@ -66,7 +66,7 @@ Read-only:
 <a id="nestedobjatt--lifecycles--phase--release_retention_policy"></a>
 ### Nested Schema for `lifecycles.phase.release_retention_policy`
 
-Read-only:
+Read-Only:
 
 - **quantity_to_keep** (Number)
 - **should_keep_forever** (Boolean)
@@ -76,7 +76,7 @@ Read-only:
 <a id="nestedobjatt--lifecycles--phase--tentacle_retention_policy"></a>
 ### Nested Schema for `lifecycles.phase.tentacle_retention_policy`
 
-Read-only:
+Read-Only:
 
 - **quantity_to_keep** (Number)
 - **should_keep_forever** (Boolean)
@@ -87,7 +87,7 @@ Read-only:
 <a id="nestedatt--lifecycles--release_retention_policy"></a>
 ### Nested Schema for `lifecycles.release_retention_policy`
 
-Read-only:
+Read-Only:
 
 - **quantity_to_keep** (Number)
 - **should_keep_forever** (Boolean)
@@ -97,7 +97,7 @@ Read-only:
 <a id="nestedatt--lifecycles--tentacle_retention_policy"></a>
 ### Nested Schema for `lifecycles.tentacle_retention_policy`
 
-Read-only:
+Read-Only:
 
 - **quantity_to_keep** (Number)
 - **should_keep_forever** (Boolean)

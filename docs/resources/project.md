@@ -6,7 +6,7 @@ description: |-
   This resource manages projects in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_project`
+# octopusdeploy_project (Resource)
 
 This resource manages projects in Octopus Deploy.
 
@@ -69,7 +69,7 @@ resource "octopusdeploy_project" "example" {
 - **version_control_settings** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--version_control_settings))
 - **versioning_strategy** (Block Set) (see [below for nested schema](#nestedblock--versioning_strategy))
 
-### Read-only
+### Read-Only
 
 - **deployment_process_id** (String)
 - **extension_settings** (Block Set) (see [below for nested schema](#nestedblock--extension_settings))
@@ -157,7 +157,7 @@ Optional:
 <a id="nestedblock--extension_settings"></a>
 ### Nested Schema for `extension_settings`
 
-Read-only:
+Read-Only:
 
 - **extension_id** (String)
 - **values** (List of String)

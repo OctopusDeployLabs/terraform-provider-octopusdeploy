@@ -6,7 +6,7 @@ description: |-
   This resource manages accounts in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_account`
+# octopusdeploy_account (Resource)
 
 This resource manages accounts in Octopus Deploy.
 

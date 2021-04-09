@@ -6,7 +6,7 @@ description: |-
   Provides information about existing machine policies.
 ---
 
-# Data Source `octopusdeploy_machine_policies`
+# octopusdeploy_machine_policies (Data Source)
 
 Provides information about existing machine policies.
 
@@ -23,14 +23,14 @@ Provides information about existing machine policies.
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **machine_policies** (Block List) A list of machine policies that match the filter(s). (see [below for nested schema](#nestedblock--machine_policies))
 
 <a id="nestedblock--machine_policies"></a>
 ### Nested Schema for `machine_policies`
 
-Read-only:
+Read-Only:
 
 - **connection_connect_timeout** (Number)
 - **connection_retry_count_limit** (Number)
@@ -51,7 +51,7 @@ Read-only:
 <a id="nestedatt--machine_policies--machine_cleanup_policy"></a>
 ### Nested Schema for `machine_policies.machine_cleanup_policy`
 
-Read-only:
+Read-Only:
 
 - **delete_machines_behavior** (String)
 - **delete_machines_elapsed_timespan** (Number)
@@ -60,7 +60,7 @@ Read-only:
 <a id="nestedatt--machine_policies--machine_connectivity_policy"></a>
 ### Nested Schema for `machine_policies.machine_connectivity_policy`
 
-Read-only:
+Read-Only:
 
 - **machine_connectivity_behavior** (String)
 
@@ -68,7 +68,7 @@ Read-only:
 <a id="nestedatt--machine_policies--machine_health_check_policy"></a>
 ### Nested Schema for `machine_policies.machine_health_check_policy`
 
-Read-only:
+Read-Only:
 
 - **bash_health_check_policy** (List of Object) (see [below for nested schema](#nestedobjatt--machine_policies--machine_health_check_policy--bash_health_check_policy))
 - **health_check_cron** (String)
@@ -80,7 +80,7 @@ Read-only:
 <a id="nestedobjatt--machine_policies--machine_health_check_policy--bash_health_check_policy"></a>
 ### Nested Schema for `machine_policies.machine_health_check_policy.bash_health_check_policy`
 
-Read-only:
+Read-Only:
 
 - **run_type** (String)
 - **script_body** (String)
@@ -89,7 +89,7 @@ Read-only:
 <a id="nestedobjatt--machine_policies--machine_health_check_policy--powershell_health_check_policy"></a>
 ### Nested Schema for `machine_policies.machine_health_check_policy.powershell_health_check_policy`
 
-Read-only:
+Read-Only:
 
 - **run_type** (String)
 - **script_body** (String)
@@ -99,7 +99,7 @@ Read-only:
 <a id="nestedatt--machine_policies--machine_update_policy"></a>
 ### Nested Schema for `machine_policies.machine_update_policy`
 
-Read-only:
+Read-Only:
 
 - **calamari_update_behavior** (String)
 - **tentacle_update_account_id** (String)

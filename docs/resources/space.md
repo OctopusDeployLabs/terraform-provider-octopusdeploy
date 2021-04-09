@@ -6,7 +6,7 @@ description: |-
   This resource manages spaces in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_space`
+# octopusdeploy_space (Resource)
 
 This resource manages spaces in Octopus Deploy.
 

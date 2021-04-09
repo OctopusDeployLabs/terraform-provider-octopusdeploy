@@ -6,7 +6,7 @@ description: |-
   Provides information about existing environments.
 ---
 
-# Data Source `octopusdeploy_environments`
+# octopusdeploy_environments (Data Source)
 
 Provides information about existing environments.
 
@@ -33,7 +33,7 @@ data "octopusdeploy_environments" "example" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **environments** (Block List) A list of environments that match the filter(s). (see [below for nested schema](#nestedblock--environments))
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
@@ -41,7 +41,7 @@ data "octopusdeploy_environments" "example" {
 <a id="nestedblock--environments"></a>
 ### Nested Schema for `environments`
 
-Read-only:
+Read-Only:
 
 - **allow_dynamic_infrastructure** (Boolean)
 - **description** (String) The description of this resource.

@@ -6,7 +6,7 @@ description: |-
   This resource manages tenants in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_tenant`
+# octopusdeploy_tenant (Resource)
 
 This resource manages tenants in Octopus Deploy.
 

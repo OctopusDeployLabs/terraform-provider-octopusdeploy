@@ -6,7 +6,7 @@ description: |-
   
 ---
 
-# Resource `octopusdeploy_token_account`
+# octopusdeploy_token_account (Resource)
 
 
 

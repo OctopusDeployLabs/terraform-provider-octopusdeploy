@@ -6,7 +6,7 @@ description: |-
   Provides information about existing tag sets.
 ---
 
-# Data Source `octopusdeploy_tag_sets`
+# octopusdeploy_tag_sets (Data Source)
 
 Provides information about existing tag sets.
 
@@ -23,14 +23,14 @@ Provides information about existing tag sets.
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **tag_sets** (Block List) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedblock--tag_sets))
 
 <a id="nestedblock--tag_sets"></a>
 ### Nested Schema for `tag_sets`
 
-Read-only:
+Read-Only:
 
 - **description** (String) The description of this resource.
 - **id** (String) The unique ID for this resource.
@@ -42,7 +42,7 @@ Read-only:
 <a id="nestedatt--tag_sets--tag"></a>
 ### Nested Schema for `tag_sets.tag`
 
-Read-only:
+Read-Only:
 
 - **canonical_tag_name** (String)
 - **color** (String)

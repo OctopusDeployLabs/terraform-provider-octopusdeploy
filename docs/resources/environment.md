@@ -6,7 +6,7 @@ description: |-
   This resource manages environments in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_environment`
+# octopusdeploy_environment (Resource)
 
 This resource manages environments in Octopus Deploy.
 
@@ -35,7 +35,7 @@ resource "octopusdeploy_environment" "example" {
 - **id** (String) The unique ID for this resource.
 - **use_guided_failure** (Boolean)
 
-### Read-only
+### Read-Only
 
 - **sort_order** (Number)
 

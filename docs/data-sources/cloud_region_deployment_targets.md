@@ -6,7 +6,7 @@ description: |-
   Provides information about existing cloud region deployment targets.
 ---
 
-# Data Source `octopusdeploy_cloud_region_deployment_targets`
+# octopusdeploy_cloud_region_deployment_targets (Data Source)
 
 Provides information about existing cloud region deployment targets.
 
@@ -42,7 +42,7 @@ data "octopusdeploy_cloud_region_deployment_targets" "example" {
 - **tenants** (List of String) A filter to search by a list of tenant IDs.
 - **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
 
-### Read-only
+### Read-Only
 
 - **cloud_region_deployment_targets** (Block List) A list of cloud region deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--cloud_region_deployment_targets))
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
@@ -50,7 +50,7 @@ data "octopusdeploy_cloud_region_deployment_targets" "example" {
 <a id="nestedblock--cloud_region_deployment_targets"></a>
 ### Nested Schema for `cloud_region_deployment_targets`
 
-Read-only:
+Read-Only:
 
 - **default_worker_pool_id** (String)
 - **environments** (List of String) A list of environment IDs associated with this resource.

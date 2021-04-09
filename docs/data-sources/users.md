@@ -6,7 +6,7 @@ description: |-
   Provides information about existing users.
 ---
 
-# Data Source `octopusdeploy_users`
+# octopusdeploy_users (Data Source)
 
 Provides information about existing users.
 
@@ -30,7 +30,7 @@ data "octopusdeploy_users" "example" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **users** (Block List) A list of users that match the filter(s). (see [below for nested schema](#nestedblock--users))
@@ -38,7 +38,7 @@ data "octopusdeploy_users" "example" {
 <a id="nestedblock--users"></a>
 ### Nested Schema for `users`
 
-Read-only:
+Read-Only:
 
 - **can_password_be_edited** (Boolean)
 - **display_name** (String) The display name of this resource.
@@ -54,7 +54,7 @@ Read-only:
 <a id="nestedatt--users--identity"></a>
 ### Nested Schema for `users.identity`
 
-Read-only:
+Read-Only:
 
 - **claim** (Set of Object) (see [below for nested schema](#nestedobjatt--users--identity--claim))
 - **provider** (String)
@@ -62,7 +62,7 @@ Read-only:
 <a id="nestedobjatt--users--identity--claim"></a>
 ### Nested Schema for `users.identity.claim`
 
-Read-only:
+Read-Only:
 
 - **is_identifying_claim** (Boolean)
 - **name** (String)

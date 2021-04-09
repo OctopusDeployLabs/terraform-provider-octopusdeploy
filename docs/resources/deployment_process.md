@@ -6,7 +6,7 @@ description: |-
   This resource manages deployment processes in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_deployment_process`
+# octopusdeploy_deployment_process (Resource)
 
 This resource manages deployment processes in Octopus Deploy.
 

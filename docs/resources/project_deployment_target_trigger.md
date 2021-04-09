@@ -6,7 +6,7 @@ description: |-
   
 ---
 
-# Resource `octopusdeploy_project_deployment_target_trigger`
+# octopusdeploy_project_deployment_target_trigger (Resource)
 
 
 

@@ -6,7 +6,7 @@ description: |-
   Provides information about existing polling tentacle deployment targets.
 ---
 
-# Data Source `octopusdeploy_polling_tentacle_deployment_targets`
+# octopusdeploy_polling_tentacle_deployment_targets (Data Source)
 
 Provides information about existing polling tentacle deployment targets.
 
@@ -32,7 +32,7 @@ Provides information about existing polling tentacle deployment targets.
 - **tenants** (List of String) A filter to search by a list of tenant IDs.
 - **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **polling_tentacle_deployment_targets** (Block List) A list of polling tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--polling_tentacle_deployment_targets))
@@ -40,7 +40,7 @@ Provides information about existing polling tentacle deployment targets.
 <a id="nestedblock--polling_tentacle_deployment_targets"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets`
 
-Read-only:
+Read-Only:
 
 - **certificate_signature_algorithm** (String)
 - **endpoint** (List of Object) (see [below for nested schema](#nestedatt--polling_tentacle_deployment_targets--endpoint))
@@ -70,7 +70,7 @@ Read-only:
 <a id="nestedatt--polling_tentacle_deployment_targets--endpoint"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets.endpoint`
 
-Read-only:
+Read-Only:
 
 - **aad_client_credential_secret** (String)
 - **aad_credential_type** (String)
@@ -116,7 +116,7 @@ Read-only:
 <a id="nestedobjatt--polling_tentacle_deployment_targets--endpoint--authentication"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets.endpoint.authentication`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **admin_login** (String)
@@ -135,7 +135,7 @@ Read-only:
 <a id="nestedobjatt--polling_tentacle_deployment_targets--endpoint--container"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets.endpoint.container`
 
-Read-only:
+Read-Only:
 
 - **feed_id** (String)
 - **image** (String)
@@ -144,7 +144,7 @@ Read-only:
 <a id="nestedobjatt--polling_tentacle_deployment_targets--endpoint--destination"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets.endpoint.destination`
 
-Read-only:
+Read-Only:
 
 - **destination_type** (String)
 - **drop_folder_path** (String)
@@ -153,7 +153,7 @@ Read-only:
 <a id="nestedobjatt--polling_tentacle_deployment_targets--endpoint--tentacle_version_details"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets.endpoint.tentacle_version_details`
 
-Read-only:
+Read-Only:
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)
@@ -165,7 +165,7 @@ Read-only:
 <a id="nestedatt--polling_tentacle_deployment_targets--tentacle_version_details"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets.tentacle_version_details`
 
-Read-only:
+Read-Only:
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)

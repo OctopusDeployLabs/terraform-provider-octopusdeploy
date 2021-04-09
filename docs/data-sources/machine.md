@@ -6,7 +6,7 @@ description: |-
   
 ---
 
-# Data Source `octopusdeploy_machine`
+# octopusdeploy_machine (Data Source)
 
 
 
@@ -23,7 +23,7 @@ description: |-
 
 - **id** (String) The ID of this resource.
 
-### Read-only
+### Read-Only
 
 - **endpoint_communicationstyle** (String)
 - **endpoint_id** (String)

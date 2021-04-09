@@ -6,7 +6,7 @@ description: |-
   This resource manages Azure subscription accounts in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_azure_subscription_account`
+# octopusdeploy_azure_subscription_account (Resource)
 
 This resource manages Azure subscription accounts in Octopus Deploy.
 

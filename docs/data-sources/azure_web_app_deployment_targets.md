@@ -6,7 +6,7 @@ description: |-
   Provides information about existing Azure web app deployment targets.
 ---
 
-# Data Source `octopusdeploy_azure_web_app_deployment_targets`
+# octopusdeploy_azure_web_app_deployment_targets (Data Source)
 
 Provides information about existing Azure web app deployment targets.
 
@@ -42,7 +42,7 @@ data "octopusdeploy_azure_web_app_deployment_targets" "example" {
 - **tenants** (List of String) A filter to search by a list of tenant IDs.
 - **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
 
-### Read-only
+### Read-Only
 
 - **azure_web_app_deployment_targets** (Block List) A list of Azure web app deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--azure_web_app_deployment_targets))
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
@@ -50,7 +50,7 @@ data "octopusdeploy_azure_web_app_deployment_targets" "example" {
 <a id="nestedblock--azure_web_app_deployment_targets"></a>
 ### Nested Schema for `azure_web_app_deployment_targets`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **endpoint** (List of Object) (see [below for nested schema](#nestedatt--azure_web_app_deployment_targets--endpoint))
@@ -81,7 +81,7 @@ Read-only:
 <a id="nestedatt--azure_web_app_deployment_targets--endpoint"></a>
 ### Nested Schema for `azure_web_app_deployment_targets.endpoint`
 
-Read-only:
+Read-Only:
 
 - **aad_client_credential_secret** (String)
 - **aad_credential_type** (String)
@@ -127,7 +127,7 @@ Read-only:
 <a id="nestedobjatt--azure_web_app_deployment_targets--endpoint--authentication"></a>
 ### Nested Schema for `azure_web_app_deployment_targets.endpoint.authentication`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **admin_login** (String)
@@ -146,7 +146,7 @@ Read-only:
 <a id="nestedobjatt--azure_web_app_deployment_targets--endpoint--container"></a>
 ### Nested Schema for `azure_web_app_deployment_targets.endpoint.container`
 
-Read-only:
+Read-Only:
 
 - **feed_id** (String)
 - **image** (String)
@@ -155,7 +155,7 @@ Read-only:
 <a id="nestedobjatt--azure_web_app_deployment_targets--endpoint--destination"></a>
 ### Nested Schema for `azure_web_app_deployment_targets.endpoint.destination`
 
-Read-only:
+Read-Only:
 
 - **destination_type** (String)
 - **drop_folder_path** (String)
@@ -164,7 +164,7 @@ Read-only:
 <a id="nestedobjatt--azure_web_app_deployment_targets--endpoint--tentacle_version_details"></a>
 ### Nested Schema for `azure_web_app_deployment_targets.endpoint.tentacle_version_details`
 
-Read-only:
+Read-Only:
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)

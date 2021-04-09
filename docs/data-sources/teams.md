@@ -6,7 +6,7 @@ description: |-
   Provides information about existing users.
 ---
 
-# Data Source `octopusdeploy_teams`
+# octopusdeploy_teams (Data Source)
 
 Provides information about existing users.
 
@@ -23,7 +23,7 @@ Provides information about existing users.
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **spaces** (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--spaces))
@@ -32,23 +32,23 @@ Provides information about existing users.
 <a id="nestedblock--spaces"></a>
 ### Nested Schema for `spaces`
 
-Read-only:
+Read-Only:
 
 - **can_be_deleted** (Boolean)
 - **can_be_renamed** (Boolean)
 - **can_change_members** (Boolean)
 - **can_change_roles** (Boolean)
-- **description** (String)
+- **description** (String) The user-friendly description of this team.
 - **external_security_groups** (List of Object) (see [below for nested schema](#nestedatt--spaces--external_security_groups))
 - **id** (String) The unique ID for this resource.
-- **name** (String)
-- **space_id** (String)
+- **name** (String) The name of this team.
+- **space_id** (String) The space associated with this team.
 - **users** (List of String) A list of user IDs designated to be members of this team.
 
 <a id="nestedatt--spaces--external_security_groups"></a>
 ### Nested Schema for `spaces.external_security_groups`
 
-Read-only:
+Read-Only:
 
 - **display_id_and_name** (Boolean)
 - **display_name** (String)
@@ -59,23 +59,23 @@ Read-only:
 <a id="nestedblock--teams"></a>
 ### Nested Schema for `teams`
 
-Read-only:
+Read-Only:
 
 - **can_be_deleted** (Boolean)
 - **can_be_renamed** (Boolean)
 - **can_change_members** (Boolean)
 - **can_change_roles** (Boolean)
-- **description** (String)
+- **description** (String) The user-friendly description of this team.
 - **external_security_groups** (List of Object) (see [below for nested schema](#nestedatt--teams--external_security_groups))
 - **id** (String) The unique ID for this resource.
-- **name** (String)
-- **space_id** (String)
+- **name** (String) The name of this team.
+- **space_id** (String) The space associated with this team.
 - **users** (List of String) A list of user IDs designated to be members of this team.
 
 <a id="nestedatt--teams--external_security_groups"></a>
 ### Nested Schema for `teams.external_security_groups`
 
-Read-only:
+Read-Only:
 
 - **display_id_and_name** (Boolean)
 - **display_name** (String)

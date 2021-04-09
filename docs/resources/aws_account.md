@@ -6,7 +6,7 @@ description: |-
   This resource manages AWS accounts in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_aws_account`
+# octopusdeploy_aws_account (Resource)
 
 This resource manages AWS accounts in Octopus Deploy.
 

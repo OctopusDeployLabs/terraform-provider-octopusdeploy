@@ -6,7 +6,7 @@ description: |-
   Provides information about existing channels.
 ---
 
-# Data Source `octopusdeploy_channels`
+# octopusdeploy_channels (Data Source)
 
 Provides information about existing channels.
 
@@ -32,14 +32,14 @@ data "octopusdeploy_channels" "example" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **channels** (Block List) A channel that matches the specified filter(s). (see [below for nested schema](#nestedblock--channels))
 
 <a id="nestedblock--channels"></a>
 ### Nested Schema for `channels`
 
-Read-only:
+Read-Only:
 
 - **description** (String) The description of this resource.
 - **id** (String) The unique ID for this resource.
@@ -54,7 +54,7 @@ Read-only:
 <a id="nestedatt--channels--rule"></a>
 ### Nested Schema for `channels.rule`
 
-Read-only:
+Read-Only:
 
 - **actions** (List of String)
 - **id** (String)

@@ -6,7 +6,7 @@ description: |-
   Provides information about existing Kubernetes cluster deployment targets.
 ---
 
-# Data Source `octopusdeploy_kubernetes_cluster_deployment_targets`
+# octopusdeploy_kubernetes_cluster_deployment_targets (Data Source)
 
 Provides information about existing Kubernetes cluster deployment targets.
 
@@ -32,7 +32,7 @@ Provides information about existing Kubernetes cluster deployment targets.
 - **tenants** (List of String) A filter to search by a list of tenant IDs.
 - **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
 
-### Read-only
+### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
 - **kubernetes_cluster_deployment_targets** (Block List) A list of Kubernetes cluster deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--kubernetes_cluster_deployment_targets))
@@ -40,7 +40,7 @@ Provides information about existing Kubernetes cluster deployment targets.
 <a id="nestedblock--kubernetes_cluster_deployment_targets"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets`
 
-Read-only:
+Read-Only:
 
 - **authentication** (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--authentication))
 - **aws_account_authentication** (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--aws_account_authentication))
@@ -79,7 +79,7 @@ Read-only:
 <a id="nestedatt--kubernetes_cluster_deployment_targets--authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.authentication`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 
@@ -87,7 +87,7 @@ Read-only:
 <a id="nestedatt--kubernetes_cluster_deployment_targets--aws_account_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.aws_account_authentication`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **assume_role** (Boolean)
@@ -102,7 +102,7 @@ Read-only:
 <a id="nestedatt--kubernetes_cluster_deployment_targets--azure_service_principal_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.azure_service_principal_authentication`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **cluster_name** (String)
@@ -112,7 +112,7 @@ Read-only:
 <a id="nestedatt--kubernetes_cluster_deployment_targets--certificate_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.certificate_authentication`
 
-Read-only:
+Read-Only:
 
 - **client_certificate** (String)
 
@@ -120,7 +120,7 @@ Read-only:
 <a id="nestedatt--kubernetes_cluster_deployment_targets--container"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.container`
 
-Read-only:
+Read-Only:
 
 - **feed_id** (String)
 - **image** (String)
@@ -129,7 +129,7 @@ Read-only:
 <a id="nestedatt--kubernetes_cluster_deployment_targets--endpoint"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.endpoint`
 
-Read-only:
+Read-Only:
 
 - **aad_client_credential_secret** (String)
 - **aad_credential_type** (String)
@@ -175,7 +175,7 @@ Read-only:
 <a id="nestedobjatt--kubernetes_cluster_deployment_targets--endpoint--authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.endpoint.authentication`
 
-Read-only:
+Read-Only:
 
 - **account_id** (String)
 - **admin_login** (String)
@@ -194,7 +194,7 @@ Read-only:
 <a id="nestedobjatt--kubernetes_cluster_deployment_targets--endpoint--container"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.endpoint.container`
 
-Read-only:
+Read-Only:
 
 - **feed_id** (String)
 - **image** (String)
@@ -203,7 +203,7 @@ Read-only:
 <a id="nestedobjatt--kubernetes_cluster_deployment_targets--endpoint--destination"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.endpoint.destination`
 
-Read-only:
+Read-Only:
 
 - **destination_type** (String)
 - **drop_folder_path** (String)
@@ -212,7 +212,7 @@ Read-only:
 <a id="nestedobjatt--kubernetes_cluster_deployment_targets--endpoint--tentacle_version_details"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.endpoint.tentacle_version_details`
 
-Read-only:
+Read-Only:
 
 - **upgrade_locked** (Boolean)
 - **upgrade_required** (Boolean)

@@ -6,7 +6,7 @@ description: |-
   Provides information about existing accounts.
 ---
 
-# Data Source `octopusdeploy_accounts`
+# octopusdeploy_accounts (Data Source)
 
 Provides information about existing accounts.
 
@@ -33,7 +33,7 @@ data "octopusdeploy_accounts" "example" {
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
-### Read-only
+### Read-Only
 
 - **accounts** (List of Object) A list of accounts that match the filter(s). (see [below for nested schema](#nestedatt--accounts))
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
@@ -41,7 +41,7 @@ data "octopusdeploy_accounts" "example" {
 <a id="nestedatt--accounts"></a>
 ### Nested Schema for `accounts`
 
-Read-only:
+Read-Only:
 
 - **access_key** (String)
 - **account_type** (String)

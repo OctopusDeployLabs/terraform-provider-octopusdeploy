@@ -6,7 +6,7 @@ description: |-
   This resource manages certificates in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_certificate`
+# octopusdeploy_certificate (Resource)
 
 This resource manages certificates in Octopus Deploy.
 

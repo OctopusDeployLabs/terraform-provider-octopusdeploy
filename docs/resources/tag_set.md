@@ -6,7 +6,7 @@ description: |-
   This resource manages tag sets in Octopus Deploy.
 ---
 
-# Resource `octopusdeploy_tag_set`
+# octopusdeploy_tag_set (Resource)
 
 This resource manages tag sets in Octopus Deploy.
 

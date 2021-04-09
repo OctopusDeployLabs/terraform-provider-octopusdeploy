@@ -6,7 +6,7 @@ description: |-
   
 ---
 
-# Resource `octopusdeploy_variable`
+# octopusdeploy_variable (Resource)
 
 
 
@@ -32,7 +32,7 @@ description: |-
 - **sensitive_value** (String, Sensitive)
 - **value** (String)
 
-### Read-only
+### Read-Only
 
 - **encrypted_value** (String)
 - **key_fingerprint** (String)
