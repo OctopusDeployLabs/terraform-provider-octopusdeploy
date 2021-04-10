@@ -59,13 +59,14 @@ func testAccListeningTentacleDeploymentTargetBasic(localName string, name string
 	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
 	thumbprint := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	useGuidedFailure := false
 
 	return fmt.Sprintf(`data "octopusdeploy_machine_policies" "default" {
 		partial_name = "Default Machine Policy"
 	}`+"\n"+
-		testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, useGuidedFailure)+"\n"+`
+		testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
 	resource "octopusdeploy_listening_tentacle_deployment_target" "%s" {
 		environments                      = ["${octopusdeploy_environment.%s.id}"]
 		is_disabled                       = true
