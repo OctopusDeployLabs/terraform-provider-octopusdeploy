@@ -1,4 +1,9 @@
-# Step 2 - The Setup
+---
+page_title: "2. Setup"
+subcategory: "Guides"
+---
+
+# 2. Setup
 
 To use the Terraform provider, you may want to test it if you don't have a dev environment of Octopus Deploy.
 

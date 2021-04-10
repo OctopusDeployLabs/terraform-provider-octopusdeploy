@@ -1,4 +1,9 @@
-# Step 3 - Terraform Directory
+---
+page_title: "3. Working Directory"
+subcategory: "Guides"
+---
+
+# 3. Working Directory
 
 Before we can create a resource, we need a place for the HCL code to exist. Of similar importance, we need the Octopus Deploy Terraform provider.
 

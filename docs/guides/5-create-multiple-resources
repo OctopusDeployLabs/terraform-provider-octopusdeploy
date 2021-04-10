@@ -1,4 +1,10 @@
-# Step 5 - Creating Multiple Resources
+---
+page_title: "5. Creating Multiple Resources"
+subcategory: "Guides"
+---
+
+# 5. Creating Multiple Resources
+
 In step 4, you learned about creating one resource. That was just to test the waters so you could see how the provider would interact with Octopus Deploy. Now that you've done so, it's time to really test the waters, kick it into 6th gear, and take this puppy for a spin.
 
 First, you'll set up a `main.tf` configuration with multiple resources to create.
