@@ -18,23 +18,3 @@ func expandListeningTentacle(flattenedMap map[string]interface{}) *octopusdeploy
 
 	return endpoint
 }
-
-func flattenListeningTentacle(endpoint *octopusdeploy.ListeningTentacleEndpoint) []interface{} {
-	if endpoint == nil {
-		return nil
-	}
-
-	rawEndpoint := map[string]interface{}{
-		"certificate_signature_algorithm": endpoint.CertificateSignatureAlgorithm,
-		"id":                              endpoint.GetID(),
-		"proxy_id":                        endpoint.ProxyID,
-		"tentacle_version_details":        flattenTentacleVersionDetails(endpoint.TentacleVersionDetails),
-		"thumbprint":                      endpoint.Thumbprint,
-	}
-
-	if endpoint.URI != nil {
-		rawEndpoint["tentacle_url"] = endpoint.URI.String()
-	}
-
-	return []interface{}{rawEndpoint}
-}

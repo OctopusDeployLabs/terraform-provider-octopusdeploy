@@ -63,39 +63,3 @@ func expandKubernetesCluster(flattenedMap map[string]interface{}) *octopusdeploy
 
 	return endpoint
 }
-
-func flattenKubernetesCluster(endpoint *octopusdeploy.KubernetesEndpoint) []interface{} {
-	if endpoint == nil {
-		return nil
-	}
-
-	flattenedEndpoint := map[string]interface{}{
-		"cluster_certificate":    endpoint.ClusterCertificate,
-		"container":              flattenContainer(endpoint.Container),
-		"default_worker_pool_id": endpoint.DefaultWorkerPoolID,
-		"id":                     endpoint.GetID(),
-		"namespace":              endpoint.Namespace,
-		"proxy_id":               endpoint.ProxyID,
-		"running_in_container":   endpoint.RunningInContainer,
-		"skip_tls_verification":  endpoint.SkipTLSVerification,
-	}
-
-	if endpoint.ClusterURL != nil {
-		flattenedEndpoint["cluster_url"] = endpoint.ClusterURL.String()
-	}
-
-	switch endpoint.Authentication.GetAuthenticationType() {
-	case "KubernetesAws":
-		flattenedEndpoint["aws_account_authentication"] = flattenKubernetesAwsAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesAwsAuthentication))
-	case "KubernetesAzure":
-		flattenedEndpoint["azure_service_principal_authentication"] = flattenKubernetesAzureAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesAzureAuthentication))
-	case "KubernetesCertificate":
-		flattenedEndpoint["certificate_authentication"] = flattenKubernetesCertificateAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesCertificateAuthentication))
-	case "KubernetesStandard":
-		flattenedEndpoint["authentication"] = flattenKubernetesStandardAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))
-	case "None":
-		flattenedEndpoint["authentication"] = flattenKubernetesStandardAuthentication(endpoint.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))
-	}
-
-	return []interface{}{flattenedEndpoint}
-}

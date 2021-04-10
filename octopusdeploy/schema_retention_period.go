@@ -32,26 +32,6 @@ func flattenRetentionPeriod(r octopusdeploy.RetentionPeriod) []interface{} {
 	return []interface{}{retentionPeriod}
 }
 
-func getRetentionPeriodDataSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"quantity_to_keep": {
-			Computed:    true,
-			Description: "The number of days/releases to keep. The default value is `30`. If `0` then all are kept.",
-			Type:        schema.TypeInt,
-		},
-		"should_keep_forever": {
-			Computed:    true,
-			Description: "Indicates if items should never be deleted. The default value is `false`.",
-			Type:        schema.TypeBool,
-		},
-		"unit": {
-			Computed:    true,
-			Description: "The unit of quantity to keep. Valid units are `Days` or `Items`. The default value is `Days`.",
-			Type:        schema.TypeString,
-		},
-	}
-}
-
 func getRetentionPeriodSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"quantity_to_keep": {

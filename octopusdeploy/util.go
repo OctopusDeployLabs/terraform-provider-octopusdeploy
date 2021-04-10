@@ -1,15 +1,12 @@
 package octopusdeploy
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func getImporter() *schema.ResourceImporter {
@@ -99,23 +96,4 @@ func getStringOrEmpty(tfAttr interface{}) string {
 		return ""
 	}
 	return tfAttr.(string)
-}
-
-func destroyFeedHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.Feeds.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("error retrieving feed %s", err)
-		}
-		return fmt.Errorf("Feed still exists")
-	}
-	return nil
-}
-
-func feedExistsHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if _, err := client.Feeds.GetByID(r.Primary.ID); err != nil {
-			return fmt.Errorf("error retrieving feed %s", err)
-		}
-	}
-	return nil
 }

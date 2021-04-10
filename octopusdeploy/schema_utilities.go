@@ -415,19 +415,6 @@ func getVariableTypeSchema() *schema.Schema {
 	}
 }
 
-func merge(map1 map[string]string, map2 map[string]string) map[string]string {
-	result := make(map[string]string)
-
-	for k, v := range map1 {
-		result[k] = v
-	}
-	for k, v := range map2 {
-		result[k] = v
-	}
-
-	return result
-}
-
 func setDataSchema(schema *map[string]*schema.Schema) {
 	for _, field := range *schema {
 		field.Computed = true

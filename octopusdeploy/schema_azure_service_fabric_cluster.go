@@ -20,22 +20,3 @@ func expandAzureServiceFabricCluster(flattenedMap map[string]interface{}) *octop
 
 	return endpoint
 }
-
-func flattenAzureServiceFabricCluster(endpoint *octopusdeploy.AzureServiceFabricEndpoint) []interface{} {
-	if endpoint == nil {
-		return nil
-	}
-
-	return []interface{}{map[string]interface{}{
-		"aad_client_credential_secret":  endpoint.AadClientCredentialSecret,
-		"aad_credential_type":           endpoint.AadCredentialType,
-		"aad_user_credential_username":  endpoint.AadUserCredentialUsername,
-		"certificate_store_location":    endpoint.CertificateStoreLocation,
-		"certificate_store_name":        endpoint.CertificateStoreName,
-		"client_certificate_variable":   endpoint.ClientCertificateVariable,
-		"connection_endpoint":           endpoint.ConnectionEndpoint,
-		"id":                            endpoint.GetID(),
-		"security_mode":                 endpoint.SecurityMode,
-		"server_certificate_thumbprint": endpoint.ServerCertificateThumbprint,
-	}}
-}

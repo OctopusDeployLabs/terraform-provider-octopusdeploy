@@ -45,13 +45,6 @@ func flattenPhases(phases []octopusdeploy.Phase) []interface{} {
 	return flattenedPhases
 }
 
-func getPhaseDataSchema() map[string]*schema.Schema {
-	dataSchema := getPhaseSchema()
-	setDataSchema(&dataSchema)
-
-	return dataSchema
-}
-
 func getPhaseSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"automatic_deployment_targets": {

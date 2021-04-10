@@ -14,17 +14,3 @@ func expandAzureWebApp(flattenedMap map[string]interface{}) *octopusdeploy.Azure
 
 	return endpoint
 }
-
-func flattenAzureWebApp(endpoint *octopusdeploy.AzureWebAppEndpoint) []interface{} {
-	if endpoint == nil {
-		return nil
-	}
-
-	return []interface{}{map[string]interface{}{
-		"account_id":          endpoint.AccountID,
-		"id":                  endpoint.GetID(),
-		"resource_group_name": endpoint.ResourceGroupName,
-		"web_app_name":        endpoint.WebAppName,
-		"web_app_slot_name":   endpoint.WebAppSlotName,
-	}}
-}

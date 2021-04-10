@@ -11,14 +11,3 @@ func expandCloudRegion(flattenedMap map[string]interface{}) *octopusdeploy.Cloud
 
 	return endpoint
 }
-
-func flattenCloudRegion(endpoint *octopusdeploy.CloudRegionEndpoint) []interface{} {
-	if endpoint == nil {
-		return nil
-	}
-
-	return []interface{}{map[string]interface{}{
-		"default_worker_pool_id": endpoint.DefaultWorkerPoolID,
-		"id":                     endpoint.GetID(),
-	}}
-}
