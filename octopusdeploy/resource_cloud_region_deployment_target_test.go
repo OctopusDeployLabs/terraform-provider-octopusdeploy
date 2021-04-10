@@ -60,9 +60,10 @@ func testAccCloudRegionDeploymentTargetBasic(localName string, name string) stri
 	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
 
-	return fmt.Sprintf(testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, useGuidedFailure)+"\n"+`
+	return fmt.Sprintf(testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
 		resource "octopusdeploy_cloud_region_deployment_target" "%s" {
 		  default_worker_pool_id = "WorkerPools-41"
 		  environments           = ["${octopusdeploy_environment.%s.id}"]

@@ -47,7 +47,7 @@ Read-Only:
 - **description** (String) The description of this resource.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **sort_order** (Number)
+- **sort_order** (Number) The order number to sort an environment.
 - **use_guided_failure** (Boolean)
 
 

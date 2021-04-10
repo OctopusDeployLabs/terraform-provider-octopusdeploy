@@ -18,6 +18,7 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 	allowDynamicInfrastructure := false
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
 
 	resource.Test(t, resource.TestCase{
@@ -31,9 +32,32 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "allow_dynamic_infrastructure", strconv.FormatBool(allowDynamicInfrastructure)),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "sort_order", strconv.Itoa(sortOrder)),
 					resource.TestCheckResourceAttr(prefix, "use_guided_failure", strconv.FormatBool(useGuidedFailure)),
 				),
-				Config: testEnvironmentBasic(localName, name, description, allowDynamicInfrastructure, useGuidedFailure),
+				Config: testEnvironmentBasic(localName, name, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure),
+			},
+		},
+	})
+}
+
+func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_environment." + localName
+
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testEnvironmentDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testEnvironmentExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+				),
+				Config: testEnvironmentMinimum(localName, name),
 			},
 		},
 	})
@@ -45,13 +69,14 @@ func testEnvironmentMinimum(localName string, name string) string {
 	}`, localName, name)
 }
 
-func testEnvironmentBasic(localName string, name string, description string, allowDynamicInfrastructure bool, useGuidedFailure bool) string {
+func testEnvironmentBasic(localName string, name string, description string, allowDynamicInfrastructure bool, sortOrder int, useGuidedFailure bool) string {
 	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
 		allow_dynamic_infrastructure = "%v"
 		description                  = "%s"
 		name                         = "%s"
+		sort_order                   = %v
 		use_guided_failure           = "%v"
-	}`, localName, allowDynamicInfrastructure, description, name, useGuidedFailure)
+	}`, localName, allowDynamicInfrastructure, description, name, sortOrder, useGuidedFailure)
 }
 
 func testEnvironmentExists(prefix string) resource.TestCheckFunc {
