@@ -4,7 +4,6 @@ import (
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandListeningTentacle(flattenedMap map[string]interface{}) *octopusdeploy.ListeningTentacleEndpoint {
@@ -38,32 +37,4 @@ func flattenListeningTentacle(endpoint *octopusdeploy.ListeningTentacleEndpoint)
 	}
 
 	return []interface{}{rawEndpoint}
-}
-
-func getListeningTentacleSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"certificate_signature_algorithm": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id": getIDSchema(),
-		"proxy_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"tentacle_version_details": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: getTentacleVersionDetailsSchema()},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"tentacle_url": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
-		"thumbprint": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
-	}
 }

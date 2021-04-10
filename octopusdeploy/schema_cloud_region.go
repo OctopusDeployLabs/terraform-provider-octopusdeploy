@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandCloudRegion(flattenedMap map[string]interface{}) *octopusdeploy.CloudRegionEndpoint {
@@ -22,14 +21,4 @@ func flattenCloudRegion(endpoint *octopusdeploy.CloudRegionEndpoint) []interface
 		"default_worker_pool_id": endpoint.DefaultWorkerPoolID,
 		"id":                     endpoint.GetID(),
 	}}
-}
-
-func getCloudRegionSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"default_worker_pool_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id": getIDSchema(),
-	}
 }

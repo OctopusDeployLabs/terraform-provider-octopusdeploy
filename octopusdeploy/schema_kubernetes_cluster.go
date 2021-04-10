@@ -4,7 +4,6 @@ import (
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandKubernetesCluster(flattenedMap map[string]interface{}) *octopusdeploy.KubernetesEndpoint {
@@ -99,81 +98,4 @@ func flattenKubernetesCluster(endpoint *octopusdeploy.KubernetesEndpoint) []inte
 	}
 
 	return []interface{}{flattenedEndpoint}
-}
-
-func getKubernetesClusterSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"authentication": {
-			Computed:     true,
-			Elem:         &schema.Resource{Schema: getKubernetesAuthenticationSchema()},
-			ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
-			MaxItems:     1,
-			MinItems:     0,
-			Optional:     true,
-			Type:         schema.TypeList,
-		},
-		"aws_account_authentication": {
-			Computed:     true,
-			Elem:         &schema.Resource{Schema: getKubernetesAwsAuthenticationSchema()},
-			ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
-			MaxItems:     1,
-			MinItems:     0,
-			Optional:     true,
-			Type:         schema.TypeList,
-		},
-		"azure_service_principal_authentication": {
-			Computed:     true,
-			Elem:         &schema.Resource{Schema: getKubernetesAzureAuthenticationSchema()},
-			ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
-			MaxItems:     1,
-			MinItems:     0,
-			Optional:     true,
-			Type:         schema.TypeList,
-		},
-		"certificate_authentication": {
-			Computed:     true,
-			Elem:         &schema.Resource{Schema: getKubernetesCertificateAuthenticationSchema()},
-			ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
-			MaxItems:     1,
-			MinItems:     0,
-			Optional:     true,
-			Type:         schema.TypeList,
-		},
-		"cluster_certificate": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"cluster_url": {
-			Required: true,
-			Type:     schema.TypeString,
-		},
-		"container": {
-			Computed:    true,
-			Description: "The deployment action container associated with this Kubernetes cluster.",
-			Elem:        &schema.Resource{Schema: getDeploymentActionContainerSchema()},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"default_worker_pool_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id": getIDSchema(),
-		"namespace": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"proxy_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"running_in_container": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-		"skip_tls_verification": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-	}
 }

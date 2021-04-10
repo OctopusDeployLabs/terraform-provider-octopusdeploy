@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandAzureCloudService(flattenedMap map[string]interface{}) *octopusdeploy.AzureCloudServiceEndpoint {
@@ -28,26 +27,4 @@ func flattenAzureCloudService(endpoint *octopusdeploy.AzureCloudServiceEndpoint)
 		"id":                         endpoint.GetID(),
 		"use_current_instance_count": endpoint.UseCurrentInstanceCount,
 	}}
-}
-
-func getAzureCloudServiceSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"account_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"cloud_service_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"default_worker_pool_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id": getIDSchema(),
-		"use_current_instance_count": {
-			Optional: true,
-			Type:     schema.TypeBool,
-		},
-	}
 }

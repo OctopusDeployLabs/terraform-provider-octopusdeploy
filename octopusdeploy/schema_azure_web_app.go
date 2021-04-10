@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandAzureWebApp(flattenedMap map[string]interface{}) *octopusdeploy.AzureWebAppEndpoint {
@@ -28,26 +27,4 @@ func flattenAzureWebApp(endpoint *octopusdeploy.AzureWebAppEndpoint) []interface
 		"web_app_name":        endpoint.WebAppName,
 		"web_app_slot_name":   endpoint.WebAppSlotName,
 	}}
-}
-
-func getAzureWebAppSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"account_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"id": getIDSchema(),
-		"resource_group_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"web_app_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"web_app_slot_name": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-	}
 }

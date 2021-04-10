@@ -58,19 +58,6 @@ func flattenPackageReference(packageReference octopusdeploy.PackageReference) ma
 	return flattenedPackageReference
 }
 
-func flattenPackageReferences(packageReferences []octopusdeploy.PackageReference) []interface{} {
-	if packageReferences == nil {
-		return nil
-	}
-
-	flattenedPackageReferences := []interface{}{}
-	for _, packageReference := range packageReferences {
-		flattenedPackageReferences = append(flattenedPackageReferences, flattenPackageReference(packageReference))
-	}
-
-	return flattenedPackageReferences
-}
-
 func getPackageSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Computed:    !required,

@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandOfflinePackageDrop(flattenedMap map[string]interface{}) *octopusdeploy.OfflinePackageDropEndpoint {
@@ -25,29 +24,4 @@ func flattenOfflinePackageDrop(endpoint *octopusdeploy.OfflinePackageDropEndpoin
 	}
 
 	return []interface{}{rawEndpoint}
-}
-
-func getOfflinePackageDropSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"applications_directory": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"destination": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: getOfflinePackageDropDestinationSchema()},
-			Optional: true,
-			Type:     schema.TypeList,
-		},
-		"id": getIDSchema(),
-		"working_directory": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"sensitive_variables_encryption_password": {
-			Optional:  true,
-			Sensitive: true,
-			Type:      schema.TypeString,
-		},
-	}
 }

@@ -35,21 +35,6 @@ func expandDeploymentProcess(d *schema.ResourceData) *octopusdeploy.DeploymentPr
 	return deploymentProcess
 }
 
-func flattenDeploymentProcess(deploymentProcess *octopusdeploy.DeploymentProcess) []interface{} {
-	if deploymentProcess == nil {
-		return nil
-	}
-
-	return []interface{}{map[string]interface{}{
-		"id":               deploymentProcess.ID,
-		"last_snapshot_id": deploymentProcess.LastSnapshotID,
-		"project_id":       deploymentProcess.ProjectID,
-		"space_id":         deploymentProcess.SpaceID,
-		"step":             flattenDeploymentSteps(deploymentProcess.Steps),
-		"version":          deploymentProcess.Version,
-	}}
-}
-
 func getDeploymentProcessSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"id": getIDSchema(),
