@@ -42,7 +42,6 @@ data "octopusdeploy_project_groups" "example" {
 Read-Only:
 
 - **description** (String) The description of this resource.
-- **environments** (List of String) A list of environment IDs associated with this resource.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **retention_policy_id** (String)
