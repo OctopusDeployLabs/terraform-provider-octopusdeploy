@@ -75,8 +75,12 @@ func TestAccOctopusDeployProjectGroupWithUpdate(t *testing.T) {
 }
 
 func testAccProjectGroupBasic(localName string, name string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_project_group" "%s" {
-		name = "%s"
+	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	return fmt.Sprintf(testEnvironmentMinimum(environmentLocalName, environmentName)+"\n"+
+		`resource "octopusdeploy_project_group" "%s" {
+			name = "%s"
 	}`, localName, name)
 }
 
