@@ -62,7 +62,7 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 Read-Only:
 
 - **certificate_signature_algorithm** (String)
-- **environments** (List of String) A list of environment IDs associated with this resource.
+- **environments** (List of String) A list of environment IDs associated with this listening tentacle.
 - **has_latest_calamari** (Boolean)
 - **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **id** (String) The unique ID for this resource.

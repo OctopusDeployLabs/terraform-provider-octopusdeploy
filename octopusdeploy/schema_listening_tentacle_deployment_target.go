@@ -7,6 +7,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandListeningTentacleDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
@@ -74,7 +75,13 @@ func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"environments": getEnvironmentsSchema(),
+		"environments": {
+			Description: "A list of environment IDs associated with this listening tentacle.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Required:    true,
+			MinItems:    1,
+			Type:        schema.TypeList,
+		},
 		"has_latest_calamari": {
 			Computed: true,
 			Type:     schema.TypeBool,
@@ -144,15 +151,16 @@ func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"tentacle_url": {
-			Description: "The tenant URL of this deployment target.",
-			Required:    true,
-			Type:        schema.TypeString,
-			// ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
+			Description:      "The tenant URL of this deployment target.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPS),
 		},
 		"thumbprint": {
-			Description: "The thumbprint of this deployment target.",
-			Required:    true,
-			Type:        schema.TypeString,
+			Description:      "The thumbprint of this deployment target.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		},
 		"uri": {
 			Computed:    true,
