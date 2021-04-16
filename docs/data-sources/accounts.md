@@ -8,7 +8,7 @@ description: |-
 # Data Source (octopusdeploy_accounts)
 
 Provides information about existing accounts.
-
+~> **NOTE:** This is deprecated and may be removed in a future release.
 ## Example Usage
 
 ```terraform
