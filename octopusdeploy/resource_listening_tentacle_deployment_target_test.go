@@ -54,6 +54,27 @@ func TestAccListeningTentacleDeploymentTargetBasic(t *testing.T) {
 	})
 }
 
+func TestAccListeningTentacleDeploymentTargetSchemaValidation(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	resourceName := "octopusdeploy_listening_tentacle_deployment_target." + localName
+
+	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccListeningTentacleDeploymentTargetCheckDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccListeningTentacleDeploymentTargetSchemaValidation(localName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccListeningTentacleDeploymentTargetExists(resourceName),
+				),
+			},
+		},
+	})
+}
+
 func testAccListeningTentacleDeploymentTargetBasic(localName string, name string) string {
 	allowDynamicInfrastructure := false
 	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -77,6 +98,25 @@ func testAccListeningTentacleDeploymentTargetBasic(localName string, name string
 		tentacle_url                      = "https://example.com:1234/"
 		thumbprint                        = "%s"
 	  }`, localName, environmentLocalName, name, thumbprint)
+}
+
+func testAccListeningTentacleDeploymentTargetSchemaValidation(localName string, name string) string {
+	allowDynamicInfrastructure := false
+	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	thumbprint := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	useGuidedFailure := false
+
+	return fmt.Sprintf(testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
+		`resource "octopusdeploy_listening_tentacle_deployment_target" "%s" {
+			environments = ["${octopusdeploy_environment.%s.id}"]
+			name         = "%s"
+			roles        = ["something"]
+			tentacle_url = "https://example.com"
+			thumbprint   = "%s"
+	  	}`, localName, environmentLocalName, name, thumbprint)
 }
 
 func testAccListeningTentacleDeploymentTargetExists(resourceName string) resource.TestCheckFunc {
