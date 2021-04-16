@@ -174,11 +174,20 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 }
 
 func testAccChannelBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, name string, description string) string {
-	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+`		
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+`
 		resource "octopusdeploy_channel" "ch" {
 			description = "%s"
 			name        = "%s"
-			project_id  = "${octopusdeploy_project.%s.id}"
+			// project_id  = "${octopusdeploy_project.%s.id}"
+			project_id  = "Projects-6904"
+
+			rule {
+			  version_range = "1.0.1"
+			  action_package {
+				deployment_action = "Run a Script"
+				package_reference = "Octopus.Cli"
+			  }
+		  }
 		}`, description, name, projectLocalName)
 }
 
@@ -222,7 +231,7 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 				}
 			}
 		}
-		
+
 		resource "octopusdeploy_channel" "ch" {
 		  depends_on  = ["octopusdeploy_deployment_process.deploy_step_template"]
 		  description = "%s"
@@ -230,7 +239,7 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 		  project_id = octopusdeploy_project.test-project.id
 
 		  rule {
-		    actions = ["%s"] 
+		    actions = ["%s"]
 		    version_range = "%s"
 		  }
 		}
@@ -248,7 +257,7 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 		resource "octopusdeploy_project" "foo" {
 			name           	= "funky project"
 			lifecycle_id	= "Lifecycles-1"
-			project_group_id = "${octopusdeploy_project_group.foo.id}" 	
+			project_group_id = "${octopusdeploy_project_group.foo.id}"
 			allow_deployments_to_no_targets = true
 		}
 
@@ -260,18 +269,18 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 				action {
 					name 		= "%s"
 					action_type = "Octopus.TentaclePackage"
-		
+
 					properties = {
 						"Octopus.Action.Package.FeedId": "feeds-builtin"
 						"Octopus.Action.Package.PackageId": "#{PackageName}"
 					}
 
 				}
-				
+
 				action {
 					name 		= "%s"
 					action_type = "Octopus.TentaclePackage"
-		
+
 					properties = {
 						"Octopus.Action.Package.FeedId": "feeds-builtin"
 						"Octopus.Action.Package.PackageId": "#{PackageName}"
@@ -280,19 +289,19 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 				}
 			}
 		}
-		
+
 		resource "octopusdeploy_channel" "ch" {
 			name           	= "%s"
 			description    	= "%s"
 			project_id		= "${octopusdeploy_project.foo.id}"
 			rule {
 				version_range 	= "%s"
-				actions 		= ["%s"] 
+				actions 		= ["%s"]
 			}
-			
+
 			rule {
 				version_range 	= "%s"
-				actions 		= ["%s"] 
+				actions 		= ["%s"]
 			}
 
 			depends_on = ["octopusdeploy_deployment_process.deploy_step_template"]

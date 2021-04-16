@@ -56,9 +56,17 @@ Read-Only:
 
 Read-Only:
 
-- **actions** (List of String)
+- **action_package** (List of Object) (see [below for nested schema](#nestedobjatt--channels--rule--action_package))
 - **id** (String)
 - **tag** (String)
 - **version_range** (String)
+
+<a id="nestedobjatt--channels--rule--action_package"></a>
+### Nested Schema for `channels.rule.action_package`
+
+Read-Only:
+
+- **deployment_action** (String)
+- **package_reference** (String)
 
 

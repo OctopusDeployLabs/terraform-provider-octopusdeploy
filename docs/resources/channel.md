@@ -40,12 +40,23 @@ resource "octopusdeploy_channel" "example" {
 <a id="nestedblock--rule"></a>
 ### Nested Schema for `rule`
 
+Required:
+
+- **action_package** (Block List, Min: 1) (see [below for nested schema](#nestedblock--rule--action_package))
+
 Optional:
 
-- **actions** (List of String)
 - **id** (String) The unique ID for this resource.
 - **tag** (String)
 - **version_range** (String)
+
+<a id="nestedblock--rule--action_package"></a>
+### Nested Schema for `rule.action_package`
+
+Optional:
+
+- **deployment_action** (String)
+- **package_reference** (String)
 
 ## Import
 

@@ -7,10 +7,10 @@ import (
 
 func expandChannelRule(channelRule map[string]interface{}) octopusdeploy.ChannelRule {
 	return octopusdeploy.ChannelRule{
-		Actions:      getSliceFromTerraformTypeList(channelRule["actions"]),
-		ID:           channelRule["id"].(string),
-		Tag:          channelRule["tag"].(string),
-		VersionRange: channelRule["version_range"].(string),
+		ActionPackages: expandDeploymentActionPackages(channelRule["action_package"]),
+		ID:             channelRule["id"].(string),
+		Tag:            channelRule["tag"].(string),
+		VersionRange:   channelRule["version_range"].(string),
 	}
 }
 
@@ -18,10 +18,10 @@ func flattenChannelRules(channelRules []octopusdeploy.ChannelRule) []map[string]
 	var flattenedRules = make([]map[string]interface{}, len(channelRules))
 	for key, channelRule := range channelRules {
 		flattenedRules[key] = map[string]interface{}{
-			"actions":       channelRule.Actions,
-			"id":            channelRule.ID,
-			"tag":           channelRule.Tag,
-			"version_range": channelRule.VersionRange,
+			"action_package": flattenDeploymentActionPackages(channelRule.ActionPackages),
+			"id":             channelRule.ID,
+			"tag":            channelRule.Tag,
+			"version_range":  channelRule.VersionRange,
 		}
 	}
 
@@ -30,15 +30,15 @@ func flattenChannelRules(channelRules []octopusdeploy.ChannelRule) []map[string]
 
 func getChannelRuleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"actions": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Optional: true,
+		"action_package": {
+			Elem:     &schema.Resource{Schema: getDeploymentActionPackageSchema()},
+			Required: true,
 			Type:     schema.TypeList,
 		},
 		"id": getIDSchema(),
 		"tag": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Optional:      true,
+			Type:          schema.TypeString,
 		},
 		"version_range": {
 			Optional: true,

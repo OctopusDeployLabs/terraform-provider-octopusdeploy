@@ -23,6 +23,22 @@ func expandDeploymentActionPackage(values interface{}) *octopusdeploy.Deployment
 	}
 }
 
+func expandDeploymentActionPackages(values interface{}) []octopusdeploy.DeploymentActionPackage {
+	if values == nil {
+		return nil
+	}
+
+	actionPackages := []octopusdeploy.DeploymentActionPackage{}
+	for _, v := range values.([]interface{}) {
+		flattenedMap := v.(map[string]interface{})
+		actionPackages = append(actionPackages, octopusdeploy.DeploymentActionPackage{
+			DeploymentAction: flattenedMap["deployment_action"].(string),
+			PackageReference: flattenedMap["package_reference"].(string),
+		})
+	}
+	return actionPackages
+}
+
 func flattenDeploymentActionPackage(deploymentActionPackage *octopusdeploy.DeploymentActionPackage) []interface{} {
 	if deploymentActionPackage == nil {
 		return nil
@@ -32,6 +48,22 @@ func flattenDeploymentActionPackage(deploymentActionPackage *octopusdeploy.Deplo
 	flattenedDeploymentActionPackage["deployment_action"] = deploymentActionPackage.DeploymentAction
 	flattenedDeploymentActionPackage["package_reference"] = deploymentActionPackage.PackageReference
 	return []interface{}{flattenedDeploymentActionPackage}
+}
+
+func flattenDeploymentActionPackages(deploymentActionPackages []octopusdeploy.DeploymentActionPackage) []interface{} {
+	if len(deploymentActionPackages) == 0 {
+		return nil
+	}
+
+	flattenedDeploymentActionPackages := []interface{}{}
+	for _, v := range deploymentActionPackages {
+		flattenedDeploymentActionPackage := map[string]interface{}{
+			"deployment_action": v.DeploymentAction,
+			"package_reference": v.PackageReference,
+		}
+		flattenedDeploymentActionPackages = append(flattenedDeploymentActionPackages, flattenedDeploymentActionPackage)
+	}
+	return flattenedDeploymentActionPackages
 }
 
 func getDeploymentActionPackageSchema() map[string]*schema.Schema {
