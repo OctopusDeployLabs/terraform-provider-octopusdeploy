@@ -116,6 +116,7 @@ func getDeploymentTargetSchema() map[string]*schema.Schema {
 		"environments": {
 			Description: "A list of environment IDs associated with this resource.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
+			MinItems:    1,
 			Required:    true,
 			Type:        schema.TypeList,
 		},
