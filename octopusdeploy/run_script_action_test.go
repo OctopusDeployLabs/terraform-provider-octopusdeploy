@@ -28,8 +28,8 @@ func TestAccOctopusDeployRunScriptAction(t *testing.T) {
 func testAccRunScriptAction() string {
 	return testAccBuildTestAction(`
 		run_script_action {
-            name = "Run Script"
-            run_on_server = true
+			name = "Run Script"
+			run_on_server = true
 			script_file_name = "Test.ps1"
 			script_parameters = "-Test 1"
 			script_source = "Package"
@@ -46,6 +46,7 @@ func testAccRunScriptAction() string {
 				name = "package2"
 				package_id = "package2"
 				extract_during_deployment = false
+
 				properties = {
 				  "Extract" = "false"
 				}
