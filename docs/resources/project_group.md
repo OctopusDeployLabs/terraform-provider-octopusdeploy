@@ -15,7 +15,6 @@ This resource manages project groups in Octopus Deploy.
 ```terraform
 resource "octopusdeploy_project_group" "example" {
   description  = "The development project group."
-  environments = ["Environments-123", "Environments-321"]
   name         = "Development Project Group (OK to Delete)"
 }
 ```
@@ -30,7 +29,6 @@ resource "octopusdeploy_project_group" "example" {
 ### Optional
 
 - **description** (String) The description of this resource.
-- **environments** (List of String) A list of environment IDs associated with this resource.
 - **id** (String) The unique ID for this resource.
 - **retention_policy_id** (String)
 
