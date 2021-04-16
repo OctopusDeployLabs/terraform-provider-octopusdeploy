@@ -17,6 +17,7 @@ This resource manages listening tentacle deployment targets in Octopus Deploy.
 
 ### Required
 
+- **environments** (List of String) A list of environment IDs associated with this listening tentacle.
 - **name** (String) The name of this resource.
 - **roles** (List of String) A list of role IDs that are associated with this deployment target.
 - **tentacle_url** (String) The tenant URL of this deployment target.
@@ -25,7 +26,6 @@ This resource manages listening tentacle deployment targets in Octopus Deploy.
 ### Optional
 
 - **certificate_signature_algorithm** (String)
-- **environments** (List of String) A list of environment IDs associated with this resource.
 - **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Represents the disabled status of this deployment target.
