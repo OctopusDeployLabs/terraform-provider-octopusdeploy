@@ -25,7 +25,7 @@ func expandActionTemplateParameters(actionTemplateParameters []interface{}) []*o
 		return nil
 	}
 
-	expandedActionTemplateParameters := make([]*octopusdeploy.ActionTemplateParameter, len(actionTemplateParameters))
+	expandedActionTemplateParameters := []*octopusdeploy.ActionTemplateParameter{}
 	for _, actionTemplateParameter := range actionTemplateParameters {
 		actionTemplateParameterMap := actionTemplateParameter.(map[string]interface{})
 		expandedActionTemplateParameters = append(expandedActionTemplateParameters, expandActionTemplateParameter(actionTemplateParameterMap))

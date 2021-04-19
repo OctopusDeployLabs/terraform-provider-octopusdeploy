@@ -71,7 +71,7 @@ Read-Only:
 - **release_notes_template** (String)
 - **slug** (String)
 - **space_id** (String) The space ID associated with this resource.
-- **templates** (List of Object) (see [below for nested schema](#nestedatt--projects--templates))
+- **template** (List of Object) (see [below for nested schema](#nestedatt--projects--template))
 - **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **variable_set_id** (String)
 - **version_control_settings** (Set of Object) (see [below for nested schema](#nestedatt--projects--version_control_settings))
@@ -116,8 +116,8 @@ Read-Only:
 
 
 
-<a id="nestedatt--projects--templates"></a>
-### Nested Schema for `projects.templates`
+<a id="nestedatt--projects--template"></a>
+### Nested Schema for `projects.template`
 
 Read-Only:
 

@@ -17,4 +17,14 @@ resource "octopusdeploy_project" "example" {
     exclude_unhealthy_targets       = false
     skip_machine_behavior           = "SkipUnavailableMachines"
   }
+
+  template {
+    default_value = "example-default-value"
+    help_text     = "example-help-test"
+    label         = "example-label"
+    name          = "example-template-value"
+    display_settings = {
+      "Octopus.ControlType" : "SingleLineText"
+    }
+  }
 }

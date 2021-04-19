@@ -85,7 +85,7 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 		project.Slug = v.(string)
 	}
 
-	if v, ok := d.GetOk("templates"); ok {
+	if v, ok := d.GetOk("template"); ok {
 		project.Templates = expandActionTemplateParameters(v.([]interface{}))
 	}
 
@@ -132,7 +132,7 @@ func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
 		"release_notes_template":               project.ReleaseNotesTemplate,
 		"slug":                                 project.Slug,
 		"space_id":                             project.SpaceID,
-		"templates":                            flattenActionTemplateParameters(project.Templates),
+		"template":                             flattenActionTemplateParameters(project.Templates),
 		"tenanted_deployment_participation":    project.TenantedDeploymentMode,
 		"variable_set_id":                      project.VariableSetID,
 		"version_control_settings":             flattenVersionControlSettings(project.VersionControlSettings),
@@ -269,7 +269,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"space_id": getSpaceIDSchema(),
-		"templates": {
+		"template": {
 			Elem:     &schema.Resource{Schema: getActionTemplateParameterSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
@@ -339,7 +339,7 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdep
 	d.Set("slug", project.Slug)
 	d.Set("space_id", project.SpaceID)
 
-	if err := d.Set("templates", project.Templates); err != nil {
+	if err := d.Set("template", flattenActionTemplateParameters(project.Templates)); err != nil {
 		return fmt.Errorf("error setting templates: %s", err)
 	}
 
