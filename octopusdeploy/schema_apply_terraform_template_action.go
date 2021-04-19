@@ -115,17 +115,54 @@ func addTerraformTemplateParametersSchema(element *schema.Resource) {
 
 func addTerraformTemplateSchema(element *schema.Resource) {
 	element.Schema["template"] = &schema.Schema{
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"additional_variable_files": {
+					Optional: true,
+					Type:     schema.TypeString,
+				},
+				"directory": {
+					Optional: true,
+					Type:     schema.TypeString,
+				},
+				"run_automatic_file_substitution": {
+					Optional: true,
+					Type:     schema.TypeBool,
+				},
+				"target_files": {
+					Optional: true,
+					Type:     schema.TypeString,
+				},
+			},
+		},
+		MaxItems: 1,
 		Optional: true,
-		Type:     schema.TypeString,
+		Type:     schema.TypeSet,
 	}
 }
 
-func addTerraformTemplateSourceSchema(element *schema.Resource) {
-	element.Schema["template_source"] = &schema.Schema{
-		Default:  "Inline",
-		Optional: true,
-		Type:     schema.TypeString,
+func flattenTerraformTemplate(properties map[string]octopusdeploy.PropertyValue) []interface{} {
+	if len(properties) == 0 {
+		return nil
 	}
+
+	flattenedMap := map[string]interface{}{}
+
+	for k, v := range properties {
+		switch k {
+		case "Octopus.Action.Terraform.FileSubstitution":
+			flattenedMap["target_files"] = v.Value
+		case "Octopus.Action.Terraform.RunAutomaticFileSubstitution":
+			runAutomaticFileSubstitution, _ := strconv.ParseBool(v.Value)
+			flattenedMap["run_automatic_file_substitution"] = runAutomaticFileSubstitution
+		case "Octopus.Action.Terraform.TemplateDirectory":
+			flattenedMap["directory"] = v.Value
+		case "Octopus.Action.Terraform.VarFiles":
+			flattenedMap["additional_variable_files"] = v.Value
+		}
+	}
+
+	return []interface{}{flattenedMap}
 }
 
 func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
@@ -133,19 +170,34 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 	action.ActionType = "Octopus.TerraformApply"
 
 	if v, ok := flattenedAction["template"]; ok {
-		action.Properties["Octopus.Action.Terraform.Template"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		template := v.(*schema.Set).List()[0].(map[string]interface{})
+
+		if v, ok := template["additional_variable_files"]; ok {
+			action.Properties["Octopus.Action.Terraform.VarFiles"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		}
+
+		if v, ok := template["directory"]; ok {
+			action.Properties["Octopus.Action.Terraform.TemplateDirectory"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		}
+
+		if v, ok := template["run_automatic_file_substitution"]; ok {
+			runAutomaticFileSubstitution := v.(bool)
+			action.Properties["Octopus.Action.Terraform.RunAutomaticFileSubstitution"] = octopusdeploy.NewPropertyValue(strconv.FormatBool(runAutomaticFileSubstitution), false)
+		}
+
+		if v, ok := template["target_files"]; ok {
+			action.Properties["Octopus.Action.Terraform.FileSubstitution"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		}
 	}
 
 	if v, ok := flattenedAction["template_parameters"]; ok {
 		action.Properties["Octopus.Action.Terraform.TemplateParameters"] = octopusdeploy.NewPropertyValue(v.(string), false)
 	}
 
-	if v, ok := flattenedAction["template_source"]; ok {
-		if v == "Inline" {
-			action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue("Inline", false)
-		} else {
-			action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue("Package", false)
-		}
+	if _, ok := flattenedAction["primary_package"]; ok {
+		action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue("Package", false)
+	} else {
+		action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue("Inline", false)
 	}
 
 	if v, ok := flattenedAction["advanced_options"]; ok && len(v.(*schema.Set).List()) > 0 {
@@ -325,7 +377,9 @@ func flattenApplyTerraformTemplateAction(action octopusdeploy.DeploymentAction) 
 			runOnServer, _ := strconv.ParseBool(v.Value)
 			flattenedAction["run_on_server"] = runOnServer
 		case "Octopus.Action.Script.ScriptSource":
-			flattenedAction["template_source"] = v.Value
+			if v.Value == "Package" {
+				flattenedAction["template"] = flattenTerraformTemplate(action.Properties)
+			}
 		case "Octopus.Action.Terraform.AzureAccount":
 			if v.Value == "True" {
 				flattenedAction["azure_account"] = flattenTerraformTemplateAzureAccount(action.Properties)
@@ -354,7 +408,6 @@ func getApplyTerraformTemplateActionSchema() *schema.Schema {
 	addTerraformTemplateAzureAccountSchema(element)
 	addTerraformTemplateParametersSchema(element)
 	addTerraformTemplateSchema(element)
-	addTerraformTemplateSourceSchema(element)
 	addPrimaryPackageSchema(element, false)
 
 	return actionSchema
