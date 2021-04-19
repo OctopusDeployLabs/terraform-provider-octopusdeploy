@@ -222,9 +222,8 @@ Optional:
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--primary_package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
-- **template** (String)
+- **template** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--template))
 - **template_parameters** (String)
-- **template_source** (String)
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 
 <a id="nestedblock--step--apply_terraform_template_action--advanced_options"></a>
@@ -321,6 +320,17 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
+
+
+<a id="nestedblock--step--apply_terraform_template_action--template"></a>
+### Nested Schema for `step.apply_terraform_template_action.template`
+
+Optional:
+
+- **additional_variable_files** (String)
+- **directory** (String)
+- **run_automatic_file_substitution** (Boolean)
+- **target_files** (String)
 
 
 
