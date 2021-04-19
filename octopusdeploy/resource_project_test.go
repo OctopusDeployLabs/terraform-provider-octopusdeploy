@@ -96,15 +96,35 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 		  name             = "%s"
 		  project_group_id = %s
 
-		//   connectivity_policy {
+		  template {
+			default_value    = "default-value"
+			help_text        = "help-test"
+			label            = "label"
+			name             = "2"
+			display_settings = {
+				"Octopus.ControlType": "SingleLineText"
+			}
+		  }
+
+		  template {
+			default_value    = "default-value"
+			help_text        = "help-test"
+			label            = "label"
+			name             = "1"
+			display_settings = {
+				"Octopus.ControlType": "SingleLineText"
+			}
+		  }
+
+		  //   connectivity_policy {
 		//     allow_deployments_to_no_targets = true
 		// 	skip_machine_behavior           = "None"
 		//   }
 
 		//   version_control_settings {
 		// 	default_branch = "foo"
-		// 	url = "https://example.com/"
-		// 	username = "bar"
+		// 	url            = "https://example.com/"
+		// 	username       = "bar"
 		//   }
 
 		//   versioning_strategy {
