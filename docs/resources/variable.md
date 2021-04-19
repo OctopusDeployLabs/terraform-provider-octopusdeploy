@@ -25,10 +25,11 @@ description: |-
 
 - **description** (String) The description of this resource.
 - **id** (String) The ID of this resource.
+- **is_editable** (Boolean) Indicates whether or not this variable is considered editable.
 - **is_sensitive** (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
 - **pgp_key** (String, Sensitive)
 - **prompt** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--prompt))
-- **scope** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--scope))
+- **scope** (Block List, Max: 1) (see [below for nested schema](#nestedblock--scope))
 - **sensitive_value** (String, Sensitive)
 - **value** (String)
 

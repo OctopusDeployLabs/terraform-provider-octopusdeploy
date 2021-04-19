@@ -32,13 +32,14 @@ Read-Only:
 
 - **description** (String) The description of this resource.
 - **encrypted_value** (String)
+- **is_editable** (Boolean) Indicates whether or not this variable is considered editable.
 - **is_sensitive** (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
 - **key_fingerprint** (String)
 - **name** (String) The name of this resource.
 - **pgp_key** (String, Sensitive)
 - **project_id** (String)
 - **prompt** (Set of Object) (see [below for nested schema](#nestedatt--variables--prompt))
-- **scope** (Set of Object) (see [below for nested schema](#nestedatt--variables--scope))
+- **scope** (List of Object) (see [below for nested schema](#nestedatt--variables--scope))
 - **sensitive_value** (String, Sensitive)
 - **type** (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
 - **value** (String)

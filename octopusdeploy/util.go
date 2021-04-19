@@ -16,6 +16,10 @@ func getImporter() *schema.ResourceImporter {
 }
 
 func expandArray(values []interface{}) []string {
+	if values == nil {
+		return nil
+	}
+
 	s := make([]string, len(values))
 	for i, v := range values {
 		s[i] = v.(string)
@@ -24,6 +28,10 @@ func expandArray(values []interface{}) []string {
 }
 
 func flattenArray(values []string) []interface{} {
+	if values == nil {
+		return nil
+	}
+
 	s := make([]interface{}, len(values))
 	for i, v := range values {
 		s[i] = v
@@ -74,11 +82,15 @@ func validateAllSliceItemsInSlice(givenSlice, validationSlice []string) (string,
 	return "", true
 }
 
-func getSliceFromTerraformTypeList(inputTypeList interface{}) []string {
+func getSliceFromTerraformTypeList(list interface{}) []string {
+	if list == nil {
+		return nil
+	}
+
 	var newSlice []string
-	terraformList := inputTypeList.([]interface{})
-	for _, item := range terraformList {
-		newSlice = append(newSlice, item.(string))
+	terraformList := list.([]interface{})
+	for _, v := range terraformList {
+		newSlice = append(newSlice, v.(string))
 	}
 	return newSlice
 }

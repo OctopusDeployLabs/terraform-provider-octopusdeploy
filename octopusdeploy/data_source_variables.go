@@ -19,7 +19,11 @@ func dataSourceVariable() *schema.Resource {
 func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectID := d.Get("project_id")
 	name := d.Get("name")
-	scope := expandVariableScope(d)
+	scope := octopusdeploy.VariableScope{}
+
+	if v, ok := d.GetOk("scope"); ok {
+		scope = expandVariableScope(v)
+	}
 
 	client := m.(*octopusdeploy.Client)
 	variables, err := client.Variables.GetByName(projectID.(string), name.(string), scope)

@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"sync"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
-var mutex = &sync.Mutex{}
 
 func resourceVariable() *schema.Resource {
 	return &schema.Resource{
@@ -26,6 +23,8 @@ func resourceVariable() *schema.Resource {
 }
 
 func resourceVariableImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	log.Printf("[INFO] importing variable (%s)", d.Id())
+
 	importStrings := strings.Split(d.Id(), ":")
 	if len(importStrings) != 2 {
 		return nil, fmt.Errorf("octopusdeploy_variable import must be in the form of ProjectID:VariableID (e.g. Projects-62:0906031f-68ba-4a15-afaa-657c1564e07b")
@@ -55,7 +54,7 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	if err := setVariable(ctx, d, variable); err != nil {
+	if err := setVariable(ctx, d, *variable); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -64,26 +63,24 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	mutex.Lock()
-	defer mutex.Unlock()
 	if err := validateVariable(d); err != nil {
 		return diag.FromErr(err)
 	}
 
-	projID := d.Get("project_id").(string)
-	newVariable := expandVariable(d)
+	projectID := d.Get("project_id").(string)
+	variable := expandVariable(d)
 
-	log.Printf("[INFO] creating variable: %#v", newVariable)
+	log.Printf("[INFO] creating variable: %#v", variable)
 
 	client := m.(*octopusdeploy.Client)
-	tfVar, err := client.Variables.AddSingle(projID, newVariable)
+	tfVar, err := client.Variables.AddSingle(projectID, variable)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	for _, v := range tfVar.Variables {
-		if v.Name == newVariable.Name && v.Type == newVariable.Type && (v.IsSensitive || v.Value == newVariable.Value) && v.Description == newVariable.Description && v.IsSensitive == newVariable.IsSensitive {
-			scopeMatches, _, err := client.Variables.MatchesScope(v.Scope, newVariable.Scope)
+		if v.Name == variable.Name && v.Type == variable.Type && (v.IsSensitive || v.Value == variable.Value) && v.Description == variable.Description && v.IsSensitive == variable.IsSensitive {
+			scopeMatches, _, err := client.Variables.MatchesScope(v.Scope, variable.Scope)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -96,14 +93,11 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	d.SetId("")
-	return diag.Errorf("unable to locate variable in project %s", projID)
+	return diag.Errorf("unable to locate variable in project %s", projectID)
 }
 
 func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] updating variable (%s)", d.Id())
-
-	mutex.Lock()
-	defer mutex.Unlock()
 
 	if err := validateVariable(d); err != nil {
 		return diag.FromErr(err)
@@ -122,7 +116,9 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		if v.Name == tfVar.Name && v.Type == tfVar.Type && (v.IsSensitive || v.Value == tfVar.Value) && v.Description == tfVar.Description && v.IsSensitive == tfVar.IsSensitive {
 			scopeMatches, _, _ := client.Variables.MatchesScope(v.Scope, tfVar.Scope)
 			if scopeMatches {
-				d.SetId(v.ID)
+				if err := setVariable(ctx, d, v); err != nil {
+					return diag.FromErr(err)
+				}
 				log.Printf("[INFO] variable updated (%s)", d.Id())
 				return nil
 			}
@@ -135,9 +131,6 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting variable (%s)", d.Id())
-
-	mutex.Lock()
-	defer mutex.Unlock()
 
 	projID := d.Get("project_id").(string)
 
