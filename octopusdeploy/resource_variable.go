@@ -27,10 +27,10 @@ func resourceVariableImport(d *schema.ResourceData, m interface{}) ([]*schema.Re
 
 	importStrings := strings.Split(d.Id(), ":")
 	if len(importStrings) != 2 {
-		return nil, fmt.Errorf("octopusdeploy_variable import must be in the form of ProjectID:VariableID (e.g. Projects-62:0906031f-68ba-4a15-afaa-657c1564e07b")
+		return nil, fmt.Errorf("octopusdeploy_variable import must be in the form of OwnerID:VariableID (e.g. Projects-62:0906031f-68ba-4a15-afaa-657c1564e07b")
 	}
 
-	d.Set("project_id", importStrings[0])
+	d.Set("owner_id", importStrings[0])
 	d.SetId(importStrings[1])
 
 	return []*schema.ResourceData{d}, nil
@@ -40,10 +40,12 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] reading variable (%s)", d.Id())
 
 	id := d.Id()
-	projectID := d.Get("project_id").(string)
+	ownerID := d.Get("owner_id").(string)
+
+	log.Printf(`ID: %s OwnerID: %s`, id, ownerID)
 
 	client := m.(*octopusdeploy.Client)
-	variable, err := client.Variables.GetByID(projectID, id)
+	variable, err := client.Variables.GetByID(ownerID, id)
 	if err != nil {
 		apiError := err.(*octopusdeploy.APIError)
 		if apiError.StatusCode == 404 {
@@ -54,7 +56,7 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	if err := setVariable(ctx, d, *variable); err != nil {
+	if err := setVariable(ctx, d, variable); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -67,20 +69,20 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	projectID := d.Get("project_id").(string)
+	ownerID := d.Get("owner_id").(string)
 	variable := expandVariable(d)
 
 	log.Printf("[INFO] creating variable: %#v", variable)
 
 	client := m.(*octopusdeploy.Client)
-	tfVar, err := client.Variables.AddSingle(projectID, variable)
+	tfVar, err := client.Variables.AddSingle(ownerID, variable)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	for _, v := range tfVar.Variables {
 		if v.Name == variable.Name && v.Type == variable.Type && (v.IsSensitive || v.Value == variable.Value) && v.Description == variable.Description && v.IsSensitive == variable.IsSensitive {
-			scopeMatches, _, err := client.Variables.MatchesScope(v.Scope, variable.Scope)
+			scopeMatches, _, err := client.Variables.MatchesScope(v.Scope, &variable.Scope)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -93,7 +95,7 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	d.SetId("")
-	return diag.Errorf("unable to locate variable in project %s", projectID)
+	return diag.Errorf("unable to locate variable in project %s", ownerID)
 }
 
 func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -104,17 +106,17 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	tfVar := expandVariable(d)
-	projID := d.Get("project_id").(string)
+	ownerID := d.Get("owner_id").(string)
 
 	client := m.(*octopusdeploy.Client)
-	updatedVars, err := client.Variables.UpdateSingle(projID, tfVar)
+	updatedVars, err := client.Variables.UpdateSingle(ownerID, tfVar)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	for _, v := range updatedVars.Variables {
 		if v.Name == tfVar.Name && v.Type == tfVar.Type && (v.IsSensitive || v.Value == tfVar.Value) && v.Description == tfVar.Description && v.IsSensitive == tfVar.IsSensitive {
-			scopeMatches, _, _ := client.Variables.MatchesScope(v.Scope, tfVar.Scope)
+			scopeMatches, _, _ := client.Variables.MatchesScope(v.Scope, &tfVar.Scope)
 			if scopeMatches {
 				if err := setVariable(ctx, d, v); err != nil {
 					return diag.FromErr(err)
@@ -126,16 +128,16 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	d.SetId("")
-	return diag.Errorf("unable to locate variable in project %s", projID)
+	return diag.Errorf("unable to locate variable in project %s", ownerID)
 }
 
 func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting variable (%s)", d.Id())
 
-	projID := d.Get("project_id").(string)
+	ownerID := d.Get("owner_id").(string)
 
 	client := m.(*octopusdeploy.Client)
-	_, err := client.Variables.DeleteSingle(projID, d.Id())
+	_, err := client.Variables.DeleteSingle(ownerID, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

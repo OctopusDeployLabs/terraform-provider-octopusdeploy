@@ -36,8 +36,8 @@ Read-Only:
 - **is_sensitive** (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
 - **key_fingerprint** (String)
 - **name** (String) The name of this resource.
+- **owner_id** (String)
 - **pgp_key** (String, Sensitive)
-- **project_id** (String)
 - **prompt** (Set of Object) (see [below for nested schema](#nestedatt--variables--prompt))
 - **scope** (List of Object) (see [below for nested schema](#nestedatt--variables--scope))
 - **sensitive_value** (String, Sensitive)
@@ -63,15 +63,7 @@ Read-Only:
 - **channels** (List of String)
 - **environments** (List of String)
 - **machines** (List of String)
-- **parent_deployments** (List of String)
-- **private** (List of String)
-- **process_owners** (List of String)
-- **projects** (List of String)
 - **roles** (List of String)
-- **target_roles** (List of String)
 - **tenant_tags** (List of String)
-- **tenants** (List of String)
-- **triggers** (List of String)
-- **users** (List of String)
 
 
