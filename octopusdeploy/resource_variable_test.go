@@ -42,7 +42,7 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 					testOctopusDeployVariableExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
-					resource.TestCheckResourceAttrSet(prefix, "project_id"),
+					resource.TestCheckResourceAttrSet(prefix, "owner_id"),
 					resource.TestCheckResourceAttr(prefix, "type", variableType),
 					resource.TestCheckResourceAttr(prefix, "value", value),
 					resource.TestCheckResourceAttr(prefix, "scope.#", "1"),
@@ -56,7 +56,7 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 					testOctopusDeployVariableExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
-					resource.TestCheckResourceAttrSet(prefix, "project_id"),
+					resource.TestCheckResourceAttrSet(prefix, "owner_id"),
 					resource.TestCheckResourceAttr(prefix, "type", variableType),
 					resource.TestCheckResourceAttr(prefix, "value", newValue),
 					resource.TestCheckResourceAttr(prefix, "scope.#", "1"),
@@ -126,7 +126,7 @@ func testVariableBasic(environmentLocalName string,
 		  description  = "%s"
 		  is_sensitive = "%v"
 		  name         = "%s"
-		  project_id   = octopusdeploy_project.%s.id
+		  owner_id     = octopusdeploy_project.%s.id
 		  type         = "%s"
 		  value        = "%s"
 
