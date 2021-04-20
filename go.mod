@@ -5,7 +5,7 @@ go 1.15
 require (
 	cloud.google.com/go/storage v1.14.0 // indirect
 	github.com/Microsoft/go-winio v0.4.17 // indirect
-	github.com/OctopusDeploy/go-octopusdeploy v1.7.21
+	github.com/OctopusDeploy/go-octopusdeploy v1.7.22
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
@@ -34,8 +34,9 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.10 // indirect
-	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d // indirect
+	golang.org/x/net v0.0.0-20210420072503-d25e30425868 // indirect
 	golang.org/x/oauth2 v0.0.0-20210413134643-5e61552d6c78 // indirect
+	golang.org/x/sys v0.0.0-20210420072515-93ed5bcd2bfe // indirect
 	golang.org/x/term v0.0.0-20210406210042-72f3dc4e9b72 // indirect
 	google.golang.org/api v0.44.0 // indirect
 	google.golang.org/genproto v0.0.0-20210416161957-9910b6c460de // indirect
