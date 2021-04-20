@@ -94,15 +94,22 @@ func getVariableSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"name": getNameSchema(true),
+		"owner_id": {
+			ConflictsWith: []string{"project_id"},
+			Optional:      true,
+			Type:          schema.TypeString,
+		},
 		"pgp_key": {
 			ForceNew:  true,
 			Optional:  true,
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"owner_id": {
-			Required: true,
-			Type:     schema.TypeString,
+		"project_id": {
+			ConflictsWith: []string{"owner_id"},
+			Deprecated:    "This attribute is deprecated; please use owner_id instead.",
+			Optional:      true,
+			Type:          schema.TypeString,
 		},
 		"prompt": {
 			Elem:     &schema.Resource{Schema: getVariablePromptOptionsSchema()},

@@ -19,6 +19,18 @@ func TestExpandVariableScope(t *testing.T) {
 	assert.Equal(t, octopusdeploy.VariableScope{}, scope)
 	assert.Empty(t, scope.Channels)
 
+	flattenedVariableScope = []interface{}{nil}
+	scope = expandVariableScope(flattenedVariableScope)
+	assert.True(t, scope.IsEmpty())
+	assert.Equal(t, octopusdeploy.VariableScope{}, scope)
+	assert.Empty(t, scope.Channels)
+
+	flattenedVariableScope = []interface{}{"foo"}
+	scope = expandVariableScope(flattenedVariableScope)
+	assert.True(t, scope.IsEmpty())
+	assert.Equal(t, octopusdeploy.VariableScope{}, scope)
+	assert.Empty(t, scope.Channels)
+
 	flattenedVariableScope = []interface{}{map[string]interface{}{}}
 	scope = expandVariableScope(flattenedVariableScope)
 	assert.True(t, scope.IsEmpty())

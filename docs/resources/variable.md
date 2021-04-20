@@ -18,7 +18,6 @@ description: |-
 ### Required
 
 - **name** (String) The name of this resource.
-- **owner_id** (String)
 - **type** (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
 
 ### Optional
@@ -27,7 +26,9 @@ description: |-
 - **id** (String) The ID of this resource.
 - **is_editable** (Boolean) Indicates whether or not this variable is considered editable.
 - **is_sensitive** (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
+- **owner_id** (String)
 - **pgp_key** (String, Sensitive)
+- **project_id** (String, Deprecated)
 - **prompt** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--prompt))
 - **scope** (Block List, Max: 1) (see [below for nested schema](#nestedblock--scope))
 - **sensitive_value** (String, Sensitive)
