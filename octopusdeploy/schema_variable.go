@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandVariable(d *schema.ResourceData) octopusdeploy.Variable {
+func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 	name := d.Get("name").(string)
 
 	variable := octopusdeploy.NewVariable(name)
@@ -56,7 +56,7 @@ func expandVariable(d *schema.ResourceData) octopusdeploy.Variable {
 		}
 	}
 
-	return *variable
+	return variable
 }
 
 func getVariableDataSchema() map[string]*schema.Schema {
@@ -100,7 +100,7 @@ func getVariableSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"project_id": {
+		"owner_id": {
 			Required: true,
 			Type:     schema.TypeString,
 		},
@@ -131,7 +131,11 @@ func getVariableSchema() map[string]*schema.Schema {
 	}
 }
 
-func setVariable(ctx context.Context, d *schema.ResourceData, variable octopusdeploy.Variable) error {
+func setVariable(ctx context.Context, d *schema.ResourceData, variable *octopusdeploy.Variable) error {
+	if d == nil || variable == nil {
+		return fmt.Errorf("error setting scope")
+	}
+
 	d.Set("description", variable.Description)
 	d.Set("is_editable", variable.IsEditable)
 	d.Set("is_sensitive", variable.IsSensitive)

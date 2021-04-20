@@ -22,7 +22,7 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	}
 
 	if v, ok := d.GetOk("auto_deploy_release_overrides"); ok {
-		project.AutoDeployReleaseOverrides = v.([]*octopusdeploy.AutoDeployReleaseOverride)
+		project.AutoDeployReleaseOverrides = v.([]octopusdeploy.AutoDeployReleaseOverride)
 	}
 
 	if v, ok := d.GetOk("cloned_from_project_id"); ok {
