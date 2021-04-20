@@ -38,6 +38,7 @@ Read-Only:
 - **name** (String) The name of this resource.
 - **owner_id** (String)
 - **pgp_key** (String, Sensitive)
+- **project_id** (String, Deprecated)
 - **prompt** (Set of Object) (see [below for nested schema](#nestedatt--variables--prompt))
 - **scope** (List of Object) (see [below for nested schema](#nestedatt--variables--scope))
 - **sensitive_value** (String, Sensitive)
