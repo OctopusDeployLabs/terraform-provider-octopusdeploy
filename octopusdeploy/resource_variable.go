@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+var mutex = &sync.Mutex{}
 
 func resourceVariable() *schema.Resource {
 	return &schema.Resource{
@@ -37,6 +40,9 @@ func resourceVariableImport(d *schema.ResourceData, m interface{}) ([]*schema.Re
 }
 
 func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	if err := validateVariable(d); err != nil {
 		return diag.FromErr(err)
 	}
@@ -125,6 +131,9 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	log.Printf("[INFO] updating variable (%s)", d.Id())
 
 	if err := validateVariable(d); err != nil {
@@ -172,6 +181,9 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	log.Printf("[INFO] deleting variable (%s)", d.Id())
 
 	projectID, projectOk := d.GetOk("project_id")
