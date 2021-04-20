@@ -11,7 +11,7 @@ func expandVariableScope(flattenedVariableScope interface{}) octopusdeploy.Varia
 	}
 
 	list := flattenedVariableScope.([]interface{})
-	if len(list) == 0 {
+	if len(list) == 0 || list[0] == nil {
 		return octopusdeploy.VariableScope{}
 	}
 
