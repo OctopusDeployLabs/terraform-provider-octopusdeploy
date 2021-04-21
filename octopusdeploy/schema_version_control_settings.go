@@ -6,18 +6,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandVersionControlSettings(versionControlSettings interface{}) *octopusdeploy.VersionControlSettings {
-	versionControlSettingsList := versionControlSettings.(*schema.Set).List()
+func expandVersionControlSettings(flattenedVersionControlSettings interface{}) *octopusdeploy.VersionControlSettings {
+	versionControlSettingsList := flattenedVersionControlSettings.(*schema.Set).List()
 	versionControlSettingsMap := versionControlSettingsList[0].(map[string]interface{})
 
-	return &octopusdeploy.VersionControlSettings{
+	versionControlSettings := &octopusdeploy.VersionControlSettings{
 		BasePath:      versionControlSettingsMap["base_path"].(string),
 		DefaultBranch: versionControlSettingsMap["default_branch"].(string),
 		HasValue:      versionControlSettingsMap["has_value"].(bool),
-		Password:      octopusdeploy.NewSensitiveValue(versionControlSettingsMap["password"].(string)),
 		URL:           versionControlSettingsMap["url"].(string),
 		Username:      versionControlSettingsMap["username"].(string),
 	}
+
+	if password := versionControlSettingsMap["password"].(string); len(password) > 0 {
+		versionControlSettings.Password = octopusdeploy.NewSensitiveValue(password)
+	}
+
+	return versionControlSettings
 }
 
 func flattenVersionControlSettings(versionControlSettings *octopusdeploy.VersionControlSettings) []interface{} {
