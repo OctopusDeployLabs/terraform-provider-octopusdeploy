@@ -133,6 +133,7 @@ func testVariableBasic(environmentLocalName string,
 		  scope {
 			channels     = [octopusdeploy_channel.%s.id]
 		    environments = [octopusdeploy_environment.%s.id]
+			tenant_tags  = ["Tenants-5241"]
 		  }
 		}`,
 		environmentLocalName,
