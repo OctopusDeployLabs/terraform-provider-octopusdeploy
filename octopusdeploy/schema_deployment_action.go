@@ -49,7 +49,8 @@ func flattenAction(action octopusdeploy.DeploymentAction) map[string]interface{}
 		}
 
 		if v, ok := action.Properties["Octopus.Action.Template.Version"]; ok {
-			actionTemplate["version"] = v.Value
+			version, _ := strconv.Atoi(v.Value)
+			actionTemplate["version"] = version
 		}
 
 		flattenedAction["action_template"] = []interface{}{actionTemplate}
