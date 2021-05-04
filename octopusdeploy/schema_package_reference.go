@@ -33,12 +33,8 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 		Type:        schema.TypeString,
 	}
 
-	packageElementSchema["extract_during_deployment"] = &schema.Schema{
-		Computed:    true,
-		Description: "Whether to extract the package during deployment",
-		Optional:    true,
-		Type:        schema.TypeBool,
-	}
+	// Set the standard packages as optional so user can define.
+	packageElementSchema["extract_during_deployment"].Optional = true
 }
 
 func flattenPackageReference(packageReference octopusdeploy.PackageReference) map[string]interface{} {
@@ -69,6 +65,11 @@ func getPackageSchema(required bool) *schema.Schema {
 					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
 					Optional:    true,
 					Type:        schema.TypeString,
+				},
+				"extract_during_deployment": {
+					Computed:    true,
+					Description: "Whether to extract the package during deployment",
+					Type:        schema.TypeBool,
 				},
 				"feed_id": {
 					Default:     "feeds-builtin",

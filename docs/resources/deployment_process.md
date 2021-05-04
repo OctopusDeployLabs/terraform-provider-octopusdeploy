@@ -192,6 +192,10 @@ Optional:
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
 
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
+
 
 
 <a id="nestedblock--step--apply_terraform_template_action"></a>
@@ -305,6 +309,10 @@ Optional:
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
 
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
+
 
 <a id="nestedblock--step--apply_terraform_template_action--primary_package"></a>
 ### Nested Schema for `step.apply_terraform_template_action.primary_package`
@@ -320,6 +328,10 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
+
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 
 
 <a id="nestedblock--step--apply_terraform_template_action--template"></a>
@@ -399,6 +411,10 @@ Optional:
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
 
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
+
 
 
 <a id="nestedblock--step--deploy_package_action"></a>
@@ -443,6 +459,10 @@ Optional:
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
 
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
+
 
 <a id="nestedblock--step--deploy_package_action--action_template"></a>
 ### Nested Schema for `step.deploy_package_action.action_template`
@@ -480,6 +500,10 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
+
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 
 
 <a id="nestedblock--step--deploy_package_action--windows_service"></a>
@@ -556,6 +580,10 @@ Optional:
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
 
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
+
 
 <a id="nestedblock--step--deploy_windows_service_action--action_template"></a>
 ### Nested Schema for `step.deploy_windows_service_action.action_template`
@@ -593,6 +621,10 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
+
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 
 
 
@@ -659,6 +691,10 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
+
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 
 
 
@@ -745,6 +781,10 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
+
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 
 
 
@@ -834,6 +874,10 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
+
+Read-Only:
+
+- **extract_during_deployment** (Boolean) Whether to extract the package during deployment
 
 ## Import
 
