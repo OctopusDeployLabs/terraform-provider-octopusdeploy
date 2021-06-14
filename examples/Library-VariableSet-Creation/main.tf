@@ -1,6 +1,6 @@
 provider "octopusdeploy" {
   address  = var.serverURL
-  apikey   = var.apiKey
+  api_key   = var.apiKey
   space_id = var.space
 }
 
