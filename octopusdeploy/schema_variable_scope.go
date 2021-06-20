@@ -52,10 +52,6 @@ func flattenVariableScope(scope octopusdeploy.VariableScope) []interface{} {
 		flattenedScope["machines"] = scope.Machines
 	}
 
-	if len(scope.Machines) > 0 {
-		flattenedScope["process_owners"] = scope.Machines
-	}
-
 	if len(scope.Roles) > 0 {
 		flattenedScope["roles"] = scope.Roles
 	}
