@@ -34,8 +34,8 @@ func expandTeam(d *schema.ResourceData) *octopusdeploy.Team {
 		team.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk("external_security_groups"); ok {
-		team.ExternalSecurityGroups = expandExternalSecurityGroups(v.(*schema.Set).List())
+	if v, ok := d.GetOk("external_security_group"); ok {
+		team.ExternalSecurityGroups = expandExternalSecurityGroups(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk("space_id"); ok {
@@ -55,16 +55,16 @@ func flattenTeam(team *octopusdeploy.Team) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"can_be_deleted":           team.CanBeDeleted,
-		"can_be_renamed":           team.CanBeRenamed,
-		"can_change_members":       team.CanChangeMembers,
-		"can_change_roles":         team.CanChangeRoles,
-		"description":              team.Description,
-		"external_security_groups": flattenExternalSecurityGroups(team.ExternalSecurityGroups),
-		"id":                       team.GetID(),
-		"name":                     team.Name,
-		"space_id":                 team.SpaceID,
-		"users":                    team.MemberUserIDs,
+		"can_be_deleted":          team.CanBeDeleted,
+		"can_be_renamed":          team.CanBeRenamed,
+		"can_change_members":      team.CanChangeMembers,
+		"can_change_roles":        team.CanChangeRoles,
+		"description":             team.Description,
+		"external_security_group": flattenExternalSecurityGroups(team.ExternalSecurityGroups),
+		"id":                      team.GetID(),
+		"name":                    team.Name,
+		"space_id":                team.SpaceID,
+		"users":                   team.MemberUserIDs,
 	}
 }
 
@@ -122,7 +122,7 @@ func getTeamSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
-		"external_security_groups": {
+		"external_security_group": {
 			Optional: true,
 			Elem:     &schema.Resource{Schema: getExternalSecurityGroupsSchema()},
 			Type:     schema.TypeList,
@@ -156,8 +156,8 @@ func setTeam(ctx context.Context, d *schema.ResourceData, team *octopusdeploy.Te
 	d.Set("can_change_roles", team.CanChangeRoles)
 	d.Set("description", team.Description)
 
-	if err := d.Set("external_security_groups", flattenExternalSecurityGroups(team.ExternalSecurityGroups)); err != nil {
-		return fmt.Errorf("error setting external_security_groups: %s", err)
+	if err := d.Set("external_security_group", flattenExternalSecurityGroups(team.ExternalSecurityGroups)); err != nil {
+		return fmt.Errorf("error setting external_security_group: %s", err)
 	}
 
 	d.Set("id", team.GetID())
