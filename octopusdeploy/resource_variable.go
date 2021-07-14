@@ -113,11 +113,12 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 	client := m.(*octopusdeploy.Client)
 	variable, err := client.Variables.GetByID(variableOwnerID, id)
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] variable (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] variable (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}
@@ -204,11 +205,12 @@ func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m inter
 	client := m.(*octopusdeploy.Client)
 	_, err := client.Variables.DeleteSingle(variableOwnerID, d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] variable (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] variable (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}

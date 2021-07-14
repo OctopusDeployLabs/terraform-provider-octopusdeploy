@@ -62,11 +62,12 @@ func resourceAzureCloudServiceDeploymentTargetRead(ctx context.Context, d *schem
 	client := m.(*octopusdeploy.Client)
 	deploymentTarget, err := client.Machines.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] Azure cloud service deployment target (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] Azure cloud service deployment target (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}

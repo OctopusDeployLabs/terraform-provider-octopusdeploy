@@ -94,11 +94,12 @@ func resourceTenantProjectVariableDelete(ctx context.Context, d *schema.Resource
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] tenant (%s) not found; deleting common variable from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] tenant (%s) not found; deleting common variable from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}
@@ -158,11 +159,12 @@ func resourceTenantProjectVariableRead(ctx context.Context, d *schema.ResourceDa
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] tenant (%s) not found; deleting tenant project variable from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] tenant (%s) not found; deleting tenant project variable from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}
