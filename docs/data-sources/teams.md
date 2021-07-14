@@ -39,14 +39,14 @@ Read-Only:
 - **can_change_members** (Boolean)
 - **can_change_roles** (Boolean)
 - **description** (String) The user-friendly description of this team.
-- **external_security_groups** (List of Object) (see [below for nested schema](#nestedatt--spaces--external_security_groups))
+- **external_security_group** (List of Object) (see [below for nested schema](#nestedatt--spaces--external_security_group))
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this team.
 - **space_id** (String) The space associated with this team.
 - **users** (List of String) A list of user IDs designated to be members of this team.
 
-<a id="nestedatt--spaces--external_security_groups"></a>
-### Nested Schema for `spaces.external_security_groups`
+<a id="nestedatt--spaces--external_security_group"></a>
+### Nested Schema for `spaces.external_security_group`
 
 Read-Only:
 
@@ -66,14 +66,14 @@ Read-Only:
 - **can_change_members** (Boolean)
 - **can_change_roles** (Boolean)
 - **description** (String) The user-friendly description of this team.
-- **external_security_groups** (List of Object) (see [below for nested schema](#nestedatt--teams--external_security_groups))
+- **external_security_group** (List of Object) (see [below for nested schema](#nestedatt--teams--external_security_group))
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this team.
 - **space_id** (String) The space associated with this team.
 - **users** (List of String) A list of user IDs designated to be members of this team.
 
-<a id="nestedatt--teams--external_security_groups"></a>
-### Nested Schema for `teams.external_security_groups`
+<a id="nestedatt--teams--external_security_group"></a>
+### Nested Schema for `teams.external_security_group`
 
 Read-Only:
 

@@ -26,13 +26,13 @@ This resource manages teams in Octopus Deploy.
 - **can_change_members** (Boolean)
 - **can_change_roles** (Boolean)
 - **description** (String) The user-friendly description of this team.
-- **external_security_groups** (Block List) (see [below for nested schema](#nestedblock--external_security_groups))
+- **external_security_group** (Block List) (see [below for nested schema](#nestedblock--external_security_group))
 - **id** (String) The unique ID for this resource.
 - **space_id** (String) The space associated with this team.
 - **users** (List of String) A list of user IDs designated to be members of this team.
 
-<a id="nestedblock--external_security_groups"></a>
-### Nested Schema for `external_security_groups`
+<a id="nestedblock--external_security_group"></a>
+### Nested Schema for `external_security_group`
 
 Optional:
 

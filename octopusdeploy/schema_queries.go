@@ -257,7 +257,6 @@ func getQueryTags() *schema.Schema {
 
 func getQueryTake() *schema.Schema {
 	return &schema.Schema{
-		Default:     1,
 		Description: "A filter to specify the number of items to take (or return) in the response.",
 		Type:        schema.TypeInt,
 		Optional:    true,
