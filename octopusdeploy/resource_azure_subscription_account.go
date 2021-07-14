@@ -62,11 +62,12 @@ func resourceAzureSubscriptionAccountRead(ctx context.Context, d *schema.Resourc
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] Azure subscription account (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] Azure subscription account (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}
