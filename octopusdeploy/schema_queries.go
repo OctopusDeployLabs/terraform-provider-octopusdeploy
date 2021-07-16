@@ -70,6 +70,14 @@ func getQueryCommunicationStyles() *schema.Schema {
 	}
 }
 
+func getQueryContentType() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by content type.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
 func getQueryDeploymentID() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by deployment ID.",
