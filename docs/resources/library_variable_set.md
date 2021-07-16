@@ -22,7 +22,7 @@ description: |-
 ### Optional
 
 - **description** (String) The description of this resource.
-- **id** (String) The ID of this resource.
+- **id** (String) The unique ID for this resource.
 - **space_id** (String) The space ID associated with this resource.
 - **template** (Block List) (see [below for nested schema](#nestedblock--template))
 
