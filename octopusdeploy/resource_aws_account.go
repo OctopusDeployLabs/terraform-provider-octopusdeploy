@@ -72,11 +72,6 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	amazonWebServicesAccount := accountResource.(*octopusdeploy.AmazonWebServicesAccount)
 	if err := setAmazonWebServicesAccount(ctx, d, amazonWebServicesAccount); err != nil {
 		return diag.FromErr(err)
@@ -97,12 +92,7 @@ func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	accountResource, err := octopusdeploy.ToAccount(updatedAccount.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setAmazonWebServicesAccount(ctx, d, accountResource.(*octopusdeploy.AmazonWebServicesAccount)); err != nil {
+	if err := setAmazonWebServicesAccount(ctx, d, updatedAccount.(*octopusdeploy.AmazonWebServicesAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -78,7 +78,10 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	accountResource := account.(*octopusdeploy.AccountResource)
+	accountResource, err := octopusdeploy.ToAccountResource(account)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := setAccountResource(ctx, d, accountResource); err != nil {
 		return diag.FromErr(err)
@@ -89,18 +92,22 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	accountResource := expandAccountResource(d)
+
 	log.Printf("[INFO] updating account (%s)", d.Id())
 
-	accountResource := expandAccountResource(d)
 	client := m.(*octopusdeploy.Client)
 	updatedAccount, err := client.Accounts.Update(accountResource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	updatedAccountResource := updatedAccount.(*octopusdeploy.AccountResource)
+	accountResource, err = octopusdeploy.ToAccountResource(updatedAccount)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	if err := setAccountResource(ctx, d, updatedAccountResource); err != nil {
+	if err := setAccountResource(ctx, d, accountResource); err != nil {
 		return diag.FromErr(err)
 	}
 

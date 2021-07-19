@@ -71,18 +71,11 @@ func resourceTokenAccountRead(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
+	if err := setTokenAccount(ctx, d, accountResource.(*octopusdeploy.TokenAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	tokenAccount := accountResource.(*octopusdeploy.TokenAccount)
-
-	if err := setTokenAccount(ctx, d, tokenAccount); err != nil {
-		return diag.FromErr(err)
-	}
-
-	log.Printf("[INFO] token account read: %#v", tokenAccount)
+	log.Printf("[INFO] token account read: (%s)", d.Id())
 	return nil
 }
 
@@ -97,12 +90,7 @@ func resourceTokenAccountUpdate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	accountResource, err := octopusdeploy.ToAccount(updatedAccount.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setTokenAccount(ctx, d, accountResource.(*octopusdeploy.TokenAccount)); err != nil {
+	if err := setTokenAccount(ctx, d, updatedAccount.(*octopusdeploy.TokenAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 

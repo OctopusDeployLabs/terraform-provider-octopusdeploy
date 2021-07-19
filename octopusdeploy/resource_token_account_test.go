@@ -44,6 +44,7 @@ func testTokenAccountBasic(localName string, description string, name string, te
 		description                       = "%s"
 		name                              = "%s"
 		tenanted_deployment_participation = "%s"
+		tenants                           = []
 		token                             = "%s"
 	}`, localName, description, name, tenantedDeploymentParticipation, token)
 }

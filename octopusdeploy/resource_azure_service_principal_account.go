@@ -72,11 +72,6 @@ func resourceAzureServicePrincipalAccountRead(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	azureServicePrincipalAccount := accountResource.(*octopusdeploy.AzureServicePrincipalAccount)
 	if err := setAzureServicePrincipalAccount(ctx, d, azureServicePrincipalAccount); err != nil {
 		return diag.FromErr(err)
@@ -97,12 +92,7 @@ func resourceAzureServicePrincipalAccountUpdate(ctx context.Context, d *schema.R
 		return diag.FromErr(err)
 	}
 
-	accountResource, err := octopusdeploy.ToAccount(updatedAccount.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setAzureServicePrincipalAccount(ctx, d, accountResource.(*octopusdeploy.AzureServicePrincipalAccount)); err != nil {
+	if err := setAzureServicePrincipalAccount(ctx, d, updatedAccount.(*octopusdeploy.AzureServicePrincipalAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 
