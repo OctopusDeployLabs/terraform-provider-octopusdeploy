@@ -50,9 +50,8 @@ func resourceTenantDelete(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[INFO] tenant deleted (%s)", d.Id())
 	d.SetId("")
-
-	log.Printf("[INFO] tenant deleted")
 	return nil
 }
 

@@ -46,14 +46,12 @@ func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m inte
 	log.Printf("[INFO] deleting lifecycle (%s)", d.Id())
 
 	client := m.(*octopusdeploy.Client)
-	err := client.Lifecycles.DeleteByID(d.Id())
-	if err != nil {
+	if err := client.Lifecycles.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[INFO] lifecycle deleted (%s)", d.Id())
 	d.SetId("")
-
-	log.Printf("[INFO] lifecycle deleted")
 	return nil
 }
 

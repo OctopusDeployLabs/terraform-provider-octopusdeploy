@@ -50,9 +50,8 @@ func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[INFO] environment deleted (%s)", d.Id())
 	d.SetId("")
-
-	log.Printf("[INFO] environment deleted")
 	return nil
 }
 

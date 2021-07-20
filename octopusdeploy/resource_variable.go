@@ -18,6 +18,7 @@ func resourceVariable() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVariableCreate,
 		DeleteContext: resourceVariableDelete,
+		Description:   "This resource manages variables in Octopus Deploy.",
 		Importer:      &schema.ResourceImporter{State: resourceVariableImport},
 		ReadContext:   resourceVariableRead,
 		Schema:        getVariableSchema(),
@@ -215,9 +216,8 @@ func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[INFO] variable deleted (%s)", d.Id())
 	d.SetId("")
-
-	log.Printf("[INFO] variable deleted")
 	return nil
 }
 

@@ -50,9 +50,8 @@ func resourceProjectGroupDelete(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[INFO] project group deleted (%s)", d.Id())
 	d.SetId("")
-
-	log.Printf("[INFO] project group deleted")
 	return nil
 }
 

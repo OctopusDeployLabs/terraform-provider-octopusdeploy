@@ -46,7 +46,9 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 	value := d.Get("value").(string)
 	variableID := d.Get("variable_id").(string)
 
-	log.Printf("[INFO] creating tenant common variable")
+	id := tenantID + ":" + libraryVariableSetID + ":" + variableID
+
+	log.Printf("[INFO] creating tenant common variable (%s)", id)
 
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
@@ -64,7 +66,7 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = octopusdeploy.NewPropertyValue(value, false)
 			client.Tenants.UpdateVariables(tenant, tenantVariables)
 
-			d.SetId(tenantID + ":" + libraryVariableSetID + ":" + variableID)
+			d.SetId(id)
 			log.Printf("[INFO] tenant common variable created (%s)", d.Id())
 			return nil
 		}
@@ -79,7 +81,9 @@ func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceD
 	tenantID := d.Get("tenant_id").(string)
 	variableID := d.Get("variable_id").(string)
 
-	log.Printf("[INFO] deleting tenant common variable")
+	id := tenantID + ":" + libraryVariableSetID + ":" + variableID
+
+	log.Printf("[INFO] deleting tenant common variable (%s)", id)
 
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
@@ -106,16 +110,16 @@ func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceD
 					delete(tenantVariables.LibraryVariables[libraryVariableSetID].Variables, variableID)
 					client.Tenants.UpdateVariables(tenant, tenantVariables)
 
-					d.SetId("")
 					log.Printf("[INFO] tenant common variable deleted (%s)", d.Id())
+					d.SetId("")
 					return nil
 				}
 			}
 		}
 	}
 
-	d.SetId("")
 	log.Printf("[INFO] tenant common variable not found; deleting from state: %s", d.Id())
+	d.SetId("")
 	return nil
 }
 
@@ -142,7 +146,9 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 	tenantID := d.Get("tenant_id").(string)
 	variableID := d.Get("variable_id").(string)
 
-	log.Printf("[INFO] reading tenant common variable")
+	id := tenantID + ":" + libraryVariableSetID + ":" + variableID
+
+	log.Printf("[INFO] reading tenant common variable (%s)", id)
 
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
@@ -167,7 +173,7 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 			for id, value := range v.Variables {
 				if id == variableID {
 					d.Set("value", value.Value)
-					d.SetId(tenantID + ":" + libraryVariableSetID + ":" + variableID)
+					d.SetId(id)
 
 					log.Printf("[INFO] tenant common variable read (%s)", d.Id())
 					return nil
@@ -187,7 +193,9 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 	value := d.Get("value").(string)
 	variableID := d.Get("variable_id").(string)
 
-	log.Printf("[INFO] updating tenant common variable")
+	id := tenantID + ":" + libraryVariableSetID + ":" + variableID
+
+	log.Printf("[INFO] updating tenant common variable (%s)", id)
 
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
@@ -205,12 +213,12 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = octopusdeploy.NewPropertyValue(value, false)
 			client.Tenants.UpdateVariables(tenant, tenantVariables)
 
-			d.SetId(tenantID + ":" + libraryVariableSetID + ":" + variableID)
+			d.SetId(id)
 			log.Printf("[INFO] tenant common variable updated (%s)", d.Id())
 			return nil
 		}
 	}
 
 	d.SetId("")
-	return diag.Errorf("unable to locate tenant variable for tenant ID, %s", tenantID)
+	return diag.Errorf("unable to locate tenant common variable for tenant ID, %s", tenantID)
 }

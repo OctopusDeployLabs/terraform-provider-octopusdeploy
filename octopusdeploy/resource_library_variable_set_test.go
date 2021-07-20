@@ -37,6 +37,7 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 	prefix := "octopusdeploy_library_variable_set." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLibraryVariableSetDestroy,
@@ -44,10 +45,28 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
+				Config: testLibraryVariableSetBasic(localName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "template.#", "0"),
+				),
+			},
+			{
+				Config: testLibraryVariableSetBasicWithDescription(localName, name, description),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "template.#", "0"),
+				),
+			},
+			{
 				Config: testLibraryVariableSetComplex(localName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "template.#", "3"),
+					resource.TestCheckResourceAttr(prefix, "template.1.default_value", "wjehqwjkehwqkejhqwe"),
 				),
 			},
 		},
@@ -84,7 +103,7 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 				),
-				Config: testAccLibraryVariableSetWithDescription(localName, name, description),
+				Config: testLibraryVariableSetBasicWithDescription(localName, name, description),
 			},
 			// update again by remove its description
 			{
@@ -111,7 +130,7 @@ func testLibraryVariableSetBasic(localName string, name string) string {
 	}`, localName, name)
 }
 
-func testAccLibraryVariableSetWithDescription(localName string, name string, description string) string {
+func testLibraryVariableSetBasicWithDescription(localName string, name string, description string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_library_variable_set" "%s" {
 		name        = "%s"
 		description = "%s"
