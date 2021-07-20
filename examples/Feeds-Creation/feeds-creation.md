@@ -39,7 +39,7 @@ The `variables.tf` configuration file contains the following variables to be use
 The `terraform.tfvars` configure file contains the values for the variables that are being passed in at runtime. An example is below:
 
 ```
-serverURL   = "https://mikelevanoctopus.octopus.app"
+serverURL   = "https://example.octopus.app"
 space       = "Default"
 feedNale    = "DevOpsfeed"
 feedName    = "GitHubFeed"
@@ -52,7 +52,7 @@ To use Terraform to create the resource:
 
 1. Clone the repository
 2. Change directory (`cd`) into the *examples* directory
-3. `cd` into the appropriate resource 
+3. `cd` into the appropriate resource
 4. Edit the `terraform.tfvars` configuration file for the appropriate values
 5. Run the following commands to initiate, plan, and apply the creation:
    - `terraform init`
