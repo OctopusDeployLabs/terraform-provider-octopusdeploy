@@ -6,7 +6,7 @@ import (
 )
 
 func expandExternalSecurityGroups(externalSecurityGroups []interface{}) []octopusdeploy.NamedReferenceItem {
-	expandedExternalSecurityGroups := make([]octopusdeploy.NamedReferenceItem, 0, len(externalSecurityGroups))
+	expandedExternalSecurityGroups := []octopusdeploy.NamedReferenceItem{}
 	for _, externalSecurityGroup := range externalSecurityGroups {
 		if externalSecurityGroup != nil {
 			rawExternalSecurityGroup := externalSecurityGroup.(map[string]interface{})
@@ -38,19 +38,13 @@ func expandExternalSecurityGroups(externalSecurityGroups []interface{}) []octopu
 }
 
 func flattenExternalSecurityGroups(externalSecurityGroups []octopusdeploy.NamedReferenceItem) []interface{} {
-	if externalSecurityGroups == nil {
-		return nil
-	}
-
-	flattenedExternalSecurityGroups := make([]interface{}, len(externalSecurityGroups))
-	for i, externalSecurityGroup := range externalSecurityGroups {
-		rawExternalSecurityGroup := map[string]interface{}{
-			"display_id_and_name": externalSecurityGroup.DisplayIDAndName,
-			"display_name":        externalSecurityGroup.DisplayName,
-			"id":                  externalSecurityGroup.ID,
-		}
-
-		flattenedExternalSecurityGroups[i] = rawExternalSecurityGroup
+	flattenedExternalSecurityGroups := []interface{}{}
+	for _, v := range externalSecurityGroups {
+		flattenedExternalSecurityGroups = append(flattenedExternalSecurityGroups, map[string]interface{}{
+			"display_id_and_name": v.DisplayIDAndName,
+			"display_name":        v.DisplayName,
+			"id":                  v.ID,
+		})
 	}
 
 	return flattenedExternalSecurityGroups
