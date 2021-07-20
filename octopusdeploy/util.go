@@ -87,10 +87,15 @@ func getSliceFromTerraformTypeList(list interface{}) []string {
 		return nil
 	}
 
+	if _, ok := list.([]interface{}); !ok {
+		return nil
+	}
+
 	var newSlice []string
-	terraformList := list.([]interface{})
-	for _, v := range terraformList {
-		newSlice = append(newSlice, v.(string))
+	for _, v := range list.([]interface{}) {
+		if v != nil {
+			newSlice = append(newSlice, v.(string))
+		}
 	}
 	return newSlice
 }
