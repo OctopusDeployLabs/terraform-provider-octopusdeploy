@@ -5,7 +5,7 @@ go 1.15
 require (
 	cloud.google.com/go/storage v1.14.0 // indirect
 	github.com/Microsoft/go-winio v0.4.17 // indirect
-	github.com/OctopusDeploy/go-octopusdeploy v1.7.28
+	github.com/OctopusDeploy/go-octopusdeploy v1.7.31
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
@@ -21,7 +21,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.4.2 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
-	github.com/hashicorp/hcl/v2 v2.10.0 // indirect
+	github.com/hashicorp/hcl/v2 v2.10.1 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.3.1 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/hashicorp/yamux v0.0.0-20210707203944-259a57b3608c // indirect
@@ -40,7 +40,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210413134643-5e61552d6c78 // indirect
 	golang.org/x/term v0.0.0-20210406210042-72f3dc4e9b72 // indirect
 	google.golang.org/api v0.44.0 // indirect
-	google.golang.org/genproto v0.0.0-20210716133855-ce7ef5c701ea // indirect
+	google.golang.org/genproto v0.0.0-20210721163202-f1cecdd8b78a // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
