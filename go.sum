@@ -87,8 +87,8 @@ github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugX
 github.com/Microsoft/go-winio v0.4.17 h1:iT12IBVClFevaf8PuVyi3UmZOVh4OqnaLxDTW2O6j3w=
 github.com/Microsoft/go-winio v0.4.17/go.mod h1:JPGBdM1cNvN/6ISo+n8V5iA4v8pBzdOpzfwIujj1a84=
 github.com/NYTimes/gziphandler v0.0.0-20170623195520-56545f4a5d46/go.mod h1:3wb06e3pkSAbeQ52E9H9iFoQsEEwGN64994WTCIhntQ=
-github.com/OctopusDeploy/go-octopusdeploy v1.7.28 h1:+yV5nFCS7FNsIlyPELZBd7yQ2symuIXdXX93aUaKivA=
-github.com/OctopusDeploy/go-octopusdeploy v1.7.28/go.mod h1:nJWi3LFyOQ7TLKnaee9TO4uAB+8EseducrdgrNLmrM8=
+github.com/OctopusDeploy/go-octopusdeploy v1.7.30 h1:95qJK1XWtKob/hCztwtkt5oYuF6o6pjmquGJApcFLAo=
+github.com/OctopusDeploy/go-octopusdeploy v1.7.30/go.mod h1:nJWi3LFyOQ7TLKnaee9TO4uAB+8EseducrdgrNLmrM8=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7/go.mod h1:z4/9nQmJSSwwds7ejkxaJwO37dru3geImFUdJlaLzQo=
 github.com/PuerkitoBio/purell v1.0.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
