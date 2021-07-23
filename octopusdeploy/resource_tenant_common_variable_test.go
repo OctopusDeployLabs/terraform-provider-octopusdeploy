@@ -65,7 +65,7 @@ func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName s
 				name          = "Test Template"
 
 				display_settings = {
-					"Octopus.ControlType" = "SingleLineText"
+					"Octopus.ControlType" = "Sensitive"
 				}
 			}
 		}
@@ -86,18 +86,18 @@ func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName s
 			}
 		}
 
-		resource "octopusdeploy_variable" "test-variable" {
-			name     = "test-variable-name"
-			owner_id = octopusdeploy_library_variable_set.test-library-variable-set.id
-			type     = "String"
-			value    = "this is the value"
-		}
-
 		resource "octopusdeploy_tenant_common_variable" "%s" {
 			library_variable_set_id = octopusdeploy_library_variable_set.test-library-variable-set.id
 			tenant_id               = octopusdeploy_tenant.%s.id
 			variable_id             = octopusdeploy_library_variable_set.test-library-variable-set.template[0].id
-			value                   = "%s"
+
+			property_value {
+				is_sensitive = true
+
+				sensitive_value {
+					new_value = "%s"
+				}
+			}
 		}`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, environmentLocalName, localName, tenantLocalName, value)
 }
 

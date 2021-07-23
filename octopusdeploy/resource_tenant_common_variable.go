@@ -27,9 +27,11 @@ func resourceTenantCommonVariable() *schema.Resource {
 				Required: true,
 				Type:     schema.TypeString,
 			},
-			"value": {
+			"property_value": {
 				Required: true,
-				Type:     schema.TypeString,
+				Elem:     &schema.Resource{Schema: getPropertyValueSchema()},
+				MaxItems: 1,
+				Type:     schema.TypeList,
 			},
 			"variable_id": {
 				Required: true,
@@ -43,7 +45,6 @@ func resourceTenantCommonVariable() *schema.Resource {
 func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
-	value := d.Get("value").(string)
 	variableID := d.Get("variable_id").(string)
 
 	id := tenantID + ":" + libraryVariableSetID + ":" + variableID
@@ -63,7 +64,9 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 
 	for _, v := range tenantVariables.LibraryVariables {
 		if v.LibraryVariableSetID == libraryVariableSetID {
-			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = octopusdeploy.NewPropertyValue(value, false)
+			propertyValue := expandPropertyValue(d.Get("property_value"))
+
+			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = *propertyValue
 			client.Tenants.UpdateVariables(tenant, tenantVariables)
 
 			d.SetId(id)
@@ -172,7 +175,10 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 		if v.LibraryVariableSetID == libraryVariableSetID {
 			for id, value := range v.Variables {
 				if id == variableID {
-					d.Set("value", value.Value)
+					if !value.IsSensitive && value.SensitiveValue == nil {
+						d.Set("property_value", flattenPropertyValue(&value))
+					}
+
 					d.SetId(id)
 
 					log.Printf("[INFO] tenant common variable read (%s)", d.Id())
@@ -190,7 +196,6 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
-	value := d.Get("value").(string)
 	variableID := d.Get("variable_id").(string)
 
 	id := tenantID + ":" + libraryVariableSetID + ":" + variableID
@@ -210,7 +215,8 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 
 	for _, v := range tenantVariables.LibraryVariables {
 		if v.LibraryVariableSetID == libraryVariableSetID {
-			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = octopusdeploy.NewPropertyValue(value, false)
+			propertyValue := expandPropertyValue(d.Get("property_value"))
+			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = *propertyValue
 			client.Tenants.UpdateVariables(tenant, tenantVariables)
 
 			d.SetId(id)
