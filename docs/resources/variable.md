@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_variable Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages variables in Octopus Deploy.
 ---
 
 # octopusdeploy_variable (Resource)
 
-
+This resource manages variables in Octopus Deploy.
 
 
 
