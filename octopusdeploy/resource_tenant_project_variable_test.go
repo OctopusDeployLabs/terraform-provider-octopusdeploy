@@ -80,7 +80,10 @@ func testAccTenantProjectVariableBasic(lifecycleLocalName string, lifecycleName 
 			project_id     = octopusdeploy_project.%s.id
 			tenant_id      = octopusdeploy_tenant.%s.id
 			template_id    = octopusdeploy_project.%s.template[0].id
-			value          = "%s"
+
+			property_value {
+				value = "%s"
+			}
 		}`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, environmentLocalName, localName, environmentLocalName, projectLocalName, tenantLocalName, projectLocalName, value)
 }
 

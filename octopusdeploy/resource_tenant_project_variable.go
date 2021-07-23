@@ -27,15 +27,17 @@ func resourceTenantProjectVariable() *schema.Resource {
 				Required: true,
 				Type:     schema.TypeString,
 			},
+			"property_value": {
+				Required: true,
+				Elem:     &schema.Resource{Schema: getPropertyValueSchema()},
+				MaxItems: 1,
+				Type:     schema.TypeList,
+			},
 			"template_id": {
 				Required: true,
 				Type:     schema.TypeString,
 			},
 			"tenant_id": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
-			"value": {
 				Required: true,
 				Type:     schema.TypeString,
 			},
@@ -49,7 +51,6 @@ func resourceTenantProjectVariableCreate(ctx context.Context, d *schema.Resource
 	projectID := d.Get("project_id").(string)
 	templateID := d.Get("template_id").(string)
 	tenantID := d.Get("tenant_id").(string)
-	value := d.Get("value").(string)
 
 	log.Printf("[INFO] creating tenant project variable")
 
@@ -68,7 +69,9 @@ func resourceTenantProjectVariableCreate(ctx context.Context, d *schema.Resource
 		if v.ProjectID == projectID {
 			for k := range v.Variables {
 				if k == environmentID {
-					tenantVariables.ProjectVariables[projectID].Variables[environmentID][templateID] = octopusdeploy.NewPropertyValue(value, false)
+					propertyValue := expandPropertyValue(d.Get("property_value"))
+
+					tenantVariables.ProjectVariables[projectID].Variables[environmentID][templateID] = *propertyValue
 					client.Tenants.UpdateVariables(tenant, tenantVariables)
 
 					d.SetId(tenantID + ":" + projectID + ":" + environmentID + ":" + templateID)
@@ -89,7 +92,9 @@ func resourceTenantProjectVariableDelete(ctx context.Context, d *schema.Resource
 	templateID := d.Get("template_id").(string)
 	tenantID := d.Get("tenant_id").(string)
 
-	log.Printf("[INFO] deleting tenant project variable")
+	id := tenantID + ":" + projectID + ":" + environmentID + ":" + templateID
+
+	log.Printf("[INFO] deleting tenant project variable (%s)", id)
 
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
@@ -116,8 +121,8 @@ func resourceTenantProjectVariableDelete(ctx context.Context, d *schema.Resource
 					delete(tenantVariables.ProjectVariables[projectID].Variables[environmentID], templateID)
 					client.Tenants.UpdateVariables(tenant, tenantVariables)
 
-					d.SetId("")
 					log.Printf("[INFO] tenant project variable deleted (%s)", d.Id())
+					d.SetId("")
 					return nil
 				}
 			}
@@ -154,7 +159,9 @@ func resourceTenantProjectVariableRead(ctx context.Context, d *schema.ResourceDa
 	templateID := d.Get("template_id").(string)
 	tenantID := d.Get("tenant_id").(string)
 
-	log.Printf("[INFO] reading tenant project variable")
+	id := tenantID + ":" + projectID + ":" + environmentID + ":" + templateID
+
+	log.Printf("[INFO] reading tenant project variable (%s)", id)
 
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
@@ -178,8 +185,11 @@ func resourceTenantProjectVariableRead(ctx context.Context, d *schema.ResourceDa
 		if v.ProjectID == projectID {
 			for k, value := range v.Variables {
 				if k == environmentID {
-					d.Set("value", value[templateID].Value)
-					d.SetId(tenantID + ":" + projectID + ":" + environmentID + ":" + templateID)
+					if !value[environmentID].IsSensitive && value[environmentID].SensitiveValue == nil {
+						propertyValue := value[environmentID]
+						d.Set("property_value", flattenPropertyValue(&propertyValue))
+					}
+					d.SetId(id)
 
 					log.Printf("[INFO] tenant project variable read (%s)", d.Id())
 					return nil
@@ -198,9 +208,10 @@ func resourceTenantProjectVariableUpdate(ctx context.Context, d *schema.Resource
 	projectID := d.Get("project_id").(string)
 	templateID := d.Get("template_id").(string)
 	tenantID := d.Get("tenant_id").(string)
-	value := d.Get("value").(string)
 
-	log.Printf("[INFO] updating tenant project variable")
+	id := tenantID + ":" + projectID + ":" + environmentID + ":" + templateID
+
+	log.Printf("[INFO] updating tenant project variable (%s)", id)
 
 	client := m.(*octopusdeploy.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
@@ -217,10 +228,11 @@ func resourceTenantProjectVariableUpdate(ctx context.Context, d *schema.Resource
 		if v.ProjectID == projectID {
 			for k := range v.Variables {
 				if k == environmentID {
-					tenantVariables.ProjectVariables[projectID].Variables[environmentID][templateID] = octopusdeploy.NewPropertyValue(value, false)
+					propertyValue := expandPropertyValue(d.Get("property_value"))
+					tenantVariables.ProjectVariables[projectID].Variables[environmentID][templateID] = *propertyValue
 					client.Tenants.UpdateVariables(tenant, tenantVariables)
 
-					d.SetId(tenantID + ":" + projectID + ":" + environmentID + ":" + templateID)
+					d.SetId(id)
 					log.Printf("[INFO] tenant project variable updated (%s)", d.Id())
 					return nil
 				}
