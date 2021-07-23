@@ -23,15 +23,15 @@ func resourceTenantCommonVariable() *schema.Resource {
 				Required: true,
 				Type:     schema.TypeString,
 			},
-			"tenant_id": {
-				Required: true,
-				Type:     schema.TypeString,
-			},
 			"property_value": {
 				Required: true,
 				Elem:     &schema.Resource{Schema: getPropertyValueSchema()},
 				MaxItems: 1,
 				Type:     schema.TypeList,
+			},
+			"tenant_id": {
+				Required: true,
+				Type:     schema.TypeString,
 			},
 			"variable_id": {
 				Required: true,
