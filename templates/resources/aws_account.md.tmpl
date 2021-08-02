@@ -8,15 +8,25 @@ description: |-
 # {{.Name}} ({{.Type}})
 
 {{ .Description | trimspace }}
-{{ if .IsDeprecated -}}~> **NOTE:** This is deprecated and may be removed in a future release.{{- end }}
+
+{{ if .IsDeprecated }}
+~> **NOTE:** This is deprecated and may be removed in a future release.
+{{ end }}
+
+{{ printf "%v" .HasExample }}
+
+{{ if .HasExample -}}
 ## Example Usage
 
-{{ tffile (printf "%s%s%s" "examples/resources/" .Type "/resource.tf") }}
+{{ printf "{{tffile %q}}" .ExampleFile }}
+{{- end }}
 
 {{ .SchemaMarkdown | trimspace }}
 
+{{ if .HasImport -}}
 ## Import
 
 Import is supported using the following syntax:
 
-{{ codefile "shell" (printf "%s%s%s" "examples/resources/" .Type "/import.sh") }}
+{{ printf "{{codefile \"shell\" %q}}" .ImportFile }}
+{{- end }}
