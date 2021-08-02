@@ -134,6 +134,7 @@ Optional:
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--package))
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--primary_package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
+- **property** (Block Set) (see [below for nested schema](#nestedblock--step--action--property))
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 - **worker_pool_id** (String) The worker pool associated with this deployment action.
@@ -193,6 +194,15 @@ Optional:
 - **properties** (Map of String) A list of properties associated with this package.
 
 
+<a id="nestedblock--step--action--property"></a>
+### Nested Schema for `step.action.property`
+
+Required:
+
+- **key** (String)
+- **value** (String)
+
+
 
 <a id="nestedblock--step--apply_terraform_template_action"></a>
 ### Nested Schema for `step.apply_terraform_template_action`
@@ -221,6 +231,7 @@ Optional:
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--package))
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--primary_package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
+- **property** (Block Set) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--property))
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **template** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--template))
 - **template_parameters** (String)
@@ -322,6 +333,15 @@ Optional:
 - **properties** (Map of String) A list of properties associated with this package.
 
 
+<a id="nestedblock--step--apply_terraform_template_action--property"></a>
+### Nested Schema for `step.apply_terraform_template_action.property`
+
+Required:
+
+- **key** (String)
+- **value** (String)
+
+
 <a id="nestedblock--step--apply_terraform_template_action--template"></a>
 ### Nested Schema for `step.apply_terraform_template_action.template`
 
@@ -359,6 +379,7 @@ Optional:
 - **notes** (String) The notes associated with this deploymnt action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
+- **property** (Block Set) (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--property))
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 
@@ -400,6 +421,15 @@ Optional:
 - **properties** (Map of String) A list of properties associated with this package.
 
 
+<a id="nestedblock--step--deploy_kubernetes_secret_action--property"></a>
+### Nested Schema for `step.deploy_kubernetes_secret_action.property`
+
+Required:
+
+- **key** (String)
+- **value** (String)
+
+
 
 <a id="nestedblock--step--deploy_package_action"></a>
 ### Nested Schema for `step.deploy_package_action`
@@ -425,6 +455,7 @@ Optional:
 - **notes** (String) The notes associated with this deploymnt action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_package_action--package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
+- **property** (Block Set) (see [below for nested schema](#nestedblock--step--deploy_package_action--property))
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 - **windows_service** (Block Set, Max: 1) Deploy a windows service feature (see [below for nested schema](#nestedblock--step--deploy_package_action--windows_service))
 
@@ -482,6 +513,15 @@ Optional:
 - **properties** (Map of String) A list of properties associated with this package.
 
 
+<a id="nestedblock--step--deploy_package_action--property"></a>
+### Nested Schema for `step.deploy_package_action.property`
+
+Required:
+
+- **key** (String)
+- **value** (String)
+
+
 <a id="nestedblock--step--deploy_package_action--windows_service"></a>
 ### Nested Schema for `step.deploy_package_action.windows_service`
 
@@ -537,6 +577,7 @@ Optional:
 - **notes** (String) The notes associated with this deploymnt action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
+- **property** (Block Set) (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--property))
 - **service_account** (String) Which built-in account will the service run under. Can be LocalSystem, NT Authority\NetworkService, NT Authority\LocalService, _CUSTOM or an expression
 - **start_mode** (String) When will the service start. Can be auto, delayed-auto, manual, unchanged or an expression
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
@@ -595,6 +636,15 @@ Optional:
 - **properties** (Map of String) A list of properties associated with this package.
 
 
+<a id="nestedblock--step--deploy_windows_service_action--property"></a>
+### Nested Schema for `step.deploy_windows_service_action.property`
+
+Required:
+
+- **key** (String)
+- **value** (String)
+
+
 
 <a id="nestedblock--step--manual_intervention_action"></a>
 ### Nested Schema for `step.manual_intervention_action`
@@ -620,6 +670,7 @@ Optional:
 - **notes** (String) The notes associated with this deploymnt action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--manual_intervention_action--package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
+- **property** (Block Set) (see [below for nested schema](#nestedblock--step--manual_intervention_action--property))
 - **responsible_teams** (String) The teams responsible to resolve this step. If no teams are specified, all users who have permission to deploy the project can resolve it.
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 
@@ -661,6 +712,15 @@ Optional:
 - **properties** (Map of String) A list of properties associated with this package.
 
 
+<a id="nestedblock--step--manual_intervention_action--property"></a>
+### Nested Schema for `step.manual_intervention_action.property`
+
+Required:
+
+- **key** (String)
+- **value** (String)
+
+
 
 <a id="nestedblock--step--run_kubectl_script_action"></a>
 ### Nested Schema for `step.run_kubectl_script_action`
@@ -686,6 +746,7 @@ Optional:
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package))
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
+- **property** (Block Set) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--property))
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **script_file_name** (String) The script file name in the package
 - **script_parameters** (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
@@ -747,6 +808,15 @@ Optional:
 - **properties** (Map of String) A list of properties associated with this package.
 
 
+<a id="nestedblock--step--run_kubectl_script_action--property"></a>
+### Nested Schema for `step.run_kubectl_script_action.property`
+
+Required:
+
+- **key** (String)
+- **value** (String)
+
+
 
 <a id="nestedblock--step--run_script_action"></a>
 ### Nested Schema for `step.run_script_action`
@@ -772,6 +842,7 @@ Optional:
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--package))
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--primary_package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.
+- **property** (Block Set) (see [below for nested schema](#nestedblock--step--run_script_action--property))
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **script_body** (String)
 - **script_file_name** (String) The script file name in the package
@@ -834,6 +905,15 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **properties** (Map of String) A list of properties associated with this package.
+
+
+<a id="nestedblock--step--run_script_action--property"></a>
+### Nested Schema for `step.run_script_action.property`
+
+Required:
+
+- **key** (String)
+- **value** (String)
 
 ## Import
 

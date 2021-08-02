@@ -19,12 +19,29 @@ This resource manages tenant project variables in Octopus Deploy.
 
 - **environment_id** (String)
 - **project_id** (String)
+- **property_value** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--property_value))
 - **template_id** (String)
 - **tenant_id** (String)
-- **value** (String)
 
 ### Optional
 
 - **id** (String) The ID of this resource.
+
+<a id="nestedblock--property_value"></a>
+### Nested Schema for `property_value`
+
+Optional:
+
+- **is_sensitive** (Boolean)
+- **sensitive_value** (Block List, Max: 1) (see [below for nested schema](#nestedblock--property_value--sensitive_value))
+- **value** (String)
+
+<a id="nestedblock--property_value--sensitive_value"></a>
+### Nested Schema for `property_value.sensitive_value`
+
+Optional:
+
+- **hint** (String)
+- **new_value** (String)
 
 
