@@ -4,26 +4,27 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 )
 
-func expandProperties(properties interface{}) map[string]octopusdeploy.PropertyValue {
-	if properties == nil {
+func expandProperties(propertyValues interface{}) map[string]octopusdeploy.PropertyValue {
+	if propertyValues == nil {
 		return nil
 	}
 
-	expandedProperties := map[string]octopusdeploy.PropertyValue{}
-	for k, v := range properties.(map[string]interface{}) {
-		expandedProperties[k] = octopusdeploy.NewPropertyValue(v.(string), false)
+	expandedPropertyValues := map[string]octopusdeploy.PropertyValue{}
+	for k, v := range propertyValues.(map[string]interface{}) {
+		expandedPropertyValues[k] = *expandPropertyValue(v)
 	}
-	return expandedProperties
+	return expandedPropertyValues
 }
 
-func flattenProperties(properties map[string]octopusdeploy.PropertyValue) map[string]interface{} {
-	if len(properties) == 0 {
+func flattenProperties(propertyValues map[string]octopusdeploy.PropertyValue) map[string]interface{} {
+	if len(propertyValues) == 0 {
 		return nil
 	}
 
 	flattenedProperties := map[string]interface{}{}
-	for k, v := range properties {
-		flattenedProperties[k] = v.Value
+	for i := range propertyValues {
+		propertyValue := propertyValues[i]
+		flattenedProperties[i] = flattenPropertyValue(&propertyValue)
 	}
 	return flattenedProperties
 }
