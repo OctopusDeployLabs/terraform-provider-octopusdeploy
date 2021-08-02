@@ -89,12 +89,11 @@ func testAccListeningTentacleDeploymentTargetBasic(localName string, name string
 	}`+"\n"+
 		testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
 	resource "octopusdeploy_listening_tentacle_deployment_target" "%s" {
-		environments                      = ["${octopusdeploy_environment.%s.id}"]
+		environments                      = [octopusdeploy_environment.%s.id]
 		is_disabled                       = true
-		machine_policy_id                 = "${data.octopusdeploy_machine_policies.default.machine_policies[0].id}"
+		machine_policy_id                 = data.octopusdeploy_machine_policies.default.machine_policies[0].id
 		name                              = "%s"
 		roles                             = ["Prod"]
-		tenanted_deployment_participation = "Untenanted"
 		tentacle_url                      = "https://example.com:1234/"
 		thumbprint                        = "%s"
 	  }`, localName, environmentLocalName, name, thumbprint)
@@ -111,7 +110,7 @@ func testAccListeningTentacleDeploymentTargetSchemaValidation(localName string, 
 
 	return fmt.Sprintf(testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
 		`resource "octopusdeploy_listening_tentacle_deployment_target" "%s" {
-			environments = ["${octopusdeploy_environment.%s.id}"]
+			environments = [octopusdeploy_environment.%s.id]
 			name         = "%s"
 			roles        = ["something"]
 			tentacle_url = "https://example.com"
