@@ -173,14 +173,14 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 
 	for _, v := range tenantVariables.LibraryVariables {
 		if v.LibraryVariableSetID == libraryVariableSetID {
-			for id, value := range v.Variables {
-				if id == variableID {
-					if !value.IsSensitive && value.SensitiveValue == nil {
-						d.Set("property_value", flattenPropertyValue(&value))
+			for i := range v.Variables {
+				if i == variableID {
+					if !v.Variables[i].IsSensitive && v.Variables[i].SensitiveValue == nil {
+						propertyValue := v.Variables[i]
+						d.Set("property_value", flattenPropertyValue(&propertyValue))
 					}
 
-					d.SetId(id)
-
+					d.SetId(i)
 					log.Printf("[INFO] tenant common variable read (%s)", d.Id())
 					return nil
 				}
