@@ -50,9 +50,8 @@ func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[INFO] environment deleted (%s)", d.Id())
 	d.SetId("")
-
-	log.Printf("[INFO] environment deleted")
 	return nil
 }
 
@@ -62,11 +61,12 @@ func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m inte
 	client := m.(*octopusdeploy.Client)
 	environment, err := client.Environments.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] environment (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] environment (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}

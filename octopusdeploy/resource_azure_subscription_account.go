@@ -62,17 +62,13 @@ func resourceAzureSubscriptionAccountRead(ctx context.Context, d *schema.Resourc
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] Azure subscription account (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] Azure subscription account (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
-		return diag.FromErr(err)
-	}
-
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -96,12 +92,7 @@ func resourceAzureSubscriptionAccountUpdate(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	accountResource, err := octopusdeploy.ToAccount(updatedAccount.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setAzureSubscriptionAccount(ctx, d, accountResource.(*octopusdeploy.AzureSubscriptionAccount)); err != nil {
+	if err := setAzureSubscriptionAccount(ctx, d, updatedAccount.(*octopusdeploy.AzureSubscriptionAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 

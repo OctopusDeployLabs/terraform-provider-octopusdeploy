@@ -318,7 +318,7 @@ func getSubscriptionIDSchema(isRequired bool) *schema.Schema {
 
 func getTenantedDeploymentSchema() *schema.Schema {
 	return &schema.Schema{
-		Default:     "Untenanted",
+		Computed:    true,
 		Description: "The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.",
 		Optional:    true,
 		Type:        schema.TypeString,
@@ -348,6 +348,7 @@ func getTenantIDSchema(isRequired bool) *schema.Schema {
 
 func getTenantsSchema() *schema.Schema {
 	return &schema.Schema{
+		Computed:    true,
 		Description: "A list of tenant IDs associated with this resource.",
 		Elem:        &schema.Schema{Type: schema.TypeString},
 		Optional:    true,

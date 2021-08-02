@@ -42,11 +42,11 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 					testOctopusDeployVariableExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
-					resource.TestCheckResourceAttrSet(prefix, "project_id"),
+					resource.TestCheckResourceAttrSet(prefix, "owner_id"),
 					resource.TestCheckResourceAttr(prefix, "type", variableType),
 					resource.TestCheckResourceAttr(prefix, "value", value),
 					resource.TestCheckResourceAttr(prefix, "scope.#", "1"),
-					resource.TestCheckResourceAttr(prefix, "scope.0.%", "2"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.%", "6"),
 					resource.TestCheckResourceAttr(prefix, "scope.0.environments.#", "1"),
 				),
 				Config: testVariableBasic(environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, channelLocalName, channelName, localName, name, description, isSensitive, value, variableType),
@@ -56,11 +56,11 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 					testOctopusDeployVariableExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
-					resource.TestCheckResourceAttrSet(prefix, "project_id"),
+					resource.TestCheckResourceAttrSet(prefix, "owner_id"),
 					resource.TestCheckResourceAttr(prefix, "type", variableType),
 					resource.TestCheckResourceAttr(prefix, "value", newValue),
 					resource.TestCheckResourceAttr(prefix, "scope.#", "1"),
-					resource.TestCheckResourceAttr(prefix, "scope.0.%", "2"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.%", "6"),
 					resource.TestCheckResourceAttr(prefix, "scope.0.environments.#", "1"),
 				),
 				Config: testVariableBasic(environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, channelLocalName, channelName, localName, name, description, isSensitive, newValue, variableType),
@@ -126,13 +126,14 @@ func testVariableBasic(environmentLocalName string,
 		  description  = "%s"
 		  is_sensitive = "%v"
 		  name         = "%s"
-		  project_id   = octopusdeploy_project.%s.id
+		  owner_id     = octopusdeploy_project.%s.id
 		  type         = "%s"
 		  value        = "%s"
 
 		  scope {
 			channels     = [octopusdeploy_channel.%s.id]
 		    environments = [octopusdeploy_environment.%s.id]
+			tenant_tags  = ["Tenants-5241"]
 		  }
 		}`,
 		environmentLocalName,
@@ -163,7 +164,7 @@ func testVariableBasic(environmentLocalName string,
 func testAccVariableSchemaValidation(localName string, name string, projectID string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_variable" "%s" {
 		name       = "%s"
-		project_id = "%s"
+		owner_id   = "%s"
 		type       = "String"
 		value      = "1"
 	  }`, localName, name, projectID)
@@ -171,22 +172,22 @@ func testAccVariableSchemaValidation(localName string, name string, projectID st
 
 func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		var projectID string
+		var ownerID string
 		var variableID string
 
 		for _, r := range s.RootModule().Resources {
 			if r.Type == "octopusdeploy_project" {
-				projectID = r.Primary.ID
+				ownerID = r.Primary.ID
 			}
 
 			if r.Type == "octopusdeploy_variable" {
-				projectID = r.Primary.Attributes["project_id"]
+				ownerID = r.Primary.Attributes["owner_id"]
 				variableID = r.Primary.ID
 			}
 		}
 
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
-		if _, err := client.Variables.GetByID(projectID, variableID); err != nil {
+		if _, err := client.Variables.GetByID(ownerID, variableID); err != nil {
 			return fmt.Errorf("error retrieving variable %s", err)
 		}
 
@@ -195,12 +196,12 @@ func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
 }
 
 func testVariableDestroy(s *terraform.State) error {
-	var projectID string
+	var ownerID string
 	var variableID string
 
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_project" {
-			projectID = r.Primary.ID
+			ownerID = r.Primary.ID
 		}
 
 		if r.Type == "octopusdeploy_variable" {
@@ -209,7 +210,7 @@ func testVariableDestroy(s *terraform.State) error {
 	}
 
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
-	variable, err := client.Variables.GetByID(projectID, variableID)
+	variable, err := client.Variables.GetByID(ownerID, variableID)
 	if err == nil {
 		if variable != nil {
 			return fmt.Errorf("variable (%s) still exists", variableID)

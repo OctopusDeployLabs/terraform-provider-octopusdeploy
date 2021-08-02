@@ -8,7 +8,9 @@ description: |-
 # Resource (octopusdeploy_account)
 
 This resource manages accounts in Octopus Deploy.
+
 ~> **NOTE:** This is deprecated and may be removed in a future release.
+
 ## Example Usage
 
 ```terraform
@@ -96,4 +98,5 @@ resource "octopusdeploy_account" "token_account" {
 - **tenants** (List of String) A list of tenant IDs associated with this resource.
 - **token** (String, Sensitive) The token of this resource.
 - **username** (String, Sensitive) The username associated with this resource.
+
 

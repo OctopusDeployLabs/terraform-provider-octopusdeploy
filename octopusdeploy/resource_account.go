@@ -68,16 +68,20 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interfac
 	client := m.(*octopusdeploy.Client)
 	account, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] account (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] account (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}
 
-	accountResource := account.(*octopusdeploy.AccountResource)
+	accountResource, err := octopusdeploy.ToAccountResource(account)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := setAccountResource(ctx, d, accountResource); err != nil {
 		return diag.FromErr(err)
@@ -88,18 +92,22 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	accountResource := expandAccountResource(d)
+
 	log.Printf("[INFO] updating account (%s)", d.Id())
 
-	accountResource := expandAccountResource(d)
 	client := m.(*octopusdeploy.Client)
 	updatedAccount, err := client.Accounts.Update(accountResource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	updatedAccountResource := updatedAccount.(*octopusdeploy.AccountResource)
+	accountResource, err = octopusdeploy.ToAccountResource(updatedAccount)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	if err := setAccountResource(ctx, d, updatedAccountResource); err != nil {
+	if err := setAccountResource(ctx, d, accountResource); err != nil {
 		return diag.FromErr(err)
 	}
 

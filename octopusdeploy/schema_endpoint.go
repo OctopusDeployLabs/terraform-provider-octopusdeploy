@@ -71,26 +71,29 @@ func flattenEndpointResource(endpoint *octopusdeploy.EndpointResource) []interfa
 		"host":                            endpoint.Host,
 		"id":                              endpoint.GetID(),
 		"namespace":                       endpoint.Namespace,
-		"proxy_id":                        endpoint.ProxyID,
-		"port":                            endpoint.Port,
-		"resource_group_name":             endpoint.ResourceGroupName,
-		"running_in_container":            endpoint.RunningInContainer,
-		"security_mode":                   endpoint.SecurityMode,
-		"server_certificate_thumbprint":   endpoint.ServerCertificateThumbprint,
-		"skip_tls_verification":           endpoint.SkipTLSVerification,
-		"slot":                            endpoint.Slot,
-		"storage_account_name":            endpoint.StorageAccountName,
-		"swap_if_possible":                endpoint.SwapIfPossible,
-		"tentacle_version_details":        flattenTentacleVersionDetails(endpoint.TentacleVersionDetails),
-		"thumbprint":                      endpoint.Thumbprint,
-		"working_directory":               endpoint.WorkingDirectory,
-		"use_current_instance_count":      endpoint.UseCurrentInstanceCount,
-		"web_app_name":                    endpoint.WebAppName,
-		"web_app_slot_name":               endpoint.WebAppSlotName,
+		"port":                          endpoint.Port,
+		"resource_group_name":           endpoint.ResourceGroupName,
+		"running_in_container":          endpoint.RunningInContainer,
+		"security_mode":                 endpoint.SecurityMode,
+		"server_certificate_thumbprint": endpoint.ServerCertificateThumbprint,
+		"skip_tls_verification":         endpoint.SkipTLSVerification,
+		"slot":                          endpoint.Slot,
+		"storage_account_name":          endpoint.StorageAccountName,
+		"swap_if_possible":              endpoint.SwapIfPossible,
+		"tentacle_version_details":      flattenTentacleVersionDetails(endpoint.TentacleVersionDetails),
+		"thumbprint":                    endpoint.Thumbprint,
+		"working_directory":             endpoint.WorkingDirectory,
+		"use_current_instance_count":    endpoint.UseCurrentInstanceCount,
+		"web_app_name":                  endpoint.WebAppName,
+		"web_app_slot_name":             endpoint.WebAppSlotName,
 	}
 
 	if endpoint.ClusterURL != nil {
 		rawEndpoint["cluster_url"] = endpoint.ClusterURL.String()
+	}
+
+	if !isEmpty(endpoint.ProxyID) {
+		rawEndpoint["proxy_id"] = endpoint.ProxyID
 	}
 
 	if endpoint.URI != nil {

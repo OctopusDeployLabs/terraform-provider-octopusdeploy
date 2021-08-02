@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -17,26 +18,27 @@ func dataSourceLibraryVariableSet() *schema.Resource {
 }
 
 func dataSourceLibraryVariableSetReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	name := d.Get("name").(string)
+	query := octopusdeploy.LibraryVariablesQuery{
+		ContentType: d.Get("content_type").(string),
+		IDs:         expandArray(d.Get("ids").([]interface{})),
+		PartialName: d.Get("partial_name").(string),
+		Skip:        d.Get("skip").(int),
+		Take:        d.Get("take").(int),
+	}
 
 	client := m.(*octopusdeploy.Client)
-	libraryVariableSets, err := client.LibraryVariableSets.GetByPartialName(name)
+	libraryVariableSets, err := client.LibraryVariableSets.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if len(libraryVariableSets) == 0 {
-		return nil
+
+	flattenedLibraryVariableSets := []interface{}{}
+	for _, libraryVariableSet := range libraryVariableSets.Items {
+		flattenedLibraryVariableSets = append(flattenedLibraryVariableSets, flattenLibraryVariableSet(libraryVariableSet))
 	}
 
-	// NOTE: two or more library variables can have the same name in Octopus.
-	// Therefore, a better search criteria needs to be implemented below.
-
-	for _, libraryVariableSet := range libraryVariableSets {
-		if libraryVariableSet.Name == name {
-			setLibraryVariableSet(ctx, d, libraryVariableSet)
-			return nil
-		}
-	}
+	d.Set("library_variable_sets", flattenedLibraryVariableSets)
+	d.SetId("Library Variables Sets " + time.Now().UTC().String())
 
 	return nil
 }

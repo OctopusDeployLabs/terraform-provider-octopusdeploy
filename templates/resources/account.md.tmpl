@@ -8,10 +8,9 @@ description: |-
 # {{.Name}} ({{.Type}})
 
 {{ .Description | trimspace }}
-{{ if .IsDeprecated -}}
-
+{{ if .IsDeprecated }}
 ~> **NOTE:** This is deprecated and may be removed in a future release.
-{{- end }}
+{{ end }}
 ## Example Usage
 
 {{ tffile (printf "%s%s%s" "examples/resources/" .Type "/resource.tf") }}

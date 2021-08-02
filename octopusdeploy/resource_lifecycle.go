@@ -46,14 +46,12 @@ func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m inte
 	log.Printf("[INFO] deleting lifecycle (%s)", d.Id())
 
 	client := m.(*octopusdeploy.Client)
-	err := client.Lifecycles.DeleteByID(d.Id())
-	if err != nil {
+	if err := client.Lifecycles.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[INFO] lifecycle deleted (%s)", d.Id())
 	d.SetId("")
-
-	log.Printf("[INFO] lifecycle deleted")
 	return nil
 }
 
@@ -63,11 +61,12 @@ func resourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interf
 	client := m.(*octopusdeploy.Client)
 	lifecycle, err := client.Lifecycles.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] lifecycle (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] lifecycle (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}

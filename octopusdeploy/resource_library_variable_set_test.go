@@ -37,6 +37,7 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 	prefix := "octopusdeploy_library_variable_set." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLibraryVariableSetDestroy,
@@ -44,10 +45,28 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
+				Config: testLibraryVariableSetBasic(localName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "template.#", "0"),
+				),
+			},
+			{
+				Config: testLibraryVariableSetBasicWithDescription(localName, name, description),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "template.#", "0"),
+				),
+			},
+			{
 				Config: testLibraryVariableSetComplex(localName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "template.#", "3"),
+					resource.TestCheckResourceAttr(prefix, "template.1.default_value", "wjehqwjkehwqkejhqwe"),
 				),
 			},
 		},
@@ -57,6 +76,9 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_library_variable_set." + localName
+
+	dataLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	dataPrefix := "data.octopusdeploy_library_variable_sets." + dataLocalName
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -81,7 +103,7 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 				),
-				Config: testAccLibraryVariableSetWithDescription(localName, name, description),
+				Config: testLibraryVariableSetBasicWithDescription(localName, name, description),
 			},
 			// update again by remove its description
 			{
@@ -91,6 +113,12 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "description", ""),
 				),
 				Config: testLibraryVariableSetBasic(localName, name),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLibraryVariableSetDataSourceID(dataPrefix),
+				),
+				Config: testLibraryVariableSetsData(dataLocalName, name),
 			},
 		},
 	})
@@ -102,17 +130,24 @@ func testLibraryVariableSetBasic(localName string, name string) string {
 	}`, localName, name)
 }
 
-func testAccLibraryVariableSetWithDescription(localName string, name string, description string) string {
+func testLibraryVariableSetBasicWithDescription(localName string, name string, description string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_library_variable_set" "%s" {
 		name        = "%s"
 		description = "%s"
 	}`, localName, name, description)
 }
 
+func testLibraryVariableSetsData(localName string, name string) string {
+	return fmt.Sprintf(`data "octopusdeploy_library_variable_sets" "%s" {
+		partial_name = "%s"
+	}`, localName, name)
+}
+
 func testLibraryVariableSetComplex(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_library_variable_set" "%s" {
-		description     = "This is the description."
-		name            = "%s"
+		description = "This is the description."
+		name        = "%s"
+
 		template {
 			default_value    = "Default Value???"
 			display_settings = {
@@ -122,6 +157,7 @@ func testLibraryVariableSetComplex(localName string, name string) string {
 			label            = "Test Label"
 			name             = "Test Template"
 		}
+
 		template {
 			default_value    = "wjehqwjkehwqkejhqwe"
 			display_settings = {
@@ -131,6 +167,7 @@ func testLibraryVariableSetComplex(localName string, name string) string {
 			label            = "alsdjhaldksh"
 			name             = "Another Variable???"
 		}
+
 		template {
 			default_value    = "qweq|qwe"
 			display_settings = {
@@ -184,4 +221,19 @@ func existsHelperLibraryVariableSet(s *terraform.State, client *octopusdeploy.Cl
 		}
 	}
 	return nil
+}
+
+func testAccCheckLibraryVariableSetDataSourceID(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		all := s.RootModule().Resources
+		rs, ok := all[n]
+		if !ok {
+			return fmt.Errorf("cannot find library variable set data source: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("snapshot library variable set source ID not set")
+		}
+		return nil
+	}
 }

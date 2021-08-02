@@ -7,8 +7,7 @@ import (
 )
 
 func expandRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.RetentionPeriod {
-	v, ok := d.GetOk(key)
-	if ok {
+	if v, ok := d.GetOk(key); ok {
 		retentionPeriod := v.([]interface{})
 		if len(retentionPeriod) == 1 {
 			tfRetentionItem := retentionPeriod[0].(map[string]interface{})

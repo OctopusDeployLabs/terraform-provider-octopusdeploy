@@ -30,15 +30,46 @@ func expandLibraryVariableSet(d *schema.ResourceData) *octopusdeploy.LibraryVari
 	return libraryVariableSet
 }
 
+func flattenLibraryVariableSet(libraryVariableSet *octopusdeploy.LibraryVariableSet) map[string]interface{} {
+	if libraryVariableSet == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"description":     libraryVariableSet.Description,
+		"id":              libraryVariableSet.GetID(),
+		"name":            libraryVariableSet.Name,
+		"space_id":        libraryVariableSet.SpaceID,
+		"template":        flattenActionTemplateParameters(libraryVariableSet.Templates),
+		"variable_set_id": libraryVariableSet.VariableSetID,
+	}
+}
+
 func getLibraryVariableSetDataSchema() map[string]*schema.Schema {
+	dataSchema := getLibraryVariableSetSchema()
+	setDataSchema(&dataSchema)
+
 	return map[string]*schema.Schema{
-		"name": getNameSchema(true),
+		"content_type": getQueryContentType(),
+		"id":           getDataSchemaID(),
+		"ids":          getQueryIDs(),
+		"library_variable_sets": {
+			Computed:    true,
+			Description: "A list of library variable sets that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
 	}
 }
 
 func getLibraryVariableSetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"description": getDescriptionSchema(),
+		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
 		"space_id":    getSpaceIDSchema(),
 		"template": {

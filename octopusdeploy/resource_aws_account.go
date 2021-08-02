@@ -62,17 +62,13 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] AWS account (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] AWS account (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
-		return diag.FromErr(err)
-	}
-
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -96,12 +92,7 @@ func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	accountResource, err := octopusdeploy.ToAccount(updatedAccount.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setAmazonWebServicesAccount(ctx, d, accountResource.(*octopusdeploy.AmazonWebServicesAccount)); err != nil {
+	if err := setAmazonWebServicesAccount(ctx, d, updatedAccount.(*octopusdeploy.AmazonWebServicesAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_variable Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages variables in Octopus Deploy.
 ---
 
 # octopusdeploy_variable (Resource)
 
-
+This resource manages variables in Octopus Deploy.
 
 
 
@@ -18,7 +18,6 @@ description: |-
 ### Required
 
 - **name** (String) The name of this resource.
-- **project_id** (String)
 - **type** (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
 
 ### Optional
@@ -27,7 +26,9 @@ description: |-
 - **id** (String) The ID of this resource.
 - **is_editable** (Boolean) Indicates whether or not this variable is considered editable.
 - **is_sensitive** (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
+- **owner_id** (String)
 - **pgp_key** (String, Sensitive)
+- **project_id** (String, Deprecated)
 - **prompt** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--prompt))
 - **scope** (Block List, Max: 1) (see [below for nested schema](#nestedblock--scope))
 - **sensitive_value** (String, Sensitive)
@@ -57,15 +58,7 @@ Optional:
 - **channels** (List of String) A list of channels that are scoped to this variable value.
 - **environments** (List of String) A list of environments that are scoped to this variable value.
 - **machines** (List of String) A list of machines that are scoped to this variable value.
-- **parent_deployments** (List of String) A list of parent deployments that are scoped to this variable value.
-- **private** (List of String)
-- **process_owners** (List of String) A list of process owners that are scoped to this variable value.
-- **projects** (List of String) A list of projects that are scoped to this variable value.
 - **roles** (List of String) A list of roles that are scoped to this variable value.
-- **target_roles** (List of String) A list of target roles that are scoped to this variable value.
 - **tenant_tags** (List of String) A list of tenant tags that are scoped to this variable value.
-- **tenants** (List of String) A list of tenants that are scoped to this variable value.
-- **triggers** (List of String) A list of triggers that are scoped to this variable value.
-- **users** (List of String) A list of users that are scoped to this variable value.
 
 

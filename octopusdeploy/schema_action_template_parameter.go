@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandActionTemplateParameter(tfTemplate map[string]interface{}) *octopusdeploy.ActionTemplateParameter {
+func expandActionTemplateParameter(tfTemplate map[string]interface{}) octopusdeploy.ActionTemplateParameter {
 	actionTemplateParameter := octopusdeploy.NewActionTemplateParameter()
 
 	propertyValue := octopusdeploy.NewPropertyValue(tfTemplate["default_value"].(string), false)
@@ -17,15 +17,15 @@ func expandActionTemplateParameter(tfTemplate map[string]interface{}) *octopusde
 	actionTemplateParameter.Label = tfTemplate["label"].(string)
 	actionTemplateParameter.Name = tfTemplate["name"].(string)
 
-	return actionTemplateParameter
+	return *actionTemplateParameter
 }
 
-func expandActionTemplateParameters(actionTemplateParameters []interface{}) []*octopusdeploy.ActionTemplateParameter {
+func expandActionTemplateParameters(actionTemplateParameters []interface{}) []octopusdeploy.ActionTemplateParameter {
 	if len(actionTemplateParameters) == 0 {
 		return nil
 	}
 
-	expandedActionTemplateParameters := []*octopusdeploy.ActionTemplateParameter{}
+	expandedActionTemplateParameters := []octopusdeploy.ActionTemplateParameter{}
 	for _, actionTemplateParameter := range actionTemplateParameters {
 		actionTemplateParameterMap := actionTemplateParameter.(map[string]interface{})
 		expandedActionTemplateParameters = append(expandedActionTemplateParameters, expandActionTemplateParameter(actionTemplateParameterMap))
@@ -33,7 +33,7 @@ func expandActionTemplateParameters(actionTemplateParameters []interface{}) []*o
 	return expandedActionTemplateParameters
 }
 
-func flattenActionTemplateParameters(actionTemplateParameters []*octopusdeploy.ActionTemplateParameter) []interface{} {
+func flattenActionTemplateParameters(actionTemplateParameters []octopusdeploy.ActionTemplateParameter) []interface{} {
 	flattenedActionTemplateParameters := make([]interface{}, 0)
 	for _, actionTemplateParameter := range actionTemplateParameters {
 		a := make(map[string]interface{})

@@ -70,6 +70,14 @@ func getQueryCommunicationStyles() *schema.Schema {
 	}
 }
 
+func getQueryContentType() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by content type.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
 func getQueryDeploymentID() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by deployment ID.",
@@ -257,7 +265,6 @@ func getQueryTags() *schema.Schema {
 
 func getQueryTake() *schema.Schema {
 	return &schema.Schema{
-		Default:     1,
 		Description: "A filter to specify the number of items to take (or return) in the response.",
 		Type:        schema.TypeInt,
 		Optional:    true,

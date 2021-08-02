@@ -63,11 +63,12 @@ func resourceAwsElasticContainerRegistryRead(ctx context.Context, d *schema.Reso
 	client := m.(*octopusdeploy.Client)
 	feedResource, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] AWS Elastic Container Registry (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] AWS Elastic Container Registry (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}

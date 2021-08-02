@@ -51,6 +51,7 @@ func testAccKubernetesClusterDeploymentTargetBasic(accountLocalName string, acco
 		   environments = ["%s"]
 		   name         = "%s"
 		   roles        = ["%s"]
+		   tenanted_deployment_participation = "Untenanted"
 
 		   authentication {
 		     account_id = "%s"

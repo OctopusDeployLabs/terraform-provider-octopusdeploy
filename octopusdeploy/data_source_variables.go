@@ -17,7 +17,7 @@ func dataSourceVariable() *schema.Resource {
 }
 
 func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectID := d.Get("project_id")
+	ownerID := d.Get("owner_id")
 	name := d.Get("name")
 	scope := octopusdeploy.VariableScope{}
 
@@ -26,15 +26,15 @@ func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	client := m.(*octopusdeploy.Client)
-	variables, err := client.Variables.GetByName(projectID.(string), name.(string), scope)
+	variables, err := client.Variables.GetByName(ownerID.(string), name.(string), &scope)
 	if err != nil {
-		return diag.Errorf("error reading variable from project %s with name %s: %s", projectID, name, err.Error())
+		return diag.Errorf("error reading variable with owner ID %s with name %s: %s", ownerID, name, err.Error())
 	}
 	if variables == nil {
 		return nil
 	}
 	if len(variables) > 1 {
-		return diag.Errorf("found %v variables for project %s with name %s, should match exactly 1", len(variables), projectID, name)
+		return diag.Errorf("found %v variables with owner ID %s with name %s, should match exactly 1", len(variables), ownerID, name)
 	}
 
 	d.SetId(variables[0].ID)

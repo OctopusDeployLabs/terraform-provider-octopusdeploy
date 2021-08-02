@@ -62,27 +62,21 @@ func resourceUsernamePasswordAccountRead(ctx context.Context, d *schema.Resource
 	client := m.(*octopusdeploy.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] username-password account (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
+		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] username-password account (%s) not found; deleting from state", d.Id())
+				d.SetId("")
+				return nil
+			}
 		}
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
+	if err := setUsernamePasswordAccount(ctx, d, accountResource.(*octopusdeploy.UsernamePasswordAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	usernamePasswordAccount := accountResource.(*octopusdeploy.UsernamePasswordAccount)
-
-	if err := setUsernamePasswordAccount(ctx, d, usernamePasswordAccount); err != nil {
-		return diag.FromErr(err)
-	}
-
-	log.Printf("[INFO] username-password account read: %#v", usernamePasswordAccount)
+	log.Printf("[INFO] username-password account read: (%s)", d.Id())
 	return nil
 }
 
@@ -92,17 +86,12 @@ func resourceUsernamePasswordAccountUpdate(ctx context.Context, d *schema.Resour
 	log.Printf("[INFO] updating username-password account: %#v", account)
 
 	client := m.(*octopusdeploy.Client)
-	accountResource, err := client.Accounts.Update(account)
+	updatedAccount, err := client.Accounts.Update(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setUsernamePasswordAccount(ctx, d, accountResource.(*octopusdeploy.UsernamePasswordAccount)); err != nil {
+	if err := setUsernamePasswordAccount(ctx, d, updatedAccount.(*octopusdeploy.UsernamePasswordAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 
