@@ -46,8 +46,9 @@ func getSensitiveValueSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"new_value": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
 		},
 	}
 }
