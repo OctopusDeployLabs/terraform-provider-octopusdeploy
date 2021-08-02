@@ -5,17 +5,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandPropertyValue(values interface{}) *octopusdeploy.PropertyValue {
-	if values == nil {
+func expandPropertyValue(value interface{}) *octopusdeploy.PropertyValue {
+	if value == nil {
 		return nil
 	}
 
-	flattenedValues := values.([]interface{})
-	if len(flattenedValues) == 0 {
+	flattenedValue := value.([]interface{})
+	if len(flattenedValue) == 0 {
 		return nil
 	}
 
-	flattenedPropertyValue := flattenedValues[0].(map[string]interface{})
+	flattenedPropertyValue := flattenedValue[0].(map[string]interface{})
 
 	isSensitive := flattenedPropertyValue["is_sensitive"].(bool)
 
