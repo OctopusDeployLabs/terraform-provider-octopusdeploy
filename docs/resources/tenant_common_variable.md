@@ -18,29 +18,13 @@ This resource manages tenant common variables in Octopus Deploy.
 ### Required
 
 - **library_variable_set_id** (String)
-- **property_value** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--property_value))
 - **tenant_id** (String)
 - **variable_id** (String)
 
 ### Optional
 
 - **id** (String) The ID of this resource.
-
-<a id="nestedblock--property_value"></a>
-### Nested Schema for `property_value`
-
-Optional:
-
 - **is_sensitive** (Boolean)
-- **sensitive_value** (Block List, Max: 1) (see [below for nested schema](#nestedblock--property_value--sensitive_value))
-- **value** (String)
-
-<a id="nestedblock--property_value--sensitive_value"></a>
-### Nested Schema for `property_value.sensitive_value`
-
-Optional:
-
-- **hint** (String)
-- **new_value** (String)
+- **value** (String, Sensitive)
 
 
