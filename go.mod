@@ -6,11 +6,11 @@ require (
 	cloud.google.com/go v0.89.0 // indirect
 	cloud.google.com/go/storage v1.16.0 // indirect
 	github.com/Microsoft/go-winio v0.4.17 // indirect
-	github.com/OctopusDeploy/go-octopusdeploy v1.7.31
+	github.com/OctopusDeploy/go-octopusdeploy v1.7.32
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
-	github.com/aws/aws-sdk-go v1.40.12 // indirect
+	github.com/aws/aws-sdk-go v1.40.13 // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/gliderlabs/ssh v0.3.2 // indirect
 	github.com/go-playground/validator/v10 v10.8.0 // indirect
@@ -32,7 +32,7 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20210707203944-259a57b3608c // indirect
 	github.com/jhump/protoreflect v1.8.2 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
-	github.com/klauspost/compress v1.13.1 // indirect
+	github.com/klauspost/compress v1.13.2 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

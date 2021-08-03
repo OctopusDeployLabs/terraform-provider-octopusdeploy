@@ -94,6 +94,8 @@ github.com/Microsoft/go-winio v0.4.17/go.mod h1:JPGBdM1cNvN/6ISo+n8V5iA4v8pBzdOp
 github.com/NYTimes/gziphandler v0.0.0-20170623195520-56545f4a5d46/go.mod h1:3wb06e3pkSAbeQ52E9H9iFoQsEEwGN64994WTCIhntQ=
 github.com/OctopusDeploy/go-octopusdeploy v1.7.31 h1:ktl8w3/nfPayPDqACHoQWw4XCRC5pIFAokZC4z0jQwg=
 github.com/OctopusDeploy/go-octopusdeploy v1.7.31/go.mod h1:LxU1FLdl4U4G39ktDOfUrj2pDeVMVvh4ik69SQ2Pc3Q=
+github.com/OctopusDeploy/go-octopusdeploy v1.7.32 h1:o3tUmIZ45AU9/LcXFcKFousLse+WXW8+NsEr24p1NNo=
+github.com/OctopusDeploy/go-octopusdeploy v1.7.32/go.mod h1:zKekXHXGaY0Avpn4+nYVL5GMFpbV5MfH92vvN/c9HYM=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7/go.mod h1:z4/9nQmJSSwwds7ejkxaJwO37dru3geImFUdJlaLzQo=
 github.com/PuerkitoBio/purell v1.0.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
@@ -138,6 +140,8 @@ github.com/aws/aws-sdk-go v1.40.6 h1:JCQfi5MD8cW0PCAzr88hj9tj4BdEJkAy8EyAJ6c8I/k
 github.com/aws/aws-sdk-go v1.40.6/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
 github.com/aws/aws-sdk-go v1.40.12 h1:66+IAWhl+aaZCW1+ndS/GNfAxy8tJca2cMoIF2O325I=
 github.com/aws/aws-sdk-go v1.40.12/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
+github.com/aws/aws-sdk-go v1.40.13 h1:QC1uYnUqVjhw0DEoIkmloErlno8t7NAtxFU+4fLWRTU=
+github.com/aws/aws-sdk-go v1.40.13/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d h1:xDfNPAt8lFiC1UJrqV3uuy861HCTo708pDMbjHHdCas=
@@ -490,6 +494,8 @@ github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+o
 github.com/klauspost/compress v1.11.2/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYsUV+/s2qKfXs=
 github.com/klauspost/compress v1.13.1 h1:wXr2uRxZTJXHLly6qhJabee5JqIhTRoLBhDOA74hDEQ=
 github.com/klauspost/compress v1.13.1/go.mod h1:8dP1Hq4DHOhN9w426knH3Rhby4rFm6D8eO+e+Dq5Gzg=
+github.com/klauspost/compress v1.13.2 h1:YecVYiuZPySnUyT8Ar9d5VawPwybeQw9IcwsLfdfdEk=
+github.com/klauspost/compress v1.13.2/go.mod h1:8dP1Hq4DHOhN9w426knH3Rhby4rFm6D8eO+e+Dq5Gzg=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.2/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFBFZlji/RkVcI2GknAs/DXo4wKdlNEc=
