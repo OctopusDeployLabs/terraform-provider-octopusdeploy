@@ -87,17 +87,11 @@ func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName s
 		}
 
 		resource "octopusdeploy_tenant_common_variable" "%s" {
+			is_sensitive            = true
 			library_variable_set_id = octopusdeploy_library_variable_set.test-library-variable-set.id
 			tenant_id               = octopusdeploy_tenant.%s.id
 			variable_id             = octopusdeploy_library_variable_set.test-library-variable-set.template[0].id
-
-			property_value {
-				is_sensitive = true
-
-				sensitive_value {
-					new_value = "%s"
-				}
-			}
+			value                   = "%s"
 		}`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, environmentLocalName, localName, tenantLocalName, value)
 }
 

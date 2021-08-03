@@ -19,19 +19,24 @@ func resourceTenantCommonVariable() *schema.Resource {
 		Importer:      &schema.ResourceImporter{State: resourceTenantCommonVariableImporter},
 		ReadContext:   resourceTenantCommonVariableRead,
 		Schema: map[string]*schema.Schema{
+			"is_sensitive": {
+				Default:  false,
+				Optional: true,
+				Type:     schema.TypeBool,
+			},
 			"library_variable_set_id": {
 				Required: true,
 				Type:     schema.TypeString,
 			},
-			"property_value": {
-				Required: true,
-				Elem:     &schema.Resource{Schema: getPropertyValueSchema()},
-				MaxItems: 1,
-				Type:     schema.TypeList,
-			},
 			"tenant_id": {
 				Required: true,
 				Type:     schema.TypeString,
+			},
+			"value": {
+				Default:   "",
+				Optional:  true,
+				Sensitive: true,
+				Type:      schema.TypeString,
 			},
 			"variable_id": {
 				Required: true,
@@ -64,9 +69,10 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 
 	for _, v := range tenantVariables.LibraryVariables {
 		if v.LibraryVariableSetID == libraryVariableSetID {
-			propertyValue := expandPropertyValue(d.Get("property_value"))
+			isSensitive := d.Get("is_sensitive").(bool)
+			value := d.Get("value").(string)
 
-			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = *propertyValue
+			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = octopusdeploy.NewPropertyValue(value, isSensitive)
 			client.Tenants.UpdateVariables(tenant, tenantVariables)
 
 			d.SetId(id)
@@ -76,7 +82,7 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	d.SetId("")
-	return diag.Errorf("unable to locate tenant variable for tenant ID, %s", tenantID)
+	return diag.Errorf("unable to locate tenant common variable for tenant ID, %s", tenantID)
 }
 
 func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -175,9 +181,10 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 		if v.LibraryVariableSetID == libraryVariableSetID {
 			for i := range v.Variables {
 				if i == variableID {
+					d.Set("is_sensitive", v.Variables[i].IsSensitive)
+
 					if !v.Variables[i].IsSensitive && v.Variables[i].SensitiveValue == nil {
-						propertyValue := v.Variables[i]
-						d.Set("property_value", flattenPropertyValue(&propertyValue))
+						d.Set("value", v.Variables[i].Value)
 					}
 
 					d.SetId(i)
@@ -215,8 +222,10 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 
 	for _, v := range tenantVariables.LibraryVariables {
 		if v.LibraryVariableSetID == libraryVariableSetID {
-			propertyValue := expandPropertyValue(d.Get("property_value"))
-			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = *propertyValue
+			isSensitive := d.Get("is_sensitive").(bool)
+			value := d.Get("value").(string)
+
+			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[variableID] = octopusdeploy.NewPropertyValue(value, isSensitive)
 			client.Tenants.UpdateVariables(tenant, tenantVariables)
 
 			d.SetId(id)
