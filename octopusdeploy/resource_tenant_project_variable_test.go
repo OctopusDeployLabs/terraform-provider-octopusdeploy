@@ -18,8 +18,10 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	primaryEnvironmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	primaryEnvironmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	secondaryEnvironmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	secondaryEnvironmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tenantLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tenantName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tenantDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -39,22 +41,23 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testTenantProjectVariableExists(resourceName),
 				),
-				Config: testAccTenantProjectVariableBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, tenantLocalName, tenantName, tenantDescription, tenantVariablesLocalName, value),
+				Config: testAccTenantProjectVariableBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, primaryEnvironmentLocalName, primaryEnvironmentName, secondaryEnvironmentLocalName, secondaryEnvironmentName, tenantLocalName, tenantName, tenantDescription, tenantVariablesLocalName, value),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testTenantProjectVariableExists(resourceName),
 				),
-				Config: testAccTenantProjectVariableBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, tenantLocalName, tenantName, tenantDescription, tenantVariablesLocalName, newValue),
+				Config: testAccTenantProjectVariableBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, primaryEnvironmentLocalName, primaryEnvironmentName, secondaryEnvironmentLocalName, secondaryEnvironmentName, tenantLocalName, tenantName, tenantDescription, tenantVariablesLocalName, newValue),
 			},
 		},
 	})
 }
 
-func testAccTenantProjectVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, tenantLocalName string, tenantName string, tenantDescription string, localName string, value string) string {
+func testAccTenantProjectVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, primaryEnvironmentLocalName string, primaryEnvironmentName string, secondaryEnvironmentLocalName string, secondaryEnvironmentName string, tenantLocalName string, tenantName string, tenantDescription string, localName string, value string) string {
 	return fmt.Sprintf(testAccLifecycleBasic(lifecycleLocalName, lifecycleName)+"\n"+
 		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
-		testEnvironmentMinimum(environmentLocalName, environmentName)+"\n"+`
+		testEnvironmentMinimum(primaryEnvironmentLocalName, primaryEnvironmentName)+"\n"+
+		testEnvironmentMinimum(secondaryEnvironmentLocalName, secondaryEnvironmentName)+"\n"+`
 		resource "octopusdeploy_project" "%s" {
 			lifecycle_id                   = octopusdeploy_lifecycle.%s.id
 			name                           = "%s"
@@ -71,18 +74,25 @@ func testAccTenantProjectVariableBasic(lifecycleLocalName string, lifecycleName 
 
 			project_environment {
 				project_id   = octopusdeploy_project.%s.id
-				environments = [octopusdeploy_environment.%s.id]
+				environments = [octopusdeploy_environment.%s.id, octopusdeploy_environment.%s.id]
 			}
 		}
 
 		resource "octopusdeploy_tenant_project_variable" "%s" {
 			environment_id = octopusdeploy_environment.%s.id
-			is_sensitive   = false
 			project_id     = octopusdeploy_project.%s.id
 			tenant_id      = octopusdeploy_tenant.%s.id
 			template_id    = octopusdeploy_project.%s.template[0].id
 			value          = "%s"
-		}`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, environmentLocalName, localName, environmentLocalName, projectLocalName, tenantLocalName, projectLocalName, value)
+		}
+
+		resource "octopusdeploy_tenant_project_variable" "%s" {
+			environment_id = octopusdeploy_environment.%s.id
+			project_id     = octopusdeploy_project.%s.id
+			tenant_id      = octopusdeploy_tenant.%s.id
+			template_id    = octopusdeploy_project.%s.template[0].id
+			value          = "%s"
+		}`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, primaryEnvironmentLocalName, secondaryEnvironmentLocalName, localName, primaryEnvironmentLocalName, projectLocalName, tenantLocalName, projectLocalName, value, localName+"2", secondaryEnvironmentLocalName, projectLocalName, tenantLocalName, projectLocalName, value)
 }
 
 func testTenantProjectVariableExists(prefix string) resource.TestCheckFunc {

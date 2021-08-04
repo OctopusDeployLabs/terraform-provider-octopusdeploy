@@ -87,10 +87,9 @@ func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName s
 		}
 
 		resource "octopusdeploy_tenant_common_variable" "%s" {
-			is_sensitive            = true
 			library_variable_set_id = octopusdeploy_library_variable_set.test-library-variable-set.id
+			template_id             = octopusdeploy_library_variable_set.test-library-variable-set.template[0].id
 			tenant_id               = octopusdeploy_tenant.%s.id
-			variable_id             = octopusdeploy_library_variable_set.test-library-variable-set.template[0].id
 			value                   = "%s"
 		}`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, environmentLocalName, localName, tenantLocalName, value)
 }
@@ -99,13 +98,13 @@ func testTenantCommonVariableExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		var tenantID string
 		var libraryVariableSetID string
-		var variableID string
+		var templateID string
 
 		for _, r := range s.RootModule().Resources {
 			if r.Type == "octopusdeploy_tenant_common_variable" {
 				libraryVariableSetID = r.Primary.Attributes["library_variable_set_id"]
+				templateID = r.Primary.Attributes["template_id"]
 				tenantID = r.Primary.Attributes["tenant_id"]
-				variableID = r.Primary.Attributes["variable_id"]
 			}
 		}
 
@@ -122,7 +121,7 @@ func testTenantCommonVariableExists(prefix string) resource.TestCheckFunc {
 
 		for _, v := range tenantVariables.LibraryVariables {
 			if v.LibraryVariableSetID == libraryVariableSetID {
-				if _, ok := v.Variables[variableID]; ok {
+				if _, ok := v.Variables[templateID]; ok {
 					return nil
 				}
 			}

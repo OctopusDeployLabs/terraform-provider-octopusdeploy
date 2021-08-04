@@ -23,11 +23,6 @@ func resourceTenantProjectVariable() *schema.Resource {
 				Required: true,
 				Type:     schema.TypeString,
 			},
-			"is_sensitive": {
-				Default:  false,
-				Optional: true,
-				Type:     schema.TypeBool,
-			},
 			"project_id": {
 				Required: true,
 				Type:     schema.TypeString,
@@ -72,11 +67,22 @@ func resourceTenantProjectVariableCreate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	for _, v := range tenantVariables.ProjectVariables {
-		if v.ProjectID == projectID {
-			for k := range v.Variables {
-				if k == environmentID {
-					isSensitive := d.Get("is_sensitive").(bool)
+	project, err := client.Projects.GetByID(projectID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	isSensitive := false
+	for _, template := range project.Templates {
+		if template.GetID() == templateID {
+			isSensitive = template.DisplaySettings["Octopus.ControlType"] == "Sensitive"
+		}
+	}
+
+	for _, projectVariable := range tenantVariables.ProjectVariables {
+		if projectVariable.ProjectID == projectID {
+			for environment := range projectVariable.Variables {
+				if environment == environmentID {
 					value := d.Get("value").(string)
 
 					tenantVariables.ProjectVariables[projectID].Variables[environmentID][templateID] = octopusdeploy.NewPropertyValue(value, isSensitive)
@@ -122,10 +128,10 @@ func resourceTenantProjectVariableDelete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	for _, v := range tenantVariables.ProjectVariables {
-		if v.ProjectID == projectID {
-			for k := range v.Variables {
-				if k == environmentID {
+	for _, projectVariable := range tenantVariables.ProjectVariables {
+		if projectVariable.ProjectID == projectID {
+			for environment := range projectVariable.Variables {
+				if environment == environmentID {
 					delete(tenantVariables.ProjectVariables[projectID].Variables[environmentID], templateID)
 					client.Tenants.UpdateVariables(tenant, tenantVariables)
 
@@ -189,18 +195,27 @@ func resourceTenantProjectVariableRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	for _, v := range tenantVariables.ProjectVariables {
-		if v.ProjectID == projectID {
-			for k, value := range v.Variables {
-				if k == environmentID {
-					d.Set("is_sensitive", value[templateID].IsSensitive)
+	project, err := client.Projects.GetByID(projectID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-					if !value[templateID].IsSensitive {
-						d.Set("value", value[templateID].Value)
+	isSensitive := false
+	for _, template := range project.Templates {
+		if template.GetID() == templateID {
+			isSensitive = template.DisplaySettings["Octopus.ControlType"] == "Sensitive"
+		}
+	}
+
+	for _, projectVariable := range tenantVariables.ProjectVariables {
+		if projectVariable.ProjectID == projectID {
+			for environment, templates := range projectVariable.Variables {
+				if environment == environmentID {
+					if !isSensitive {
+						d.Set("value", templates[templateID].Value)
 					}
 
 					d.SetId(id)
-
 					log.Printf("[INFO] tenant project variable read (%s)", d.Id())
 					return nil
 				}
@@ -234,11 +249,22 @@ func resourceTenantProjectVariableUpdate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	for _, v := range tenantVariables.ProjectVariables {
-		if v.ProjectID == projectID {
-			for k := range v.Variables {
-				if k == environmentID {
-					isSensitive := d.Get("is_sensitive").(bool)
+	project, err := client.Projects.GetByID(projectID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	isSensitive := false
+	for _, template := range project.Templates {
+		if template.GetID() == templateID {
+			isSensitive = template.DisplaySettings["Octopus.ControlType"] == "Sensitive"
+		}
+	}
+
+	for _, projectVariable := range tenantVariables.ProjectVariables {
+		if projectVariable.ProjectID == projectID {
+			for environment := range projectVariable.Variables {
+				if environment == environmentID {
 					value := d.Get("value").(string)
 
 					tenantVariables.ProjectVariables[projectID].Variables[environmentID][templateID] = octopusdeploy.NewPropertyValue(value, isSensitive)
