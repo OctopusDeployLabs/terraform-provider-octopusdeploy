@@ -18,13 +18,12 @@ This resource manages tenant common variables in Octopus Deploy.
 ### Required
 
 - **library_variable_set_id** (String)
+- **template_id** (String)
 - **tenant_id** (String)
-- **variable_id** (String)
 
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **is_sensitive** (Boolean)
 - **value** (String, Sensitive)
 
 
