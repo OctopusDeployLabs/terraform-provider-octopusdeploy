@@ -38,12 +38,14 @@ func TestAccTenantCommonVariableBasic(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testTenantCommonVariableExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "value", value),
 				),
 				Config: testAccTenantCommonVariableBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, tenantLocalName, tenantName, tenantDescription, tenantVariablesLocalName, value),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testTenantCommonVariableExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "value", newValue),
 				),
 				Config: testAccTenantCommonVariableBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, tenantLocalName, tenantName, tenantDescription, tenantVariablesLocalName, newValue),
 			},
