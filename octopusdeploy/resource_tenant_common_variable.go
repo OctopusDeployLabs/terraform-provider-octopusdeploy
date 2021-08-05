@@ -43,9 +43,13 @@ func resourceTenantCommonVariable() *schema.Resource {
 }
 
 func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
 	templateID := d.Get("template_id").(string)
+	value := d.Get("value").(string)
 
 	id := tenantID + ":" + libraryVariableSetID + ":" + templateID
 
@@ -62,29 +66,20 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	libraryVariableSet, err := client.LibraryVariableSets.GetByID(libraryVariableSetID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	isSensitive := false
-	for _, template := range libraryVariableSet.Templates {
+	for _, template := range tenantVariables.LibraryVariables[libraryVariableSetID].Templates {
 		if template.GetID() == templateID {
 			isSensitive = template.DisplaySettings["Octopus.ControlType"] == "Sensitive"
 		}
 	}
 
-	for _, libraryVariable := range tenantVariables.LibraryVariables {
-		if libraryVariable.LibraryVariableSetID == libraryVariableSetID {
-			value := d.Get("value").(string)
+	if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
+		libraryVariable.Variables[templateID] = octopusdeploy.NewPropertyValue(value, isSensitive)
+		client.Tenants.UpdateVariables(tenant, tenantVariables)
 
-			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[templateID] = octopusdeploy.NewPropertyValue(value, isSensitive)
-			client.Tenants.UpdateVariables(tenant, tenantVariables)
-
-			d.SetId(id)
-			log.Printf("[INFO] tenant common variable created (%s)", d.Id())
-			return nil
-		}
+		d.SetId(id)
+		log.Printf("[INFO] tenant common variable created (%s)", d.Id())
+		return nil
 	}
 
 	d.SetId("")
@@ -92,6 +87,9 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
 	templateID := d.Get("template_id").(string)
@@ -118,18 +116,25 @@ func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	for _, v := range tenantVariables.LibraryVariables {
-		if v.LibraryVariableSetID == libraryVariableSetID {
-			for variable := range v.Variables {
-				if variable == templateID {
-					delete(tenantVariables.LibraryVariables[libraryVariableSetID].Variables, templateID)
-					client.Tenants.UpdateVariables(tenant, tenantVariables)
+	isSensitive := false
+	for _, template := range tenantVariables.LibraryVariables[libraryVariableSetID].Templates {
+		if template.GetID() == templateID {
+			isSensitive = template.DisplaySettings["Octopus.ControlType"] == "Sensitive"
+		}
+	}
 
-					log.Printf("[INFO] tenant common variable deleted (%s)", d.Id())
-					d.SetId("")
-					return nil
-				}
+	if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
+		if _, ok := libraryVariable.Variables[templateID]; ok {
+			if isSensitive {
+				libraryVariable.Variables[templateID] = octopusdeploy.PropertyValue{IsSensitive: true, SensitiveValue: &octopusdeploy.SensitiveValue{HasValue: false}}
+			} else {
+				delete(libraryVariable.Variables, templateID)
 			}
+			client.Tenants.UpdateVariables(tenant, tenantVariables)
+
+			log.Printf("[INFO] tenant common variable deleted (%s)", d.Id())
+			d.SetId("")
+			return nil
 		}
 	}
 
@@ -183,31 +188,22 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	libraryVariableSet, err := client.LibraryVariableSets.GetByID(libraryVariableSetID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	isSensitive := false
-	for _, template := range libraryVariableSet.Templates {
+	for _, template := range tenantVariables.LibraryVariables[libraryVariableSetID].Templates {
 		if template.GetID() == templateID {
 			isSensitive = template.DisplaySettings["Octopus.ControlType"] == "Sensitive"
 		}
 	}
 
-	for _, libraryVariable := range tenantVariables.LibraryVariables {
-		if libraryVariable.LibraryVariableSetID == libraryVariableSetID {
-			for template := range libraryVariable.Variables {
-				if template == templateID {
-					if !isSensitive {
-						d.Set("value", libraryVariable.Variables[template].Value)
-					}
-
-					d.SetId(template)
-					log.Printf("[INFO] tenant common variable read (%s)", d.Id())
-					return nil
-				}
+	if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
+		if template, ok := libraryVariable.Variables[templateID]; ok {
+			if !isSensitive {
+				d.Set("value", template.Value)
 			}
+
+			d.SetId(id)
+			log.Printf("[INFO] tenant common variable read (%s)", d.Id())
+			return nil
 		}
 	}
 
@@ -217,9 +213,13 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
 	templateID := d.Get("template_id").(string)
+	value := d.Get("value").(string)
 
 	id := tenantID + ":" + libraryVariableSetID + ":" + templateID
 
@@ -236,29 +236,20 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	libraryVariableSet, err := client.LibraryVariableSets.GetByID(libraryVariableSetID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	isSensitive := false
-	for _, template := range libraryVariableSet.Templates {
+	for _, template := range tenantVariables.LibraryVariables[libraryVariableSetID].Templates {
 		if template.GetID() == templateID {
 			isSensitive = template.DisplaySettings["Octopus.ControlType"] == "Sensitive"
 		}
 	}
 
-	for _, v := range tenantVariables.LibraryVariables {
-		if v.LibraryVariableSetID == libraryVariableSetID {
-			value := d.Get("value").(string)
+	if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
+		libraryVariable.Variables[templateID] = octopusdeploy.NewPropertyValue(value, isSensitive)
+		client.Tenants.UpdateVariables(tenant, tenantVariables)
 
-			tenantVariables.LibraryVariables[libraryVariableSetID].Variables[templateID] = octopusdeploy.NewPropertyValue(value, isSensitive)
-			client.Tenants.UpdateVariables(tenant, tenantVariables)
-
-			d.SetId(id)
-			log.Printf("[INFO] tenant common variable updated (%s)", d.Id())
-			return nil
-		}
+		d.SetId(id)
+		log.Printf("[INFO] tenant common variable updated (%s)", d.Id())
+		return nil
 	}
 
 	d.SetId("")
