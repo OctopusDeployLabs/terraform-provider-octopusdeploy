@@ -79,6 +79,7 @@ func getTeamDataSchema() map[string]*schema.Schema {
 		"include_system": getQueryIncludeSystem(),
 		"partial_name":   getQueryPartialName(),
 		"skip":           getQuerySkip(),
+		"spaces":         getQuerySpaces(),
 		"take":           getQueryTake(),
 		"teams": {
 			Computed:    true,
