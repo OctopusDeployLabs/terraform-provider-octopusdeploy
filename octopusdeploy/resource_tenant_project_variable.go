@@ -171,6 +171,9 @@ func resourceTenantProjectVariableImporter(d *schema.ResourceData, m interface{}
 }
 
 func resourceTenantProjectVariableRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	environmentID := d.Get("environment_id").(string)
 	projectID := d.Get("project_id").(string)
 	templateID := d.Get("template_id").(string)

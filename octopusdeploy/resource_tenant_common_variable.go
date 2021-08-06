@@ -162,6 +162,9 @@ func resourceTenantCommonVariableImporter(d *schema.ResourceData, m interface{})
 }
 
 func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
 	templateID := d.Get("template_id").(string)
