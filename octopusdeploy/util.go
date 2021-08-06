@@ -4,8 +4,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -37,28 +35,6 @@ func flattenArray(values []string) []interface{} {
 		s[i] = v
 	}
 	return s
-}
-
-// Validate a value against a set of possible values
-func validateValueFunc(values []string) schema.SchemaValidateDiagFunc {
-
-	return func(v interface{}, c cty.Path) diag.Diagnostics {
-		var diags diag.Diagnostics
-
-		value := v.(string)
-		valid := false
-		for _, val := range values {
-			if value == val {
-				valid = true
-				break
-			}
-		}
-
-		if !valid {
-			diags = diag.Errorf("unexpected: %s", value)
-		}
-		return diags
-	}
 }
 
 // validateStringInSlice checks if a string is in the given slice

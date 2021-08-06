@@ -5,6 +5,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandMachineHealthCheckPolicy(values interface{}) *octopusdeploy.MachineHealthCheckPolicy {
@@ -62,10 +63,10 @@ func getMachineHealthCheckPolicySchema() map[string]*schema.Schema {
 			Default:  "RunScript",
 			Optional: true,
 			Type:     schema.TypeString,
-			ValidateDiagFunc: validateValueFunc([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"OnlyConnectivity",
 				"RunScript",
-			}),
+			}, false)),
 		},
 		"powershell_health_check_policy": {
 			Elem:     &schema.Resource{Schema: getMachineScriptPolicySchema()},

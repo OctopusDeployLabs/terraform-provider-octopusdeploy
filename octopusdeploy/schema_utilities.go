@@ -10,7 +10,7 @@ func getAccountTypeSchema(isRequired bool) *schema.Schema {
 		Description: "Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
 		ForceNew:    true,
 		Type:        schema.TypeString,
-		ValidateDiagFunc: validateValueFunc([]string{
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"AmazonWebServicesAccount",
 			"AmazonWebServicesRoleAccount",
 			"AzureServicePrincipal",
@@ -19,7 +19,7 @@ func getAccountTypeSchema(isRequired bool) *schema.Schema {
 			"SshKeyPair",
 			"Token",
 			"UsernamePassword",
-		}),
+		}, false)),
 	}
 
 	if isRequired {
@@ -85,12 +85,12 @@ func getAzureEnvironmentSchema() *schema.Schema {
 		Description: "The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.",
 		Optional:    true,
 		Type:        schema.TypeString,
-		ValidateDiagFunc: validateValueFunc([]string{
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"AzureCloud",
 			"AzureChinaCloud",
 			"AzureGermanCloud",
 			"AzureUSGovernment",
-		}),
+		}, false)),
 	}
 }
 
@@ -280,14 +280,14 @@ func getStatusSchema() *schema.Schema {
 		Description: "The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.",
 		Optional:    true,
 		Type:        schema.TypeString,
-		ValidateDiagFunc: validateValueFunc([]string{
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"CalamariNeedsUpgrade",
 			"Disabled",
 			"NeedsUpgrade",
 			"Offline",
 			"Online",
 			"Unknown",
-		}),
+		}, false)),
 	}
 }
 
@@ -322,11 +322,11 @@ func getTenantedDeploymentSchema() *schema.Schema {
 		Description: "The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.",
 		Optional:    true,
 		Type:        schema.TypeString,
-		ValidateDiagFunc: validateValueFunc([]string{
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"Untenanted",
 			"TenantedOrUntenanted",
 			"Tenanted",
-		}),
+		}, false)),
 	}
 }
 
