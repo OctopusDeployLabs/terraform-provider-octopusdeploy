@@ -24,14 +24,14 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccChannelCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccChannelBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, name, description),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
+					testAccChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", name),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "description", description),
 					resource.TestCheckResourceAttrSet(terraformNamePrefix, "project_id"),
@@ -53,15 +53,15 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	const channelName = "Funky Channel"
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccChannelCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			// create baseline channel
 			{
 				Config: testAccChannelBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, channelName, "this is funky"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
+					testAccChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", channelName),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "description", "this is funky"),
 				),
@@ -70,7 +70,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 			{
 				Config: testAccChannelBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, channelName, "funky it is"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
+					testAccChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", channelName),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "description", "funky it is"),
 				),
@@ -85,15 +85,16 @@ func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
 	const channelDescription = "this is Funky"
 	const actionName = "Funky Action"
 	const versionRange = "1.0"
+
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccChannelCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{ // create channel with one rule
 				Config: testAccChannelWithOneRule(channelName, channelDescription, versionRange, actionName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
+					testAccChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", channelName),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "rule.0.version_range", versionRange),
@@ -114,15 +115,16 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 	const updatedVersionRange = "2.5"
 	const actionName = "Funky Action"
 	const updatedActionName = "Updated Action"
+
 	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccChannelCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{ // create baseline channel
 				Config: testAccChannelWithOneRule(channelName, channelDescription, versionRange, actionName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
+					testAccChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", channelName),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "rule.0.version_range", versionRange),
@@ -132,7 +134,7 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 			{ // create updated channel with new values
 				Config: testAccChannelWithOneRule(updatedChannelName, updatedChannelDescription, updatedVersionRange, updatedActionName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
+					testAccChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", updatedChannelName),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "description", updatedChannelDescription),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "rule.0.version_range", updatedVersionRange),
@@ -158,9 +160,9 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{ // create channel with two rules
-				Config: testAccChannelWithtwoRules(channelName, channelDescription, versionRange1, actionName1, versionRange2, actionName2),
+				Config: testAccChannelWithTwoRules(channelName, channelDescription, versionRange1, actionName1, versionRange2, actionName2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOctopusDeployChannelExists(terraformNamePrefix),
+					testAccChannelExists(terraformNamePrefix),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "name", channelName),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "description", channelDescription),
 					resource.TestCheckResourceAttr(terraformNamePrefix, "rule.0.version_range", versionRange1),
@@ -248,7 +250,7 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 	)
 }
 
-func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, versionRange2, actionName2 string) string {
+func testAccChannelWithTwoRules(name, description, versionRange1, actionName1, versionRange2, actionName2 string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_project_group" "foo" {
 			name = "Integration Test Project Group"
@@ -311,7 +313,7 @@ func testAccChannelWithtwoRules(name, description, versionRange1, actionName1, v
 	)
 }
 
-func testAccCheckOctopusDeployChannelExists(n string) resource.TestCheckFunc {
+func testAccChannelExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		if err := existsHelperChannel(s, client); err != nil {
