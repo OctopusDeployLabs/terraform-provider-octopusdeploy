@@ -29,7 +29,7 @@ func TestAccTenantBasic(t *testing.T) {
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccUserCheckDestroy,
+		CheckDestroy: testAccTenantCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -82,4 +82,19 @@ func testTenantExists(prefix string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func testAccTenantCheckDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_tenant" {
+			continue
+		}
+
+		if tenant, err := client.Tenants.GetByID(rs.Primary.ID); err == nil {
+			return fmt.Errorf("tenant (%s) still exists", tenant.GetID())
+		}
+	}
+
+	return nil
 }
