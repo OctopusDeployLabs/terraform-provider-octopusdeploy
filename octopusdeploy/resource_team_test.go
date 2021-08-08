@@ -26,7 +26,7 @@ func TestAccTeamBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testTeamExists(resourceName),
+					testAccTeamExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 				),
@@ -34,7 +34,7 @@ func TestAccTeamBasic(t *testing.T) {
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testTeamExists(resourceName),
+					testAccTeamExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", newDescription),
 				),
@@ -51,12 +51,12 @@ func testAccTeamBasic(localName string, name string, description string) string 
 	}`, localName, description, name)
 }
 
-func testTeamExists(prefix string) resource.TestCheckFunc {
+func testAccTeamExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// find the corresponding state object
-		rs, ok := s.RootModule().Resources[prefix]
+		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Not found: %s", prefix)
+			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
@@ -75,9 +75,8 @@ func testAccTeamCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.Teams.GetByID(rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("team (%s) still exists", rs.Primary.ID)
+		if team, err := client.Teams.GetByID(rs.Primary.ID); err == nil {
+			return fmt.Errorf("team (%s) still exists", team.GetID())
 		}
 	}
 
