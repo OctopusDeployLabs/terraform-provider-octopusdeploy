@@ -20,7 +20,7 @@ func TestAccTeamBasic(t *testing.T) {
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccUserCheckDestroy,
+		CheckDestroy: testAccTeamCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -66,4 +66,20 @@ func testTeamExists(prefix string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func testAccTeamCheckDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_team" {
+			continue
+		}
+
+		_, err := client.Teams.GetByID(rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("team (%s) still exists", rs.Primary.ID)
+		}
+	}
+
+	return nil
 }
