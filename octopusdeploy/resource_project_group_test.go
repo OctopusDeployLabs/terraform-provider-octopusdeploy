@@ -78,9 +78,15 @@ func testAccProjectGroupBasic(localName string, name string) string {
 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	return fmt.Sprintf(testEnvironmentMinimum(environmentLocalName, environmentName)+"\n"+
+	return fmt.Sprintf(testAccEnvironment(environmentLocalName, environmentName)+"\n"+
 		`resource "octopusdeploy_project_group" "%s" {
 			name = "%s"
+	}`, localName, name)
+}
+
+func testAccProjectGroup(localName string, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project_group" "%s" {
+		name = "%s"
 	}`, localName, name)
 }
 

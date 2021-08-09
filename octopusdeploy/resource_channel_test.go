@@ -179,9 +179,8 @@ func testAccChannelBasic(lifecycleLocalName string, lifecycleName string, projec
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+`
 		resource "octopusdeploy_channel" "ch" {
 			description = "%s"
-			name        = "%s"
-			// project_id  = "${octopusdeploy_project.%s.id}"
-			project_id  = "Projects-6904"
+			name = "%s"
+			project_id = "${octopusdeploy_project.%s.id}"
 
 			rule {
 			  version_range = "1.0.1"

@@ -55,7 +55,7 @@ func TestAccTenantBasic(t *testing.T) {
 
 func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, localName string, name string, description string) string {
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
-		testEnvironmentMinimum(environmentLocalName, environmentName)+"\n"+`
+		testAccEnvironment(environmentLocalName, environmentName)+"\n"+`
 	resource "octopusdeploy_tenant" "%s" {
 		description = "%s"
 		name        = "%s"

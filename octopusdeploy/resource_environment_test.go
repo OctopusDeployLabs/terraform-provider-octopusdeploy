@@ -57,13 +57,13 @@ func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
 					testEnvironmentExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
-				Config: testEnvironmentMinimum(localName, name),
+				Config: testAccEnvironment(localName, name),
 			},
 		},
 	})
 }
 
-func testEnvironmentMinimum(localName string, name string) string {
+func testAccEnvironment(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
 		name = "%s"
 	}`, localName, name)
