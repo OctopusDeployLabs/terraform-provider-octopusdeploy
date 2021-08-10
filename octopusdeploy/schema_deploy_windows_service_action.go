@@ -97,7 +97,7 @@ func addDeployWindowsServiceSchema(element *schema.Resource) {
 	}
 }
 
-func expandDeployWindowsServiceAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func expandDeployWindowsServiceAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.WindowsService"
 
@@ -140,7 +140,7 @@ func flattenWindowsService(properties map[string]octopusdeploy.PropertyValue) []
 	return []interface{}{flattenedWindowsService}
 }
 
-func flattenDeployWindowsServiceAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenDeployWindowsServiceAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 
 	for propertyName, propertyValue := range action.Properties {
@@ -174,7 +174,7 @@ func flattenDeployWindowsServiceAction(action octopusdeploy.DeploymentAction) ma
 	return flattenedAction
 }
 
-func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
+func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, action *octopusdeploy.DeploymentAction) {
 	if windowsServiceList, ok := tfAction["windows_service"]; ok {
 		tfWindowsService := windowsServiceList.(*schema.Set).List()
 		if len(tfWindowsService) > 0 {
@@ -183,7 +183,7 @@ func addWindowsServiceFeatureToActionResource(tfAction map[string]interface{}, a
 	}
 }
 
-func addWindowsServiceToActionResource(flattenedAction map[string]interface{}, action octopusdeploy.DeploymentAction) {
+func addWindowsServiceToActionResource(flattenedAction map[string]interface{}, action *octopusdeploy.DeploymentAction) {
 	if len(action.Properties["Octopus.Action.EnabledFeatures"].Value) == 0 {
 		action.Properties["Octopus.Action.EnabledFeatures"] = octopusdeploy.NewPropertyValue("Octopus.Features.WindowsService", false)
 	} else if !strings.Contains(action.Properties["Octopus.Action.EnabledFeatures"].Value, "Octopus.Features.WindowsService") {

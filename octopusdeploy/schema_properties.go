@@ -11,7 +11,7 @@ func expandProperties(propertyValues interface{}) map[string]octopusdeploy.Prope
 
 	expandedPropertyValues := map[string]octopusdeploy.PropertyValue{}
 	for k, v := range propertyValues.(map[string]interface{}) {
-		expandedPropertyValues[k] = *expandPropertyValue(v)
+		expandedPropertyValues[k] = expandPropertyValue(v)
 	}
 	return expandedPropertyValues
 }

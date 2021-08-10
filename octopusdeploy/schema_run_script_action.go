@@ -25,8 +25,16 @@ func addScriptFromPackageSchema(element *schema.Resource) {
 	}
 }
 
-func expandRunScriptAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func expandRunScriptAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
+	if len(flattenedAction) == 0 {
+		return nil
+	}
+
 	action := expandAction(flattenedAction)
+	if action == nil {
+		return nil
+	}
+
 	action.ActionType = "Octopus.Script"
 
 	if v, ok := flattenedAction["script_body"]; ok {
@@ -74,7 +82,11 @@ func expandRunScriptAction(flattenedAction map[string]interface{}) octopusdeploy
 	return action
 }
 
-func flattenRunScriptAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenRunScriptAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+	if action == nil {
+		return nil
+	}
+
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
@@ -111,6 +123,7 @@ func flattenRunScriptAction(action octopusdeploy.DeploymentAction) map[string]in
 
 func getRunScriptActionSchema() *schema.Schema {
 	actionSchema, element := getActionSchema()
+	addPropertiesSchema(element, "This attribute is deprecated and will be removed in a future release. Please use the attributes that match the properties that are stored to this map.")
 	addExecutionLocationSchema(element)
 	addScriptFromPackageSchema(element)
 	addPackagesSchema(element, false)

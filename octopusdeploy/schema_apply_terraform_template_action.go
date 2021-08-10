@@ -165,7 +165,7 @@ func flattenTerraformTemplate(properties map[string]octopusdeploy.PropertyValue)
 	return []interface{}{flattenedMap}
 }
 
-func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.TerraformApply"
 
@@ -368,7 +368,7 @@ func flattenTerraformTemplateAzureAccount(properties map[string]octopusdeploy.Pr
 	return []interface{}{flattenedMap}
 }
 
-func flattenApplyTerraformTemplateAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenApplyTerraformTemplateAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 
 	for k, v := range action.Properties {
