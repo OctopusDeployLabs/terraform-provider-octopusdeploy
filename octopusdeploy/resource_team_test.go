@@ -14,10 +14,9 @@ func TestAccTeamBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_team." + localName
 
-	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
-	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	updatedDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccTeamCheckDestroy,
@@ -36,9 +35,9 @@ func TestAccTeamBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccTeamCheckExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "description", newDescription),
+					resource.TestCheckResourceAttr(resourceName, "description", updatedDescription),
 				),
-				Config: testAccTeamBasic(localName, name, newDescription),
+				Config: testAccTeamBasic(localName, name, updatedDescription),
 			},
 		},
 	})

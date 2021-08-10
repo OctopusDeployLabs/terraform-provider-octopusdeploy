@@ -11,12 +11,13 @@ import (
 )
 
 func TestAccProjectBasic(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	resourceName := "octopusdeploy_project." + localName
+
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := "octopusdeploy_project." + localName
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -32,9 +33,9 @@ func TestAccProjectBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testAccProjectCheckExists(prefix),
-					resource.TestCheckResourceAttr(prefix, "description", description),
-					resource.TestCheckResourceAttr(prefix, "name", name),
+					testAccProjectCheckExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", description),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
 			},
@@ -93,36 +94,35 @@ func testAccProject(lifecycleLocalName string, projectGroupLocalName string, loc
 }
 
 func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string) string {
-	lifecycleID := "octopusdeploy_lifecycle." + lifecycleLocalName + ".id"
-	projectGroupID := "octopusdeploy_project_group." + projectGroupLocalName + ".id"
-
 	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
 		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
 		`resource "octopusdeploy_project" "%s" {
-		  description      = "%s"
-		  lifecycle_id     = %s
-		  name             = "%s"
-		  project_group_id = %s
+			description      = "%s"
+			lifecycle_id     = "${octopusdeploy_lifecycle.%s.id}"
+			name             = "%s"
+			project_group_id = "${octopusdeploy_project_group.%s.id}"
 
-		  template {
-			default_value    = "default-value"
-			help_text        = "help-test"
-			label            = "label"
-			name             = "2"
-			display_settings = {
-				"Octopus.ControlType": "SingleLineText"
-			}
-		  }
+			template {
+				default_value = "default-value"
+				help_text     = "help-test"
+				label         = "label"
+				name          = "2"
 
-		  template {
-			default_value    = "default-value"
-			help_text        = "help-test"
-			label            = "label"
-			name             = "1"
-			display_settings = {
-				"Octopus.ControlType": "SingleLineText"
+				display_settings = {
+					"Octopus.ControlType": "SingleLineText"
+				}
 			}
-		  }
+
+			template {
+				default_value = "default-value"
+				help_text     = "help-test"
+				label         = "label"
+				name          = "1"
+
+				display_settings = {
+					"Octopus.ControlType": "SingleLineText"
+				}
+			}
 
 		  //   connectivity_policy {
 		//     allow_deployments_to_no_targets = true
@@ -138,7 +138,7 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 		//   versioning_strategy {
 		//     template = "alskdjaslkdj"
 		//   }
-		}`, localName, description, lifecycleID, name, projectGroupID)
+		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
@@ -156,15 +156,6 @@ func testAccProjectCheckDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckOctopusDeployProjectDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
-
-	if err := destroyProjectHelper(s, client); err != nil {
-		return err
-	}
-	return nil
-}
-
 func testAccProjectCheckExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
@@ -173,24 +164,6 @@ func testAccProjectCheckExists(resourceName string) resource.TestCheckFunc {
 		}
 		return nil
 	}
-}
-
-func destroyProjectHelper(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if r.Type != "octopusdeploy_project" {
-			continue
-		}
-
-		if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {
-			apiError := err.(*octopusdeploy.APIError)
-			if apiError.StatusCode == 404 {
-				continue
-			}
-			return fmt.Errorf("error retrieving project %s", err)
-		}
-		return fmt.Errorf("project still exists")
-	}
-	return nil
 }
 
 func existsHelper(s *terraform.State, client *octopusdeploy.Client) error {

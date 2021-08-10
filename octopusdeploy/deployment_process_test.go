@@ -12,9 +12,13 @@ import (
 
 func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccProjectCheckDestroy,
+			testAccProjectGroupCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDeploymentProcessBasic(),
@@ -31,9 +35,13 @@ func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
 	prefix := "octopusdeploy_deployment_process." + localName
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccProjectCheckDestroy,
+			testAccProjectGroupCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -92,7 +100,7 @@ func testAccDeploymentProcessBasic() string {
 					script_file_name = "Run.ps132"
 					script_source = "Package"
 					tenant_tags = ["tag/tag"]
-					
+
 					primary_package {
 						acquisition_location = "Server"
 						feed_id = "feeds-builtin"
@@ -121,13 +129,13 @@ func testAccDeploymentProcessBasic() string {
 			  name = "Step2"
 			  start_trigger = "StartWithPrevious"
 			  target_roles = ["WebServer"]
-	
+
 			  run_script_action {
 				  name = "Step2"
 				  run_on_server = true
 				  script_body = "Write-Host 'hi'"
 			  }
-			} 
+			}
 		}`, projectID)
 }
 
@@ -161,8 +169,8 @@ func testAccProcessWithActionTemplate(localName string) string {
 
 				template {
 				  community_action_template_id = "CommunityActionTemplates-27"
-				  id = "ActionTemplates-281"
-				  version = 3
+				  id                           = "ActionTemplates-281"
+				  version                      = 3
 				}
 			  }
 			}
@@ -185,27 +193,12 @@ func testAccBuildTestAction(action string) string {
 			project_id = %s
 
 			step {
-				name = "Test"
+				name         = "Test"
 				target_roles = ["Foo", "Bar", "Quux"]
 
 				%s
 			}
 		}`, projectID, action)
-}
-
-func testAccCheckOctopusDeployDeploymentProcessDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
-
-	if err := destroyProjectHelper(s, client); err != nil {
-		return err
-	}
-	if err := destroyHelperProjectGroup(s, client); err != nil {
-		return err
-	}
-	if err := destroyHelperLifecycle(s, client); err != nil {
-		return err
-	}
-	return nil
 }
 
 func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {

@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -9,6 +10,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+func TestAccTenantProjectVariableComplex(t *testing.T) {
+	sensitiveLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sensitiveValue := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	value := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	prefix := "octopusdeploy_tenant_project_variable." + sensitiveLocalName
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccTenantProjectVariableCheckDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testTenantProjectVariableExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "value", sensitiveValue),
+				),
+				Config: fmt.Sprintf(`resource "octopusdeploy_tenant_project_variable" "%s" {
+					environment_id = "Environments-10981"
+					project_id     = "Projects-7341"
+					tenant_id      = "Tenants-5481"
+					template_id    = "c076f5f7-e678-4a29-8055-4dca46d480ff"
+					value          = "%s"
+				}
+
+				resource "octopusdeploy_tenant_project_variable" "%s" {
+					environment_id = "Environments-10981"
+					project_id     = "Projects-7341"
+					tenant_id      = "Tenants-5481"
+					template_id    = "6ded4b69-0fb2-44c1-8d44-267c0e5f1db9"
+					value          = "%s"
+				}`, sensitiveLocalName, sensitiveValue, localName, value),
+			},
+		},
+	})
+}
 
 func TestAccTenantProjectVariableBasic(t *testing.T) {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -36,7 +75,7 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 	newValue := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccUserCheckDestroy,
+		CheckDestroy: testAccTenantProjectVariableCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -63,10 +102,10 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 }
 
 func testAccTenantProjectVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, primaryEnvironmentLocalName string, primaryEnvironmentName string, secondaryEnvironmentLocalName string, secondaryEnvironmentName string, tenantLocalName string, tenantName string, tenantDescription string, primaryLocalName string, primaryValue string, secondaryLocalName string, secondaryValue string) string {
-	return fmt.Sprintf(testAccLifecycleBasic(lifecycleLocalName, lifecycleName)+"\n"+
+	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
 		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
-		testEnvironmentMinimum(primaryEnvironmentLocalName, primaryEnvironmentName)+"\n"+
-		testEnvironmentMinimum(secondaryEnvironmentLocalName, secondaryEnvironmentName)+"\n"+`
+		testAccEnvironment(primaryEnvironmentLocalName, primaryEnvironmentName)+"\n"+
+		testAccEnvironment(secondaryEnvironmentLocalName, secondaryEnvironmentName)+"\n"+`
 		resource "octopusdeploy_project" "%s" {
 			lifecycle_id                   = octopusdeploy_lifecycle.%s.id
 			name                           = "%s"
@@ -142,4 +181,43 @@ func testTenantProjectVariableExists(prefix string) resource.TestCheckFunc {
 
 		return fmt.Errorf("tenant project variable not found")
 	}
+}
+
+func testAccTenantProjectVariableCheckDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_tenant_project_variable" {
+			continue
+		}
+
+		importStrings := strings.Split(rs.Primary.ID, ":")
+		if len(importStrings) != 4 {
+			return fmt.Errorf("octopusdeploy_tenant_project_variable import must be in the form of TenantID:ProjectID:EnvironmentID:TemplateID (e.g. Tenants-123:Projects-456:Environments-789:6c9f2ba3-3ccd-407f-bbdf-6618e4fd0a0c")
+		}
+
+		tenantID := importStrings[0]
+		projectID := importStrings[1]
+		environmentID := importStrings[2]
+		templateID := importStrings[3]
+
+		tenant, err := client.Tenants.GetByID(tenantID)
+		if err != nil {
+			return nil
+		}
+
+		tenantVariables, err := client.Tenants.GetVariables(tenant)
+		if err != nil {
+			return nil
+		}
+
+		if projectVariable, ok := tenantVariables.ProjectVariables[projectID]; ok {
+			if _, ok := projectVariable.Variables[environmentID]; ok {
+				if _, ok := projectVariable.Variables[environmentID][templateID]; ok {
+					return fmt.Errorf("tenant project variable (%s) still exists", rs.Primary.ID)
+				}
+			}
+		}
+	}
+
+	return nil
 }

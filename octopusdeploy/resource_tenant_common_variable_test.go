@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -31,7 +32,7 @@ func TestAccTenantCommonVariableBasic(t *testing.T) {
 	newValue := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccUserCheckDestroy,
+		CheckDestroy: testAccTenantCommonVariableCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -54,9 +55,9 @@ func TestAccTenantCommonVariableBasic(t *testing.T) {
 }
 
 func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, tenantLocalName string, tenantName string, tenantDescription string, localName string, value string) string {
-	return fmt.Sprintf(testAccLifecycleBasic(lifecycleLocalName, lifecycleName)+"\n"+
+	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
 		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
-		testEnvironmentMinimum(environmentLocalName, environmentName)+"\n"+`
+		testAccEnvironment(environmentLocalName, environmentName)+"\n"+`
 		resource "octopusdeploy_library_variable_set" "test-library-variable-set" {
 			name = "test"
 
@@ -96,19 +97,25 @@ func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName s
 		}`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, environmentLocalName, localName, tenantLocalName, value)
 }
 
-func testTenantCommonVariableExists(prefix string) resource.TestCheckFunc {
+func testTenantCommonVariableExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		var tenantID string
-		var libraryVariableSetID string
-		var templateID string
-
-		for _, r := range s.RootModule().Resources {
-			if r.Type == "octopusdeploy_tenant_common_variable" {
-				libraryVariableSetID = r.Primary.Attributes["library_variable_set_id"]
-				templateID = r.Primary.Attributes["template_id"]
-				tenantID = r.Primary.Attributes["tenant_id"]
-			}
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Not found: %s", resourceName)
 		}
+
+		if len(rs.Primary.ID) == 0 {
+			return fmt.Errorf("Library variable ID is not set")
+		}
+
+		importStrings := strings.Split(rs.Primary.ID, ":")
+		if len(importStrings) != 3 {
+			return fmt.Errorf("octopusdeploy_tenant_common_variable import must be in the form of TenantID:LibraryVariableSetID:VariableID (e.g. Tenants-123:LibraryVariableSets-456:6c9f2ba3-3ccd-407f-bbdf-6618e4fd0a0c")
+		}
+
+		tenantID := importStrings[0]
+		libraryVariableSetID := importStrings[1]
+		templateID := importStrings[2]
 
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		tenant, err := client.Tenants.GetByID(tenantID)
@@ -121,14 +128,48 @@ func testTenantCommonVariableExists(prefix string) resource.TestCheckFunc {
 			return err
 		}
 
-		for _, v := range tenantVariables.LibraryVariables {
-			if v.LibraryVariableSetID == libraryVariableSetID {
-				if _, ok := v.Variables[templateID]; ok {
-					return nil
-				}
+		if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
+			if _, ok := libraryVariable.Variables[templateID]; ok {
+				return nil
 			}
 		}
 
 		return fmt.Errorf("tenant common variable not found")
 	}
+}
+
+func testAccTenantCommonVariableCheckDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_tenant_common_variable" {
+			continue
+		}
+
+		importStrings := strings.Split(rs.Primary.ID, ":")
+		if len(importStrings) != 3 {
+			return fmt.Errorf("octopusdeploy_tenant_common_variable import must be in the form of TenantID:LibraryVariableSetID:VariableID (e.g. Tenants-123:LibraryVariableSets-456:6c9f2ba3-3ccd-407f-bbdf-6618e4fd0a0c")
+		}
+
+		tenantID := importStrings[0]
+		libraryVariableSetID := importStrings[1]
+		templateID := importStrings[2]
+
+		tenant, err := client.Tenants.GetByID(tenantID)
+		if err != nil {
+			return nil
+		}
+
+		tenantVariables, err := client.Tenants.GetVariables(tenant)
+		if err != nil {
+			return nil
+		}
+
+		if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
+			if _, ok := libraryVariable.Variables[templateID]; ok {
+				return fmt.Errorf("tenant common variable (%s) still exists", rs.Primary.ID)
+			}
+		}
+	}
+
+	return nil
 }

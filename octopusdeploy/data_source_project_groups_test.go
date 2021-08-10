@@ -10,10 +10,8 @@ import (
 )
 
 func TestAccDataSourceProjectGroups(t *testing.T) {
-	t.Parallel()
-
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	name := fmt.Sprintf("data.octopusdeploy_project_groups.%s", localName)
+	prefix := fmt.Sprintf("data.octopusdeploy_project_groups.%s", localName)
 	take := 10
 
 	resource.Test(t, resource.TestCase{
@@ -21,10 +19,17 @@ func TestAccDataSourceProjectGroups(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceProjectGroupsConfig(localName, take),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckProjectGroupsDataSourceID(name),
-				)},
+					testAccCheckProjectGroupsDataSourceID(prefix),
+				),
+				Config: testAccDataSourceProjectGroupsConfig(localName, take),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckProjectGroupsDataSourceID(prefix),
+				),
+				Config: testAccDataSourceProjectGroupsEmpty(localName),
+			},
 		},
 	})
 }
@@ -48,4 +53,8 @@ func testAccDataSourceProjectGroupsConfig(localName string, take int) string {
 	return fmt.Sprintf(`data "octopusdeploy_project_groups" "%s" {
 		take = %v
 	}`, localName, take)
+}
+
+func testAccDataSourceProjectGroupsEmpty(localName string) string {
+	return fmt.Sprintf(`data "octopusdeploy_project_groups" "%s" {}`, localName)
 }

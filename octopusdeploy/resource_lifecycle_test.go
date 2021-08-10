@@ -222,23 +222,6 @@ func testAccCheckLifecyclePhaseCount(name string, expected int) resource.TestChe
 		return nil
 	}
 }
-func destroyHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if r.Type != "octopusdeploy_lifecycle" {
-			continue
-		}
-
-		if _, err := client.Lifecycles.GetByID(r.Primary.ID); err != nil {
-			apiError := err.(*octopusdeploy.APIError)
-			if apiError.StatusCode == 404 {
-				continue
-			}
-			return fmt.Errorf("error retrieving lifecycle %s", err)
-		}
-		return fmt.Errorf("lifecycle still exists")
-	}
-	return nil
-}
 
 func existsHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) error {
 	for _, r := range s.RootModule().Resources {

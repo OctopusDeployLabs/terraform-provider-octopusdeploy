@@ -35,9 +35,13 @@ func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccProjectCheckDestroy,
+			testAccProjectGroupCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -52,30 +56,34 @@ func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
 func testAccApplyTerraformAction(name string, runOnServer bool, templateSource string, allowPluginDownloads bool, applyParameters string, initParameters string, pluginCacheDirectory string, workspace string, template string, templateParameters string) string {
 	return testAccBuildTestAction(fmt.Sprintf(`
 		apply_terraform_template_action {
-			name = "%s"
+			name          = "%s"
 			run_on_server = %v
-			template = "%s"
-			template_parameters = "%s"
-			template_source = "%s"
+
+			template {
+				additional_variable_files         = "additional-variable-files"
+				directory                         = "template-directory"
+				run_automatic_file_substitution   = false
+				target_files                      = "target-files"
+			}
 
 			advanced_options {
 				allow_additional_plugin_downloads = %v
-				apply_parameters = "%s"
-				init_parameters = "%s"
-				plugin_cache_directory = "%s"
-				workspace = "%s"
+				apply_parameters                  = "%s"
+				init_parameters                   = "%s"
+				plugin_cache_directory            = "%s"
+				workspace                         = "%s"
 			}
 
 			aws_account {
-				region = "us-east-1"
-				variable = "foo"
+				region            = "us-east-1"
+				variable          = "foo"
 				use_instance_role = true
 
 				role {
-					arn = "arn"
-					external_id = "external-id"
+					arn               = "arn"
+					external_id       = "external-id"
 					role_session_name = "role-session-name"
-					session_duration = 1800
+					session_duration  = 1800
 				}
 			}
 
@@ -87,7 +95,7 @@ func testAccApplyTerraformAction(name string, runOnServer bool, templateSource s
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
 			}
-    }`, name, runOnServer, template, templateParameters, templateSource, allowPluginDownloads, applyParameters, initParameters, pluginCacheDirectory, workspace))
+    }`, name, runOnServer, allowPluginDownloads, applyParameters, initParameters, pluginCacheDirectory, workspace))
 }
 
 func testAccCheckApplyTerraformAction(name string, runOnServer bool, scriptSource string, allowPluginDownloads bool, applyParameters string, initParameters string, pluginCacheDirectory string, workspace string, source string, parameters string) resource.TestCheckFunc {
