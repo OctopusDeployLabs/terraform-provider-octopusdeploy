@@ -5,19 +5,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandContainer(values interface{}) octopusdeploy.DeploymentActionContainer {
+func expandContainer(values interface{}) *octopusdeploy.DeploymentActionContainer {
 	if values == nil {
-		return octopusdeploy.DeploymentActionContainer{}
+		return nil
 	}
 
 	flattenedValues := values.([]interface{})
 	if len(flattenedValues) == 0 || flattenedValues[0] == nil {
-		return octopusdeploy.DeploymentActionContainer{}
+		return nil
 	}
 
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	deploymentActionContainer := octopusdeploy.DeploymentActionContainer{}
+	deploymentActionContainer := &octopusdeploy.DeploymentActionContainer{}
 
 	if feedID := flattenedMap["feed_id"]; feedID != nil {
 		deploymentActionContainer.FeedID = feedID.(string)
@@ -30,7 +30,11 @@ func expandContainer(values interface{}) octopusdeploy.DeploymentActionContainer
 	return deploymentActionContainer
 }
 
-func flattenContainer(deploymentActionContainer octopusdeploy.DeploymentActionContainer) []interface{} {
+func flattenContainer(deploymentActionContainer *octopusdeploy.DeploymentActionContainer) []interface{} {
+	if deploymentActionContainer == nil {
+		return nil
+	}
+
 	return []interface{}{map[string]interface{}{
 		"feed_id": deploymentActionContainer.FeedID,
 		"image":   deploymentActionContainer.Image,
