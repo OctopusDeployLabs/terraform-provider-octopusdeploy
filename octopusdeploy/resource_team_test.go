@@ -58,7 +58,7 @@ func TestAccTeamUserRole(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeAggregateTestCheckFunc(
-					testTeamExists(resourceName),
+					testAccTeamCheckExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 					resource.TestCheckResourceAttrPair(resourceName, "user_role.0.user_role_id", userRoleResource, "id"),

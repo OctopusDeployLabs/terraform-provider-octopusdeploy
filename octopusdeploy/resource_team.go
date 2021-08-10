@@ -79,7 +79,7 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(err)
 	}
 
-	userRoles, err := client.Teams.GetScopedUserRolesByID(d.Id())
+	userRoles, err := client.Teams.GetScopedUserRoles(*team, octopusdeploy.SkipTakeQuery{})
 	if err != nil {
 		return diag.FromErr(err)
 	}
