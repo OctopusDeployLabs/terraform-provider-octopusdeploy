@@ -11,9 +11,13 @@ import (
 
 func TestAccOctopusDeployRunKubectlScriptAction(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccProjectCheckDestroy,
+			testAccProjectGroupCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRunKubectlScriptAction(),
@@ -30,12 +34,12 @@ func testAccRunKubectlScriptAction() string {
 		run_kubectl_script_action {
       name = "Run Script"
       run_on_server = true
-			
+
 			primary_package {
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
 			}
-			
+
 			script_file_name = "Test.ps1"
 			script_parameters = "-Test 1"
     }

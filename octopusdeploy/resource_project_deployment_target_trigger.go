@@ -21,47 +21,39 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": getNameSchema(true),
 			"project_id": {
-				Type:        schema.TypeString,
+				Description: "The ID of the project to attach the trigger.",
 				Required:    true,
-				Description: "The project_id of the Project to attach the trigger to.",
+				Type:        schema.TypeString,
 			},
 			"should_redeploy": {
-				Type:        schema.TypeBool,
-				Optional:    true,
 				Default:     false,
 				Description: "Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.",
+				Optional:    true,
+				Type:        schema.TypeBool,
 			},
 			"event_groups": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional:    true,
 				Description: "Apply event group filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
 			},
 			"event_categories": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional:    true,
 				Description: "Apply event category filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
 			},
 			"roles": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional:    true,
 				Description: "Apply event role filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
 			},
 			"environment_ids": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Optional:    true,
 				Description: "Apply environment id filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Type:        schema.TypeList,
 			},
 		},
 	}

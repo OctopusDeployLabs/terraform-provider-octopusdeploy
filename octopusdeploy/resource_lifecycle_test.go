@@ -36,7 +36,7 @@ func TestAccLifecycleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
 					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
 				),
-				Config: testAccLifecycleBasic(localName, name),
+				Config: testAccLifecycle(localName, name),
 			},
 		},
 	})
@@ -70,7 +70,7 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
 					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
 				),
-				Config: testAccLifecycleBasic(localName, name),
+				Config: testAccLifecycle(localName, name),
 			},
 			// update lifecycle with a description
 			{
@@ -108,7 +108,7 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
 					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
 				),
-				Config: testAccLifecycleBasic(localName, name),
+				Config: testAccLifecycle(localName, name),
 			},
 		},
 	})
@@ -147,7 +147,7 @@ func TestAccLifecycleComplex(t *testing.T) {
 	})
 }
 
-func testAccLifecycleBasic(localName string, name string) string {
+func testAccLifecycle(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
 		name = "%s"
 	}`, localName, name)
@@ -168,9 +168,9 @@ func testAccLifecycleComplex(localName string, name string) string {
 	environment3LocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environment3Name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	return fmt.Sprintf(testEnvironmentMinimum(environment1LocalName, environment1Name)+"\n"+
-		testEnvironmentMinimum(environment2LocalName, environment2Name)+"\n"+
-		testEnvironmentMinimum(environment3LocalName, environment3Name)+"\n"+
+	return fmt.Sprintf(testAccEnvironment(environment1LocalName, environment1Name)+"\n"+
+		testAccEnvironment(environment2LocalName, environment2Name)+"\n"+
+		testAccEnvironment(environment3LocalName, environment3Name)+"\n"+
 		`resource "octopusdeploy_lifecycle" "%s" {
 			name        = "%s"
 			description = "Funky Lifecycle description"
@@ -221,23 +221,6 @@ func testAccCheckLifecyclePhaseCount(name string, expected int) resource.TestChe
 
 		return nil
 	}
-}
-func destroyHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) error {
-	for _, r := range s.RootModule().Resources {
-		if r.Type != "octopusdeploy_lifecycle" {
-			continue
-		}
-
-		if _, err := client.Lifecycles.GetByID(r.Primary.ID); err != nil {
-			apiError := err.(*octopusdeploy.APIError)
-			if apiError.StatusCode == 404 {
-				continue
-			}
-			return fmt.Errorf("error retrieving lifecycle %s", err)
-		}
-		return fmt.Errorf("lifecycle still exists")
-	}
-	return nil
 }
 
 func existsHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) error {

@@ -26,7 +26,7 @@ resource "octopusdeploy_project_deployment_target_trigger" "example" {
 ### Required
 
 - **name** (String) The name of this resource.
-- **project_id** (String) The project_id of the Project to attach the trigger to.
+- **project_id** (String) The ID of the project to attach the trigger.
 
 ### Optional
 

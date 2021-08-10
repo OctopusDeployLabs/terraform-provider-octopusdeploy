@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) octopusdeploy.DeploymentAction {
+func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.KubernetesDeploySecret"
 
@@ -24,7 +24,7 @@ func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) 
 	return action
 }
 
-func flattenDeployKubernetesSecretAction(action octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenDeployKubernetesSecretAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {

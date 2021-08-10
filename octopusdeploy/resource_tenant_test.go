@@ -29,7 +29,7 @@ func TestAccTenantBasic(t *testing.T) {
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccUserCheckDestroy,
+		CheckDestroy: testAccTenantCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -55,7 +55,7 @@ func TestAccTenantBasic(t *testing.T) {
 
 func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, localName string, name string, description string) string {
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
-		testEnvironmentMinimum(environmentLocalName, environmentName)+"\n"+`
+		testAccEnvironment(environmentLocalName, environmentName)+"\n"+`
 	resource "octopusdeploy_tenant" "%s" {
 		description = "%s"
 		name        = "%s"
@@ -82,4 +82,19 @@ func testTenantExists(prefix string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func testAccTenantCheckDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_tenant" {
+			continue
+		}
+
+		if tenant, err := client.Tenants.GetByID(rs.Primary.ID); err == nil {
+			return fmt.Errorf("tenant (%s) still exists", tenant.GetID())
+		}
+	}
+
+	return nil
 }

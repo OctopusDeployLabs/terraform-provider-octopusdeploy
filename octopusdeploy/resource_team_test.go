@@ -14,10 +14,9 @@ func TestAccTeamBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_team." + localName
 
-	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
-	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	updatedDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccTeamCheckDestroy,
@@ -26,7 +25,7 @@ func TestAccTeamBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testTeamExists(resourceName),
+					testAccTeamCheckExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 				),
@@ -34,11 +33,11 @@ func TestAccTeamBasic(t *testing.T) {
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testTeamExists(resourceName),
+					testAccTeamCheckExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "description", newDescription),
+					resource.TestCheckResourceAttr(resourceName, "description", updatedDescription),
 				),
-				Config: testAccTeamBasic(localName, name, newDescription),
+				Config: testAccTeamBasic(localName, name, updatedDescription),
 			},
 		},
 	})
@@ -71,12 +70,11 @@ func TestAccTeamUserRole(t *testing.T) {
 	})
 }
 
-func testTeamExists(prefix string) resource.TestCheckFunc {
+func testAccTeamCheckExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		// find the corresponding state object
-		rs, ok := s.RootModule().Resources[prefix]
+		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Not found: %s", prefix)
+			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
@@ -95,9 +93,8 @@ func testAccTeamCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.Teams.GetByID(rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("team (%s) still exists", rs.Primary.ID)
+		if team, err := client.Teams.GetByID(rs.Primary.ID); err == nil {
+			return fmt.Errorf("team (%s) still exists", team.GetID())
 		}
 	}
 

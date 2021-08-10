@@ -15,18 +15,18 @@ func expandVariableScope(flattenedVariableScope interface{}) octopusdeploy.Varia
 		return octopusdeploy.VariableScope{}
 	}
 
-	flattenedMap := list[0].(map[string]interface{})
-
-	variableScope := octopusdeploy.VariableScope{
-		Actions:      getSliceFromTerraformTypeList(flattenedMap["actions"]),
-		Channels:     getSliceFromTerraformTypeList(flattenedMap["channels"]),
-		Environments: getSliceFromTerraformTypeList(flattenedMap["environments"]),
-		Machines:     getSliceFromTerraformTypeList(flattenedMap["machines"]),
-		Roles:        getSliceFromTerraformTypeList(flattenedMap["roles"]),
-		TenantTags:   getSliceFromTerraformTypeList(flattenedMap["tenant_tags"]),
+	if flattenedMap, ok := list[0].(map[string]interface{}); ok {
+		return octopusdeploy.VariableScope{
+			Actions:      getSliceFromTerraformTypeList(flattenedMap["actions"]),
+			Channels:     getSliceFromTerraformTypeList(flattenedMap["channels"]),
+			Environments: getSliceFromTerraformTypeList(flattenedMap["environments"]),
+			Machines:     getSliceFromTerraformTypeList(flattenedMap["machines"]),
+			Roles:        getSliceFromTerraformTypeList(flattenedMap["roles"]),
+			TenantTags:   getSliceFromTerraformTypeList(flattenedMap["tenant_tags"]),
+		}
 	}
 
-	return variableScope
+	return octopusdeploy.VariableScope{}
 }
 
 func flattenVariableScope(scope octopusdeploy.VariableScope) []interface{} {

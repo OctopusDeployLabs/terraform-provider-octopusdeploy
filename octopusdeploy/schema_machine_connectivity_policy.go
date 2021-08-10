@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandMachineConnectivityPolicy(values interface{}) *octopusdeploy.MachineConnectivityPolicy {
@@ -30,10 +31,10 @@ func getMachineConnectivityPolicySchema() map[string]*schema.Schema {
 			Default:  "ExpectedToBeOnline",
 			Optional: true,
 			Type:     schema.TypeString,
-			ValidateDiagFunc: validateValueFunc([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"ExpectedToBeOnline",
 				"MayBeOfflineAndCanBeSkipped",
-			}),
+			}, false)),
 		},
 	}
 }

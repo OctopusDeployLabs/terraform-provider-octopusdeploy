@@ -5,54 +5,67 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccOctopusDeployRunScriptAction(t *testing.T) {
+func TestAccRunScriptAction(t *testing.T) {
+	feedLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	feedName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	feedURI := "http://test.com"
+	feedIsEnhancedMode := true
+	feedUsername := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	feedPassword := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOctopusDeployDeploymentProcessDestroy,
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccProjectCheckDestroy,
+			testAccProjectGroupCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRunScriptAction(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRunScriptAction(),
 				),
+				Config: testAccRunScriptAction(feedLocalName, feedName, feedURI, feedUsername, feedPassword, feedIsEnhancedMode),
 			},
 		},
 	})
 }
 
-func testAccRunScriptAction() string {
-	return testAccBuildTestAction(`
+func testAccRunScriptAction(feedLocalName string, feedName string, feedURI string, feedUsername string, feedPassword string, feedIsEnhancedMode bool) string {
+	return fmt.Sprintf(testAccNuGetFeed(feedLocalName, feedName, feedURI, feedUsername, feedPassword, feedIsEnhancedMode)+"\n"+
+		testAccBuildTestAction(`
 		run_script_action {
-			name = "Run Script"
-			run_on_server = true
-			script_file_name = "Test.ps1"
-			script_parameters = "-Test 1"
-			script_source = "Package"
+			name                           = "Run Script"
+			run_on_server                  = true
+			script_file_name               = "Test.ps1"
+			script_parameters              = "-Test 1"
+			script_source                  = "Package"
 			variable_substitution_in_files = "test.json"
 
-			primary_package {
-				package_id = "MyPackage"
-				feed_id = "feeds-builtin"
-			}
-
 			package {
-				acquisition_location = "Server"
-				feed_id = octopusdeploy_nuget_feed.testing.id
-				name = "package2"
-				package_id = "package2"
+				acquisition_location      = "Server"
+				feed_id                   = "${octopusdeploy_nuget_feed.%s.id}"
+				name                      = "package2"
+				package_id                = "package2"
 				extract_during_deployment = false
 
 				properties = {
-				  "Extract" = "false"
+					"Extract" = "false"
 				}
 			}
-        }
-	`)
+
+			primary_package {
+				feed_id    = "feeds-builtin"
+				package_id = "MyPackage"
+			}
+		}
+	`), feedLocalName)
 }
 
 func testAccCheckRunScriptAction() resource.TestCheckFunc {

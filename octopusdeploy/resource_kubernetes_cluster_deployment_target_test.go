@@ -44,7 +44,7 @@ func testAccKubernetesClusterDeploymentTargetBasic(accountLocalName string, acco
 	userRoleID := "${octopusdeploy_user_role." + userRoleLocalName + ".id}"
 
 	return fmt.Sprintf(testUsernamePasswordMinimum(accountLocalName, accountName, accountUsername)+"\n"+
-		testEnvironmentMinimum(environmentLocalName, environmentName)+"\n"+
+		testAccEnvironment(environmentLocalName, environmentName)+"\n"+
 		testUserRoleMinimum(userRoleLocalName, userRoleName)+"\n"+
 		`resource "octopusdeploy_kubernetes_cluster_deployment_target" "%s" {
 		   cluster_url  = "%s"

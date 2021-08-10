@@ -27,7 +27,6 @@ func TestAccOctopusDeployNuGetFeedBasic(t *testing.T) {
 		CheckDestroy: testOctopusDeployNuGetFeedDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testNuGetFeedBasic(localName, name, feedURI, username, password, isEnhancedMode),
 				Check: resource.ComposeTestCheckFunc(
 					testOctopusDeployNuGetFeedExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "feed_uri", feedURI),
@@ -36,18 +35,19 @@ func TestAccOctopusDeployNuGetFeedBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "password", password),
 					resource.TestCheckResourceAttr(prefix, "username", username),
 				),
+				Config: testAccNuGetFeed(localName, name, feedURI, username, password, isEnhancedMode),
 			},
 		},
 	})
 }
 
-func testNuGetFeedBasic(localName string, name string, feedURI string, username string, password string, isEnhancedMode bool) string {
+func testAccNuGetFeed(localName string, name string, feedURI string, username string, password string, isEnhancedMode bool) string {
 	return fmt.Sprintf(`resource "octopusdeploy_nuget_feed" "%s" {
-		feed_uri = "%s"
+		feed_uri         = "%s"
 		is_enhanced_mode = %v
-		name = "%s"
-		password = "%s"
-		username = "%s"
+		name             = "%s"
+		password         = "%s"
+		username         = "%s"
 	}`, localName, feedURI, isEnhancedMode, name, password, username)
 }
 

@@ -41,7 +41,7 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 	}
 }
 
-func flattenPackageReference(packageReference octopusdeploy.PackageReference) map[string]interface{} {
+func flattenPackageReference(packageReference *octopusdeploy.PackageReference) map[string]interface{} {
 	flattenedPackageReference := map[string]interface{}{
 		"acquisition_location": packageReference.AcquisitionLocation,
 		"feed_id":              packageReference.FeedID,
@@ -98,8 +98,8 @@ func getPackageSchema(required bool) *schema.Schema {
 	}
 }
 
-func expandPackageReference(tfPkg map[string]interface{}) octopusdeploy.PackageReference {
-	pkg := octopusdeploy.PackageReference{
+func expandPackageReference(tfPkg map[string]interface{}) *octopusdeploy.PackageReference {
+	pkg := &octopusdeploy.PackageReference{
 		AcquisitionLocation: tfPkg["acquisition_location"].(string),
 		FeedID:              tfPkg["feed_id"].(string),
 		Name:                getStringOrEmpty(tfPkg["name"]),

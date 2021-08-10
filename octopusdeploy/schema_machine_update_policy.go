@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandMachineUpdatePolicy(values interface{}) *octopusdeploy.MachineUpdatePolicy {
@@ -34,11 +35,11 @@ func getMachineUpdatePolicySchema() map[string]*schema.Schema {
 			Default:  "UpdateOnDeployment",
 			Optional: true,
 			Type:     schema.TypeString,
-			ValidateDiagFunc: validateValueFunc([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"UpdateAlways",
 				"UpdateOnDeployment",
 				"UpdateOnNewMachine",
-			}),
+			}, false)),
 		},
 		"tentacle_update_account_id": {
 			Optional: true,
@@ -48,10 +49,10 @@ func getMachineUpdatePolicySchema() map[string]*schema.Schema {
 			Default:  "NeverUpdate",
 			Optional: true,
 			Type:     schema.TypeString,
-			ValidateDiagFunc: validateValueFunc([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"NeverUpdate",
 				"Update",
-			}),
+			}, false)),
 		},
 	}
 }

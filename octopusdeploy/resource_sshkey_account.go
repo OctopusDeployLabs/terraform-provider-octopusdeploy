@@ -72,12 +72,8 @@ func resourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	accountResource, err = octopusdeploy.ToAccount(accountResource.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setSSHKeyAccount(ctx, d, accountResource.(*octopusdeploy.SSHKeyAccount)); err != nil {
+	sshKeyAccount := accountResource.(*octopusdeploy.SSHKeyAccount)
+	if err := setSSHKeyAccount(ctx, d, sshKeyAccount); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -95,12 +91,7 @@ func resourceSSHKeyAccountUpdate(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	accountResource, err := octopusdeploy.ToAccount(updatedAccount.(*octopusdeploy.AccountResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setSSHKeyAccount(ctx, d, accountResource.(*octopusdeploy.SSHKeyAccount)); err != nil {
+	if err := setSSHKeyAccount(ctx, d, updatedAccount.(*octopusdeploy.SSHKeyAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 

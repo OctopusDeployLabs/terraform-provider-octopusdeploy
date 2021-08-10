@@ -117,7 +117,7 @@ func getFeedSchema() map[string]*schema.Schema {
 			Default:  "None",
 			Optional: true,
 			Type:     schema.TypeString,
-			ValidateDiagFunc: validateValueFunc([]string{
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"AwsElasticContainerRegistry",
 				"BuiltIn",
 				"Docker",
@@ -127,7 +127,7 @@ func getFeedSchema() map[string]*schema.Schema {
 				"None",
 				"NuGet",
 				"OctopusProject",
-			}),
+			}, false)),
 		},
 		"feed_uri": {
 			Required: true,
