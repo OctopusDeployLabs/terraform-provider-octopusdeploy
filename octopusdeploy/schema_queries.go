@@ -304,3 +304,12 @@ func getQueryThumbprint() *schema.Schema {
 		Type:        schema.TypeString,
 	}
 }
+
+func getQuerySpaces() *schema.Schema {
+	return &schema.Schema{
+		Description: "A filter to search by a list of space IDs.",
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Type:        schema.TypeList,
+	}
+}

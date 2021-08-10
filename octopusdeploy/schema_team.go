@@ -71,6 +71,7 @@ func flattenTeam(team *octopusdeploy.Team) map[string]interface{} {
 func getTeamDataSchema() map[string]*schema.Schema {
 	dataSchema := getTeamSchema()
 	setDataSchema(&dataSchema)
+	delete(dataSchema, "user_role")
 
 	return map[string]*schema.Schema{
 		"id":             getDataSchemaID(),
@@ -78,19 +79,67 @@ func getTeamDataSchema() map[string]*schema.Schema {
 		"include_system": getQueryIncludeSystem(),
 		"partial_name":   getQueryPartialName(),
 		"skip":           getQuerySkip(),
-		"spaces": {
-			Description: "A list of spaces that match the filter(s).",
-			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"take": getQueryTake(),
+		"spaces":         getQuerySpaces(),
+		"take":           getQueryTake(),
 		"teams": {
 			Computed:    true,
 			Description: "A list of teams that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,
+		},
+	}
+}
+
+func getTeamUserRoleSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"environment_ids": {
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Set:      schema.HashString,
+			Type:     schema.TypeSet,
+		},
+		"id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"project_group_ids": {
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Set:      schema.HashString,
+			Type:     schema.TypeSet,
+		},
+		"project_ids": {
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Set:      schema.HashString,
+			Type:     schema.TypeSet,
+		},
+		"space_id": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"team_id": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"tenant_ids": {
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Optional: true,
+			Set:      schema.HashString,
+			Type:     schema.TypeSet,
+		},
+		"user_role_id": {
+			Type:     schema.TypeString,
+			Required: true,
 		},
 	}
 }
@@ -145,6 +194,15 @@ func getTeamSchema() map[string]*schema.Schema {
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			Optional:    true,
 			Type:        schema.TypeList,
+		},
+		"user_role": {
+			Elem: &schema.Resource{
+				Schema: getTeamUserRoleSchema(),
+			},
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeSet,
+			Set:      resourceTeamUserRoleSetHash,
 		},
 	}
 }

@@ -43,11 +43,31 @@ func TestAccTeamBasic(t *testing.T) {
 	})
 }
 
-func testAccTeamBasic(localName string, name string, description string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_team" "%s" {
-		description = "%s"
-		name = "%s"
-	}`, localName, description, name)
+func TestAccTeamUserRole(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	resourceName := "octopusdeploy_team." + localName
+	userRoleResource := "octopusdeploy_user_role." + localName
+
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccTeamCheckDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testTeamExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "description", description),
+					resource.TestCheckResourceAttrPair(resourceName, "user_role.0.user_role_id", userRoleResource, "id"),
+					resource.TestCheckResourceAttr(resourceName, "user_role.#", "1"),
+				),
+				Config: testAccTeamUserRole(localName, name, description),
+			},
+		},
+	})
 }
 
 func testAccTeamCheckExists(resourceName string) resource.TestCheckFunc {
@@ -79,4 +99,28 @@ func testAccTeamCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func testAccTeamBasic(localName string, name string, description string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_team" "%s" {
+		description = "%s"
+		name = "%s"
+	}`, localName, description, name)
+}
+
+func testAccTeamUserRole(localName string, name string, description string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_user_role" "%[1]s" {
+		name = "%[3]s"
+		granted_space_permissions = ["AccountCreate"]
+	}
+
+	resource "octopusdeploy_team" "%[1]s" {
+		description = "%[2]s"
+		name = "%[3]s"
+
+		user_role {
+			space_id = "Spaces-1"
+			user_role_id = octopusdeploy_user_role.%[1]s.id
+		}
+	}`, localName, description, name)
 }

@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"hash/crc32"
 	"log"
 	"strings"
 
@@ -62,13 +63,18 @@ func getSliceFromTerraformTypeList(list interface{}) []string {
 	if list == nil {
 		return nil
 	}
-
-	if _, ok := list.([]interface{}); !ok {
-		return nil
+	terraformList, ok := list.([]interface{})
+	if !ok {
+		terraformSet, ok := list.(*schema.Set)
+		if ok {
+			terraformList = terraformSet.List()
+		} else {
+			// It's not a list or set type
+			return nil
+		}
 	}
-
 	var newSlice []string
-	for _, v := range list.([]interface{}) {
+	for _, v := range terraformList {
 		if v != nil {
 			newSlice = append(newSlice, v.(string))
 		}
@@ -89,4 +95,15 @@ func getStringOrEmpty(tfAttr interface{}) string {
 		return ""
 	}
 	return tfAttr.(string)
+}
+
+func stringHashCode(s string) int {
+	v := int(crc32.ChecksumIEEE([]byte(s)))
+	if v >= 0 {
+		return v
+	}
+	if -v >= 0 {
+		return -v
+	}
+	return 0
 }

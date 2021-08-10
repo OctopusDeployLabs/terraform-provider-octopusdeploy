@@ -20,41 +20,14 @@ Provides information about existing users.
 - **ids** (List of String) A filter to search by a list of IDs.
 - **include_system** (Boolean) A filter to include system teams.
 - **partial_name** (String) A filter to search by the partial match of a name.
+- **spaces** (List of String) A filter to search by a list of space IDs.
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
 - **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
-- **spaces** (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--spaces))
 - **teams** (Block List) A list of teams that match the filter(s). (see [below for nested schema](#nestedblock--teams))
-
-<a id="nestedblock--spaces"></a>
-### Nested Schema for `spaces`
-
-Read-Only:
-
-- **can_be_deleted** (Boolean)
-- **can_be_renamed** (Boolean)
-- **can_change_members** (Boolean)
-- **can_change_roles** (Boolean)
-- **description** (String) The user-friendly description of this team.
-- **external_security_group** (List of Object) (see [below for nested schema](#nestedatt--spaces--external_security_group))
-- **id** (String) The unique ID for this resource.
-- **name** (String) The name of this team.
-- **space_id** (String) The space associated with this team.
-- **users** (List of String) A list of user IDs designated to be members of this team.
-
-<a id="nestedatt--spaces--external_security_group"></a>
-### Nested Schema for `spaces.external_security_group`
-
-Read-Only:
-
-- **display_id_and_name** (Boolean)
-- **display_name** (String)
-- **id** (String)
-
-
 
 <a id="nestedblock--teams"></a>
 ### Nested Schema for `teams`

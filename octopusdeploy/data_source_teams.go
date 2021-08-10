@@ -22,6 +22,7 @@ func dataSourceTeamsRead(ctx context.Context, d *schema.ResourceData, meta inter
 		IDs:           expandArray(d.Get("ids").([]interface{})),
 		IncludeSystem: d.Get("include_system").(bool),
 		PartialName:   d.Get("partial_name").(string),
+		Spaces:        expandArray(d.Get("spaces").([]interface{})),
 		Skip:          d.Get("skip").(int),
 		Take:          d.Get("take").(int),
 	}
