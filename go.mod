@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.90.0 // indirect
 	cloud.google.com/go/storage v1.16.0 // indirect
 	github.com/Microsoft/go-winio v0.4.17 // indirect
-	github.com/OctopusDeploy/go-octopusdeploy v1.7.38
+	github.com/OctopusDeploy/go-octopusdeploy v1.7.40
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.40.19 // indirect
@@ -41,7 +41,6 @@ require (
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5 // indirect
 	golang.org/x/term v0.0.0-20210406210042-72f3dc4e9b72 // indirect
-	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/api v0.52.0 // indirect
 	google.golang.org/genproto v0.0.0-20210810220042-07d9e28b16a8 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
