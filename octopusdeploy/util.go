@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"fmt"
 	"hash/crc32"
 	"log"
 	"strings"
@@ -106,4 +107,24 @@ func stringHashCode(s string) int {
 		return -v
 	}
 	return 0
+}
+
+func makeMutuallyExclusive(schemaBlock *schema.Schema, parent string) *schema.Schema {
+	if resource, ok := schemaBlock.Elem.(*schema.Resource); ok {
+		schema := resource.Schema
+		keys := make([]string, len(schema))
+		i := 0
+		for key := range schema {
+			if parent != "" {
+				keys[i] = fmt.Sprintf("%s.0.%s", parent, key)
+			} else {
+				keys[i] = key
+			}
+			i++
+		}
+		for _, value := range schema {
+			value.ExactlyOneOf = keys
+		}
+	}
+	return schemaBlock
 }

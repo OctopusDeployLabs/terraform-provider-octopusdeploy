@@ -18,6 +18,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 		ReadContext:   resourceProjectDeploymentTargetTriggerRead,
 		UpdateContext: resourceProjectDeploymentTargetTriggerUpdate,
 
+		DeprecationMessage: "The octopusdeploy_project_deployment_target_trigger is deprecated. Please utilize the octopusdeploy_project_trigger.",
 		Schema: map[string]*schema.Schema{
 			"name": getNameSchema(true),
 			"project_id": {
