@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccGCPAccountBasic(t *testing.T) {
+func TestAccGcpAccountBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_gcp_account." + localName
 
@@ -31,13 +31,13 @@ func TestAccGCPAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 				),
-				Config: testGCPAccountBasic(localName, name, description, jsonKey, tenantedDeploymentParticipation),
+				Config: testGcpAccountBasic(localName, name, description, jsonKey, tenantedDeploymentParticipation),
 			},
 		},
 	})
 }
 
-func testGCPAccountBasic(localName string, name string, description string, jsonKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+func testGcpAccountBasic(localName string, name string, description string, jsonKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`resource "octopusdeploy_gcp_account" "%s" {
 		description = "%s"
 		json_key = "%s"
@@ -48,4 +48,11 @@ func testGCPAccountBasic(localName string, name string, description string, json
 	data "octopusdeploy_accounts" "test" {
 		ids = [octopusdeploy_gcp_account.%s.id]
 	}`, localName, description, jsonKey, name, tenantedDeploymentParticipation, localName)
+}
+
+func testGcpAccount(localName string, name string, jsonKey string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_gcp_account" "%s" {
+		json_key = "%s"
+		name = "%s"
+	}`, localName, jsonKey, name)
 }
