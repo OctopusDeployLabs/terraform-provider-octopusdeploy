@@ -27,7 +27,7 @@ func flattenKubernetesGcpAuthentication(kubernetesGcpAuthentication *octopusdepl
 	}
 
 	return []interface{}{map[string]interface{}{
-		"account_id":                   kubernetesAwsAuthentication.AccountID,
+		"account_id":                  kubernetesGcpAuthentication.AccountID,
 		"cluster_name":                kubernetesGcpAuthentication.ClusterName,
 		"impersonate_service_account": kubernetesGcpAuthentication.ImpersonateServiceAccount,
 		"project":                     kubernetesGcpAuthentication.Project,
