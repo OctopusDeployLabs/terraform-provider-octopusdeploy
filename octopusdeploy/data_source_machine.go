@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataMachine() *schema.Resource {
+func dataSourceMachine() *schema.Resource {
 	return &schema.Resource{
 		DeprecationMessage: "use a machine-specific data resource instead",
 		Read:               dataMachineReadByName,
