@@ -40,12 +40,14 @@ func (c *Config) Client() (*octopusdeploy.Client, diag.Diagnostics) {
 	}
 
 	if len(c.SpaceName) > 0 {
-		space, err := client.Spaces.GetByName(c.SpaceName)
+		spaces, err := client.Spaces.Get(octopusdeploy.SpacesQuery{
+			Name: c.SpaceName,
+		})
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 
-		client, err = octopusdeploy.NewClient(nil, apiURL, c.APIKey, space.GetID())
+		client, err = octopusdeploy.NewClient(nil, apiURL, c.APIKey, spaces.Items[0].GetID())
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
