@@ -20,8 +20,8 @@ Provides information about existing users.
 - **ids** (List of String) A filter to search by a list of IDs.
 - **include_system** (Boolean) A filter to include system teams.
 - **partial_name** (String) A filter to search by the partial match of a name.
-- **spaces** (List of String) A filter to search by a list of space IDs.
 - **skip** (Number) A filter to specify the number of items to skip in the response.
+- **spaces** (List of String) A filter to search by a list of space IDs.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
