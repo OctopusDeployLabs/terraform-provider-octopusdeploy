@@ -8,7 +8,31 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/stretchr/testify/require"
 )
+
+func TestExpandRunScriptAction(t *testing.T) {
+	runScriptAction := expandRunScriptAction(nil)
+	require.Nil(t, runScriptAction)
+
+	runScriptAction = expandRunScriptAction(map[string]interface{}{})
+	require.Nil(t, runScriptAction)
+
+	runScriptAction = expandRunScriptAction(map[string]interface{}{
+		"name": nil,
+	})
+	require.Nil(t, runScriptAction)
+
+	runScriptAction = expandRunScriptAction(map[string]interface{}{
+		"action_type": nil,
+	})
+	require.Nil(t, runScriptAction)
+
+	runScriptAction = expandRunScriptAction(map[string]interface{}{
+		"name": acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
+	})
+	require.NotNil(t, runScriptAction)
+}
 
 func TestAccRunScriptAction(t *testing.T) {
 	feedLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -20,8 +44,10 @@ func TestAccRunScriptAction(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccDeploymentProcessCheckDestroy,
 			testAccProjectCheckDestroy,
 			testAccProjectGroupCheckDestroy,
+			testAccEnvironmentCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -50,14 +76,10 @@ func testAccRunScriptAction(feedLocalName string, feedName string, feedURI strin
 
 			package {
 				acquisition_location      = "Server"
+				extract_during_deployment = false
 				feed_id                   = "${octopusdeploy_nuget_feed.%s.id}"
 				name                      = "package2"
 				package_id                = "package2"
-				extract_during_deployment = false
-
-				properties = {
-					"Extract" = "false"
-				}
 			}
 
 			primary_package {

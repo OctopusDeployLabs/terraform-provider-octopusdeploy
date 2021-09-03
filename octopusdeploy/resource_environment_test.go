@@ -22,13 +22,13 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 	useGuidedFailure := false
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testEnvironmentDestroy,
+		CheckDestroy: testAccEnvironmentCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testEnvironmentExists(prefix),
+					testAccEnvironmentExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "allow_dynamic_infrastructure", strconv.FormatBool(allowDynamicInfrastructure)),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
@@ -43,19 +43,19 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 
 func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := "octopusdeploy_environment." + localName
+	resourceName := "octopusdeploy_environment." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testEnvironmentDestroy,
+		CheckDestroy: testAccEnvironmentCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testEnvironmentExists(prefix),
-					resource.TestCheckResourceAttr(prefix, "name", name),
+					testAccEnvironmentExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 				Config: testAccEnvironment(localName, name),
 			},
@@ -79,7 +79,7 @@ func testEnvironmentBasic(localName string, name string, description string, all
 	}`, localName, allowDynamicInfrastructure, description, name, sortOrder, useGuidedFailure)
 }
 
-func testEnvironmentExists(prefix string) resource.TestCheckFunc {
+func testAccEnvironmentExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 		environmentID := s.RootModule().Resources[prefix].Primary.ID
@@ -91,19 +91,15 @@ func testEnvironmentExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testEnvironmentDestroy(s *terraform.State) error {
+func testAccEnvironmentCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*octopusdeploy.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_environment" {
 			continue
 		}
 
-		environmentID := rs.Primary.ID
-		environment, err := client.Environments.GetByID(environmentID)
-		if err == nil {
-			if environment != nil {
-				return fmt.Errorf("environment (%s) still exists", rs.Primary.ID)
-			}
+		if environment, err := client.Environments.GetByID(rs.Primary.ID); err == nil {
+			return fmt.Errorf("environment (%s) still exists", environment.GetID())
 		}
 	}
 

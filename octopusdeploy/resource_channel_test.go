@@ -186,6 +186,7 @@ func testAccChannelBasic(localName string, lifecycleLocalName string, lifecycleN
 
 			rule {
 			  version_range = "1.0.1"
+
 			  action_package {
 				deployment_action = "Run a Script"
 				package_reference = "Octopus.Cli"
@@ -341,7 +342,7 @@ func testAccChannelCheckDestroy(s *terraform.State) error {
 	if err := destroyHelperChannel(s, client); err != nil {
 		return err
 	}
-	if err := testEnvironmentDestroy(s); err != nil {
+	if err := testAccEnvironmentCheckDestroy(s); err != nil {
 		return err
 	}
 	return nil

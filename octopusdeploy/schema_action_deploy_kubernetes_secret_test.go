@@ -32,9 +32,9 @@ func TestAccOctopusDeployDeployKuberentesSecretAction(t *testing.T) {
 func testAccDeployKuberentesSecretAction() string {
 	return testAccBuildTestAction(`
 		deploy_kubernetes_secret_action {
-      name = "Run Script"
-      run_on_server = true
-			secret_name = "secret name"
+			name          = "Run Script"
+			run_on_server = true
+			secret_name   = "secret name"
 
 			secret_values = {
 				"key-123" = "value-123",
