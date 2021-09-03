@@ -10,6 +10,7 @@ func expandKubernetesGcpAuthentication(values interface{}) *octopusdeploy.Kubern
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
 	authentication := octopusdeploy.NewKubernetesGcpAuthentication()
+	authentication.AccountID = flattenedAuthentication["account_id"].(string)
 	authentication.ClusterName = flattenedAuthentication["cluster_name"].(string)
 	authentication.ImpersonateServiceAccount = flattenedAuthentication["impersonate_service_account"].(bool)
 	authentication.Project = flattenedAuthentication["project"].(string)
@@ -26,6 +27,7 @@ func flattenKubernetesGcpAuthentication(kubernetesGcpAuthentication *octopusdepl
 	}
 
 	return []interface{}{map[string]interface{}{
+		"account_id":                   kubernetesAwsAuthentication.AccountID,
 		"cluster_name":                kubernetesGcpAuthentication.ClusterName,
 		"impersonate_service_account": kubernetesGcpAuthentication.ImpersonateServiceAccount,
 		"project":                     kubernetesGcpAuthentication.Project,
@@ -38,6 +40,10 @@ func flattenKubernetesGcpAuthentication(kubernetesGcpAuthentication *octopusdepl
 
 func getKubernetesGcpAuthenticationSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"account_id": {
+			Required: true,
+			Type:     schema.TypeString,
+		},
 		"cluster_name": {
 			Required: true,
 			Type:     schema.TypeString,
