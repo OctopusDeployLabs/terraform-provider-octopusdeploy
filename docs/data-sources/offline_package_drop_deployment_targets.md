@@ -138,7 +138,13 @@ Read-Only:
 - **client_certificate** (String)
 - **cluster_name** (String)
 - **cluster_resource_group** (String)
+- **impersonate_service_account** (Boolean)
+- **project** (String)
+- **region** (String)
+- **service_account_emails** (String)
 - **use_instance_role** (Boolean)
+- **use_vm_service_account** (Boolean)
+- **zone** (String)
 
 
 <a id="nestedobjatt--offline_package_drop_deployment_targets--endpoint--container"></a>

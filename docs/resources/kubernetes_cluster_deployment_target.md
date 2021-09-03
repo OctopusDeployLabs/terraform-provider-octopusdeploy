@@ -32,6 +32,7 @@ This resource manages Kubernets cluster deployment targets in Octopus Deploy.
 - **container** (Block List) (see [below for nested schema](#nestedblock--container))
 - **default_worker_pool_id** (String)
 - **endpoint** (Block List) (see [below for nested schema](#nestedblock--endpoint))
+- **gcp_account_authentication** (Block List, Max: 1) (see [below for nested schema](#nestedblock--gcp_account_authentication))
 - **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean)
@@ -175,7 +176,13 @@ Optional:
 - **client_certificate** (String)
 - **cluster_name** (String)
 - **cluster_resource_group** (String)
+- **impersonate_service_account** (Boolean)
+- **project** (String)
+- **region** (String)
+- **service_account_emails** (String)
 - **use_instance_role** (Boolean)
+- **use_vm_service_account** (Boolean)
+- **zone** (String)
 
 
 <a id="nestedblock--endpoint--container"></a>
@@ -205,5 +212,23 @@ Optional:
 - **upgrade_required** (Boolean)
 - **upgrade_suggested** (Boolean)
 - **version** (String)
+
+
+
+<a id="nestedblock--gcp_account_authentication"></a>
+### Nested Schema for `gcp_account_authentication`
+
+Required:
+
+- **cluster_name** (String)
+- **project** (String)
+
+Optional:
+
+- **impersonate_service_account** (Boolean)
+- **region** (String)
+- **service_account_emails** (String)
+- **use_vm_service_account** (Boolean)
+- **zone** (String)
 
 

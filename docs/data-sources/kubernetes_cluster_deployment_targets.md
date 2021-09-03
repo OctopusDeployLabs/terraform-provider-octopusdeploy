@@ -52,6 +52,7 @@ Read-Only:
 - **default_worker_pool_id** (String)
 - **endpoint** (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--endpoint))
 - **environments** (List of String) A list of environment IDs associated with this resource.
+- **gcp_account_authentication** (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--gcp_account_authentication))
 - **has_latest_calamari** (Boolean)
 - **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
 - **id** (String) The unique ID for this resource.
@@ -188,7 +189,13 @@ Read-Only:
 - **client_certificate** (String)
 - **cluster_name** (String)
 - **cluster_resource_group** (String)
+- **impersonate_service_account** (Boolean)
+- **project** (String)
+- **region** (String)
+- **service_account_emails** (String)
 - **use_instance_role** (Boolean)
+- **use_vm_service_account** (Boolean)
+- **zone** (String)
 
 
 <a id="nestedobjatt--kubernetes_cluster_deployment_targets--endpoint--container"></a>
@@ -218,5 +225,20 @@ Read-Only:
 - **upgrade_required** (Boolean)
 - **upgrade_suggested** (Boolean)
 - **version** (String)
+
+
+
+<a id="nestedatt--kubernetes_cluster_deployment_targets--gcp_account_authentication"></a>
+### Nested Schema for `kubernetes_cluster_deployment_targets.gcp_account_authentication`
+
+Read-Only:
+
+- **cluster_name** (String)
+- **impersonate_service_account** (Boolean)
+- **project** (String)
+- **region** (String)
+- **service_account_emails** (String)
+- **use_vm_service_account** (Boolean)
+- **zone** (String)
 
 
