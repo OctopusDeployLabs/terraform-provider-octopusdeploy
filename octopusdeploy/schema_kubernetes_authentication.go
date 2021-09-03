@@ -18,6 +18,8 @@ func expandKubernetesAuthentication(values interface{}) octopusdeploy.IKubernete
 		return expandKubernetesAzureAuthentication(flattenedMap)
 	case "KubernetesCertificate":
 		return expandKubernetesCertificateAuthentication(flattenedMap)
+	case "KubernetesGoogleCloud":
+		return expandKubernetesGcpAuthentication(flattenedMap)
 	case "KubernetesStandard":
 		return expandKubernetesStandardAuthentication(flattenedMap)
 	case "None":
@@ -36,7 +38,13 @@ func expandKubernetesAuthentication(values interface{}) octopusdeploy.IKubernete
 		ClientCertificate:         flattenedMap["client_certificate"].(string),
 		ClusterName:               flattenedMap["cluster_name"].(string),
 		ClusterResourceGroup:      flattenedMap["cluster_resource_group"].(string),
+		ImpersonateServiceAccount: flattenedMap["impersonate_service_account"].(bool),
+		Project:                   flattenedMap["project"].(string),
+		Region:                    flattenedMap["region"].(string),
+		ServiceAccountEmails:      flattenedMap["service_account_emails"].(string),
+		UseVmServiceAccount:       flattenedMap["use_vm_service_account"].(bool),
 		UseInstanceRole:           flattenedMap["use_instance_role"].(bool),
+		Zone:                      flattenedMap["zone"].(string),
 	}
 }
 
@@ -52,6 +60,8 @@ func flattenKubernetesAuthentication(kubernetesAuthentication octopusdeploy.IKub
 		return flattenKubernetesAzureAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesAzureAuthentication))
 	case "KubernetesCertificate":
 		return flattenKubernetesCertificateAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesCertificateAuthentication))
+	case "KubernetesGoogleCloud":
+		return flattenKubernetesGcpAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesGcpAuthentication))
 	case "KubernetesStandard":
 		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesStandardAuthentication))
 	case "None":
@@ -115,6 +125,7 @@ func getKubernetesAuthenticationSchema() map[string]*schema.Schema {
 				"KubernetesAws",
 				"KubernetesAzure",
 				"KubernetesCertificate",
+				"KubernetesGoogleCloud",
 				"KubernetesStandard",
 				"None",
 			}, false)),
@@ -131,9 +142,33 @@ func getKubernetesAuthenticationSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
+		"impersonate_service_account": {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"project": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"region": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"service_account_emails": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
 		"use_instance_role": {
 			Optional: true,
 			Type:     schema.TypeBool,
+		},
+		"use_vm_service_account": {
+			Optional: true,
+			Type:     schema.TypeBool,
+		},
+		"zone": {
+			Optional: true,
+			Type:     schema.TypeString,
 		},
 	}
 }

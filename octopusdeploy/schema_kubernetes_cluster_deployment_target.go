@@ -38,6 +38,10 @@ func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *octopusdep
 		endpoint.DefaultWorkerPoolID = v.(string)
 	}
 
+	if v, ok := d.GetOk("gcp_account_authentication"); ok {
+		endpoint.Authentication = expandKubernetesGcpAuthentication(v)
+	}
+
 	if v, ok := d.GetOk("namespace"); ok {
 		endpoint.Namespace = v.(string)
 	}
@@ -86,6 +90,8 @@ func flattenKubernetesClusterDeploymentTarget(deploymentTarget *octopusdeploy.De
 		flattenedDeploymentTarget["azure_service_principal_authentication"] = flattenKubernetesAzureAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAzureAuthentication))
 	case "KubernetesCertificate":
 		flattenedDeploymentTarget["certificate_authentication"] = flattenKubernetesCertificateAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesCertificateAuthentication))
+	case "KubernetesGoogleCloud":
+		flattenedDeploymentTarget["gcp_account_authentication"] = flattenKubernetesGcpAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesGcpAuthentication))
 	case "KubernetesStandard":
 		flattenedDeploymentTarget["authentication"] = flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))
 	case "None":
@@ -122,7 +128,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesStandardAuthenticationSchema()},
-		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -132,7 +138,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["aws_account_authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesAwsAuthenticationSchema()},
-		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -142,7 +148,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["azure_service_principal_authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesAzureAuthenticationSchema()},
-		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -152,7 +158,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["certificate_authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesCertificateAuthenticationSchema()},
-		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication"},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -179,6 +185,16 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["default_worker_pool_id"] = &schema.Schema{
 		Optional: true,
 		Type:     schema.TypeString,
+	}
+
+	kubernetesClusterDeploymentTargetSchema["gcp_account_authentication"] = &schema.Schema{
+		Computed:     true,
+		Elem:         &schema.Resource{Schema: getKubernetesGcpAuthenticationSchema()},
+		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
+		MaxItems:     1,
+		MinItems:     0,
+		Optional:     true,
+		Type:         schema.TypeList,
 	}
 
 	kubernetesClusterDeploymentTargetSchema["namespace"] = &schema.Schema{
@@ -238,6 +254,10 @@ func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.Resourc
 	case "KubernetesCertificate":
 		if err := d.Set("certificate_authentication", flattenKubernetesCertificateAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesCertificateAuthentication))); err != nil {
 			return fmt.Errorf("error setting certificate_authentication: %s", err)
+		}
+	case "KubernetesGoogleCloud":
+		if err := d.Set("gcp_account_authentication", flattenKubernetesGcpAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesGcpAuthentication))); err != nil {
+			return fmt.Errorf("error setting gcp_account_authentication: %s", err)
 		}
 	case "KubernetesStandard":
 		if err := d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))); err != nil {
