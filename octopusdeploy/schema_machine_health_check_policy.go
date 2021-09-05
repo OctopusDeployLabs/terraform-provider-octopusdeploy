@@ -9,19 +9,49 @@ import (
 )
 
 func expandMachineHealthCheckPolicy(values interface{}) *octopusdeploy.MachineHealthCheckPolicy {
-	flattenedValues := values.([]interface{})
-	flattenedMap := flattenedValues[0].(map[string]interface{})
-
-	duration, _ := time.ParseDuration(flattenedMap["health_check_interval"].(string))
-
-	return &octopusdeploy.MachineHealthCheckPolicy{
-		BashHealthCheckPolicy:       expandMachineScriptPolicy(flattenedMap["bash_health_check_policy"]),
-		HealthCheckCron:             flattenedMap["health_check_cron"].(string),
-		HealthCheckCronTimezone:     flattenedMap["health_check_cron_timezone"].(string),
-		HealthCheckInterval:         duration,
-		HealthCheckType:             flattenedMap["health_check_type"].(string),
-		PowerShellHealthCheckPolicy: expandMachineScriptPolicy(flattenedMap["powershell_health_check_policy"]),
+	if values == nil {
+		return nil
 	}
+	flattenedValues := values.(*schema.Set)
+	if len(flattenedValues.List()) == 0 {
+		return nil
+	}
+
+	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
+
+	machineHealthCheckPolicy := octopusdeploy.NewMachineHealthCheckPolicy()
+
+	if v, ok := flattenedMap["bash_health_check_policy"]; ok {
+		if len(v.([]interface{})) > 0 {
+			machineHealthCheckPolicy.BashHealthCheckPolicy = expandMachineScriptPolicy(v)
+		}
+	}
+
+	if v, ok := flattenedMap["health_check_cron"]; ok {
+		machineHealthCheckPolicy.HealthCheckCron = v.(string)
+	}
+
+	if v, ok := flattenedMap["health_check_cron_timezone"]; ok {
+		if s := v.(string); len(s) > 0 {
+			machineHealthCheckPolicy.HealthCheckCronTimezone = s
+		}
+	}
+
+	if v, ok := flattenedMap["health_check_interval"]; ok {
+		machineHealthCheckPolicy.HealthCheckInterval = time.Duration(v.(int))
+	}
+
+	if v, ok := flattenedMap["health_check_type"]; ok {
+		machineHealthCheckPolicy.HealthCheckType = v.(string)
+	}
+
+	if v, ok := flattenedMap["powershell_health_check_policy"]; ok {
+		if len(v.([]interface{})) > 0 {
+			machineHealthCheckPolicy.PowerShellHealthCheckPolicy = expandMachineScriptPolicy(v)
+		}
+	}
+
+	return machineHealthCheckPolicy
 }
 
 func flattenMachineHealthCheckPolicy(machineHealthCheckPolicy *octopusdeploy.MachineHealthCheckPolicy) []interface{} {
@@ -44,7 +74,7 @@ func getMachineHealthCheckPolicySchema() map[string]*schema.Schema {
 		"bash_health_check_policy": {
 			Elem:     &schema.Resource{Schema: getMachineScriptPolicySchema()},
 			MaxItems: 1,
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeList,
 		},
 		"health_check_cron": {
@@ -52,10 +82,12 @@ func getMachineHealthCheckPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"health_check_cron_timezone": {
+			Default:  "UTC",
 			Optional: true,
 			Type:     schema.TypeString,
 		},
 		"health_check_interval": {
+			Default:  24 * time.Hour,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
@@ -71,7 +103,7 @@ func getMachineHealthCheckPolicySchema() map[string]*schema.Schema {
 		"powershell_health_check_policy": {
 			Elem:     &schema.Resource{Schema: getMachineScriptPolicySchema()},
 			MaxItems: 1,
-			Optional: true,
+			Required: true,
 			Type:     schema.TypeList,
 		},
 	}

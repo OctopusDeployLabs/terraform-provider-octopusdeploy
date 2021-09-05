@@ -7,14 +7,31 @@ import (
 )
 
 func expandMachineUpdatePolicy(values interface{}) *octopusdeploy.MachineUpdatePolicy {
-	flattenedValues := values.([]interface{})
-	flattenedMap := flattenedValues[0].(map[string]interface{})
-
-	return &octopusdeploy.MachineUpdatePolicy{
-		CalamariUpdateBehavior:  flattenedMap["calamari_update_behavior"].(string),
-		TentacleUpdateAccountID: flattenedMap["tentacle_update_account_id"].(string),
-		TentacleUpdateBehavior:  flattenedMap["tentacle_update_behavior"].(string),
+	if values == nil {
+		return nil
 	}
+	flattenedValues := values.(*schema.Set)
+	if len(flattenedValues.List()) == 0 {
+		return nil
+	}
+
+	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
+
+	machineUpdatePolicy := octopusdeploy.NewMachineUpdatePolicy()
+
+	if v, ok := flattenedMap["calamari_update_behavior"]; ok {
+		machineUpdatePolicy.CalamariUpdateBehavior = v.(string)
+	}
+
+	if v, ok := flattenedMap["tentacle_update_account_id"]; ok {
+		machineUpdatePolicy.TentacleUpdateAccountID = v.(string)
+	}
+
+	if v, ok := flattenedMap["tentacle_update_behavior"]; ok {
+		machineUpdatePolicy.TentacleUpdateBehavior = v.(string)
+	}
+
+	return machineUpdatePolicy
 }
 
 func flattenMachineUpdatePolicy(machineUpdatePolicy *octopusdeploy.MachineUpdatePolicy) []interface{} {

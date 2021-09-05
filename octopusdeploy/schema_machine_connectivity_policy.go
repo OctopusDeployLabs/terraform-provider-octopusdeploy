@@ -7,12 +7,23 @@ import (
 )
 
 func expandMachineConnectivityPolicy(values interface{}) *octopusdeploy.MachineConnectivityPolicy {
-	flattenedValues := values.([]interface{})
-	flattenedMap := flattenedValues[0].(map[string]interface{})
-
-	return &octopusdeploy.MachineConnectivityPolicy{
-		MachineConnectivityBehavior: flattenedMap["machine_connectivity_behavior"].(string),
+	if values == nil {
+		return nil
 	}
+	flattenedValues := values.(*schema.Set)
+	if len(flattenedValues.List()) == 0 {
+		return nil
+	}
+
+	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
+
+	machineConnectivityPolicy := octopusdeploy.NewMachineConnectivityPolicy()
+
+	if v, ok := flattenedMap["machine_connectivity_behavior"]; ok {
+		machineConnectivityPolicy.MachineConnectivityBehavior = v.(string)
+	}
+
+	return machineConnectivityPolicy
 }
 
 func flattenMachineConnectivityPolicy(machineConnectivityPolicy *octopusdeploy.MachineConnectivityPolicy) []interface{} {

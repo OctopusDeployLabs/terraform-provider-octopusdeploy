@@ -33,6 +33,22 @@ func TestAccMachinePolicyImportBasic(t *testing.T) {
 	})
 }
 
+func TestAccMachinePolicyIssue230(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccMachinePolicyCheckDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testMachinePolicyIssue230(localName, name),
+			},
+		},
+	})
+}
+
 func TestAccMachinePolicyBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_machine_policy." + localName
@@ -72,6 +88,39 @@ func testMachinePolicyDataSource(localName string, name string) string {
 func testMachinePolicyBasic(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_machine_policy" "%s" {
 		name = "%s"
+	}`, localName, name)
+}
+
+func testMachinePolicyIssue230(localName string, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_machine_policy" "%s" {
+		name = "%s"
+
+		machine_connectivity_policy {
+		  machine_connectivity_behavior = "ExpectedToBeOnline"
+		}
+
+		machine_cleanup_policy {
+		  delete_machines_behavior         = "DeleteUnavailableMachines"
+		  delete_machines_elapsed_timespan = 3600000000000
+		}
+
+		machine_health_check_policy {
+		  health_check_type     = "OnlyConnectivity"
+		  health_check_interval = 15000000000
+
+		  bash_health_check_policy {
+			run_type = "InheritFromDefault"
+		  }
+
+		  powershell_health_check_policy {
+			run_type = "InheritFromDefault"
+		}
+	  }
+
+		machine_update_policy {
+		  calamari_update_behavior = "UpdateAlways"
+		  tentacle_update_behavior = "NeverUpdate"
+		}
 	}`, localName, name)
 }
 
