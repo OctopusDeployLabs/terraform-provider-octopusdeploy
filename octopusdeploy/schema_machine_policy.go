@@ -40,19 +40,27 @@ func expandMachinePolicy(d *schema.ResourceData) *octopusdeploy.MachinePolicy {
 	}
 
 	if v, ok := d.GetOk("machine_cleanup_policy"); ok {
-		machinePolicy.MachineCleanupPolicy = expandMachineCleanupPolicy(v)
+		if len(v.(*schema.Set).List()) > 0 {
+			machinePolicy.MachineCleanupPolicy = expandMachineCleanupPolicy(v)
+		}
 	}
 
 	if v, ok := d.GetOk("machine_connectivity_policy"); ok {
-		machinePolicy.MachineConnectivityPolicy = expandMachineConnectivityPolicy(v)
+		if len(v.(*schema.Set).List()) > 0 {
+			machinePolicy.MachineConnectivityPolicy = expandMachineConnectivityPolicy(v)
+		}
 	}
 
 	if v, ok := d.GetOk("machine_health_check_policy"); ok {
-		machinePolicy.MachineHealthCheckPolicy = expandMachineHealthCheckPolicy(v)
+		if len(v.(*schema.Set).List()) > 0 {
+			machinePolicy.MachineHealthCheckPolicy = expandMachineHealthCheckPolicy(v)
+		}
 	}
 
 	if v, ok := d.GetOk("machine_update_policy"); ok {
-		machinePolicy.MachineUpdatePolicy = expandMachineUpdatePolicy(v)
+		if len(v.(*schema.Set).List()) > 0 {
+			machinePolicy.MachineUpdatePolicy = expandMachineUpdatePolicy(v)
+		}
 	}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -64,7 +72,7 @@ func expandMachinePolicy(d *schema.ResourceData) *octopusdeploy.MachinePolicy {
 	}
 
 	if v, ok := d.GetOk("polling_request_queue_timeout"); ok {
-		machinePolicy.PollingRequestMaximumMessageProcessingTimeout = time.Duration(v.(int))
+		machinePolicy.PollingRequestQueueTimeout = time.Duration(v.(int))
 	}
 
 	if v, ok := d.GetOk("space_id"); ok {
@@ -94,7 +102,7 @@ func flattenMachinePolicy(machinePolicy *octopusdeploy.MachinePolicy) map[string
 		"machine_update_policy":           flattenMachineUpdatePolicy(machinePolicy.MachineUpdatePolicy),
 		"name":                            machinePolicy.Name,
 		"polling_request_maximum_message_processing_timeout": machinePolicy.PollingRequestMaximumMessageProcessingTimeout,
-		"polling_request_queue_timeout":                      machinePolicy.PollingRequestMaximumMessageProcessingTimeout,
+		"polling_request_queue_timeout":                      machinePolicy.PollingRequestQueueTimeout,
 		"space_id":                                           machinePolicy.SpaceID,
 	}
 }
@@ -121,22 +129,22 @@ func getMachinePolicyDataSchema() map[string]*schema.Schema {
 func getMachinePolicySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"connection_connect_timeout": {
-			Computed: true,
+			Default:  time.Minute,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
 		"connection_retry_count_limit": {
-			Computed: true,
+			Default:  5,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
 		"connection_retry_sleep_interval": {
-			Computed: true,
+			Default:  time.Second,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
 		"connection_retry_time_limit": {
-			Computed: true,
+			Default:  5 * time.Minute,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
@@ -147,28 +155,24 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 		"machine_cleanup_policy": {
-			Computed: true,
 			Elem:     &schema.Resource{Schema: getMachineCleanupPolicySchema()},
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
 		"machine_connectivity_policy": {
-			Computed: true,
 			Elem:     &schema.Resource{Schema: getMachineConnectivityPolicySchema()},
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
 		"machine_health_check_policy": {
-			Computed: true,
 			Elem:     &schema.Resource{Schema: getMachineHealthCheckPolicySchema()},
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
 		"machine_update_policy": {
-			Computed: true,
 			Elem:     &schema.Resource{Schema: getMachineUpdatePolicySchema()},
 			MaxItems: 1,
 			Optional: true,
@@ -176,12 +180,12 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 		},
 		"name": getNameSchema(true),
 		"polling_request_maximum_message_processing_timeout": {
-			Computed: true,
+			Default:  10 * time.Minute,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
 		"polling_request_queue_timeout": {
-			Computed: true,
+			Default:  2 * time.Minute,
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
@@ -197,6 +201,10 @@ func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy
 	d.Set("description", machinePolicy.Description)
 	d.Set("id", machinePolicy.GetID())
 	d.Set("is_default", machinePolicy.IsDefault)
+	d.Set("name", machinePolicy.Name)
+	d.Set("polling_request_maximum_message_processing_timeout", machinePolicy.PollingRequestMaximumMessageProcessingTimeout)
+	d.Set("polling_request_queue_timeout", machinePolicy.PollingRequestQueueTimeout)
+	d.Set("space_id", machinePolicy.SpaceID)
 
 	if err := d.Set("machine_cleanup_policy", flattenMachineCleanupPolicy(machinePolicy.MachineCleanupPolicy)); err != nil {
 		return fmt.Errorf("error setting machine_cleanup_policy: %s", err)
@@ -213,11 +221,6 @@ func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy
 	if err := d.Set("machine_update_policy", flattenMachineUpdatePolicy(machinePolicy.MachineUpdatePolicy)); err != nil {
 		return fmt.Errorf("error setting machine_update_policy: %s", err)
 	}
-
-	d.Set("name", machinePolicy.Name)
-	d.Set("polling_request_maximum_message_processing_timeout", machinePolicy.PollingRequestMaximumMessageProcessingTimeout)
-	d.Set("polling_request_queue_timeout", machinePolicy.PollingRequestMaximumMessageProcessingTimeout)
-	d.Set("space_id", machinePolicy.SpaceID)
 
 	return nil
 }

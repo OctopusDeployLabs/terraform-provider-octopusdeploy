@@ -9,13 +9,27 @@ import (
 )
 
 func expandMachineCleanupPolicy(values interface{}) *octopusdeploy.MachineCleanupPolicy {
-	flattenedValues := values.([]interface{})
-	flattenedMap := flattenedValues[0].(map[string]interface{})
-
-	return &octopusdeploy.MachineCleanupPolicy{
-		DeleteMachinesBehavior:        flattenedMap["delete_machines_behavior"].(string),
-		DeleteMachinesElapsedTimeSpan: time.Duration(flattenedMap["delete_machines_elapsed_timespan"].(int)),
+	if values == nil {
+		return nil
 	}
+	flattenedValues := values.(*schema.Set)
+	if len(flattenedValues.List()) == 0 {
+		return nil
+	}
+
+	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
+
+	machineCleanupPolicy := octopusdeploy.NewMachineCleanupPolicy()
+
+	if v, ok := flattenedMap["delete_machines_behavior"]; ok {
+		machineCleanupPolicy.DeleteMachinesBehavior = v.(string)
+	}
+
+	if v, ok := flattenedMap["delete_machines_elapsed_timespan"]; ok {
+		machineCleanupPolicy.DeleteMachinesElapsedTimeSpan = time.Duration(v.(int))
+	}
+
+	return machineCleanupPolicy
 }
 
 func flattenMachineCleanupPolicy(machineCleanupPolicy *octopusdeploy.MachineCleanupPolicy) []interface{} {

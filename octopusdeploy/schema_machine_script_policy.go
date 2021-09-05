@@ -3,16 +3,32 @@ package octopusdeploy
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandMachineScriptPolicy(values interface{}) *octopusdeploy.MachineScriptPolicy {
+	if values == nil {
+		return nil
+	}
 	flattenedValues := values.([]interface{})
+	if len(flattenedValues) == 0 {
+		return nil
+	}
+
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	return &octopusdeploy.MachineScriptPolicy{
-		RunType:    flattenedMap["run_type"].(string),
-		ScriptBody: flattenedMap["script_body"].(*string),
+	machineScriptPolicy := octopusdeploy.NewMachineScriptPolicy()
+
+	if v, ok := flattenedMap["run_type"]; ok {
+		machineScriptPolicy.RunType = v.(string)
 	}
+
+	if v, ok := flattenedMap["script_body"]; ok {
+		scriptBody := v.(string)
+		machineScriptPolicy.ScriptBody = &scriptBody
+	}
+
+	return machineScriptPolicy
 }
 
 func flattenMachineScriptPolicy(machineScriptPolicy *octopusdeploy.MachineScriptPolicy) []interface{} {
@@ -29,8 +45,14 @@ func flattenMachineScriptPolicy(machineScriptPolicy *octopusdeploy.MachineScript
 func getMachineScriptPolicySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"run_type": {
+			Default:  "InheritFromDefault",
 			Optional: true,
 			Type:     schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+				"InheritFromDefault",
+				"Inline",
+				"OnlyConnectivity",
+			}, false)),
 		},
 		"script_body": {
 			Optional: true,
