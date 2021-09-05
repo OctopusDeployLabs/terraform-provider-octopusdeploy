@@ -220,6 +220,7 @@ Optional:
 
 Required:
 
+- **account_id** (String)
 - **cluster_name** (String)
 - **project** (String)
 

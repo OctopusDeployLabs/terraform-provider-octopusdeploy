@@ -233,6 +233,7 @@ Read-Only:
 
 Read-Only:
 
+- **account_id** (String)
 - **cluster_name** (String)
 - **impersonate_service_account** (Boolean)
 - **project** (String)

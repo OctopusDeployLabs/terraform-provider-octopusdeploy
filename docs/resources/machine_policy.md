@@ -59,14 +59,17 @@ Optional:
 <a id="nestedblock--machine_health_check_policy"></a>
 ### Nested Schema for `machine_health_check_policy`
 
+Required:
+
+- **bash_health_check_policy** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy--bash_health_check_policy))
+- **powershell_health_check_policy** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy--powershell_health_check_policy))
+
 Optional:
 
-- **bash_health_check_policy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy--bash_health_check_policy))
 - **health_check_cron** (String)
 - **health_check_cron_timezone** (String)
 - **health_check_interval** (Number)
 - **health_check_type** (String)
-- **powershell_health_check_policy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy--powershell_health_check_policy))
 
 <a id="nestedblock--machine_health_check_policy--bash_health_check_policy"></a>
 ### Nested Schema for `machine_health_check_policy.bash_health_check_policy`
