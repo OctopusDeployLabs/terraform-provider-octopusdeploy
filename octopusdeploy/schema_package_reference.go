@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -108,7 +109,7 @@ func expandPackageReference(tfPkg map[string]interface{}) *octopusdeploy.Package
 	}
 
 	if v, ok := tfPkg["extract_during_deployment"]; ok {
-		pkg.Properties["Extract"] = strconv.FormatBool(v.(bool))
+		pkg.Properties["Extract"] = strings.Title(strconv.FormatBool(v.(bool)))
 	}
 
 	if properties := tfPkg["properties"]; properties != nil {
