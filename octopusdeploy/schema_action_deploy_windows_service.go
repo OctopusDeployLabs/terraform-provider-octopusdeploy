@@ -192,7 +192,7 @@ func addWindowsServiceToActionResource(flattenedAction map[string]interface{}, a
 	}
 
 	if createOrUpdateService, ok := flattenedAction["create_or_update_service"]; ok {
-		action.Properties["Octopus.Action.WindowsService.CreateOrUpdateService"] = octopusdeploy.NewPropertyValue(strconv.FormatBool(createOrUpdateService.(bool)), false)
+		action.Properties["Octopus.Action.WindowsService.CreateOrUpdateService"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(createOrUpdateService.(bool))), false)
 	}
 
 	action.Properties["Octopus.Action.WindowsService.ServiceName"] = octopusdeploy.NewPropertyValue(flattenedAction["service_name"].(string), false)

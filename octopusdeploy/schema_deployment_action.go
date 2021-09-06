@@ -349,7 +349,7 @@ func expandAction(flattenedAction map[string]interface{}) *octopusdeploy.Deploym
 
 	if v, ok := flattenedAction["run_on_server"]; ok {
 		runOnServer := v.(bool)
-		action.Properties["Octopus.Action.RunOnServer"] = octopusdeploy.NewPropertyValue(strconv.FormatBool(runOnServer), false)
+		action.Properties["Octopus.Action.RunOnServer"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(runOnServer)), false)
 	}
 
 	if v, ok := flattenedAction["action_template"]; ok {

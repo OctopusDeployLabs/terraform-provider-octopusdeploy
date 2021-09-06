@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -182,7 +183,7 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 
 		if v, ok := template["run_automatic_file_substitution"]; ok {
 			runAutomaticFileSubstitution := v.(bool)
-			action.Properties["Octopus.Action.Terraform.RunAutomaticFileSubstitution"] = octopusdeploy.NewPropertyValue(strconv.FormatBool(runAutomaticFileSubstitution), false)
+			action.Properties["Octopus.Action.Terraform.RunAutomaticFileSubstitution"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(runAutomaticFileSubstitution)), false)
 		}
 
 		if v, ok := template["target_files"]; ok {
@@ -205,7 +206,7 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 
 		if v, ok := advancedOptions["allow_additional_plugin_downloads"]; ok {
 			allowPluginDownloads := v.(bool)
-			action.Properties["Octopus.Action.Terraform.AllowPluginDownloads"] = octopusdeploy.NewPropertyValue(strconv.FormatBool(allowPluginDownloads), false)
+			action.Properties["Octopus.Action.Terraform.AllowPluginDownloads"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(allowPluginDownloads)), false)
 		}
 
 		if v, ok := advancedOptions["apply_parameters"]; ok {
@@ -261,7 +262,7 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 		}
 
 		if v, ok := awsAccount["use_instance_role"]; ok {
-			action.Properties["Octopus.Action.AwsAccount.UseInstanceRole"] = octopusdeploy.NewPropertyValue(strconv.FormatBool(v.(bool)), false)
+			action.Properties["Octopus.Action.AwsAccount.UseInstanceRole"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(v.(bool))), false)
 		}
 	}
 
