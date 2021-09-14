@@ -42,6 +42,15 @@ func addTerraformTemplateAdvancedOptionsSchema(element *schema.Resource) {
 	}
 }
 
+func addTerraformTemplatePlanSchema(element *schema.Resource) {
+	element.Schema["is_plan"] = &schema.Schema{
+		Optional:    true,
+		Type:        schema.TypeBool,
+		Default:     false,
+		Description: "Determines whether the action only generates a terraform plan",
+	}
+}
+
 func addTerraformTemplateAwsAccountSchema(element *schema.Resource) {
 	element.Schema["aws_account"] = &schema.Schema{
 		Elem: &schema.Resource{
@@ -166,10 +175,7 @@ func flattenTerraformTemplate(properties map[string]octopusdeploy.PropertyValue)
 	return []interface{}{flattenedMap}
 }
 
-func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
-	action := expandAction(flattenedAction)
-	action.ActionType = "Octopus.TerraformApply"
-
+func expandTerraformTemplateAction(flattenedAction map[string]interface{}, action *octopusdeploy.DeploymentAction) {
 	if v, ok := flattenedAction["template"]; ok {
 		template := v.(*schema.Set).List()[0].(map[string]interface{})
 
@@ -275,7 +281,15 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 			action.Properties["Octopus.Action.AzureAccount.Variable"] = octopusdeploy.NewPropertyValue(v.(string), false)
 		}
 	}
-
+}
+func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
+	action := expandAction(flattenedAction)
+	if isPlan, ok := flattenedAction["is_plan"].(bool); ok && isPlan {
+		action.ActionType = "Octopus.TerraformPlan"
+	} else {
+		action.ActionType = "Octopus.TerraformApply"
+	}
+	expandTerraformTemplateAction(flattenedAction, action)
 	return action
 }
 
@@ -369,7 +383,7 @@ func flattenTerraformTemplateAzureAccount(properties map[string]octopusdeploy.Pr
 	return []interface{}{flattenedMap}
 }
 
-func flattenApplyTerraformTemplateAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenTerraformTemplateAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 
 	for k, v := range action.Properties {
@@ -401,9 +415,10 @@ func flattenApplyTerraformTemplateAction(action *octopusdeploy.DeploymentAction)
 	return flattenedAction
 }
 
-func getApplyTerraformTemplateActionSchema() *schema.Schema {
+func getTerraformTemplateActionSchema() *schema.Schema {
 	actionSchema, element := getActionSchema()
 	addExecutionLocationSchema(element)
+	addTerraformTemplatePlanSchema(element)
 	addTerraformTemplateAdvancedOptionsSchema(element)
 	addTerraformTemplateAwsAccountSchema(element)
 	addTerraformTemplateAzureAccountSchema(element)
