@@ -112,11 +112,11 @@ func testAccCheckApplyTerraformAction(name string, runOnServer bool, isPlan bool
 		action := process.Steps[0].Actions[0]
 
 		if !isPlan && action.ActionType != "Octopus.TerraformApply" {
-			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
+			return fmt.Errorf("Action type is incorrect: %s, isPlan: %s", action.ActionType, strconv.FormatBool(isPlan))
 		}
 
 		if isPlan && action.ActionType != "Octopus.TerraformPlan" {
-			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
+			return fmt.Errorf("Action type is incorrect: %s, isPlan: %s", action.ActionType, strconv.FormatBool(isPlan))
 		}
 
 		if action.Properties["Octopus.Action.Terraform.AdditionalInitParams"].Value != initParameters {
