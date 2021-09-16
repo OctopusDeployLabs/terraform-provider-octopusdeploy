@@ -26,7 +26,8 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 	projectID := d.Get("project_id").(string)
 	shouldRedeploy := d.Get("should_redeploy").(bool)
 
-	deploymentTargetTrigger := octopusdeploy.NewProjectDeploymentTargetTrigger(name, projectID, shouldRedeploy, nil, nil, nil)
+	action := octopusdeploy.NewAutoDeployAction(shouldRedeploy)
+	filter := octopusdeploy.NewDeploymentTargetFilter([]string{}, []string{}, []string{}, []string{})
 
 	if attr, ok := d.GetOk("event_groups"); ok {
 		eventGroups := getSliceFromTerraformTypeList(attr)
@@ -44,7 +45,7 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 			return nil, fmt.Errorf("Invalid value for event_groups. %s not in %v", invalidValue, validValues)
 		}
 
-		deploymentTargetTrigger.AddEventGroups(eventGroups)
+		filter.EventGroups = append(filter.EventGroups, eventGroups...)
 	}
 
 	if attr, ok := d.GetOk("event_categories"); ok {
@@ -67,16 +68,18 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 			return nil, fmt.Errorf("Invalid value for event_categories. %s not in %v", invalidValue, validValues)
 		}
 
-		deploymentTargetTrigger.AddEventCategories(eventCategories)
+		filter.EventCategories = append(filter.EventCategories, eventCategories...)
 	}
 
 	if attr, ok := d.GetOk("roles"); ok {
-		deploymentTargetTrigger.Filter.Roles = getSliceFromTerraformTypeList(attr)
+		filter.Roles = getSliceFromTerraformTypeList(attr)
 	}
 
 	if attr, ok := d.GetOk("environment_ids"); ok {
-		deploymentTargetTrigger.Filter.EnvironmentIDs = getSliceFromTerraformTypeList(attr)
+		filter.Environments = getSliceFromTerraformTypeList(attr)
 	}
+
+	deploymentTargetTrigger := octopusdeploy.NewProjectTrigger(name, "", false, projectID, action, filter)
 
 	return deploymentTargetTrigger, nil
 }
@@ -117,12 +120,15 @@ func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.R
 
 	logResource("project_trigger", m)
 
-	d.Set("environment_ids", resource.Filter.EnvironmentIDs)
-	d.Set("event_groups", resource.Filter.EventGroups)
-	d.Set("event_categories", resource.Filter.EventCategories)
+	action := resource.Action.(*octopusdeploy.AutoDeployAction)
+	filter := resource.Filter.(*octopusdeploy.DeploymentTargetFilter)
+
+	d.Set("environment_ids", filter.Environments)
+	d.Set("event_groups", filter.EventGroups)
+	d.Set("event_categories", filter.EventCategories)
 	d.Set("name", resource.Name)
-	d.Set("roles", resource.Filter.Roles)
-	d.Set("should_redeploy", resource.Action.ShouldRedeployWhenMachineHasBeenDeployedTo)
+	d.Set("roles", filter.Roles)
+	d.Set("should_redeploy", action.ShouldRedeploy)
 
 	return nil
 }
