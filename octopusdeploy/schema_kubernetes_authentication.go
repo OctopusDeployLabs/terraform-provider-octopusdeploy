@@ -7,7 +7,15 @@ import (
 )
 
 func expandKubernetesAuthentication(values interface{}) octopusdeploy.IKubernetesAuthentication {
+	if values == nil {
+		return nil
+	}
+
 	flattenedValues := values.(*schema.Set)
+	if len(flattenedValues.List()) == 0 {
+		return nil
+	}
+
 	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
 
 	authenticationType := flattenedMap["authentication_type"].(string)
