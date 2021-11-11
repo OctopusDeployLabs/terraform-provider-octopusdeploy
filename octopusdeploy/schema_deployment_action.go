@@ -117,7 +117,6 @@ func flattenAction(action *octopusdeploy.DeploymentAction) map[string]interface{
 
 func getDeploymentActionSchema() *schema.Schema {
 	actionSchema, element := getActionSchema()
-	addExecutionLocationSchema(element)
 	addActionTypeSchema(element)
 	addExecutionLocationSchema(element)
 	element.Schema["action_type"] = &schema.Schema{
@@ -126,6 +125,7 @@ func getDeploymentActionSchema() *schema.Schema {
 		Type:        schema.TypeString,
 	}
 	addWorkerPoolSchema(element)
+	addWorkerPoolVariableSchema(element)
 	addPackagesSchema(element, false)
 
 	return actionSchema
@@ -280,6 +280,14 @@ func addPropertiesSchema(element *schema.Resource, deprecated string) {
 func addWorkerPoolSchema(element *schema.Resource) {
 	element.Schema["worker_pool_id"] = &schema.Schema{
 		Description: "The worker pool associated with this deployment action.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
+func addWorkerPoolVariableSchema(element *schema.Resource) {
+	element.Schema["worker_pool_variable"] = &schema.Schema{
+		Description: "The worker pool variable associated with this deployment action.",
 		Optional:    true,
 		Type:        schema.TypeString,
 	}
