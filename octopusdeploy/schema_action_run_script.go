@@ -79,6 +79,14 @@ func expandRunScriptAction(flattenedAction map[string]interface{}) *octopusdeplo
 		}
 	}
 
+	if v, ok := flattenedAction["worker_pool_id"]; ok {
+		action.WorkerPoolID = v.(string)
+	}
+
+	if v, ok := flattenedAction["worker_pool_variable"]; ok {
+		action.WorkerPoolVariable = v.(string)
+	}
+
 	return action
 }
 
@@ -88,6 +96,14 @@ func flattenRunScriptAction(action *octopusdeploy.DeploymentAction) map[string]i
 	}
 
 	flattenedAction := flattenAction(action)
+
+	if len(action.WorkerPoolID) > 0 {
+		flattenedAction["worker_pool_id"] = action.WorkerPoolID
+	}
+
+	if len(action.WorkerPoolVariable) > 0 {
+		flattenedAction["worker_pool_variable"] = action.WorkerPoolVariable
+	}
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
 		runOnServer, _ := strconv.ParseBool(v.Value)
@@ -127,6 +143,8 @@ func getRunScriptActionSchema() *schema.Schema {
 	addExecutionLocationSchema(element)
 	addScriptFromPackageSchema(element)
 	addPackagesSchema(element, false)
+	addWorkerPoolSchema(element)
+	addWorkerPoolVariableSchema(element)
 
 	element.Schema["script_body"] = &schema.Schema{
 		Optional: true,
