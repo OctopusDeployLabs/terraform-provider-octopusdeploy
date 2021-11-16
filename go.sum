@@ -98,6 +98,8 @@ github.com/Microsoft/hcsshim/test v0.0.0-20210227013316-43a75bb4edd3/go.mod h1:m
 github.com/NYTimes/gziphandler v0.0.0-20170623195520-56545f4a5d46/go.mod h1:3wb06e3pkSAbeQ52E9H9iFoQsEEwGN64994WTCIhntQ=
 github.com/OctopusDeploy/go-octopusdeploy v1.7.46 h1:K2uQECz+QMw7v8GHUS+d2h6ltmvgWdDVqRO53lXfqM4=
 github.com/OctopusDeploy/go-octopusdeploy v1.7.46/go.mod h1:AOTuiOhHW6cen7fNQRLTGxSp55+HK4+95mFS6Yyqix0=
+github.com/OctopusDeploy/go-octopusdeploy v1.7.47 h1:/Z5OlHtHZWNA816JAQOvvX0ZFe1CRLJ6UGGcZmmzsnA=
+github.com/OctopusDeploy/go-octopusdeploy v1.7.47/go.mod h1:AOTuiOhHW6cen7fNQRLTGxSp55+HK4+95mFS6Yyqix0=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7/go.mod h1:z4/9nQmJSSwwds7ejkxaJwO37dru3geImFUdJlaLzQo=
