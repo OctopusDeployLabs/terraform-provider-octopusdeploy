@@ -40,7 +40,6 @@ func TestFlattenDeploymentAction(t *testing.T) {
 
 	actual = flattenAction(expanded)
 	expected := map[string]interface{}{
-		"action_type":                        actionType,
 		"can_be_used_for_project_versioning": false,
 		"is_disabled":                        false,
 		"is_required":                        false,
@@ -53,7 +52,6 @@ func TestFlattenDeploymentAction(t *testing.T) {
 	expanded.IsRequired = true
 	actual = flattenAction(expanded)
 	expected = map[string]interface{}{
-		"action_type":                        actionType,
 		"can_be_used_for_project_versioning": true,
 		"is_disabled":                        true,
 		"is_required":                        true,
@@ -65,7 +63,6 @@ func TestFlattenDeploymentAction(t *testing.T) {
 	expanded.Condition = "condition"
 	actual = flattenAction(expanded)
 	expected = map[string]interface{}{
-		"action_type":                        actionType,
 		"can_be_used_for_project_versioning": true,
 		"channels":                           []string{"channel"},
 		"condition":                          "condition",

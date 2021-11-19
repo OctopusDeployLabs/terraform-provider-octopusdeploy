@@ -11,8 +11,17 @@ import (
 func flattenDeploymentAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
 	flattenedDeploymentAction := flattenAction(action)
 
-	flattenedDeploymentAction["action_type"] = action.ActionType
-	flattenedDeploymentAction["worker_pool_id"] = action.WorkerPoolID
+	if len(action.ActionType) > 0 {
+		flattenedDeploymentAction["action_type"] = action.ActionType
+	}
+
+	if len(action.WorkerPoolID) > 0 {
+		flattenedDeploymentAction["worker_pool_id"] = action.WorkerPoolID
+	}
+
+	if len(action.WorkerPoolVariable) > 0 {
+		flattenedDeploymentAction["worker_pool_variable"] = action.WorkerPoolVariable
+	}
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
 		runOnServer, _ := strconv.ParseBool(v.Value)
