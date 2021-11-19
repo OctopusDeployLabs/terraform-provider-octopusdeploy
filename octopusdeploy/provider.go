@@ -40,6 +40,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_users":                                           dataSourceUsers(),
 			"octopusdeploy_user_roles":                                      dataSourceUserRoles(),
 			"octopusdeploy_variables":                                       dataSourceVariable(),
+			"octopusdeploy_worker_pools":                                    dataSourceWorkerPools(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_account":                                        resourceAccount(),
@@ -56,6 +57,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_deployment_process":                             resourceDeploymentProcess(),
 			"octopusdeploy_deployment_target":                              resourceDeploymentTarget(),
 			"octopusdeploy_docker_container_registry":                      resourceDockerContainerRegistry(),
+			"octopusdeploy_dynamic_worker_pool":                            resourceDynamicWorkerPool(),
 			"octopusdeploy_environment":                                    resourceEnvironment(),
 			"octopusdeploy_feed":                                           resourceFeed(),
 			"octopusdeploy_github_repository_feed":                         resourceGitHubRepositoryFeed(),
@@ -77,6 +79,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_space":                                          resourceSpace(),
 			"octopusdeploy_ssh_connection_deployment_target":               resourceSSHConnectionDeploymentTarget(),
 			"octopusdeploy_ssh_key_account":                                resourceSSHKeyAccount(),
+			"octopusdeploy_static_worker_pool":                             resourceStaticWorkerPool(),
 			"octopusdeploy_tag_set":                                        resourceTagSet(),
 			"octopusdeploy_team":                                           resourceTeam(),
 			"octopusdeploy_tenant":                                         resourceTenant(),
