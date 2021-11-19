@@ -1,12 +1,27 @@
 package octopusdeploy
 
 import (
+	"fmt"
 	"hash/crc32"
 	"log"
+	"math/rand"
 	"strings"
+	"time"
 
+	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func createRandomBoolean() bool {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Float32() < 0.5
+}
+
+func createRandomString() string {
+	fullName := fmt.Sprintf("test-string %s", uuid.New())
+	fullName = fullName[0:44]
+	return fullName
+}
 
 func getImporter() *schema.ResourceImporter {
 	return &schema.ResourceImporter{
