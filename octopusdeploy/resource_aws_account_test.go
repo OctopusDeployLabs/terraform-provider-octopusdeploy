@@ -35,7 +35,7 @@ func TestAccAWSAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "secret_key", secretKey),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 				),
-				Config: testAWSAccountBasic(localName, name, description, accessKey, secretKey, tenantedDeploymentParticipation),
+				Config: testAwsAccountBasic(localName, name, description, accessKey, secretKey, tenantedDeploymentParticipation),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -46,13 +46,13 @@ func TestAccAWSAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "secret_key", secretKey),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 				),
-				Config: testAWSAccountBasic(localName, name, description, newAccessKey, secretKey, tenantedDeploymentParticipation),
+				Config: testAwsAccountBasic(localName, name, description, newAccessKey, secretKey, tenantedDeploymentParticipation),
 			},
 		},
 	})
 }
 
-func testAWSAccountBasic(localName string, name string, description string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
+func testAwsAccountBasic(localName string, name string, description string, accessKey string, secretKey string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`resource "octopusdeploy_aws_account" "%s" {
 		access_key = "%s"
 		description = "%s"
@@ -64,4 +64,12 @@ func testAWSAccountBasic(localName string, name string, description string, acce
 	data "octopusdeploy_accounts" "test" {
 		ids = [octopusdeploy_aws_account.%s.id]
 	}`, localName, accessKey, description, name, secretKey, tenantedDeploymentParticipation, localName)
+}
+
+func testAwsAccount(localName string, name string, accessKey string, secretKey string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_aws_account" "%s" {
+		access_key = "%s"
+		name       = "%s"
+		secret_key = "%s"
+	}`, localName, secretKey, name, secretKey)
 }

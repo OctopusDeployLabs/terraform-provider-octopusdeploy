@@ -38,6 +38,45 @@ func TestAccKubernetesClusterDeploymentTargetBasic(t *testing.T) {
 	})
 }
 
+func TestAccKubernetesClusterDeploymentTargetAws(t *testing.T) {
+	accountLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	accountName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	accountAccessKey := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	accountSecretKey := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	userRoleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	userRoleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	clusterName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	clusterURL := "https://example.com"
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: testAccDeploymentTargetCheckDestroy,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKubernetesClusterDeploymentTargetAws(
+					accountLocalName,
+					accountName,
+					accountAccessKey,
+					accountSecretKey,
+					environmentLocalName,
+					environmentName,
+					userRoleLocalName,
+					userRoleName,
+					localName,
+					name,
+					clusterURL,
+					clusterName),
+			},
+		},
+	})
+}
+
 func TestAccKubernetesClusterDeploymentTargetGcp(t *testing.T) {
 	accountLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -114,7 +153,7 @@ func testAccKubernetesClusterDeploymentTargetGcp(
 	clusterName string,
 	project string,
 	region string) string {
-	usernamePasswordAccountID := "${octopusdeploy_gcp_account." + accountLocalName + ".id}"
+	gcpAccountID := "${octopusdeploy_gcp_account." + accountLocalName + ".id}"
 	environmentID := "${octopusdeploy_environment." + environmentLocalName + ".id}"
 	userRoleID := "${octopusdeploy_user_role." + userRoleLocalName + ".id}"
 
@@ -134,5 +173,39 @@ func testAccKubernetesClusterDeploymentTargetGcp(
 			 project = "%s"
 			 region = "%s"
 		   }
-	     }`, localName, clusterURL, environmentID, name, userRoleID, usernamePasswordAccountID, clusterName, project, region)
+	     }`, localName, clusterURL, environmentID, name, userRoleID, gcpAccountID, clusterName, project, region)
+}
+
+func testAccKubernetesClusterDeploymentTargetAws(
+	accountLocalName string,
+	accountName string,
+	accountAccessKey string,
+	accountSecretKey string,
+	environmentLocalName string,
+	environmentName string,
+	userRoleLocalName string,
+	userRoleName string,
+	localName string,
+	name string,
+	clusterURL string,
+	clusterName string) string {
+	awsAccountID := "${octopusdeploy_aws_account." + accountLocalName + ".id}"
+	environmentID := "${octopusdeploy_environment." + environmentLocalName + ".id}"
+	userRoleID := "${octopusdeploy_user_role." + userRoleLocalName + ".id}"
+
+	return fmt.Sprintf(testAwsAccount(accountLocalName, accountName, accountAccessKey, accountSecretKey)+"\n"+
+		testAccEnvironment(environmentLocalName, environmentName)+"\n"+
+		testUserRoleMinimum(userRoleLocalName, userRoleName)+"\n"+
+		`resource "octopusdeploy_kubernetes_cluster_deployment_target" "%s" {
+		   cluster_url  = "%s"
+		   environments = ["%s"]
+		   name         = "%s"
+		   roles        = ["%s"]
+		   tenanted_deployment_participation = "Untenanted"
+
+		   aws_account_authentication {
+		     account_id = "%s"
+			 cluster_name = "%s"
+		   }
+	     }`, localName, clusterURL, environmentID, name, userRoleID, awsAccountID, clusterName)
 }
