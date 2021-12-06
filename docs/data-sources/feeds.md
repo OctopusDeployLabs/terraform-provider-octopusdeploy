@@ -29,6 +29,7 @@ data "octopusdeploy_feeds" "example" {
 - **feed_type** (String) A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, or `OctopusProject`.
 - **id** (String) The ID of this resource.
 - **ids** (List of String) A filter to search by a list of IDs.
+- **name** (String) A filter to search by name.
 - **partial_name** (String) A filter to search by the partial match of a name.
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.

@@ -31,7 +31,7 @@ resource "octopusdeploy_deployment_process" "example" {
           #TODO: Experiment with steps of your own :)
           Write-Host '[Learn more about the types of steps available in Octopus](https://g.octopushq.com/OnboardingAddStepsLearnMore)'
         EOT
-      run_on_server = true
+      run_on_server                      = true
     }
   }
   step {
@@ -50,7 +50,7 @@ resource "octopusdeploy_deployment_process" "example" {
           #TODO: Experiment with steps of your own :)
           echo '[Learn more about the types of steps available in Octopus](https://g.octopushq.com/OnboardingAddStepsLearnMore)'
         EOT
-      run_on_server = true
+      run_on_server                      = true
     }
   }
 }
@@ -125,6 +125,7 @@ Optional:
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 - **worker_pool_id** (String) The worker pool associated with this deployment action.
+- **worker_pool_variable** (String) The worker pool variable associated with this deployment action.
 
 <a id="nestedblock--step--action--action_template"></a>
 ### Nested Schema for `step.action.action_template`
@@ -768,6 +769,8 @@ Optional:
 - **script_syntax** (String)
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
 - **variable_substitution_in_files** (String) A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.
+- **worker_pool_id** (String) The worker pool associated with this deployment action.
+- **worker_pool_variable** (String) The worker pool variable associated with this deployment action.
 
 <a id="nestedblock--step--run_script_action--action_template"></a>
 ### Nested Schema for `step.run_script_action.action_template`
