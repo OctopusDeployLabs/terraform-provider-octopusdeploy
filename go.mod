@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	cloud.google.com/go/storage v1.18.2 // indirect
-	github.com/OctopusDeploy/go-octopusdeploy v1.7.52
+	github.com/OctopusDeploy/go-octopusdeploy v1.7.54
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.42.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
