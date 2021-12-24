@@ -35,3 +35,30 @@ There are configuration parameters available for this provider:
 If a space ID or name is not specified, the Terraform Provider for Octopus Deploy will assume the default space.
 
 Run `terraform init` to initialize this provider and enable resource management.
+
+## 🛠 Build Instructions
+
+A build of this Terraform Provider can be created using the [Makefile](https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/blob/master/Makefile) provided in the source:
+
+```
+% make build -f Makefile
+```
+
+This will generate a binary that will be installed to the local plugins folder. Once installed, the provider may be used through the following configuration:
+
+```hcl
+terraform {
+  required_providers {
+    octopusdeploy = {
+      source  = "octopus.com/com/octopusdeploy"
+      version = "0.7.64"
+    }
+  }
+}
+
+provider "octopusdeploy" {
+  address  = # address
+  api_key  = # API key
+  space_id = # space ID
+}
+```
