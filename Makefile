@@ -3,19 +3,20 @@ HOSTNAME=octopus.com
 NAMESPACE=com
 NAME=octopusdeploy
 BINARY=terraform-provider-${NAME}
-VERSION=0.7.5
+VERSION=0.7.64
 OS_ARCH?=darwin_amd64
 
 ifeq ($(OS), Windows_NT)
-PROFILE=${USERPROFILE}
+PROFILE=${APPDATA}/terraform.d
+EXT=.exe
 else
-PROFILE=~
+PROFILE=~/.terraform.d
 endif
 
 default: install
 
 build:
-	go build -o ${BINARY}
+	go build -o ${BINARY}${EXT}
 
 release:
 	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
@@ -32,8 +33,8 @@ release:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
 
 install: build
-	mkdir -p $(PROFILE)/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
-	mv ${BINARY} $(PROFILE)/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+	mkdir -p $(PROFILE)/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+	mv ${BINARY}${EXT} $(PROFILE)/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 test:
 	go test -i $(TEST) || exit 1
