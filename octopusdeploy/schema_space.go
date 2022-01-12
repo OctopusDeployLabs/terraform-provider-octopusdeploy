@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-const spaceManagersTeamIdPrefix = "teams-spacemanagers-"
+const spaceManagersTeamIDPrefix = "teams-spacemanagers-"
 
 func expandSpace(d *schema.ResourceData) *octopusdeploy.Space {
 	name := d.Get("name").(string)
@@ -40,12 +40,12 @@ func expandSpace(d *schema.ResourceData) *octopusdeploy.Space {
 	return space
 }
 
-func addSpaceManagers(spaceID string, teamIds []string) []string {
+func addSpaceManagers(spaceID string, teamIDs []string) []string {
 	var newSlice []string
 	if getStringOrEmpty(spaceID) != "" {
-		newSlice = append(newSlice, spaceManagersTeamIdPrefix+spaceID)
+		newSlice = append(newSlice, spaceManagersTeamIDPrefix+spaceID)
 	}
-	for _, v := range teamIds {
+	for _, v := range teamIDs {
 		newSlice = append(newSlice, v)
 	}
 	return newSlice
@@ -145,7 +145,7 @@ func removeSpaceManagers(teamIds []string) []string {
 	}
 	var newSlice []string
 	for _, v := range teamIds {
-		if !strings.Contains(v, spaceManagersTeamIdPrefix) {
+		if !strings.Contains(v, spaceManagersTeamIDPrefix) {
 			newSlice = append(newSlice, v)
 		}
 	}
