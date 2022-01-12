@@ -18,21 +18,22 @@ terraform {
 
 provider "octopusdeploy" {
   # configuration options
-  address    = "https://octopus.example.com"
-  api_key    = "API-XXXXXXXXXXXXX"
-  space_id   = "Spaces-321"
-  space_name = "Development Team"
+  address    = "https://octopus.example.com" # (required; string) the service endpoint of the Octopus REST API
+  api_key    = "API-XXXXXXXXXXXXX"           # (required; string) the API key to use with the Octopus REST API
+  space_id   = "Spaces-321"                  # (optional; string) the space ID in Octopus Deploy
+  space_name = "Development Team"            # (optional; string) the space name in Octopus Deploy
 }
 ```
 
-There are configuration parameters available for this provider:
+If neither `space_id` or `space_name` is specified, the Terraform Provider for Octopus Deploy will assume the default space.
 
-* `address` (required; string) the service endpoint of the Octopus REST API
-* `api_key` (required; string) the API key to use with the Octopus REST API
-* `space_id` (optional; string) the space ID in Octopus Deploy
-* `space_name` (optional; string) the space name in Octopus Deploy
+### Environment Variables
 
-If a space ID or name is not specified, the Terraform Provider for Octopus Deploy will assume the default space.
+You can provide your Octopus Server configuration via the `OCTOPUS_URL` and `OCTOPUS_APIKEY` environment variables, representing your Octopus Server address and API Key, respectively.
+
+```hcl
+provider "octopusdeploy" {}
+```
 
 Run `terraform init` to initialize this provider and enable resource management.
 
