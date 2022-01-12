@@ -85,6 +85,10 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 		project.Slug = v.(string)
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		project.SpaceID = v.(string)
+	}
+
 	if v, ok := d.GetOk("template"); ok {
 		project.Templates = expandActionTemplateParameters(v.([]interface{}))
 	}
