@@ -3,10 +3,13 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+const spaceManagersTeamIDPrefix = "teams-spacemanagers-"
 
 func expandSpace(d *schema.ResourceData) *octopusdeploy.Space {
 	name := d.Get("name").(string)
@@ -27,7 +30,7 @@ func expandSpace(d *schema.ResourceData) *octopusdeploy.Space {
 	}
 
 	if v, ok := d.GetOk("space_managers_teams"); ok {
-		space.SpaceManagersTeams = getSliceFromTerraformTypeList(v)
+		space.SpaceManagersTeams = addSpaceManagers(space.GetID(), getSliceFromTerraformTypeList(v))
 	}
 
 	if v, ok := d.GetOk("is_task_queue_stopped"); ok {
@@ -35,6 +38,17 @@ func expandSpace(d *schema.ResourceData) *octopusdeploy.Space {
 	}
 
 	return space
+}
+
+func addSpaceManagers(spaceID string, teamIDs []string) []string {
+	var newSlice []string
+	if getStringOrEmpty(spaceID) != "" {
+		newSlice = append(newSlice, spaceManagersTeamIDPrefix+spaceID)
+	}
+	for _, v := range teamIDs {
+		newSlice = append(newSlice, v)
+	}
+	return newSlice
 }
 
 func flattenSpace(space *octopusdeploy.Space) map[string]interface{} {
@@ -116,11 +130,24 @@ func setSpace(ctx context.Context, d *schema.ResourceData, space *octopusdeploy.
 		return fmt.Errorf("error setting space_managers_team_members: %s", err)
 	}
 
-	if err := d.Set("space_managers_teams", space.SpaceManagersTeams); err != nil {
+	if err := d.Set("space_managers_teams", removeSpaceManagers(space.SpaceManagersTeams)); err != nil {
 		return fmt.Errorf("error setting space_managers_teams: %s", err)
 	}
 
 	d.Set("is_task_queue_stopped", space.TaskQueueStopped)
 
 	return nil
+}
+
+func removeSpaceManagers(teamIDs []string) []string {
+	if len(teamIDs) == 0 {
+		return teamIDs
+	}
+	var newSlice []string
+	for _, v := range teamIDs {
+		if !strings.Contains(v, spaceManagersTeamIDPrefix) {
+			newSlice = append(newSlice, v)
+		}
+	}
+	return newSlice
 }
