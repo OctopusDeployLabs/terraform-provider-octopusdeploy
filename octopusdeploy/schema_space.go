@@ -139,12 +139,12 @@ func setSpace(ctx context.Context, d *schema.ResourceData, space *octopusdeploy.
 	return nil
 }
 
-func removeSpaceManagers(teamIds []string) []string {
-	if len(teamIds) == 0 {
-		return teamIds
+func removeSpaceManagers(teamIDs []string) []string {
+	if len(teamIDs) == 0 {
+		return teamIDs
 	}
 	var newSlice []string
-	for _, v := range teamIds {
+	for _, v := range teamIDs {
 		if !strings.Contains(v, spaceManagersTeamIDPrefix) {
 			newSlice = append(newSlice, v)
 		}
