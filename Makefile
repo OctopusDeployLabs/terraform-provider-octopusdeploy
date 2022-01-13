@@ -4,13 +4,18 @@ NAMESPACE=com
 NAME=octopusdeploy
 BINARY=terraform-provider-${NAME}
 VERSION=0.7.64
-OS_ARCH?=darwin_amd64
 
 ifeq ($(OS), Windows_NT)
+OS_ARCH?=windows_amd64
 PROFILE=${APPDATA}/terraform.d
 EXT=.exe
 else
 PROFILE=~/.terraform.d
+ifeq ($(shell uname), Linux)
+OS_ARCH?=linux_amd64
+else
+OS_ARCH?=darwin_amd64
+endif
 endif
 
 default: install
