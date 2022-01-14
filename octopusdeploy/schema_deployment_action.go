@@ -1,6 +1,9 @@
 package octopusdeploy
 
 import (
+	"fmt"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"strings"
 
@@ -128,11 +131,6 @@ func getDeploymentActionSchema() *schema.Schema {
 	actionSchema, element := getActionSchema()
 	addActionTypeSchema(element)
 	addExecutionLocationSchema(element)
-	element.Schema["action_type"] = &schema.Schema{
-		Description: "The type of action",
-		Required:    true,
-		Type:        schema.TypeString,
-	}
 	addWorkerPoolSchema(element)
 	addWorkerPoolVariableSchema(element)
 	addPackagesSchema(element, false)
@@ -229,17 +227,18 @@ func getActionSchema() (*schema.Schema, *schema.Resource) {
 			},
 			"name": getNameSchema(true),
 			"notes": {
-				Description: "The notes associated with this deploymnt action.",
+				Description: "The notes associated with this deployment action.",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"package": getPackageSchema(false),
 			"properties": {
-				Computed:    true,
-				Description: "The properties associated with this deployment action.",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
-				Type:        schema.TypeMap,
+				Computed:         true,
+				Description:      "The properties associated with this deployment action.",
+				Elem:             &schema.Schema{Type: schema.TypeString},
+				Optional:         true,
+				Type:             schema.TypeMap,
+				ValidateDiagFunc: warnIfIncludesRunOnServer(),
 			},
 			"tenant_tags": getTenantTagsSchema(),
 		},
@@ -255,6 +254,26 @@ func getActionSchema() (*schema.Schema, *schema.Resource) {
 	return actionSchema, element
 }
 
+func warnIfIncludesRunOnServer() schema.SchemaValidateDiagFunc {
+	return func(v interface{}, path cty.Path) diag.Diagnostics {
+		var diags diag.Diagnostics
+
+		keys := v.(map[string]interface{})
+		const key = "Octopus.Action.RunOnServer"
+
+		if _, ok := keys[key]; ok {
+			diags = append(diags, diag.Diagnostic{
+				Severity:      diag.Warning,
+				Summary:       fmt.Sprintf("\"%s\" is defined in properties", key),
+				Detail:        "Please update your template to specify \"run_on_server\" under the action instead.",
+				AttributePath: append(path, cty.IndexStep{Key: cty.StringVal(key)}),
+			})
+		}
+
+		return diags
+	}
+}
+
 func addExecutionLocationSchema(element *schema.Resource) {
 	element.Schema["run_on_server"] = &schema.Schema{
 		Default:     false,
@@ -266,9 +285,47 @@ func addExecutionLocationSchema(element *schema.Resource) {
 
 func addActionTypeSchema(element *schema.Resource) {
 	element.Schema["action_type"] = &schema.Schema{
-		Description: "The type of action",
-		Required:    true,
-		Type:        schema.TypeString,
+		Description:      "The type of action",
+		Required:         true,
+		Type:             schema.TypeString,
+		ValidateDiagFunc: warnIfActionTypeExists(),
+	}
+}
+
+func warnIfActionTypeExists() schema.SchemaValidateDiagFunc {
+	return func(v interface{}, path cty.Path) diag.Diagnostics {
+		var diags diag.Diagnostics
+
+		value := v.(string)
+
+		var actionType string
+		switch value {
+		case "Octopus.KubernetesDeploySecret":
+			actionType = "deploy_kubernetes_secret_action"
+		case "Octopus.KubernetesRunScript":
+			actionType = "run_kubectl_script_action"
+		case "Octopus.Manual":
+			actionType = "manual_intervention_action"
+		case "Octopus.Script":
+			actionType = "run_script_action"
+		case "Octopus.TentaclePackage":
+			actionType = "deploy_package_action"
+		case "Octopus.TerraformApply":
+			actionType = "apply_terraform_template_action"
+		case "Octopus.WindowsService":
+			actionType = "deploy_windows_service_action"
+		}
+
+		if len(actionType) > 0 {
+			diags = append(diags, diag.Diagnostic{
+				Severity:      diag.Warning,
+				Summary:       "This action type has its own explicit action type",
+				Detail:        fmt.Sprintf("Please use the new \"%s\" instead of the generic \"action\".", actionType),
+				AttributePath: path,
+			})
+		}
+
+		return diags
 	}
 }
 
