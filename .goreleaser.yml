@@ -42,8 +42,21 @@ signs:
         "${artifact}",
       ]
 changelog:
+  use: github
   sort: asc
+  groups:
+    - title: 'New Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Breaking Changes'
+      regexp: "^.*break[(\\w)]*:+.*$"
+      order: 1
+    - title: 'Bug Fixes'
+      regexp: "^.*bug[(\\w)]*:+.*$"
+      order: 2
   filters:
     exclude:
       - "^docs:"
       - "^test:"
+      - "^README.md"
+      - "^.goreleaser.yaml"
