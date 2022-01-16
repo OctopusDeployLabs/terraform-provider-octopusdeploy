@@ -20,7 +20,7 @@ func TestExpandDeploymentActionContainer(t *testing.T) {
 	actual = expandContainer(emptyInterfaceArray)
 	require.Equal(t, expected, actual)
 
-	var testMap []interface{} = make([]interface{}, 1)
+	var testMap = make([]interface{}, 1)
 	actual = expandContainer(testMap)
 	require.Equal(t, expected, actual)
 

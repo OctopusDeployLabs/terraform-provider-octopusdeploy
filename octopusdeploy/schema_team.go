@@ -193,7 +193,7 @@ func getTeamSchema() map[string]*schema.Schema {
 			Description: "A list of user IDs designated to be members of this team.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			Optional:    true,
-			Type:        schema.TypeList,
+			Type:        schema.TypeSet,
 		},
 		"user_role": {
 			Elem: &schema.Resource{
