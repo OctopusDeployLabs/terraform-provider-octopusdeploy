@@ -73,18 +73,19 @@ func getSpaceDataSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"id":           getDataSchemaID(),
-		"ids":          getQueryIDs(),
-		"name":         getQueryName(),
-		"partial_name": getQueryPartialName(),
-		"skip":         getQuerySkip(),
+		"name":         withConflictsWith(getQueryName(), []string{"id", "ids", "partial_name", "skip", "take"}),
+		"ids":          withConflictsWith(getQueryIDs(), []string{"name"}),
+		"partial_name": withConflictsWith(getQueryPartialName(), []string{"name"}),
+		"skip":         withConflictsWith(getQuerySkip(), []string{"name"}),
+		"take":         withConflictsWith(getQueryTake(), []string{"name"}),
 		"spaces": {
-			Computed:    true,
-			Description: "A list of spaces that match the filter(s).",
-			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
-			Type:        schema.TypeList,
+			Computed:      true,
+			Description:   "A list of spaces that match the filter(s).",
+			Elem:          &schema.Resource{Schema: dataSchema},
+			Optional:      true,
+			Type:          schema.TypeList,
+			ConflictsWith: []string{"name"},
 		},
-		"take": getQueryTake(),
 	}
 }
 
