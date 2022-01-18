@@ -12,10 +12,14 @@ import (
 func expandSSHKeyAccount(d *schema.ResourceData) *octopusdeploy.SSHKeyAccount {
 	name := d.Get("name").(string)
 	username := d.Get("username").(string)
-	privateKeyFile := octopusdeploy.NewSensitiveValue(d.Get("private_key_passphrase").(string))
+	privateKeyFile := octopusdeploy.NewSensitiveValue(d.Get("private_key_file").(string))
 
 	account, _ := octopusdeploy.NewSSHKeyAccount(name, username, privateKeyFile)
 	account.ID = d.Id()
+
+	if v, ok := d.GetOk("private_key_passphrase"); ok {
+		account.PrivateKeyPassphrase = octopusdeploy.NewSensitiveValue(v.(string))
+	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
 		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
