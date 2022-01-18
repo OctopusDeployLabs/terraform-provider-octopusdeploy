@@ -213,7 +213,7 @@ func getQueryOrderBy() *schema.Schema {
 	}
 }
 
-func WithConflictsWith(m *schema.Schema, conflictsWith []string) *schema.Schema {
+func withConflictsWith(m *schema.Schema, conflictsWith []string) *schema.Schema {
 	m.ConflictsWith = conflictsWith
 	return m
 }
