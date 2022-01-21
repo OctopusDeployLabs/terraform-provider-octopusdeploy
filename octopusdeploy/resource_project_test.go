@@ -21,6 +21,7 @@ func TestAccProjectBasic(t *testing.T) {
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	updatedDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -38,6 +39,60 @@ func TestAccProjectBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
 				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccProjectCheckExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", updatedDescription),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+				),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, updatedDescription),
+			},
+		},
+	})
+}
+
+func TestAccProjectCaC(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	resourceName := "octopusdeploy_project." + localName
+
+	basePath := ".octopus/" + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) // note: replace with password
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)  // note: replace with valid space ID
+	url := "https://example.com"                                        // note: replace with git repository address
+	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) // note: replace with valid username
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccProjectCheckDestroy,
+			testAccProjectGroupCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccProjectCheckExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "git_persistence_settings.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "git_persistence_settings.0.base_path", basePath),
+					resource.TestCheckResourceAttr(resourceName, "git_persistence_settings.0.credentials.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "git_persistence_settings.0.credentials.0.password", password),
+					resource.TestCheckResourceAttr(resourceName, "git_persistence_settings.0.credentials.0.username", username),
+					resource.TestCheckResourceAttr(resourceName, "git_persistence_settings.0.url", url),
+					resource.TestCheckResourceAttr(resourceName, "description", description),
+					resource.TestCheckResourceAttrSet(resourceName, "lifecycle_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "project_group_id"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "space_id", spaceID),
+				),
+				Config: testAccProjectCaC(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description, basePath, url, password, username),
 			},
 		},
 	})
@@ -101,6 +156,7 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 			lifecycle_id     = "${octopusdeploy_lifecycle.%s.id}"
 			name             = "%s"
 			project_group_id = "${octopusdeploy_project_group.%s.id}"
+			space_id         = "Spaces-683"
 
 			template {
 				default_value = "default-value"
@@ -139,6 +195,28 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 		//     template = "alskdjaslkdj"
 		//   }
 		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
+}
+
+func testAccProjectCaC(spaceID string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string, basePath string, url string, password string, username string) string {
+	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
+		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
+		`resource "octopusdeploy_project" "%s" {
+	       description      = "%s"
+		   lifecycle_id     = octopusdeploy_lifecycle.%s.id
+		   name             = "%s"
+		   project_group_id = octopusdeploy_project_group.%s.id
+		   space_id         = "%s"
+
+			git_persistence_settings {
+				base_path = "%s"
+				url       = "%s"
+
+				credentials {
+					password = "%s"
+					username = "%s"
+				}
+			}
+		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName, spaceID, basePath, url, password, username)
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
