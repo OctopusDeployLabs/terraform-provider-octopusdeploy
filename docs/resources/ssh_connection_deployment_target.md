@@ -5,7 +5,7 @@ description: |-
   This resource manages SSH connection deployment targets in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_ssh_connection_deployment_target)
+# Resource: octopusdeploy_ssh_connection_deployment_target
 
 This resource manages SSH connection deployment targets in Octopus Deploy.
 

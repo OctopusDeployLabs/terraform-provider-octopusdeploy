@@ -5,7 +5,7 @@ description: |-
   This resource manages GCP accounts in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_gcp_account)
+# Resource: octopusdeploy_gcp_account
 
 This resource manages GCP accounts in Octopus Deploy.
 

@@ -26,7 +26,7 @@ Provides information about existing users.
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **teams** (Block List) A list of teams that match the filter(s). (see [below for nested schema](#nestedblock--teams))
 
 <a id="nestedblock--teams"></a>
@@ -43,7 +43,7 @@ Read-Only:
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this team.
 - **space_id** (String) The space associated with this team.
-- **users** (List of String) A list of user IDs designated to be members of this team.
+- **users** (Set of String) A list of user IDs designated to be members of this team.
 
 <a id="nestedatt--teams--external_security_group"></a>
 ### Nested Schema for `teams.external_security_group`

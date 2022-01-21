@@ -22,7 +22,7 @@ data "octopusdeploy_variables" "example" {
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **variables** (Block List) A list of variables that match the filter(s). (see [below for nested schema](#nestedblock--variables))
 
 <a id="nestedblock--variables"></a>

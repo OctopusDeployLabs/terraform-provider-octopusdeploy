@@ -29,7 +29,7 @@ Provides information about existing tenants.
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **tenants** (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
 
 <a id="nestedblock--tenants"></a>

@@ -5,7 +5,7 @@ description: |-
   This resource manages Kubernets cluster deployment targets in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_kubernetes_cluster_deployment_target)
+# Resource: octopusdeploy_kubernetes_cluster_deployment_target
 
 This resource manages Kubernets cluster deployment targets in Octopus Deploy.
 

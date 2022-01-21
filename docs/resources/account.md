@@ -5,11 +5,9 @@ description: |-
   This resource manages accounts in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_account)
+# Resource: octopusdeploy_account
 
 This resource manages accounts in Octopus Deploy.
-
-~> **NOTE:** This is deprecated and may be removed in a future release.
 
 ## Example Usage
 

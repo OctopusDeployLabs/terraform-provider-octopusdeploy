@@ -45,7 +45,7 @@ data "octopusdeploy_azure_service_fabric_cluster_deployment_targets" "example" {
 ### Read-Only
 
 - **azure_service_fabric_cluster_deployment_targets** (Block List) A list of Azure service fabric cluster deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--azure_service_fabric_cluster_deployment_targets))
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
 <a id="nestedblock--azure_service_fabric_cluster_deployment_targets"></a>
 ### Nested Schema for `azure_service_fabric_cluster_deployment_targets`

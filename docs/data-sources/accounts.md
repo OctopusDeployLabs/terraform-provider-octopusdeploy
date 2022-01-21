@@ -5,11 +5,9 @@ description: |-
   Provides information about existing accounts.
 ---
 
-# Data Source (octopusdeploy_accounts)
+# Data Source: octopusdeploy_accounts
 
 Provides information about existing accounts.
-
-~> **NOTE:** This is deprecated and may be removed in a future release.
 
 ## Example Usage
 
@@ -37,7 +35,7 @@ data "octopusdeploy_accounts" "example" {
 ### Read-Only
 
 - **accounts** (List of Object) A list of accounts that match the filter(s). (see [below for nested schema](#nestedatt--accounts))
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
 <a id="nestedatt--accounts"></a>
 ### Nested Schema for `accounts`

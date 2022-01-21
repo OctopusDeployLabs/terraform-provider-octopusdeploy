@@ -5,7 +5,7 @@ description: |-
   This resource manages a Docker Container Registry in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_docker_container_registry)
+# Resource: octopusdeploy_docker_container_registry
 
 This resource manages a Docker Container Registry in Octopus Deploy.
 

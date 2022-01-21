@@ -5,7 +5,7 @@ description: |-
   This resource manages a AWS Elastic Container Registry in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_aws_elastic_container_registry)
+# Resource: octopusdeploy_aws_elastic_container_registry
 
 This resource manages a AWS Elastic Container Registry in Octopus Deploy.
 

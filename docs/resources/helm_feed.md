@@ -5,7 +5,7 @@ description: |-
   This resource manages a Helm feed in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_helm_feed)
+# Resource: octopusdeploy_helm_feed
 
 This resource manages a Helm feed in Octopus Deploy.
 

@@ -25,7 +25,7 @@ Provides information about existing library variable sets.
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **library_variable_sets** (Block List) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedblock--library_variable_sets))
 
 <a id="nestedblock--library_variable_sets"></a>

@@ -33,7 +33,7 @@ data "octopusdeploy_project_groups" "example" {
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **project_groups** (Block List) A list of project groups that match the filter(s). (see [below for nested schema](#nestedblock--project_groups))
 
 <a id="nestedblock--project_groups"></a>
@@ -41,9 +41,9 @@ data "octopusdeploy_project_groups" "example" {
 
 Read-Only:
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this project group.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
-- **retention_policy_id** (String)
+- **retention_policy_id** (String) The ID of the retention policy associated with this project group.
 
 

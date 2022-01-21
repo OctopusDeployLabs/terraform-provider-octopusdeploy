@@ -5,7 +5,7 @@ description: |-
   
 ---
 
-# Resource (octopusdeploy_deployment_target)
+# Resource: octopusdeploy_deployment_target
 
 
 

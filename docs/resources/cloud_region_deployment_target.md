@@ -5,7 +5,7 @@ description: |-
   This resource manages cloud region deployment targets in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_cloud_region_deployment_target)
+# Resource: octopusdeploy_cloud_region_deployment_target
 
 This resource manages cloud region deployment targets in Octopus Deploy.
 

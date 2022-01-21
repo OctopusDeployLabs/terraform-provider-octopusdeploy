@@ -45,7 +45,7 @@ data "octopusdeploy_azure_web_app_deployment_targets" "example" {
 ### Read-Only
 
 - **azure_web_app_deployment_targets** (Block List) A list of Azure web app deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--azure_web_app_deployment_targets))
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
 <a id="nestedblock--azure_web_app_deployment_targets"></a>
 ### Nested Schema for `azure_web_app_deployment_targets`

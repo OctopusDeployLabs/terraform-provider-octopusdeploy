@@ -5,7 +5,7 @@ description: |-
   This resource manages listening tentacle deployment targets in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_listening_tentacle_deployment_target)
+# Resource: octopusdeploy_listening_tentacle_deployment_target
 
 This resource manages listening tentacle deployment targets in Octopus Deploy.
 

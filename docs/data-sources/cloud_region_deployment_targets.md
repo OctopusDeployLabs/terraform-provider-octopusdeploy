@@ -45,7 +45,7 @@ data "octopusdeploy_cloud_region_deployment_targets" "example" {
 ### Read-Only
 
 - **cloud_region_deployment_targets** (Block List) A list of cloud region deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--cloud_region_deployment_targets))
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
 <a id="nestedblock--cloud_region_deployment_targets"></a>
 ### Nested Schema for `cloud_region_deployment_targets`
