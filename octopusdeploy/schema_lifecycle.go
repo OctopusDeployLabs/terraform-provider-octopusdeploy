@@ -81,9 +81,14 @@ func getLifecycleDataSchema() map[string]*schema.Schema {
 
 func getLifecycleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": getDescriptionSchema(),
-		"id":          getIDSchema(),
-		"name":        getNameSchema(true),
+		"description": {
+			Computed:    true,
+			Description: "The description of this lifecycle.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"id":   getIDSchema(),
+		"name": getNameSchema(true),
 		"phase": {
 			Computed: true,
 			Elem:     &schema.Resource{Schema: getPhaseSchema()},
@@ -93,10 +98,7 @@ func getLifecycleSchema() map[string]*schema.Schema {
 		"release_retention_policy": {
 			Computed: true,
 			DefaultFunc: func() (interface{}, error) {
-				return flattenRetentionPeriod(octopusdeploy.RetentionPeriod{
-					Unit:           "Days",
-					QuantityToKeep: 30,
-				}), nil
+				return flattenRetentionPeriod(octopusdeploy.NewRetentionPeriod(30, "Days", false)), nil
 			},
 			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
 			MaxItems: 1,
@@ -107,10 +109,7 @@ func getLifecycleSchema() map[string]*schema.Schema {
 		"tentacle_retention_policy": {
 			Computed: true,
 			DefaultFunc: func() (interface{}, error) {
-				return flattenRetentionPeriod(octopusdeploy.RetentionPeriod{
-					Unit:           "Days",
-					QuantityToKeep: 30,
-				}), nil
+				return flattenRetentionPeriod(octopusdeploy.NewRetentionPeriod(30, "Days", false)), nil
 			},
 			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
 			MaxItems: 1,
