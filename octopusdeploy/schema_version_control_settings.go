@@ -1,78 +1,46 @@
 package octopusdeploy
 
 import (
+	"net/url"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandVersionControlSettings(flattenedVersionControlSettings interface{}) *octopusdeploy.VersionControlSettings {
-	versionControlSettingsList := flattenedVersionControlSettings.(*schema.Set).List()
-	versionControlSettingsMap := versionControlSettingsList[0].(map[string]interface{})
-
-	versionControlSettings := &octopusdeploy.VersionControlSettings{
-		BasePath:      versionControlSettingsMap["base_path"].(string),
-		DefaultBranch: versionControlSettingsMap["default_branch"].(string),
-		HasValue:      versionControlSettingsMap["has_value"].(bool),
-		URL:           versionControlSettingsMap["url"].(string),
-		Username:      versionControlSettingsMap["username"].(string),
-	}
-
-	if password := versionControlSettingsMap["password"].(string); len(password) > 0 {
-		versionControlSettings.Password = octopusdeploy.NewSensitiveValue(password)
-	}
-
-	return versionControlSettings
-}
-
-func flattenVersionControlSettings(versionControlSettings *octopusdeploy.VersionControlSettings) []interface{} {
-	if versionControlSettings == nil {
+func expandVersionControlSettings(values interface{}) *octopusdeploy.VersionControlSettings {
+	if values == nil {
 		return nil
 	}
 
-	flattenedVersionControlSettings := make(map[string]interface{})
-	flattenedVersionControlSettings["base_path"] = versionControlSettings.BasePath
-	flattenedVersionControlSettings["default_branch"] = versionControlSettings.DefaultBranch
-	flattenedVersionControlSettings["has_value"] = versionControlSettings.HasValue
-	flattenedVersionControlSettings["url"] = versionControlSettings.URL
-	flattenedVersionControlSettings["username"] = versionControlSettings.Username
-	return []interface{}{flattenedVersionControlSettings}
-}
-
-func getVersionControlSettingsSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"base_path": {
-			Description: "The base path associated with these version control settings.",
-			Type:        schema.TypeString,
-			Optional:    true,
-		},
-		"default_branch": {
-			Description: "The default branch associated with these version control settings.",
-			Type:        schema.TypeString,
-			Optional:    true,
-		},
-		"has_value": {
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
-		"password": {
-			Description:      "The password associated with these version control settings.",
-			Sensitive:        true,
-			Optional:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
-		},
-		"url": {
-			Description: "The URL associated with these version control settings.",
-			Type:        schema.TypeString,
-			Optional:    true,
-		},
-		"username": {
-			Description:      "The username associated with these version control settings.",
-			Optional:         true,
-			Sensitive:        true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
-		},
+	flattenedValues := values.([]interface{})
+	if len(flattenedValues) == 0 || flattenedValues[0] == nil {
+		return nil
 	}
+
+	flattenedMap := flattenedValues[0].(map[string]interface{})
+
+	if flattenedMap["type"] == "Database" {
+		return &octopusdeploy.VersionControlSettings{
+			Type: "Database",
+		}
+	}
+
+	url, err := url.Parse(flattenedMap["url"].(string))
+	if err != nil {
+		return nil
+	}
+
+	var credential octopusdeploy.IGitCredential
+	if v, ok := flattenedMap["credentials"]; ok {
+		credential = expandGitCredential(v)
+	} else {
+		credential = octopusdeploy.NewAnonymousGitCredential()
+	}
+
+	return octopusdeploy.NewVersionControlSettings(
+		flattenedMap["base_path"].(string),
+		credential,
+		flattenedMap["default_branch"].(string),
+		"VersionControlled",
+		url,
+	)
 }

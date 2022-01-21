@@ -8,9 +8,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeploymentProcess(d *schema.ResourceData) *octopusdeploy.DeploymentProcess {
-	deploymentProcess := octopusdeploy.NewDeploymentProcess(d.Get("project_id").(string))
+func expandDeploymentProcess(d *schema.ResourceData, client *octopusdeploy.Client) *octopusdeploy.DeploymentProcess {
+	projectID := d.Get("project_id").(string)
+	deploymentProcess := octopusdeploy.NewDeploymentProcess(projectID)
 	deploymentProcess.ID = d.Id()
+
+	if v, ok := d.GetOk("branch"); ok {
+		deploymentProcess.Branch = v.(string)
+	} else {
+		project, err := client.Projects.GetByID(projectID)
+		if err != nil {
+			return nil
+		}
+
+		if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == "VersionControlled" {
+			deploymentProcess.Branch = project.PersistenceSettings.(*octopusdeploy.GitPersistenceSettings).DefaultBranch
+		}
+	}
 
 	if v, ok := d.GetOk("last_snapshot_id"); ok {
 		deploymentProcess.LastSnapshotID = v.(string)
@@ -35,29 +49,8 @@ func expandDeploymentProcess(d *schema.ResourceData) *octopusdeploy.DeploymentPr
 	return deploymentProcess
 }
 
-func getDeploymentProcessSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"id": getIDSchema(),
-		"last_snapshot_id": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
-		"project_id": {
-			Description: "The project ID associated with this d eployment process.",
-			Required:    true,
-			Type:        schema.TypeString,
-		},
-		"space_id": getSpaceIDSchema(),
-		"step":     getDeploymentStepSchema(),
-		"version": {
-			Computed: true,
-			Optional: true,
-			Type:     schema.TypeInt,
-		},
-	}
-}
-
 func setDeploymentProcess(ctx context.Context, d *schema.ResourceData, deploymentProcess *octopusdeploy.DeploymentProcess) error {
+	d.Set("branch", deploymentProcess.Branch)
 	d.Set("last_snapshot_id", deploymentProcess.LastSnapshotID)
 	d.Set("project_id", deploymentProcess.ProjectID)
 	d.Set("space_id", deploymentProcess.SpaceID)

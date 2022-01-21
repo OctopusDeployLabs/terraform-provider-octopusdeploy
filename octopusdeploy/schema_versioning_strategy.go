@@ -5,11 +5,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandVersioningStrategy(values interface{}) octopusdeploy.VersioningStrategy {
+func expandVersioningStrategy(values interface{}) *octopusdeploy.VersioningStrategy {
 	versioningStrategyList := values.(*schema.Set).List()
 	versioningStrategyMap := versioningStrategyList[0].(map[string]interface{})
 
-	versioningStrategy := octopusdeploy.VersioningStrategy{}
+	versioningStrategy := &octopusdeploy.VersioningStrategy{}
 
 	if versioningStrategyMap["donor_package_step_id"] != nil {
 		donorPackageStepID := versioningStrategyMap["donor_package_step_id"].(string)
@@ -24,7 +24,11 @@ func expandVersioningStrategy(values interface{}) octopusdeploy.VersioningStrate
 	return versioningStrategy
 }
 
-func flattenVersioningStrategy(versioningStrategy octopusdeploy.VersioningStrategy) []interface{} {
+func flattenVersioningStrategy(versioningStrategy *octopusdeploy.VersioningStrategy) []interface{} {
+	if versioningStrategy == nil {
+		return nil
+	}
+
 	flattenedVersioningStrategy := make(map[string]interface{})
 	flattenedVersioningStrategy["donor_package"] = flattenDeploymentActionPackage(versioningStrategy.DonorPackage)
 	flattenedVersioningStrategy["donor_package_step_id"] = versioningStrategy.DonorPackageStepID
