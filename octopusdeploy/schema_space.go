@@ -67,16 +67,25 @@ func flattenSpace(space *octopusdeploy.Space) map[string]interface{} {
 	}
 }
 
-func getSpaceDataSchema() map[string]*schema.Schema {
+func getSpaceDataSourceSchema() map[string]*schema.Schema {
+	dataSchema := getSpaceSchema()
+	setDataSchema(&dataSchema)
+
+	dataSchema["name"] = getNameSchema(true)
+
+	return dataSchema
+}
+
+func getSpacesDataSourceSchema() map[string]*schema.Schema {
 	dataSchema := getSpaceSchema()
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
 		"id":           getDataSchemaID(),
 		"ids":          getQueryIDs(),
-		"name":         getQueryName(),
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
 		"spaces": {
 			Computed:    true,
 			Description: "A list of spaces that match the filter(s).",
@@ -84,7 +93,6 @@ func getSpaceDataSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"take": getQueryTake(),
 	}
 }
 

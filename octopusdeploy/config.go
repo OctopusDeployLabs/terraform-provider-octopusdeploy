@@ -9,10 +9,9 @@ import (
 
 // Config holds Address and the APIKey of the Octopus Deploy server
 type Config struct {
-	Address   string
-	APIKey    string
-	SpaceID   string
-	SpaceName string
+	Address string
+	APIKey  string
+	SpaceID string
 }
 
 // Client returns a new Octopus Deploy client
@@ -34,20 +33,6 @@ func (c *Config) Client() (*octopusdeploy.Client, diag.Diagnostics) {
 		}
 
 		client, err = octopusdeploy.NewClient(nil, apiURL, c.APIKey, space.GetID())
-		if err != nil {
-			return nil, diag.FromErr(err)
-		}
-	}
-
-	if len(c.SpaceName) > 0 {
-		spaces, err := client.Spaces.Get(octopusdeploy.SpacesQuery{
-			Name: c.SpaceName,
-		})
-		if err != nil {
-			return nil, diag.FromErr(err)
-		}
-
-		client, err = octopusdeploy.NewClient(nil, apiURL, c.APIKey, spaces.Items[0].GetID())
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}

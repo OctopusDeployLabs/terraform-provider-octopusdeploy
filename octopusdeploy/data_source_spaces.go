@@ -13,25 +13,28 @@ func dataSourceSpaces() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides information about existing spaces.",
 		ReadContext: dataSourceSpacesRead,
-		Schema:      getSpaceDataSchema(),
+		Schema:      getSpacesDataSourceSchema(),
 	}
 }
 
 func dataSourceSpacesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+	client := m.(*octopusdeploy.Client)
+
+	flattenedSpaces := []interface{}{}
+
 	query := octopusdeploy.SpacesQuery{
 		IDs:         expandArray(d.Get("ids").([]interface{})),
-		PartialName: d.Get("name").(string),
+		PartialName: d.Get("partial_name").(string),
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
 
-	client := m.(*octopusdeploy.Client)
 	spaces, err := client.Spaces.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	flattenedSpaces := []interface{}{}
 	for _, space := range spaces.Items {
 		flattenedSpaces = append(flattenedSpaces, flattenSpace(space))
 	}

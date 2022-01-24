@@ -33,6 +33,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_project_groups":                                  dataSourceProjectGroups(),
 			"octopusdeploy_projects":                                        dataSourceProjects(),
 			"octopusdeploy_script_modules":                                  dataSourceScriptModules(),
+			"octopusdeploy_space":                                           dataSourceSpace(),
 			"octopusdeploy_spaces":                                          dataSourceSpaces(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
 			"octopusdeploy_tag_sets":                                        dataSourceTagSets(),
@@ -107,16 +108,9 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 			},
 			"space_id": {
-				ConflictsWith: []string{"space_name"},
-				Description:   "The space ID to target",
-				Optional:      true,
-				Type:          schema.TypeString,
-			},
-			"space_name": {
-				ConflictsWith: []string{"space_id"},
-				Description:   "The space name to target",
-				Optional:      true,
-				Type:          schema.TypeString,
+				Description: "The space ID to target",
+				Optional:    true,
+				Type:        schema.TypeString,
 			},
 		},
 
@@ -130,9 +124,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		APIKey:  d.Get("api_key").(string),
 	}
 
-	if spaceName, ok := d.GetOk("space_name"); ok {
-		config.SpaceName = spaceName.(string)
-	} else if spaceID, ok := d.GetOk("space_id"); ok {
+	if spaceID, ok := d.GetOk("space_id"); ok {
 		config.SpaceID = spaceID.(string)
 	}
 
