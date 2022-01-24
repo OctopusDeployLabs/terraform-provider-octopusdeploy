@@ -25,7 +25,6 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.0.0-20210816115301-cb2034eba045 // indirect
 	github.com/hashicorp/yamux v0.0.0-20211028200310-0bc27b27de87 // indirect
 	github.com/jhump/protoreflect v1.10.1 // indirect
-	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/klauspost/compress v1.14.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
