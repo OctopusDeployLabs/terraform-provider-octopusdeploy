@@ -5,12 +5,10 @@ description: |-
 {{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
 
-# {{.Name}} ({{.Type}})
+# {{.Name}}: {{.Type}}
 
 {{ .Description | trimspace }}
-{{ if .IsDeprecated }}
-~> **NOTE:** This is deprecated and may be removed in a future release.
-{{ end }}
+
 ## Example Usage
 
 {{ tffile (printf "%s%s%s" "examples/resources/" .Type "/resource.tf") }}

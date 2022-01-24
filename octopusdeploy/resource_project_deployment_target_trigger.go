@@ -42,7 +42,7 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 		}
 
 		if invalidValue, ok := validateAllSliceItemsInSlice(eventGroups, validValues); !ok {
-			return nil, fmt.Errorf("Invalid value for event_groups. %s not in %v", invalidValue, validValues)
+			return nil, fmt.Errorf("invalid value for event_groups. %s not in %v", invalidValue, validValues)
 		}
 
 		filter.EventGroups = append(filter.EventGroups, eventGroups...)
@@ -65,7 +65,7 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 		}
 
 		if invalidValue, ok := validateAllSliceItemsInSlice(eventCategories, validValues); !ok {
-			return nil, fmt.Errorf("Invalid value for event_categories. %s not in %v", invalidValue, validValues)
+			return nil, fmt.Errorf("invalid value for event_categories. %s not in %v", invalidValue, validValues)
 		}
 
 		filter.EventCategories = append(filter.EventCategories, eventCategories...)

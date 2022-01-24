@@ -32,7 +32,7 @@ Provides information about existing tag sets.
 
 Read-Only:
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this tag set.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **sort_order** (Number) The sort order associated with this resource.

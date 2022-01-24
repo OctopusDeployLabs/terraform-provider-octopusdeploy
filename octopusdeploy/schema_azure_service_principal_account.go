@@ -65,7 +65,7 @@ func getAzureServicePrincipalAccountSchema() map[string]*schema.Schema {
 		"application_id":                    getApplicationIDSchema(true),
 		"authentication_endpoint":           getAuthenticationEndpointSchema(false),
 		"azure_environment":                 getAzureEnvironmentSchema(),
-		"description":                       getDescriptionSchema(),
+		"description":                       getDescriptionSchema("Azure service principal account"),
 		"environments":                      getEnvironmentsSchema(),
 		"id":                                getIDSchema(),
 		"name":                              getNameSchema(true),

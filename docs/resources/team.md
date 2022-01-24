@@ -6,7 +6,7 @@ description: |-
   This resource manages teams in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_team)
+# Resource: octopusdeploy_team
 
 This resource manages teams in Octopus Deploy.
 
@@ -36,7 +36,7 @@ user roles.
 - **id** (String) The unique ID for this resource.
 - **space_id** (String) The space associated with this team.
 - **user_role** (Block Set) (see [below for nested schema](#nestedblock--user_role))
-- **users** (List of String) A list of user IDs designated to be members of this team.
+- **users** (Set of String) A list of user IDs designated to be members of this team.
 
 <a id="nestedblock--external_security_group"></a>
 ### Nested Schema for `external_security_group`

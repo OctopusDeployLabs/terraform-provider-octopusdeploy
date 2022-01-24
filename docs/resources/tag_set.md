@@ -38,7 +38,7 @@ resource "octopusdeploy_tag_set" "example" {
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this tag set.
 - **id** (String) The unique ID for this resource.
 - **sort_order** (Number) The sort order associated with this resource.
 - **space_id** (String) The space ID associated with this resource.
@@ -55,7 +55,7 @@ Required:
 Optional:
 
 - **canonical_tag_name** (String)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this tag.
 - **id** (String) The unique ID for this resource.
 - **sort_order** (Number)
 

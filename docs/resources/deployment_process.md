@@ -61,15 +61,16 @@ resource "octopusdeploy_deployment_process" "example" {
 
 ### Required
 
-- **project_id** (String) The project ID associated with this d eployment process.
+- **project_id** (String) The project ID associated with this deployment process.
 
 ### Optional
 
+- **branch** (String) The branch name associated with this deployment process (i.e. `main`). This value is optional and only applies to associated projects that are stored in version control.
 - **id** (String) The unique ID for this resource.
 - **last_snapshot_id** (String)
 - **space_id** (String) The space ID associated with this resource.
 - **step** (Block List) (see [below for nested schema](#nestedblock--step))
-- **version** (Number)
+- **version** (Number) The version number of this deployment process.
 
 <a id="nestedblock--step"></a>
 ### Nested Schema for `step`
@@ -118,7 +119,7 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
-- **notes** (String) The notes associated with this deploymnt action.
+- **notes** (String) The notes associated with this deployment action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--package))
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--primary_package))
 - **properties** (Map of String) The properties associated with this deployment action.
@@ -206,7 +207,7 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
-- **notes** (String) The notes associated with this deploymnt action.
+- **notes** (String) The notes associated with this deployment action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--package))
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--primary_package))
 - **properties** (Map of String) The properties associated with this deployment action.
@@ -345,7 +346,7 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
-- **notes** (String) The notes associated with this deploymnt action.
+- **notes** (String) The notes associated with this deployment action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **run_on_server** (Boolean) Whether this step runs on a worker or on the target
@@ -411,7 +412,7 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
-- **notes** (String) The notes associated with this deploymnt action.
+- **notes** (String) The notes associated with this deployment action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_package_action--package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **tenant_tags** (List of String) A list of tenant tags associated with this resource.
@@ -523,7 +524,7 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
-- **notes** (String) The notes associated with this deploymnt action.
+- **notes** (String) The notes associated with this deployment action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **service_account** (String) Which built-in account will the service run under. Can be LocalSystem, NT Authority\NetworkService, NT Authority\LocalService, _CUSTOM or an expression
@@ -606,7 +607,7 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
-- **notes** (String) The notes associated with this deploymnt action.
+- **notes** (String) The notes associated with this deployment action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--manual_intervention_action--package))
 - **properties** (Map of String) The properties associated with this deployment action.
 - **responsible_teams** (String) The teams responsible to resolve this step. If no teams are specified, all users who have permission to deploy the project can resolve it.
@@ -671,7 +672,7 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
-- **notes** (String) The notes associated with this deploymnt action.
+- **notes** (String) The notes associated with this deployment action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package))
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package))
 - **properties** (Map of String) The properties associated with this deployment action.
@@ -757,7 +758,7 @@ Optional:
 - **id** (String) The unique ID for this resource.
 - **is_disabled** (Boolean) Indicates the disabled status of this deployment action.
 - **is_required** (Boolean) Indicates the required status of this deployment action.
-- **notes** (String) The notes associated with this deploymnt action.
+- **notes** (String) The notes associated with this deployment action.
 - **package** (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--package))
 - **primary_package** (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--primary_package))
 - **properties** (Map of String, Deprecated) The properties associated with this deployment action.

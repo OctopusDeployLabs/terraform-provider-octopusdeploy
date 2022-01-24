@@ -34,7 +34,7 @@ Provides information about existing offline package drop deployment targets.
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **offline_package_drop_deployment_targets** (Block List) A list of offline package drop deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--offline_package_drop_deployment_targets))
 
 <a id="nestedblock--offline_package_drop_deployment_targets"></a>

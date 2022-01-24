@@ -5,7 +5,7 @@ description: |-
   This resource manages polling tentacle deployment targets in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_polling_tentacle_deployment_target)
+# Resource: octopusdeploy_polling_tentacle_deployment_target
 
 This resource manages polling tentacle deployment targets in Octopus Deploy.
 

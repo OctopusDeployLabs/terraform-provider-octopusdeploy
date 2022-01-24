@@ -5,7 +5,7 @@ description: |-
   This resource manages a Maven feed in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_maven_feed)
+# Resource: octopusdeploy_maven_feed
 
 This resource manages a Maven feed in Octopus Deploy.
 

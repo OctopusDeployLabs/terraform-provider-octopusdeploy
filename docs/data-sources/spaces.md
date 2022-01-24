@@ -35,7 +35,7 @@ data "octopusdeploy_spaces" "spaces" {
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **spaces** (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--spaces))
 
 <a id="nestedblock--spaces"></a>
@@ -43,7 +43,7 @@ data "octopusdeploy_spaces" "spaces" {
 
 Read-Only:
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this space.
 - **id** (String) The unique ID for this resource.
 - **is_default** (Boolean) Specifies if this space is the default space in Octopus.
 - **is_task_queue_stopped** (Boolean) Specifies the status of the task queue for this space.

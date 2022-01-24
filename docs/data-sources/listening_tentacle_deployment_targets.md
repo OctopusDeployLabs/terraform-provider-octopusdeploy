@@ -53,7 +53,7 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **listening_tentacle_deployment_targets** (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacle_deployment_targets))
 
 <a id="nestedblock--listening_tentacle_deployment_targets"></a>

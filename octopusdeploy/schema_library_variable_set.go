@@ -68,7 +68,7 @@ func getLibraryVariableSetDataSchema() map[string]*schema.Schema {
 
 func getLibraryVariableSetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("library variable set"),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
 		"space_id":    getSpaceIDSchema(),

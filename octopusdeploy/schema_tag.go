@@ -43,7 +43,7 @@ func getTagsSchema() map[string]*schema.Schema {
 			Required: true,
 			Type:     schema.TypeString,
 		},
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("tag"),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
 		"sort_order": {

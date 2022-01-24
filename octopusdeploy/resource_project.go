@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -28,6 +29,24 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	client := m.(*octopusdeploy.Client)
 	createdProject, err := client.Projects.Add(project)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if v, ok := d.GetOk("git_persistence_settings"); ok {
+		versionControlSettings := expandVersionControlSettings(v)
+		if versionControlSettings.Type == "VersionControlled" {
+			log.Printf("[INFO] converting project to use VCS (%s)", d.Id())
+			vcsProject, err := client.Projects.ConvertToVcs(createdProject, versionControlSettings)
+			if err != nil {
+				client.Projects.DeleteByID(createdProject.GetID())
+				return diag.FromErr(err)
+			}
+			createdProject.PersistenceSettings = vcsProject.PersistenceSettings
+		}
+	}
+
+	createdProject, err = client.Projects.GetByID(createdProject.GetID())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -62,7 +81,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	project, err := client.Projects.GetByID(d.Id())
 	if err != nil {
 		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
+			if apiError.StatusCode == http.StatusNotFound {
 				log.Printf("[INFO] project (%s) not found; deleting from state", d.Id())
 				d.SetId("")
 				return nil
@@ -82,9 +101,35 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] updating project (%s)", d.Id())
 
-	project := expandProject(d)
 	client := m.(*octopusdeploy.Client)
-	updatedProject, err := client.Projects.Update(project)
+	project := expandProject(d)
+	var updatedProject *octopusdeploy.Project
+	var err error
+
+	projectLinks, err := client.Projects.GetByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == "VersionControlled" {
+		if v, ok := d.GetOk("git_persistence_settings"); ok {
+			convertToVcsLink := projectLinks.Links["ConvertToVcs"]
+
+			if len(convertToVcsLink) != 0 {
+				versionControlSettings := expandVersionControlSettings(v)
+				project.Links["ConvertToVcs"] = convertToVcsLink
+				log.Printf("[INFO] converting project to use VCS (%s)", d.Id())
+				project, err = client.Projects.ConvertToVcs(project, versionControlSettings)
+				if err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+	}
+
+	project.Links = projectLinks.Links
+
+	updatedProject, err = client.Projects.Update(project)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -34,7 +34,7 @@ resource "octopusdeploy_script_module" "example" {
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this script module.
 - **id** (String) The unique ID for this resource.
 - **space_id** (String) The space ID associated with this resource.
 - **variable_set_id** (String) The variable set ID for this script module.

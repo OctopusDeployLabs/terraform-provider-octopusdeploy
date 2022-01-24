@@ -25,7 +25,7 @@ This resource manages machine policies in Octopus Deploy.
 - **connection_retry_count_limit** (Number)
 - **connection_retry_sleep_interval** (Number)
 - **connection_retry_time_limit** (Number)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this machine policy.
 - **id** (String) The unique ID for this resource.
 - **machine_cleanup_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_cleanup_policy))
 - **machine_connectivity_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_connectivity_policy))

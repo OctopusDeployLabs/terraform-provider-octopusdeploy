@@ -178,7 +178,7 @@ func resourceTeamUpdateUserRoles(ctx context.Context, d *schema.ResourceData, m 
 							apiError := err.(*octopusdeploy.APIError)
 							if apiError.StatusCode != 404 {
 								// It's already been deleted, maybe mixing with the independent resource?
-								return fmt.Errorf("Error removing user role %s from team %s: %s", userRole.ID, team.ID, err)
+								return fmt.Errorf("error removing user role %s from team %s: %s", userRole.ID, team.ID, err)
 							}
 						}
 					}
@@ -189,7 +189,7 @@ func resourceTeamUpdateUserRoles(ctx context.Context, d *schema.ResourceData, m 
 				for _, userRole := range add {
 					_, err := client.ScopedUserRoles.Add(userRole)
 					if err != nil {
-						return fmt.Errorf("Error creating user role for team %s: %s", team.ID, err)
+						return fmt.Errorf("error creating user role for team %s: %s", team.ID, err)
 					}
 				}
 			}

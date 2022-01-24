@@ -150,7 +150,7 @@ func getQueryHealthStatuses() *schema.Schema {
 func getDataSchemaID() *schema.Schema {
 	return &schema.Schema{
 		Computed:    true,
-		Description: "A auto-generated identifier that includes the timestamp when this data source was last modified.",
+		Description: "An auto-generated identifier that includes the timestamp when this data source was last modified.",
 		Type:        schema.TypeString,
 	}
 }

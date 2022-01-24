@@ -81,7 +81,7 @@ func getDynamicWorkerPoolSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeBool,
 		},
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("dynamic worker pool"),
 		"id":          getIDSchema(),
 		"is_default": {
 			Optional: true,

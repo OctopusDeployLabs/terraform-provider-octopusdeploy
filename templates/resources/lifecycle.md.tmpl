@@ -1,6 +1,6 @@
 ---
 page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
-subcategory: "Accounts"
+subcategory: ""
 description: |-
 {{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
@@ -12,6 +12,7 @@ description: |-
 ## Example Usage
 
 {{ tffile (printf "%s%s%s" "examples/resources/" .Type "/resource.tf") }}
+
 {{ .SchemaMarkdown | trimspace }}
 
 {{ if .HasImport -}}

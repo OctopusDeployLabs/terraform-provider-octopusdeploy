@@ -5,7 +5,7 @@ description: |-
   
 ---
 
-# Resource (octopusdeploy_feed)
+# Resource: octopusdeploy_feed
 
 
 

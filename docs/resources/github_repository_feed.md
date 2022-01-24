@@ -5,7 +5,7 @@ description: |-
   This resource manages a GitHub repository feed in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_github_repository_feed)
+# Resource: octopusdeploy_github_repository_feed
 
 This resource manages a GitHub repository feed in Octopus Deploy.
 

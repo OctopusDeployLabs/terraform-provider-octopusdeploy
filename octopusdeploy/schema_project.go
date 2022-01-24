@@ -13,8 +13,9 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	name := d.Get("name").(string)
 	lifecycleID := d.Get("lifecycle_id").(string)
 	projectGroupID := d.Get("project_group_id").(string)
+	spaceID := d.Get("space_id").(string)
 
-	project := octopusdeploy.NewProject(name, lifecycleID, projectGroupID)
+	project := octopusdeploy.NewProject(spaceID, name, lifecycleID, projectGroupID)
 	project.ID = d.Id()
 
 	if v, ok := d.GetOk("auto_create_release"); ok {
@@ -57,6 +58,10 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 		project.ExtensionSettings = expandExtensionSettingsValues(v.(*schema.Set).List())
 	}
 
+	if v, ok := d.GetOk("git_persistence_settings"); ok {
+		project.PersistenceSettings = expandGitPersistenceSettings(v)
+	}
+
 	if v, ok := d.GetOk("included_library_variable_sets"); ok {
 		project.IncludedLibraryVariableSets = getSliceFromTerraformTypeList(v)
 	}
@@ -85,20 +90,12 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 		project.Slug = v.(string)
 	}
 
-	if v, ok := d.GetOk("space_id"); ok {
-		project.SpaceID = v.(string)
-	}
-
 	if v, ok := d.GetOk("template"); ok {
 		project.Templates = expandActionTemplateParameters(v.([]interface{}))
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
 		project.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
-	}
-
-	if v, ok := d.GetOk("version_control_settings"); ok {
-		project.VersionControlSettings = expandVersionControlSettings(v)
 	}
 
 	if v, ok := d.GetOk("versioning_strategy"); ok {
@@ -113,10 +110,11 @@ func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
 		return nil
 	}
 
-	return map[string]interface{}{
+	projectMap := map[string]interface{}{
 		"auto_create_release":                  project.AutoCreateRelease,
 		"auto_deploy_release_overrides":        project.AutoDeployReleaseOverrides,
 		"cloned_from_project_id":               project.ClonedFromProjectID,
+		"connectivity_policy":                  flattenConnectivityPolicy(project.ConnectivityPolicy),
 		"default_guided_failure_mode":          project.DefaultGuidedFailureMode,
 		"default_to_skip_if_already_installed": project.DefaultToSkipIfAlreadyInstalled,
 		"deployment_changes_template":          project.DeploymentChangesTemplate,
@@ -130,7 +128,6 @@ func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
 		"is_version_controlled":                project.IsVersionControlled,
 		"lifecycle_id":                         project.LifecycleID,
 		"name":                                 project.Name,
-		"connectivity_policy":                  flattenConnectivityPolicy(project.ConnectivityPolicy),
 		"project_group_id":                     project.ProjectGroupID,
 		"release_creation_strategy":            flattenReleaseCreationStrategy(project.ReleaseCreationStrategy),
 		"release_notes_template":               project.ReleaseNotesTemplate,
@@ -139,9 +136,16 @@ func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
 		"template":                             flattenActionTemplateParameters(project.Templates),
 		"tenanted_deployment_participation":    project.TenantedDeploymentMode,
 		"variable_set_id":                      project.VariableSetID,
-		"version_control_settings":             flattenVersionControlSettings(project.VersionControlSettings),
 		"versioning_strategy":                  flattenVersioningStrategy(project.VersioningStrategy),
 	}
+
+	if project.PersistenceSettings != nil {
+		if project.PersistenceSettings.GetType() == "VersionControlled" {
+			projectMap["git_persistence_settings"] = flattenGitPersistenceSettings(project.PersistenceSettings, projectMap["git_persistence_settings.0.credentials.0.password"].(string))
+		}
+	}
+
+	return projectMap
 }
 
 func getProjectDataSchema() map[string]*schema.Schema {
@@ -175,16 +179,19 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:       schema.TypeBool,
 		},
 		"auto_create_release": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
 		"auto_deploy_release_overrides": {
+			Computed: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"cloned_from_project_id": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -196,9 +203,9 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"default_guided_failure_mode": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeString,
-			Default:  "EnvironmentDefault",
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"EnvironmentDefault",
 				"Off",
@@ -206,10 +213,12 @@ func getProjectSchema() map[string]*schema.Schema {
 			}, false)),
 		},
 		"default_to_skip_if_already_installed": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
 		"deployment_changes_template": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -217,7 +226,12 @@ func getProjectSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"description": getDescriptionSchema(),
+		"description": {
+			Computed:    true,
+			Description: "The description of this project.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
 		"discrete_channel_release": {
 			Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
 			Optional:    true,
@@ -228,34 +242,97 @@ func getProjectSchema() map[string]*schema.Schema {
 			Elem:     &schema.Resource{Schema: getExtensionSettingsSchema()},
 			Type:     schema.TypeSet,
 		},
+		"git_persistence_settings": {
+			Description: "Provides Git-related persistence settings for a version-controlled project.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"base_path": {
+						Default:     ".octopus",
+						Description: "The base path associated with these version control settings.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"credentials": {
+						Description: "The credentials associated with these version control settings.",
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"password": {
+									Description:      "The password for the Git credential.",
+									Required:         true,
+									Sensitive:        true,
+									Type:             schema.TypeString,
+									ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+								},
+								"username": {
+									Description:      "The username for the Git credential.",
+									Required:         true,
+									Type:             schema.TypeString,
+									ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+								},
+							},
+						},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"default_branch": {
+						Default:     "main",
+						Description: "The default branch associated with these version control settings.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"url": {
+						Description:      "The URL associated with these version control settings.",
+						Required:         true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
+					},
+				},
+			},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
 		"id": getIDSchema(),
 		"included_library_variable_sets": {
+			Computed: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
 		"is_disabled": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
 		"is_discrete_channel_release": {
+			Computed:    true,
 			Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
 		"is_version_controlled": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
 		"lifecycle_id": {
-			Description: "The lifecycle ID associated with this project.",
-			Required:    true,
-			Type:        schema.TypeString,
+			Description:      "The lifecycle ID associated with this project.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
-		"name": getNameSchema(true),
+		"name": {
+			Description:      "The name of the project in Octopus Deploy. This name must be unique.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
 		"project_group_id": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description:      "The project group ID associated with this project.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"release_creation_strategy": {
 			Computed: true,
@@ -265,6 +342,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"release_notes_template": {
+			Computed: true,
 			Optional: true,
 			Type:     schema.TypeString,
 		},
@@ -272,7 +350,12 @@ func getProjectSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
-		"space_id": getSpaceIDSchema(),
+		"space_id": {
+			Description:      "The space ID associated with this project.",
+			Optional:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
 		"template": {
 			Elem:     &schema.Resource{Schema: getActionTemplateParameterSchema()},
 			Optional: true,
@@ -282,13 +365,6 @@ func getProjectSchema() map[string]*schema.Schema {
 		"variable_set_id": {
 			Computed: true,
 			Type:     schema.TypeString,
-		},
-		"version_control_settings": {
-			Computed: true,
-			Elem:     &schema.Resource{Schema: getVersionControlSettingsSchema()},
-			MaxItems: 1,
-			Optional: true,
-			Type:     schema.TypeSet,
 		},
 		"versioning_strategy": {
 			Computed: true,
@@ -322,8 +398,6 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdep
 		return fmt.Errorf("error setting extension_settings: %s", err)
 	}
 
-	d.Set("id", project.GetID())
-
 	if err := d.Set("included_library_variable_sets", project.IncludedLibraryVariableSets); err != nil {
 		return fmt.Errorf("error setting included_library_variable_sets: %s", err)
 	}
@@ -333,6 +407,15 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdep
 	d.Set("is_version_controlled", project.IsVersionControlled)
 	d.Set("lifecycle_id", project.LifecycleID)
 	d.Set("name", project.Name)
+
+	if project.PersistenceSettings != nil {
+		if project.PersistenceSettings.GetType() == "VersionControlled" {
+			if err := d.Set("git_persistence_settings", flattenGitPersistenceSettings(project.PersistenceSettings, d.Get("git_persistence_settings.0.credentials.0.password").(string))); err != nil {
+				return fmt.Errorf("error setting git_persistence_settings: %s", err)
+			}
+		}
+	}
+
 	d.Set("project_group_id", project.ProjectGroupID)
 
 	if err := d.Set("release_creation_strategy", flattenReleaseCreationStrategy(project.ReleaseCreationStrategy)); err != nil {
@@ -350,15 +433,11 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdep
 	d.Set("tenanted_deployment_participation", project.TenantedDeploymentMode)
 	d.Set("variable_set_id", project.VariableSetID)
 
-	if project.IsVersionControlled {
-		if err := d.Set("version_control_settings", flattenVersionControlSettings(project.VersionControlSettings)); err != nil {
-			return fmt.Errorf("error setting version_control_settings: %s", err)
-		}
-	}
-
 	if err := d.Set("versioning_strategy", flattenVersioningStrategy(project.VersioningStrategy)); err != nil {
 		return fmt.Errorf("error setting versioning_strategy: %s", err)
 	}
+
+	d.Set("id", project.GetID())
 
 	return nil
 }

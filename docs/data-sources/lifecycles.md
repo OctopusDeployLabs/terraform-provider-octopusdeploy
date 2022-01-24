@@ -41,7 +41,7 @@ data "octopusdeploy_lifecycles" "example" {
 
 Read-Only:
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this lifecycle.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **phase** (List of Object) (see [below for nested schema](#nestedatt--lifecycles--phase))

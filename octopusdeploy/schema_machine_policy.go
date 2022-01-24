@@ -148,7 +148,7 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeInt,
 		},
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("machine policy"),
 		"id":          getIDSchema(),
 		"is_default": {
 			Computed: true,

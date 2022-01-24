@@ -34,15 +34,15 @@ func expandSSHKeyAccount(d *schema.ResourceData) *octopusdeploy.SSHKeyAccount {
 
 func getSSHKeyAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description":  getDescriptionSchema(),
+		"description":  getDescriptionSchema("SSH key account"),
 		"environments": getEnvironmentsSchema(),
 		"id":           getIDSchema(),
 		"name":         getNameSchema(true),
 		"private_key_file": {
-			Required:     true,
-			Sensitive:    true,
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringIsNotEmpty,
+			Required:         true,
+			Sensitive:        true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		},
 		"private_key_passphrase": {
 			Optional:  true,
@@ -64,7 +64,6 @@ func setSSHKeyAccount(ctx context.Context, d *schema.ResourceData, account *octo
 		return fmt.Errorf("error setting environments: %s", err)
 	}
 
-	d.Set("id", account.GetID())
 	d.Set("name", account.GetName())
 	d.Set("space_id", account.GetSpaceID())
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
@@ -78,8 +77,6 @@ func setSSHKeyAccount(ctx context.Context, d *schema.ResourceData, account *octo
 	}
 
 	d.Set("username", account.Username)
-
-	d.SetId(account.GetID())
 
 	return nil
 }

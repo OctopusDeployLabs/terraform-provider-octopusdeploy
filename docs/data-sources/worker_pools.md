@@ -34,7 +34,7 @@ Provides information about existing worker pools.
 Read-Only:
 
 - **can_add_workers** (Boolean)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this worker pool.
 - **id** (String) The unique ID for this resource.
 - **is_default** (Boolean)
 - **name** (String) The name of this resource.

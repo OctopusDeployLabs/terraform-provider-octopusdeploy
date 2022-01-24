@@ -5,7 +5,7 @@ description: |-
   Provides information about existing feeds.
 ---
 
-# Data Source (octopusdeploy_feeds)
+# Data Source: octopusdeploy_feeds
 
 Provides information about existing feeds.
 

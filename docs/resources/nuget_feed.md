@@ -5,7 +5,7 @@ description: |-
   This resource manages a NuGet feed in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_nuget_feed)
+# Resource: octopusdeploy_nuget_feed
 
 This resource manages a NuGet feed in Octopus Deploy.
 

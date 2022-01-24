@@ -138,6 +138,7 @@ func testAccDeploymentProcessBasic(localName string) string {
 
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
 		`resource "octopusdeploy_deployment_process" "%s" {
+			branch     = "%s"
 			project_id = "${octopusdeploy_project.%s.id}"
 
 			step {

@@ -28,9 +28,9 @@ resource "octopusdeploy_project_group" "example" {
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this project group.
 - **id** (String) The unique ID for this resource.
-- **retention_policy_id** (String)
+- **retention_policy_id** (String) The ID of the retention policy associated with this project group.
 
 ## Import
 

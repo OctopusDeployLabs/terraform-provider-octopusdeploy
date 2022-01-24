@@ -33,7 +33,7 @@ data "octopusdeploy_script_modules" "example" {
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **script_modules** (Block List) A list of script modules that match the filter(s). (see [below for nested schema](#nestedblock--script_modules))
 
 <a id="nestedblock--script_modules"></a>
@@ -41,7 +41,7 @@ data "octopusdeploy_script_modules" "example" {
 
 Read-Only:
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this script module.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **script** (Set of Object) The script associated with this script module. (see [below for nested schema](#nestedatt--script_modules--script))

@@ -29,7 +29,7 @@ Provides information about existing tenants.
 
 ### Read-Only
 
-- **id** (String) A auto-generated identifier that includes the timestamp when this data source was last modified.
+- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - **tenants** (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
 
 <a id="nestedblock--tenants"></a>
@@ -38,7 +38,7 @@ Provides information about existing tenants.
 Read-Only:
 
 - **cloned_from_tenant_id** (String) The ID of the tenant from which this tenant was cloned.
-- **description** (String) The description of this resource.
+- **description** (String) The description of this tenant.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **project_environment** (Set of Object) (see [below for nested schema](#nestedatt--tenants--project_environment))

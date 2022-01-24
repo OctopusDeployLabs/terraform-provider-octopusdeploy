@@ -1,6 +1,6 @@
 ---
 page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
-subcategory: "Accounts"
+subcategory: ""
 description: |-
 {{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
@@ -9,9 +9,12 @@ description: |-
 
 {{ .Description | trimspace }}
 
+~> Credentials are stored in state as plaintext. [Read more about sensitive data in state.](https://www.terraform.io/language/state/sensitive-data)
+
 ## Example Usage
 
 {{ tffile (printf "%s%s%s" "examples/resources/" .Type "/resource.tf") }}
+
 {{ .SchemaMarkdown | trimspace }}
 
 {{ if .HasImport -}}

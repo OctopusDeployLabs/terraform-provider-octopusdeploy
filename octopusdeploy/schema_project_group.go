@@ -59,12 +59,19 @@ func getProjectGroupDataSchema() map[string]*schema.Schema {
 
 func getProjectGroupSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": getDescriptionSchema(),
-		"id":          getIDSchema(),
-		"name":        getNameSchema(true),
+		"description": {
+			Computed:    true,
+			Description: "The description of this project group.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"id":   getIDSchema(),
+		"name": getNameSchema(true),
 		"retention_policy_id": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Computed:    true,
+			Description: "The ID of the retention policy associated with this project group.",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 	}
 }

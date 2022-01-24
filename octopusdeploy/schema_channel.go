@@ -84,7 +84,7 @@ func getChannelDataSchema() map[string]*schema.Schema {
 
 func getChannelSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("channel"),
 		"id":          getIDSchema(),
 		"is_default": {
 			Description: "Indicates if this is the default channel for the associated project.",

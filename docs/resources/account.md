@@ -5,11 +5,9 @@ description: |-
   This resource manages accounts in Octopus Deploy.
 ---
 
-# Resource (octopusdeploy_account)
+# Resource: octopusdeploy_account
 
 This resource manages accounts in Octopus Deploy.
-
-~> **NOTE:** This is deprecated and may be removed in a future release.
 
 ## Example Usage
 
@@ -80,7 +78,7 @@ resource "octopusdeploy_account" "token_account" {
 - **certificate_data** (String, Sensitive)
 - **certificate_thumbprint** (String, Sensitive)
 - **client_secret** (String, Sensitive)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this account resource.
 - **environments** (List of String) A list of environment IDs associated with this resource.
 - **id** (String) The unique ID for this resource.
 - **password** (String, Sensitive) The password associated with this resource.

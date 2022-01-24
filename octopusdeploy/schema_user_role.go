@@ -92,7 +92,7 @@ func getUserRoleSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("user role"),
 		"granted_space_permissions": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,

@@ -29,7 +29,7 @@ resource "octopusdeploy_channel" "example" {
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this channel.
 - **id** (String) The unique ID for this resource.
 - **is_default** (Boolean) Indicates if this is the default channel for the associated project.
 - **lifecycle_id** (String) The lifecycle ID associated with this channel.
