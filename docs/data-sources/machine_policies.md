@@ -36,7 +36,7 @@ Read-Only:
 - **connection_retry_count_limit** (Number)
 - **connection_retry_sleep_interval** (Number)
 - **connection_retry_time_limit** (Number)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this machine policy.
 - **id** (String) The unique ID for this resource.
 - **is_default** (Boolean)
 - **machine_cleanup_policy** (Set of Object) (see [below for nested schema](#nestedatt--machine_policies--machine_cleanup_policy))

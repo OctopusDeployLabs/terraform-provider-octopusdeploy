@@ -21,7 +21,7 @@ This resource manages library variable sets in Octopus Deploy.
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this library variable set.
 - **id** (String) The unique ID for this resource.
 - **space_id** (String) The space ID associated with this resource.
 - **template** (Block List) (see [below for nested schema](#nestedblock--template))

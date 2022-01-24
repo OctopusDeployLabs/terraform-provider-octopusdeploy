@@ -44,7 +44,7 @@ data "octopusdeploy_environments" "example" {
 Read-Only:
 
 - **allow_dynamic_infrastructure** (Boolean)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this environment.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **sort_order** (Number) The order number to sort an environment.

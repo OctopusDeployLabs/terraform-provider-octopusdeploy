@@ -42,7 +42,7 @@ data "octopusdeploy_user_roles" "example" {
 Read-Only:
 
 - **can_be_deleted** (Boolean)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this user role.
 - **granted_space_permissions** (List of String)
 - **granted_system_permissions** (List of String)
 - **id** (String) The unique ID for this resource.

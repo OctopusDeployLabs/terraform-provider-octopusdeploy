@@ -21,7 +21,7 @@ This resource manages static worker pools in Octopus Deploy.
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this static worker pool.
 - **id** (String) The unique ID for this resource.
 - **is_default** (Boolean)
 - **sort_order** (Number) The order number to sort a dynamic worker pool.

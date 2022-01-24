@@ -22,7 +22,7 @@ This resource manages variables in Octopus Deploy.
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this variable.
 - **id** (String) The ID of this resource.
 - **is_editable** (Boolean) Indicates whether or not this variable is considered editable.
 - **is_sensitive** (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
@@ -44,7 +44,7 @@ This resource manages variables in Octopus Deploy.
 
 Optional:
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this variable prompt option.
 - **is_required** (Boolean)
 - **label** (String)
 

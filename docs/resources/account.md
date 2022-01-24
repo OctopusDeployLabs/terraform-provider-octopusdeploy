@@ -78,7 +78,7 @@ resource "octopusdeploy_account" "token_account" {
 - **certificate_data** (String, Sensitive)
 - **certificate_thumbprint** (String, Sensitive)
 - **client_secret** (String, Sensitive)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this account resource.
 - **environments** (List of String) A list of environment IDs associated with this resource.
 - **id** (String) The unique ID for this resource.
 - **password** (String, Sensitive) The password associated with this resource.

@@ -40,7 +40,7 @@ data "octopusdeploy_script_modules" "example" {
 
 Read-Only:
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this script module.
 - **id** (String) The unique ID for this resource.
 - **name** (String) The name of this resource.
 - **script** (Set of Object) The script associated with this script module. (see [below for nested schema](#nestedatt--script_modules--script))

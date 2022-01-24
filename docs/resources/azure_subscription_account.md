@@ -32,7 +32,7 @@ resource "octopusdeploy_azure_subscription_account" "example" {
 - **azure_environment** (String) The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
 - **certificate** (String, Sensitive)
 - **certificate_thumbprint** (String, Sensitive)
-- **description** (String) The description of this resource.
+- **description** (String) The description of this Azure subscription account.
 - **environments** (List of String) A list of environment IDs associated with this resource.
 - **id** (String) The ID of this resource.
 - **space_id** (String) The space ID associated with this resource.

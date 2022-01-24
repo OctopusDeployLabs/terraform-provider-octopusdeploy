@@ -54,7 +54,6 @@ resource "octopusdeploy_project" "example" {
 - **lifecycle_id** (String) The lifecycle ID associated with this project.
 - **name** (String) The name of the project in Octopus Deploy. This name must be unique.
 - **project_group_id** (String) The project group ID associated with this project.
-- **space_id** (String) The space ID associated with this project.
 
 ### Optional
 
@@ -76,6 +75,7 @@ resource "octopusdeploy_project" "example" {
 - **is_version_controlled** (Boolean)
 - **release_creation_strategy** (Block List, Max: 1) (see [below for nested schema](#nestedblock--release_creation_strategy))
 - **release_notes_template** (String)
+- **space_id** (String) The space ID associated with this project.
 - **template** (Block List) (see [below for nested schema](#nestedblock--template))
 - **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - **versioning_strategy** (Block Set) (see [below for nested schema](#nestedblock--versioning_strategy))

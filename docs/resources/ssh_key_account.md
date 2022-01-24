@@ -29,7 +29,7 @@ resource "octopusdeploy_ssh_key_account" "example" {
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this SSH key account.
 - **environments** (List of String) A list of environment IDs associated with this resource.
 - **id** (String) The unique ID for this resource.
 - **private_key_passphrase** (String, Sensitive)

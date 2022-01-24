@@ -27,7 +27,7 @@ resource "octopusdeploy_token_account" "example" {
 
 ### Optional
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this token account.
 - **environments** (List of String) A list of environment IDs associated with this resource.
 - **id** (String) The unique ID for this resource.
 - **space_id** (String) The space ID associated with this resource.

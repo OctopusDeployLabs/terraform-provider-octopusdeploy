@@ -30,7 +30,7 @@ data "octopusdeploy_variables" "example" {
 
 Read-Only:
 
-- **description** (String) The description of this resource.
+- **description** (String) The description of this variable.
 - **encrypted_value** (String)
 - **is_editable** (Boolean) Indicates whether or not this variable is considered editable.
 - **is_sensitive** (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.

@@ -35,7 +35,7 @@ resource "octopusdeploy_azure_service_principal" "example" {
 
 - **authentication_endpoint** (String) The authentication endpoint URI for this resource.
 - **azure_environment** (String) The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
-- **description** (String) The description of this resource.
+- **description** (String) The description of this Azure service principal account.
 - **environments** (List of String) A list of environment IDs associated with this resource.
 - **id** (String) The unique ID for this resource.
 - **resource_manager_endpoint** (String) The resource manager endpoint URI for this resource.
