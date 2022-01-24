@@ -77,7 +77,7 @@ func getVariableDataSchema() map[string]*schema.Schema {
 
 func getVariableSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("variable"),
 		"encrypted_value": {
 			Computed: true,
 			Type:     schema.TypeString,

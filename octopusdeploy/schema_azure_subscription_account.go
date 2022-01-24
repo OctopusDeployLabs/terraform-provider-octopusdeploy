@@ -87,7 +87,7 @@ func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"description":  getDescriptionSchema(),
+		"description":  getDescriptionSchema("Azure subscription account"),
 		"environments": getEnvironmentsSchema(),
 		"management_endpoint": {
 			Required:     true,

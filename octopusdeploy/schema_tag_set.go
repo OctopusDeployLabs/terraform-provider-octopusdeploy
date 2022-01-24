@@ -73,7 +73,7 @@ func getTagSetDataSchema() map[string]*schema.Schema {
 
 func getTagSetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("tag set"),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
 		"sort_order":  getSortOrderSchema(),

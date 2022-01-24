@@ -82,7 +82,7 @@ func getWorkerPoolSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeBool,
 		},
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("worker pool"),
 		"id":          getIDSchema(),
 		"is_default": {
 			Optional: true,

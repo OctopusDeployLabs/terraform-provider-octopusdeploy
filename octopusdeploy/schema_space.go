@@ -90,7 +90,7 @@ func getSpaceDataSchema() map[string]*schema.Schema {
 
 func getSpaceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("space"),
 		"id":          getIDSchema(),
 		"is_default": {
 			Description: "Specifies if this space is the default space in Octopus.",

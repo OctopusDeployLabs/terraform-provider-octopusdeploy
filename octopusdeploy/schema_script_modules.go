@@ -96,7 +96,7 @@ func getScriptModuleDataSchema() map[string]*schema.Schema {
 
 func getScriptModuleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("script module"),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
 		"script": {

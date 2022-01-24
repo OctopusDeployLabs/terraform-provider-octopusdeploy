@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -109,9 +111,9 @@ func getCertificateDataFormatSchema() *schema.Schema {
 	}
 }
 
-func getDescriptionSchema() *schema.Schema {
+func getDescriptionSchema(resourceName string) *schema.Schema {
 	return &schema.Schema{
-		Description: "The description of this resource.",
+		Description: fmt.Sprintf("The description of this %s.", resourceName),
 		Optional:    true,
 		Type:        schema.TypeString,
 	}

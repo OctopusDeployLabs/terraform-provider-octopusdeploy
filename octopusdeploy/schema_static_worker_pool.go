@@ -78,7 +78,7 @@ func getStaticWorkerPoolSchema() map[string]*schema.Schema {
 			Computed: true,
 			Type:     schema.TypeBool,
 		},
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("static worker pool"),
 		"id":          getIDSchema(),
 		"is_default": {
 			Optional: true,

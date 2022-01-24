@@ -140,7 +140,7 @@ func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
 	}
 
 	if project.PersistenceSettings != nil {
-		if project.PersistenceSettings.GetType() != "Database" {
+		if project.PersistenceSettings.GetType() == "VersionControlled" {
 			projectMap["git_persistence_settings"] = flattenGitPersistenceSettings(project.PersistenceSettings, projectMap["git_persistence_settings.0.credentials.0.password"].(string))
 		}
 	}
@@ -352,7 +352,7 @@ func getProjectSchema() map[string]*schema.Schema {
 		},
 		"space_id": {
 			Description:      "The space ID associated with this project.",
-			Required:         true,
+			Optional:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
@@ -409,7 +409,7 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdep
 	d.Set("name", project.Name)
 
 	if project.PersistenceSettings != nil {
-		if project.PersistenceSettings.GetType() != "Database" {
+		if project.PersistenceSettings.GetType() == "VersionControlled" {
 			if err := d.Set("git_persistence_settings", flattenGitPersistenceSettings(project.PersistenceSettings, d.Get("git_persistence_settings.0.credentials.0.password").(string))); err != nil {
 				return fmt.Errorf("error setting git_persistence_settings: %s", err)
 			}

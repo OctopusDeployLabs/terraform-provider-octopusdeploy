@@ -202,7 +202,7 @@ func getAccountResourceSchema() map[string]*schema.Schema {
 			Sensitive: true,
 			Type:      schema.TypeString,
 		},
-		"description":               getDescriptionSchema(),
+		"description":               getDescriptionSchema("account resource"),
 		"environments":              getEnvironmentsSchema(),
 		"id":                        getIDSchema(),
 		"name":                      getNameSchema(true),

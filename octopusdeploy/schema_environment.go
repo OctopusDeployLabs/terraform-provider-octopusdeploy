@@ -73,7 +73,7 @@ func getEnvironmentSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("environment"),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
 		"sort_order": {

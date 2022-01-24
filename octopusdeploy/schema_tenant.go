@@ -85,7 +85,7 @@ func getTenantSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
-		"description": getDescriptionSchema(),
+		"description": getDescriptionSchema("tenant"),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
 		"project_environment": {
