@@ -44,7 +44,7 @@ func expandTokenAccount(d *schema.ResourceData) *octopusdeploy.TokenAccount {
 
 func getTokenAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description":                       getDescriptionSchema(),
+		"description":                       getDescriptionSchema("token account"),
 		"environments":                      getEnvironmentsSchema(),
 		"id":                                getIDSchema(),
 		"name":                              getNameSchema(true),
@@ -63,7 +63,6 @@ func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *octop
 		return fmt.Errorf("error setting environments: %s", err)
 	}
 
-	d.Set("id", account.GetID())
 	d.Set("name", account.GetName())
 	d.Set("space_id", account.GetSpaceID())
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
