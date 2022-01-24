@@ -22,7 +22,6 @@ provider "octopusdeploy" {
   address       = "https://octopus-cloud-or-server-uri"
   api_key       = "octous_deploy_api_key"
   space_id      = "..."
-  space_name    = "..."
 }
 ```
 
@@ -34,6 +33,5 @@ provider "octopusdeploy" {
 
 ### Optional
 * `space_id` (String) The ID of the space to create the resources in.
-* `space_name` (String) The name of the space to create the resources in.
 
-**If `space_id` and `space_name` is not specified the default space will be used.**
+**If `space_id` is not specified the default space will be used.**
