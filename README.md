@@ -16,16 +16,20 @@ terraform {
   }
 }
 
+data "octopusdeploy_space" "space" {
+  provider = octopusdeploy.unscoped
+  name     = "Development Team"
+}
+
 provider "octopusdeploy" {
   # configuration options
-  address    = "https://octopus.example.com" # (required; string) the service endpoint of the Octopus REST API
-  api_key    = "API-XXXXXXXXXXXXX"           # (required; string) the API key to use with the Octopus REST API
-  space_id   = "Spaces-321"                  # (optional; string) the space ID in Octopus Deploy
-  space_name = "Development Team"            # (optional; string) the space name in Octopus Deploy
+  address    = "https://octopus.example.com"     # (required; string) the service endpoint of the Octopus REST API
+  api_key    = "API-XXXXXXXXXXXXX"               # (required; string) the API key to use with the Octopus REST API
+  space_id   = data.octopusdeploy_space.space.id # (optional; string) the space ID in Octopus Deploy
 }
 ```
 
-If neither `space_id` or `space_name` is specified, the Terraform Provider for Octopus Deploy will assume the default space.
+If `space_id` is not specified the Terraform Provider for Octopus Deploy will assume the default space.
 
 ### Environment Variables
 

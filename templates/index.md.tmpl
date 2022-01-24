@@ -42,10 +42,20 @@ provider "octopusdeploy" {
 Scoping the provider by the name of a space is done as follows:
 
 ```terraform
-provider "octopusdeploy" {
+provider "octopusdeploy" "unscoped" {
   address    = "https://octopus.example.com"
   api_key    = "API-XXXXXXXXXXXXX"
-  space_name = "Support" # the name of the space
+}
+
+data "octopusdeploy_space" "support" {
+  provider = octopusdeploy.unscoped
+  name     = "Support"
+}
+
+provider "octopusdeploy" {
+  address  = "https://octopus.example.com"
+  api_key  = "API-XXXXXXXXXXXXX"
+  space_id = data.octopusdeploy_space.support.id
 }
 ```
 
@@ -56,23 +66,33 @@ provider "octopusdeploy" {
 To manage resources in multiple spaces you can use multiple instances of the provider with [aliases](https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances) like so:
 
 ```terraform
-provider "octopusdeploy" {
+provider "octopusdeploy" "unscoped" {
   address = "https://octopus.example.com"
   api_key = "API-XXXXXXXXXXXXX"
 }
 
-provider "octopusdeploy" {
-  alias      = "space_support"
-  address    = "https://octopus.example.com"
-  api_key    = "API-XXXXXXXXXXXXX"
-  space_name = "Support" # The name of the space
+data "octopusdeploy_space" "support" {
+  provider = octopusdeploy.unscoped
+  name     = "Support"
 }
 
 provider "octopusdeploy" {
-  alias      = "space_product_development"
-  address    = "https://octopus.example.com"
-  api_key    = "API-XXXXXXXXXXXXX"
-  space_name = "Product Development" # The name of another space
+  alias    = "space_support"
+  address  = "https://octopus.example.com"
+  api_key  = "API-XXXXXXXXXXXXX"
+  space_id = data.octopusdeploy_space.support.id
+}
+
+data "octopusdeploy_space" "dev" {
+  provider = octopusdeploy.unscoped
+  name     = "Product Development"
+}
+
+provider "octopusdeploy" {
+  alias    = "space_product_development"
+  address  = "https://octopus.example.com"
+  api_key  = "API-XXXXXXXXXXXXX"
+  space_id = data.octopusdeploy_space.dev.id
 }
 
 /*
