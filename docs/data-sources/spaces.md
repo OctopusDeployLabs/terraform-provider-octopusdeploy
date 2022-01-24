@@ -28,7 +28,6 @@ data "octopusdeploy_spaces" "spaces" {
 ### Optional
 
 - **ids** (List of String) A filter to search by a list of IDs.
-- **name** (String) A filter to search by name.
 - **partial_name** (String) A filter to search by the partial match of a name.
 - **skip** (Number) A filter to specify the number of items to skip in the response.
 - **take** (Number) A filter to specify the number of items to take (or return) in the response.
