@@ -68,10 +68,12 @@ func flattenSpace(space *octopusdeploy.Space) map[string]interface{} {
 }
 
 func getSpaceDataSourceSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"id":   getDataSchemaID(),
-		"name": getNameSchema(true),
-	}
+	dataSchema := getSpaceSchema()
+	setDataSchema(&dataSchema)
+
+	dataSchema["name"] = getNameSchema(true)
+
+	return dataSchema
 }
 
 func getSpacesDataSourceSchema() map[string]*schema.Schema {
