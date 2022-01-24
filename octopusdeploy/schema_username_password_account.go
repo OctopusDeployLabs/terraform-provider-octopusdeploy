@@ -8,40 +8,39 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandUsernamePasswordAccount(d *schema.ResourceData) *octopusdeploy.UsernamePasswordAccount {
+func expandUsernamePasswordAccount(d *schema.ResourceData) octopusdeploy.IUsernamePasswordAccount {
 	name := d.Get("name").(string)
 
 	account, _ := octopusdeploy.NewUsernamePasswordAccount(name)
-	account.ID = d.Id()
-
-	account.Password = octopusdeploy.NewSensitiveValue(d.Get("password").(string))
+	account.SetID(d.Id())
+	account.SetPassword(octopusdeploy.NewSensitiveValue(d.Get("password").(string)))
 
 	if v, ok := d.GetOk("description"); ok {
-		account.Description = v.(string)
+		account.SetDescription(v.(string))
 	}
 
 	if v, ok := d.GetOk("environments"); ok {
-		account.EnvironmentIDs = getSliceFromTerraformTypeList(v)
+		account.SetEnvironmentIDs(getSliceFromTerraformTypeList(v))
 	}
 
 	if v, ok := d.GetOk("space_id"); ok {
-		account.SpaceID = v.(string)
+		account.SetSpaceID(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		account.SetTenantedDeploymentMode(octopusdeploy.TenantedDeploymentMode(v.(string)))
 	}
 
 	if v, ok := d.GetOk("tenants"); ok {
-		account.TenantIDs = getSliceFromTerraformTypeList(v)
+		account.SetTenantIDs(getSliceFromTerraformTypeList(v))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
-		account.TenantTags = getSliceFromTerraformTypeList(v)
+		account.SetTenantTags(getSliceFromTerraformTypeList(v))
 	}
 
 	if v, ok := d.GetOk("username"); ok {
-		account.Username = v.(string)
+		account.SetUsername(v.(string))
 	}
 
 	return account
@@ -76,7 +75,7 @@ func setUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData, acc
 
 func getUsernamePasswordAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description":                       getDescriptionSchema(),
+		"description":                       getDescriptionSchema("username/password account"),
 		"environments":                      getEnvironmentsSchema(),
 		"id":                                getIDSchema(),
 		"name":                              getNameSchema(true),
