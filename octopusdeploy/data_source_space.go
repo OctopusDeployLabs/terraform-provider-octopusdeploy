@@ -21,10 +21,10 @@ func dataSourceSpaceRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 	client := m.(*octopusdeploy.Client)
 
-	space_name := d.Get("name").(string)
-	space, err := client.Spaces.GetByName(space_name)
+	spaceName := d.Get("name").(string)
+	space, err := client.Spaces.GetByName(spaceName)
 	if err != nil {
-		return diag.Errorf("Unable to find space with name '%s'", space_name)
+		return diag.Errorf("Unable to find space with name '%s'", spaceName)
 	}
 	log.Printf("[INFO] Found space with name '%s', with ID '%s'", space.Name, space.ID)
 
