@@ -67,24 +67,32 @@ func flattenSpace(space *octopusdeploy.Space) map[string]interface{} {
 	}
 }
 
-func getSpaceDataSchema() map[string]*schema.Schema {
+func getSpaceDataSourceSchema() map[string]*schema.Schema {
+	dataSchema := getSpaceSchema()
+	setDataSchema(&dataSchema)
+
+	return map[string]*schema.Schema{
+		"id":   getDataSchemaID(),
+		"name": getNameSchema(true),
+	}
+}
+
+func getSpacesDataSourceSchema() map[string]*schema.Schema {
 	dataSchema := getSpaceSchema()
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
 		"id":           getDataSchemaID(),
-		"name":         withConflictsWith(getQueryName(), []string{"id", "ids", "partial_name", "skip", "take"}),
-		"ids":          withConflictsWith(getQueryIDs(), []string{"name"}),
-		"partial_name": withConflictsWith(getQueryPartialName(), []string{"name"}),
-		"skip":         withConflictsWith(getQuerySkip(), []string{"name"}),
-		"take":         withConflictsWith(getQueryTake(), []string{"name"}),
+		"ids":          getQueryIDs(),
+		"partial_name": getQueryPartialName(),
+		"skip":         getQuerySkip(),
+		"take":         getQueryTake(),
 		"spaces": {
-			Computed:      true,
-			Description:   "A list of spaces that match the filter(s).",
-			Elem:          &schema.Resource{Schema: dataSchema},
-			Optional:      true,
-			Type:          schema.TypeList,
-			ConflictsWith: []string{"name"},
+			Computed:    true,
+			Description: "A list of spaces that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 	}
 }

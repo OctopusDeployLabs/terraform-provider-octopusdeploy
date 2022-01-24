@@ -33,6 +33,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_project_groups":                                  dataSourceProjectGroups(),
 			"octopusdeploy_projects":                                        dataSourceProjects(),
 			"octopusdeploy_script_modules":                                  dataSourceScriptModules(),
+			"octopusdeploy_space":                                           dataSourceSpace(),
 			"octopusdeploy_spaces":                                          dataSourceSpaces(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
 			"octopusdeploy_tag_sets":                                        dataSourceTagSets(),

@@ -213,11 +213,6 @@ func getQueryOrderBy() *schema.Schema {
 	}
 }
 
-func withConflictsWith(m *schema.Schema, conflictsWith []string) *schema.Schema {
-	m.ConflictsWith = conflictsWith
-	return m
-}
-
 func getQueryPartialName() *schema.Schema {
 	return &schema.Schema{
 		Description: "A filter to search by the partial match of a name.",
