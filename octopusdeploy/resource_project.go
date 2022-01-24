@@ -39,6 +39,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 			log.Printf("[INFO] converting project to use VCS (%s)", d.Id())
 			vcsProject, err := client.Projects.ConvertToVcs(createdProject, versionControlSettings)
 			if err != nil {
+				client.Projects.DeleteByID(createdProject.GetID())
 				return diag.FromErr(err)
 			}
 			createdProject.PersistenceSettings = vcsProject.PersistenceSettings
