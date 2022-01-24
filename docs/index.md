@@ -109,4 +109,3 @@ resource "octopusdeploy_environment" "Env3" {
 - **address** (String) The endpoint of the Octopus REST API
 - **api_key** (String) The API key to use with the Octopus REST API
 - **space_id** (String) The space ID to target
-- **space_name** (String) The space name to target
