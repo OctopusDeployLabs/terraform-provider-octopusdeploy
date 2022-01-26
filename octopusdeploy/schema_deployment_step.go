@@ -76,6 +76,13 @@ func expandDeploymentStep(flattenedStep map[string]interface{}) *octopusdeploy.D
 		}
 	}
 
+	if v, ok := flattenedStep["destroy_terraform_template_action"]; ok {
+		for _, tfAction := range v.([]interface{}) {
+			action := expandDestroyTerraformTemplateAction(tfAction.(map[string]interface{}))
+			step.Actions = append(step.Actions, *action)
+		}
+	}
+
 	if v, ok := flattenedStep["run_script_action"]; ok {
 		for _, tfAction := range v.([]interface{}) {
 			action := expandRunScriptAction(tfAction.(map[string]interface{}))
@@ -138,8 +145,10 @@ func flattenDeploymentSteps(deploymentSteps []octopusdeploy.DeploymentStep) []ma
 				flattenedDeploymentSteps[key]["run_script_action"] = []interface{}{flattenRunScriptAction(&deploymentStep.Actions[i])}
 			case "Octopus.TentaclePackage":
 				flattenedDeploymentSteps[key]["deploy_package_action"] = []interface{}{flattenDeployPackageAction(&deploymentStep.Actions[i])}
-			case "Octopus.TerraformApply":
-				flattenedDeploymentSteps[key]["apply_terraform_template_action"] = []interface{}{flattenApplyTerraformTemplateAction(&deploymentStep.Actions[i])}
+			case "Octopus.TerraformApply", "Octopus.TerraformPlan":
+				flattenedDeploymentSteps[key]["apply_terraform_template_action"] = []interface{}{flattenTerraformTemplateAction(&deploymentStep.Actions[i])}
+			case "Octopus.TerraformDestroy", "Octopus.TerraformPlanDestroy":
+				flattenedDeploymentSteps[key]["destroy_terraform_template_action"] = []interface{}{flattenTerraformTemplateAction(&deploymentStep.Actions[i])}
 			case "Octopus.WindowsService":
 				flattenedDeploymentSteps[key]["deploy_windows_service_action"] = []interface{}{flattenDeployWindowsServiceAction(&deploymentStep.Actions[i])}
 			default:
@@ -156,7 +165,7 @@ func getDeploymentStepSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"action":                          getDeploymentActionSchema(),
-				"apply_terraform_template_action": getApplyTerraformTemplateActionSchema(),
+				"apply_terraform_template_action": getTerraformTemplateActionSchema(),
 				"condition": {
 					Default:     "Success",
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
@@ -175,12 +184,13 @@ func getDeploymentStepSchema() *schema.Schema {
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
-				"deploy_kubernetes_secret_action": getDeployKubernetesSecretActionSchema(),
-				"deploy_package_action":           getDeployPackageActionSchema(),
-				"deploy_windows_service_action":   getDeployWindowsServiceActionSchema(),
-				"id":                              getIDSchema(),
-				"manual_intervention_action":      getManualInterventionActionSchema(),
-				"name":                            getNameSchema(true),
+				"deploy_kubernetes_secret_action":   getDeployKubernetesSecretActionSchema(),
+				"deploy_package_action":             getDeployPackageActionSchema(),
+				"deploy_windows_service_action":     getDeployWindowsServiceActionSchema(),
+				"destroy_terraform_template_action": getTerraformTemplateActionSchema(),
+				"id":                                getIDSchema(),
+				"manual_intervention_action":        getManualInterventionActionSchema(),
+				"name":                              getNameSchema(true),
 				"package_requirement": {
 					Default:     "LetOctopusDecide",
 					Description: "Whether to run this step before or after package acquisition (if possible)",

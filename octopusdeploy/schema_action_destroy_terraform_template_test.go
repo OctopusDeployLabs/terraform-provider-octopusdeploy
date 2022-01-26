@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
+func TestAccOctopusDeployDestroyTerraformAction(t *testing.T) {
 	allowPluginDownloads := acctest.RandIntRange(0, 2) == 0
 	applyParameters := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	initParameters := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -46,17 +46,17 @@ func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckApplyTerraformAction(name, runOnServer, isPlan, scriptSource, allowPluginDownloads, applyParameters, initParameters, pluginCacheDirectory, workspace, source, parameters),
+					testAccCheckDestroyTerraformAction(name, runOnServer, isPlan, scriptSource, allowPluginDownloads, applyParameters, initParameters, pluginCacheDirectory, workspace, source, parameters),
 				),
-				Config: testAccApplyTerraformAction(name, runOnServer, isPlan, scriptSource, allowPluginDownloads, applyParameters, initParameters, pluginCacheDirectory, workspace, source, parameters),
+				Config: testAccDestroyTerraformAction(name, runOnServer, isPlan, scriptSource, allowPluginDownloads, applyParameters, initParameters, pluginCacheDirectory, workspace, source, parameters),
 			},
 		},
 	})
 }
 
-func testAccApplyTerraformAction(name string, runOnServer bool, isPlan bool, templateSource string, allowPluginDownloads bool, applyParameters string, initParameters string, pluginCacheDirectory string, workspace string, template string, templateParameters string) string {
+func testAccDestroyTerraformAction(name string, runOnServer bool, isPlan bool, templateSource string, allowPluginDownloads bool, applyParameters string, initParameters string, pluginCacheDirectory string, workspace string, template string, templateParameters string) string {
 	return testAccBuildTestAction(fmt.Sprintf(`
-		apply_terraform_template_action {
+		destroy_terraform_template_action {
 			name          = "%s"
 			run_on_server = %v
 			is_plan       = %v
@@ -100,7 +100,7 @@ func testAccApplyTerraformAction(name string, runOnServer bool, isPlan bool, tem
     }`, name, runOnServer, isPlan, allowPluginDownloads, applyParameters, initParameters, pluginCacheDirectory, workspace))
 }
 
-func testAccCheckApplyTerraformAction(name string, runOnServer bool, isPlan bool, scriptSource string, allowPluginDownloads bool, applyParameters string, initParameters string, pluginCacheDirectory string, workspace string, source string, parameters string) resource.TestCheckFunc {
+func testAccCheckDestroyTerraformAction(name string, runOnServer bool, isPlan bool, scriptSource string, allowPluginDownloads bool, applyParameters string, initParameters string, pluginCacheDirectory string, workspace string, source string, parameters string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*octopusdeploy.Client)
 
@@ -111,11 +111,11 @@ func testAccCheckApplyTerraformAction(name string, runOnServer bool, isPlan bool
 
 		action := process.Steps[0].Actions[0]
 
-		if !isPlan && action.ActionType != "Octopus.TerraformApply" {
+		if !isPlan && action.ActionType != "Octopus.TerraformDestroy" {
 			return fmt.Errorf("Action type is incorrect: %s, isPlan: %s", action.ActionType, strconv.FormatBool(isPlan))
 		}
 
-		if isPlan && action.ActionType != "Octopus.TerraformPlan" {
+		if isPlan && action.ActionType != "Octopus.TerraformPlanDestroy" {
 			return fmt.Errorf("Action type is incorrect: %s, isPlan: %s", action.ActionType, strconv.FormatBool(isPlan))
 		}
 
