@@ -410,6 +410,7 @@ func getVariableTypeSchema() *schema.Schema {
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"AmazonWebServicesAccount",
 			"AzureAccount",
+			"GoogleCloudAccount",
 			"Certificate",
 			"Sensitive",
 			"String",

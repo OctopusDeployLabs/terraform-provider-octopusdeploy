@@ -91,6 +91,16 @@ func testAccApplyTerraformAction(name string, runOnServer bool, templateSource s
 				variable = "qwe"
 			}
 
+			google_account {
+				variable = "boo"
+				use_vm_service_account = true
+				project = "projectboo"
+				region = "regionboo"
+				zone = "zoneboo"
+				service_account_emails = "my@octopus.com"
+				impersonate_service_account = true
+			}
+
 			primary_package {
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
