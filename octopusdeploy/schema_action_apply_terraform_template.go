@@ -108,7 +108,7 @@ func addTerraformTemplateAzureAccountSchema(element *schema.Resource) {
 }
 
 func addTerraformTemplateGoogleAccountSchema(element *schema.Resource) {
-	element.Schema["google_account"] = &schema.Schema{
+	element.Schema["google_cloud_account"] = &schema.Schema{
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"variable": {
@@ -316,7 +316,7 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 		}
 	}
 
-	if v, ok := flattenedAction["google_account"]; ok && len(v.(*schema.Set).List()) > 0 {
+	if v, ok := flattenedAction["google_cloud_account"]; ok && len(v.(*schema.Set).List()) > 0 {
 		action.Properties["Octopus.Action.Terraform.GoogleCloudAccount"] = octopusdeploy.NewPropertyValue("True", false)
 
 		googleAccount := v.(*schema.Set).List()[0].(map[string]interface{})
@@ -492,7 +492,7 @@ func flattenApplyTerraformTemplateAction(action *octopusdeploy.DeploymentAction)
 			}
 		case "Octopus.Action.Terraform.GoogleCloudAccount":
 			if v.Value == "True" {
-				flattenedAction["google_account"] = flattenTerraformTemplateGoogleAccount(action.Properties)
+				flattenedAction["google_cloud_account"] = flattenTerraformTemplateGoogleAccount(action.Properties)
 			}
 		case "Octopus.Action.Terraform.ManagedAccount":
 			if v.Value == "AWS" {

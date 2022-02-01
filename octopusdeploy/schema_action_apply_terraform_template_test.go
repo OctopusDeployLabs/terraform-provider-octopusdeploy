@@ -91,7 +91,7 @@ func testAccApplyTerraformAction(name string, runOnServer bool, templateSource s
 				variable = "qwe"
 			}
 
-			google_account {
+			google_cloud_account {
 				variable = "boo"
 				use_vm_service_account = true
 				project = "projectboo"
