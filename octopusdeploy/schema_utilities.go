@@ -404,7 +404,7 @@ func getUsernameSchema(isRequired bool) *schema.Schema {
 
 func getVariableTypeSchema() *schema.Schema {
 	return &schema.Schema{
-		Description: "The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.",
+		Description: "The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.",
 		Required:    true,
 		Type:        schema.TypeString,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
