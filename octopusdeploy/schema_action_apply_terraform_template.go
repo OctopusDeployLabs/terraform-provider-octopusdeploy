@@ -107,6 +107,52 @@ func addTerraformTemplateAzureAccountSchema(element *schema.Resource) {
 	}
 }
 
+func addTerraformTemplateGoogleAccountSchema(element *schema.Resource) {
+	element.Schema["google_cloud_account"] = &schema.Schema{
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"variable": {
+					Optional: true,
+					Type:     schema.TypeString,
+				},
+				"use_vm_service_account": {
+					Optional:    true,
+					Description: "When running in a Compute Engine virtual machine, use the associated VM service account",
+					Type:        schema.TypeBool,
+				},
+				"project": {
+					Optional:    true,
+					Description: "This sets GOOGLE_PROJECT environment variable",
+					Type:        schema.TypeString,
+				},
+				"region": {
+					Optional:    true,
+					Description: "This sets GOOGLE_REGION environment variable",
+					Type:        schema.TypeString,
+				},
+				"zone": {
+					Optional:    true,
+					Description: "This sets GOOGLE_ZONE environment variable",
+					Type:        schema.TypeString,
+				},
+				"service_account_emails": {
+					Optional:    true,
+					Description: "This sets GOOGLE_IMPERSONATE_SERVICE_ACCOUNT environment variable",
+					Type:        schema.TypeString,
+				},
+				"impersonate_service_account": {
+					Optional:    true,
+					Description: "Impersonate service accounts",
+					Type:        schema.TypeBool,
+				},
+			},
+		},
+		MaxItems: 1,
+		Optional: true,
+		Type:     schema.TypeSet,
+	}
+}
+
 func addTerraformTemplateParametersSchema(element *schema.Resource) {
 	element.Schema["template_parameters"] = &schema.Schema{
 		Optional: true,
@@ -276,6 +322,40 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 		}
 	}
 
+	if v, ok := flattenedAction["google_cloud_account"]; ok && len(v.(*schema.Set).List()) > 0 {
+		action.Properties["Octopus.Action.Terraform.GoogleCloudAccount"] = octopusdeploy.NewPropertyValue("True", false)
+
+		googleAccount := v.(*schema.Set).List()[0].(map[string]interface{})
+
+		if v, ok := googleAccount["variable"]; ok {
+			action.Properties["Octopus.Action.GoogleCloudAccount.Variable"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		}
+
+		if v, ok := googleAccount["use_vm_service_account"]; ok {
+			action.Properties["Octopus.Action.GoogleCloud.UseVMServiceAccount"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(v.(bool))), false)
+		}
+
+		if v, ok := googleAccount["impersonate_service_account"]; ok {
+			action.Properties["Octopus.Action.GoogleCloud.ImpersonateServiceAccount"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(v.(bool))), false)
+		}
+
+		if v, ok := googleAccount["service_account_emails"]; ok {
+			action.Properties["Octopus.Action.GoogleCloud.ServiceAccountEmails"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		}
+
+		if v, ok := googleAccount["zone"]; ok {
+			action.Properties["Octopus.Action.GoogleCloud.Zone"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		}
+
+		if v, ok := googleAccount["region"]; ok {
+			action.Properties["Octopus.Action.GoogleCloud.Region"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		}
+
+		if v, ok := googleAccount["project"]; ok {
+			action.Properties["Octopus.Action.GoogleCloud.Project"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		}
+	}
+
 	return action
 }
 
@@ -299,6 +379,37 @@ func flattenTerraformTemplateAdvancedOptions(properties map[string]octopusdeploy
 			flattenedMap["plugin_cache_directory"] = v.Value
 		case "Octopus.Action.Terraform.Workspace":
 			flattenedMap["workspace"] = v.Value
+		}
+	}
+
+	return []interface{}{flattenedMap}
+}
+
+func flattenTerraformTemplateGoogleAccount(properties map[string]octopusdeploy.PropertyValue) []interface{} {
+	if len(properties) == 0 {
+		return nil
+	}
+
+	flattenedMap := map[string]interface{}{}
+
+	for k, v := range properties {
+		switch k {
+		case "Octopus.Action.GoogleCloudAccount.Variable":
+			flattenedMap["variable"] = v.Value
+		case "Octopus.Action.GoogleCloud.ServiceAccountEmails":
+			flattenedMap["service_account_emails"] = v.Value
+		case "Octopus.Action.GoogleCloud.Project":
+			flattenedMap["project"] = v.Value
+		case "Octopus.Action.GoogleCloud.Zone":
+			flattenedMap["zone"] = v.Value
+		case "Octopus.Action.GoogleCloud.Region":
+			flattenedMap["region"] = v.Value
+		case "Octopus.Action.GoogleCloud.UseVMServiceAccount":
+			useVMServiceAccount, _ := strconv.ParseBool(v.Value)
+			flattenedMap["use_vm_service_account"] = useVMServiceAccount
+		case "Octopus.Action.GoogleCloud.ImpersonateServiceAccount":
+			impersonateServiceAccount, _ := strconv.ParseBool(v.Value)
+			flattenedMap["impersonate_service_account"] = impersonateServiceAccount
 		}
 	}
 
@@ -385,6 +496,10 @@ func flattenApplyTerraformTemplateAction(action *octopusdeploy.DeploymentAction)
 			if v.Value == "True" {
 				flattenedAction["azure_account"] = flattenTerraformTemplateAzureAccount(action.Properties)
 			}
+		case "Octopus.Action.Terraform.GoogleCloudAccount":
+			if v.Value == "True" {
+				flattenedAction["google_cloud_account"] = flattenTerraformTemplateGoogleAccount(action.Properties)
+			}
 		case "Octopus.Action.Terraform.ManagedAccount":
 			if v.Value == "AWS" {
 				flattenedAction["aws_account"] = flattenTerraformTemplateAwsAccount(action.Properties)
@@ -407,6 +522,7 @@ func getApplyTerraformTemplateActionSchema() *schema.Schema {
 	addTerraformTemplateAdvancedOptionsSchema(element)
 	addTerraformTemplateAwsAccountSchema(element)
 	addTerraformTemplateAzureAccountSchema(element)
+	addTerraformTemplateGoogleAccountSchema(element)
 	addTerraformTemplateParametersSchema(element)
 	addTerraformTemplateSchema(element)
 	addPrimaryPackageSchema(element, false)

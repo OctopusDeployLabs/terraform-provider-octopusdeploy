@@ -21,6 +21,9 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 	value := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	variableType := "String"
 
+	accountVariableType := "GoogleCloudAccount"
+	accountValue := "octopusdeploy_gcp_account." + localName + ".id"
+
 	channelLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	channelName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -39,7 +42,7 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testOctopusDeployVariableExists(prefix),
+					testOctopusDeployVariableExists(),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttrSet(prefix, "owner_id"),
@@ -53,7 +56,7 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testOctopusDeployVariableExists(prefix),
+					testOctopusDeployVariableExists(),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttrSet(prefix, "owner_id"),
@@ -65,11 +68,24 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 				),
 				Config: testVariableBasic(environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, channelLocalName, channelName, localName, name, description, isSensitive, newValue, variableType),
 			},
-			// {
-			// 	ResourceName:      prefix,
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testOctopusDeployVariableExists(),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttrSet(prefix, "owner_id"),
+					resource.TestCheckResourceAttr(prefix, "type", accountVariableType),
+					resource.TestCheckResourceAttr(prefix, "value", accountValue),
+					resource.TestCheckResourceAttr(prefix, "scope.#", "1"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.%", "6"),
+					resource.TestCheckResourceAttr(prefix, "scope.0.environments.#", "1"),
+				),
+				Config: fmt.Sprintf(`%s
+
+%s`,
+					testGcpAccount(localName, name, acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)),
+					testVariableBasic(environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, channelLocalName, channelName, localName, name, description, isSensitive, accountValue, accountVariableType)),
+			},
 		},
 	})
 }
@@ -84,10 +100,11 @@ func TestAccOctopusDeployVariableSchemaValidation(t *testing.T) {
 		CheckDestroy: testVariableDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
+
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testOctopusDeployVariableExists(prefix),
+					testOctopusDeployVariableExists(),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
 				Config: testAccVariableSchemaValidation(localName, name, projectID),
@@ -99,28 +116,15 @@ func TestAccOctopusDeployVariableSchemaValidation(t *testing.T) {
 func testVariableBasic(environmentLocalName string,
 	environmentName string,
 	lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, channelLocalName string, channelName string, localName string, name string, description string, isSensitive bool, value string, variableType string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
-	      name = "%s"
-		}
+	return fmt.Sprintf(`%s
 
-		resource "octopusdeploy_lifecycle" "%s" {
-		  name = "%s"
-		}
+		%s
 
-		resource "octopusdeploy_project_group" "%s" {
-		  name = "%s"
-		}
+		%s
 
-		resource "octopusdeploy_project" "%s" {
-		  lifecycle_id     = octopusdeploy_lifecycle.%s.id
-		  name             = "%s"
-		  project_group_id = octopusdeploy_project_group.%s.id
-		}
+		%s
 
-		resource "octopusdeploy_channel" "%s" {
-		  name       = "%s"
-		  project_id = octopusdeploy_project.%s.id
-		}
+		%s
 
 		resource "octopusdeploy_variable" "%s" {
 		  description  = "%s"
@@ -133,22 +137,14 @@ func testVariableBasic(environmentLocalName string,
 		  scope {
 			channels     = [octopusdeploy_channel.%s.id]
 		    environments = [octopusdeploy_environment.%s.id]
-			tenant_tags  = ["Tenants-5241"]
+			tenant_tags  = []
 		  }
 		}`,
-		environmentLocalName,
-		environmentName,
-		lifecycleLocalName,
-		lifecycleName,
-		projectGroupLocalName,
-		projectGroupName,
-		projectLocalName,
-		lifecycleLocalName,
-		projectName,
-		projectGroupLocalName,
-		channelLocalName,
-		channelName,
-		projectLocalName,
+		createEnvironment(environmentLocalName, environmentName),
+		createLifecycle(lifecycleLocalName, lifecycleName),
+		createProjectGroup(projectGroupLocalName, projectGroupName),
+		createProject(projectLocalName, projectName, lifecycleLocalName, projectGroupLocalName),
+		createChannel(channelLocalName, channelName, projectLocalName),
 		localName,
 		description,
 		isSensitive,
@@ -161,6 +157,40 @@ func testVariableBasic(environmentLocalName string,
 	)
 }
 
+func createEnvironment(localName, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
+		name = "%s"
+	}`, localName, name)
+}
+
+func createLifecycle(localName, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
+		name = "%s"
+	}`, localName, name)
+}
+
+func createProjectGroup(localName, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project_group" "%s" {
+		name = "%s"
+	}`, localName, name)
+}
+
+func createProject(localName, name, lifecycleLocal, projectGroupLocal string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
+		name             = "%s"
+		lifecycle_id     = octopusdeploy_lifecycle.%s.id
+		project_group_id = octopusdeploy_project_group.%s.id
+		space_id 		 = "Spaces-1"
+	}`, localName, name, lifecycleLocal, projectGroupLocal)
+}
+
+func createChannel(localName, name, projectLocal string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_channel" "%s" {
+		name = "%s"
+		project_id = octopusdeploy_project.%s.id
+	}`, localName, name, projectLocal)
+}
+
 func testAccVariableSchemaValidation(localName string, name string, projectID string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_variable" "%s" {
 		name       = "%s"
@@ -170,7 +200,7 @@ func testAccVariableSchemaValidation(localName string, name string, projectID st
 	  }`, localName, name, projectID)
 }
 
-func testOctopusDeployVariableExists(n string) resource.TestCheckFunc {
+func testOctopusDeployVariableExists() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		var ownerID string
 		var variableID string
