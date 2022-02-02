@@ -116,28 +116,34 @@ func addTerraformTemplateGoogleAccountSchema(element *schema.Resource) {
 					Type:     schema.TypeString,
 				},
 				"use_vm_service_account": {
-					Optional: true,
-					Type:     schema.TypeBool,
+					Optional:    true,
+					Description: "When running in a Compute Engine virtual machine, use the associated VM service account",
+					Type:        schema.TypeBool,
 				},
 				"project": {
-					Optional: true,
-					Type:     schema.TypeString,
+					Optional:    true,
+					Description: "This sets GOOGLE_PROJECT environment variable",
+					Type:        schema.TypeString,
 				},
 				"region": {
-					Optional: true,
-					Type:     schema.TypeString,
+					Optional:    true,
+					Description: "This sets GOOGLE_REGION environment variable",
+					Type:        schema.TypeString,
 				},
 				"zone": {
-					Optional: true,
-					Type:     schema.TypeString,
+					Optional:    true,
+					Description: "This sets GOOGLE_ZONE environment variable",
+					Type:        schema.TypeString,
 				},
 				"service_account_emails": {
-					Optional: true,
-					Type:     schema.TypeString,
+					Optional:    true,
+					Description: "This sets GOOGLE_IMPERSONATE_SERVICE_ACCOUNT environment variable",
+					Type:        schema.TypeString,
 				},
 				"impersonate_service_account": {
-					Optional: true,
-					Type:     schema.TypeBool,
+					Optional:    true,
+					Description: "Impersonate service accounts",
+					Type:        schema.TypeBool,
 				},
 			},
 		},
@@ -399,8 +405,8 @@ func flattenTerraformTemplateGoogleAccount(properties map[string]octopusdeploy.P
 		case "Octopus.Action.GoogleCloud.Region":
 			flattenedMap["region"] = v.Value
 		case "Octopus.Action.GoogleCloud.UseVMServiceAccount":
-			useVmServiceAccount, _ := strconv.ParseBool(v.Value)
-			flattenedMap["use_vm_service_account"] = useVmServiceAccount
+			useVMServiceAccount, _ := strconv.ParseBool(v.Value)
+			flattenedMap["use_vm_service_account"] = useVMServiceAccount
 		case "Octopus.Action.GoogleCloud.ImpersonateServiceAccount":
 			impersonateServiceAccount, _ := strconv.ParseBool(v.Value)
 			flattenedMap["impersonate_service_account"] = impersonateServiceAccount
