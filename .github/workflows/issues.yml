@@ -9,4 +9,4 @@ jobs:
     steps:
       - name: Create Story in Shortcut
         run: |
-          curl -X POST -H "Content-Type: application/json" -H "Shortcut-Token: ${{ secrets.SHORTCUT_API_TOKEN }}" -d '{ "name": "#${{ github.event.issue.number }} ${{ github.event.issue.title }}", "project_id": "${{ secrets.SHORTCUT_PROJECT_ID }}" }' -L "https://api.app.shortcut.com/api/v3/stories"
+          curl -X POST -H "Content-Type: application/json" -H "Shortcut-Token: ${{ secrets.SHORTCUT_API_TOKEN }}" -d '{ "name": "${{ github.event.issue.title }}", "project_id": "${{ secrets.SHORTCUT_PROJECT_ID }}" }' -L "https://api.app.shortcut.com/api/v3/stories"
