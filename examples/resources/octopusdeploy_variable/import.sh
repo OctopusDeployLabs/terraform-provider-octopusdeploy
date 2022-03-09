@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_variable.<name> <variable-id>
