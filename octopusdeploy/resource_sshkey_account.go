@@ -24,7 +24,7 @@ func resourceSSHKeyAccount() *schema.Resource {
 func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account := expandSSHKeyAccount(d)
 
-	log.Printf("[INFO] creating SSH key account: %#v", account)
+	log.Printf("[INFO] creating SSH key account")
 
 	client := m.(*octopusdeploy.Client)
 	createdAccount, err := client.Accounts.Add(account)
