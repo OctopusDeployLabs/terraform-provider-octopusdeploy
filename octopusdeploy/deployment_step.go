@@ -97,7 +97,7 @@ func buildDeploymentStepResource(tfStep map[string]interface{}) octopusdeploy.De
 
 	conditionExpression := tfStep["condition_expression"]
 	if conditionExpression != nil {
-		step.Properties["Octopus.Action.ConditionVariableExpression"] = conditionExpression.(string)
+		step.Properties["Octopus.Step.ConditionVariableExpression"] = conditionExpression.(string)
 	}
 
 	windowSize := tfStep["window_size"]
