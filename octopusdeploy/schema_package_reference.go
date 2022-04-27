@@ -52,8 +52,12 @@ func flattenPackageReference(packageReference *octopusdeploy.PackageReference) m
 		"properties":           packageReference.Properties,
 	}
 
-	if v, ok := packageReference.Properties["Extract"]; ok {
-		flattenedPackageReference["extract_during_deployment"] = v
+	// primary packages have no name and always extract during deployment; therefore, this
+	// condition (below) only applies to non-primary packages
+	if len(packageReference.Name) > 0 {
+		if v, ok := packageReference.Properties["Extract"]; ok {
+			flattenedPackageReference["extract_during_deployment"] = v
+		}
 	}
 
 	return flattenedPackageReference
