@@ -12,6 +12,7 @@ import (
 
 func TestAccDeploymentProcessWithPackage(t *testing.T) {
 	actionName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	actionType := "Octopus.DeployTentaclePackage"
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -25,7 +26,6 @@ func TestAccDeploymentProcessWithPackage(t *testing.T) {
 	stepName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resourceName := "octopusdeploy_deployment_process." + localName
-	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccDeploymentProcessCheckDestroy,
@@ -35,16 +35,20 @@ func TestAccDeploymentProcessWithPackage(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccDeploymentProcessExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
+					resource.TestCheckResourceAttr(resourceName, "step.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.name", stepName),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.action_type", actionType),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.name", actionName),
 				),
-				Config: testAccDeploymentProcessWithPackage(localName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, stepName, actionName, packageName, packageID),
+				Config: testAccDeploymentProcessWithPackage(localName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, stepName, actionName, actionType, packageName, packageID),
 			},
 		},
 	})
 }
 
-func testAccDeploymentProcessWithPackage(localName string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, stepName string, actionName string, packageName string, packageID string) string {
+func testAccDeploymentProcessWithPackage(localName string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, stepName string, actionName string, actionType string, packageName string, packageID string) string {
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+`
 		resource "octopusdeploy_deployment_process" "%s" {
 			project_id = "${octopusdeploy_project.%s.id}"
@@ -53,8 +57,9 @@ func testAccDeploymentProcessWithPackage(localName string, lifecycleLocalName st
 				name         = "%s"
 				target_roles = ["Foo"]
 
-				deploy_tentacle_package_action {
-					name         = "%s"
+				action {
+					action_type = "%s"
+					name        = "%s"
 
 					package {
 						name       = "%s"
@@ -62,7 +67,7 @@ func testAccDeploymentProcessWithPackage(localName string, lifecycleLocalName st
 					}
 				}
 			}
-		}`, localName, projectLocalName, stepName, actionName, packageName, packageID)
+		}`, localName, projectLocalName, stepName, actionType, actionName, packageName, packageID)
 }
 
 func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
@@ -82,7 +87,8 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccDeploymentProcessExists(resourceName),
-					testAccCheckOctopusDeployDeploymentProcess(),
+					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
+					resource.TestCheckResourceAttr(resourceName, "step.#", "2"),
 				),
 				Config: testAccDeploymentProcessBasic(localName),
 			},
@@ -127,6 +133,42 @@ func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
 	})
 }
 
+func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	resourceName := "octopusdeploy_deployment_process." + localName
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccDeploymentProcessCheckDestroy,
+			testAccProjectCheckDestroy,
+			testAccProjectGroupCheckDestroy,
+			testAccLifecycleCheckDestroy,
+		),
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccDeploymentProcessExists(resourceName),
+					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
+					resource.TestCheckResourceAttr(resourceName, "step.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.condition", "Success"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.name", "Transfer DG Package"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.start_trigger", "StartAfterPrevious"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.action_type", "Octopus.TransferPackage"),
+					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.channels"),
+					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.container"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.condition", "Success"),
+					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.environments"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.run_on_server", "false"),
+				),
+				Config: testAccProcessWithImpliedPrimaryPackage(localName),
+			},
+		},
+	})
+}
+
 func testAccDeploymentProcessBasic(localName string) string {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -138,7 +180,6 @@ func testAccDeploymentProcessBasic(localName string) string {
 
 	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
 		`resource "octopusdeploy_deployment_process" "%s" {
-			branch     = "%s"
 			project_id = "${octopusdeploy_project.%s.id}"
 
 			step {
@@ -200,6 +241,59 @@ func testAccDeploymentProcessBasic(localName string) string {
 		}`, localName, projectLocalName)
 }
 
+func testAccProcessWithImpliedPrimaryPackage(localName string) string {
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	projectID := "octopusdeploy_project." + projectLocalName + ".id"
+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, name, description)+"\n"+
+		`resource "octopusdeploy_deployment_process" "%s" {
+			project_id = %s
+
+			step {
+				condition           = "Success"
+				name                = "Transfer DG Package"
+				package_requirement = "LetOctopusDecide"
+				start_trigger       = "StartAfterPrevious"
+				target_roles        = ["test-1"]
+				properties          = {
+					"Octopus.Action.TargetRoles": "test-1"
+				}
+
+				action {
+					action_type                        = "Octopus.TransferPackage"
+					can_be_used_for_project_versioning = true
+					condition                          = "Success"
+					is_disabled                        = false
+					is_required                        = false
+					name                               = "Test"
+
+					primary_package {
+						acquisition_location = "Server"
+						feed_id              = "feeds-builtin"
+						package_id           = "test-package"
+
+						properties = {
+							"SelectionMode" = "immediate"
+						}
+					}
+
+					properties = {
+							"Octopus.Action.Package.TransferPath" = "/var"
+							"Octopus.Action.Package.PackageId" = "test-package"
+							"Octopus.Action.Package.DownloadOnTentacle" = "False"
+					}
+				}
+			}
+  		}`, localName, projectID)
+}
+
 func testAccProcessWithActionTemplate(localName string) string {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -216,23 +310,23 @@ func testAccProcessWithActionTemplate(localName string) string {
 			project_id = %s
 
 			step {
-			  condition = "Success"
-			  name = "Terraform - PlanV2"
+			  condition     = "Success"
+			  name          = "Terraform - PlanV2"
 			  start_trigger = "StartAfterPrevious"
 
-			  action {
-			    action_type = "Octopus.Script"
+			  run_script_action {
 			    can_be_used_for_project_versioning = true
-				is_disabled = false
-				is_required = true
-				name = "AWS - Create a Security Group"
-				run_on_server = true
+				is_disabled                        = false
+				is_required                        = true
+				name                               = "AWS - Create a Security Group"
+				run_on_server                      = true
+				script_body                        = "// hello"
 
-				// template {
-				//   community_action_template_id = "CommunityActionTemplates-27"
-				//   id                           = "ActionTemplates-281"
-				//   version                      = 3
-				// }
+				template {
+				  community_action_template_id = "CommunityActionTemplates-27"
+				  id                           = "ActionTemplates-281"
+				  version                      = 3
+				}
 			  }
 			}
 		}`, localName, projectID)
