@@ -100,5 +100,5 @@ func setOfflinePackageDropDeploymentTarget(ctx context.Context, d *schema.Resour
 
 	d.Set("working_directory", endpointResource.WorkingDirectory)
 
-	return setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(d, deploymentTarget)
 }

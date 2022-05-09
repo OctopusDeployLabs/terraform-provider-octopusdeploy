@@ -118,5 +118,5 @@ func setSSHConnectionDeploymentTarget(ctx context.Context, d *schema.ResourceDat
 	d.Set("port", endpointResource.Port)
 	d.Set("proxy_id", endpointResource.ProxyID)
 
-	return setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(d, deploymentTarget)
 }

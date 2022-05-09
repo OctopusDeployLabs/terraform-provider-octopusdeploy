@@ -72,5 +72,5 @@ func setCloudRegionDeploymentTarget(ctx context.Context, d *schema.ResourceData,
 
 	d.Set("default_worker_pool_id", endpointResource.DefaultWorkerPoolID)
 
-	return setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(d, deploymentTarget)
 }

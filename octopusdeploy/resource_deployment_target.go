@@ -32,7 +32,7 @@ func resourceDeploymentTargetCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	setDeploymentTarget(ctx, d, createdDeploymentTarget)
+	setDeploymentTarget(d, createdDeploymentTarget)
 
 	log.Printf("[INFO] deployment target created (%s)", d.Id())
 	return nil
@@ -62,7 +62,7 @@ func resourceDeploymentTargetRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	setDeploymentTarget(ctx, d, deploymentTarget)
+	setDeploymentTarget(d, deploymentTarget)
 
 	log.Printf("[INFO] deployment target read (%s)", d.Id())
 	return nil
@@ -79,7 +79,7 @@ func resourceDeploymentTargetUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	setDeploymentTarget(ctx, d, updatedDeploymentTarget)
+	setDeploymentTarget(d, updatedDeploymentTarget)
 
 	log.Printf("[INFO] deployment target updated (%s)", d.Id())
 	return nil

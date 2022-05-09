@@ -1,37 +1,10 @@
 package octopusdeploy
 
 import (
-	"context"
-	"fmt"
-	"net/url"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
-
-func expandListeningTentacleDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
-	tentacleURL, _ := url.Parse(d.Get("tentacle_url").(string))
-	thumbprint := d.Get("thumbprint").(string)
-
-	endpoint := octopusdeploy.NewListeningTentacleEndpoint(tentacleURL, thumbprint)
-
-	if v, ok := d.GetOk("certificate_signature_algorithm"); ok {
-		endpoint.CertificateSignatureAlgorithm = v.(string)
-	}
-
-	if v, ok := d.GetOk("proxy_id"); ok {
-		endpoint.ProxyID = v.(string)
-	}
-
-	if v, ok := d.GetOk("tentacle_version_details"); ok {
-		endpoint.TentacleVersionDetails = expandTentacleVersionDetails(v)
-	}
-
-	deploymentTarget := expandDeploymentTarget(d)
-	deploymentTarget.Endpoint = endpoint
-	return deploymentTarget
-}
 
 func flattenListeningTentacleDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
@@ -48,28 +21,7 @@ func flattenListeningTentacleDeploymentTarget(deploymentTarget *octopusdeploy.De
 }
 
 func getListeningTentacleDeploymentTargetDataSchema() map[string]*schema.Schema {
-	dataSchema := getListeningTentacleDeploymentTargetSchema()
-	setDataSchema(&dataSchema)
-
-	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
-
-	deploymentTargetDataSchema["listening_tentacle_deployment_targets"] = &schema.Schema{
-		Computed:    true,
-		Description: "A list of listening tentacle deployment targets that match the filter(s).",
-		Elem:        &schema.Resource{Schema: dataSchema},
-		Optional:    true,
-		Type:        schema.TypeList,
-	}
-
-	delete(deploymentTargetDataSchema, "communication_styles")
-	delete(deploymentTargetDataSchema, "deployment_targets")
-	deploymentTargetDataSchema["id"] = getDataSchemaID()
-
-	return deploymentTargetDataSchema
-}
-
-func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
+	dataSchema := map[string]*schema.Schema{
 		"certificate_signature_algorithm": {
 			Computed: true,
 			Optional: true,
@@ -167,24 +119,24 @@ func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 			Description: "The URI of this deployment target.",
 			Optional:    true,
 			Type:        schema.TypeString,
-			// ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
 		},
 	}
-}
 
-func setListeningTentacleDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
-	if err != nil {
-		return err
+	setDataSchema(&dataSchema)
+
+	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
+
+	deploymentTargetDataSchema["listening_tentacle_deployment_targets"] = &schema.Schema{
+		Computed:    true,
+		Description: "A list of listening tentacle deployment targets that match the filter(s).",
+		Elem:        &schema.Resource{Schema: dataSchema},
+		Optional:    true,
+		Type:        schema.TypeList,
 	}
 
-	d.Set("certificate_signature_algorithm", endpointResource.CertificateSignatureAlgorithm)
-	d.Set("proxy_id", endpointResource.ProxyID)
-	d.Set("tentacle_url", endpointResource.URI.String())
+	delete(deploymentTargetDataSchema, "communication_styles")
+	delete(deploymentTargetDataSchema, "deployment_targets")
+	deploymentTargetDataSchema["id"] = getDataSchemaID()
 
-	if err := d.Set("tentacle_version_details", flattenTentacleVersionDetails(endpointResource.TentacleVersionDetails)); err != nil {
-		return fmt.Errorf("error setting tentacle_version_details: %s", err)
-	}
-
-	return setDeploymentTarget(ctx, d, deploymentTarget)
+	return deploymentTargetDataSchema
 }

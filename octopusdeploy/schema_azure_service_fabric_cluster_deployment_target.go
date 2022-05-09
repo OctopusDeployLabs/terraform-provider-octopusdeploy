@@ -176,5 +176,5 @@ func setAzureServiceFabricClusterDeploymentTarget(ctx context.Context, d *schema
 	d.Set("security_mode", endpointResource.SecurityMode)
 	d.Set("server_certificate_thumbprint", endpointResource.ServerCertificateThumbprint)
 
-	return setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(d, deploymentTarget)
 }

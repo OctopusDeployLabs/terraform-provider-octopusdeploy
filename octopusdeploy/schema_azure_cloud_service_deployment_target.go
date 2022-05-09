@@ -136,5 +136,5 @@ func setAzureCloudServiceDeploymentTarget(ctx context.Context, d *schema.Resourc
 	d.Set("swap_if_possible", endpointResource.SwapIfPossible)
 	d.Set("use_current_instance_count", endpointResource.UseCurrentInstanceCount)
 
-	return setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(d, deploymentTarget)
 }

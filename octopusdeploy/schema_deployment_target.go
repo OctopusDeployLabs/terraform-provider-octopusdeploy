@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -181,7 +180,7 @@ func getDeploymentTargetSchema() map[string]*schema.Schema {
 	}
 }
 
-func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
+func setDeploymentTarget(d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
 	d.Set("has_latest_calamari", deploymentTarget.HasLatestCalamari)
 	d.Set("health_status", deploymentTarget.HealthStatus)
 	d.Set("is_disabled", deploymentTarget.IsDisabled)

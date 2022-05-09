@@ -103,5 +103,5 @@ func setAzureWebAppDeploymentTarget(ctx context.Context, d *schema.ResourceData,
 	d.Set("web_app_name", endpointResource.WebAppName)
 	d.Set("web_app_slot_name", endpointResource.WebAppSlotName)
 
-	return setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(d, deploymentTarget)
 }

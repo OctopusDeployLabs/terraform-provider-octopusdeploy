@@ -269,5 +269,5 @@ func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.Resourc
 		}
 	}
 
-	return setDeploymentTarget(ctx, d, deploymentTarget)
+	return setDeploymentTarget(d, deploymentTarget)
 }
