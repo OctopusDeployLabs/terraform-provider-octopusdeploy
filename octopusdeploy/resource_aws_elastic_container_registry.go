@@ -13,7 +13,7 @@ func resourceAwsElasticContainerRegistry() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceAwsElasticContainerRegistryCreate,
 		DeleteContext: resourceAwsElasticContainerRegistryDelete,
-		Description:   "This resource manages a AWS Elastic Container Registry in Octopus Deploy.",
+		Description:   "This resource manages an AWS Elastic Container Registry in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceAwsElasticContainerRegistryRead,
 		Schema:        getAwsElasticContainerRegistrySchema(),
@@ -22,21 +22,21 @@ func resourceAwsElasticContainerRegistry() *schema.Resource {
 }
 
 func resourceAwsElasticContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	dockerContainerRegistry := expandAwsElasticContainerRegistry(d)
+	feed := expandAwsElasticContainerRegistry(d)
 
-	log.Printf("[INFO] creating AWS Elastic Container Registry: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] creating AWS Elastic Container Registry: %#v", feed)
 
 	client := m.(*octopusdeploy.Client)
-	createdAwsElasticContainerRegistry, err := client.Feeds.Add(dockerContainerRegistry)
+	createdFeed, err := client.Feeds.Add(feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAwsElasticContainerRegistry(ctx, d, createdAwsElasticContainerRegistry.(*octopusdeploy.AwsElasticContainerRegistry)); err != nil {
+	if err := setAwsElasticContainerRegistry(ctx, d, createdFeed.(*octopusdeploy.AwsElasticContainerRegistry)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(createdAwsElasticContainerRegistry.GetID())
+	d.SetId(createdFeed.GetID())
 
 	log.Printf("[INFO] AWS Elastic Container Registry created (%s)", d.Id())
 	return nil

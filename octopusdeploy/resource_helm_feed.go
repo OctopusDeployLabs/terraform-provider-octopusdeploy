@@ -22,21 +22,21 @@ func resourceHelmFeed() *schema.Resource {
 }
 
 func resourceHelmFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	dockerContainerRegistry := expandHelmFeed(d)
+	feed := expandHelmFeed(d)
 
-	log.Printf("[INFO] creating Helm feed: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] creating Helm feed: %#v", feed)
 
 	client := m.(*octopusdeploy.Client)
-	createdHelmFeed, err := client.Feeds.Add(dockerContainerRegistry)
+	createdFeed, err := client.Feeds.Add(feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setHelmFeed(ctx, d, createdHelmFeed.(*octopusdeploy.HelmFeed)); err != nil {
+	if err := setHelmFeed(ctx, d, createdFeed.(*octopusdeploy.HelmFeed)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(createdHelmFeed.GetID())
+	d.SetId(createdFeed.GetID())
 
 	log.Printf("[INFO] Helm feed created (%s)", d.Id())
 	return nil
@@ -78,12 +78,12 @@ func resourceHelmFeedRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	dockerContainerRegistry := feedResource.(*octopusdeploy.HelmFeed)
-	if err := setHelmFeed(ctx, d, dockerContainerRegistry); err != nil {
+	helmFeed := feedResource.(*octopusdeploy.HelmFeed)
+	if err := setHelmFeed(ctx, d, helmFeed); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Helm feed read: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] Helm feed read: %#v", helmFeed)
 	return nil
 }
 
