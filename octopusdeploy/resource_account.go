@@ -25,7 +25,7 @@ func resourceAccount() *schema.Resource {
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	accountResource := expandAccountResource(d)
 
-	log.Printf("[INFO] creating account: %#v", accountResource)
+	log.Printf("[INFO] creating account (%s)", accountResource.GetID())
 
 	client := m.(*octopusdeploy.Client)
 	createdAccount, err := client.Accounts.Add(accountResource)
