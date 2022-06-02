@@ -9,10 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandHelmFeed(d *schema.ResourceData) *octopusdeploy.HelmFeed {
+func expandHelmFeed(d *schema.ResourceData) (*octopusdeploy.HelmFeed, error) {
 	name := d.Get("name").(string)
 
-	var helmFeed = octopusdeploy.NewHelmFeed(name)
+	helmFeed, err := octopusdeploy.NewHelmFeed(name)
+	if err != nil {
+		return nil, err
+	}
+
 	helmFeed.ID = d.Id()
 
 	if v, ok := d.GetOk("feed_uri"); ok {
@@ -31,7 +35,7 @@ func expandHelmFeed(d *schema.ResourceData) *octopusdeploy.HelmFeed {
 		helmFeed.Username = v.(string)
 	}
 
-	return helmFeed
+	return helmFeed, nil
 }
 
 func getHelmFeedSchema() map[string]*schema.Schema {

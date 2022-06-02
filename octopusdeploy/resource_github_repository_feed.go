@@ -22,12 +22,15 @@ func resourceGitHubRepositoryFeed() *schema.Resource {
 }
 
 func resourceGitHubRepositoryFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	dockerContainerRegistry := expandGitHubRepositoryFeed(d)
+	feed, err := expandGitHubRepositoryFeed(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] creating GitHub repository feed: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] creating GitHub repository feed, %s", feed.GetName())
 
 	client := m.(*octopusdeploy.Client)
-	createdGitHubRepositoryFeed, err := client.Feeds.Add(dockerContainerRegistry)
+	createdGitHubRepositoryFeed, err := client.Feeds.Add(feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -78,19 +81,22 @@ func resourceGitHubRepositoryFeedRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	dockerContainerRegistry := feedResource.(*octopusdeploy.GitHubRepositoryFeed)
-	if err := setGitHubRepositoryFeed(ctx, d, dockerContainerRegistry); err != nil {
+	gitHubRepositoryFeed := feedResource.(*octopusdeploy.GitHubRepositoryFeed)
+	if err := setGitHubRepositoryFeed(ctx, d, gitHubRepositoryFeed); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] GitHub repository feed read: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] GitHub repository feed read (%s)", gitHubRepositoryFeed.GetID())
 	return nil
 }
 
 func resourceGitHubRepositoryFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandGitHubRepositoryFeed(d)
+	feed, err := expandGitHubRepositoryFeed(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] updating GitHub repository feed: %#v", feed)
+	log.Printf("[INFO] updating GitHub repository feed (%s)", feed.GetID())
 
 	client := m.(*octopusdeploy.Client)
 	updatedFeed, err := client.Feeds.Update(feed)

@@ -9,10 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandGitHubRepositoryFeed(d *schema.ResourceData) *octopusdeploy.GitHubRepositoryFeed {
+func expandGitHubRepositoryFeed(d *schema.ResourceData) (*octopusdeploy.GitHubRepositoryFeed, error) {
 	name := d.Get("name").(string)
 
-	var gitHubRepositoryFeed = octopusdeploy.NewGitHubRepositoryFeed(name)
+	gitHubRepositoryFeed, err := octopusdeploy.NewGitHubRepositoryFeed(name)
+	if err != nil {
+		return nil, err
+	}
+
 	gitHubRepositoryFeed.ID = d.Id()
 
 	if v, ok := d.GetOk("download_attempts"); ok {
@@ -39,7 +43,7 @@ func expandGitHubRepositoryFeed(d *schema.ResourceData) *octopusdeploy.GitHubRep
 		gitHubRepositoryFeed.Username = v.(string)
 	}
 
-	return gitHubRepositoryFeed
+	return gitHubRepositoryFeed, nil
 }
 
 func getGitHubRepositoryFeedSchema() map[string]*schema.Schema {

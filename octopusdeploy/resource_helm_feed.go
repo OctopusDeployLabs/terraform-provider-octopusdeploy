@@ -22,9 +22,12 @@ func resourceHelmFeed() *schema.Resource {
 }
 
 func resourceHelmFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandHelmFeed(d)
+	feed, err := expandHelmFeed(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] creating Helm feed: %#v", feed)
+	log.Printf("[INFO] creating Helm feed, %s", feed.GetName())
 
 	client := m.(*octopusdeploy.Client)
 	createdFeed, err := client.Feeds.Add(feed)
@@ -83,14 +86,17 @@ func resourceHelmFeedRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Helm feed read: %#v", helmFeed)
+	log.Printf("[INFO] Helm feed read (%s)", helmFeed.GetID())
 	return nil
 }
 
 func resourceHelmFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandHelmFeed(d)
+	feed, err := expandHelmFeed(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] updating Helm feed: %#v", feed)
+	log.Printf("[INFO] updating Helm feed (%s)", feed.GetID())
 
 	client := m.(*octopusdeploy.Client)
 	updatedFeed, err := client.Feeds.Update(feed)
@@ -98,12 +104,7 @@ func resourceHelmFeedUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	feedResource, err := octopusdeploy.ToFeed(updatedFeed.(*octopusdeploy.FeedResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := setHelmFeed(ctx, d, feedResource.(*octopusdeploy.HelmFeed)); err != nil {
+	if err := setHelmFeed(ctx, d, updatedFeed.(*octopusdeploy.HelmFeed)); err != nil {
 		return diag.FromErr(err)
 	}
 

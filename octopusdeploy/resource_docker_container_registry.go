@@ -22,9 +22,12 @@ func resourceDockerContainerRegistry() *schema.Resource {
 }
 
 func resourceDockerContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	dockerContainerRegistry := expandDockerContainerRegistry(d)
+	dockerContainerRegistry, err := expandDockerContainerRegistry(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] creating Docker container registry: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] creating Docker container registry, %s", dockerContainerRegistry.GetName())
 
 	client := m.(*octopusdeploy.Client)
 	createdDockerContainerRegistry, err := client.Feeds.Add(dockerContainerRegistry)
@@ -83,14 +86,17 @@ func resourceDockerContainerRegistryRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Docker container registry read: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] Docker container registry read (%s)", dockerContainerRegistry.GetID())
 	return nil
 }
 
 func resourceDockerContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandDockerContainerRegistry(d)
+	feed, err := expandDockerContainerRegistry(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] updating Docker container registry: %#v", feed)
+	log.Printf("[INFO] updating Docker container registry (%s)", feed.GetID())
 
 	client := m.(*octopusdeploy.Client)
 	updatedFeed, err := client.Feeds.Update(feed)

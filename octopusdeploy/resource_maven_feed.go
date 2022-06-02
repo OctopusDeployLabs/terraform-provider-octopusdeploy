@@ -22,21 +22,24 @@ func resourceMavenFeed() *schema.Resource {
 }
 
 func resourceMavenFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	dockerContainerRegistry := expandMavenFeed(d)
-
-	log.Printf("[INFO] creating Maven feed: %#v", dockerContainerRegistry)
-
-	client := m.(*octopusdeploy.Client)
-	createdMavenFeed, err := client.Feeds.Add(dockerContainerRegistry)
+	mavenFeed, err := expandMavenFeed(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setMavenFeed(ctx, d, createdMavenFeed.(*octopusdeploy.MavenFeed)); err != nil {
+	log.Printf("[INFO] creating Maven feed: %s", mavenFeed.GetName())
+
+	client := m.(*octopusdeploy.Client)
+	createdFeed, err := client.Feeds.Add(mavenFeed)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(createdMavenFeed.GetID())
+	if err := setMavenFeed(ctx, d, createdFeed.(*octopusdeploy.MavenFeed)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(createdFeed.GetID())
 
 	log.Printf("[INFO] Maven feed created (%s)", d.Id())
 	return nil
@@ -78,19 +81,22 @@ func resourceMavenFeedRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	dockerContainerRegistry := feedResource.(*octopusdeploy.MavenFeed)
-	if err := setMavenFeed(ctx, d, dockerContainerRegistry); err != nil {
+	mavenFeed := feedResource.(*octopusdeploy.MavenFeed)
+	if err := setMavenFeed(ctx, d, mavenFeed); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Maven feed read: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] Maven feed read (%s)", mavenFeed.GetID())
 	return nil
 }
 
 func resourceMavenFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandMavenFeed(d)
+	feed, err := expandMavenFeed(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] updating Maven feed: %#v", feed)
+	log.Printf("[INFO] updating Maven feed (%s)", feed.GetID())
 
 	client := m.(*octopusdeploy.Client)
 	updatedFeed, err := client.Feeds.Update(feed)
