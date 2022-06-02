@@ -42,8 +42,12 @@ signs:
         "${artifact}",
       ]
 changelog:
-  use: github
-  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^README.md"
+      - "^.goreleaser.yaml"
   groups:
     - title: 'New Features'
       regexp: "^.*feat[(\\w)]*:+.*$"
@@ -52,11 +56,9 @@ changelog:
       regexp: "^.*break[(\\w)]*:+.*$"
       order: 1
     - title: 'Bug Fixes'
-      regexp: "^.*bug[(\\w)]*:+.*$"
-      order: 2
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
-      - "^README.md"
-      - "^.goreleaser.yaml"
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 10
+    - title: Other Work
+      order: 999
+  sort: asc
+  use: github
