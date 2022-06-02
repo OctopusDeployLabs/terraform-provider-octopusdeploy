@@ -9,13 +9,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandAwsElasticContainerRegistry(d *schema.ResourceData) *octopusdeploy.AwsElasticContainerRegistry {
+func expandAwsElasticContainerRegistry(d *schema.ResourceData) (*octopusdeploy.AwsElasticContainerRegistry, error) {
 	accessKey := d.Get("access_key").(string)
 	name := d.Get("name").(string)
 	secretKey := octopusdeploy.NewSensitiveValue(d.Get("secret_key").(string))
 	region := d.Get("region").(string)
 
-	var awsElasticContainerRegistry = octopusdeploy.NewAwsElasticContainerRegistry(name, accessKey, secretKey, region)
+	awsElasticContainerRegistry, err := octopusdeploy.NewAwsElasticContainerRegistry(name, accessKey, secretKey, region)
+	if err != nil {
+		return nil, err
+	}
+
 	awsElasticContainerRegistry.ID = d.Id()
 
 	if v, ok := d.GetOk("package_acquisition_location_options"); ok {
@@ -26,7 +30,7 @@ func expandAwsElasticContainerRegistry(d *schema.ResourceData) *octopusdeploy.Aw
 		awsElasticContainerRegistry.SpaceID = v.(string)
 	}
 
-	return awsElasticContainerRegistry
+	return awsElasticContainerRegistry, nil
 }
 
 func getAwsElasticContainerRegistrySchema() map[string]*schema.Schema {

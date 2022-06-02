@@ -9,11 +9,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandNuGetFeed(d *schema.ResourceData) *octopusdeploy.NuGetFeed {
+func expandNuGetFeed(d *schema.ResourceData) (*octopusdeploy.NuGetFeed, error) {
 	name := d.Get("name").(string)
 	feedURI := d.Get("feed_uri").(string)
 
-	nuGetFeed := octopusdeploy.NewNuGetFeed(name, feedURI)
+	nuGetFeed, err := octopusdeploy.NewNuGetFeed(name, feedURI)
+	if err != nil {
+		return nil, err
+	}
+
 	nuGetFeed.ID = d.Id()
 
 	if v, ok := d.GetOk("download_attempts"); ok {
@@ -40,7 +44,7 @@ func expandNuGetFeed(d *schema.ResourceData) *octopusdeploy.NuGetFeed {
 		nuGetFeed.Username = v.(string)
 	}
 
-	return nuGetFeed
+	return nuGetFeed, nil
 }
 
 func getNuGetFeedSchema() map[string]*schema.Schema {

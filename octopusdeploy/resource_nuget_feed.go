@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,7 +22,12 @@ func resourceNuGetFeed() *schema.Resource {
 }
 
 func resourceNuGetFeedCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandNuGetFeed(d)
+	feed, err := expandNuGetFeed(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] creating NuGet feed: %s", feed.GetName())
 
 	client := m.(*octopusdeploy.Client)
 	createdFeed, err := client.Feeds.Add(feed)
@@ -29,11 +35,19 @@ func resourceNuGetFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
+	if err := setNuGetFeed(ctx, d, createdFeed.(*octopusdeploy.NuGetFeed)); err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId(createdFeed.GetID())
-	return resourceNuGetFeedRead(ctx, d, m)
+
+	log.Printf("[INFO] NuGet feed created (%s)", d.Id())
+	return nil
 }
 
 func resourceNuGetFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] deleting NuGet feed (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
 	err := client.Feeds.DeleteByID(d.Id())
 	if err != nil {
@@ -41,15 +55,20 @@ func resourceNuGetFeedDelete(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	d.SetId("")
+
+	log.Printf("[INFO] NuGet feed deleted")
 	return nil
 }
 
 func resourceNuGetFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] reading NuGet feed (%s)", d.Id())
+
 	client := m.(*octopusdeploy.Client)
 	feedResource, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
 		if apiError, ok := err.(*octopusdeploy.APIError); ok {
 			if apiError.StatusCode == 404 {
+				log.Printf("[INFO] NuGet feed (%s) not found; deleting from state", d.Id())
 				d.SetId("")
 				return nil
 			}
@@ -63,19 +82,37 @@ func resourceNuGetFeedRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	nuGetFeed := feedResource.(*octopusdeploy.NuGetFeed)
+	if err := setNuGetFeed(ctx, d, nuGetFeed); err != nil {
+		return diag.FromErr(err)
+	}
 
-	setNuGetFeed(ctx, d, nuGetFeed)
+	log.Printf("[INFO] NuGet feed read (%s)", nuGetFeed.GetID())
 	return nil
 }
 
 func resourceNuGetFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandNuGetFeed(d)
-
-	client := m.(*octopusdeploy.Client)
-	_, err := client.Feeds.Update(feed)
+	feed, err := expandNuGetFeed(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	return resourceNuGetFeedRead(ctx, d, m)
+	log.Printf("[INFO] updating NuGet feed (%s)", feed.GetID())
+
+	client := m.(*octopusdeploy.Client)
+	updatedFeed, err := client.Feeds.Update(feed)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	feedResource, err := octopusdeploy.ToFeed(updatedFeed.(*octopusdeploy.FeedResource))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := setNuGetFeed(ctx, d, feedResource.(*octopusdeploy.NuGetFeed)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] NuGet feed updated (%s)", d.Id())
+	return nil
 }

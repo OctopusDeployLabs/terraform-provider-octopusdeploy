@@ -9,10 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandMavenFeed(d *schema.ResourceData) *octopusdeploy.MavenFeed {
+func expandMavenFeed(d *schema.ResourceData) (*octopusdeploy.MavenFeed, error) {
 	name := d.Get("name").(string)
 
-	var mavenFeed = octopusdeploy.NewMavenFeed(name)
+	mavenFeed, err := octopusdeploy.NewMavenFeed(name)
+	if err != nil {
+		return nil, err
+	}
+
 	mavenFeed.ID = d.Id()
 
 	if v, ok := d.GetOk("download_attempts"); ok {
@@ -39,7 +43,7 @@ func expandMavenFeed(d *schema.ResourceData) *octopusdeploy.MavenFeed {
 		mavenFeed.Username = v.(string)
 	}
 
-	return mavenFeed
+	return mavenFeed, nil
 }
 
 func getMavenFeedSchema() map[string]*schema.Schema {

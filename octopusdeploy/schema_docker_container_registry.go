@@ -9,10 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandDockerContainerRegistry(d *schema.ResourceData) *octopusdeploy.DockerContainerRegistry {
+func expandDockerContainerRegistry(d *schema.ResourceData) (*octopusdeploy.DockerContainerRegistry, error) {
 	name := d.Get("name").(string)
 
-	var dockerContainerRegistry = octopusdeploy.NewDockerContainerRegistry(name)
+	dockerContainerRegistry, err := octopusdeploy.NewDockerContainerRegistry(name)
+	if err != nil {
+		return nil, err
+	}
+
 	dockerContainerRegistry.ID = d.Id()
 
 	if v, ok := d.GetOk("api_version"); ok {
@@ -43,7 +47,7 @@ func expandDockerContainerRegistry(d *schema.ResourceData) *octopusdeploy.Docker
 		dockerContainerRegistry.Username = v.(string)
 	}
 
-	return dockerContainerRegistry
+	return dockerContainerRegistry, nil
 }
 
 func getDockerContainerRegistrySchema() map[string]*schema.Schema {

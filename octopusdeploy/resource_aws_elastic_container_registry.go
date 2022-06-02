@@ -22,12 +22,15 @@ func resourceAwsElasticContainerRegistry() *schema.Resource {
 }
 
 func resourceAwsElasticContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandAwsElasticContainerRegistry(d)
+	awsElasticContainerRegistry, err := expandAwsElasticContainerRegistry(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] creating AWS Elastic Container Registry: %#v", feed)
+	log.Printf("[INFO] creating AWS Elastic Container Registry, %s", awsElasticContainerRegistry.GetName())
 
 	client := m.(*octopusdeploy.Client)
-	createdFeed, err := client.Feeds.Add(feed)
+	createdFeed, err := client.Feeds.Add(awsElasticContainerRegistry)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -78,22 +81,25 @@ func resourceAwsElasticContainerRegistryRead(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	dockerContainerRegistry := feedResource.(*octopusdeploy.AwsElasticContainerRegistry)
-	if err := setAwsElasticContainerRegistry(ctx, d, dockerContainerRegistry); err != nil {
+	awsElasticContainerRegistry := feedResource.(*octopusdeploy.AwsElasticContainerRegistry)
+	if err := setAwsElasticContainerRegistry(ctx, d, awsElasticContainerRegistry); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] AWS Elastic Container Registry read: %#v", dockerContainerRegistry)
+	log.Printf("[INFO] AWS Elastic Container Registry read: %s", awsElasticContainerRegistry.GetID())
 	return nil
 }
 
 func resourceAwsElasticContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	feed := expandAwsElasticContainerRegistry(d)
+	awsElasticContainerRegistry, err := expandAwsElasticContainerRegistry(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	log.Printf("[INFO] updating AWS Elastic Container Registry: %#v", feed)
+	log.Printf("[INFO] updating AWS Elastic Container Registry (%s)", awsElasticContainerRegistry.GetID())
 
 	client := m.(*octopusdeploy.Client)
-	updatedFeed, err := client.Feeds.Update(feed)
+	updatedFeed, err := client.Feeds.Update(awsElasticContainerRegistry)
 	if err != nil {
 		return diag.FromErr(err)
 	}
