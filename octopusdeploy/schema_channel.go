@@ -53,6 +53,7 @@ func flattenChannel(channel *octopusdeploy.Channel) map[string]interface{} {
 
 	return map[string]interface{}{
 		"description":  channel.Description,
+		"id":           channel.GetID(),
 		"is_default":   channel.IsDefault,
 		"lifecycle_id": channel.LifecycleID,
 		"name":         channel.Name,
