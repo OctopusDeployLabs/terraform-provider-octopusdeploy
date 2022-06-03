@@ -21,6 +21,10 @@ func expandProjectGroup(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
 		projectGroup.RetentionPolicyID = v.(string)
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		projectGroup.SpaceID = v.(string)
+	}
+
 	return projectGroup
 }
 
@@ -34,6 +38,7 @@ func flattenProjectGroup(projectGroup *octopusdeploy.ProjectGroup) map[string]in
 		"id":                  projectGroup.GetID(),
 		"name":                projectGroup.Name,
 		"retention_policy_id": projectGroup.RetentionPolicyID,
+		"space_id":            projectGroup.SpaceID,
 	}
 }
 
@@ -73,6 +78,12 @@ func getProjectGroupSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
+		"space_id": {
+			Computed:    true,
+			Description: "The space ID associated with this project group.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
 	}
 }
 
@@ -81,6 +92,7 @@ func setProjectGroup(ctx context.Context, d *schema.ResourceData, projectGroup *
 
 	d.Set("name", projectGroup.Name)
 	d.Set("retention_policy_id", projectGroup.RetentionPolicyID)
+	d.Set("space_id", projectGroup.SpaceID)
 
 	d.SetId(projectGroup.GetID())
 
