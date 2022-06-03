@@ -66,6 +66,8 @@ github.com/OctopusDeploy/go-octopusdeploy v1.8.0 h1:xBal2KnXaGiPxkU/74Jnt25nTSzT
 github.com/OctopusDeploy/go-octopusdeploy v1.8.0/go.mod h1:hdkCXH+tHnuPk3qP4+17PQn6qIWFls1oYXKQu5cXOkg=
 github.com/OctopusDeploy/go-octopusdeploy v1.8.1 h1:u4HMT/Z57srtpL2VvcddYcm+u2x8/WE9hL1d2dKM1II=
 github.com/OctopusDeploy/go-octopusdeploy v1.8.1/go.mod h1:hdkCXH+tHnuPk3qP4+17PQn6qIWFls1oYXKQu5cXOkg=
+github.com/OctopusDeploy/go-octopusdeploy v1.8.2 h1:G2P2VTlymYsGVepei6+cJsVd6HySBCqyVyOnxaFupA0=
+github.com/OctopusDeploy/go-octopusdeploy v1.8.2/go.mod h1:hdkCXH+tHnuPk3qP4+17PQn6qIWFls1oYXKQu5cXOkg=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7/go.mod h1:z4/9nQmJSSwwds7ejkxaJwO37dru3geImFUdJlaLzQo=
@@ -89,6 +91,8 @@ github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkY
 github.com/aws/aws-sdk-go v1.15.78/go.mod h1:E3/ieXAlvM0XWO57iftYVDLLvQ824smPP3ATZkfNZeM=
 github.com/aws/aws-sdk-go v1.44.26 h1:fOvltAUcUA3IFe0ddPSlmCBSwPKifsXJf4beI0f8XS0=
 github.com/aws/aws-sdk-go v1.44.26/go.mod h1:y4AeaBuwd2Lk+GepC1E9v0qOiTws0MIWAX4oIKwKHZo=
+github.com/aws/aws-sdk-go v1.44.27 h1:8CMspeZSrewnbvAwgl8qo5R7orDLwQnTGBf/OKPiHxI=
+github.com/aws/aws-sdk-go v1.44.27/go.mod h1:y4AeaBuwd2Lk+GepC1E9v0qOiTws0MIWAX4oIKwKHZo=
 github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d h1:xDfNPAt8lFiC1UJrqV3uuy861HCTo708pDMbjHHdCas=
 github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d/go.mod h1:6QX/PXZ00z/TKoufEY6K/a0k6AhaJrQKdFe6OfVXsa4=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
@@ -396,6 +400,7 @@ github.com/sirupsen/logrus v1.4.1/go.mod h1:ni0Sbl8bgC9z8RoU9G6nDWqqs/fq4eDPysMB
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
 github.com/spf13/pflag v1.0.2/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/objx v0.1.1 h1:2vfRuCMp5sSVIDSqO8oNnWJq7mPa6KVP3iPIwFBuy8A=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
@@ -837,6 +842,8 @@ google.golang.org/genproto v0.0.0-20220523171625-347a074981d8/go.mod h1:RAyBrSAP
 google.golang.org/genproto v0.0.0-20220527130721-00d5c0f3be58/go.mod h1:yKyY4AMRwFiC8yMMNaMi+RkCnjZJt9LoWuvhXjMs+To=
 google.golang.org/genproto v0.0.0-20220601144221-27df5f98adab h1:YYs5818GyaApJxN5iyBnJxr7FUDrKpcXX+GaPrv0Cms=
 google.golang.org/genproto v0.0.0-20220601144221-27df5f98adab/go.mod h1:yKyY4AMRwFiC8yMMNaMi+RkCnjZJt9LoWuvhXjMs+To=
+google.golang.org/genproto v0.0.0-20220602131408-e326c6e8e9c8 h1:qRu95HZ148xXw+XeZ3dvqe85PxH4X8+jIo0iRPKcEnM=
+google.golang.org/genproto v0.0.0-20220602131408-e326c6e8e9c8/go.mod h1:yKyY4AMRwFiC8yMMNaMi+RkCnjZJt9LoWuvhXjMs+To=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.20.1/go.mod h1:10oTOabMzJvdu6/UiuZezV6QK5dSlG84ov/aaiqXj38=
 google.golang.org/grpc v1.21.1/go.mod h1:oYelfM1adQP15Ek0mdvEgi9Df8B9CZIaU1084ijfRaM=
