@@ -3,7 +3,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.18
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy v1.8.2
+	github.com/OctopusDeploy/go-octopusdeploy v1.8.4
 	github.com/google/uuid v1.3.0
 	github.com/gruntwork-io/terratest v0.40.13
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -70,7 +70,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/tmccombs/hcl2json v0.3.4 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
