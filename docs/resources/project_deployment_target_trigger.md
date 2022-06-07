@@ -25,17 +25,20 @@ resource "octopusdeploy_project_deployment_target_trigger" "example" {
 
 ### Required
 
-- **name** (String) The name of this resource.
-- **project_id** (String) The ID of the project to attach the trigger.
+- `name` (String) The name of this resource.
+- `project_id` (String) The ID of the project to attach the trigger.
 
 ### Optional
 
-- **environment_ids** (List of String) Apply environment id filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.
-- **event_categories** (List of String) Apply event category filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.
-- **event_groups** (List of String) Apply event group filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.
-- **id** (String) The ID of this resource.
-- **roles** (List of String) Apply event role filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.
-- **should_redeploy** (Boolean) Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.
+- `environment_ids` (List of String) Apply environment id filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.
+- `event_categories` (List of String) Apply event category filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.
+- `event_groups` (List of String) Apply event group filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.
+- `roles` (List of String) Apply event role filters to restrict which deployment targets will actually cause the trigger to fire, and consequently, which deployment targets will be automatically deployed to.
+- `should_redeploy` (Boolean) Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 ## Import
 

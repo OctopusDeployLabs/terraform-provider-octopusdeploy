@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_azure_service_principal - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_azure_service_principal Resource - terraform-provider-octopusdeploy"
 subcategory: "Accounts"
 description: |-
   This resource manages Azure service principal accounts in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_azure_service_principal
+# octopusdeploy_azure_service_principal: Resource
 
 This resource manages Azure service principal accounts in Octopus Deploy.
 
@@ -25,23 +25,23 @@ resource "octopusdeploy_azure_service_principal" "example" {
 
 ### Required
 
-- **application_id** (String) The application ID of this resource.
-- **name** (String) The name of this resource.
-- **password** (String, Sensitive) The password associated with this resource.
-- **subscription_id** (String) The subscription ID of this resource.
-- **tenant_id** (String) The tenant ID of this resource.
+- `application_id` (String) The application ID of this resource.
+- `name` (String) The name of this resource.
+- `password` (String, Sensitive) The password associated with this resource.
+- `subscription_id` (String) The subscription ID of this resource.
+- `tenant_id` (String) The tenant ID of this resource.
 
 ### Optional
 
-- **authentication_endpoint** (String) The authentication endpoint URI for this resource.
-- **azure_environment** (String) The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
-- **description** (String) The description of this Azure service principal account.
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **id** (String) The unique ID for this resource.
-- **resource_manager_endpoint** (String) The resource manager endpoint URI for this resource.
-- **space_id** (String) The space ID associated with this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
+- `authentication_endpoint` (String) The authentication endpoint URI for this resource.
+- `azure_environment` (String) The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
+- `description` (String) The description of this Azure service principal account.
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `id` (String) The unique ID for this resource.
+- `resource_manager_endpoint` (String) The resource manager endpoint URI for this resource.
+- `space_id` (String) The space ID associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
 
 

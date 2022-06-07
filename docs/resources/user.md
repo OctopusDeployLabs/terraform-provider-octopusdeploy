@@ -42,39 +42,39 @@ resource "octopusdeploy_user" "example" {
 
 ### Required
 
-- **display_name** (String) The display name of this resource.
-- **username** (String, Sensitive) The username associated with this resource.
+- `display_name` (String) The display name of this resource.
+- `username` (String, Sensitive) The username associated with this resource.
 
 ### Optional
 
-- **email_address** (String) The email address of this resource.
-- **id** (String) The unique ID for this resource.
-- **identity** (Block Set) (see [below for nested schema](#nestedblock--identity))
-- **is_active** (Boolean)
-- **is_service** (Boolean)
-- **password** (String, Sensitive) The password associated with this resource.
+- `email_address` (String) The email address of this resource.
+- `id` (String) The unique ID for this resource.
+- `identity` (Block Set) (see [below for nested schema](#nestedblock--identity))
+- `is_active` (Boolean)
+- `is_service` (Boolean)
+- `password` (String, Sensitive) The password associated with this resource.
 
 ### Read-Only
 
-- **can_password_be_edited** (Boolean)
-- **is_requestor** (Boolean)
+- `can_password_be_edited` (Boolean)
+- `is_requestor` (Boolean)
 
 <a id="nestedblock--identity"></a>
 ### Nested Schema for `identity`
 
 Optional:
 
-- **claim** (Block Set) (see [below for nested schema](#nestedblock--identity--claim))
-- **provider** (String)
+- `claim` (Block Set) (see [below for nested schema](#nestedblock--identity--claim))
+- `provider` (String)
 
 <a id="nestedblock--identity--claim"></a>
 ### Nested Schema for `identity.claim`
 
 Required:
 
-- **is_identifying_claim** (Boolean)
-- **name** (String) The name of this resource.
-- **value** (String)
+- `is_identifying_claim` (Boolean)
+- `name` (String) The name of this resource.
+- `value` (String)
 
 ## Import
 

@@ -26,47 +26,47 @@ data "octopusdeploy_channels" "example" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **channels** (Block List) A channel that matches the specified filter(s). (see [below for nested schema](#nestedblock--channels))
+- `channels` (Block List) A channel that matches the specified filter(s). (see [below for nested schema](#nestedblock--channels))
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--channels"></a>
 ### Nested Schema for `channels`
 
 Read-Only:
 
-- **description** (String) The description of this channel.
-- **id** (String) The unique ID for this resource.
-- **is_default** (Boolean) Indicates if this is the default channel for the associated project.
-- **lifecycle_id** (String) The lifecycle ID associated with this channel.
-- **name** (String) The name of this resource.
-- **project_id** (String) The project ID associated with this channel.
-- **rule** (List of Object) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channels--rule))
-- **space_id** (String) The space ID associated with this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
+- `description` (String) The description of this channel.
+- `id` (String) The unique ID for this resource.
+- `is_default` (Boolean) Indicates if this is the default channel for the associated project.
+- `lifecycle_id` (String) The lifecycle ID associated with this channel.
+- `name` (String) The name of this resource.
+- `project_id` (String) The project ID associated with this channel.
+- `rule` (List of Object) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channels--rule))
+- `space_id` (String) The space ID associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
 <a id="nestedatt--channels--rule"></a>
 ### Nested Schema for `channels.rule`
 
 Read-Only:
 
-- **action_package** (List of Object) (see [below for nested schema](#nestedobjatt--channels--rule--action_package))
-- **id** (String)
-- **tag** (String)
-- **version_range** (String)
+- `action_package` (List of Object) (see [below for nested schema](#nestedobjatt--channels--rule--action_package))
+- `id` (String)
+- `tag` (String)
+- `version_range` (String)
 
 <a id="nestedobjatt--channels--rule--action_package"></a>
 ### Nested Schema for `channels.rule.action_package`
 
 Read-Only:
 
-- **deployment_action** (String)
-- **package_reference** (String)
+- `deployment_action` (String)
+- `package_reference` (String)
 
 

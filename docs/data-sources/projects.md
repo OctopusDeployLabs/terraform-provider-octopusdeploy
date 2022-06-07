@@ -29,63 +29,63 @@ data "octopusdeploy_projects" "example" {
 
 ### Optional
 
-- **cloned_from_project_id** (String) A filter to search for cloned resources by a project ID.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **is_clone** (Boolean) A filter to search for cloned resources.
-- **name** (String) A filter to search by name.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `cloned_from_project_id` (String) A filter to search for cloned resources by a project ID.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `is_clone` (Boolean) A filter to search for cloned resources.
+- `name` (String) A filter to search by name.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **projects** (Block List) A list of projects that match the filter(s). (see [below for nested schema](#nestedblock--projects))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `projects` (Block List) A list of projects that match the filter(s). (see [below for nested schema](#nestedblock--projects))
 
 <a id="nestedblock--projects"></a>
 ### Nested Schema for `projects`
 
 Read-Only:
 
-- **allow_deployments_to_no_targets** (Boolean, Deprecated)
-- **auto_create_release** (Boolean)
-- **auto_deploy_release_overrides** (List of String)
-- **cloned_from_project_id** (String)
-- **connectivity_policy** (List of Object) (see [below for nested schema](#nestedatt--projects--connectivity_policy))
-- **default_guided_failure_mode** (String)
-- **default_to_skip_if_already_installed** (Boolean)
-- **deployment_changes_template** (String)
-- **deployment_process_id** (String)
-- **description** (String) The description of this project.
-- **discrete_channel_release** (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
-- **extension_settings** (Set of Object) (see [below for nested schema](#nestedatt--projects--extension_settings))
-- **git_persistence_settings** (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_persistence_settings))
-- **id** (String) The unique ID for this resource.
-- **included_library_variable_sets** (List of String)
-- **is_disabled** (Boolean)
-- **is_discrete_channel_release** (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
-- **is_version_controlled** (Boolean)
-- **lifecycle_id** (String) The lifecycle ID associated with this project.
-- **name** (String) The name of the project in Octopus Deploy. This name must be unique.
-- **project_group_id** (String) The project group ID associated with this project.
-- **release_creation_strategy** (List of Object) (see [below for nested schema](#nestedatt--projects--release_creation_strategy))
-- **release_notes_template** (String)
-- **slug** (String)
-- **space_id** (String) The space ID associated with this project.
-- **template** (List of Object) (see [below for nested schema](#nestedatt--projects--template))
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **variable_set_id** (String)
-- **versioning_strategy** (Set of Object) (see [below for nested schema](#nestedatt--projects--versioning_strategy))
+- `allow_deployments_to_no_targets` (Boolean, Deprecated)
+- `auto_create_release` (Boolean)
+- `auto_deploy_release_overrides` (List of String)
+- `cloned_from_project_id` (String)
+- `connectivity_policy` (List of Object) (see [below for nested schema](#nestedatt--projects--connectivity_policy))
+- `default_guided_failure_mode` (String)
+- `default_to_skip_if_already_installed` (Boolean)
+- `deployment_changes_template` (String)
+- `deployment_process_id` (String)
+- `description` (String) The description of this project.
+- `discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
+- `extension_settings` (Set of Object) (see [below for nested schema](#nestedatt--projects--extension_settings))
+- `git_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_persistence_settings))
+- `id` (String) The unique ID for this resource.
+- `included_library_variable_sets` (List of String)
+- `is_disabled` (Boolean)
+- `is_discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
+- `is_version_controlled` (Boolean)
+- `lifecycle_id` (String) The lifecycle ID associated with this project.
+- `name` (String) The name of the project in Octopus Deploy. This name must be unique.
+- `project_group_id` (String) The project group ID associated with this project.
+- `release_creation_strategy` (List of Object) (see [below for nested schema](#nestedatt--projects--release_creation_strategy))
+- `release_notes_template` (String)
+- `slug` (String)
+- `space_id` (String) The space ID associated with this project.
+- `template` (List of Object) (see [below for nested schema](#nestedatt--projects--template))
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `variable_set_id` (String)
+- `versioning_strategy` (Set of Object) (see [below for nested schema](#nestedatt--projects--versioning_strategy))
 
 <a id="nestedatt--projects--connectivity_policy"></a>
 ### Nested Schema for `projects.connectivity_policy`
 
 Read-Only:
 
-- **allow_deployments_to_no_targets** (Boolean)
-- **exclude_unhealthy_targets** (Boolean)
-- **skip_machine_behavior** (String)
-- **target_roles** (List of String)
+- `allow_deployments_to_no_targets` (Boolean)
+- `exclude_unhealthy_targets` (Boolean)
+- `skip_machine_behavior` (String)
+- `target_roles` (List of String)
 
 
 <a id="nestedatt--projects--extension_settings"></a>
@@ -93,8 +93,8 @@ Read-Only:
 
 Read-Only:
 
-- **extension_id** (String)
-- **values** (List of String)
+- `extension_id` (String)
+- `values` (List of String)
 
 
 <a id="nestedatt--projects--git_persistence_settings"></a>
@@ -102,18 +102,18 @@ Read-Only:
 
 Read-Only:
 
-- **base_path** (String)
-- **credentials** (List of Object) (see [below for nested schema](#nestedobjatt--projects--git_persistence_settings--credentials))
-- **default_branch** (String)
-- **url** (String)
+- `base_path` (String)
+- `credentials` (List of Object) (see [below for nested schema](#nestedobjatt--projects--git_persistence_settings--credentials))
+- `default_branch` (String)
+- `url` (String)
 
 <a id="nestedobjatt--projects--git_persistence_settings--credentials"></a>
 ### Nested Schema for `projects.git_persistence_settings.credentials`
 
 Read-Only:
 
-- **password** (String)
-- **username** (String)
+- `password` (String)
+- `username` (String)
 
 
 
@@ -122,17 +122,17 @@ Read-Only:
 
 Read-Only:
 
-- **channel_id** (String)
-- **release_creation_package** (List of Object) (see [below for nested schema](#nestedobjatt--projects--release_creation_strategy--release_creation_package))
-- **release_creation_package_step_id** (String)
+- `channel_id` (String)
+- `release_creation_package` (List of Object) (see [below for nested schema](#nestedobjatt--projects--release_creation_strategy--release_creation_package))
+- `release_creation_package_step_id` (String)
 
 <a id="nestedobjatt--projects--release_creation_strategy--release_creation_package"></a>
 ### Nested Schema for `projects.release_creation_strategy.release_creation_package`
 
 Read-Only:
 
-- **deployment_action** (String)
-- **package_reference** (String)
+- `deployment_action` (String)
+- `package_reference` (String)
 
 
 
@@ -141,12 +141,12 @@ Read-Only:
 
 Read-Only:
 
-- **default_value** (String)
-- **display_settings** (Map of String)
-- **help_text** (String)
-- **id** (String)
-- **label** (String)
-- **name** (String)
+- `default_value` (String)
+- `display_settings` (Map of String)
+- `help_text` (String)
+- `id` (String)
+- `label` (String)
+- `name` (String)
 
 
 <a id="nestedatt--projects--versioning_strategy"></a>
@@ -154,16 +154,16 @@ Read-Only:
 
 Read-Only:
 
-- **donor_package** (List of Object) (see [below for nested schema](#nestedobjatt--projects--versioning_strategy--donor_package))
-- **donor_package_step_id** (String)
-- **template** (String)
+- `donor_package` (List of Object) (see [below for nested schema](#nestedobjatt--projects--versioning_strategy--donor_package))
+- `donor_package_step_id` (String)
+- `template` (String)
 
 <a id="nestedobjatt--projects--versioning_strategy--donor_package"></a>
 ### Nested Schema for `projects.versioning_strategy.donor_package`
 
 Read-Only:
 
-- **deployment_action** (String)
-- **package_reference** (String)
+- `deployment_action` (String)
+- `package_reference` (String)
 
 

@@ -17,30 +17,30 @@ Provides information about existing worker pools.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **name** (String) A filter to search by name.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `name` (String) A filter to search by name.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **worker_pools** (Block List) A list of worker pools that match the filter(s). (see [below for nested schema](#nestedblock--worker_pools))
+- `id` (String) The ID of this resource.
+- `worker_pools` (Block List) A list of worker pools that match the filter(s). (see [below for nested schema](#nestedblock--worker_pools))
 
 <a id="nestedblock--worker_pools"></a>
 ### Nested Schema for `worker_pools`
 
 Read-Only:
 
-- **can_add_workers** (Boolean)
-- **description** (String) The description of this worker pool.
-- **id** (String) The unique ID for this resource.
-- **is_default** (Boolean)
-- **name** (String) The name of this resource.
-- **sort_order** (Number) The order number to sort a dynamic worker pool.
-- **space_id** (String) The space ID associated with this resource.
-- **worker_pool_type** (String)
-- **worker_type** (String)
+- `can_add_workers` (Boolean)
+- `description` (String) The description of this worker pool.
+- `id` (String) The unique ID for this resource.
+- `is_default` (Boolean)
+- `name` (String) The name of this resource.
+- `sort_order` (Number) The order number to sort a dynamic worker pool.
+- `space_id` (String) The space ID associated with this resource.
+- `worker_pool_type` (String)
+- `worker_type` (String)
 
 

@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_cloud_region_deployment_target - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_cloud_region_deployment_target Resource - terraform-provider-octopusdeploy"
 subcategory: "Deployment Targets"
 description: |-
   This resource manages cloud region deployment targets in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_cloud_region_deployment_target
+# octopusdeploy_cloud_region_deployment_target: Resource
 
 This resource manages cloud region deployment targets in Octopus Deploy.
 
@@ -24,32 +24,32 @@ resource "octopusdeploy_cloud_region_deployment_target" "example" {
 
 ### Required
 
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **name** (String) The name of this resource.
-- **roles** (List of String)
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `name` (String) The name of this resource.
+- `roles` (List of String)
 
 ### Optional
 
-- **default_worker_pool_id** (String)
-- **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **id** (String) The unique ID for this resource.
-- **is_disabled** (Boolean)
-- **machine_policy_id** (String)
-- **operating_system** (String)
-- **shell_name** (String)
-- **shell_version** (String)
-- **space_id** (String) The space ID associated with this resource.
-- **status** (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- **status_summary** (String) A summary elaborating on the status of this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
-- **thumbprint** (String)
-- **uri** (String)
+- `default_worker_pool_id` (String)
+- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `id` (String) The unique ID for this resource.
+- `is_disabled` (Boolean)
+- `machine_policy_id` (String)
+- `operating_system` (String)
+- `shell_name` (String)
+- `shell_version` (String)
+- `space_id` (String) The space ID associated with this resource.
+- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
+- `status_summary` (String) A summary elaborating on the status of this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `thumbprint` (String)
+- `uri` (String)
 
 ### Read-Only
 
-- **has_latest_calamari** (Boolean)
-- **is_in_process** (Boolean)
+- `has_latest_calamari` (Boolean)
+- `is_in_process` (Boolean)
 
 

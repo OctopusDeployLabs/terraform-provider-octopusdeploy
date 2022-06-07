@@ -27,51 +27,51 @@ data "octopusdeploy_cloud_region_deployment_targets" "example" {
 
 ### Optional
 
-- **deployment_id** (String) A filter to search by deployment ID.
-- **environments** (List of String) A filter to search by a list of environment IDs.
-- **health_statuses** (List of String) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **is_disabled** (Boolean) A filter to search by the disabled status of a resource.
-- **name** (String) A filter to search by name.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **roles** (List of String) A filter to search by a list of role IDs.
-- **shell_names** (List of String) A list of shell names to match in the query and/or search
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
-- **tenant_tags** (List of String) A filter to search by a list of tenant tags.
-- **tenants** (List of String) A filter to search by a list of tenant IDs.
-- **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
+- `deployment_id` (String) A filter to search by deployment ID.
+- `environments` (List of String) A filter to search by a list of environment IDs.
+- `health_statuses` (List of String) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `is_disabled` (Boolean) A filter to search by the disabled status of a resource.
+- `name` (String) A filter to search by name.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `roles` (List of String) A filter to search by a list of role IDs.
+- `shell_names` (List of String) A list of shell names to match in the query and/or search
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
+- `tenant_tags` (List of String) A filter to search by a list of tenant tags.
+- `tenants` (List of String) A filter to search by a list of tenant IDs.
+- `thumbprint` (String) The thumbprint of the deployment target to match in the query and/or search
 
 ### Read-Only
 
-- **cloud_region_deployment_targets** (Block List) A list of cloud region deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--cloud_region_deployment_targets))
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `cloud_region_deployment_targets` (Block List) A list of cloud region deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--cloud_region_deployment_targets))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
 <a id="nestedblock--cloud_region_deployment_targets"></a>
 ### Nested Schema for `cloud_region_deployment_targets`
 
 Read-Only:
 
-- **default_worker_pool_id** (String)
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **has_latest_calamari** (Boolean)
-- **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **id** (String) The unique ID for this resource.
-- **is_disabled** (Boolean)
-- **is_in_process** (Boolean)
-- **machine_policy_id** (String)
-- **name** (String) The name of this resource.
-- **operating_system** (String)
-- **roles** (List of String)
-- **shell_name** (String)
-- **shell_version** (String)
-- **space_id** (String) The space ID associated with this resource.
-- **status** (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- **status_summary** (String) A summary elaborating on the status of this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
-- **thumbprint** (String)
-- **uri** (String)
+- `default_worker_pool_id` (String)
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `has_latest_calamari` (Boolean)
+- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `id` (String) The unique ID for this resource.
+- `is_disabled` (Boolean)
+- `is_in_process` (Boolean)
+- `machine_policy_id` (String)
+- `name` (String) The name of this resource.
+- `operating_system` (String)
+- `roles` (List of String)
+- `shell_name` (String)
+- `shell_version` (String)
+- `space_id` (String) The space ID associated with this resource.
+- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
+- `status_summary` (String) A summary elaborating on the status of this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `thumbprint` (String)
+- `uri` (String)
 
 

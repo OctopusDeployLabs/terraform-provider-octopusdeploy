@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_listening_tentacle_deployment_target - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_listening_tentacle_deployment_target Resource - terraform-provider-octopusdeploy"
 subcategory: "Deployment Targets"
 description: |-
   This resource manages listening tentacle deployment targets in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_listening_tentacle_deployment_target
+# octopusdeploy_listening_tentacle_deployment_target: Resource
 
 This resource manages listening tentacle deployment targets in Octopus Deploy.
 
@@ -28,45 +28,45 @@ resource "octopusdeploy_listening_tentacle_deployment_target" "example" {
 
 ### Required
 
-- **environments** (List of String) A list of environment IDs associated with this listening tentacle.
-- **name** (String) The name of this resource.
-- **roles** (List of String) A list of role IDs that are associated with this deployment target.
-- **tentacle_url** (String) The tenant URL of this deployment target.
-- **thumbprint** (String) The thumbprint of this deployment target.
+- `environments` (List of String) A list of environment IDs associated with this listening tentacle.
+- `name` (String) The name of this resource.
+- `roles` (List of String) A list of role IDs that are associated with this deployment target.
+- `tentacle_url` (String) The tenant URL of this deployment target.
+- `thumbprint` (String) The thumbprint of this deployment target.
 
 ### Optional
 
-- **certificate_signature_algorithm** (String)
-- **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **id** (String) The unique ID for this resource.
-- **is_disabled** (Boolean) Represents the disabled status of this deployment target.
-- **is_in_process** (Boolean) Represents the in-process status of this deployment target.
-- **machine_policy_id** (String) The machine policy ID that is associated with this deployment target.
-- **operating_system** (String) The operating system that is associated with this deployment target.
-- **proxy_id** (String) The proxy ID that is associated with this deployment target.
-- **shell_name** (String) The shell name associated with this deployment target.
-- **shell_version** (String) The shell version associated with this deployment target.
-- **space_id** (String) The space ID associated with this resource.
-- **status** (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- **status_summary** (String) A summary elaborating on the status of this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
-- **tentacle_version_details** (Block List) (see [below for nested schema](#nestedblock--tentacle_version_details))
-- **uri** (String) The URI of this deployment target.
+- `certificate_signature_algorithm` (String)
+- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `id` (String) The unique ID for this resource.
+- `is_disabled` (Boolean) Represents the disabled status of this deployment target.
+- `is_in_process` (Boolean) Represents the in-process status of this deployment target.
+- `machine_policy_id` (String) The machine policy ID that is associated with this deployment target.
+- `operating_system` (String) The operating system that is associated with this deployment target.
+- `proxy_id` (String) The proxy ID that is associated with this deployment target.
+- `shell_name` (String) The shell name associated with this deployment target.
+- `shell_version` (String) The shell version associated with this deployment target.
+- `space_id` (String) The space ID associated with this resource.
+- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
+- `status_summary` (String) A summary elaborating on the status of this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `tentacle_version_details` (Block List) (see [below for nested schema](#nestedblock--tentacle_version_details))
+- `uri` (String) The URI of this deployment target.
 
 ### Read-Only
 
-- **has_latest_calamari** (Boolean)
+- `has_latest_calamari` (Boolean)
 
 <a id="nestedblock--tentacle_version_details"></a>
 ### Nested Schema for `tentacle_version_details`
 
 Optional:
 
-- **upgrade_locked** (Boolean)
-- **upgrade_required** (Boolean)
-- **upgrade_suggested** (Boolean)
-- **version** (String)
+- `upgrade_locked` (Boolean)
+- `upgrade_required` (Boolean)
+- `upgrade_suggested` (Boolean)
+- `version` (String)
 
 

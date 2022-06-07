@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_polling_tentacle_deployment_target - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_polling_tentacle_deployment_target Resource - terraform-provider-octopusdeploy"
 subcategory: "Deployment Targets"
 description: |-
   This resource manages polling tentacle deployment targets in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_polling_tentacle_deployment_target
+# octopusdeploy_polling_tentacle_deployment_target: Resource
 
 This resource manages polling tentacle deployment targets in Octopus Deploy.
 
@@ -28,109 +28,109 @@ resource "octopusdeploy_listening_tentacle_deployment_target" "example" {
 
 ### Required
 
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **name** (String) The name of this resource.
-- **roles** (List of String)
-- **tentacle_url** (String)
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `name` (String) The name of this resource.
+- `roles` (List of String)
+- `tentacle_url` (String)
 
 ### Optional
 
-- **certificate_signature_algorithm** (String)
-- **endpoint** (Block List) (see [below for nested schema](#nestedblock--endpoint))
-- **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **id** (String) The unique ID for this resource.
-- **is_disabled** (Boolean)
-- **machine_policy_id** (String)
-- **operating_system** (String)
-- **shell_name** (String)
-- **shell_version** (String)
-- **space_id** (String) The space ID associated with this resource.
-- **status** (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- **status_summary** (String) A summary elaborating on the status of this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
-- **tentacle_version_details** (Block List) (see [below for nested schema](#nestedblock--tentacle_version_details))
-- **thumbprint** (String)
-- **uri** (String)
+- `certificate_signature_algorithm` (String)
+- `endpoint` (Block List) (see [below for nested schema](#nestedblock--endpoint))
+- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `id` (String) The unique ID for this resource.
+- `is_disabled` (Boolean)
+- `machine_policy_id` (String)
+- `operating_system` (String)
+- `shell_name` (String)
+- `shell_version` (String)
+- `space_id` (String) The space ID associated with this resource.
+- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
+- `status_summary` (String) A summary elaborating on the status of this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `tentacle_version_details` (Block List) (see [below for nested schema](#nestedblock--tentacle_version_details))
+- `thumbprint` (String)
+- `uri` (String)
 
 ### Read-Only
 
-- **has_latest_calamari** (Boolean)
-- **is_in_process** (Boolean)
+- `has_latest_calamari` (Boolean)
+- `is_in_process` (Boolean)
 
 <a id="nestedblock--endpoint"></a>
 ### Nested Schema for `endpoint`
 
 Required:
 
-- **communication_style** (String)
+- `communication_style` (String)
 
 Optional:
 
-- **aad_client_credential_secret** (String)
-- **aad_credential_type** (String)
-- **aad_user_credential_username** (String)
-- **account_id** (String)
-- **applications_directory** (String)
-- **authentication** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--endpoint--authentication))
-- **certificate_signature_algorithm** (String)
-- **certificate_store_location** (String)
-- **certificate_store_name** (String)
-- **client_certificate_variable** (String)
-- **cloud_service_name** (String)
-- **cluster_certificate** (String)
-- **cluster_url** (String)
-- **connection_endpoint** (String)
-- **container** (Block List) (see [below for nested schema](#nestedblock--endpoint--container))
-- **default_worker_pool_id** (String)
-- **destination** (Block List) (see [below for nested schema](#nestedblock--endpoint--destination))
-- **dot_net_core_platform** (String)
-- **fingerprint** (String)
-- **host** (String)
-- **id** (String) The unique ID for this resource.
-- **namespace** (String)
-- **port** (Number)
-- **proxy_id** (String)
-- **resource_group_name** (String)
-- **running_in_container** (Boolean)
-- **security_mode** (String)
-- **server_certificate_thumbprint** (String)
-- **skip_tls_verification** (Boolean)
-- **slot** (String)
-- **storage_account_name** (String)
-- **swap_if_possible** (Boolean)
-- **tentacle_version_details** (Block List) (see [below for nested schema](#nestedblock--endpoint--tentacle_version_details))
-- **thumbprint** (String)
-- **uri** (String)
-- **use_current_instance_count** (Boolean)
-- **web_app_name** (String)
-- **web_app_slot_name** (String)
-- **working_directory** (String)
+- `aad_client_credential_secret` (String)
+- `aad_credential_type` (String)
+- `aad_user_credential_username` (String)
+- `account_id` (String)
+- `applications_directory` (String)
+- `authentication` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--endpoint--authentication))
+- `certificate_signature_algorithm` (String)
+- `certificate_store_location` (String)
+- `certificate_store_name` (String)
+- `client_certificate_variable` (String)
+- `cloud_service_name` (String)
+- `cluster_certificate` (String)
+- `cluster_url` (String)
+- `connection_endpoint` (String)
+- `container` (Block List) (see [below for nested schema](#nestedblock--endpoint--container))
+- `default_worker_pool_id` (String)
+- `destination` (Block List) (see [below for nested schema](#nestedblock--endpoint--destination))
+- `dot_net_core_platform` (String)
+- `fingerprint` (String)
+- `host` (String)
+- `id` (String) The unique ID for this resource.
+- `namespace` (String)
+- `port` (Number)
+- `proxy_id` (String)
+- `resource_group_name` (String)
+- `running_in_container` (Boolean)
+- `security_mode` (String)
+- `server_certificate_thumbprint` (String)
+- `skip_tls_verification` (Boolean)
+- `slot` (String)
+- `storage_account_name` (String)
+- `swap_if_possible` (Boolean)
+- `tentacle_version_details` (Block List) (see [below for nested schema](#nestedblock--endpoint--tentacle_version_details))
+- `thumbprint` (String)
+- `uri` (String)
+- `use_current_instance_count` (Boolean)
+- `web_app_name` (String)
+- `web_app_slot_name` (String)
+- `working_directory` (String)
 
 <a id="nestedblock--endpoint--authentication"></a>
 ### Nested Schema for `endpoint.authentication`
 
 Optional:
 
-- **account_id** (String)
-- **admin_login** (String)
-- **assume_role** (Boolean)
-- **assume_role_external_id** (String)
-- **assume_role_session_duration** (Number)
-- **assumed_role_arn** (String)
-- **assumed_role_session** (String)
-- **authentication_type** (String)
-- **client_certificate** (String)
-- **cluster_name** (String)
-- **cluster_resource_group** (String)
-- **impersonate_service_account** (Boolean)
-- **project** (String)
-- **region** (String)
-- **service_account_emails** (String)
-- **use_instance_role** (Boolean)
-- **use_vm_service_account** (Boolean)
-- **zone** (String)
+- `account_id` (String)
+- `admin_login` (String)
+- `assume_role` (Boolean)
+- `assume_role_external_id` (String)
+- `assume_role_session_duration` (Number)
+- `assumed_role_arn` (String)
+- `assumed_role_session` (String)
+- `authentication_type` (String)
+- `client_certificate` (String)
+- `cluster_name` (String)
+- `cluster_resource_group` (String)
+- `impersonate_service_account` (Boolean)
+- `project` (String)
+- `region` (String)
+- `service_account_emails` (String)
+- `use_instance_role` (Boolean)
+- `use_vm_service_account` (Boolean)
+- `zone` (String)
 
 
 <a id="nestedblock--endpoint--container"></a>
@@ -138,8 +138,8 @@ Optional:
 
 Optional:
 
-- **feed_id** (String)
-- **image** (String)
+- `feed_id` (String)
+- `image` (String)
 
 
 <a id="nestedblock--endpoint--destination"></a>
@@ -147,8 +147,8 @@ Optional:
 
 Optional:
 
-- **destination_type** (String)
-- **drop_folder_path** (String)
+- `destination_type` (String)
+- `drop_folder_path` (String)
 
 
 <a id="nestedblock--endpoint--tentacle_version_details"></a>
@@ -156,10 +156,10 @@ Optional:
 
 Optional:
 
-- **upgrade_locked** (Boolean)
-- **upgrade_required** (Boolean)
-- **upgrade_suggested** (Boolean)
-- **version** (String)
+- `upgrade_locked` (Boolean)
+- `upgrade_required` (Boolean)
+- `upgrade_suggested` (Boolean)
+- `version` (String)
 
 
 
@@ -168,9 +168,9 @@ Optional:
 
 Optional:
 
-- **upgrade_locked** (Boolean)
-- **upgrade_required** (Boolean)
-- **upgrade_suggested** (Boolean)
-- **version** (String)
+- `upgrade_locked` (Boolean)
+- `upgrade_required` (Boolean)
+- `upgrade_suggested` (Boolean)
+- `version` (String)
 
 

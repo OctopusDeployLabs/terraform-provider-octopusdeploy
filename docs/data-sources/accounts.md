@@ -1,5 +1,5 @@
 ---
-page_title: "Data Source octopusdeploy_accounts - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_accounts Data Source - terraform-provider-octopusdeploy"
 subcategory: "Accounts"
 description: |-
   Provides information about existing accounts.
@@ -26,47 +26,47 @@ data "octopusdeploy_accounts" "example" {
 
 ### Optional
 
-- **account_type** (String) A filter to search by a list of account types.  Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `account_type` (String) A filter to search by a list of account types.  Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **accounts** (List of Object) A list of accounts that match the filter(s). (see [below for nested schema](#nestedatt--accounts))
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `accounts` (List of Object) A list of accounts that match the filter(s). (see [below for nested schema](#nestedatt--accounts))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
 <a id="nestedatt--accounts"></a>
 ### Nested Schema for `accounts`
 
 Read-Only:
 
-- **access_key** (String)
-- **account_type** (String)
-- **active_directory_endpoint_base_uri** (String)
-- **application_id** (String)
-- **authentication_endpoint** (String)
-- **azure_environment** (String)
-- **certificate_data** (String)
-- **certificate_thumbprint** (String)
-- **client_secret** (String)
-- **description** (String)
-- **environments** (List of String)
-- **id** (String)
-- **name** (String)
-- **password** (String)
-- **private_key_file** (String)
-- **private_key_passphrase** (String)
-- **resource_manager_endpoint** (String)
-- **secret_key** (String)
-- **service_management_endpoint_base_uri** (String)
-- **service_management_endpoint_suffix** (String)
-- **space_id** (String)
-- **subscription_id** (String)
-- **tenant_id** (String)
-- **tenant_tags** (List of String)
-- **tenanted_deployment_participation** (String)
-- **tenants** (List of String)
-- **token** (String)
-- **username** (String)
+- `access_key` (String)
+- `account_type` (String)
+- `active_directory_endpoint_base_uri` (String)
+- `application_id` (String)
+- `authentication_endpoint` (String)
+- `azure_environment` (String)
+- `certificate_data` (String)
+- `certificate_thumbprint` (String)
+- `client_secret` (String)
+- `description` (String)
+- `environments` (List of String)
+- `id` (String)
+- `name` (String)
+- `password` (String)
+- `private_key_file` (String)
+- `private_key_passphrase` (String)
+- `resource_manager_endpoint` (String)
+- `secret_key` (String)
+- `service_management_endpoint_base_uri` (String)
+- `service_management_endpoint_suffix` (String)
+- `space_id` (String)
+- `subscription_id` (String)
+- `tenant_id` (String)
+- `tenant_tags` (List of String)
+- `tenanted_deployment_participation` (String)
+- `tenants` (List of String)
+- `token` (String)
+- `username` (String)

@@ -27,27 +27,27 @@ data "octopusdeploy_spaces" "spaces" {
 
 ### Optional
 
-- **ids** (List of String) A filter to search by a list of IDs.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **spaces** (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--spaces))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `spaces` (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--spaces))
 
 <a id="nestedblock--spaces"></a>
 ### Nested Schema for `spaces`
 
 Read-Only:
 
-- **description** (String) The description of this space.
-- **id** (String) The unique ID for this resource.
-- **is_default** (Boolean) Specifies if this space is the default space in Octopus.
-- **is_task_queue_stopped** (Boolean) Specifies the status of the task queue for this space.
-- **name** (String) The name of this resource.
-- **space_managers_team_members** (List of String) A list of user IDs designated to be managers of this space.
-- **space_managers_teams** (List of String) A list of team IDs designated to be managers of this space.
+- `description` (String) The description of this space.
+- `id` (String) The unique ID for this resource.
+- `is_default` (Boolean) Specifies if this space is the default space in Octopus.
+- `is_task_queue_stopped` (Boolean) Specifies the status of the task queue for this space.
+- `name` (String) The name of this resource.
+- `space_managers_team_members` (List of String) A list of user IDs designated to be managers of this space.
+- `space_managers_teams` (List of String) A list of team IDs designated to be managers of this space.
 
 

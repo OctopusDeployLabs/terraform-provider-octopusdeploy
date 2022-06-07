@@ -17,32 +17,32 @@ This resource manages library variable sets in Octopus Deploy.
 
 ### Required
 
-- **name** (String) The name of this resource.
+- `name` (String) The name of this resource.
 
 ### Optional
 
-- **description** (String) The description of this library variable set.
-- **id** (String) The unique ID for this resource.
-- **space_id** (String) The space ID associated with this resource.
-- **template** (Block List) (see [below for nested schema](#nestedblock--template))
+- `description` (String) The description of this library variable set.
+- `id` (String) The unique ID for this resource.
+- `space_id` (String) The space ID associated with this resource.
+- `template` (Block List) (see [below for nested schema](#nestedblock--template))
 
 ### Read-Only
 
-- **variable_set_id** (String)
+- `variable_set_id` (String)
 
 <a id="nestedblock--template"></a>
 ### Nested Schema for `template`
 
 Required:
 
-- **name** (String) The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`.
+- `name` (String) The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`.
 
 Optional:
 
-- **default_value** (String) A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.
-- **display_settings** (Map of String) The display settings for the parameter.
-- **help_text** (String) The help presented alongside the parameter input.
-- **id** (String) The unique ID for this resource.
-- **label** (String) The label shown beside the parameter when presented in the deployment process. Example: `Server name`.
+- `default_value` (String) A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.
+- `display_settings` (Map of String) The display settings for the parameter.
+- `help_text` (String) The help presented alongside the parameter input.
+- `id` (String) The unique ID for this resource.
+- `label` (String) The label shown beside the parameter when presented in the deployment process. Example: `Server name`.
 
 

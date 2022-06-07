@@ -17,33 +17,30 @@ description: |-
 
 ### Required
 
-- **name** (String)
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `name` (String)
 
 ### Read-Only
 
-- **endpoint_communicationstyle** (String)
-- **endpoint_id** (String)
-- **endpoint_proxyid** (String)
-- **endpoint_tentacleversiondetails_upgradelocked** (String)
-- **endpoint_tentacleversiondetails_upgraderequired** (String)
-- **endpoint_tentacleversiondetails_upgradesuggested** (String)
-- **endpoint_tentacleversiondetails_version** (String)
-- **endpoint_thumbprint** (String)
-- **endpoint_uri** (String)
-- **environments** (List of String)
-- **haslatestcalamari** (Boolean)
-- **isdisabled** (Boolean)
-- **isinprocess** (Boolean)
-- **machinepolicy** (String)
-- **roles** (List of String)
-- **status** (String)
-- **statussummary** (String)
-- **tenanteddeploymentparticipation** (String)
-- **tenantids** (List of String)
-- **tenanttags** (List of String)
+- `endpoint_communicationstyle` (String)
+- `endpoint_id` (String)
+- `endpoint_proxyid` (String)
+- `endpoint_tentacleversiondetails_upgradelocked` (String)
+- `endpoint_tentacleversiondetails_upgraderequired` (String)
+- `endpoint_tentacleversiondetails_upgradesuggested` (String)
+- `endpoint_tentacleversiondetails_version` (String)
+- `endpoint_thumbprint` (String)
+- `endpoint_uri` (String)
+- `environments` (List of String)
+- `haslatestcalamari` (Boolean)
+- `id` (String) The ID of this resource.
+- `isdisabled` (Boolean)
+- `isinprocess` (Boolean)
+- `machinepolicy` (String)
+- `roles` (List of String)
+- `status` (String)
+- `statussummary` (String)
+- `tenanteddeploymentparticipation` (String)
+- `tenantids` (List of String)
+- `tenanttags` (List of String)
 
 

@@ -26,15 +26,15 @@ resource "octopusdeploy_environment" "example" {
 
 ### Required
 
-- **name** (String) The name of this resource.
+- `name` (String) The name of this resource.
 
 ### Optional
 
-- **allow_dynamic_infrastructure** (Boolean)
-- **description** (String) The description of this environment.
-- **id** (String) The unique ID for this resource.
-- **sort_order** (Number) The order number to sort an environment.
-- **use_guided_failure** (Boolean)
+- `allow_dynamic_infrastructure` (Boolean)
+- `description` (String) The description of this environment.
+- `id` (String) The unique ID for this resource.
+- `sort_order` (Number) The order number to sort an environment.
+- `use_guided_failure` (Boolean)
 
 ## Import
 

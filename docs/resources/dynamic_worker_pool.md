@@ -17,19 +17,19 @@ This resource manages dynamic worker pools in Octopus Deploy.
 
 ### Required
 
-- **name** (String) The name of this resource.
-- **worker_type** (String)
+- `name` (String) The name of this resource.
+- `worker_type` (String)
 
 ### Optional
 
-- **description** (String) The description of this dynamic worker pool.
-- **id** (String) The unique ID for this resource.
-- **is_default** (Boolean)
-- **sort_order** (Number) The order number to sort a dynamic worker pool.
-- **space_id** (String) The space ID associated with this resource.
+- `description` (String) The description of this dynamic worker pool.
+- `id` (String) The unique ID for this resource.
+- `is_default` (Boolean)
+- `sort_order` (Number) The order number to sort a dynamic worker pool.
+- `space_id` (String) The space ID associated with this resource.
 
 ### Read-Only
 
-- **can_add_workers** (Boolean)
+- `can_add_workers` (Boolean)
 
 

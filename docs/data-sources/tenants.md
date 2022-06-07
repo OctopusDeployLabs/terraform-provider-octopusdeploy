@@ -17,40 +17,40 @@ Provides information about existing tenants.
 
 ### Optional
 
-- **cloned_from_tenant_id** (String) A filter to search for a cloned tenant by its ID.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **is_clone** (Boolean) A filter to search for cloned resources.
-- **name** (String) A filter to search by name.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **project_id** (String) A filter to search by a project ID.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **tags** (List of String) A filter to search by a list of tags.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `cloned_from_tenant_id` (String) A filter to search for a cloned tenant by its ID.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `is_clone` (Boolean) A filter to search for cloned resources.
+- `name` (String) A filter to search by name.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `project_id` (String) A filter to search by a project ID.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `tags` (List of String) A filter to search by a list of tags.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **tenants** (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `tenants` (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
 
 <a id="nestedblock--tenants"></a>
 ### Nested Schema for `tenants`
 
 Read-Only:
 
-- **cloned_from_tenant_id** (String) The ID of the tenant from which this tenant was cloned.
-- **description** (String) The description of this tenant.
-- **id** (String) The unique ID for this resource.
-- **name** (String) The name of this resource.
-- **project_environment** (Set of Object) (see [below for nested schema](#nestedatt--tenants--project_environment))
-- **space_id** (String) The space ID associated with this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
+- `cloned_from_tenant_id` (String) The ID of the tenant from which this tenant was cloned.
+- `description` (String) The description of this tenant.
+- `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
+- `project_environment` (Set of Object) (see [below for nested schema](#nestedatt--tenants--project_environment))
+- `space_id` (String) The space ID associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
 <a id="nestedatt--tenants--project_environment"></a>
 ### Nested Schema for `tenants.project_environment`
 
 Read-Only:
 
-- **environments** (List of String)
-- **project_id** (String)
+- `environments` (List of String)
+- `project_id` (String)
 
 

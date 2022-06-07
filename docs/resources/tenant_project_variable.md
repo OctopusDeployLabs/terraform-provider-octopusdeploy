@@ -17,14 +17,17 @@ This resource manages tenant project variables in Octopus Deploy.
 
 ### Required
 
-- **environment_id** (String)
-- **project_id** (String)
-- **template_id** (String)
-- **tenant_id** (String)
+- `environment_id` (String)
+- `project_id` (String)
+- `template_id` (String)
+- `tenant_id` (String)
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **value** (String, Sensitive)
+- `value` (String, Sensitive)
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 

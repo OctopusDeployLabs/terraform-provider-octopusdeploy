@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_ssh_key_account - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_ssh_key_account Resource - terraform-provider-octopusdeploy"
 subcategory: "Accounts"
 description: |-
   This resource manages SSH key accounts in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_ssh_key_account
+# octopusdeploy_ssh_key_account: Resource
 
 This resource manages SSH key accounts in Octopus Deploy.
 
@@ -23,19 +23,19 @@ resource "octopusdeploy_ssh_key_account" "example" {
 
 ### Required
 
-- **name** (String) The name of this resource.
-- **private_key_file** (String, Sensitive)
-- **username** (String, Sensitive) The username associated with this resource.
+- `name` (String) The name of this resource.
+- `private_key_file` (String, Sensitive)
+- `username` (String, Sensitive) The username associated with this resource.
 
 ### Optional
 
-- **description** (String) The description of this SSH key account.
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **id** (String) The unique ID for this resource.
-- **private_key_passphrase** (String, Sensitive)
-- **space_id** (String) The space ID associated with this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
+- `description` (String) The description of this SSH key account.
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `id` (String) The unique ID for this resource.
+- `private_key_passphrase` (String, Sensitive)
+- `space_id` (String) The space ID associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
 
 

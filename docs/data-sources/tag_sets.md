@@ -17,38 +17,38 @@ Provides information about existing tag sets.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **tag_sets** (Block List) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedblock--tag_sets))
+- `id` (String) The ID of this resource.
+- `tag_sets` (Block List) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedblock--tag_sets))
 
 <a id="nestedblock--tag_sets"></a>
 ### Nested Schema for `tag_sets`
 
 Read-Only:
 
-- **description** (String) The description of this tag set.
-- **id** (String) The unique ID for this resource.
-- **name** (String) The name of this resource.
-- **sort_order** (Number) The sort order associated with this resource.
-- **space_id** (String) The space ID associated with this resource.
-- **tag** (List of Object) A list of tags. (see [below for nested schema](#nestedatt--tag_sets--tag))
+- `description` (String) The description of this tag set.
+- `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
+- `sort_order` (Number) The sort order associated with this resource.
+- `space_id` (String) The space ID associated with this resource.
+- `tag` (List of Object) A list of tags. (see [below for nested schema](#nestedatt--tag_sets--tag))
 
 <a id="nestedatt--tag_sets--tag"></a>
 ### Nested Schema for `tag_sets.tag`
 
 Read-Only:
 
-- **canonical_tag_name** (String)
-- **color** (String)
-- **description** (String)
-- **id** (String)
-- **name** (String)
-- **sort_order** (Number)
+- `canonical_tag_name` (String)
+- `color` (String)
+- `description` (String)
+- `id` (String)
+- `name` (String)
+- `sort_order` (Number)
 
 
