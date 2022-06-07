@@ -42,12 +42,11 @@ signs:
 changelog:
   filters:
     exclude:
-      - "^docs:"
       - "^test:"
       - "^README.md"
       - "^.goreleaser.yaml"
   groups:
-    - title: 'New Features'
+    - title: 'New Features and Updates'
       regexp: "^.*feat[(\\w)]*:+.*$"
       order: 0
     - title: 'Breaking Changes'
@@ -56,6 +55,9 @@ changelog:
     - title: 'Bug Fixes'
       regexp: "^.*fix[(\\w)]*:+.*$"
       order: 10
+    - title: 'Documentation Updates'
+      regexp: "^.*docs[(\\w)]*:+.*$"
+      order: 20
     - title: Other Work
       order: 999
   sort: asc
