@@ -10,20 +10,16 @@ builds:
     ldflags:
       - "-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}"
     goos:
-      - freebsd
-      - windows
-      - linux
       - darwin
+      - linux
+      - windows
     goarch:
-      - amd64
       - "386"
+      - amd64
       - arm
       - arm64
-    ignore:
-      - goos: darwin
-        goarch: "386"
-      - goos: windows
-        goarch: arm64
+    goarm:
+      - "7"
     binary: "{{ .ProjectName }}_v{{ .Version }}"
 archives:
   - format: zip
