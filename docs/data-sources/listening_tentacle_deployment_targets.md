@@ -36,64 +36,64 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 
 ### Optional
 
-- **deployment_id** (String) A filter to search by deployment ID.
-- **environments** (List of String) A filter to search by a list of environment IDs.
-- **health_statuses** (List of String) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **is_disabled** (Boolean) A filter to search by the disabled status of a resource.
-- **name** (String) A filter to search by name.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **roles** (List of String) A filter to search by a list of role IDs.
-- **shell_names** (List of String) A list of shell names to match in the query and/or search
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
-- **tenant_tags** (List of String) A filter to search by a list of tenant tags.
-- **tenants** (List of String) A filter to search by a list of tenant IDs.
-- **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
+- `deployment_id` (String) A filter to search by deployment ID.
+- `environments` (List of String) A filter to search by a list of environment IDs.
+- `health_statuses` (List of String) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `is_disabled` (Boolean) A filter to search by the disabled status of a resource.
+- `name` (String) A filter to search by name.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `roles` (List of String) A filter to search by a list of role IDs.
+- `shell_names` (List of String) A list of shell names to match in the query and/or search
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
+- `tenant_tags` (List of String) A filter to search by a list of tenant tags.
+- `tenants` (List of String) A filter to search by a list of tenant IDs.
+- `thumbprint` (String) The thumbprint of the deployment target to match in the query and/or search
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **listening_tentacle_deployment_targets** (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacle_deployment_targets))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `listening_tentacle_deployment_targets` (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacle_deployment_targets))
 
 <a id="nestedblock--listening_tentacle_deployment_targets"></a>
 ### Nested Schema for `listening_tentacle_deployment_targets`
 
 Read-Only:
 
-- **certificate_signature_algorithm** (String)
-- **environments** (List of String) A list of environment IDs associated with this listening tentacle.
-- **has_latest_calamari** (Boolean)
-- **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **id** (String) The unique ID for this resource.
-- **is_disabled** (Boolean) Represents the disabled status of this deployment target.
-- **is_in_process** (Boolean) Represents the in-process status of this deployment target.
-- **machine_policy_id** (String) The machine policy ID that is associated with this deployment target.
-- **name** (String) The name of this resource.
-- **operating_system** (String) The operating system that is associated with this deployment target.
-- **proxy_id** (String) The proxy ID that is associated with this deployment target.
-- **roles** (List of String) A list of role IDs that are associated with this deployment target.
-- **shell_name** (String) The shell name associated with this deployment target.
-- **shell_version** (String) The shell version associated with this deployment target.
-- **space_id** (String) The space ID associated with this resource.
-- **status** (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- **status_summary** (String) A summary elaborating on the status of this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
-- **tentacle_url** (String) The tenant URL of this deployment target.
-- **tentacle_version_details** (List of Object) (see [below for nested schema](#nestedatt--listening_tentacle_deployment_targets--tentacle_version_details))
-- **thumbprint** (String) The thumbprint of this deployment target.
-- **uri** (String) The URI of this deployment target.
+- `certificate_signature_algorithm` (String)
+- `environments` (List of String) A list of environment IDs associated with this listening tentacle.
+- `has_latest_calamari` (Boolean)
+- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `id` (String) The unique ID for this resource.
+- `is_disabled` (Boolean) Represents the disabled status of this deployment target.
+- `is_in_process` (Boolean) Represents the in-process status of this deployment target.
+- `machine_policy_id` (String) The machine policy ID that is associated with this deployment target.
+- `name` (String) The name of this resource.
+- `operating_system` (String) The operating system that is associated with this deployment target.
+- `proxy_id` (String) The proxy ID that is associated with this deployment target.
+- `roles` (List of String) A list of role IDs that are associated with this deployment target.
+- `shell_name` (String) The shell name associated with this deployment target.
+- `shell_version` (String) The shell version associated with this deployment target.
+- `space_id` (String) The space ID associated with this resource.
+- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
+- `status_summary` (String) A summary elaborating on the status of this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `tentacle_url` (String) The tenant URL of this deployment target.
+- `tentacle_version_details` (List of Object) (see [below for nested schema](#nestedatt--listening_tentacle_deployment_targets--tentacle_version_details))
+- `thumbprint` (String) The thumbprint of this deployment target.
+- `uri` (String) The URI of this deployment target.
 
 <a id="nestedatt--listening_tentacle_deployment_targets--tentacle_version_details"></a>
 ### Nested Schema for `listening_tentacle_deployment_targets.tentacle_version_details`
 
 Read-Only:
 
-- **upgrade_locked** (Boolean)
-- **upgrade_required** (Boolean)
-- **upgrade_suggested** (Boolean)
-- **version** (String)
+- `upgrade_locked` (Boolean)
+- `upgrade_required` (Boolean)
+- `upgrade_suggested` (Boolean)
+- `version` (String)
 
 

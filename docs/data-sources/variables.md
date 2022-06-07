@@ -22,37 +22,37 @@ data "octopusdeploy_variables" "example" {
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **variables** (Block List) A list of variables that match the filter(s). (see [below for nested schema](#nestedblock--variables))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `variables` (Block List) A list of variables that match the filter(s). (see [below for nested schema](#nestedblock--variables))
 
 <a id="nestedblock--variables"></a>
 ### Nested Schema for `variables`
 
 Read-Only:
 
-- **description** (String) The description of this variable.
-- **encrypted_value** (String)
-- **is_editable** (Boolean) Indicates whether or not this variable is considered editable.
-- **is_sensitive** (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
-- **key_fingerprint** (String)
-- **name** (String) The name of this resource.
-- **owner_id** (String)
-- **pgp_key** (String, Sensitive)
-- **project_id** (String, Deprecated)
-- **prompt** (Set of Object) (see [below for nested schema](#nestedatt--variables--prompt))
-- **scope** (List of Object) (see [below for nested schema](#nestedatt--variables--scope))
-- **sensitive_value** (String, Sensitive)
-- **type** (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
-- **value** (String)
+- `description` (String) The description of this variable.
+- `encrypted_value` (String)
+- `is_editable` (Boolean) Indicates whether or not this variable is considered editable.
+- `is_sensitive` (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
+- `key_fingerprint` (String)
+- `name` (String) The name of this resource.
+- `owner_id` (String)
+- `pgp_key` (String, Sensitive)
+- `project_id` (String, Deprecated)
+- `prompt` (Set of Object) (see [below for nested schema](#nestedatt--variables--prompt))
+- `scope` (List of Object) (see [below for nested schema](#nestedatt--variables--scope))
+- `sensitive_value` (String, Sensitive)
+- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
+- `value` (String)
 
 <a id="nestedatt--variables--prompt"></a>
 ### Nested Schema for `variables.prompt`
 
 Read-Only:
 
-- **description** (String)
-- **is_required** (Boolean)
-- **label** (String)
+- `description` (String)
+- `is_required` (Boolean)
+- `label` (String)
 
 
 <a id="nestedatt--variables--scope"></a>
@@ -60,11 +60,11 @@ Read-Only:
 
 Read-Only:
 
-- **actions** (List of String)
-- **channels** (List of String)
-- **environments** (List of String)
-- **machines** (List of String)
-- **roles** (List of String)
-- **tenant_tags** (List of String)
+- `actions` (List of String)
+- `channels` (List of String)
+- `environments` (List of String)
+- `machines` (List of String)
+- `roles` (List of String)
+- `tenant_tags` (List of String)
 
 

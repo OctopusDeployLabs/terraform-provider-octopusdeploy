@@ -26,51 +26,51 @@ data "octopusdeploy_lifecycles" "example" {
 
 ### Optional
 
-- **id** (String) The ID of this resource.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **lifecycles** (Block List) A list of lifecycles that match the filter(s). (see [below for nested schema](#nestedblock--lifecycles))
+- `id` (String) The ID of this resource.
+- `lifecycles` (Block List) A list of lifecycles that match the filter(s). (see [below for nested schema](#nestedblock--lifecycles))
 
 <a id="nestedblock--lifecycles"></a>
 ### Nested Schema for `lifecycles`
 
 Read-Only:
 
-- **description** (String) The description of this lifecycle.
-- **id** (String) The unique ID for this resource.
-- **name** (String) The name of this resource.
-- **phase** (List of Object) (see [below for nested schema](#nestedatt--lifecycles--phase))
-- **release_retention_policy** (List of Object) (see [below for nested schema](#nestedatt--lifecycles--release_retention_policy))
-- **space_id** (String) The space ID associated with this resource.
-- **tentacle_retention_policy** (List of Object) (see [below for nested schema](#nestedatt--lifecycles--tentacle_retention_policy))
+- `description` (String) The description of this lifecycle.
+- `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
+- `phase` (List of Object) (see [below for nested schema](#nestedatt--lifecycles--phase))
+- `release_retention_policy` (List of Object) (see [below for nested schema](#nestedatt--lifecycles--release_retention_policy))
+- `space_id` (String) The space ID associated with this resource.
+- `tentacle_retention_policy` (List of Object) (see [below for nested schema](#nestedatt--lifecycles--tentacle_retention_policy))
 
 <a id="nestedatt--lifecycles--phase"></a>
 ### Nested Schema for `lifecycles.phase`
 
 Read-Only:
 
-- **automatic_deployment_targets** (List of String)
-- **id** (String)
-- **is_optional_phase** (Boolean)
-- **minimum_environments_before_promotion** (Number)
-- **name** (String)
-- **optional_deployment_targets** (List of String)
-- **release_retention_policy** (List of Object) (see [below for nested schema](#nestedobjatt--lifecycles--phase--release_retention_policy))
-- **tentacle_retention_policy** (List of Object) (see [below for nested schema](#nestedobjatt--lifecycles--phase--tentacle_retention_policy))
+- `automatic_deployment_targets` (List of String)
+- `id` (String)
+- `is_optional_phase` (Boolean)
+- `minimum_environments_before_promotion` (Number)
+- `name` (String)
+- `optional_deployment_targets` (List of String)
+- `release_retention_policy` (List of Object) (see [below for nested schema](#nestedobjatt--lifecycles--phase--release_retention_policy))
+- `tentacle_retention_policy` (List of Object) (see [below for nested schema](#nestedobjatt--lifecycles--phase--tentacle_retention_policy))
 
 <a id="nestedobjatt--lifecycles--phase--release_retention_policy"></a>
 ### Nested Schema for `lifecycles.phase.release_retention_policy`
 
 Read-Only:
 
-- **quantity_to_keep** (Number)
-- **should_keep_forever** (Boolean)
-- **unit** (String)
+- `quantity_to_keep` (Number)
+- `should_keep_forever` (Boolean)
+- `unit` (String)
 
 
 <a id="nestedobjatt--lifecycles--phase--tentacle_retention_policy"></a>
@@ -78,9 +78,9 @@ Read-Only:
 
 Read-Only:
 
-- **quantity_to_keep** (Number)
-- **should_keep_forever** (Boolean)
-- **unit** (String)
+- `quantity_to_keep` (Number)
+- `should_keep_forever` (Boolean)
+- `unit` (String)
 
 
 
@@ -89,9 +89,9 @@ Read-Only:
 
 Read-Only:
 
-- **quantity_to_keep** (Number)
-- **should_keep_forever** (Boolean)
-- **unit** (String)
+- `quantity_to_keep` (Number)
+- `should_keep_forever` (Boolean)
+- `unit` (String)
 
 
 <a id="nestedatt--lifecycles--tentacle_retention_policy"></a>
@@ -99,8 +99,8 @@ Read-Only:
 
 Read-Only:
 
-- **quantity_to_keep** (Number)
-- **should_keep_forever** (Boolean)
-- **unit** (String)
+- `quantity_to_keep` (Number)
+- `should_keep_forever` (Boolean)
+- `unit` (String)
 
 

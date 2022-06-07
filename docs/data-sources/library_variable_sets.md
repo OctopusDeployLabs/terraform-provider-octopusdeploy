@@ -17,39 +17,39 @@ Provides information about existing library variable sets.
 
 ### Optional
 
-- **content_type** (String) A filter to search by content type.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `content_type` (String) A filter to search by content type.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **library_variable_sets** (Block List) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedblock--library_variable_sets))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `library_variable_sets` (Block List) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedblock--library_variable_sets))
 
 <a id="nestedblock--library_variable_sets"></a>
 ### Nested Schema for `library_variable_sets`
 
 Read-Only:
 
-- **description** (String) The description of this library variable set.
-- **id** (String) The unique ID for this resource.
-- **name** (String) The name of this resource.
-- **space_id** (String) The space ID associated with this resource.
-- **template** (List of Object) (see [below for nested schema](#nestedatt--library_variable_sets--template))
-- **variable_set_id** (String)
+- `description` (String) The description of this library variable set.
+- `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
+- `space_id` (String) The space ID associated with this resource.
+- `template` (List of Object) (see [below for nested schema](#nestedatt--library_variable_sets--template))
+- `variable_set_id` (String)
 
 <a id="nestedatt--library_variable_sets--template"></a>
 ### Nested Schema for `library_variable_sets.template`
 
 Read-Only:
 
-- **default_value** (String)
-- **display_settings** (Map of String)
-- **help_text** (String)
-- **id** (String)
-- **label** (String)
-- **name** (String)
+- `default_value` (String)
+- `display_settings` (Map of String)
+- `help_text` (String)
+- `id` (String)
+- `label` (String)
+- `name` (String)
 
 

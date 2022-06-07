@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_aws_account - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_aws_account Resource - terraform-provider-octopusdeploy"
 subcategory: "Accounts"
 description: |-
   This resource manages AWS accounts in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_aws_account
+# octopusdeploy_aws_account: Resource
 
 This resource manages AWS accounts in Octopus Deploy.
 
@@ -23,18 +23,21 @@ resource "octopusdeploy_aws_account" "example" {
 
 ### Required
 
-- **access_key** (String) The access key associated with this AWS account.
-- **name** (String) The name of this AWS account.
-- **secret_key** (String, Sensitive) The secret key associated with this resource.
+- `access_key` (String) The access key associated with this AWS account.
+- `name` (String) The name of this AWS account.
+- `secret_key` (String, Sensitive) The secret key associated with this resource.
 
 ### Optional
 
-- **description** (String) A user-friendly description of this AWS account.
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **id** (String) The ID of this resource.
-- **space_id** (String) The space ID associated with this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
+- `description` (String) A user-friendly description of this AWS account.
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `space_id` (String) The space ID associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 

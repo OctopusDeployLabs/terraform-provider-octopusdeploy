@@ -26,24 +26,25 @@ data "octopusdeploy_project_groups" "example" {
 
 ### Optional
 
-- **ids** (List of String) A filter to search by a list of IDs.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **project_groups** (Block List) A list of project groups that match the filter(s). (see [below for nested schema](#nestedblock--project_groups))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `project_groups` (Block List) A list of project groups that match the filter(s). (see [below for nested schema](#nestedblock--project_groups))
 
 <a id="nestedblock--project_groups"></a>
 ### Nested Schema for `project_groups`
 
 Read-Only:
 
-- **description** (String) The description of this project group.
-- **id** (String) The unique ID for this resource.
-- **name** (String) The name of this resource.
-- **retention_policy_id** (String) The ID of the retention policy associated with this project group.
+- `description` (String) The description of this project group.
+- `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
+- `retention_policy_id` (String) The ID of the retention policy associated with this project group.
+- `space_id` (String) The space ID associated with this project group.
 
 

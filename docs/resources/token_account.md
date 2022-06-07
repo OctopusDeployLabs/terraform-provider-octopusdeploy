@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_token_account - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_token_account Resource - terraform-provider-octopusdeploy"
 subcategory: "Accounts"
 description: |-
   
 ---
 
-# Resource: octopusdeploy_token_account
+# octopusdeploy_token_account: Resource
 
 
 
@@ -22,17 +22,17 @@ resource "octopusdeploy_token_account" "example" {
 
 ### Required
 
-- **name** (String) The name of this resource.
-- **token** (String, Sensitive) The token of this resource.
+- `name` (String) The name of this resource.
+- `token` (String, Sensitive) The token of this resource.
 
 ### Optional
 
-- **description** (String) The description of this token account.
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **id** (String) The unique ID for this resource.
-- **space_id** (String) The space ID associated with this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
+- `description` (String) The description of this token account.
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `id` (String) The unique ID for this resource.
+- `space_id` (String) The space ID associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
 
 

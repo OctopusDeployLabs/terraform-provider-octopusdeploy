@@ -1,13 +1,13 @@
 ---
-page_title: "Resource octopusdeploy_aws_elastic_container_registry - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_aws_elastic_container_registry Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  This resource manages a AWS Elastic Container Registry in Octopus Deploy.
+  This resource manages an AWS Elastic Container Registry in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_aws_elastic_container_registry
+# octopusdeploy_aws_elastic_container_registry: Resource
 
-This resource manages a AWS Elastic Container Registry in Octopus Deploy.
+This resource manages an AWS Elastic Container Registry in Octopus Deploy.
 
 ## Example Usage
 
@@ -24,15 +24,15 @@ resource "octopusdeploy_aws_elastic_container_registry" "example" {
 
 ### Required
 
-- **access_key** (String) The AWS access key to use when authenticating against Amazon Web Services.
-- **name** (String) A short, memorable, unique name for this feed. Example: ACME Builds.
-- **region** (String) The AWS region where the registry resides.
-- **secret_key** (String, Sensitive) The AWS secret key to use when authenticating against Amazon Web Services.
+- `access_key` (String) The AWS access key to use when authenticating against Amazon Web Services.
+- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `region` (String) The AWS region where the registry resides.
+- `secret_key` (String, Sensitive) The AWS secret key to use when authenticating against Amazon Web Services.
 
 ### Optional
 
-- **id** (String) The unique ID for this feed.
-- **package_acquisition_location_options** (List of String)
-- **space_id** (String) The space ID associated with this feed.
+- `id` (String) The unique ID for this feed.
+- `package_acquisition_location_options` (List of String)
+- `space_id` (String) The space ID associated with this feed.
 
 

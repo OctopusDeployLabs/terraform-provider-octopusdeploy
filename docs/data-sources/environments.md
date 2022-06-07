@@ -27,27 +27,27 @@ data "octopusdeploy_environments" "example" {
 
 ### Optional
 
-- **ids** (List of String) A filter to search by a list of IDs.
-- **name** (String) A filter to search by name.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `name` (String) A filter to search by name.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **environments** (Block List) A list of environments that match the filter(s). (see [below for nested schema](#nestedblock--environments))
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `environments` (Block List) A list of environments that match the filter(s). (see [below for nested schema](#nestedblock--environments))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
 <a id="nestedblock--environments"></a>
 ### Nested Schema for `environments`
 
 Read-Only:
 
-- **allow_dynamic_infrastructure** (Boolean)
-- **description** (String) The description of this environment.
-- **id** (String) The unique ID for this resource.
-- **name** (String) The name of this resource.
-- **sort_order** (Number) The order number to sort an environment.
-- **use_guided_failure** (Boolean)
+- `allow_dynamic_infrastructure` (Boolean)
+- `description` (String) The description of this environment.
+- `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
+- `sort_order` (Number) The order number to sort an environment.
+- `use_guided_failure` (Boolean)
 
 

@@ -17,23 +17,23 @@ This resource manages tenants in Octopus Deploy.
 
 ### Required
 
-- **name** (String) The name of this resource.
+- `name` (String) The name of this resource.
 
 ### Optional
 
-- **cloned_from_tenant_id** (String) The ID of the tenant from which this tenant was cloned.
-- **description** (String) The description of this tenant.
-- **id** (String) The unique ID for this resource.
-- **project_environment** (Block Set) (see [below for nested schema](#nestedblock--project_environment))
-- **space_id** (String) The space ID associated with this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
+- `cloned_from_tenant_id` (String) The ID of the tenant from which this tenant was cloned.
+- `description` (String) The description of this tenant.
+- `id` (String) The unique ID for this resource.
+- `project_environment` (Block Set) (see [below for nested schema](#nestedblock--project_environment))
+- `space_id` (String) The space ID associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
 <a id="nestedblock--project_environment"></a>
 ### Nested Schema for `project_environment`
 
 Required:
 
-- **environments** (List of String) A list of environment IDs associated with this tenant through a project.
-- **project_id** (String) The project ID associated with this tenant.
+- `environments` (List of String) A list of environment IDs associated with this tenant through a project.
+- `project_id` (String) The project ID associated with this tenant.
 
 

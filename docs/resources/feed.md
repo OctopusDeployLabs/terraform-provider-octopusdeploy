@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_feed - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_feed Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
   
 ---
 
-# Resource: octopusdeploy_feed
+# octopusdeploy_feed: Resource
 
 
 
@@ -28,28 +28,28 @@ resource "octopusdeploy_feed" "example" {
 
 ### Required
 
-- **feed_uri** (String)
-- **name** (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `feed_uri` (String)
+- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
 
 ### Optional
 
-- **access_key** (String)
-- **api_version** (String)
-- **delete_unreleased_packages_after_days** (Number)
-- **download_attempts** (Number) The number of times a deployment should attempt to download a package from this feed before failing.
-- **download_retry_backoff_seconds** (Number) The number of seconds to apply as a linear back off between download attempts.
-- **feed_type** (String)
-- **id** (String) The unique ID for this resource.
-- **is_enhanced_mode** (Boolean)
-- **package_acquisition_location_options** (List of String)
-- **password** (String, Sensitive) The password associated with this resource.
-- **registry_path** (String)
-- **secret_key** (String, Sensitive)
-- **space_id** (String) The space ID associated with this resource.
-- **username** (String, Sensitive) The username associated with this resource.
+- `access_key` (String)
+- `api_version` (String)
+- `delete_unreleased_packages_after_days` (Number)
+- `download_attempts` (Number) The number of times a deployment should attempt to download a package from this feed before failing.
+- `download_retry_backoff_seconds` (Number) The number of seconds to apply as a linear back off between download attempts.
+- `feed_type` (String)
+- `id` (String) The unique ID for this resource.
+- `is_enhanced_mode` (Boolean)
+- `package_acquisition_location_options` (List of String)
+- `password` (String, Sensitive) The password associated with this resource.
+- `registry_path` (String)
+- `secret_key` (String, Sensitive)
+- `space_id` (String) The space ID associated with this resource.
+- `username` (String, Sensitive) The username associated with this resource.
 
 ### Read-Only
 
-- **region** (String)
+- `region` (String)
 
 

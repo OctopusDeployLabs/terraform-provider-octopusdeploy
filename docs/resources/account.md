@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_account - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_account Resource - terraform-provider-octopusdeploy"
 subcategory: "Accounts"
 description: |-
   This resource manages accounts in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_account
+# octopusdeploy_account: Resource
 
 This resource manages accounts in Octopus Deploy.
 
@@ -65,36 +65,36 @@ resource "octopusdeploy_account" "token_account" {
 
 ### Required
 
-- **account_type** (String) Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.
-- **name** (String) The name of this resource.
+- `account_type` (String) Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.
+- `name` (String) The name of this resource.
 
 ### Optional
 
-- **access_key** (String) The access key associated with this resource.
-- **active_directory_endpoint_base_uri** (String)
-- **application_id** (String) The application ID of this resource.
-- **authentication_endpoint** (String) The authentication endpoint URI for this resource.
-- **azure_environment** (String) The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
-- **certificate_data** (String, Sensitive)
-- **certificate_thumbprint** (String, Sensitive)
-- **client_secret** (String, Sensitive)
-- **description** (String) The description of this account resource.
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **id** (String) The unique ID for this resource.
-- **password** (String, Sensitive) The password associated with this resource.
-- **private_key_file** (String, Sensitive)
-- **private_key_passphrase** (String, Sensitive)
-- **resource_manager_endpoint** (String) The resource manager endpoint URI for this resource.
-- **secret_key** (String, Sensitive) The secret key associated with this resource.
-- **service_management_endpoint_base_uri** (String)
-- **service_management_endpoint_suffix** (String)
-- **space_id** (String) The space ID associated with this resource.
-- **subscription_id** (String) The subscription ID of this resource.
-- **tenant_id** (String) The tenant ID of this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
-- **token** (String, Sensitive) The token of this resource.
-- **username** (String, Sensitive) The username associated with this resource.
+- `access_key` (String) The access key associated with this resource.
+- `active_directory_endpoint_base_uri` (String)
+- `application_id` (String) The application ID of this resource.
+- `authentication_endpoint` (String) The authentication endpoint URI for this resource.
+- `azure_environment` (String) The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
+- `certificate_data` (String, Sensitive)
+- `certificate_thumbprint` (String, Sensitive)
+- `client_secret` (String, Sensitive)
+- `description` (String) The description of this account resource.
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `id` (String) The unique ID for this resource.
+- `password` (String, Sensitive) The password associated with this resource.
+- `private_key_file` (String, Sensitive)
+- `private_key_passphrase` (String, Sensitive)
+- `resource_manager_endpoint` (String) The resource manager endpoint URI for this resource.
+- `secret_key` (String, Sensitive) The secret key associated with this resource.
+- `service_management_endpoint_base_uri` (String)
+- `service_management_endpoint_suffix` (String)
+- `space_id` (String) The space ID associated with this resource.
+- `subscription_id` (String) The subscription ID of this resource.
+- `tenant_id` (String) The tenant ID of this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `token` (String, Sensitive) The token of this resource.
+- `username` (String, Sensitive) The username associated with this resource.
 
 

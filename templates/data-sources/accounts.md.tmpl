@@ -5,12 +5,12 @@ description: |-
 {{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
 
-# {{.Name}}: {{.Type}}
+# Data Source: {{.Name}}
 
 {{ .Description | trimspace }}
 
 ## Example Usage
 
-{{ tffile (printf "%s%s%s" "examples/data-sources/" .Type "/data-source.tf") }}
+{{ tffile (printf "%s%s%s" "examples/data-sources/" .Name "/data-source.tf") }}
 
 {{ .SchemaMarkdown | trimspace }}

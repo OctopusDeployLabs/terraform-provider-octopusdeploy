@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_docker_container_registry - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_docker_container_registry Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
   This resource manages a Docker Container Registry in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_docker_container_registry
+# octopusdeploy_docker_container_registry: Resource
 
 This resource manages a Docker Container Registry in Octopus Deploy.
 
@@ -25,17 +25,17 @@ resource "octopusdeploy_docker_container_registry" "example" {
 
 ### Required
 
-- **feed_uri** (String) The URL to a Maven repository. This URL is the same value defined in the `repositories`/`repository`/`url` element of a Maven `settings.xml` file.
-- **name** (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `feed_uri` (String) The URL to a Maven repository. This URL is the same value defined in the `repositories`/`repository`/`url` element of a Maven `settings.xml` file.
+- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
 
 ### Optional
 
-- **api_version** (String)
-- **id** (String) The unique ID for this resource.
-- **package_acquisition_location_options** (List of String)
-- **password** (String, Sensitive) The password associated with this resource.
-- **registry_path** (String)
-- **space_id** (String) The space ID associated with this resource.
-- **username** (String, Sensitive) The username associated with this resource.
+- `api_version` (String)
+- `id` (String) The unique ID for this resource.
+- `package_acquisition_location_options` (List of String)
+- `password` (String, Sensitive) The password associated with this resource.
+- `registry_path` (String)
+- `space_id` (String) The space ID associated with this resource.
+- `username` (String, Sensitive) The username associated with this resource.
 
 

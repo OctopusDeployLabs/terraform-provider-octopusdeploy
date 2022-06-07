@@ -17,128 +17,128 @@ Provides information about existing SSH connection deployment targets.
 
 ### Optional
 
-- **deployment_id** (String) A filter to search by deployment ID.
-- **environments** (List of String) A filter to search by a list of environment IDs.
-- **health_statuses** (List of String) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **ids** (List of String) A filter to search by a list of IDs.
-- **is_disabled** (Boolean) A filter to search by the disabled status of a resource.
-- **name** (String) A filter to search by name.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **roles** (List of String) A filter to search by a list of role IDs.
-- **shell_names** (List of String) A list of shell names to match in the query and/or search
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
-- **tenant_tags** (List of String) A filter to search by a list of tenant tags.
-- **tenants** (List of String) A filter to search by a list of tenant IDs.
-- **thumbprint** (String) The thumbprint of the deployment target to match in the query and/or search
+- `deployment_id` (String) A filter to search by deployment ID.
+- `environments` (List of String) A filter to search by a list of environment IDs.
+- `health_statuses` (List of String) A filter to search by a list of health statuses of resources. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `is_disabled` (Boolean) A filter to search by the disabled status of a resource.
+- `name` (String) A filter to search by name.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `roles` (List of String) A filter to search by a list of role IDs.
+- `shell_names` (List of String) A list of shell names to match in the query and/or search
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
+- `tenant_tags` (List of String) A filter to search by a list of tenant tags.
+- `tenants` (List of String) A filter to search by a list of tenant IDs.
+- `thumbprint` (String) The thumbprint of the deployment target to match in the query and/or search
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **ssh_connection_deployment_targets** (Block List) A list of SSH connection deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--ssh_connection_deployment_targets))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `ssh_connection_deployment_targets` (Block List) A list of SSH connection deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--ssh_connection_deployment_targets))
 
 <a id="nestedblock--ssh_connection_deployment_targets"></a>
 ### Nested Schema for `ssh_connection_deployment_targets`
 
 Read-Only:
 
-- **account_id** (String)
-- **dot_net_core_platform** (String)
-- **endpoint** (List of Object) (see [below for nested schema](#nestedatt--ssh_connection_deployment_targets--endpoint))
-- **environments** (List of String) A list of environment IDs associated with this resource.
-- **fingerprint** (String)
-- **has_latest_calamari** (Boolean)
-- **health_status** (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- **host** (String)
-- **id** (String) The unique ID for this resource.
-- **is_disabled** (Boolean)
-- **is_in_process** (Boolean)
-- **machine_policy_id** (String)
-- **name** (String) The name of this resource.
-- **operating_system** (String)
-- **port** (Number)
-- **proxy_id** (String)
-- **roles** (List of String)
-- **shell_name** (String)
-- **shell_version** (String)
-- **space_id** (String) The space ID associated with this resource.
-- **status** (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- **status_summary** (String) A summary elaborating on the status of this resource.
-- **tenant_tags** (List of String) A list of tenant tags associated with this resource.
-- **tenanted_deployment_participation** (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- **tenants** (List of String) A list of tenant IDs associated with this resource.
-- **thumbprint** (String)
-- **uri** (String)
+- `account_id` (String)
+- `dot_net_core_platform` (String)
+- `endpoint` (List of Object) (see [below for nested schema](#nestedatt--ssh_connection_deployment_targets--endpoint))
+- `environments` (List of String) A list of environment IDs associated with this resource.
+- `fingerprint` (String)
+- `has_latest_calamari` (Boolean)
+- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
+- `host` (String)
+- `id` (String) The unique ID for this resource.
+- `is_disabled` (Boolean)
+- `is_in_process` (Boolean)
+- `machine_policy_id` (String)
+- `name` (String) The name of this resource.
+- `operating_system` (String)
+- `port` (Number)
+- `proxy_id` (String)
+- `roles` (List of String)
+- `shell_name` (String)
+- `shell_version` (String)
+- `space_id` (String) The space ID associated with this resource.
+- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
+- `status_summary` (String) A summary elaborating on the status of this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `thumbprint` (String)
+- `uri` (String)
 
 <a id="nestedatt--ssh_connection_deployment_targets--endpoint"></a>
 ### Nested Schema for `ssh_connection_deployment_targets.endpoint`
 
 Read-Only:
 
-- **aad_client_credential_secret** (String)
-- **aad_credential_type** (String)
-- **aad_user_credential_username** (String)
-- **account_id** (String)
-- **applications_directory** (String)
-- **authentication** (Set of Object) (see [below for nested schema](#nestedobjatt--ssh_connection_deployment_targets--endpoint--authentication))
-- **certificate_signature_algorithm** (String)
-- **certificate_store_location** (String)
-- **certificate_store_name** (String)
-- **client_certificate_variable** (String)
-- **cloud_service_name** (String)
-- **cluster_certificate** (String)
-- **cluster_url** (String)
-- **communication_style** (String)
-- **connection_endpoint** (String)
-- **container** (List of Object) (see [below for nested schema](#nestedobjatt--ssh_connection_deployment_targets--endpoint--container))
-- **default_worker_pool_id** (String)
-- **destination** (List of Object) (see [below for nested schema](#nestedobjatt--ssh_connection_deployment_targets--endpoint--destination))
-- **dot_net_core_platform** (String)
-- **fingerprint** (String)
-- **host** (String)
-- **id** (String)
-- **namespace** (String)
-- **port** (Number)
-- **proxy_id** (String)
-- **resource_group_name** (String)
-- **running_in_container** (Boolean)
-- **security_mode** (String)
-- **server_certificate_thumbprint** (String)
-- **skip_tls_verification** (Boolean)
-- **slot** (String)
-- **storage_account_name** (String)
-- **swap_if_possible** (Boolean)
-- **tentacle_version_details** (List of Object) (see [below for nested schema](#nestedobjatt--ssh_connection_deployment_targets--endpoint--tentacle_version_details))
-- **thumbprint** (String)
-- **uri** (String)
-- **use_current_instance_count** (Boolean)
-- **web_app_name** (String)
-- **web_app_slot_name** (String)
-- **working_directory** (String)
+- `aad_client_credential_secret` (String)
+- `aad_credential_type` (String)
+- `aad_user_credential_username` (String)
+- `account_id` (String)
+- `applications_directory` (String)
+- `authentication` (Set of Object) (see [below for nested schema](#nestedobjatt--ssh_connection_deployment_targets--endpoint--authentication))
+- `certificate_signature_algorithm` (String)
+- `certificate_store_location` (String)
+- `certificate_store_name` (String)
+- `client_certificate_variable` (String)
+- `cloud_service_name` (String)
+- `cluster_certificate` (String)
+- `cluster_url` (String)
+- `communication_style` (String)
+- `connection_endpoint` (String)
+- `container` (List of Object) (see [below for nested schema](#nestedobjatt--ssh_connection_deployment_targets--endpoint--container))
+- `default_worker_pool_id` (String)
+- `destination` (List of Object) (see [below for nested schema](#nestedobjatt--ssh_connection_deployment_targets--endpoint--destination))
+- `dot_net_core_platform` (String)
+- `fingerprint` (String)
+- `host` (String)
+- `id` (String)
+- `namespace` (String)
+- `port` (Number)
+- `proxy_id` (String)
+- `resource_group_name` (String)
+- `running_in_container` (Boolean)
+- `security_mode` (String)
+- `server_certificate_thumbprint` (String)
+- `skip_tls_verification` (Boolean)
+- `slot` (String)
+- `storage_account_name` (String)
+- `swap_if_possible` (Boolean)
+- `tentacle_version_details` (List of Object) (see [below for nested schema](#nestedobjatt--ssh_connection_deployment_targets--endpoint--tentacle_version_details))
+- `thumbprint` (String)
+- `uri` (String)
+- `use_current_instance_count` (Boolean)
+- `web_app_name` (String)
+- `web_app_slot_name` (String)
+- `working_directory` (String)
 
 <a id="nestedobjatt--ssh_connection_deployment_targets--endpoint--authentication"></a>
 ### Nested Schema for `ssh_connection_deployment_targets.endpoint.authentication`
 
 Read-Only:
 
-- **account_id** (String)
-- **admin_login** (String)
-- **assume_role** (Boolean)
-- **assume_role_external_id** (String)
-- **assume_role_session_duration** (Number)
-- **assumed_role_arn** (String)
-- **assumed_role_session** (String)
-- **authentication_type** (String)
-- **client_certificate** (String)
-- **cluster_name** (String)
-- **cluster_resource_group** (String)
-- **impersonate_service_account** (Boolean)
-- **project** (String)
-- **region** (String)
-- **service_account_emails** (String)
-- **use_instance_role** (Boolean)
-- **use_vm_service_account** (Boolean)
-- **zone** (String)
+- `account_id` (String)
+- `admin_login` (String)
+- `assume_role` (Boolean)
+- `assume_role_external_id` (String)
+- `assume_role_session_duration` (Number)
+- `assumed_role_arn` (String)
+- `assumed_role_session` (String)
+- `authentication_type` (String)
+- `client_certificate` (String)
+- `cluster_name` (String)
+- `cluster_resource_group` (String)
+- `impersonate_service_account` (Boolean)
+- `project` (String)
+- `region` (String)
+- `service_account_emails` (String)
+- `use_instance_role` (Boolean)
+- `use_vm_service_account` (Boolean)
+- `zone` (String)
 
 
 <a id="nestedobjatt--ssh_connection_deployment_targets--endpoint--container"></a>
@@ -146,8 +146,8 @@ Read-Only:
 
 Read-Only:
 
-- **feed_id** (String)
-- **image** (String)
+- `feed_id` (String)
+- `image` (String)
 
 
 <a id="nestedobjatt--ssh_connection_deployment_targets--endpoint--destination"></a>
@@ -155,8 +155,8 @@ Read-Only:
 
 Read-Only:
 
-- **destination_type** (String)
-- **drop_folder_path** (String)
+- `destination_type` (String)
+- `drop_folder_path` (String)
 
 
 <a id="nestedobjatt--ssh_connection_deployment_targets--endpoint--tentacle_version_details"></a>
@@ -164,9 +164,9 @@ Read-Only:
 
 Read-Only:
 
-- **upgrade_locked** (Boolean)
-- **upgrade_required** (Boolean)
-- **upgrade_suggested** (Boolean)
-- **version** (String)
+- `upgrade_locked` (Boolean)
+- `upgrade_required` (Boolean)
+- `upgrade_suggested` (Boolean)
+- `version` (String)
 
 

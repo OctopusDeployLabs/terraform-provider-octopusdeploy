@@ -26,29 +26,29 @@ data "octopusdeploy_user_roles" "example" {
 
 ### Optional
 
-- **ids** (List of String) A filter to search by a list of IDs.
-- **partial_name** (String) A filter to search by the partial match of a name.
-- **skip** (Number) A filter to specify the number of items to skip in the response.
-- **take** (Number) A filter to specify the number of items to take (or return) in the response.
+- `ids` (List of String) A filter to search by a list of IDs.
+- `partial_name` (String) A filter to search by the partial match of a name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- **id** (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- **user_roles** (Block List) A list of user roles that match the filter(s). (see [below for nested schema](#nestedblock--user_roles))
+- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `user_roles` (Block List) A list of user roles that match the filter(s). (see [below for nested schema](#nestedblock--user_roles))
 
 <a id="nestedblock--user_roles"></a>
 ### Nested Schema for `user_roles`
 
 Read-Only:
 
-- **can_be_deleted** (Boolean)
-- **description** (String) The description of this user role.
-- **granted_space_permissions** (List of String)
-- **granted_system_permissions** (List of String)
-- **id** (String) The unique ID for this resource.
-- **name** (String) The name of this resource.
-- **space_permission_descriptions** (List of String)
-- **supported_restrictions** (List of String)
-- **system_permission_descriptions** (List of String)
+- `can_be_deleted` (Boolean)
+- `description` (String) The description of this user role.
+- `granted_space_permissions` (List of String)
+- `granted_system_permissions` (List of String)
+- `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
+- `space_permission_descriptions` (List of String)
+- `supported_restrictions` (List of String)
+- `system_permission_descriptions` (List of String)
 
 

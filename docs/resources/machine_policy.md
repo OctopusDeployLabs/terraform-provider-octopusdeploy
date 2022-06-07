@@ -17,35 +17,35 @@ This resource manages machine policies in Octopus Deploy.
 
 ### Required
 
-- **name** (String) The name of this resource.
+- `name` (String) The name of this resource.
 
 ### Optional
 
-- **connection_connect_timeout** (Number)
-- **connection_retry_count_limit** (Number)
-- **connection_retry_sleep_interval** (Number)
-- **connection_retry_time_limit** (Number)
-- **description** (String) The description of this machine policy.
-- **id** (String) The unique ID for this resource.
-- **machine_cleanup_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_cleanup_policy))
-- **machine_connectivity_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_connectivity_policy))
-- **machine_health_check_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy))
-- **machine_update_policy** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_update_policy))
-- **polling_request_maximum_message_processing_timeout** (Number)
-- **polling_request_queue_timeout** (Number)
-- **space_id** (String) The space ID associated with this resource.
+- `connection_connect_timeout` (Number)
+- `connection_retry_count_limit` (Number)
+- `connection_retry_sleep_interval` (Number)
+- `connection_retry_time_limit` (Number)
+- `description` (String) The description of this machine policy.
+- `id` (String) The unique ID for this resource.
+- `machine_cleanup_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_cleanup_policy))
+- `machine_connectivity_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_connectivity_policy))
+- `machine_health_check_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy))
+- `machine_update_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_update_policy))
+- `polling_request_maximum_message_processing_timeout` (Number)
+- `polling_request_queue_timeout` (Number)
+- `space_id` (String) The space ID associated with this resource.
 
 ### Read-Only
 
-- **is_default** (Boolean)
+- `is_default` (Boolean)
 
 <a id="nestedblock--machine_cleanup_policy"></a>
 ### Nested Schema for `machine_cleanup_policy`
 
 Optional:
 
-- **delete_machines_behavior** (String)
-- **delete_machines_elapsed_timespan** (Number)
+- `delete_machines_behavior` (String)
+- `delete_machines_elapsed_timespan` (Number)
 
 
 <a id="nestedblock--machine_connectivity_policy"></a>
@@ -53,7 +53,7 @@ Optional:
 
 Optional:
 
-- **machine_connectivity_behavior** (String)
+- `machine_connectivity_behavior` (String)
 
 
 <a id="nestedblock--machine_health_check_policy"></a>
@@ -61,23 +61,23 @@ Optional:
 
 Required:
 
-- **bash_health_check_policy** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy--bash_health_check_policy))
-- **powershell_health_check_policy** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy--powershell_health_check_policy))
+- `bash_health_check_policy` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy--bash_health_check_policy))
+- `powershell_health_check_policy` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy--powershell_health_check_policy))
 
 Optional:
 
-- **health_check_cron** (String)
-- **health_check_cron_timezone** (String)
-- **health_check_interval** (Number)
-- **health_check_type** (String)
+- `health_check_cron` (String)
+- `health_check_cron_timezone` (String)
+- `health_check_interval` (Number)
+- `health_check_type` (String)
 
 <a id="nestedblock--machine_health_check_policy--bash_health_check_policy"></a>
 ### Nested Schema for `machine_health_check_policy.bash_health_check_policy`
 
 Optional:
 
-- **run_type** (String)
-- **script_body** (String)
+- `run_type` (String)
+- `script_body` (String)
 
 
 <a id="nestedblock--machine_health_check_policy--powershell_health_check_policy"></a>
@@ -85,8 +85,8 @@ Optional:
 
 Optional:
 
-- **run_type** (String)
-- **script_body** (String)
+- `run_type` (String)
+- `script_body` (String)
 
 
 
@@ -95,8 +95,8 @@ Optional:
 
 Optional:
 
-- **calamari_update_behavior** (String)
-- **tentacle_update_account_id** (String)
-- **tentacle_update_behavior** (String)
+- `calamari_update_behavior` (String)
+- `tentacle_update_account_id` (String)
+- `tentacle_update_behavior` (String)
 
 

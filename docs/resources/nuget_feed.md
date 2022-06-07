@@ -1,11 +1,11 @@
 ---
-page_title: "Resource octopusdeploy_nuget_feed - terraform-provider-octopusdeploy"
+page_title: "octopusdeploy_nuget_feed Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
   This resource manages a NuGet feed in Octopus Deploy.
 ---
 
-# Resource: octopusdeploy_nuget_feed
+# octopusdeploy_nuget_feed: Resource
 
 This resource manages a NuGet feed in Octopus Deploy.
 
@@ -27,18 +27,18 @@ resource "octopusdeploy_nuget_feed" "example" {
 
 ### Required
 
-- **feed_uri** (String) The feed URI can be a URL or a folder path.
-- **name** (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `feed_uri` (String) The feed URI can be a URL or a folder path.
+- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
 
 ### Optional
 
-- **download_attempts** (Number) The number of times a deployment should attempt to download a package from this feed before failing.
-- **download_retry_backoff_seconds** (Number) The number of seconds to apply as a linear back off between download attempts.
-- **id** (String) The unique ID for this resource.
-- **is_enhanced_mode** (Boolean) This will improve performance of the NuGet feed but may not be supported by some older feeds. Disable if the operation, Create Release does not return the latest version for a package.
-- **package_acquisition_location_options** (List of String)
-- **password** (String, Sensitive) The password associated with this resource.
-- **space_id** (String) The space ID associated with this resource.
-- **username** (String, Sensitive) The username associated with this resource.
+- `download_attempts` (Number) The number of times a deployment should attempt to download a package from this feed before failing.
+- `download_retry_backoff_seconds` (Number) The number of seconds to apply as a linear back off between download attempts.
+- `id` (String) The unique ID for this resource.
+- `is_enhanced_mode` (Boolean) This will improve performance of the NuGet feed but may not be supported by some older feeds. Disable if the operation, Create Release does not return the latest version for a package.
+- `package_acquisition_location_options` (List of String)
+- `password` (String, Sensitive) The password associated with this resource.
+- `space_id` (String) The space ID associated with this resource.
+- `username` (String, Sensitive) The username associated with this resource.
 
 

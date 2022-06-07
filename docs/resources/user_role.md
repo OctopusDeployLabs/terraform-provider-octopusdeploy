@@ -32,18 +32,18 @@ resource "octopusdeploy_user_role" "example" {
 
 ### Required
 
-- **name** (String) The name of this resource.
+- `name` (String) The name of this resource.
 
 ### Optional
 
-- **can_be_deleted** (Boolean)
-- **description** (String) The description of this user role.
-- **granted_space_permissions** (List of String)
-- **granted_system_permissions** (List of String)
-- **id** (String) The unique ID for this resource.
-- **space_permission_descriptions** (List of String)
-- **supported_restrictions** (List of String)
-- **system_permission_descriptions** (List of String)
+- `can_be_deleted` (Boolean)
+- `description` (String) The description of this user role.
+- `granted_space_permissions` (List of String)
+- `granted_system_permissions` (List of String)
+- `id` (String) The unique ID for this resource.
+- `space_permission_descriptions` (List of String)
+- `supported_restrictions` (List of String)
+- `system_permission_descriptions` (List of String)
 
 ## Import
 

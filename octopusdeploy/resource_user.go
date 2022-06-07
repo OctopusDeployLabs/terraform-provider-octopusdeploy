@@ -24,7 +24,7 @@ func resourceUser() *schema.Resource {
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	user := expandUser(d)
 
-	log.Printf("[INFO] creating user (%s)", user.GetID())
+	log.Printf("[DEBUG] creating user")
 
 	client := m.(*octopusdeploy.Client)
 	createdUser, err := client.Users.Add(user)
@@ -38,7 +38,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	d.SetId(createdUser.GetID())
 
-	log.Printf("[INFO] user created (%s)", d.Id())
+	log.Printf("[DEBUG] user created (%s)", d.Id())
 	return nil
 }
 
