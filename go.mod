@@ -3,12 +3,12 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.18
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy v1.8.3
+	github.com/OctopusDeploy/go-octopusdeploy v1.8.5
 	github.com/google/uuid v1.3.0
 	github.com/gruntwork-io/terratest v0.40.13
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.17.0
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.2
 )
 
 require (
