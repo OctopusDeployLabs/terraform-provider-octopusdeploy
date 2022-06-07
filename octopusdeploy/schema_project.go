@@ -13,9 +13,8 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	name := d.Get("name").(string)
 	lifecycleID := d.Get("lifecycle_id").(string)
 	projectGroupID := d.Get("project_group_id").(string)
-	spaceID := d.Get("space_id").(string)
 
-	project := octopusdeploy.NewProject(spaceID, name, lifecycleID, projectGroupID)
+	project := octopusdeploy.NewProject(name, lifecycleID, projectGroupID)
 	project.ID = d.Id()
 
 	if v, ok := d.GetOk("auto_create_release"); ok {
@@ -88,6 +87,10 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 
 	if v, ok := d.GetOk("slug"); ok {
 		project.Slug = v.(string)
+	}
+
+	if v, ok := d.GetOk("space_id"); ok {
+		project.SpaceID = v.(string)
 	}
 
 	if v, ok := d.GetOk("template"); ok {
@@ -351,6 +354,7 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"space_id": {
+			Computed:         true,
 			Description:      "The space ID associated with this project.",
 			Optional:         true,
 			Type:             schema.TypeString,
