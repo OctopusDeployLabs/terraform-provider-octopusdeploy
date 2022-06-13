@@ -70,8 +70,8 @@ github.com/Masterminds/sprig/v3 v3.2.2/go.mod h1:UoaO7Yp8KlPnJIYWTFkMaqPUYKTfGFP
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/Microsoft/go-winio v0.4.16 h1:FtSW/jqD+l4ba5iPBj9CODVtgfYAD8w2wS923g/cFDk=
 github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugXOPRXwdLnMv0=
-github.com/OctopusDeploy/go-octopusdeploy v1.8.5 h1:k8MS/p7Dg2IATppWtLHJils9tP5aFl5ttGll66cN7VY=
-github.com/OctopusDeploy/go-octopusdeploy v1.8.5/go.mod h1:53/298KRhEbphPJaTRRpjTuNMBjdb567XCAtnu0yuzg=
+github.com/OctopusDeploy/go-octopusdeploy v1.8.6 h1:HvdMKaVNhbmlyXF7Y9+HO4ZcF7+e9WlkETcgoTvG5xM=
+github.com/OctopusDeploy/go-octopusdeploy v1.8.6/go.mod h1:53/298KRhEbphPJaTRRpjTuNMBjdb567XCAtnu0yuzg=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7/go.mod h1:z4/9nQmJSSwwds7ejkxaJwO37dru3geImFUdJlaLzQo=
