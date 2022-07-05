@@ -1,0 +1,19 @@
+name: build
+on:
+  push:
+    branches:
+      - '**'
+  schedule:
+    - cron: '0 19 * * *'
+  workflow_dispatch:  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+      - run: go build ./...
