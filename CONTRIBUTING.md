@@ -1,39 +1,31 @@
-# Contributing
+# Contributing Guide
 
-## Testing and Linting
+Thanks for contributing to this project! :+1: This project and everyone participating in it is governed by the [Octopus Deploy Code of Conduct](https://github.com/OctopusDeploy/.github/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior using the instructions in the code of conduct.
 
-The GitHub action in the workflow file `.github/test.yml` creates an Octopus instance and then runs linting and tests
-against it. A PR will only be accepted if it doesn't break any existing passing tests, if all linting rules also pass,
-and if the new feature has additional tests.
+This guide provides an overview of the contribution workflow from opening an issue, creating a PR, reviewing, and merging the PR.
 
-GitHub actions are available in forked repos, but must be manually enabled.
+## Getting Started
 
-## Go Dependencies
+This project is built, tested, and released by workflows defined in GitHub Actions (see [Actions](/actions/) for more information). Release management is controlled through [Release-Please](https://github.com/googleapis/release-please).
 
-Dependencies are managed using [Go 1.11 Modules](https://github.com/golang/go/wiki/Modules)
+### Issues
 
-## Local Integration Tests
+We :heart: feedback! Submitting an issue (i.e. feature, bug) is the best way to document things your experience with this project. For example, if there's a feature missing or there's behavior that doesn't match your expectations then we strongly encourage you to submit an issue. That way, contributors can track them and have interested folks (like you) by notified if/when they're resolved.
 
-To make development easier, run a local Octopus Deploy server on your machine. The Docker Compose file at
-`tests/docker-compose.yml` will create a test environment. Set the `OCTOPUS_VERSION` environment variable to a valid
-`octopusdeploy/octopusdeploy` [image tag](https://hub.docker.com/r/octopusdeploy/octopusdeploy).
+#### Create a New Issue
 
-When it comes up, login on [http://localhost:8080](http://localhost:8080) with username `admin` and password `Password01!`.
+Use the Issues feature in GitHub to document bugs and/or features related to this project. Please ensure to apply any/all associated metadata (such as labels) in order to classify them appropriately. Also, please provide as much contextual information as you can, especially when documenting bugs. Templates are provided in this project to guide the authoring process.
 
-To get an API to use for local development, go to **Administrator | Profile | My API Keys** and click **New API Key**.
+#### Resolve an Issue
 
-Set the two following environment variables:
+Issues will be triaged and modified (if necessary) by the [CODEOWNERS](CODEOWNERS) for this project. It is important to associate pull requests with issues by referencing their issue ID in the commit message. That way, issues will be able to document changes and/or fixes. This will assist visitors when reading through issue lists.
 
-```bash
-export OCTOPUS_URL=http://localhost:8080/
-export OCTOPUS_APIKEY=API-YOUR-API-KEY
-```
+### Commit Your Change(s) through Pull Requests
 
-You can now run integration tests.
+This project employs [branch protection](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule); the `main` branch is protected. Therefore, your changes MUST be committed to a branch and submitted as a pull request. Also, this project requires the use of [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for all commit messages. Using Conventional Commits enables this project to autogenerate its [CHANGELOG.md](CHANGELOG.md) and release notes.
 
-## Running Pull Requests Locally
+### Your Pull Request is Merged! Now What?
 
-You can locally test pull requests just as the build server would.
+Congratulations! :tada: And thank you very much for your contribution to this project!
 
-- Install [golangci-lint](https://github.com/golangci/golangci-lint)
-- Run `./ci-scripts/pull_request.sh`
+Once your pull request is merged, our build and test workflow will execute once again to validate changes. Afterward, your changes will be committed to the `main` branch.

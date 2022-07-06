@@ -67,3 +67,7 @@ provider "octopusdeploy" {
   space_id = # space ID
 }
 ```
+
+## 🤝 Contributions
+
+Contributions are welcome! :heart: Please read our [Contributing Guide](CONTRIBUTING.md) for information about how to get involved in this project.
