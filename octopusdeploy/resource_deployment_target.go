@@ -32,7 +32,9 @@ func resourceDeploymentTargetCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	setDeploymentTarget(ctx, d, createdDeploymentTarget)
+	if err := setDeploymentTarget(ctx, d, createdDeploymentTarget); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] deployment target created (%s)", d.Id())
 	return nil
