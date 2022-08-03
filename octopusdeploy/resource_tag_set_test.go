@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
@@ -19,7 +18,6 @@ func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 	tagColor := "#6e6e6e"
 	tagDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tagName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	tagSortOrder := acctest.RandIntRange(0, 10)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testTagSetDestroy,
@@ -30,6 +28,7 @@ func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testTagSetExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "tag.#", "0"),
 				),
 				Config: testTagSetMinimal(localName, name),
 			},
@@ -37,12 +36,13 @@ func TestAccOctopusDeployTagSetBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testTagSetExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttrSet(prefix, "id"),
+					resource.TestCheckResourceAttrSet(prefix, "tag.0.id"),
 					resource.TestCheckResourceAttr(prefix, "tag.0.color", tagColor),
 					resource.TestCheckResourceAttr(prefix, "tag.0.description", tagDescription),
 					resource.TestCheckResourceAttr(prefix, "tag.0.name", tagName),
-					resource.TestCheckResourceAttr(prefix, "tag.0.sort_order", strconv.Itoa(tagSortOrder)),
 				),
-				Config: testTagSetComplete(localName, name, tagColor, tagDescription, tagName, tagSortOrder),
+				Config: testTagSetComplete(localName, name, tagColor, tagDescription, tagName),
 			},
 		},
 	})
@@ -54,16 +54,15 @@ func testTagSetMinimal(localName string, name string) string {
 	}`, localName, name)
 }
 
-func testTagSetComplete(localName string, name string, tagColor string, tagDescription string, tagName string, tagSortOrder int) string {
+func testTagSetComplete(localName string, name string, tagColor string, tagDescription string, tagName string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_tag_set" "%s" {
 		name = "%s"
 		tag {
 			color = "%s"
 			description = "%s"
 			name = "%s"
-			sort_order = "%v"
 		}
-	}`, localName, name, tagColor, tagDescription, tagName, tagSortOrder)
+	}`, localName, name, tagColor, tagDescription, tagName)
 }
 
 func testTagSetExists(prefix string) resource.TestCheckFunc {

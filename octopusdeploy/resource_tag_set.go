@@ -27,12 +27,16 @@ func resourceTagSetCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] creating tag set: %#v", tagSet)
 
 	client := m.(*octopusdeploy.Client)
-	tagSet, err := client.TagSets.Add(tagSet)
+	createdTagSet, err := client.TagSets.Add(tagSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(tagSet.GetID())
+	if err := setTagSet(ctx, d, createdTagSet); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(createdTagSet.GetID())
 
 	log.Printf("[INFO] tag set created (%s)", d.Id())
 	return nil
