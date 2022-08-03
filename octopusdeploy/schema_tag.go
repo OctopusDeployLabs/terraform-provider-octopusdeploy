@@ -36,7 +36,6 @@ func getTagsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"canonical_tag_name": {
 			Computed: true,
-			Optional: true,
 			Type:     schema.TypeString,
 		},
 		"color": {
@@ -44,10 +43,14 @@ func getTagsSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"description": getDescriptionSchema("tag"),
-		"id":          getIDSchema(),
-		"name":        getNameSchema(true),
+		"id": {
+			Computed:    true,
+			Description: "The unique ID for the tag.",
+			Type:        schema.TypeString,
+		},
+		"name": getNameSchema(true),
 		"sort_order": {
-			Optional: true,
+			Computed: true,
 			Type:     schema.TypeInt,
 		},
 	}
