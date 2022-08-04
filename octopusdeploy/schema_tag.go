@@ -51,6 +51,7 @@ func getTagsSchema() map[string]*schema.Schema {
 		"name": getNameSchema(true),
 		"sort_order": {
 			Computed: true,
+			Optional: true,
 			Type:     schema.TypeInt,
 		},
 	}
