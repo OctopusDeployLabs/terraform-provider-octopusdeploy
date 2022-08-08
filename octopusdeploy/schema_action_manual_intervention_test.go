@@ -33,8 +33,9 @@ func testAccManualInterventionAction() string {
 	return testAccBuildTestAction(`
 		manual_intervention_action {
 			name = "Test"
+			block_deployments = true
 			instructions = "Approve Me"
-			responsible_teams = "A Team"
+			responsible_teams = ["A Team", "B Team"]
 		}
 	`)
 }
@@ -54,11 +55,15 @@ func testAccCheckManualInterventionAction() resource.TestCheckFunc {
 			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
 		}
 
+		if action.Properties["Octopus.Action.Manual.BlockConcurrentDeployments"].Value != "True" {
+			return fmt.Errorf("Block Deployments is incorrect: %s", action.Properties["Octopus.Action.Manual.BlockConcurrentDeployments"].Value)
+		}
+
 		if action.Properties["Octopus.Action.Manual.Instructions"].Value != "Approve Me" {
 			return fmt.Errorf("Instructions is incorrect: %s", action.Properties["Octopus.Action.Manual.Instructions"].Value)
 		}
 
-		if action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"].Value != "A Team" {
+		if action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"].Value != "A Team,B Team" {
 			return fmt.Errorf("ResponsibleTeamIds is incorrect: %s", action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"].Value)
 		}
 
