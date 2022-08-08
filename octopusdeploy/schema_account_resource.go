@@ -66,7 +66,7 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	}
 
 	if v, ok := d.GetOk("private_key_passphrase"); ok {
-		accountResource.PrivateKeyFile = octopusdeploy.NewSensitiveValue(v.(string))
+		accountResource.PrivateKeyPassphrase = octopusdeploy.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("resource_management_endpoint_base_uri"); ok {
