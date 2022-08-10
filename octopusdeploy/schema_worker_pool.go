@@ -1,42 +1,10 @@
 package octopusdeploy
 
 import (
-	"context"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
-
-func expandWorkerPool(d *schema.ResourceData) *workerpools.WorkerPoolResource {
-	name := d.Get("name").(string)
-	workerPoolType := workerpools.WorkerPoolType(d.Get("worker_pool_type").(string))
-
-	workerPool := workerpools.NewWorkerPoolResource(name, workerPoolType)
-	workerPool.ID = d.Id()
-
-	if v, ok := d.GetOk("can_add_workers"); ok {
-		workerPool.CanAddWorkers = v.(bool)
-	}
-
-	if v, ok := d.GetOk("description"); ok {
-		workerPool.Description = v.(string)
-	}
-
-	if v, ok := d.GetOk("is_default"); ok {
-		workerPool.IsDefault = v.(bool)
-	}
-
-	if v, ok := d.GetOk("sort_order"); ok {
-		workerPool.SortOrder = v.(int)
-	}
-
-	if v, ok := d.GetOk("worker_type"); ok {
-		workerPool.WorkerType = workerpools.WorkerType(v.(string))
-	}
-
-	return workerPool
-}
 
 func flattenWorkerPool(workerPool *workerpools.WorkerPoolResource) map[string]interface{} {
 	if workerPool == nil {
@@ -116,19 +84,4 @@ func getWorkerPoolSchema() map[string]*schema.Schema {
 			}, false)),
 		},
 	}
-}
-
-func setWorkerPool(ctx context.Context, d *schema.ResourceData, workerPool *workerpools.WorkerPoolResource) error {
-	d.Set("can_add_workers", workerPool.CanAddWorkers)
-	d.Set("description", workerPool.Description)
-	d.Set("is_default", workerPool.IsDefault)
-	d.Set("name", workerPool.Name)
-	d.Set("space_id", workerPool.SpaceID)
-	d.Set("sort_order", workerPool.SortOrder)
-	d.Set("worker_pool_type", workerPool.WorkerPoolType)
-	d.Set("worker_type", workerPool.WorkerType)
-
-	d.SetId(workerPool.GetID())
-
-	return nil
 }
