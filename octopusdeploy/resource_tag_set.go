@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,8 +27,8 @@ func resourceTagSetCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	log.Printf("[INFO] creating tag set: %#v", tagSet)
 
-	client := m.(*octopusdeploy.Client)
-	createdTagSet, err := client.TagSets.Add(tagSet)
+	octopus := m.(*client.Client)
+	createdTagSet, err := octopus.TagSets.Add(tagSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -45,8 +46,8 @@ func resourceTagSetCreate(ctx context.Context, d *schema.ResourceData, m interfa
 func resourceTagSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting tag set (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
-	if err := client.TagSets.DeleteByID(d.Id()); err != nil {
+	octopus := m.(*client.Client)
+	if err := octopus.TagSets.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -59,17 +60,10 @@ func resourceTagSetDelete(ctx context.Context, d *schema.ResourceData, m interfa
 func resourceTagSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading tag set (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
-	tagSet, err := client.TagSets.GetByID(d.Id())
+	octopus := m.(*client.Client)
+	tagSet, err := octopus.TagSets.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] tag set (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "tag set")
 	}
 
 	if err := setTagSet(ctx, d, tagSet); err != nil {
@@ -85,8 +79,14 @@ func resourceTagSetUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	log.Printf("[INFO] updating tag set: %#v", tagSet)
 
-	client := m.(*octopusdeploy.Client)
-	updatedTagSet, err := client.TagSets.Update(tagSet)
+	octopus := m.(*client.Client)
+	existingTagSet, err := octopus.TagSets.GetByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	tagSet.Tags = existingTagSet.Tags
+
+	updatedTagSet, err := octopus.TagSets.Update(tagSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
