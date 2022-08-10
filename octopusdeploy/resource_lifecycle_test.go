@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -197,7 +197,7 @@ func testAccLifecycleComplex(localName string, name string) string {
 
 func testAccCheckLifecycleExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		if err := existsHelperLifecycle(s, client); err != nil {
 			return err
 		}
@@ -207,7 +207,7 @@ func testAccCheckLifecycleExists(n string) resource.TestCheckFunc {
 
 func testAccCheckLifecyclePhaseCount(name string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		resourceList, err := client.Lifecycles.GetByPartialName(name)
 		if err != nil {
 			return err
@@ -223,7 +223,7 @@ func testAccCheckLifecyclePhaseCount(name string, expected int) resource.TestChe
 	}
 }
 
-func existsHelperLifecycle(s *terraform.State, client *octopusdeploy.Client) error {
+func existsHelperLifecycle(s *terraform.State, client *client.Client) error {
 	for _, r := range s.RootModule().Resources {
 		if r.Type == "octopusdeploy_lifecycle" {
 			if _, err := client.Lifecycles.GetByID(r.Primary.ID); err != nil {
@@ -240,7 +240,7 @@ func testAccLifecycleCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		lifecycle, err := client.Lifecycles.GetByID(rs.Primary.ID)
 		if err == nil && lifecycle != nil {
 			return fmt.Errorf("lifecycle (%s) still exists", rs.Primary.ID)

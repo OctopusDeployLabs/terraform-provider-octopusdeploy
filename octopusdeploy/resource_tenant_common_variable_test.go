@@ -5,7 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -55,8 +56,10 @@ func TestAccTenantCommonVariableBasic(t *testing.T) {
 }
 
 func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, tenantLocalName string, tenantName string, tenantDescription string, localName string, value string) string {
+	projectGroup := test.NewProjectGroupTestOptions()
+
 	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
-		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
+		test.ProjectGroupConfiguration(projectGroup)+"\n"+
 		testAccEnvironment(environmentLocalName, environmentName)+"\n"+`
 		resource "octopusdeploy_library_variable_set" "test-library-variable-set" {
 			name = "test"
@@ -117,7 +120,7 @@ func testTenantCommonVariableExists(resourceName string) resource.TestCheckFunc 
 		libraryVariableSetID := importStrings[1]
 		templateID := importStrings[2]
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		tenant, err := client.Tenants.GetByID(tenantID)
 		if err != nil {
 			return err
@@ -139,7 +142,7 @@ func testTenantCommonVariableExists(resourceName string) resource.TestCheckFunc 
 }
 
 func testAccTenantCommonVariableCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_tenant_common_variable" {
 			continue

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -67,7 +67,7 @@ func testTagSetComplete(localName string, name string, tagColor string, tagDescr
 
 func testTagSetExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		tagSetID := s.RootModule().Resources[prefix].Primary.ID
 		if _, err := client.TagSets.GetByID(tagSetID); err != nil {
 			return err
@@ -78,7 +78,7 @@ func testTagSetExists(prefix string) resource.TestCheckFunc {
 }
 
 func testTagSetDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		tagSetID := rs.Primary.ID
 		tagSet, err := client.TagSets.GetByID(tagSetID)

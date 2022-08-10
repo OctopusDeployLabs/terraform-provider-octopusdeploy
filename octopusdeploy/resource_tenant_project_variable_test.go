@@ -5,7 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -102,8 +103,10 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 }
 
 func testAccTenantProjectVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, primaryEnvironmentLocalName string, primaryEnvironmentName string, secondaryEnvironmentLocalName string, secondaryEnvironmentName string, tenantLocalName string, tenantName string, tenantDescription string, primaryLocalName string, primaryValue string, secondaryLocalName string, secondaryValue string) string {
+	projectGroup := test.NewProjectGroupTestOptions()
+
 	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
-		testAccProjectGroupBasic(projectGroupLocalName, projectGroupName)+"\n"+
+		test.ProjectGroupConfiguration(projectGroup)+"\n"+
 		testAccEnvironment(primaryEnvironmentLocalName, primaryEnvironmentName)+"\n"+
 		testAccEnvironment(secondaryEnvironmentLocalName, secondaryEnvironmentName)+"\n"+`
 		resource "octopusdeploy_project" "%s" {
@@ -160,7 +163,7 @@ func testTenantProjectVariableExists(prefix string) resource.TestCheckFunc {
 			}
 		}
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		tenant, err := client.Tenants.GetByID(tenantID)
 		if err != nil {
 			return err
@@ -184,7 +187,7 @@ func testTenantProjectVariableExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccTenantProjectVariableCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_tenant_project_variable" {
 			continue

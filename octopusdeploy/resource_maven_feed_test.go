@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -56,7 +56,7 @@ func testMavenFeedBasic(localName string, downloadAttempts int, downloadRetryBac
 
 func testMavenFeedExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		feedID := s.RootModule().Resources[prefix].Primary.ID
 		if _, err := client.Feeds.GetByID(feedID); err != nil {
 			return err
@@ -72,7 +72,7 @@ func testMavenFeedCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		feed, err := client.Feeds.GetByID(rs.Primary.ID)
 		if err == nil && feed != nil {
 			return fmt.Errorf("Maven feed (%s) still exists", rs.Primary.ID)

@@ -2,9 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -51,6 +52,9 @@ func TestAccTeamUserRole(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
+	// TODO: replace with client reference
+	spaceID := os.Getenv("OCTOPUS_SPACE")
+
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccTeamCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -64,7 +68,7 @@ func TestAccTeamUserRole(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceName, "user_role.0.user_role_id", userRoleResource, "id"),
 					resource.TestCheckResourceAttr(resourceName, "user_role.#", "1"),
 				),
-				Config: testAccTeamUserRole(localName, name, description),
+				Config: testAccTeamUserRole(spaceID, localName, name, description),
 			},
 		},
 	})
@@ -77,7 +81,7 @@ func testAccTeamCheckExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		if _, err := client.Teams.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
@@ -87,7 +91,7 @@ func testAccTeamCheckExists(resourceName string) resource.TestCheckFunc {
 }
 
 func testAccTeamCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_team" {
 			continue
@@ -104,23 +108,23 @@ func testAccTeamCheckDestroy(s *terraform.State) error {
 func testAccTeamBasic(localName string, name string, description string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_team" "%s" {
 		description = "%s"
-		name = "%s"
+		name        = "%s"
 	}`, localName, description, name)
 }
 
-func testAccTeamUserRole(localName string, name string, description string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_user_role" "%[1]s" {
-		name = "%[3]s"
+func testAccTeamUserRole(spaceID string, localName string, name string, description string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_user_role" "%[2]s" {
 		granted_space_permissions = ["AccountCreate"]
+		name                      = "%[4]s"
 	}
 
-	resource "octopusdeploy_team" "%[1]s" {
-		description = "%[2]s"
-		name = "%[3]s"
+	resource "octopusdeploy_team" "%[2]s" {
+		description = "%[3]s"
+		name        = "%[4]s"
 
 		user_role {
-			space_id = "Spaces-1"
-			user_role_id = octopusdeploy_user_role.%[1]s.id
+			space_id = "%[1]s"
+			user_role_id = octopusdeploy_user_role.%[2]s.id
 		}
-	}`, localName, description, name)
+	}`, spaceID, localName, description, name)
 }

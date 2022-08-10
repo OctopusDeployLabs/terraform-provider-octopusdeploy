@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,7 +21,7 @@ func TestExpandDeploymentActionPackage(t *testing.T) {
 		},
 	}
 
-	expected := &octopusdeploy.DeploymentActionPackage{
+	expected := &packages.DeploymentActionPackage{
 		DeploymentAction: "",
 		PackageReference: "",
 	}
@@ -37,7 +37,7 @@ func TestExpandDeploymentActionPackage(t *testing.T) {
 	}
 
 	actual = expandDeploymentActionPackage(flattened)
-	expected = &octopusdeploy.DeploymentActionPackage{
+	expected = &packages.DeploymentActionPackage{
 		DeploymentAction: "test-deployment_action",
 		PackageReference: "test-package_reference",
 	}
@@ -48,7 +48,7 @@ func TestFlattenDeploymentActionPackage(t *testing.T) {
 	actual := flattenDeploymentActionPackage(nil)
 	require.Nil(t, actual)
 
-	expanded := &octopusdeploy.DeploymentActionPackage{}
+	expanded := &packages.DeploymentActionPackage{}
 
 	actual = flattenDeploymentActionPackage(expanded)
 	expected := []interface{}{
@@ -59,7 +59,7 @@ func TestFlattenDeploymentActionPackage(t *testing.T) {
 	}
 	require.Equal(t, expected, actual)
 
-	expanded = &octopusdeploy.DeploymentActionPackage{
+	expanded = &packages.DeploymentActionPackage{
 		DeploymentAction: "test-deployment_action",
 		PackageReference: "test-package_reference",
 	}

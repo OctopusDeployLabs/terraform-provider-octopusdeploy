@@ -2,9 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -20,6 +21,9 @@ func TestAccScopedUserRole(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
+	// TODO: replace with client reference
+	spaceID := os.Getenv("OCTOPUS_SPACE")
+
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccScopedUserRoleCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -33,7 +37,7 @@ func TestAccScopedUserRole(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "environment_ids.#", "1"),
 					resource.TestCheckResourceAttrPair(resourceName, "environment_ids.0", environmentResource, "id"),
 				),
-				Config: testAccScopedUserRole(localName, name, description),
+				Config: testAccScopedUserRole(spaceID, localName, name, description),
 			},
 		},
 	})
@@ -47,7 +51,7 @@ func testScopedUserRoleExists(prefix string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", prefix)
 		}
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		if _, err := client.ScopedUserRoles.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
@@ -57,7 +61,7 @@ func testScopedUserRoleExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccScopedUserRoleCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_scoped_user_role" {
 			continue
@@ -72,25 +76,25 @@ func testAccScopedUserRoleCheckDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccScopedUserRole(localName string, name string, description string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_user_role" "%[1]s" {
-		name = "%[3]s"
+func testAccScopedUserRole(spaceID string, localName string, name string, description string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_user_role" "%[2]s" {
+		name = "%[4]s"
 		granted_space_permissions = ["AccountCreate"]
 	}
 
-	resource "octopusdeploy_team" "%[1]s" {
-		description = "%[2]s"
-		name = "%[3]s"
+	resource "octopusdeploy_team" "%[2]s" {
+		description = "%[3]s"
+		name = "%[4]s"
 	}
 
-	resource "octopusdeploy_environment" "%[1]s" {
-		name = "%[3]s"
+	resource "octopusdeploy_environment" "%[2]s" {
+		name = "%[4]s"
 	}
 	
-	resource "octopusdeploy_scoped_user_role" "%[1]s" {
-		space_id = "Spaces-1"
-		team_id = octopusdeploy_team.%[1]s.id
-		user_role_id = octopusdeploy_user_role.%[1]s.id
-		environment_ids = [octopusdeploy_environment.%[1]s.id]
-	}`, localName, description, name)
+	resource "octopusdeploy_scoped_user_role" "%[2]s" {
+		space_id = "%[1]s"
+		team_id = octopusdeploy_team.%[2]s.id
+		user_role_id = octopusdeploy_user_role.%[2]s.id
+		environment_ids = [octopusdeploy_environment.%[2]s.id]
+	}`, spaceID, localName, description, name)
 }
