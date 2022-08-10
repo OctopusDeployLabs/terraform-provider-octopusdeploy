@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandMachineScriptPolicy(values interface{}) *octopusdeploy.MachineScriptPolicy {
+func expandMachineScriptPolicy(values interface{}) *machines.MachineScriptPolicy {
 	if values == nil {
 		return nil
 	}
@@ -17,7 +17,7 @@ func expandMachineScriptPolicy(values interface{}) *octopusdeploy.MachineScriptP
 
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	machineScriptPolicy := octopusdeploy.NewMachineScriptPolicy()
+	machineScriptPolicy := machines.NewMachineScriptPolicy()
 
 	if v, ok := flattenedMap["run_type"]; ok {
 		machineScriptPolicy.RunType = v.(string)
@@ -31,7 +31,7 @@ func expandMachineScriptPolicy(values interface{}) *octopusdeploy.MachineScriptP
 	return machineScriptPolicy
 }
 
-func flattenMachineScriptPolicy(machineScriptPolicy *octopusdeploy.MachineScriptPolicy) []interface{} {
+func flattenMachineScriptPolicy(machineScriptPolicy *machines.MachineScriptPolicy) []interface{} {
 	if machineScriptPolicy == nil {
 		return nil
 	}

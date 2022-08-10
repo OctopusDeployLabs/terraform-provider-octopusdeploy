@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	log.Printf("[INFO] creating channel: %#v", channel)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdChannel, err := client.Channels.Add(channel)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,7 +46,7 @@ func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceChannelDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting channel (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Channels.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,17 +60,10 @@ func resourceChannelDelete(ctx context.Context, d *schema.ResourceData, m interf
 func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading channel (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	channel, err := client.Channels.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] channel (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "channel")
 	}
 
 	if err := setChannel(ctx, d, channel); err != nil {
@@ -84,7 +78,7 @@ func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	log.Printf("[INFO] updating channel (%s)", d.Id())
 
 	channel := expandChannel(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedChannel, err := client.Channels.Update(channel)
 	if err != nil {
 		return diag.FromErr(err)

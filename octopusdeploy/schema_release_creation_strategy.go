@@ -1,24 +1,24 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandReleaseCreationStrategy(releaseCreationStrategy []interface{}) *octopusdeploy.ReleaseCreationStrategy {
+func expandReleaseCreationStrategy(releaseCreationStrategy []interface{}) *projects.ReleaseCreationStrategy {
 	if len(releaseCreationStrategy) == 0 {
 		return nil
 	}
 
 	releaseCreationStrategyMap := releaseCreationStrategy[0].(map[string]interface{})
-	return &octopusdeploy.ReleaseCreationStrategy{
+	return &projects.ReleaseCreationStrategy{
 		ChannelID:                    releaseCreationStrategyMap["channel_id"].(string),
 		ReleaseCreationPackage:       expandDeploymentActionPackage(releaseCreationStrategyMap["release_creation_package"]),
 		ReleaseCreationPackageStepID: releaseCreationStrategyMap["release_creation_package_step_id"].(string),
 	}
 }
 
-func flattenReleaseCreationStrategy(releaseCreationStrategy *octopusdeploy.ReleaseCreationStrategy) []interface{} {
+func flattenReleaseCreationStrategy(releaseCreationStrategy *projects.ReleaseCreationStrategy) []interface{} {
 	if releaseCreationStrategy == nil {
 		return nil
 	}

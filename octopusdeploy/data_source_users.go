@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,21 +19,21 @@ func dataSourceUsers() *schema.Resource {
 }
 
 func dataSourceUsersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	query := octopusdeploy.UsersQuery{
+	query := users.UsersQuery{
 		Filter: d.Get("filter").(string),
 		IDs:    expandArray(d.Get("ids").([]interface{})),
 		Skip:   d.Get("skip").(int),
 		Take:   d.Get("take").(int),
 	}
 
-	client := meta.(*octopusdeploy.Client)
-	users, err := client.Users.Get(query)
+	client := meta.(*client.Client)
+	existingUsers, err := client.Users.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedUsers := []interface{}{}
-	for _, user := range users.Items {
+	for _, user := range existingUsers.Items {
 		flattenedUsers = append(flattenedUsers, flattenUser(user))
 	}
 

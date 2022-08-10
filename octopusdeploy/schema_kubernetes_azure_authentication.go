@@ -1,15 +1,15 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandKubernetesAzureAuthentication(values interface{}) *octopusdeploy.KubernetesAzureAuthentication {
+func expandKubernetesAzureAuthentication(values interface{}) *machines.KubernetesAzureAuthentication {
 	flattenedValues := values.([]interface{})
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
-	authentication := octopusdeploy.NewKubernetesAzureAuthentication()
+	authentication := machines.NewKubernetesAzureAuthentication()
 	authentication.AccountID = flattenedAuthentication["account_id"].(string)
 	authentication.AuthenticationType = "KubernetesAzure"
 	authentication.ClusterName = flattenedAuthentication["cluster_name"].(string)
@@ -17,7 +17,7 @@ func expandKubernetesAzureAuthentication(values interface{}) *octopusdeploy.Kube
 	return authentication
 }
 
-func flattenKubernetesAzureAuthentication(kubernetesAzureAuthentication *octopusdeploy.KubernetesAzureAuthentication) []interface{} {
+func flattenKubernetesAzureAuthentication(kubernetesAzureAuthentication *machines.KubernetesAzureAuthentication) []interface{} {
 	if kubernetesAzureAuthentication == nil {
 		return nil
 	}

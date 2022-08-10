@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,7 @@ func dataSourceProjects() *schema.Resource {
 }
 
 func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.ProjectsQuery{
+	query := projects.ProjectsQuery{
 		ClonedFromProjectID: d.Get("cloned_from_project_id").(string),
 		IDs:                 expandArray(d.Get("ids").([]interface{})),
 		IsClone:             d.Get("is_clone").(bool),
@@ -28,14 +29,14 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 		Take:                d.Get("take").(int),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	projects, err := client.Projects.Get(query)
+	client := m.(*client.Client)
+	existingProjects, err := client.Projects.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedProjects := []interface{}{}
-	for _, project := range projects.Items {
+	for _, project := range existingProjects.Items {
 		flattenedProjects = append(flattenedProjects, flattenProject(project))
 	}
 

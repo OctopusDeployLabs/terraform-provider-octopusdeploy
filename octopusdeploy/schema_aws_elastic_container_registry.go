@@ -4,18 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandAwsElasticContainerRegistry(d *schema.ResourceData) (*octopusdeploy.AwsElasticContainerRegistry, error) {
+func expandAwsElasticContainerRegistry(d *schema.ResourceData) (*feeds.AwsElasticContainerRegistry, error) {
 	accessKey := d.Get("access_key").(string)
 	name := d.Get("name").(string)
-	secretKey := octopusdeploy.NewSensitiveValue(d.Get("secret_key").(string))
+	secretKey := core.NewSensitiveValue(d.Get("secret_key").(string))
 	region := d.Get("region").(string)
 
-	awsElasticContainerRegistry, err := octopusdeploy.NewAwsElasticContainerRegistry(name, accessKey, secretKey, region)
+	awsElasticContainerRegistry, err := feeds.NewAwsElasticContainerRegistry(name, accessKey, secretKey, region)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func getAwsElasticContainerRegistrySchema() map[string]*schema.Schema {
 	}
 }
 
-func setAwsElasticContainerRegistry(ctx context.Context, d *schema.ResourceData, awsElasticContainerRegistry *octopusdeploy.AwsElasticContainerRegistry) error {
+func setAwsElasticContainerRegistry(ctx context.Context, d *schema.ResourceData, awsElasticContainerRegistry *feeds.AwsElasticContainerRegistry) error {
 	d.Set("access_key", awsElasticContainerRegistry.AccessKey)
 	d.Set("name", awsElasticContainerRegistry.Name)
 	d.Set("space_id", awsElasticContainerRegistry.SpaceID)

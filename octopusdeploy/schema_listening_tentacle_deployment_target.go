@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandListeningTentacleDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
+func expandListeningTentacleDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
 	tentacleURL, _ := url.Parse(d.Get("tentacle_url").(string))
 	thumbprint := d.Get("thumbprint").(string)
 
-	endpoint := octopusdeploy.NewListeningTentacleEndpoint(tentacleURL, thumbprint)
+	endpoint := machines.NewListeningTentacleEndpoint(tentacleURL, thumbprint)
 
 	if v, ok := d.GetOk("certificate_signature_algorithm"); ok {
 		endpoint.CertificateSignatureAlgorithm = v.(string)
@@ -33,13 +33,13 @@ func expandListeningTentacleDeploymentTarget(d *schema.ResourceData) *octopusdep
 	return deploymentTarget
 }
 
-func flattenListeningTentacleDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenListeningTentacleDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["certificate_signature_algorithm"] = endpointResource.CertificateSignatureAlgorithm
 	flattenedDeploymentTarget["proxy_id"] = endpointResource.ProxyID
 	flattenedDeploymentTarget["tentacle_version_details"] = flattenTentacleVersionDetails(endpointResource.TentacleVersionDetails)
@@ -172,8 +172,8 @@ func getListeningTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 	}
 }
 
-func setListeningTentacleDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setListeningTentacleDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}

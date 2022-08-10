@@ -3,11 +3,11 @@ package octopusdeploy
 import (
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeployPackageAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
+func expandDeployPackageAction(flattenedAction map[string]interface{}) *deployments.DeploymentAction {
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.TentaclePackage"
 
@@ -15,7 +15,7 @@ func expandDeployPackageAction(flattenedAction map[string]interface{}) *octopusd
 	return action
 }
 
-func flattenDeployPackageAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenDeployPackageAction(action *deployments.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.EnabledFeatures"]; ok {

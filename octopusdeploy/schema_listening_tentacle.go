@@ -3,14 +3,14 @@ package octopusdeploy
 import (
 	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 )
 
-func expandListeningTentacle(flattenedMap map[string]interface{}) *octopusdeploy.ListeningTentacleEndpoint {
+func expandListeningTentacle(flattenedMap map[string]interface{}) *machines.ListeningTentacleEndpoint {
 	tentacleURL, _ := url.Parse(flattenedMap["tentacle_url"].(string))
 	thumbprint := flattenedMap["thumbprint"].(string)
 
-	endpoint := octopusdeploy.NewListeningTentacleEndpoint(tentacleURL, thumbprint)
+	endpoint := machines.NewListeningTentacleEndpoint(tentacleURL, thumbprint)
 	endpoint.CertificateSignatureAlgorithm = flattenedMap["certificate_signature_algorithm"].(string)
 	endpoint.ID = flattenedMap["id"].(string)
 	endpoint.ProxyID = flattenedMap["proxy_id"].(string)

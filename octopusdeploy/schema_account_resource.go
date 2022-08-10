@@ -4,20 +4,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResource {
+func expandAccountResource(d *schema.ResourceData) *accounts.AccountResource {
 	name := d.Get("name").(string)
 
-	var accountType octopusdeploy.AccountType
+	var accountType accounts.AccountType
 	if v, ok := d.GetOk("account_type"); ok {
-		accountType = octopusdeploy.AccountType(v.(string))
+		accountType = accounts.AccountType(v.(string))
 	}
 
-	accountResource := octopusdeploy.NewAccountResource(name, accountType)
+	accountResource := accounts.NewAccountResource(name, accountType)
 	accountResource.ID = d.Id()
 
 	if v, ok := d.GetOk("access_key"); ok {
@@ -38,7 +39,7 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	}
 
 	if v, ok := d.GetOk("certificate_data"); ok {
-		accountResource.CertificateBytes = octopusdeploy.NewSensitiveValue(v.(string))
+		accountResource.CertificateBytes = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("certificate_thumbprint"); ok {
@@ -46,7 +47,7 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	}
 
 	if v, ok := d.GetOk("client_secret"); ok {
-		accountResource.ApplicationPassword = octopusdeploy.NewSensitiveValue(v.(string))
+		accountResource.ApplicationPassword = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("description"); ok {
@@ -58,15 +59,15 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		accountResource.ApplicationPassword = octopusdeploy.NewSensitiveValue(v.(string))
+		accountResource.ApplicationPassword = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("private_key_file"); ok {
-		accountResource.PrivateKeyFile = octopusdeploy.NewSensitiveValue(v.(string))
+		accountResource.PrivateKeyFile = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("private_key_passphrase"); ok {
-		accountResource.PrivateKeyFile = octopusdeploy.NewSensitiveValue(v.(string))
+		accountResource.PrivateKeyFile = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("resource_management_endpoint_base_uri"); ok {
@@ -82,7 +83,7 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	}
 
 	if v, ok := d.GetOk("secret_key"); ok {
-		accountResource.SecretKey = octopusdeploy.NewSensitiveValue(v.(string))
+		accountResource.SecretKey = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("space_id"); ok {
@@ -95,7 +96,7 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		accountResource.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		accountResource.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_id"); ok {
@@ -112,7 +113,7 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	}
 
 	if v, ok := d.GetOk("token"); ok {
-		accountResource.Token = octopusdeploy.NewSensitiveValue(v.(string))
+		accountResource.Token = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("username"); ok {
@@ -122,7 +123,7 @@ func expandAccountResource(d *schema.ResourceData) *octopusdeploy.AccountResourc
 	return accountResource
 }
 
-func flattenAccountResource(accountResource *octopusdeploy.AccountResource) map[string]interface{} {
+func flattenAccountResource(accountResource *accounts.AccountResource) map[string]interface{} {
 	flattenedAccountResource := map[string]interface{}{
 		"access_key":                        accountResource.AccessKey,
 		"account_type":                      accountResource.AccountType,
@@ -238,7 +239,7 @@ func getAccountResourceSchema() map[string]*schema.Schema {
 	}
 }
 
-func setAccountResource(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AccountResource) error {
+func setAccountResource(ctx context.Context, d *schema.ResourceData, account *accounts.AccountResource) error {
 	d.Set("access_key", account.AccessKey)
 	d.Set("account_type", account.GetAccountType())
 	d.Set("active_directory_endpoint_base_uri", account.AuthenticationEndpoint)

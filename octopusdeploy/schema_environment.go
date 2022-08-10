@@ -3,14 +3,14 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandEnvironment(d *schema.ResourceData) *octopusdeploy.Environment {
+func expandEnvironment(d *schema.ResourceData) *environments.Environment {
 	name := d.Get("name").(string)
 
-	environment := octopusdeploy.NewEnvironment(name)
+	environment := environments.NewEnvironment(name)
 	environment.ID = d.Id()
 
 	if v, ok := d.GetOk("allow_dynamic_infrastructure"); ok {
@@ -32,7 +32,7 @@ func expandEnvironment(d *schema.ResourceData) *octopusdeploy.Environment {
 	return environment
 }
 
-func flattenEnvironment(environment *octopusdeploy.Environment) map[string]interface{} {
+func flattenEnvironment(environment *environments.Environment) map[string]interface{} {
 	if environment == nil {
 		return nil
 	}
@@ -89,7 +89,7 @@ func getEnvironmentSchema() map[string]*schema.Schema {
 	}
 }
 
-func setEnvironment(ctx context.Context, d *schema.ResourceData, environment *octopusdeploy.Environment) error {
+func setEnvironment(ctx context.Context, d *schema.ResourceData, environment *environments.Environment) error {
 	d.Set("allow_dynamic_infrastructure", environment.AllowDynamicInfrastructure)
 	d.Set("description", environment.Description)
 	d.Set("name", environment.Name)

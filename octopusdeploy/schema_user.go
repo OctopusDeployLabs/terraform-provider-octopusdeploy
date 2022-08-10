@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandUser(d *schema.ResourceData) *octopusdeploy.User {
+func expandUser(d *schema.ResourceData) *users.User {
 	username := d.Get("username").(string)
 	displayName := d.Get("display_name").(string)
 
-	user := octopusdeploy.NewUser(username, displayName)
+	user := users.NewUser(username, displayName)
 	user.ID = d.Id()
 
 	if v, ok := d.GetOk("email_address"); ok {
@@ -42,7 +42,7 @@ func expandUser(d *schema.ResourceData) *octopusdeploy.User {
 	return user
 }
 
-func flattenUser(user *octopusdeploy.User) map[string]interface{} {
+func flattenUser(user *users.User) map[string]interface{} {
 	if user == nil {
 		return nil
 	}
@@ -110,7 +110,7 @@ func getUserSchema() map[string]*schema.Schema {
 	}
 }
 
-func setUser(ctx context.Context, d *schema.ResourceData, user *octopusdeploy.User) error {
+func setUser(ctx context.Context, d *schema.ResourceData, user *users.User) error {
 	d.Set("can_password_be_edited", user.CanPasswordBeEdited)
 	d.Set("display_name", user.DisplayName)
 	d.Set("email_address", user.EmailAddress)

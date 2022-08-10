@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,7 @@ func dataSourceFeeds() *schema.Resource {
 }
 
 func dataSourceFeedsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.FeedsQuery{
+	query := feeds.FeedsQuery{
 		FeedType:    d.Get("feed_type").(string),
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
@@ -26,15 +27,15 @@ func dataSourceFeedsRead(ctx context.Context, d *schema.ResourceData, m interfac
 		Take:        d.Get("take").(int),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	feeds, err := client.Feeds.Get(query)
+	client := m.(*client.Client)
+	existingFeeds, err := client.Feeds.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedFeeds := []interface{}{}
-	for _, feed := range feeds.Items {
-		feedResource, err := octopusdeploy.ToFeedResource(feed)
+	for _, feed := range existingFeeds.Items {
+		feedResource, err := feeds.ToFeedResource(feed)
 		if err != nil {
 			return diag.FromErr(err)
 		}

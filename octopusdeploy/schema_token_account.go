@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandTokenAccount(d *schema.ResourceData) *octopusdeploy.TokenAccount {
+func expandTokenAccount(d *schema.ResourceData) *accounts.TokenAccount {
 	name := d.Get("name").(string)
-	token := octopusdeploy.NewSensitiveValue(d.Get("token").(string))
+	token := core.NewSensitiveValue(d.Get("token").(string))
 
-	account, _ := octopusdeploy.NewTokenAccount(name, token)
+	account, _ := accounts.NewTokenAccount(name, token)
 	account.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -28,7 +29,7 @@ func expandTokenAccount(d *schema.ResourceData) *octopusdeploy.TokenAccount {
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
@@ -56,7 +57,7 @@ func getTokenAccountSchema() map[string]*schema.Schema {
 	}
 }
 
-func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.TokenAccount) error {
+func setTokenAccount(ctx context.Context, d *schema.ResourceData, account *accounts.TokenAccount) error {
 	d.Set("description", account.GetDescription())
 
 	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {

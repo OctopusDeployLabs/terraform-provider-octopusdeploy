@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandEndpoint(values interface{}) octopusdeploy.IEndpoint {
+func expandEndpoint(values interface{}) machines.IEndpoint {
 	if values == nil {
 		return nil
 	}
@@ -43,7 +43,7 @@ func expandEndpoint(values interface{}) octopusdeploy.IEndpoint {
 	return nil
 }
 
-func flattenEndpointResource(endpoint *octopusdeploy.EndpointResource) []interface{} {
+func flattenEndpointResource(endpoint *machines.EndpointResource) []interface{} {
 	if endpoint == nil {
 		return nil
 	}

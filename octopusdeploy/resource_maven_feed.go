@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,13 +31,13 @@ func resourceMavenFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	log.Printf("[INFO] creating Maven feed: %s", mavenFeed.GetName())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdFeed, err := client.Feeds.Add(mavenFeed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setMavenFeed(ctx, d, createdFeed.(*octopusdeploy.MavenFeed)); err != nil {
+	if err := setMavenFeed(ctx, d, createdFeed.(*feeds.MavenFeed)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -48,7 +50,7 @@ func resourceMavenFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceMavenFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting Maven feed (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	err := client.Feeds.DeleteByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -63,25 +65,18 @@ func resourceMavenFeedDelete(ctx context.Context, d *schema.ResourceData, m inte
 func resourceMavenFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading Maven feed (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	feedResource, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] Maven feed (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "Maven feed")
 	}
 
-	feedResource, err = octopusdeploy.ToFeed(feedResource.(*octopusdeploy.FeedResource))
+	feedResource, err = feeds.ToFeed(feedResource.(*feeds.FeedResource))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	mavenFeed := feedResource.(*octopusdeploy.MavenFeed)
+	mavenFeed := feedResource.(*feeds.MavenFeed)
 	if err := setMavenFeed(ctx, d, mavenFeed); err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,18 +93,18 @@ func resourceMavenFeedUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	log.Printf("[INFO] updating Maven feed (%s)", feed.GetID())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedFeed, err := client.Feeds.Update(feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	feedResource, err := octopusdeploy.ToFeed(updatedFeed.(*octopusdeploy.FeedResource))
+	feedResource, err := feeds.ToFeed(updatedFeed.(*feeds.FeedResource))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setMavenFeed(ctx, d, feedResource.(*octopusdeploy.MavenFeed)); err != nil {
+	if err := setMavenFeed(ctx, d, feedResource.(*feeds.MavenFeed)); err != nil {
 		return diag.FromErr(err)
 	}
 

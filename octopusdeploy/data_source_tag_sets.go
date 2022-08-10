@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tagsets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,21 +19,21 @@ func dataSourceTagSets() *schema.Resource {
 }
 
 func dataSourceTagSetsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.TagSetsQuery{
+	query := tagsets.TagSetsQuery{
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	tagSets, err := client.TagSets.Get(query)
+	octopus := m.(*client.Client)
+	existingTagSets, err := octopus.TagSets.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedTagSets := []interface{}{}
-	for _, tagSet := range tagSets.Items {
+	for _, tagSet := range existingTagSets.Items {
 		flattenedTagSets = append(flattenedTagSets, flattenTagSet(tagSet))
 	}
 

@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
+func expandVariable(d *schema.ResourceData) *variables.Variable {
 	name := d.Get("name").(string)
 
-	variable := octopusdeploy.NewVariable(name)
+	variable := variables.NewVariable(name)
 
 	if v, ok := d.GetOk("description"); ok {
 		variable.Description = v.(string)
@@ -47,10 +47,10 @@ func expandVariable(d *schema.ResourceData) *octopusdeploy.Variable {
 		tfPromptSettings := varPrompt.(*schema.Set)
 		if len(tfPromptSettings.List()) == 1 {
 			tfPromptList := tfPromptSettings.List()[0].(map[string]interface{})
-			newPrompt := octopusdeploy.VariablePromptOptions{
+			newPrompt := variables.VariablePromptOptions{
 				Description: tfPromptList["description"].(string),
 				Label:       tfPromptList["label"].(string),
-				Required:    tfPromptList["is_required"].(bool),
+				IsRequired:  tfPromptList["is_required"].(bool),
 			}
 			variable.Prompt = &newPrompt
 		}
@@ -64,7 +64,8 @@ func getVariableDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id": getDataSchemaID(),
+		"id":  getDataSchemaID(),
+		"ids": getQueryIDs(),
 		"variables": {
 			Computed:    true,
 			Description: "A list of variables that match the filter(s).",
@@ -138,7 +139,7 @@ func getVariableSchema() map[string]*schema.Schema {
 	}
 }
 
-func setVariable(ctx context.Context, d *schema.ResourceData, variable *octopusdeploy.Variable) error {
+func setVariable(ctx context.Context, d *schema.ResourceData, variable *variables.Variable) error {
 	if d == nil || variable == nil {
 		return fmt.Errorf("error setting scope")
 	}

@@ -1,17 +1,17 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 )
 
-func expandPropertyValue(value interface{}) octopusdeploy.PropertyValue {
+func expandPropertyValue(value interface{}) core.PropertyValue {
 	if v, ok := value.(string); ok {
-		return octopusdeploy.NewPropertyValue(v, false)
+		return core.NewPropertyValue(v, false)
 	}
 
 	if v, ok := value.([]interface{}); ok {
-		if sensitiveValue, ok := v[0].(*octopusdeploy.SensitiveValue); ok {
-			return octopusdeploy.PropertyValue{
+		if sensitiveValue, ok := v[0].(*core.SensitiveValue); ok {
+			return core.PropertyValue{
 				IsSensitive:    true,
 				SensitiveValue: sensitiveValue,
 			}
@@ -21,7 +21,7 @@ func expandPropertyValue(value interface{}) octopusdeploy.PropertyValue {
 	panic("Invalid property value")
 }
 
-func flattenPropertyValue(propertyValue *octopusdeploy.PropertyValue) interface{} {
+func flattenPropertyValue(propertyValue *core.PropertyValue) interface{} {
 	if propertyValue == nil {
 		return nil
 	}

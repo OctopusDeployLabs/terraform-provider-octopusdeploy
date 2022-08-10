@@ -4,27 +4,28 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
+func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) *deployments.DeploymentAction {
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.KubernetesDeploySecret"
 
-	action.Properties["Octopus.Action.KubernetesContainers.SecretName"] = octopusdeploy.NewPropertyValue(flattenedAction["secret_name"].(string), false)
+	action.Properties["Octopus.Action.KubernetesContainers.SecretName"] = core.NewPropertyValue(flattenedAction["secret_name"].(string), false)
 
 	if tfSecretValues, ok := flattenedAction["secret_values"]; ok {
 		secretValues := tfSecretValues.(map[string]interface{})
 
 		j, _ := json.Marshal(secretValues)
-		action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] = octopusdeploy.NewPropertyValue(string(j), false)
+		action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] = core.NewPropertyValue(string(j), false)
 	}
 
 	return action
 }
 
-func flattenDeployKubernetesSecretAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenDeployKubernetesSecretAction(action *deployments.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {

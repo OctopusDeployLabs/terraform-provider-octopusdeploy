@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const spaceManagersTeamIDPrefix = "teams-spacemanagers-"
 
-func expandSpace(d *schema.ResourceData) *octopusdeploy.Space {
+func expandSpace(d *schema.ResourceData) *spaces.Space {
 	name := d.Get("name").(string)
 
-	space := octopusdeploy.NewSpace(name)
+	space := spaces.NewSpace(name)
 	space.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -45,13 +45,11 @@ func addSpaceManagers(spaceID string, teamIDs []string) []string {
 	if getStringOrEmpty(spaceID) != "" {
 		newSlice = append(newSlice, spaceManagersTeamIDPrefix+spaceID)
 	}
-	for _, v := range teamIDs {
-		newSlice = append(newSlice, v)
-	}
+	newSlice = append(newSlice, teamIDs...)
 	return newSlice
 }
 
-func flattenSpace(space *octopusdeploy.Space) map[string]interface{} {
+func flattenSpace(space *spaces.Space) map[string]interface{} {
 	if space == nil {
 		return nil
 	}
@@ -128,7 +126,7 @@ func getSpaceSchema() map[string]*schema.Schema {
 	}
 }
 
-func setSpace(ctx context.Context, d *schema.ResourceData, space *octopusdeploy.Space) error {
+func setSpace(ctx context.Context, d *schema.ResourceData, space *spaces.Space) error {
 	d.Set("description", space.Description)
 	d.Set("id", space.GetID())
 	d.Set("is_default", space.IsDefault)

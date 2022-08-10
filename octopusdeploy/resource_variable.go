@@ -7,7 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -67,7 +68,7 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] creating variable: %#v", variable)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	variableSet, err := client.Variables.AddSingle(variableOwnerID, variable)
 	if err != nil {
 		return diag.FromErr(err)
@@ -111,17 +112,10 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 		variableOwnerID = ownerID.(string)
 	}
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	variable, err := client.Variables.GetByID(variableOwnerID, id)
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] variable (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "variable")
 	}
 
 	if err := setVariable(ctx, d, variable); err != nil {
@@ -159,7 +153,7 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		variableOwnerID = ownerID.(string)
 	}
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	variableSet, err := client.Variables.UpdateSingle(variableOwnerID, variable)
 	if err != nil {
 		return diag.FromErr(err)
@@ -203,17 +197,10 @@ func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m inter
 		variableOwnerID = ownerID.(string)
 	}
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	_, err := client.Variables.DeleteSingle(variableOwnerID, d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] variable (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "variable")
 	}
 
 	log.Printf("[INFO] variable deleted (%s)", d.Id())

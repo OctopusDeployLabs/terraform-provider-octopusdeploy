@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandChannelRule(channelRule map[string]interface{}) octopusdeploy.ChannelRule {
-	return octopusdeploy.ChannelRule{
+func expandChannelRule(channelRule map[string]interface{}) channels.ChannelRule {
+	return channels.ChannelRule{
 		ActionPackages: expandDeploymentActionPackages(channelRule["action_package"]),
 		ID:             channelRule["id"].(string),
 		Tag:            channelRule["tag"].(string),
@@ -14,7 +14,7 @@ func expandChannelRule(channelRule map[string]interface{}) octopusdeploy.Channel
 	}
 }
 
-func flattenChannelRules(channelRules []octopusdeploy.ChannelRule) []map[string]interface{} {
+func flattenChannelRules(channelRules []channels.ChannelRule) []map[string]interface{} {
 	var flattenedRules = make([]map[string]interface{}, len(channelRules))
 	for key, channelRule := range channelRules {
 		flattenedRules[key] = map[string]interface{}{

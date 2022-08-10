@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandHelmFeed(d *schema.ResourceData) (*octopusdeploy.HelmFeed, error) {
+func expandHelmFeed(d *schema.ResourceData) (*feeds.HelmFeed, error) {
 	name := d.Get("name").(string)
 
-	helmFeed, err := octopusdeploy.NewHelmFeed(name)
+	helmFeed, err := feeds.NewHelmFeed(name)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func expandHelmFeed(d *schema.ResourceData) (*octopusdeploy.HelmFeed, error) {
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		helmFeed.Password = octopusdeploy.NewSensitiveValue(v.(string))
+		helmFeed.Password = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("username"); ok {
@@ -63,7 +64,7 @@ func getHelmFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setHelmFeed(ctx context.Context, d *schema.ResourceData, mavenFeed *octopusdeploy.HelmFeed) error {
+func setHelmFeed(ctx context.Context, d *schema.ResourceData, mavenFeed *feeds.HelmFeed) error {
 	d.Set("feed_uri", mavenFeed.FeedURI)
 	d.Set("name", mavenFeed.Name)
 	d.Set("space_id", mavenFeed.SpaceID)

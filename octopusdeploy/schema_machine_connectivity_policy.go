@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandMachineConnectivityPolicy(values interface{}) *octopusdeploy.MachineConnectivityPolicy {
+func expandMachineConnectivityPolicy(values interface{}) *machines.MachineConnectivityPolicy {
 	if values == nil {
 		return nil
 	}
@@ -17,7 +17,7 @@ func expandMachineConnectivityPolicy(values interface{}) *octopusdeploy.MachineC
 
 	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
 
-	machineConnectivityPolicy := octopusdeploy.NewMachineConnectivityPolicy()
+	machineConnectivityPolicy := machines.NewMachineConnectivityPolicy()
 
 	if v, ok := flattenedMap["machine_connectivity_behavior"]; ok {
 		machineConnectivityPolicy.MachineConnectivityBehavior = v.(string)
@@ -26,7 +26,7 @@ func expandMachineConnectivityPolicy(values interface{}) *octopusdeploy.MachineC
 	return machineConnectivityPolicy
 }
 
-func flattenMachineConnectivityPolicy(machineConnectivityPolicy *octopusdeploy.MachineConnectivityPolicy) []interface{} {
+func flattenMachineConnectivityPolicy(machineConnectivityPolicy *machines.MachineConnectivityPolicy) []interface{} {
 	if machineConnectivityPolicy == nil {
 		return nil
 	}

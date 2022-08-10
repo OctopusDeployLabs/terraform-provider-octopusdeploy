@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,21 +19,21 @@ func dataSourceLifecycles() *schema.Resource {
 }
 
 func dataSourceLifecyclesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.LifecyclesQuery{
+	query := lifecycles.Query{
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	lifecycles, err := client.Lifecycles.Get(query)
+	client := m.(*client.Client)
+	existingLifecycles, err := client.Lifecycles.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedLifecycles := []interface{}{}
-	for _, lifecycle := range lifecycles.Items {
+	for _, lifecycle := range existingLifecycles.Items {
 		flattenedLifecycles = append(flattenedLifecycles, flattenLifecycle(lifecycle))
 	}
 

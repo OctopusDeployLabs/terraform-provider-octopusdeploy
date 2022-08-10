@@ -1,15 +1,15 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandKubernetesCertificateAuthentication(values interface{}) *octopusdeploy.KubernetesCertificateAuthentication {
+func expandKubernetesCertificateAuthentication(values interface{}) *machines.KubernetesCertificateAuthentication {
 	flattenedValues := values.([]interface{})
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
-	authentication := &octopusdeploy.KubernetesCertificateAuthentication{
+	authentication := &machines.KubernetesCertificateAuthentication{
 		ClientCertificate: flattenedAuthentication["client_certificate"].(string),
 	}
 
@@ -18,7 +18,7 @@ func expandKubernetesCertificateAuthentication(values interface{}) *octopusdeplo
 	return authentication
 }
 
-func flattenKubernetesCertificateAuthentication(kubernetesCertificateAuthentication *octopusdeploy.KubernetesCertificateAuthentication) []interface{} {
+func flattenKubernetesCertificateAuthentication(kubernetesCertificateAuthentication *machines.KubernetesCertificateAuthentication) []interface{} {
 	if kubernetesCertificateAuthentication == nil {
 		return nil
 	}

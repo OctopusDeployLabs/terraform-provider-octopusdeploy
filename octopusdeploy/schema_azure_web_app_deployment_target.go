@@ -3,12 +3,12 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAzureWebAppDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
-	endpoint := octopusdeploy.NewAzureWebAppEndpoint()
+func expandAzureWebAppDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
+	endpoint := machines.NewAzureWebAppEndpoint()
 
 	if v, ok := d.GetOk("account_id"); ok {
 		endpoint.AccountID = v.(string)
@@ -31,13 +31,13 @@ func expandAzureWebAppDeploymentTarget(d *schema.ResourceData) *octopusdeploy.De
 	return deploymentTarget
 }
 
-func flattenAzureWebAppDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenAzureWebAppDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["account_id"] = endpointResource.AccountID
 	flattenedDeploymentTarget["resource_group_name"] = endpointResource.ResourceGroupName
 	flattenedDeploymentTarget["web_app_name"] = endpointResource.WebAppName
@@ -92,8 +92,8 @@ func getAzureWebAppDeploymentTargetSchema() map[string]*schema.Schema {
 	return azureWebAppDeploymentTargetSchema
 }
 
-func setAzureWebAppDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setAzureWebAppDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}

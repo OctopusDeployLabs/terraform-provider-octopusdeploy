@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandMachinePolicy(d *schema.ResourceData) *octopusdeploy.MachinePolicy {
+func expandMachinePolicy(d *schema.ResourceData) *machines.MachinePolicy {
 	name := d.Get("name").(string)
 
-	machinePolicy := octopusdeploy.NewMachinePolicy(name)
+	machinePolicy := machines.NewMachinePolicy(name)
 	machinePolicy.ID = d.Id()
 
 	if v, ok := d.GetOk("connection_connect_timeout"); ok {
@@ -83,7 +83,7 @@ func expandMachinePolicy(d *schema.ResourceData) *octopusdeploy.MachinePolicy {
 
 }
 
-func flattenMachinePolicy(machinePolicy *octopusdeploy.MachinePolicy) map[string]interface{} {
+func flattenMachinePolicy(machinePolicy *machines.MachinePolicy) map[string]interface{} {
 	if machinePolicy == nil {
 		return nil
 	}
@@ -155,24 +155,28 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 		"machine_cleanup_policy": {
+			Computed: true,
 			Elem:     &schema.Resource{Schema: getMachineCleanupPolicySchema()},
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
 		"machine_connectivity_policy": {
+			Computed: true,
 			Elem:     &schema.Resource{Schema: getMachineConnectivityPolicySchema()},
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
 		"machine_health_check_policy": {
+			Computed: true,
 			Elem:     &schema.Resource{Schema: getMachineHealthCheckPolicySchema()},
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeSet,
 		},
 		"machine_update_policy": {
+			Computed: true,
 			Elem:     &schema.Resource{Schema: getMachineUpdatePolicySchema()},
 			MaxItems: 1,
 			Optional: true,
@@ -193,7 +197,7 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 	}
 }
 
-func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy *octopusdeploy.MachinePolicy) error {
+func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy *machines.MachinePolicy) error {
 	d.Set("connection_connect_timeout", machinePolicy.ConnectionConnectTimeout)
 	d.Set("connection_retry_count_limit", machinePolicy.ConnectionRetryCountLimit)
 	d.Set("connection_retry_sleep_interval", machinePolicy.ConnectionRetrySleepInterval)

@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actions"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/filters"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -21,13 +24,13 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 	}
 }
 
-func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octopusdeploy.ProjectTrigger, error) {
+func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*triggers.ProjectTrigger, error) {
 	name := d.Get("name").(string)
 	projectID := d.Get("project_id").(string)
 	shouldRedeploy := d.Get("should_redeploy").(bool)
 
-	action := octopusdeploy.NewAutoDeployAction(shouldRedeploy)
-	filter := octopusdeploy.NewDeploymentTargetFilter([]string{}, []string{}, []string{}, []string{})
+	action := actions.NewAutoDeployAction(shouldRedeploy)
+	filter := filters.NewDeploymentTargetFilter([]string{}, []string{}, []string{}, []string{})
 
 	if attr, ok := d.GetOk("event_groups"); ok {
 		eventGroups := getSliceFromTerraformTypeList(attr)
@@ -79,7 +82,7 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*octop
 		filter.Environments = getSliceFromTerraformTypeList(attr)
 	}
 
-	deploymentTargetTrigger := octopusdeploy.NewProjectTrigger(name, "", false, projectID, action, filter)
+	deploymentTargetTrigger := triggers.NewProjectTrigger(name, "", false, projectID, action, filter)
 
 	return deploymentTargetTrigger, nil
 }
@@ -90,7 +93,7 @@ func resourceProjectDeploymentTargetTriggerCreate(ctx context.Context, d *schema
 		return diag.FromErr(err)
 	}
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	resource, err := client.ProjectTriggers.Add(projectTrigger)
 	if err != nil {
 		return diag.FromErr(err)
@@ -108,7 +111,7 @@ func resourceProjectDeploymentTargetTriggerCreate(ctx context.Context, d *schema
 func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	resource, err := client.ProjectTriggers.GetByID(id)
 	if err != nil {
 		return diag.FromErr(err)
@@ -120,8 +123,8 @@ func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.R
 
 	logResource("project_trigger", m)
 
-	action := resource.Action.(*octopusdeploy.AutoDeployAction)
-	filter := resource.Filter.(*octopusdeploy.DeploymentTargetFilter)
+	action := resource.Action.(*actions.AutoDeployAction)
+	filter := resource.Filter.(*filters.DeploymentTargetFilter)
 
 	d.Set("environment_ids", filter.Environments)
 	d.Set("event_groups", filter.EventGroups)
@@ -140,7 +143,7 @@ func resourceProjectDeploymentTargetTriggerUpdate(ctx context.Context, d *schema
 	}
 	projectTrigger.ID = d.Id() // set ID so Octopus API knows which project trigger to update
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	resource, err := client.ProjectTriggers.Update(*projectTrigger)
 	if err != nil {
 		return diag.FromErr(err)
@@ -152,7 +155,7 @@ func resourceProjectDeploymentTargetTriggerUpdate(ctx context.Context, d *schema
 }
 
 func resourceProjectDeploymentTargetTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	err := client.ProjectTriggers.DeleteByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)

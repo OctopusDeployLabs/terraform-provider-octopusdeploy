@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,13 +31,13 @@ func resourceDockerContainerRegistryCreate(ctx context.Context, d *schema.Resour
 
 	log.Printf("[INFO] creating Docker container registry, %s", dockerContainerRegistry.GetName())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdDockerContainerRegistry, err := client.Feeds.Add(dockerContainerRegistry)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setDockerContainerRegistry(ctx, d, createdDockerContainerRegistry.(*octopusdeploy.DockerContainerRegistry)); err != nil {
+	if err := setDockerContainerRegistry(ctx, d, createdDockerContainerRegistry.(*feeds.DockerContainerRegistry)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -48,7 +50,7 @@ func resourceDockerContainerRegistryCreate(ctx context.Context, d *schema.Resour
 func resourceDockerContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting Docker container registry (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	err := client.Feeds.DeleteByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -63,25 +65,18 @@ func resourceDockerContainerRegistryDelete(ctx context.Context, d *schema.Resour
 func resourceDockerContainerRegistryRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading Docker container registry (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	feedResource, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] Docker container registry (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "Docker container registry")
 	}
 
-	feedResource, err = octopusdeploy.ToFeed(feedResource.(*octopusdeploy.FeedResource))
+	feedResource, err = feeds.ToFeed(feedResource.(*feeds.FeedResource))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	dockerContainerRegistry := feedResource.(*octopusdeploy.DockerContainerRegistry)
+	dockerContainerRegistry := feedResource.(*feeds.DockerContainerRegistry)
 	if err := setDockerContainerRegistry(ctx, d, dockerContainerRegistry); err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,18 +93,18 @@ func resourceDockerContainerRegistryUpdate(ctx context.Context, d *schema.Resour
 
 	log.Printf("[INFO] updating Docker container registry (%s)", feed.GetID())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedFeed, err := client.Feeds.Update(feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	feedResource, err := octopusdeploy.ToFeed(updatedFeed.(*octopusdeploy.FeedResource))
+	feedResource, err := feeds.ToFeed(updatedFeed.(*feeds.FeedResource))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setDockerContainerRegistry(ctx, d, feedResource.(*octopusdeploy.DockerContainerRegistry)); err != nil {
+	if err := setDockerContainerRegistry(ctx, d, feedResource.(*feeds.DockerContainerRegistry)); err != nil {
 		return diag.FromErr(err)
 	}
 

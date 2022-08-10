@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/teams"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandTeam(d *schema.ResourceData) *octopusdeploy.Team {
+func expandTeam(d *schema.ResourceData) *teams.Team {
 	name := d.Get("name").(string)
 
-	team := octopusdeploy.NewTeam(name)
+	team := teams.NewTeam(name)
 	team.ID = d.Id()
 
 	if v, ok := d.GetOk("can_be_deleted"); ok {
@@ -49,7 +49,7 @@ func expandTeam(d *schema.ResourceData) *octopusdeploy.Team {
 	return team
 }
 
-func flattenTeam(team *octopusdeploy.Team) map[string]interface{} {
+func flattenTeam(team *teams.Team) map[string]interface{} {
 	if team == nil {
 		return nil
 	}
@@ -207,7 +207,7 @@ func getTeamSchema() map[string]*schema.Schema {
 	}
 }
 
-func setTeam(ctx context.Context, d *schema.ResourceData, team *octopusdeploy.Team) error {
+func setTeam(ctx context.Context, d *schema.ResourceData, team *teams.Team) error {
 	d.Set("can_be_deleted", team.CanBeDeleted)
 	d.Set("can_be_renamed", team.CanBeRenamed)
 	d.Set("can_change_members", team.CanChangeMembers)

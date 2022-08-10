@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
@@ -15,28 +15,28 @@ type Config struct {
 }
 
 // Client returns a new Octopus Deploy client
-func (c *Config) Client() (*octopusdeploy.Client, diag.Diagnostics) {
+func (c *Config) Client() (*client.Client, diag.Diagnostics) {
 	apiURL, err := url.Parse(c.Address)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
 
-	client, err := octopusdeploy.NewClient(nil, apiURL, c.APIKey, "")
+	octopus, err := client.NewClient(nil, apiURL, c.APIKey, "")
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
 
 	if len(c.SpaceID) > 0 {
-		space, err := client.Spaces.GetByID(c.SpaceID)
+		space, err := octopus.Spaces.GetByID(c.SpaceID)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 
-		client, err = octopusdeploy.NewClient(nil, apiURL, c.APIKey, space.GetID())
+		octopus, err = client.NewClient(nil, apiURL, c.APIKey, space.GetID())
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 	}
 
-	return client, nil
+	return octopus, nil
 }

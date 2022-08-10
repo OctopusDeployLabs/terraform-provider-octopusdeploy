@@ -7,8 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// Provider is the plugin entry point for the Terraform Provider for Octopus
-// Deploy.
+// Provider is the plugin entry point for the Terraform provider for Octopus Deploy.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		DataSourcesMap: map[string]*schema.Resource{
@@ -83,6 +82,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_ssh_connection_deployment_target":               resourceSSHConnectionDeploymentTarget(),
 			"octopusdeploy_ssh_key_account":                                resourceSSHKeyAccount(),
 			"octopusdeploy_static_worker_pool":                             resourceStaticWorkerPool(),
+			"octopusdeploy_tag":                                            resourceTag(),
 			"octopusdeploy_tag_set":                                        resourceTagSet(),
 			"octopusdeploy_team":                                           resourceTeam(),
 			"octopusdeploy_tenant":                                         resourceTenant(),

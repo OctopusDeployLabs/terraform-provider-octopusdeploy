@@ -1,15 +1,15 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandKubernetesStandardAuthentication(values interface{}) *octopusdeploy.KubernetesStandardAuthentication {
+func expandKubernetesStandardAuthentication(values interface{}) *machines.KubernetesStandardAuthentication {
 	flattenedValues := values.([]interface{})
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
-	authentication := &octopusdeploy.KubernetesStandardAuthentication{
+	authentication := &machines.KubernetesStandardAuthentication{
 		AccountID: flattenedAuthentication["account_id"].(string),
 	}
 
@@ -18,7 +18,7 @@ func expandKubernetesStandardAuthentication(values interface{}) *octopusdeploy.K
 	return authentication
 }
 
-func flattenKubernetesStandardAuthentication(kubernetesStandardAuthentication *octopusdeploy.KubernetesStandardAuthentication) []interface{} {
+func flattenKubernetesStandardAuthentication(kubernetesStandardAuthentication *machines.KubernetesStandardAuthentication) []interface{} {
 	if kubernetesStandardAuthentication == nil {
 		return nil
 	}

@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandCertificate(d *schema.ResourceData) *octopusdeploy.CertificateResource {
+func expandCertificate(d *schema.ResourceData) *certificates.CertificateResource {
 	name := d.Get("name").(string)
-	certificateData := octopusdeploy.NewSensitiveValue(d.Get("certificate_data").(string))
-	password := octopusdeploy.NewSensitiveValue(d.Get("password").(string))
+	certificateData := core.NewSensitiveValue(d.Get("certificate_data").(string))
+	password := core.NewSensitiveValue(d.Get("password").(string))
 
-	certificate := octopusdeploy.NewCertificateResource(name, certificateData, password)
+	certificate := certificates.NewCertificateResource(name, certificateData, password)
 	certificate.ID = d.Id()
 
 	if v, ok := d.GetOk("archived"); ok {
@@ -94,7 +95,7 @@ func expandCertificate(d *schema.ResourceData) *octopusdeploy.CertificateResourc
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		certificate.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		certificate.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenants"); ok {
@@ -116,7 +117,7 @@ func expandCertificate(d *schema.ResourceData) *octopusdeploy.CertificateResourc
 	return certificate
 }
 
-func flattenCertificate(certificate *octopusdeploy.CertificateResource) map[string]interface{} {
+func flattenCertificate(certificate *certificates.CertificateResource) map[string]interface{} {
 	if certificate == nil {
 		return nil
 	}
@@ -298,7 +299,7 @@ func getCertificateSchema() map[string]*schema.Schema {
 	}
 }
 
-func setCertificate(ctx context.Context, d *schema.ResourceData, certificate *octopusdeploy.CertificateResource) error {
+func setCertificate(ctx context.Context, d *schema.ResourceData, certificate *certificates.CertificateResource) error {
 	d.Set("archived", certificate.Archived)
 	d.Set("certificate_data_format", certificate.CertificateDataFormat)
 	d.Set("has_private_key", certificate.HasPrivateKey)

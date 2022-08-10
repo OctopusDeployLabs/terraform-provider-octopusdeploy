@@ -3,14 +3,14 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandProjectGroup(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
+func expandProjectGroup(d *schema.ResourceData) *projectgroups.ProjectGroup {
 	name := d.Get("name").(string)
 
-	projectGroup := octopusdeploy.NewProjectGroup(name)
+	projectGroup := projectgroups.NewProjectGroup(name)
 	projectGroup.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -28,7 +28,7 @@ func expandProjectGroup(d *schema.ResourceData) *octopusdeploy.ProjectGroup {
 	return projectGroup
 }
 
-func flattenProjectGroup(projectGroup *octopusdeploy.ProjectGroup) map[string]interface{} {
+func flattenProjectGroup(projectGroup *projectgroups.ProjectGroup) map[string]interface{} {
 	if projectGroup == nil {
 		return nil
 	}
@@ -87,7 +87,7 @@ func getProjectGroupSchema() map[string]*schema.Schema {
 	}
 }
 
-func setProjectGroup(ctx context.Context, d *schema.ResourceData, projectGroup *octopusdeploy.ProjectGroup) error {
+func setProjectGroup(ctx context.Context, d *schema.ResourceData, projectGroup *projectgroups.ProjectGroup) error {
 	d.Set("description", projectGroup.Description)
 
 	d.Set("name", projectGroup.Name)

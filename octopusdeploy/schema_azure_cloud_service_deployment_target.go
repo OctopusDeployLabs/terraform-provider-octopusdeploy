@@ -3,12 +3,12 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAzureCloudServiceDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
-	endpoint := octopusdeploy.NewAzureCloudServiceEndpoint()
+func expandAzureCloudServiceDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
+	endpoint := machines.NewAzureCloudServiceEndpoint()
 
 	if v, ok := d.GetOk("account_id"); ok {
 		endpoint.AccountID = v.(string)
@@ -43,13 +43,13 @@ func expandAzureCloudServiceDeploymentTarget(d *schema.ResourceData) *octopusdep
 	return deploymentTarget
 }
 
-func flattenAzureCloudServiceDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenAzureCloudServiceDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["account_id"] = endpointResource.AccountID
 	flattenedDeploymentTarget["cloud_service_name"] = endpointResource.CloudServiceName
 	flattenedDeploymentTarget["default_worker_pool_id"] = endpointResource.DefaultWorkerPoolID
@@ -122,8 +122,8 @@ func getAzureCloudServiceDeploymentTargetSchema() map[string]*schema.Schema {
 	return azureCloudServiceDeploymentTargetSchema
 }
 
-func setAzureCloudServiceDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setAzureCloudServiceDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}

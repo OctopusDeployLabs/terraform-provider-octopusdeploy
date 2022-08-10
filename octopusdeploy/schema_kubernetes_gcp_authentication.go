@@ -1,15 +1,15 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandKubernetesGcpAuthentication(values interface{}) *octopusdeploy.KubernetesGcpAuthentication {
+func expandKubernetesGcpAuthentication(values interface{}) *machines.KubernetesGcpAuthentication {
 	flattenedValues := values.([]interface{})
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
-	authentication := octopusdeploy.NewKubernetesGcpAuthentication()
+	authentication := machines.NewKubernetesGcpAuthentication()
 	authentication.AccountID = flattenedAuthentication["account_id"].(string)
 	authentication.ClusterName = flattenedAuthentication["cluster_name"].(string)
 	authentication.ImpersonateServiceAccount = flattenedAuthentication["impersonate_service_account"].(bool)
@@ -21,7 +21,7 @@ func expandKubernetesGcpAuthentication(values interface{}) *octopusdeploy.Kubern
 	return authentication
 }
 
-func flattenKubernetesGcpAuthentication(kubernetesGcpAuthentication *octopusdeploy.KubernetesGcpAuthentication) []interface{} {
+func flattenKubernetesGcpAuthentication(kubernetesGcpAuthentication *machines.KubernetesGcpAuthentication) []interface{} {
 	if kubernetesGcpAuthentication == nil {
 		return nil
 	}

@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandLibraryVariableSet(d *schema.ResourceData) *octopusdeploy.LibraryVariableSet {
+func expandLibraryVariableSet(d *schema.ResourceData) *variables.LibraryVariableSet {
 	name := d.Get("name").(string)
 
-	libraryVariableSet := octopusdeploy.NewLibraryVariableSet(name)
+	libraryVariableSet := variables.NewLibraryVariableSet(name)
 	libraryVariableSet.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -30,7 +30,7 @@ func expandLibraryVariableSet(d *schema.ResourceData) *octopusdeploy.LibraryVari
 	return libraryVariableSet
 }
 
-func flattenLibraryVariableSet(libraryVariableSet *octopusdeploy.LibraryVariableSet) map[string]interface{} {
+func flattenLibraryVariableSet(libraryVariableSet *variables.LibraryVariableSet) map[string]interface{} {
 	if libraryVariableSet == nil {
 		return nil
 	}
@@ -84,7 +84,7 @@ func getLibraryVariableSetSchema() map[string]*schema.Schema {
 	}
 }
 
-func setLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryVariableSet *octopusdeploy.LibraryVariableSet) error {
+func setLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryVariableSet *variables.LibraryVariableSet) error {
 	d.Set("description", libraryVariableSet.Description)
 	d.Set("name", libraryVariableSet.Name)
 	d.Set("space_id", libraryVariableSet.SpaceID)

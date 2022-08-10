@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAzureSubscriptionAccount(d *schema.ResourceData) *octopusdeploy.AzureSubscriptionAccount {
+func expandAzureSubscriptionAccount(d *schema.ResourceData) *accounts.AzureSubscriptionAccount {
 	name := d.Get("name").(string)
 	subscriptionID, _ := uuid.Parse(d.Get("subscription_id").(string))
 
-	account, _ := octopusdeploy.NewAzureSubscriptionAccount(name, subscriptionID)
+	account, _ := accounts.NewAzureSubscriptionAccount(name, subscriptionID)
 	account.ID = d.Id()
 
 	if v, ok := d.GetOk("azure_environment"); ok {
@@ -21,7 +22,7 @@ func expandAzureSubscriptionAccount(d *schema.ResourceData) *octopusdeploy.Azure
 	}
 
 	if v, ok := d.GetOk("certificate"); ok {
-		account.CertificateBytes = octopusdeploy.NewSensitiveValue(v.(string))
+		account.CertificateBytes = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("certificate_thumbprint"); ok {
@@ -58,7 +59,7 @@ func expandAzureSubscriptionAccount(d *schema.ResourceData) *octopusdeploy.Azure
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
@@ -109,7 +110,7 @@ func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
 	}
 }
 
-func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureSubscriptionAccount) error {
+func setAzureSubscriptionAccount(ctx context.Context, d *schema.ResourceData, account *accounts.AzureSubscriptionAccount) error {
 	d.Set("azure_environment", account.AzureEnvironment)
 	d.Set("certificate_thumbprint", account.CertificateThumbprint)
 	d.Set("description", account.GetDescription())

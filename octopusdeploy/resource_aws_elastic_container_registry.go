@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,13 +31,13 @@ func resourceAwsElasticContainerRegistryCreate(ctx context.Context, d *schema.Re
 
 	log.Printf("[INFO] creating AWS Elastic Container Registry, %s", awsElasticContainerRegistry.GetName())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdFeed, err := client.Feeds.Add(awsElasticContainerRegistry)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAwsElasticContainerRegistry(ctx, d, createdFeed.(*octopusdeploy.AwsElasticContainerRegistry)); err != nil {
+	if err := setAwsElasticContainerRegistry(ctx, d, createdFeed.(*feeds.AwsElasticContainerRegistry)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -48,7 +50,7 @@ func resourceAwsElasticContainerRegistryCreate(ctx context.Context, d *schema.Re
 func resourceAwsElasticContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting AWS Elastic Container Registry (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	err := client.Feeds.DeleteByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -63,25 +65,18 @@ func resourceAwsElasticContainerRegistryDelete(ctx context.Context, d *schema.Re
 func resourceAwsElasticContainerRegistryRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading AWS Elastic Container Registry (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	feedResource, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] AWS Elastic Container Registry (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "AWS Elastic Container Registry")
 	}
 
-	feedResource, err = octopusdeploy.ToFeed(feedResource.(*octopusdeploy.FeedResource))
+	feedResource, err = feeds.ToFeed(feedResource.(*feeds.FeedResource))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	awsElasticContainerRegistry := feedResource.(*octopusdeploy.AwsElasticContainerRegistry)
+	awsElasticContainerRegistry := feedResource.(*feeds.AwsElasticContainerRegistry)
 	if err := setAwsElasticContainerRegistry(ctx, d, awsElasticContainerRegistry); err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,18 +93,18 @@ func resourceAwsElasticContainerRegistryUpdate(ctx context.Context, d *schema.Re
 
 	log.Printf("[INFO] updating AWS Elastic Container Registry (%s)", awsElasticContainerRegistry.GetID())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedFeed, err := client.Feeds.Update(awsElasticContainerRegistry)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	feedResource, err := octopusdeploy.ToFeed(updatedFeed.(*octopusdeploy.FeedResource))
+	feedResource, err := feeds.ToFeed(updatedFeed.(*feeds.FeedResource))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAwsElasticContainerRegistry(ctx, d, feedResource.(*octopusdeploy.AwsElasticContainerRegistry)); err != nil {
+	if err := setAwsElasticContainerRegistry(ctx, d, feedResource.(*feeds.AwsElasticContainerRegistry)); err != nil {
 		return diag.FromErr(err)
 	}
 

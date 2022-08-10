@@ -3,12 +3,12 @@ package octopusdeploy
 import (
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandMachineCleanupPolicy(values interface{}) *octopusdeploy.MachineCleanupPolicy {
+func expandMachineCleanupPolicy(values interface{}) *machines.MachineCleanupPolicy {
 	if values == nil {
 		return nil
 	}
@@ -19,7 +19,7 @@ func expandMachineCleanupPolicy(values interface{}) *octopusdeploy.MachineCleanu
 
 	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
 
-	machineCleanupPolicy := octopusdeploy.NewMachineCleanupPolicy()
+	machineCleanupPolicy := machines.NewMachineCleanupPolicy()
 
 	if v, ok := flattenedMap["delete_machines_behavior"]; ok {
 		machineCleanupPolicy.DeleteMachinesBehavior = v.(string)
@@ -32,7 +32,7 @@ func expandMachineCleanupPolicy(values interface{}) *octopusdeploy.MachineCleanu
 	return machineCleanupPolicy
 }
 
-func flattenMachineCleanupPolicy(machineCleanupPolicy *octopusdeploy.MachineCleanupPolicy) []interface{} {
+func flattenMachineCleanupPolicy(machineCleanupPolicy *machines.MachineCleanupPolicy) []interface{} {
 	if machineCleanupPolicy == nil {
 		return nil
 	}

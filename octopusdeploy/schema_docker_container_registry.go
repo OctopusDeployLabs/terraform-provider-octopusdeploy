@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandDockerContainerRegistry(d *schema.ResourceData) (*octopusdeploy.DockerContainerRegistry, error) {
+func expandDockerContainerRegistry(d *schema.ResourceData) (*feeds.DockerContainerRegistry, error) {
 	name := d.Get("name").(string)
 
-	dockerContainerRegistry, err := octopusdeploy.NewDockerContainerRegistry(name)
+	dockerContainerRegistry, err := feeds.NewDockerContainerRegistry(name)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,7 @@ func expandDockerContainerRegistry(d *schema.ResourceData) (*octopusdeploy.Docke
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		dockerContainerRegistry.Password = octopusdeploy.NewSensitiveValue(v.(string))
+		dockerContainerRegistry.Password = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("username"); ok {
@@ -85,7 +86,7 @@ func getDockerContainerRegistrySchema() map[string]*schema.Schema {
 	}
 }
 
-func setDockerContainerRegistry(ctx context.Context, d *schema.ResourceData, dockerContainerRegistry *octopusdeploy.DockerContainerRegistry) error {
+func setDockerContainerRegistry(ctx context.Context, d *schema.ResourceData, dockerContainerRegistry *feeds.DockerContainerRegistry) error {
 	d.Set("api_version", dockerContainerRegistry.APIVersion)
 	d.Set("feed_uri", dockerContainerRegistry.FeedURI)
 	d.Set("name", dockerContainerRegistry.Name)

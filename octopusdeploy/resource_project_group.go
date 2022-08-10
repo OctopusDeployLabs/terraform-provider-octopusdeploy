@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	log.Printf("[INFO] creating project group: %#v", projectGroup)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdProjectGroup, err := client.ProjectGroups.Add(projectGroup)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,7 +46,7 @@ func resourceProjectGroupCreate(ctx context.Context, d *schema.ResourceData, m i
 func resourceProjectGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting project group (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.ProjectGroups.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -58,17 +59,10 @@ func resourceProjectGroupDelete(ctx context.Context, d *schema.ResourceData, m i
 func resourceProjectGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading project group (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	projectGroup, err := client.ProjectGroups.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] project group (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "project group")
 	}
 
 	if err := setProjectGroup(ctx, d, projectGroup); err != nil {
@@ -83,7 +77,7 @@ func resourceProjectGroupUpdate(ctx context.Context, d *schema.ResourceData, m i
 	log.Printf("[INFO] updating project group (%s)", d.Id())
 
 	projectGroup := expandProjectGroup(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedProjectGroup, err := client.ProjectGroups.Update(*projectGroup)
 	if err != nil {
 		return diag.FromErr(err)

@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandKubernetesAuthentication(values interface{}) octopusdeploy.IKubernetesAuthentication {
+func expandKubernetesAuthentication(values interface{}) machines.IKubernetesAuthentication {
 	if values == nil {
 		return nil
 	}
@@ -34,7 +34,7 @@ func expandKubernetesAuthentication(values interface{}) octopusdeploy.IKubernete
 		return expandKubernetesStandardAuthentication(flattenedMap)
 	}
 
-	return &octopusdeploy.KubernetesAuthentication{
+	return &machines.KubernetesAuthentication{
 		AccountID:                 flattenedMap["account_id"].(string),
 		AdminLogin:                flattenedMap["admin_login"].(string),
 		AssumedRoleARN:            flattenedMap["assumed_role_arn"].(string),
@@ -56,29 +56,29 @@ func expandKubernetesAuthentication(values interface{}) octopusdeploy.IKubernete
 	}
 }
 
-func flattenKubernetesAuthentication(kubernetesAuthentication octopusdeploy.IKubernetesAuthentication) []interface{} {
+func flattenKubernetesAuthentication(kubernetesAuthentication machines.IKubernetesAuthentication) []interface{} {
 	if kubernetesAuthentication == nil {
 		return nil
 	}
 
 	switch kubernetesAuthentication.GetAuthenticationType() {
 	case "KubernetesAws":
-		return flattenKubernetesAwsAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesAwsAuthentication))
+		return flattenKubernetesAwsAuthentication(kubernetesAuthentication.(*machines.KubernetesAwsAuthentication))
 	case "KubernetesAzure":
-		return flattenKubernetesAzureAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesAzureAuthentication))
+		return flattenKubernetesAzureAuthentication(kubernetesAuthentication.(*machines.KubernetesAzureAuthentication))
 	case "KubernetesCertificate":
-		return flattenKubernetesCertificateAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesCertificateAuthentication))
+		return flattenKubernetesCertificateAuthentication(kubernetesAuthentication.(*machines.KubernetesCertificateAuthentication))
 	case "KubernetesGoogleCloud":
-		return flattenKubernetesGcpAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesGcpAuthentication))
+		return flattenKubernetesGcpAuthentication(kubernetesAuthentication.(*machines.KubernetesGcpAuthentication))
 	case "KubernetesStandard":
-		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesStandardAuthentication))
+		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*machines.KubernetesStandardAuthentication))
 	case "None":
-		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*octopusdeploy.KubernetesStandardAuthentication))
+		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*machines.KubernetesStandardAuthentication))
 	}
 
 	return nil
 
-	// authentication := kubernetesAuthentication.(*octopusdeploy.KubernetesAuthentication)
+	// authentication := kubernetesAuthentication.(*machines.KubernetesAuthentication)
 
 	// return []interface{}{map[string]interface{}{
 	// 	"account_id":                   authentication.AccountID,

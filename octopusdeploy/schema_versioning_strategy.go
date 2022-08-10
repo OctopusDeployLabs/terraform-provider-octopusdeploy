@@ -1,15 +1,15 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandVersioningStrategy(values interface{}) *octopusdeploy.VersioningStrategy {
+func expandVersioningStrategy(values interface{}) *projects.VersioningStrategy {
 	versioningStrategyList := values.(*schema.Set).List()
 	versioningStrategyMap := versioningStrategyList[0].(map[string]interface{})
 
-	versioningStrategy := &octopusdeploy.VersioningStrategy{}
+	versioningStrategy := &projects.VersioningStrategy{}
 
 	if versioningStrategyMap["donor_package_step_id"] != nil {
 		donorPackageStepID := versioningStrategyMap["donor_package_step_id"].(string)
@@ -24,7 +24,7 @@ func expandVersioningStrategy(values interface{}) *octopusdeploy.VersioningStrat
 	return versioningStrategy
 }
 
-func flattenVersioningStrategy(versioningStrategy *octopusdeploy.VersioningStrategy) []interface{} {
+func flattenVersioningStrategy(versioningStrategy *projects.VersioningStrategy) []interface{} {
 	if versioningStrategy == nil {
 		return nil
 	}

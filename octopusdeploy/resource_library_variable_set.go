@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 
 	log.Printf("[INFO] creating library variable set: %#v", libraryVariableSet)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdLibraryVariableSet, err := client.LibraryVariableSets.Add(libraryVariableSet)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,7 +46,7 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting library variable set (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	err := client.LibraryVariableSets.DeleteByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -59,17 +60,10 @@ func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceDat
 func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading library variable set (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	libraryVariableSet, err := client.LibraryVariableSets.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] library variable set (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "library variable set")
 	}
 
 	if err := setLibraryVariableSet(ctx, d, libraryVariableSet); err != nil {
@@ -85,7 +79,7 @@ func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceDat
 
 	libraryVariableSet := expandLibraryVariableSet(d)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedLibraryVariableSet, err := client.LibraryVariableSets.Update(libraryVariableSet)
 	if err != nil {
 		return diag.FromErr(err)

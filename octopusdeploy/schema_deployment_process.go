@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeploymentProcess(d *schema.ResourceData, client *octopusdeploy.Client) *octopusdeploy.DeploymentProcess {
+func expandDeploymentProcess(d *schema.ResourceData, client *client.Client) *deployments.DeploymentProcess {
 	projectID := d.Get("project_id").(string)
-	deploymentProcess := octopusdeploy.NewDeploymentProcess(projectID)
+	deploymentProcess := deployments.NewDeploymentProcess(projectID)
 	deploymentProcess.ID = d.Id()
 
 	if v, ok := d.GetOk("branch"); ok {
@@ -22,7 +24,7 @@ func expandDeploymentProcess(d *schema.ResourceData, client *octopusdeploy.Clien
 		}
 
 		if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == "VersionControlled" {
-			deploymentProcess.Branch = project.PersistenceSettings.(*octopusdeploy.GitPersistenceSettings).DefaultBranch
+			deploymentProcess.Branch = project.PersistenceSettings.(*projects.GitPersistenceSettings).DefaultBranch
 		}
 	}
 
@@ -42,14 +44,14 @@ func expandDeploymentProcess(d *schema.ResourceData, client *octopusdeploy.Clien
 		steps := v.([]interface{})
 		for _, step := range steps {
 			deploymentStep := expandDeploymentStep(step.(map[string]interface{}))
-			deploymentProcess.Steps = append(deploymentProcess.Steps, *deploymentStep)
+			deploymentProcess.Steps = append(deploymentProcess.Steps, deploymentStep)
 		}
 	}
 
 	return deploymentProcess
 }
 
-func setDeploymentProcess(ctx context.Context, d *schema.ResourceData, deploymentProcess *octopusdeploy.DeploymentProcess) error {
+func setDeploymentProcess(ctx context.Context, d *schema.ResourceData, deploymentProcess *deployments.DeploymentProcess) error {
 	d.Set("branch", deploymentProcess.Branch)
 	d.Set("last_snapshot_id", deploymentProcess.LastSnapshotID)
 	d.Set("project_id", deploymentProcess.ProjectID)

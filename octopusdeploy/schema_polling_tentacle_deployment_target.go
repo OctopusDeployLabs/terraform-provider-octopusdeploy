@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandPollingTentacleDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
+func expandPollingTentacleDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
 	tentacleURL, _ := url.Parse(d.Get("tentacle_url").(string))
 	thumbprint := d.Get("thumbprint").(string)
 
-	endpoint := octopusdeploy.NewPollingTentacleEndpoint(tentacleURL, thumbprint)
+	endpoint := machines.NewPollingTentacleEndpoint(tentacleURL, thumbprint)
 
 	if v, ok := d.GetOk("certificate_signature_algorithm"); ok {
 		endpoint.CertificateSignatureAlgorithm = v.(string)
@@ -28,13 +28,13 @@ func expandPollingTentacleDeploymentTarget(d *schema.ResourceData) *octopusdeplo
 	return deploymentTarget
 }
 
-func flattenPollingTentacleDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenPollingTentacleDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["certificate_signature_algorithm"] = endpointResource.CertificateSignatureAlgorithm
 	flattenedDeploymentTarget["tentacle_version_details"] = flattenTentacleVersionDetails(endpointResource.TentacleVersionDetails)
 	flattenedDeploymentTarget["tentacle_url"] = endpointResource.URI.String()
@@ -85,8 +85,8 @@ func getPollingTentacleDeploymentTargetSchema() map[string]*schema.Schema {
 	return pollingTentacleDeploymentTargetSchema
 }
 
-func setPollingTentacleDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setPollingTentacleDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}

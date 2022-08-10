@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceSpaceCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	log.Printf("[INFO] creating space: %#v", space)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdSpace, err := client.Spaces.Add(space)
 	if err != nil {
 		return diag.FromErr(err)
@@ -48,7 +49,7 @@ func resourceSpaceDelete(ctx context.Context, d *schema.ResourceData, m interfac
 	space := expandSpace(d)
 	space.TaskQueueStopped = true
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedSpace, err := client.Spaces.Update(space)
 	if err != nil {
 		return diag.FromErr(err)
@@ -67,17 +68,10 @@ func resourceSpaceDelete(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceSpaceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading space (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	space, err := client.Spaces.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] space (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "space")
 	}
 
 	if err := setSpace(ctx, d, space); err != nil {
@@ -92,7 +86,7 @@ func resourceSpaceUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	log.Printf("[INFO] updating space (%s)", d.Id())
 
 	space := expandSpace(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedSpace, err := client.Spaces.Update(space)
 	if err != nil {
 		return diag.FromErr(err)

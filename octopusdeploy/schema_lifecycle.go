@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandLifecycle(d *schema.ResourceData) *octopusdeploy.Lifecycle {
+func expandLifecycle(d *schema.ResourceData) *lifecycles.Lifecycle {
 	name := d.Get("name").(string)
 
-	lifecycle := octopusdeploy.NewLifecycle(name)
+	lifecycle := lifecycles.NewLifecycle(name)
 	lifecycle.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -44,7 +45,7 @@ func expandLifecycle(d *schema.ResourceData) *octopusdeploy.Lifecycle {
 	return lifecycle
 }
 
-func flattenLifecycle(lifecycle *octopusdeploy.Lifecycle) map[string]interface{} {
+func flattenLifecycle(lifecycle *lifecycles.Lifecycle) map[string]interface{} {
 	if lifecycle == nil {
 		return nil
 	}
@@ -98,7 +99,7 @@ func getLifecycleSchema() map[string]*schema.Schema {
 		"release_retention_policy": {
 			Computed: true,
 			DefaultFunc: func() (interface{}, error) {
-				return flattenRetentionPeriod(octopusdeploy.NewRetentionPeriod(30, "Days", false)), nil
+				return flattenRetentionPeriod(core.NewRetentionPeriod(30, "Days", false)), nil
 			},
 			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
 			MaxItems: 1,
@@ -109,7 +110,7 @@ func getLifecycleSchema() map[string]*schema.Schema {
 		"tentacle_retention_policy": {
 			Computed: true,
 			DefaultFunc: func() (interface{}, error) {
-				return flattenRetentionPeriod(octopusdeploy.NewRetentionPeriod(30, "Days", false)), nil
+				return flattenRetentionPeriod(core.NewRetentionPeriod(30, "Days", false)), nil
 			},
 			Elem:     &schema.Resource{Schema: getRetentionPeriodSchema()},
 			MaxItems: 1,
@@ -119,7 +120,7 @@ func getLifecycleSchema() map[string]*schema.Schema {
 	}
 }
 
-func setLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *octopusdeploy.Lifecycle) error {
+func setLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *lifecycles.Lifecycle) error {
 	d.Set("description", lifecycle.Description)
 	d.Set("id", lifecycle.GetID())
 	d.Set("name", lifecycle.Name)

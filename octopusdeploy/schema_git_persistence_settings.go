@@ -3,10 +3,10 @@ package octopusdeploy
 import (
 	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 )
 
-func expandGitPersistenceSettings(values interface{}) octopusdeploy.IPersistenceSettings {
+func expandGitPersistenceSettings(values interface{}) projects.IPersistenceSettings {
 	if values == nil {
 		return nil
 	}
@@ -23,14 +23,14 @@ func expandGitPersistenceSettings(values interface{}) octopusdeploy.IPersistence
 		return nil
 	}
 
-	var credential octopusdeploy.IGitCredential
+	var credential projects.IGitCredential
 	if v, ok := flattenedMap["credentials"]; ok {
 		credential = expandGitCredential(v)
 	} else {
-		credential = octopusdeploy.NewAnonymousGitCredential()
+		credential = projects.NewAnonymousGitCredential()
 	}
 
-	return octopusdeploy.NewGitPersistenceSettings(
+	return projects.NewGitPersistenceSettings(
 		flattenedMap["base_path"].(string),
 		credential,
 		flattenedMap["default_branch"].(string),
@@ -38,7 +38,7 @@ func expandGitPersistenceSettings(values interface{}) octopusdeploy.IPersistence
 	)
 }
 
-func flattenGitPersistenceSettings(persistenceSettings octopusdeploy.IPersistenceSettings, password string) []interface{} {
+func flattenGitPersistenceSettings(persistenceSettings projects.IPersistenceSettings, password string) []interface{} {
 	if persistenceSettings == nil {
 		return nil
 	}
@@ -47,7 +47,7 @@ func flattenGitPersistenceSettings(persistenceSettings octopusdeploy.IPersistenc
 		return nil
 	}
 
-	gitPersistanceSettings := persistenceSettings.(*octopusdeploy.GitPersistenceSettings)
+	gitPersistanceSettings := persistenceSettings.(*projects.GitPersistenceSettings)
 
 	flattenedGitPersistenceSettings := make(map[string]interface{})
 	flattenedGitPersistenceSettings["base_path"] = gitPersistanceSettings.BasePath

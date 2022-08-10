@@ -2,10 +2,12 @@ package octopusdeploy
 
 import (
 	"strconv"
-	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func addTerraformTemplateAdvancedOptionsSchema(element *schema.Resource) {
@@ -188,7 +190,7 @@ func addTerraformTemplateSchema(element *schema.Resource) {
 	}
 }
 
-func flattenTerraformTemplate(properties map[string]octopusdeploy.PropertyValue) []interface{} {
+func flattenTerraformTemplate(properties map[string]core.PropertyValue) []interface{} {
 	if len(properties) == 0 {
 		return nil
 	}
@@ -212,7 +214,7 @@ func flattenTerraformTemplate(properties map[string]octopusdeploy.PropertyValue)
 	return []interface{}{flattenedMap}
 }
 
-func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
+func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) *deployments.DeploymentAction {
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.TerraformApply"
 
@@ -220,31 +222,31 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 		template := v.(*schema.Set).List()[0].(map[string]interface{})
 
 		if v, ok := template["additional_variable_files"]; ok {
-			action.Properties["Octopus.Action.Terraform.VarFiles"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.Terraform.VarFiles"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := template["directory"]; ok {
-			action.Properties["Octopus.Action.Terraform.TemplateDirectory"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.Terraform.TemplateDirectory"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := template["run_automatic_file_substitution"]; ok {
 			runAutomaticFileSubstitution := v.(bool)
-			action.Properties["Octopus.Action.Terraform.RunAutomaticFileSubstitution"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(runAutomaticFileSubstitution)), false)
+			action.Properties["Octopus.Action.Terraform.RunAutomaticFileSubstitution"] = core.NewPropertyValue(cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(runAutomaticFileSubstitution)), false)
 		}
 
 		if v, ok := template["target_files"]; ok {
-			action.Properties["Octopus.Action.Terraform.FileSubstitution"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.Terraform.FileSubstitution"] = core.NewPropertyValue(v.(string), false)
 		}
 	}
 
 	if v, ok := flattenedAction["template_parameters"]; ok {
-		action.Properties["Octopus.Action.Terraform.TemplateParameters"] = octopusdeploy.NewPropertyValue(v.(string), false)
+		action.Properties["Octopus.Action.Terraform.TemplateParameters"] = core.NewPropertyValue(v.(string), false)
 	}
 
 	if _, ok := flattenedAction["primary_package"]; ok {
-		action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue("Package", false)
+		action.Properties["Octopus.Action.Script.ScriptSource"] = core.NewPropertyValue("Package", false)
 	} else {
-		action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue("Inline", false)
+		action.Properties["Octopus.Action.Script.ScriptSource"] = core.NewPropertyValue("Inline", false)
 	}
 
 	if v, ok := flattenedAction["advanced_options"]; ok && len(v.(*schema.Set).List()) > 0 {
@@ -252,114 +254,114 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 
 		if v, ok := advancedOptions["allow_additional_plugin_downloads"]; ok {
 			allowPluginDownloads := v.(bool)
-			action.Properties["Octopus.Action.Terraform.AllowPluginDownloads"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(allowPluginDownloads)), false)
+			action.Properties["Octopus.Action.Terraform.AllowPluginDownloads"] = core.NewPropertyValue(cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(allowPluginDownloads)), false)
 		}
 
 		if v, ok := advancedOptions["apply_parameters"]; ok {
-			action.Properties["Octopus.Action.Terraform.AdditionalActionParams"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.Terraform.AdditionalActionParams"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := advancedOptions["init_parameters"]; ok {
-			action.Properties["Octopus.Action.Terraform.AdditionalInitParams"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.Terraform.AdditionalInitParams"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := advancedOptions["plugin_cache_directory"]; ok {
-			action.Properties["Octopus.Action.Terraform.PluginsDirectory"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.Terraform.PluginsDirectory"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := advancedOptions["workspace"]; ok {
-			action.Properties["Octopus.Action.Terraform.Workspace"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.Terraform.Workspace"] = core.NewPropertyValue(v.(string), false)
 		}
 	}
 
 	if v, ok := flattenedAction["aws_account"]; ok && len(v.(*schema.Set).List()) > 0 {
-		action.Properties["Octopus.Action.Terraform.ManagedAccount"] = octopusdeploy.NewPropertyValue("AWS", false)
+		action.Properties["Octopus.Action.Terraform.ManagedAccount"] = core.NewPropertyValue("AWS", false)
 
 		awsAccount := v.(*schema.Set).List()[0].(map[string]interface{})
 
 		if v, ok := awsAccount["region"]; ok {
-			action.Properties["Octopus.Action.Aws.Region"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.Aws.Region"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := awsAccount["role"]; ok && len(v.(*schema.Set).List()) > 0 {
-			action.Properties["Octopus.Action.Aws.AssumeRole"] = octopusdeploy.NewPropertyValue("True", false)
+			action.Properties["Octopus.Action.Aws.AssumeRole"] = core.NewPropertyValue("True", false)
 
 			role := v.(*schema.Set).List()[0].(map[string]interface{})
 
 			if v, ok := role["arn"]; ok {
-				action.Properties["Octopus.Action.Aws.AssumedRoleArn"] = octopusdeploy.NewPropertyValue(v.(string), false)
+				action.Properties["Octopus.Action.Aws.AssumedRoleArn"] = core.NewPropertyValue(v.(string), false)
 			}
 
 			if v, ok := role["external_id"]; ok {
-				action.Properties["Octopus.Action.Aws.AssumeRoleExternalId"] = octopusdeploy.NewPropertyValue(v.(string), false)
+				action.Properties["Octopus.Action.Aws.AssumeRoleExternalId"] = core.NewPropertyValue(v.(string), false)
 			}
 
 			if v, ok := role["role_session_name"]; ok {
-				action.Properties["Octopus.Action.Aws.AssumedRoleSession"] = octopusdeploy.NewPropertyValue(v.(string), false)
+				action.Properties["Octopus.Action.Aws.AssumedRoleSession"] = core.NewPropertyValue(v.(string), false)
 			}
 
 			if v, ok := role["session_duration"]; ok {
-				action.Properties["Octopus.Action.Aws.AssumeRoleSessionDurationSeconds"] = octopusdeploy.NewPropertyValue(strconv.Itoa(v.(int)), false)
+				action.Properties["Octopus.Action.Aws.AssumeRoleSessionDurationSeconds"] = core.NewPropertyValue(strconv.Itoa(v.(int)), false)
 			}
 		}
 
 		if v, ok := awsAccount["variable"]; ok {
-			action.Properties["Octopus.Action.AwsAccount.Variable"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.AwsAccount.Variable"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := awsAccount["use_instance_role"]; ok {
-			action.Properties["Octopus.Action.AwsAccount.UseInstanceRole"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(v.(bool))), false)
+			action.Properties["Octopus.Action.AwsAccount.UseInstanceRole"] = core.NewPropertyValue(cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(v.(bool))), false)
 		}
 	}
 
 	if v, ok := flattenedAction["azure_account"]; ok && len(v.(*schema.Set).List()) > 0 {
-		action.Properties["Octopus.Action.Terraform.AzureAccount"] = octopusdeploy.NewPropertyValue("True", false)
+		action.Properties["Octopus.Action.Terraform.AzureAccount"] = core.NewPropertyValue("True", false)
 
 		azureAccount := v.(*schema.Set).List()[0].(map[string]interface{})
 
 		if v, ok := azureAccount["variable"]; ok {
-			action.Properties["Octopus.Action.AzureAccount.Variable"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.AzureAccount.Variable"] = core.NewPropertyValue(v.(string), false)
 		}
 	}
 
 	if v, ok := flattenedAction["google_cloud_account"]; ok && len(v.(*schema.Set).List()) > 0 {
-		action.Properties["Octopus.Action.Terraform.GoogleCloudAccount"] = octopusdeploy.NewPropertyValue("True", false)
+		action.Properties["Octopus.Action.Terraform.GoogleCloudAccount"] = core.NewPropertyValue("True", false)
 
 		googleAccount := v.(*schema.Set).List()[0].(map[string]interface{})
 
 		if v, ok := googleAccount["variable"]; ok {
-			action.Properties["Octopus.Action.GoogleCloudAccount.Variable"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.GoogleCloudAccount.Variable"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := googleAccount["use_vm_service_account"]; ok {
-			action.Properties["Octopus.Action.GoogleCloud.UseVMServiceAccount"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(v.(bool))), false)
+			action.Properties["Octopus.Action.GoogleCloud.UseVMServiceAccount"] = core.NewPropertyValue(cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(v.(bool))), false)
 		}
 
 		if v, ok := googleAccount["impersonate_service_account"]; ok {
-			action.Properties["Octopus.Action.GoogleCloud.ImpersonateServiceAccount"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(v.(bool))), false)
+			action.Properties["Octopus.Action.GoogleCloud.ImpersonateServiceAccount"] = core.NewPropertyValue(cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(v.(bool))), false)
 		}
 
 		if v, ok := googleAccount["service_account_emails"]; ok {
-			action.Properties["Octopus.Action.GoogleCloud.ServiceAccountEmails"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.GoogleCloud.ServiceAccountEmails"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := googleAccount["zone"]; ok {
-			action.Properties["Octopus.Action.GoogleCloud.Zone"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.GoogleCloud.Zone"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := googleAccount["region"]; ok {
-			action.Properties["Octopus.Action.GoogleCloud.Region"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.GoogleCloud.Region"] = core.NewPropertyValue(v.(string), false)
 		}
 
 		if v, ok := googleAccount["project"]; ok {
-			action.Properties["Octopus.Action.GoogleCloud.Project"] = octopusdeploy.NewPropertyValue(v.(string), false)
+			action.Properties["Octopus.Action.GoogleCloud.Project"] = core.NewPropertyValue(v.(string), false)
 		}
 	}
 
 	return action
 }
 
-func flattenTerraformTemplateAdvancedOptions(properties map[string]octopusdeploy.PropertyValue) []interface{} {
+func flattenTerraformTemplateAdvancedOptions(properties map[string]core.PropertyValue) []interface{} {
 	if len(properties) == 0 {
 		return nil
 	}
@@ -385,7 +387,7 @@ func flattenTerraformTemplateAdvancedOptions(properties map[string]octopusdeploy
 	return []interface{}{flattenedMap}
 }
 
-func flattenTerraformTemplateGoogleAccount(properties map[string]octopusdeploy.PropertyValue) []interface{} {
+func flattenTerraformTemplateGoogleAccount(properties map[string]core.PropertyValue) []interface{} {
 	if len(properties) == 0 {
 		return nil
 	}
@@ -416,7 +418,7 @@ func flattenTerraformTemplateGoogleAccount(properties map[string]octopusdeploy.P
 	return []interface{}{flattenedMap}
 }
 
-func flattenTerraformTemplateAwsAccount(properties map[string]octopusdeploy.PropertyValue) []interface{} {
+func flattenTerraformTemplateAwsAccount(properties map[string]core.PropertyValue) []interface{} {
 	if len(properties) == 0 {
 		return nil
 	}
@@ -442,7 +444,7 @@ func flattenTerraformTemplateAwsAccount(properties map[string]octopusdeploy.Prop
 	return []interface{}{flattenedMap}
 }
 
-func flattenTerraformTemplateAwsRole(properties map[string]octopusdeploy.PropertyValue) []interface{} {
+func flattenTerraformTemplateAwsRole(properties map[string]core.PropertyValue) []interface{} {
 	if len(properties) == 0 {
 		return nil
 	}
@@ -466,7 +468,7 @@ func flattenTerraformTemplateAwsRole(properties map[string]octopusdeploy.Propert
 	return []interface{}{flattenedMap}
 }
 
-func flattenTerraformTemplateAzureAccount(properties map[string]octopusdeploy.PropertyValue) []interface{} {
+func flattenTerraformTemplateAzureAccount(properties map[string]core.PropertyValue) []interface{} {
 	if len(properties) == 0 {
 		return nil
 	}
@@ -480,7 +482,7 @@ func flattenTerraformTemplateAzureAccount(properties map[string]octopusdeploy.Pr
 	return []interface{}{flattenedMap}
 }
 
-func flattenApplyTerraformTemplateAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenApplyTerraformTemplateAction(action *deployments.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 
 	for k, v := range action.Properties {

@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandAmazonWebServicesAccount(d *schema.ResourceData) *octopusdeploy.AmazonWebServicesAccount {
+func expandAmazonWebServicesAccount(d *schema.ResourceData) *accounts.AmazonWebServicesAccount {
 	name := d.Get("name").(string)
 	accessKey := d.Get("access_key").(string)
-	secretKey := octopusdeploy.NewSensitiveValue(d.Get("secret_key").(string))
+	secretKey := core.NewSensitiveValue(d.Get("secret_key").(string))
 
-	account, _ := octopusdeploy.NewAmazonWebServicesAccount(name, accessKey, secretKey)
+	account, _ := accounts.NewAmazonWebServicesAccount(name, accessKey, secretKey)
 	account.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -30,7 +31,7 @@ func expandAmazonWebServicesAccount(d *schema.ResourceData) *octopusdeploy.Amazo
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
@@ -71,7 +72,7 @@ func getAmazonWebServicesAccountSchema() map[string]*schema.Schema {
 	}
 }
 
-func setAmazonWebServicesAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AmazonWebServicesAccount) error {
+func setAmazonWebServicesAccount(ctx context.Context, d *schema.ResourceData, account *accounts.AmazonWebServicesAccount) error {
 	d.Set("access_key", account.AccessKey)
 	d.Set("description", account.GetDescription())
 	d.Set("name", account.GetName())

@@ -3,7 +3,8 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -19,13 +20,13 @@ func dataSourceVariable() *schema.Resource {
 func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ownerID := d.Get("owner_id")
 	name := d.Get("name")
-	scope := octopusdeploy.VariableScope{}
+	scope := variables.VariableScope{}
 
 	if v, ok := d.GetOk("scope"); ok {
 		scope = expandVariableScope(v)
 	}
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	variables, err := client.Variables.GetByName(ownerID.(string), name.(string), &scope)
 	if err != nil {
 		return diag.Errorf("error reading variable with owner ID %s with name %s: %s", ownerID, name, err.Error())

@@ -3,7 +3,8 @@ package octopusdeploy
 import (
 	"strconv"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -15,18 +16,18 @@ func getRunKubectlScriptSchema() *schema.Schema {
 	return actionSchema
 }
 
-func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
+func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) *deployments.DeploymentAction {
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.KubernetesRunScript"
 
-	action.Properties["Octopus.Action.Script.ScriptFileName"] = octopusdeploy.NewPropertyValue(flattenedAction["script_file_name"].(string), false)
-	action.Properties["Octopus.Action.Script.ScriptParameters"] = octopusdeploy.NewPropertyValue(flattenedAction["script_parameters"].(string), false)
-	action.Properties["Octopus.Action.Script.ScriptSource"] = octopusdeploy.NewPropertyValue("Package", false)
+	action.Properties["Octopus.Action.Script.ScriptFileName"] = core.NewPropertyValue(flattenedAction["script_file_name"].(string), false)
+	action.Properties["Octopus.Action.Script.ScriptParameters"] = core.NewPropertyValue(flattenedAction["script_parameters"].(string), false)
+	action.Properties["Octopus.Action.Script.ScriptSource"] = core.NewPropertyValue("Package", false)
 
 	return action
 }
 
-func flattenKubernetesRunScriptAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenKubernetesRunScriptAction(action *deployments.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {

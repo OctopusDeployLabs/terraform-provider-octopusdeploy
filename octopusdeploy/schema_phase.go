@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandPhase(tfPhase map[string]interface{}) octopusdeploy.Phase {
-	phase := octopusdeploy.Phase{
+func expandPhase(tfPhase map[string]interface{}) lifecycles.Phase {
+	phase := lifecycles.Phase{
 		AutomaticDeploymentTargets:         getSliceFromTerraformTypeList(tfPhase["automatic_deployment_targets"]),
 		IsOptionalPhase:                    tfPhase["is_optional_phase"].(bool),
 		MinimumEnvironmentsBeforePromotion: int32(tfPhase["minimum_environments_before_promotion"].(int)),
@@ -24,7 +24,7 @@ func expandPhase(tfPhase map[string]interface{}) octopusdeploy.Phase {
 	return phase
 }
 
-func flattenPhases(phases []octopusdeploy.Phase) []interface{} {
+func flattenPhases(phases []lifecycles.Phase) []interface{} {
 	flattenedPhases := make([]interface{}, 0)
 	for _, phase := range phases {
 		p := make(map[string]interface{})

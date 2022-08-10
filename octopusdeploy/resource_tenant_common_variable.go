@@ -6,7 +6,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -55,7 +57,7 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 
 	log.Printf("[INFO] creating tenant common variable (%s)", id)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
 	if err != nil {
 		return diag.FromErr(err)
@@ -74,7 +76,7 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
-		libraryVariable.Variables[templateID] = octopusdeploy.NewPropertyValue(value, isSensitive)
+		libraryVariable.Variables[templateID] = core.NewPropertyValue(value, isSensitive)
 		client.Tenants.UpdateVariables(tenant, tenantVariables)
 
 		d.SetId(id)
@@ -98,10 +100,10 @@ func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceD
 
 	log.Printf("[INFO] deleting tenant common variable (%s)", id)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+		if apiError, ok := err.(*core.APIError); ok {
 			if apiError.StatusCode == 404 {
 				log.Printf("[INFO] tenant (%s) not found; deleting tenant common variable from state", d.Id())
 				d.SetId("")
@@ -126,7 +128,7 @@ func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceD
 	if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
 		if _, ok := libraryVariable.Variables[templateID]; ok {
 			if isSensitive {
-				libraryVariable.Variables[templateID] = octopusdeploy.PropertyValue{IsSensitive: true, SensitiveValue: &octopusdeploy.SensitiveValue{HasValue: false}}
+				libraryVariable.Variables[templateID] = core.PropertyValue{IsSensitive: true, SensitiveValue: &core.SensitiveValue{HasValue: false}}
 			} else {
 				delete(libraryVariable.Variables, templateID)
 			}
@@ -138,9 +140,7 @@ func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
-	log.Printf("[INFO] tenant common variable not found; deleting from state: %s", d.Id())
-	d.SetId("")
-	return nil
+	return errors.DeleteFromState(ctx, d, "tenant common variable")
 }
 
 func resourceTenantCommonVariableImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
@@ -173,10 +173,10 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 
 	log.Printf("[INFO] reading tenant common variable (%s)", id)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
+		if apiError, ok := err.(*core.APIError); ok {
 			if apiError.StatusCode == 404 {
 				log.Printf("[INFO] tenant (%s) not found; deleting common variable from state", d.Id())
 				d.SetId("")
@@ -210,9 +210,7 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
-	log.Printf("[INFO] tenant common variable not found; deleting from state, %s", d.Id())
-	d.SetId("")
-	return nil
+	return errors.DeleteFromState(ctx, d, "tenant common variable")
 }
 
 func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -228,7 +226,7 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 
 	log.Printf("[INFO] updating tenant common variable (%s)", id)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	tenant, err := client.Tenants.GetByID(tenantID)
 	if err != nil {
 		return diag.FromErr(err)
@@ -247,7 +245,7 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 	}
 
 	if libraryVariable, ok := tenantVariables.LibraryVariables[libraryVariableSetID]; ok {
-		libraryVariable.Variables[templateID] = octopusdeploy.NewPropertyValue(value, isSensitive)
+		libraryVariable.Variables[templateID] = core.NewPropertyValue(value, isSensitive)
 		client.Tenants.UpdateVariables(tenant, tenantVariables)
 
 		d.SetId(id)

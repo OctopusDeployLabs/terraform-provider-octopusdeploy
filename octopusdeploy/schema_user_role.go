@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/userroles"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandUserRole(d *schema.ResourceData) *octopusdeploy.UserRole {
-	userRole := &octopusdeploy.UserRole{}
+func expandUserRole(d *schema.ResourceData) *userroles.UserRole {
+	userRole := &userroles.UserRole{}
 	userRole.ID = d.Id()
 
 	if v, ok := d.GetOk("can_be_deleted"); ok {
@@ -47,7 +47,7 @@ func expandUserRole(d *schema.ResourceData) *octopusdeploy.UserRole {
 	return userRole
 }
 
-func flattenUserRole(userRole *octopusdeploy.UserRole) map[string]interface{} {
+func flattenUserRole(userRole *userroles.UserRole) map[string]interface{} {
 	if userRole == nil {
 		return nil
 	}
@@ -125,7 +125,7 @@ func getUserRoleSchema() map[string]*schema.Schema {
 	}
 }
 
-func setUserRole(ctx context.Context, d *schema.ResourceData, userRole *octopusdeploy.UserRole) error {
+func setUserRole(ctx context.Context, d *schema.ResourceData, userRole *userroles.UserRole) error {
 	d.Set("can_be_deleted", userRole.CanBeDeleted)
 	d.Set("description", userRole.Description)
 	d.Set("id", userRole.GetID())

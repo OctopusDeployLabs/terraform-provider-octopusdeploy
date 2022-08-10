@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandMachineUpdatePolicy(values interface{}) *octopusdeploy.MachineUpdatePolicy {
+func expandMachineUpdatePolicy(values interface{}) *machines.MachineUpdatePolicy {
 	if values == nil {
 		return nil
 	}
@@ -17,7 +17,7 @@ func expandMachineUpdatePolicy(values interface{}) *octopusdeploy.MachineUpdateP
 
 	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
 
-	machineUpdatePolicy := octopusdeploy.NewMachineUpdatePolicy()
+	machineUpdatePolicy := machines.NewMachineUpdatePolicy()
 
 	if v, ok := flattenedMap["calamari_update_behavior"]; ok {
 		machineUpdatePolicy.CalamariUpdateBehavior = v.(string)
@@ -34,7 +34,7 @@ func expandMachineUpdatePolicy(values interface{}) *octopusdeploy.MachineUpdateP
 	return machineUpdatePolicy
 }
 
-func flattenMachineUpdatePolicy(machineUpdatePolicy *octopusdeploy.MachineUpdatePolicy) []interface{} {
+func flattenMachineUpdatePolicy(machineUpdatePolicy *machines.MachineUpdatePolicy) []interface{} {
 	if machineUpdatePolicy == nil {
 		return nil
 	}

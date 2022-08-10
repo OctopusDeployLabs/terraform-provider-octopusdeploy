@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -19,23 +20,23 @@ func dataSourceSpaces() *schema.Resource {
 
 func dataSourceSpacesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 
 	flattenedSpaces := []interface{}{}
 
-	query := octopusdeploy.SpacesQuery{
+	query := spaces.SpacesQuery{
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
 
-	spaces, err := client.Spaces.Get(query)
+	existingSpaces, err := client.Spaces.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	for _, space := range spaces.Items {
+	for _, space := range existingSpaces.Items {
 		flattenedSpaces = append(flattenedSpaces, flattenSpace(space))
 	}
 

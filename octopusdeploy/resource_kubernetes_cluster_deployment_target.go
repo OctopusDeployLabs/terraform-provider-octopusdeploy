@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceKubernetesClusterDeploymentTargetCreate(ctx context.Context, d *sch
 
 	log.Printf("[INFO] creating Kubernetes cluster deployment target: %#v", deploymentTarget)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdDeploymentTarget, err := client.Machines.Add(deploymentTarget)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,7 +46,7 @@ func resourceKubernetesClusterDeploymentTargetCreate(ctx context.Context, d *sch
 func resourceKubernetesClusterDeploymentTargetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting Kubernetes cluster deployment target (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Machines.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,17 +60,10 @@ func resourceKubernetesClusterDeploymentTargetDelete(ctx context.Context, d *sch
 func resourceKubernetesClusterDeploymentTargetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading Kubernetes cluster deployment target (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	deploymentTarget, err := client.Machines.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] Kubernetes cluster deployment target (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "Kubernetes cluster deployment target")
 	}
 
 	if err := setKubernetesClusterDeploymentTarget(ctx, d, deploymentTarget); err != nil {
@@ -84,7 +78,7 @@ func resourceKubernetesClusterDeploymentTargetUpdate(ctx context.Context, d *sch
 	log.Printf("[INFO] updating Kubernetes cluster deployment target (%s)", d.Id())
 
 	deploymentTarget := expandKubernetesClusterDeploymentTarget(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedDeploymentTarget, err := client.Machines.Update(deploymentTarget)
 	if err != nil {
 		return diag.FromErr(err)

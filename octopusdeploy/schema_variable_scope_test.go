@@ -3,44 +3,44 @@ package octopusdeploy
 import (
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestExpandVariableScope(t *testing.T) {
 	scope := expandVariableScope(nil)
 	assert.True(t, scope.IsEmpty())
-	assert.Equal(t, octopusdeploy.VariableScope{}, scope)
+	assert.Equal(t, variables.VariableScope{}, scope)
 	assert.Empty(t, scope.Channels)
 
 	flattenedVariableScope := []interface{}{}
 	scope = expandVariableScope(flattenedVariableScope)
 	assert.True(t, scope.IsEmpty())
-	assert.Equal(t, octopusdeploy.VariableScope{}, scope)
+	assert.Equal(t, variables.VariableScope{}, scope)
 	assert.Empty(t, scope.Channels)
 
 	flattenedVariableScope = []interface{}{nil}
 	scope = expandVariableScope(flattenedVariableScope)
 	assert.True(t, scope.IsEmpty())
-	assert.Equal(t, octopusdeploy.VariableScope{}, scope)
+	assert.Equal(t, variables.VariableScope{}, scope)
 	assert.Empty(t, scope.Channels)
 
 	flattenedVariableScope = []interface{}{"foo"}
 	scope = expandVariableScope(flattenedVariableScope)
 	assert.True(t, scope.IsEmpty())
-	assert.Equal(t, octopusdeploy.VariableScope{}, scope)
+	assert.Equal(t, variables.VariableScope{}, scope)
 	assert.Empty(t, scope.Channels)
 
 	flattenedVariableScope = []interface{}{map[string]interface{}{}}
 	scope = expandVariableScope(flattenedVariableScope)
 	assert.True(t, scope.IsEmpty())
-	assert.Equal(t, octopusdeploy.VariableScope{}, scope)
+	assert.Equal(t, variables.VariableScope{}, scope)
 	assert.Empty(t, scope.Channels)
 
 	flattenedVariableScope = []interface{}{map[string]interface{}{
 		"actions": []interface{}{"foo"},
 	}}
-	expectedScope := octopusdeploy.VariableScope{
+	expectedScope := variables.VariableScope{
 		Actions: []string{"foo"},
 	}
 	scope = expandVariableScope(flattenedVariableScope)
@@ -54,7 +54,7 @@ func TestFlattenVariableScope(t *testing.T) {
 	flattenedVariableScope := []interface{}{map[string]interface{}{
 		"actions": []interface{}{"foo"},
 	}}
-	expectedScope := octopusdeploy.VariableScope{
+	expectedScope := variables.VariableScope{
 		Actions: []string{"foo"},
 	}
 	scope := expandVariableScope(flattenedVariableScope)

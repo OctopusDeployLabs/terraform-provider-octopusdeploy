@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -56,7 +56,7 @@ func testStaticWorkerPoolBasic(
 
 func testStaticWorkerPoolExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		workerPoolID := s.RootModule().Resources[prefix].Primary.ID
 		if _, err := client.WorkerPools.GetByID(workerPoolID); err != nil {
 			return err
@@ -67,7 +67,7 @@ func testStaticWorkerPoolExists(prefix string) resource.TestCheckFunc {
 }
 
 func testStaticWorkerPoolDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		workerPoolID := rs.Primary.ID
 		workerPool, err := client.WorkerPools.GetByID(workerPoolID)
