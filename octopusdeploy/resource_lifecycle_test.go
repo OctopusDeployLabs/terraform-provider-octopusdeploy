@@ -174,14 +174,17 @@ func testAccLifecycleComplex(localName string, name string) string {
 		`resource "octopusdeploy_lifecycle" "%s" {
 			name        = "%s"
 			description = "Funky Lifecycle description"
+
 			release_retention_policy {
 				unit             = "Days"
 				quantity_to_keep = 2
 			}
+
 			tentacle_retention_policy {
 				unit             = "Days"
 				quantity_to_keep = 1
 			}
+
 			phase {
 				automatic_deployment_targets          = ["${octopusdeploy_environment.%s.id}"]
 				is_optional_phase                     = true
@@ -189,6 +192,7 @@ func testAccLifecycleComplex(localName string, name string) string {
 				name                                  = "P1"
 				optional_deployment_targets           = ["${octopusdeploy_environment.%s.id}"]
 			}
+
 			phase {
 				name = "P2"
 			}
