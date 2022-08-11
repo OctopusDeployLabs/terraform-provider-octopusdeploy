@@ -27,13 +27,14 @@ func NewProjectGroupTestOptions() *ProjectGroupTestOptions {
 func ProjectGroupConfiguration(options *ProjectGroupTestOptions) string {
 	configuration := fmt.Sprintf(`resource "%s" "%s" {`, options.ResourceName, options.LocalName)
 	configuration += "\n"
-	configuration += fmt.Sprintf(`name = "%s"`, options.Resource.Name)
-	configuration += "\n"
 
 	if len(options.Resource.Description) > 0 {
 		configuration += fmt.Sprintf(`description = "%s"`, options.Resource.Description)
 		configuration += "\n"
 	}
+
+	configuration += fmt.Sprintf(`name = "%s"`, options.Resource.Name)
+	configuration += "\n"
 
 	configuration += "}"
 	return configuration
