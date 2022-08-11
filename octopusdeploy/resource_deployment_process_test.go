@@ -178,7 +178,7 @@ func testAccDeploymentProcessBasic(spaceID string, localName string) string {
 
 	return fmt.Sprintf(testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
 		`resource "octopusdeploy_deployment_process" "%s" {
-			project_id = "${octopusdeploy_project.%s.id}"
+			project_id = octopusdeploy_project.%s.id
 
 			step {
 				condition = "Variable"
