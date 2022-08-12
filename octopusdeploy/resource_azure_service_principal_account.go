@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,13 +28,13 @@ func resourceAzureServicePrincipalAccountCreate(ctx context.Context, d *schema.R
 
 	log.Printf("[INFO] creating Azure service principal account: %#v", account)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdAccount, err := client.Accounts.Add(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAzureServicePrincipalAccount(ctx, d, createdAccount.(*octopusdeploy.AzureServicePrincipalAccount)); err != nil {
+	if err := setAzureServicePrincipalAccount(ctx, d, createdAccount.(*accounts.AzureServicePrincipalAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -45,7 +47,7 @@ func resourceAzureServicePrincipalAccountCreate(ctx context.Context, d *schema.R
 func resourceAzureServicePrincipalAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting Azure service principal account (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Accounts.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,20 +61,13 @@ func resourceAzureServicePrincipalAccountDelete(ctx context.Context, d *schema.R
 func resourceAzureServicePrincipalAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading Azure service principal account (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] Azure service principal account (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "Azure service principal account")
 	}
 
-	azureServicePrincipalAccount := accountResource.(*octopusdeploy.AzureServicePrincipalAccount)
+	azureServicePrincipalAccount := accountResource.(*accounts.AzureServicePrincipalAccount)
 	if err := setAzureServicePrincipalAccount(ctx, d, azureServicePrincipalAccount); err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,13 +81,13 @@ func resourceAzureServicePrincipalAccountUpdate(ctx context.Context, d *schema.R
 
 	log.Printf("[INFO] updating Azure service principal account %#v", account)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedAccount, err := client.Accounts.Update(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAzureServicePrincipalAccount(ctx, d, updatedAccount.(*octopusdeploy.AzureServicePrincipalAccount)); err != nil {
+	if err := setAzureServicePrincipalAccount(ctx, d, updatedAccount.(*accounts.AzureServicePrincipalAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -1,15 +1,15 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandKubernetesAwsAuthentication(values interface{}) *octopusdeploy.KubernetesAwsAuthentication {
+func expandKubernetesAwsAuthentication(values interface{}) *machines.KubernetesAwsAuthentication {
 	flattenedValues := values.([]interface{})
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
-	authentication := octopusdeploy.NewKubernetesAwsAuthentication()
+	authentication := machines.NewKubernetesAwsAuthentication()
 	authentication.AccountID = flattenedAuthentication["account_id"].(string)
 	authentication.AssumedRoleARN = flattenedAuthentication["assumed_role_arn"].(string)
 	authentication.AssumedRoleSession = flattenedAuthentication["assumed_role_session"].(string)
@@ -22,7 +22,7 @@ func expandKubernetesAwsAuthentication(values interface{}) *octopusdeploy.Kubern
 	return authentication
 }
 
-func flattenKubernetesAwsAuthentication(kubernetesAwsAuthentication *octopusdeploy.KubernetesAwsAuthentication) []interface{} {
+func flattenKubernetesAwsAuthentication(kubernetesAwsAuthentication *machines.KubernetesAwsAuthentication) []interface{} {
 	if kubernetesAwsAuthentication == nil {
 		return nil
 	}

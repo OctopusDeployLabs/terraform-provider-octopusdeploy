@@ -1,11 +1,11 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandContainer(values interface{}) *octopusdeploy.DeploymentActionContainer {
+func expandContainer(values interface{}) *deployments.DeploymentActionContainer {
 	if values == nil {
 		return nil
 	}
@@ -16,8 +16,11 @@ func expandContainer(values interface{}) *octopusdeploy.DeploymentActionContaine
 	}
 
 	flattenedMap := flattenedValues[0].(map[string]interface{})
+	if len(flattenedMap) == 0 {
+		return nil
+	}
 
-	deploymentActionContainer := &octopusdeploy.DeploymentActionContainer{}
+	deploymentActionContainer := &deployments.DeploymentActionContainer{}
 
 	if feedID := flattenedMap["feed_id"]; feedID != nil {
 		deploymentActionContainer.FeedID = feedID.(string)
@@ -30,7 +33,7 @@ func expandContainer(values interface{}) *octopusdeploy.DeploymentActionContaine
 	return deploymentActionContainer
 }
 
-func flattenContainer(deploymentActionContainer *octopusdeploy.DeploymentActionContainer) []interface{} {
+func flattenContainer(deploymentActionContainer *deployments.DeploymentActionContainer) []interface{} {
 	if deploymentActionContainer == nil {
 		return nil
 	}

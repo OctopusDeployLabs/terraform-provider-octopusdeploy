@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/stretchr/testify/require"
 )
@@ -23,7 +23,7 @@ func TestExpandDeploymentAction(t *testing.T) {
 		"name":        name,
 	}
 
-	expected := octopusdeploy.NewDeploymentAction(name, actionType)
+	expected := deployments.NewDeploymentAction(name, actionType)
 
 	actual = expandAction(flattened)
 	require.Equal(t, expected, actual)
@@ -36,7 +36,7 @@ func TestFlattenDeploymentAction(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	actionType := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	expanded := octopusdeploy.NewDeploymentAction(name, actionType)
+	expanded := deployments.NewDeploymentAction(name, actionType)
 
 	actual = flattenAction(expanded)
 	expected := map[string]interface{}{

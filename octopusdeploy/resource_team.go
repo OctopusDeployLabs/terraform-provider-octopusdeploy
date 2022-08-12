@@ -7,7 +7,11 @@ import (
 	"log"
 	"sort"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/teams"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/userroles"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,7 +33,7 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	log.Printf("[INFO] creating team: %#v", team)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdTeam, err := client.Teams.Add(team)
 	if err != nil {
 		return diag.FromErr(err)
@@ -52,7 +56,7 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting team (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Teams.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -66,20 +70,13 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading team (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	team, err := client.Teams.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] team (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "team")
 	}
 
-	userRoles, err := client.Teams.GetScopedUserRoles(*team, octopusdeploy.SkipTakeQuery{})
+	userRoles, err := client.Teams.GetScopedUserRoles(*team, core.SkipTakeQuery{})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,7 +95,7 @@ func resourceTeamUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	log.Printf("[INFO] updating team (%s)", d.Id())
 
 	team := expandTeam(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedTeam, err := client.Teams.Update(team)
 	if err != nil {
 		return diag.FromErr(err)
@@ -116,11 +113,11 @@ func resourceTeamUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	return resourceTeamRead(ctx, d, m)
 }
 
-func expandUserRoles(team *octopusdeploy.Team, userRoles []interface{}) []*octopusdeploy.ScopedUserRole {
-	values := make([]*octopusdeploy.ScopedUserRole, 0, len(userRoles))
+func expandUserRoles(team *teams.Team, userRoles []interface{}) []*userroles.ScopedUserRole {
+	values := make([]*userroles.ScopedUserRole, 0, len(userRoles))
 	for _, rawUserRole := range userRoles {
 		userRole := rawUserRole.(map[string]interface{})
-		scopedUserRole := octopusdeploy.NewScopedUserRole(userRole["user_role_id"].(string))
+		scopedUserRole := userroles.NewScopedUserRole(userRole["user_role_id"].(string))
 		scopedUserRole.TeamID = team.ID
 		scopedUserRole.SpaceID = userRole["space_id"].(string)
 
@@ -149,7 +146,7 @@ func expandUserRoles(team *octopusdeploy.Team, userRoles []interface{}) []*octop
 	}
 	return values
 }
-func resourceTeamUpdateUserRoles(ctx context.Context, d *schema.ResourceData, m interface{}, team *octopusdeploy.Team) error {
+func resourceTeamUpdateUserRoles(ctx context.Context, d *schema.ResourceData, m interface{}, team *teams.Team) error {
 	log.Printf("[INFO] updating team user roles (%s)", d.Id())
 	if d.HasChange("user_role") {
 		log.Printf("[INFO] user role has changes (%s)", d.Id())
@@ -168,14 +165,14 @@ func resourceTeamUpdateUserRoles(ctx context.Context, d *schema.ResourceData, m 
 
 		if len(remove) > 0 || len(add) > 0 {
 			log.Printf("[INFO] user role found diff (%s)", d.Id())
-			client := m.(*octopusdeploy.Client)
+			client := m.(*client.Client)
 			if len(remove) > 0 {
 				log.Printf("[INFO] removing user roles from team (%s)", d.Id())
 				for _, userRole := range remove {
 					if userRole.ID != "" {
 						err := client.ScopedUserRoles.DeleteByID(userRole.ID)
 						if err != nil {
-							apiError := err.(*octopusdeploy.APIError)
+							apiError := err.(*core.APIError)
 							if apiError.StatusCode != 404 {
 								// It's already been deleted, maybe mixing with the independent resource?
 								return fmt.Errorf("error removing user role %s from team %s: %s", userRole.ID, team.ID, err)

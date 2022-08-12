@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,21 +19,21 @@ func dataSourceChannels() *schema.Resource {
 }
 
 func dataSourceChannelsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.ChannelsQuery{
+	query := channels.Query{
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	channels, err := client.Channels.Get(query)
+	client := m.(*client.Client)
+	existingChannels, err := client.Channels.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedChannels := []interface{}{}
-	for _, channel := range channels.Items {
+	for _, channel := range existingChannels.Items {
 		flattenedChannels = append(flattenedChannels, flattenChannel(channel))
 	}
 

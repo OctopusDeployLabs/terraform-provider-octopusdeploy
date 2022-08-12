@@ -3,7 +3,9 @@ package octopusdeploy
 import (
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/services"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -105,20 +107,20 @@ func dataSourceMachine() *schema.Resource {
 }
 
 func dataMachineReadByName(d *schema.ResourceData, m interface{}) error {
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 
 	machineName := d.Get("name").(string)
-	machines, err := client.Machines.GetByName(machineName)
-	if err == octopusdeploy.ErrItemNotFound {
+	existingMachines, err := client.Machines.GetByName(machineName)
+	if err == services.ErrItemNotFound {
 		return nil
 	}
 	if err != nil {
 		return fmt.Errorf("error reading machine with name %s: %s", machineName, err.Error())
 	}
 
-	for _, machine := range machines {
+	for _, machine := range existingMachines {
 		if machine.Name == machineName {
-			endpointResource, err := octopusdeploy.ToEndpointResource(machine.Endpoint)
+			endpointResource, err := machines.ToEndpointResource(machine.Endpoint)
 			if err != nil {
 				return err
 			}

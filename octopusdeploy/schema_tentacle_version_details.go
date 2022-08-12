@@ -1,11 +1,11 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandTentacleVersionDetails(values interface{}) *octopusdeploy.TentacleVersionDetails {
+func expandTentacleVersionDetails(values interface{}) *machines.TentacleVersionDetails {
 	if values == nil {
 		return nil
 	}
@@ -15,7 +15,7 @@ func expandTentacleVersionDetails(values interface{}) *octopusdeploy.TentacleVer
 
 	version := flattenedTentacleVersionDetails["version"].(string)
 
-	return &octopusdeploy.TentacleVersionDetails{
+	return &machines.TentacleVersionDetails{
 		UpgradeLocked:    flattenedTentacleVersionDetails["upgrade_locked"].(bool),
 		UpgradeRequired:  flattenedTentacleVersionDetails["upgrade_required"].(bool),
 		UpgradeSuggested: flattenedTentacleVersionDetails["upgrade_suggested"].(bool),
@@ -23,7 +23,7 @@ func expandTentacleVersionDetails(values interface{}) *octopusdeploy.TentacleVer
 	}
 }
 
-func flattenTentacleVersionDetails(tentacleVersionDetails *octopusdeploy.TentacleVersionDetails) []interface{} {
+func flattenTentacleVersionDetails(tentacleVersionDetails *machines.TentacleVersionDetails) []interface{} {
 	if tentacleVersionDetails == nil {
 		return nil
 	}

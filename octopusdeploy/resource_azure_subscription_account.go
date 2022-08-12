@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,13 +28,13 @@ func resourceAzureSubscriptionAccountCreate(ctx context.Context, d *schema.Resou
 
 	log.Printf("[INFO] creating Azure subscription account: %#v", account)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdAccount, err := client.Accounts.Add(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAzureSubscriptionAccount(ctx, d, createdAccount.(*octopusdeploy.AzureSubscriptionAccount)); err != nil {
+	if err := setAzureSubscriptionAccount(ctx, d, createdAccount.(*accounts.AzureSubscriptionAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -45,7 +47,7 @@ func resourceAzureSubscriptionAccountCreate(ctx context.Context, d *schema.Resou
 func resourceAzureSubscriptionAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting Azure subscription account (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Accounts.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,20 +61,13 @@ func resourceAzureSubscriptionAccountDelete(ctx context.Context, d *schema.Resou
 func resourceAzureSubscriptionAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading Azure subscription account (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] Azure subscription account (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "Azure subscription account")
 	}
 
-	azureSubscriptionAccount := accountResource.(*octopusdeploy.AzureSubscriptionAccount)
+	azureSubscriptionAccount := accountResource.(*accounts.AzureSubscriptionAccount)
 	if err := setAzureSubscriptionAccount(ctx, d, azureSubscriptionAccount); err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,13 +81,13 @@ func resourceAzureSubscriptionAccountUpdate(ctx context.Context, d *schema.Resou
 
 	log.Printf("[INFO] updating Azure subscription account %#v", account)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedAccount, err := client.Accounts.Update(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAzureSubscriptionAccount(ctx, d, updatedAccount.(*octopusdeploy.AzureSubscriptionAccount)); err != nil {
+	if err := setAzureSubscriptionAccount(ctx, d, updatedAccount.(*accounts.AzureSubscriptionAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 

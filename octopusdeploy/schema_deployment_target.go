@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
-	deploymentMode := octopusdeploy.TenantedDeploymentMode(d.Get("tenanted_deployment_participation").(string))
+func expandDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
+	deploymentMode := core.TenantedDeploymentMode(d.Get("tenanted_deployment_participation").(string))
 	endpoint := expandEndpoint(d.Get("endpoint"))
 	environments := getSliceFromTerraformTypeList(d.Get("environments"))
 	name := d.Get("name").(string)
@@ -17,7 +18,7 @@ func expandDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTar
 	tenantIDs := getSliceFromTerraformTypeList(d.Get("tenants"))
 	tenantTags := getSliceFromTerraformTypeList(d.Get("tenant_tags"))
 
-	deploymentTarget := octopusdeploy.NewDeploymentTarget(name, endpoint, environments, roles)
+	deploymentTarget := machines.NewDeploymentTarget(name, endpoint, environments, roles)
 	deploymentTarget.ID = d.Id()
 	deploymentTarget.TenantedDeploymentMode = deploymentMode
 	deploymentTarget.TenantIDs = tenantIDs
@@ -42,12 +43,12 @@ func expandDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTar
 	return deploymentTarget
 }
 
-func flattenDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 
 	return map[string]interface{}{
 		"endpoint":                          flattenEndpointResource(endpointResource),
@@ -181,7 +182,7 @@ func getDeploymentTargetSchema() map[string]*schema.Schema {
 	}
 }
 
-func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
+func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
 	d.Set("has_latest_calamari", deploymentTarget.HasLatestCalamari)
 	d.Set("health_status", deploymentTarget.HealthStatus)
 	d.Set("is_disabled", deploymentTarget.IsDisabled)
@@ -198,7 +199,7 @@ func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deployment
 	d.Set("thumbprint", deploymentTarget.Thumbprint)
 	d.Set("uri", deploymentTarget.URI)
 
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return fmt.Errorf("error setting endpoint: %s", err)
 	}

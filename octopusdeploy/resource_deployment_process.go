@@ -3,11 +3,12 @@ package octopusdeploy
 import (
 	"context"
 	"log"
-	"net/http"
 	"regexp"
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -54,7 +55,7 @@ func getDeploymentProcessSchema() map[string]*schema.Schema {
 }
 
 func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	deploymentProcess := expandDeploymentProcess(d, client)
 
 	log.Printf("[INFO] creating deployment process: %#v", deploymentProcess)
@@ -64,7 +65,7 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	var current *octopusdeploy.DeploymentProcess
+	var current *deployments.DeploymentProcess
 	if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == "VersionControlled" {
 		current, err = client.DeploymentProcesses.Get(project, deploymentProcess.Branch)
 		if err != nil {
@@ -104,10 +105,10 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting deployment process (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	current, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err == nil {
-		deploymentProcess := &octopusdeploy.DeploymentProcess{
+		deploymentProcess := &deployments.DeploymentProcess{
 			Version: current.Version,
 		}
 		deploymentProcess.Links = current.Links
@@ -139,7 +140,7 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	deploymentProcess := &octopusdeploy.DeploymentProcess{
+	deploymentProcess := &deployments.DeploymentProcess{
 		Version: current.Version,
 	}
 	deploymentProcess.Links = current.Links
@@ -158,7 +159,7 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading deployment process (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	deploymentProcess, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err == nil {
 		if err := setDeploymentProcess(ctx, d, deploymentProcess); err != nil {
@@ -174,14 +175,7 @@ func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, 
 
 	project, err := client.Projects.GetByID(projectID)
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == http.StatusNotFound {
-				log.Printf("[INFO] project (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "project")
 	}
 
 	r, _ = regexp.Compile(`\d+-\w+`)
@@ -197,15 +191,13 @@ func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, 
 		return nil
 	}
 
-	log.Printf("[INFO] deployment process (%s) not found; deleting from state", d.Id())
-	d.SetId("")
-	return nil
+	return errors.DeleteFromState(ctx, d, "deployment process")
 }
 
 func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] updating deployment process (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	deploymentProcess := expandDeploymentProcess(d, client)
 	current, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err != nil {

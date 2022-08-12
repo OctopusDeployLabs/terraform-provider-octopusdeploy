@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandExternalSecurityGroups(externalSecurityGroups []interface{}) []octopusdeploy.NamedReferenceItem {
-	expandedExternalSecurityGroups := []octopusdeploy.NamedReferenceItem{}
+func expandExternalSecurityGroups(externalSecurityGroups []interface{}) []core.NamedReferenceItem {
+	expandedExternalSecurityGroups := []core.NamedReferenceItem{}
 	for _, externalSecurityGroup := range externalSecurityGroups {
 		if externalSecurityGroup != nil {
 			rawExternalSecurityGroup := externalSecurityGroup.(map[string]interface{})
@@ -26,7 +26,7 @@ func expandExternalSecurityGroups(externalSecurityGroups []interface{}) []octopu
 				id = rawExternalSecurityGroup["id"].(string)
 			}
 
-			item := octopusdeploy.NamedReferenceItem{
+			item := core.NamedReferenceItem{
 				DisplayIDAndName: displayIDAndName,
 				DisplayName:      displayName,
 				ID:               id,
@@ -37,7 +37,7 @@ func expandExternalSecurityGroups(externalSecurityGroups []interface{}) []octopu
 	return expandedExternalSecurityGroups
 }
 
-func flattenExternalSecurityGroups(externalSecurityGroups []octopusdeploy.NamedReferenceItem) []interface{} {
+func flattenExternalSecurityGroups(externalSecurityGroups []core.NamedReferenceItem) []interface{} {
 	flattenedExternalSecurityGroups := []interface{}{}
 	for _, v := range externalSecurityGroups {
 		flattenedExternalSecurityGroups = append(flattenedExternalSecurityGroups, map[string]interface{}{

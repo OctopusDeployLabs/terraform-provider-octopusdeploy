@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,7 @@ func dataSourceAzureServiceFabricClusterDeploymentTargets() *schema.Resource {
 }
 
 func dataSourceAzureServiceFabricClusterDeploymentTargetsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.MachinesQuery{
+	query := machines.MachinesQuery{
 		CommunicationStyles: []string{"AzureServiceFabricCluster"},
 		DeploymentID:        d.Get("deployment_id").(string),
 		EnvironmentIDs:      expandArray(d.Get("environments").([]interface{})),
@@ -36,14 +37,14 @@ func dataSourceAzureServiceFabricClusterDeploymentTargetsRead(ctx context.Contex
 		Thumbprint:          d.Get("thumbprint").(string),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	deploymentTargets, err := client.Machines.Get(query)
+	client := m.(*client.Client)
+	existingDeploymentTargets, err := client.Machines.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedAzureServiceFabricClusterDeploymentTargets := []interface{}{}
-	for _, deploymentTarget := range deploymentTargets.Items {
+	for _, deploymentTarget := range existingDeploymentTargets.Items {
 		flattenedAzureServiceFabricClusterDeploymentTargets = append(flattenedAzureServiceFabricClusterDeploymentTargets, flattenAzureServiceFabricClusterDeploymentTarget(deploymentTarget))
 	}
 

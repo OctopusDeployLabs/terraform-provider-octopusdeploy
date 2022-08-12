@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandIdentities(identities []interface{}) []octopusdeploy.Identity {
-	expandedIdentities := make([]octopusdeploy.Identity, 0, len(identities))
+func expandIdentities(identities []interface{}) []users.Identity {
+	expandedIdentities := make([]users.Identity, 0, len(identities))
 	for _, identity := range identities {
 		if identity != nil {
 			rawIdentity := identity.(map[string]interface{})
@@ -16,7 +16,7 @@ func expandIdentities(identities []interface{}) []octopusdeploy.Identity {
 				identityProviderName = rawIdentity["provider"].(string)
 			}
 
-			i := octopusdeploy.Identity{
+			i := users.Identity{
 				IdentityProviderName: identityProviderName,
 				Claims:               expandIdentityClaims(rawIdentity["claim"].(*schema.Set).List()),
 			}
@@ -26,7 +26,7 @@ func expandIdentities(identities []interface{}) []octopusdeploy.Identity {
 	return expandedIdentities
 }
 
-func flattenIdentities(identities []octopusdeploy.Identity) []interface{} {
+func flattenIdentities(identities []users.Identity) []interface{} {
 	if identities == nil {
 		return nil
 	}

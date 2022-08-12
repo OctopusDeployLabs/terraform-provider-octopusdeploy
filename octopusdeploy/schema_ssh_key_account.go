@@ -4,21 +4,22 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandSSHKeyAccount(d *schema.ResourceData) *octopusdeploy.SSHKeyAccount {
+func expandSSHKeyAccount(d *schema.ResourceData) *accounts.SSHKeyAccount {
 	name := d.Get("name").(string)
 	username := d.Get("username").(string)
-	privateKeyFile := octopusdeploy.NewSensitiveValue(d.Get("private_key_passphrase").(string))
+	privateKeyFile := core.NewSensitiveValue(d.Get("private_key_passphrase").(string))
 
-	account, _ := octopusdeploy.NewSSHKeyAccount(name, username, privateKeyFile)
+	account, _ := accounts.NewSSHKeyAccount(name, username, privateKeyFile)
 	account.ID = d.Id()
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
@@ -57,7 +58,7 @@ func getSSHKeyAccountSchema() map[string]*schema.Schema {
 	}
 }
 
-func setSSHKeyAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.SSHKeyAccount) error {
+func setSSHKeyAccount(ctx context.Context, d *schema.ResourceData, account *accounts.SSHKeyAccount) error {
 	d.Set("description", account.GetDescription())
 
 	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {

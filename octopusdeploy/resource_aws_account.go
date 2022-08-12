@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -24,15 +26,15 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	account := expandAmazonWebServicesAccount(d)
 
-	log.Printf("[INFO] creating AWS account: %#v", account)
+	log.Printf("[INFO] creating AWS account")
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdAccount, err := client.Accounts.Add(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAmazonWebServicesAccount(ctx, d, createdAccount.(*octopusdeploy.AmazonWebServicesAccount)); err != nil {
+	if err := setAmazonWebServicesAccount(ctx, d, createdAccount.(*accounts.AmazonWebServicesAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -45,7 +47,7 @@ func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.Resou
 func resourceAmazonWebServicesAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting AWS account (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Accounts.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,20 +61,13 @@ func resourceAmazonWebServicesAccountDelete(ctx context.Context, d *schema.Resou
 func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading AWS account (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	accountResource, err := client.Accounts.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] AWS account (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "AWS account")
 	}
 
-	amazonWebServicesAccount := accountResource.(*octopusdeploy.AmazonWebServicesAccount)
+	amazonWebServicesAccount := accountResource.(*accounts.AmazonWebServicesAccount)
 	if err := setAmazonWebServicesAccount(ctx, d, amazonWebServicesAccount); err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,13 +81,13 @@ func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.Resou
 
 	log.Printf("[INFO] updating AWS account: %#v", account)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedAccount, err := client.Accounts.Update(account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setAmazonWebServicesAccount(ctx, d, updatedAccount.(*octopusdeploy.AmazonWebServicesAccount)); err != nil {
+	if err := setAmazonWebServicesAccount(ctx, d, updatedAccount.(*accounts.AmazonWebServicesAccount)); err != nil {
 		return diag.FromErr(err)
 	}
 

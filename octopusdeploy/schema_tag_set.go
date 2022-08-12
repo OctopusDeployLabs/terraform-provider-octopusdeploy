@@ -2,16 +2,15 @@ package octopusdeploy
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tagsets"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandTagSet(d *schema.ResourceData) *octopusdeploy.TagSet {
+func expandTagSet(d *schema.ResourceData) *tagsets.TagSet {
 	name := d.Get("name").(string)
 
-	var tagSet = octopusdeploy.NewTagSet(name)
+	tagSet := tagsets.NewTagSet(name)
 	tagSet.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -26,18 +25,10 @@ func expandTagSet(d *schema.ResourceData) *octopusdeploy.TagSet {
 		tagSet.SpaceID = v.(string)
 	}
 
-	if v, ok := d.GetOk("tag"); ok {
-		tags := v.([]interface{})
-		for _, t := range tags {
-			tag := expandTag(t.(map[string]interface{}))
-			tagSet.Tags = append(tagSet.Tags, tag)
-		}
-	}
-
 	return tagSet
 }
 
-func flattenTagSet(tagSet *octopusdeploy.TagSet) map[string]interface{} {
+func flattenTagSet(tagSet *tagsets.TagSet) map[string]interface{} {
 	if tagSet == nil {
 		return nil
 	}
@@ -48,7 +39,6 @@ func flattenTagSet(tagSet *octopusdeploy.TagSet) map[string]interface{} {
 		"name":        tagSet.Name,
 		"sort_order":  tagSet.SortOrder,
 		"space_id":    tagSet.SpaceID,
-		"tag":         flattenTags(tagSet.Tags),
 	}
 }
 
@@ -78,25 +68,15 @@ func getTagSetSchema() map[string]*schema.Schema {
 		"name":        getNameSchema(true),
 		"sort_order":  getSortOrderSchema(),
 		"space_id":    getSpaceIDSchema(),
-		"tag": {
-			Description: "A list of tags.",
-			Elem:        &schema.Resource{Schema: getTagsSchema()},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
 	}
 }
 
-func setTagSet(ctx context.Context, d *schema.ResourceData, tagSet *octopusdeploy.TagSet) error {
+func setTagSet(ctx context.Context, d *schema.ResourceData, tagSet *tagsets.TagSet) error {
 	d.Set("description", tagSet.Description)
 	d.Set("id", tagSet.GetID())
 	d.Set("name", tagSet.Name)
 	d.Set("sort_order", tagSet.SortOrder)
 	d.Set("space_id", tagSet.SpaceID)
-
-	if err := d.Set("tag", flattenTags(tagSet.Tags)); err != nil {
-		return fmt.Errorf("error setting tag: %s", err)
-	}
 
 	return nil
 }

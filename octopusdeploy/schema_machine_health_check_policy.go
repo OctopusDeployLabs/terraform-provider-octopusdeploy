@@ -3,12 +3,12 @@ package octopusdeploy
 import (
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandMachineHealthCheckPolicy(values interface{}) *octopusdeploy.MachineHealthCheckPolicy {
+func expandMachineHealthCheckPolicy(values interface{}) *machines.MachineHealthCheckPolicy {
 	if values == nil {
 		return nil
 	}
@@ -19,7 +19,7 @@ func expandMachineHealthCheckPolicy(values interface{}) *octopusdeploy.MachineHe
 
 	flattenedMap := flattenedValues.List()[0].(map[string]interface{})
 
-	machineHealthCheckPolicy := octopusdeploy.NewMachineHealthCheckPolicy()
+	machineHealthCheckPolicy := machines.NewMachineHealthCheckPolicy()
 
 	if v, ok := flattenedMap["bash_health_check_policy"]; ok {
 		if len(v.([]interface{})) > 0 {
@@ -54,7 +54,7 @@ func expandMachineHealthCheckPolicy(values interface{}) *octopusdeploy.MachineHe
 	return machineHealthCheckPolicy
 }
 
-func flattenMachineHealthCheckPolicy(machineHealthCheckPolicy *octopusdeploy.MachineHealthCheckPolicy) []interface{} {
+func flattenMachineHealthCheckPolicy(machineHealthCheckPolicy *machines.MachineHealthCheckPolicy) []interface{} {
 	if machineHealthCheckPolicy == nil {
 		return nil
 	}

@@ -3,8 +3,11 @@ package octopusdeploy
 import (
 	"context"
 	"log"
+	"net/http"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +29,7 @@ func resourceScopedUserRoleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[INFO] creating scoped user role: %#v", scopedUserRole)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdScopedUserRole, err := client.ScopedUserRoles.Add(scopedUserRole)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,10 +48,10 @@ func resourceScopedUserRoleCreate(ctx context.Context, d *schema.ResourceData, m
 func resourceScopedUserRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting scoped user role (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.ScopedUserRoles.DeleteByID(d.Id()); err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode != 404 {
+		apiError := err.(*core.APIError)
+		if apiError.StatusCode != http.StatusNotFound {
 			return diag.FromErr(err)
 		}
 	}
@@ -62,16 +65,10 @@ func resourceScopedUserRoleDelete(ctx context.Context, d *schema.ResourceData, m
 func resourceScopedUserRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading scoped user role (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	scopedUserRole, err := client.ScopedUserRoles.GetByID(d.Id())
 	if err != nil {
-		apiError := err.(*octopusdeploy.APIError)
-		if apiError.StatusCode == 404 {
-			log.Printf("[INFO] scoped user role (%s) not found; deleting from state", d.Id())
-			d.SetId("")
-			return nil
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "scoped user role")
 	}
 
 	if err := setScopedUserRole(ctx, d, scopedUserRole); err != nil {
@@ -86,7 +83,7 @@ func resourceScopedUserRoleUpdate(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[INFO] updating scoped user role (%s)", d.Id())
 
 	scopedUserRole := expandScopedUserRole(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedScopedUserRole, err := client.ScopedUserRoles.Update(scopedUserRole)
 	if err != nil {
 		return diag.FromErr(err)

@@ -4,21 +4,22 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAzureServicePrincipalAccount(d *schema.ResourceData) *octopusdeploy.AzureServicePrincipalAccount {
+func expandAzureServicePrincipalAccount(d *schema.ResourceData) *accounts.AzureServicePrincipalAccount {
 	name := d.Get("name").(string)
 	password := d.Get("password").(string)
-	secretKey := octopusdeploy.NewSensitiveValue(password)
+	secretKey := core.NewSensitiveValue(password)
 
 	applicationID, _ := uuid.Parse(d.Get("application_id").(string))
 	tenantID, _ := uuid.Parse(d.Get("tenant_id").(string))
 	subscriptionID, _ := uuid.Parse(d.Get("subscription_id").(string))
 
-	account, _ := octopusdeploy.NewAzureServicePrincipalAccount(name, subscriptionID, tenantID, applicationID, secretKey)
+	account, _ := accounts.NewAzureServicePrincipalAccount(name, subscriptionID, tenantID, applicationID, secretKey)
 	account.ID = d.Id()
 
 	if v, ok := d.GetOk("authentication_endpoint"); ok {
@@ -46,7 +47,7 @@ func expandAzureServicePrincipalAccount(d *schema.ResourceData) *octopusdeploy.A
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
@@ -80,7 +81,7 @@ func getAzureServicePrincipalAccountSchema() map[string]*schema.Schema {
 	}
 }
 
-func setAzureServicePrincipalAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.AzureServicePrincipalAccount) error {
+func setAzureServicePrincipalAccount(ctx context.Context, d *schema.ResourceData, account *accounts.AzureServicePrincipalAccount) error {
 	d.Set("application_id", account.ApplicationID.String())
 	d.Set("authentication_endpoint", account.AuthenticationEndpoint)
 	d.Set("azure_environment", account.AzureEnvironment)

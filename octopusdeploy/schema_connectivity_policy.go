@@ -1,22 +1,22 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandConnectivityPolicy(connectivityPolicy []interface{}) *octopusdeploy.ConnectivityPolicy {
+func expandConnectivityPolicy(connectivityPolicy []interface{}) *core.ConnectivityPolicy {
 	connectivityPolicyMap := connectivityPolicy[0].(map[string]interface{})
-	return &octopusdeploy.ConnectivityPolicy{
+	return &core.ConnectivityPolicy{
 		AllowDeploymentsToNoTargets: connectivityPolicyMap["allow_deployments_to_no_targets"].(bool),
 		ExcludeUnhealthyTargets:     connectivityPolicyMap["exclude_unhealthy_targets"].(bool),
-		SkipMachineBehavior:         octopusdeploy.SkipMachineBehavior(connectivityPolicyMap["skip_machine_behavior"].(string)),
+		SkipMachineBehavior:         core.SkipMachineBehavior(connectivityPolicyMap["skip_machine_behavior"].(string)),
 		TargetRoles:                 getSliceFromTerraformTypeList(connectivityPolicyMap["target_roles"]),
 	}
 }
 
-func flattenConnectivityPolicy(connectivityPolicy *octopusdeploy.ConnectivityPolicy) []interface{} {
+func flattenConnectivityPolicy(connectivityPolicy *core.ConnectivityPolicy) []interface{} {
 	if connectivityPolicy == nil {
 		return nil
 	}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -52,7 +52,7 @@ func testScriptModule(localName string, name string, description string, body st
 }
 
 func testScriptModuleCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		scriptModuleID := rs.Primary.ID
 		if scriptModule, err := client.ScriptModules.GetByID(scriptModuleID); err == nil {
@@ -67,7 +67,7 @@ func testScriptModuleCheckDestroy(s *terraform.State) error {
 
 func testScriptModuleExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		for _, r := range s.RootModule().Resources {
 			if r.Type == "octopusdeploy_script_module" {
 				if _, err := client.ScriptModules.GetByID(r.Primary.ID); err != nil {

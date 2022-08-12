@@ -1,11 +1,11 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandOfflinePackageDropDestination(values interface{}) *octopusdeploy.OfflinePackageDropDestination {
+func expandOfflinePackageDropDestination(values interface{}) *machines.OfflinePackageDropDestination {
 	if values == nil {
 		return nil
 	}
@@ -13,13 +13,13 @@ func expandOfflinePackageDropDestination(values interface{}) *octopusdeploy.Offl
 	flattenedValues := values.([]interface{})
 	flattenedEndpoint := flattenedValues[0].(map[string]interface{})
 
-	return &octopusdeploy.OfflinePackageDropDestination{
+	return &machines.OfflinePackageDropDestination{
 		DestinationType: flattenedEndpoint["destination_type"].(string),
 		DropFolderPath:  flattenedEndpoint["drop_folder_path"].(string),
 	}
 }
 
-func flattenOfflinePackageDropDestination(offlineDropDestination *octopusdeploy.OfflinePackageDropDestination) []interface{} {
+func flattenOfflinePackageDropDestination(offlineDropDestination *machines.OfflinePackageDropDestination) []interface{} {
 	if offlineDropDestination == nil {
 		return nil
 	}

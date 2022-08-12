@@ -3,36 +3,35 @@ package octopusdeploy
 import (
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/stretchr/testify/require"
 )
 
 func TestExpandDeploymentActionContainer(t *testing.T) {
-	expected := octopusdeploy.DeploymentActionContainer{}
 	actual := expandContainer(nil)
-	require.Equal(t, expected, actual)
+	require.Nil(t, actual)
 
 	var emptyInterface interface{}
 	actual = expandContainer(emptyInterface)
-	require.Equal(t, expected, actual)
+	require.Nil(t, actual)
 
 	var emptyInterfaceArray []interface{}
 	actual = expandContainer(emptyInterfaceArray)
-	require.Equal(t, expected, actual)
+	require.Nil(t, actual)
 
 	var testMap = make([]interface{}, 1)
 	actual = expandContainer(testMap)
-	require.Equal(t, expected, actual)
+	require.Nil(t, actual)
 
 	testMap[0] = make(map[string]interface{}, 1)
 	actual = expandContainer(testMap)
-	require.Equal(t, expected, actual)
+	require.Nil(t, actual)
 
 	testMap[0] = map[string]interface{}{
 		"feed_id": "feeds-123",
 		"image":   "image-123",
 	}
-	expected = octopusdeploy.DeploymentActionContainer{
+	expected := &deployments.DeploymentActionContainer{
 		FeedID: "feeds-123",
 		Image:  "image-123",
 	}

@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceUserRoleCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] creating user role: %#v", userRole)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdUserRole, err := client.UserRoles.Add(userRole)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,7 +46,7 @@ func resourceUserRoleCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceUserRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting user role (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.UserRoles.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,17 +60,10 @@ func resourceUserRoleDelete(ctx context.Context, d *schema.ResourceData, m inter
 func resourceUserRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading user role (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	userRole, err := client.UserRoles.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] user role (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "user role")
 	}
 
 	if err := setUserRole(ctx, d, userRole); err != nil {
@@ -84,7 +78,7 @@ func resourceUserRoleUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] updating user role (%s)", d.Id())
 
 	userRole := expandUserRole(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedUserRole, err := client.UserRoles.Update(userRole)
 	if err != nil {
 		return diag.FromErr(err)

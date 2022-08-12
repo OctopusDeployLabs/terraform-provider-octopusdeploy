@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandChannel(d *schema.ResourceData) *octopusdeploy.Channel {
+func expandChannel(d *schema.ResourceData) *channels.Channel {
 	name := d.Get("name").(string)
 	projectID := d.Get("project_id").(string)
 
-	channel := octopusdeploy.NewChannel(name, projectID)
+	channel := channels.NewChannel(name, projectID)
 	channel.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -46,7 +46,7 @@ func expandChannel(d *schema.ResourceData) *octopusdeploy.Channel {
 	return channel
 }
 
-func flattenChannel(channel *octopusdeploy.Channel) map[string]interface{} {
+func flattenChannel(channel *channels.Channel) map[string]interface{} {
 	if channel == nil {
 		return nil
 	}
@@ -114,7 +114,7 @@ func getChannelSchema() map[string]*schema.Schema {
 	}
 }
 
-func setChannel(ctx context.Context, d *schema.ResourceData, channel *octopusdeploy.Channel) error {
+func setChannel(ctx context.Context, d *schema.ResourceData, channel *channels.Channel) error {
 	d.Set("description", channel.Description)
 	d.Set("is_default", channel.IsDefault)
 	d.Set("lifecycle_id", channel.LifecycleID)

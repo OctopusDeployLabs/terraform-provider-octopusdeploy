@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,7 @@ func dataSourceScriptModules() *schema.Resource {
 }
 
 func dataSourceScriptModulesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.LibraryVariablesQuery{
+	query := variables.LibraryVariablesQuery{
 		ContentType: "ScriptModule",
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
@@ -26,15 +27,15 @@ func dataSourceScriptModulesRead(ctx context.Context, d *schema.ResourceData, m 
 		Take:        d.Get("take").(int),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	libraryVariableSets, err := client.ScriptModules.Get(query)
+	client := m.(*client.Client)
+	existingScriptModules, err := client.ScriptModules.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedScriptModules := []interface{}{}
-	for _, libraryVariableSet := range libraryVariableSets.Items {
-		flattenedScriptModules = append(flattenedScriptModules, flattenScriptModule(libraryVariableSet))
+	for _, scriptModule := range existingScriptModules.Items {
+		flattenedScriptModules = append(flattenedScriptModules, flattenScriptModule(scriptModule))
 	}
 
 	d.Set("script_modules", flattenedScriptModules)

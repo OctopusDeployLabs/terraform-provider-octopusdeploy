@@ -1,11 +1,9 @@
 package octopusdeploy
 
-import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-)
+import "github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 
-func expandCloudRegion(flattenedMap map[string]interface{}) *octopusdeploy.CloudRegionEndpoint {
-	endpoint := octopusdeploy.NewCloudRegionEndpoint()
+func expandCloudRegion(flattenedMap map[string]interface{}) *machines.CloudRegionEndpoint {
+	endpoint := machines.NewCloudRegionEndpoint()
 	endpoint.ID = flattenedMap["id"].(string)
 	endpoint.DefaultWorkerPoolID = flattenedMap["default_worker_pool_id"].(string)
 

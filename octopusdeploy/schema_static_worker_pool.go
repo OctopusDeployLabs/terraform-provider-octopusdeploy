@@ -3,14 +3,14 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandStaticWorkerPool(d *schema.ResourceData) *octopusdeploy.StaticWorkerPool {
+func expandStaticWorkerPool(d *schema.ResourceData) *workerpools.StaticWorkerPool {
 	name := d.Get("name").(string)
 
-	dynamicWorkerPool := octopusdeploy.NewStaticWorkerPool(name)
+	dynamicWorkerPool := workerpools.NewStaticWorkerPool(name)
 	dynamicWorkerPool.ID = d.Id()
 
 	if v, ok := d.GetOk("can_add_workers"); ok {
@@ -36,7 +36,7 @@ func expandStaticWorkerPool(d *schema.ResourceData) *octopusdeploy.StaticWorkerP
 	return dynamicWorkerPool
 }
 
-func flattenStaticWorkerPool(staticWorkerPool *octopusdeploy.StaticWorkerPool) map[string]interface{} {
+func flattenStaticWorkerPool(staticWorkerPool *workerpools.StaticWorkerPool) map[string]interface{} {
 	if staticWorkerPool == nil {
 		return nil
 	}
@@ -95,7 +95,7 @@ func getStaticWorkerPoolSchema() map[string]*schema.Schema {
 	}
 }
 
-func setStaticWorkerPool(ctx context.Context, d *schema.ResourceData, staticWorkerPool *octopusdeploy.StaticWorkerPool) error {
+func setStaticWorkerPool(ctx context.Context, d *schema.ResourceData, staticWorkerPool *workerpools.StaticWorkerPool) error {
 	d.Set("can_add_workers", staticWorkerPool.CanAddWorkers)
 	d.Set("description", staticWorkerPool.Description)
 	d.Set("is_default", staticWorkerPool.IsDefault)

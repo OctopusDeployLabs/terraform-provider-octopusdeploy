@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,17 +14,17 @@ func TestAccOctopusDeployAzureWebAppDeploymentTargetBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_azure_web_app_deployment_target." + localName
-	tenantedDeploymentMode := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
+	tenantedDeploymentMode := core.TenantedDeploymentModeTenantedOrUntenanted
 	webAppName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccAccountCheckDestroy,
+		CheckDestroy: testAccountCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
-					testAccDeploymentTargetExists(resourceName),
+					testDeploymentTargetExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
 					resource.TestCheckResourceAttr(resourceName, "web_app_name", webAppName),
@@ -35,7 +35,7 @@ func TestAccOctopusDeployAzureWebAppDeploymentTargetBasic(t *testing.T) {
 	})
 }
 
-func testAzureWebAppDeploymentTargetBasic(localName string, name string, tenantedDeploymentParticipation octopusdeploy.TenantedDeploymentMode, webAppName string) string {
+func testAzureWebAppDeploymentTargetBasic(localName string, name string, tenantedDeploymentParticipation core.TenantedDeploymentMode, webAppName string) string {
 	allowDynamicInfrastructure := false
 	azureAccAccountID := uuid.New()
 	azureAccLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -43,7 +43,7 @@ func testAzureWebAppDeploymentTargetBasic(localName string, name string, tenante
 	azureAccDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	azureAccPassword := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	azureAccSubscriptionID := uuid.New()
-	azureAccTenantedDeploymentMode := octopusdeploy.TenantedDeploymentModeTenantedOrUntenanted
+	azureAccTenantedDeploymentMode := core.TenantedDeploymentModeTenantedOrUntenanted
 	azureAccTenantID := uuid.New()
 	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)

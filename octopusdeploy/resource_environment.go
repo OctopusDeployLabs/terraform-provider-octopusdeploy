@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	log.Printf("[INFO] creating environment: %#v", environment)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdEnvironment, err := client.Environments.Add(environment)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,7 +46,7 @@ func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting environment (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Environments.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -58,17 +59,10 @@ func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m in
 func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading environment (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	environment, err := client.Environments.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] environment (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "environment")
 	}
 
 	if err := setEnvironment(ctx, d, environment); err != nil {
@@ -83,7 +77,7 @@ func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m in
 	log.Printf("[INFO] updating environment (%s)", d.Id())
 
 	environment := expandEnvironment(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedEnvironment, err := client.Environments.Update(environment)
 	if err != nil {
 		return diag.FromErr(err)

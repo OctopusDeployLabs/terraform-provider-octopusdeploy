@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,7 @@ func dataSourceCertificates() *schema.Resource {
 }
 
 func dataSourceCertificatesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.CertificatesQuery{
+	query := certificates.CertificatesQuery{
 		Archived:    d.Get("archived").(string),
 		FirstResult: d.Get("first_result").(string),
 		IDs:         expandArray(d.Get("ids").([]interface{})),
@@ -30,14 +31,14 @@ func dataSourceCertificatesRead(ctx context.Context, d *schema.ResourceData, m i
 		Tenant:      d.Get("tenant").(string),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	certificates, err := client.Certificates.Get(query)
+	client := m.(*client.Client)
+	existingCertificates, err := client.Certificates.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedCertificates := []interface{}{}
-	for _, certificate := range certificates.Items {
+	for _, certificate := range existingCertificates.Items {
 		flattenedCertificates = append(flattenedCertificates, flattenCertificate(certificate))
 	}
 

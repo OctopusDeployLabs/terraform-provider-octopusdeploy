@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandUsernamePasswordAccount(d *schema.ResourceData) octopusdeploy.IUsernamePasswordAccount {
+func expandUsernamePasswordAccount(d *schema.ResourceData) accounts.IUsernamePasswordAccount {
 	name := d.Get("name").(string)
 
-	account, _ := octopusdeploy.NewUsernamePasswordAccount(name)
+	account, _ := accounts.NewUsernamePasswordAccount(name)
 	account.SetID(d.Id())
-	account.SetPassword(octopusdeploy.NewSensitiveValue(d.Get("password").(string)))
+	account.SetPassword(core.NewSensitiveValue(d.Get("password").(string)))
 
 	if v, ok := d.GetOk("description"); ok {
 		account.SetDescription(v.(string))
@@ -28,7 +29,7 @@ func expandUsernamePasswordAccount(d *schema.ResourceData) octopusdeploy.IUserna
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.SetTenantedDeploymentMode(octopusdeploy.TenantedDeploymentMode(v.(string)))
+		account.SetTenantedDeploymentMode(core.TenantedDeploymentMode(v.(string)))
 	}
 
 	if v, ok := d.GetOk("tenants"); ok {
@@ -46,7 +47,7 @@ func expandUsernamePasswordAccount(d *schema.ResourceData) octopusdeploy.IUserna
 	return account
 }
 
-func setUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.UsernamePasswordAccount) error {
+func setUsernamePasswordAccount(ctx context.Context, d *schema.ResourceData, account *accounts.UsernamePasswordAccount) error {
 	d.Set("description", account.GetDescription())
 
 	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {

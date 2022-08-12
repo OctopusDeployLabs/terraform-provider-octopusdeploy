@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -49,7 +49,7 @@ func testHelmFeedBasic(localName string, feedURI string, name string, username s
 
 func testHelmFeedExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		feedID := s.RootModule().Resources[prefix].Primary.ID
 		if _, err := client.Feeds.GetByID(feedID); err != nil {
 			return err
@@ -65,7 +65,7 @@ func testHelmFeedCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		feed, err := client.Feeds.GetByID(rs.Primary.ID)
 		if err == nil && feed != nil {
 			return fmt.Errorf("Helm feed (%s) still exists", rs.Primary.ID)

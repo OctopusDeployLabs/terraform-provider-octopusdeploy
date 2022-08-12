@@ -1,49 +1,12 @@
 package octopusdeploy
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandFeed(d *schema.ResourceData) *octopusdeploy.FeedResource {
-	name := d.Get("name").(string)
-	feedType := octopusdeploy.FeedType(d.Get("feed_type").(string))
-
-	var feed = octopusdeploy.NewFeedResource(name, feedType)
-	feed.ID = d.Id()
-
-	if v, ok := d.GetOk("download_attempts"); ok {
-		feed.DownloadAttempts = v.(int)
-	}
-
-	if v, ok := d.GetOk("download_retry_backoff_seconds"); ok {
-		feed.DownloadRetryBackoffSeconds = v.(int)
-	}
-
-	if v, ok := d.GetOk("is_enhanced_mode"); ok {
-		feed.EnhancedMode = v.(bool)
-	}
-
-	if v, ok := d.GetOk("feed_uri"); ok {
-		feed.FeedURI = v.(string)
-	}
-
-	if v, ok := d.GetOk("username"); ok {
-		feed.Username = v.(string)
-	}
-
-	if v, ok := d.GetOk("password"); ok {
-		feed.Password = octopusdeploy.NewSensitiveValue(v.(string))
-	}
-
-	return feed
-}
-
-func flattenFeed(feed *octopusdeploy.FeedResource) map[string]interface{} {
+func flattenFeed(feed *feeds.FeedResource) map[string]interface{} {
 	if feed == nil {
 		return nil
 	}
@@ -169,28 +132,4 @@ func getFeedSchema() map[string]*schema.Schema {
 		"space_id": getSpaceIDSchema(),
 		"username": getUsernameSchema(false),
 	}
-}
-
-func setFeed(ctx context.Context, d *schema.ResourceData, feed *octopusdeploy.FeedResource) error {
-	d.Set("access_key", feed.AccessKey)
-	d.Set("api_version", feed.APIVersion)
-	d.Set("delete_unreleased_packages_after_days", feed.DeleteUnreleasedPackagesAfterDays)
-	d.Set("download_attempts", feed.DownloadAttempts)
-	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
-	d.Set("feed_type", feed.FeedType)
-	d.Set("feed_uri", feed.FeedURI)
-	d.Set("is_enhanced_mode", feed.EnhancedMode)
-	d.Set("name", feed.Name)
-	d.Set("region", feed.Region)
-	d.Set("registry_path", feed.RegistryPath)
-	d.Set("space_id", feed.SpaceID)
-	d.Set("username", feed.Username)
-
-	if err := d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions); err != nil {
-		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)
-	}
-
-	d.SetId(feed.GetID())
-
-	return nil
 }

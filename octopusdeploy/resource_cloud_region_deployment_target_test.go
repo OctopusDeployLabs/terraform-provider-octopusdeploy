@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -74,7 +74,7 @@ func testAccCloudRegionDeploymentTargetBasic(localName string, name string) stri
 
 func testAccCloudRegionDeploymentTargetExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		deploymentTargetID := s.RootModule().Resources[resourceName].Primary.ID
 		if _, err := client.Machines.GetByID(deploymentTargetID); err != nil {
 			return fmt.Errorf("error retrieving deployment target: %s", err)
@@ -85,7 +85,7 @@ func testAccCloudRegionDeploymentTargetExists(resourceName string) resource.Test
 }
 
 func testAccCloudRegionDeploymentTargetCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_cloud_region_deployment_target" {
 			continue

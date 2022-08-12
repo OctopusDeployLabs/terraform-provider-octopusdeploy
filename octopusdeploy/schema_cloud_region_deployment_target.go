@@ -3,12 +3,12 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandCloudRegionDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
-	endpoint := octopusdeploy.NewCloudRegionEndpoint()
+func expandCloudRegionDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
+	endpoint := machines.NewCloudRegionEndpoint()
 
 	if v, ok := d.GetOk("default_worker_pool_id"); ok {
 		endpoint.DefaultWorkerPoolID = v.(string)
@@ -19,13 +19,13 @@ func expandCloudRegionDeploymentTarget(d *schema.ResourceData) *octopusdeploy.De
 	return deploymentTarget
 }
 
-func flattenCloudRegionDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenCloudRegionDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["default_worker_pool_id"] = endpointResource.DefaultWorkerPoolID
 	return flattenedDeploymentTarget
 }
@@ -64,8 +64,8 @@ func getCloudRegionDeploymentTargetSchema() map[string]*schema.Schema {
 	return cloudRegionDeploymentTargetSchema
 }
 
-func setCloudRegionDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setCloudRegionDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}

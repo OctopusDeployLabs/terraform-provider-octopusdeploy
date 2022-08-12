@@ -3,10 +3,10 @@ package octopusdeploy
 import (
 	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 )
 
-func expandVersionControlSettings(values interface{}) *octopusdeploy.VersionControlSettings {
+func expandVersionControlSettings(values interface{}) *projects.VersionControlSettings {
 	if values == nil {
 		return nil
 	}
@@ -19,7 +19,7 @@ func expandVersionControlSettings(values interface{}) *octopusdeploy.VersionCont
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
 	if flattenedMap["type"] == "Database" {
-		return &octopusdeploy.VersionControlSettings{
+		return &projects.VersionControlSettings{
 			Type: "Database",
 		}
 	}
@@ -29,14 +29,14 @@ func expandVersionControlSettings(values interface{}) *octopusdeploy.VersionCont
 		return nil
 	}
 
-	var credential octopusdeploy.IGitCredential
+	var credential projects.IGitCredential
 	if v, ok := flattenedMap["credentials"]; ok {
 		credential = expandGitCredential(v)
 	} else {
-		credential = octopusdeploy.NewAnonymousGitCredential()
+		credential = projects.NewAnonymousGitCredential()
 	}
 
-	return octopusdeploy.NewVersionControlSettings(
+	return projects.NewVersionControlSettings(
 		flattenedMap["base_path"].(string),
 		credential,
 		flattenedMap["default_branch"].(string),

@@ -4,17 +4,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccListeningTentacleDeploymentTargetImportBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	resourceName := "octopusdeploy_listening_tentacle_deployment_target." + localName
-
-	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
+func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
+	options := test.NewListeningTentacleDeploymentTargetTestOptions()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccListeningTentacleDeploymentTargetCheckDestroy,
@@ -22,10 +19,13 @@ func TestAccListeningTentacleDeploymentTargetImportBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccListeningTentacleDeploymentTargetBasic(localName, name),
+				Config: test.ListeningTentacleDeploymentTargetConfiguration(options),
+				Check: resource.ComposeTestCheckFunc(
+					testAccListeningTentacleDeploymentTargetExists(options.ResourceName),
+				),
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      options.ResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -33,94 +33,71 @@ func TestAccListeningTentacleDeploymentTargetImportBasic(t *testing.T) {
 	})
 }
 
-func TestAccListeningTentacleDeploymentTargetBasic(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	resourceName := "octopusdeploy_listening_tentacle_deployment_target." + localName
+// func TestAccListeningTentacleDeploymentTargetSchemaValidation(t *testing.T) {
+// 	options := test.NewTestOptions()
+// 	resourceName := "octopusdeploy_listening_tentacle_deployment_target." + options.LocalName
 
-	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
+// 	resource.Test(t, resource.TestCase{
+// 		CheckDestroy: testAccListeningTentacleDeploymentTargetCheckDestroy,
+// 		PreCheck:     func() { testAccPreCheck(t) },
+// 		Providers:    testAccProviders,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccListeningTentacleDeploymentTargetSchemaValidation(options),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccListeningTentacleDeploymentTargetExists(resourceName),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
 
-	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccListeningTentacleDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccListeningTentacleDeploymentTargetBasic(localName, name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccListeningTentacleDeploymentTargetExists(resourceName),
-				),
-			},
-		},
-	})
-}
+// func testAccListeningTentacleDeploymentTargetBasic(options *test.TestOptions) string {
+// 	allowDynamicInfrastructure := false
+// 	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+// 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+// 	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+// 	sortOrder := acctest.RandIntRange(0, 10)
+// 	thumbprint := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+// 	useGuidedFailure := false
 
-func TestAccListeningTentacleDeploymentTargetSchemaValidation(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	resourceName := "octopusdeploy_listening_tentacle_deployment_target." + localName
+// 	return fmt.Sprintf(`data "octopusdeploy_machine_policies" "default" {
+// 		partial_name = "Default Machine Policy"
+// 	}`+"\n"+
+// 		testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
+// 	resource "octopusdeploy_listening_tentacle_deployment_target" "%s" {
+// 		environments                      = [octopusdeploy_environment.%s.id]
+// 		is_disabled                       = true
+// 		machine_policy_id                 = data.octopusdeploy_machine_policies.default.machine_policies[0].id
+// 		name                              = "%s"
+// 		roles                             = ["Prod"]
+// 		tentacle_url                      = "https://example.com:1234/"
+// 		thumbprint                        = "%s"
+// 	  }`, options.LocalName, environmentLocalName, options.Name, thumbprint)
+// }
 
-	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
+// func testAccListeningTentacleDeploymentTargetSchemaValidation(options *test.TestOptions) string {
+// 	allowDynamicInfrastructure := false
+// 	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+// 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+// 	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+// 	sortOrder := acctest.RandIntRange(0, 10)
+// 	thumbprint := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+// 	useGuidedFailure := false
 
-	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccListeningTentacleDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccListeningTentacleDeploymentTargetSchemaValidation(localName, name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccListeningTentacleDeploymentTargetExists(resourceName),
-				),
-			},
-		},
-	})
-}
-
-func testAccListeningTentacleDeploymentTargetBasic(localName string, name string) string {
-	allowDynamicInfrastructure := false
-	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	sortOrder := acctest.RandIntRange(0, 10)
-	thumbprint := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	useGuidedFailure := false
-
-	return fmt.Sprintf(`data "octopusdeploy_machine_policies" "default" {
-		partial_name = "Default Machine Policy"
-	}`+"\n"+
-		testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
-	resource "octopusdeploy_listening_tentacle_deployment_target" "%s" {
-		environments                      = [octopusdeploy_environment.%s.id]
-		is_disabled                       = true
-		machine_policy_id                 = data.octopusdeploy_machine_policies.default.machine_policies[0].id
-		name                              = "%s"
-		roles                             = ["Prod"]
-		tentacle_url                      = "https://example.com:1234/"
-		thumbprint                        = "%s"
-	  }`, localName, environmentLocalName, name, thumbprint)
-}
-
-func testAccListeningTentacleDeploymentTargetSchemaValidation(localName string, name string) string {
-	allowDynamicInfrastructure := false
-	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	sortOrder := acctest.RandIntRange(0, 10)
-	thumbprint := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	useGuidedFailure := false
-
-	return fmt.Sprintf(testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
-		`resource "octopusdeploy_listening_tentacle_deployment_target" "%s" {
-			environments = [octopusdeploy_environment.%s.id]
-			name         = "%s"
-			roles        = ["something"]
-			tentacle_url = "https://example.com"
-			thumbprint   = "%s"
-	  	}`, localName, environmentLocalName, name, thumbprint)
-}
+// 	return fmt.Sprintf(testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
+// 		`resource "octopusdeploy_listening_tentacle_deployment_target" "%s" {
+// 			environments = [octopusdeploy_environment.%s.id]
+// 			name         = "%s"
+// 			roles        = ["something"]
+// 			tentacle_url = "https://example.com/"
+// 			thumbprint   = "%s"
+// 	  	}`, options.LocalName, environmentLocalName, options.Name, thumbprint)
+// }
 
 func testAccListeningTentacleDeploymentTargetExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		deploymentTargetID := s.RootModule().Resources[resourceName].Primary.ID
 		if _, err := client.Machines.GetByID(deploymentTargetID); err != nil {
 			return fmt.Errorf("error retrieving deployment target: %s", err)
@@ -131,7 +108,7 @@ func testAccListeningTentacleDeploymentTargetExists(resourceName string) resourc
 }
 
 func testAccListeningTentacleDeploymentTargetCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_listening_tentacle_deployment_target" {
 			continue

@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -16,7 +17,7 @@ func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
 	prefix := "octopusdeploy_dynamic_worker_pool." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	workerType := octopusdeploy.WorkerType("UbuntuDefault")
+	workerType := workerpools.WorkerType("UbuntuDefault")
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	isDefault := false
 	sortOrder := acctest.RandIntRange(50, 100)
@@ -44,7 +45,7 @@ func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
 func testDynamicWorkerPoolBasic(
 	localName string,
 	name string,
-	workerType octopusdeploy.WorkerType,
+	workerType workerpools.WorkerType,
 	description string,
 	isDefault bool,
 	sortOrder int,
@@ -60,7 +61,7 @@ func testDynamicWorkerPoolBasic(
 
 func testDynamicWorkerPoolExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		workerPoolID := s.RootModule().Resources[prefix].Primary.ID
 		if _, err := client.WorkerPools.GetByID(workerPoolID); err != nil {
 			return err
@@ -71,7 +72,7 @@ func testDynamicWorkerPoolExists(prefix string) resource.TestCheckFunc {
 }
 
 func testDynamicWorkerPoolDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*octopusdeploy.Client)
+	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		workerPoolID := rs.Primary.ID
 		workerPool, err := client.WorkerPools.GetByID(workerPoolID)

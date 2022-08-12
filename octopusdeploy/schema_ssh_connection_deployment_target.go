@@ -3,16 +3,16 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandSSHConnectionDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
+func expandSSHConnectionDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
 	host := d.Get("host").(string)
 	port := d.Get("port").(int)
 	fingerprint := d.Get("fingerprint").(string)
 
-	endpoint := octopusdeploy.NewSSHEndpoint(host, port, fingerprint)
+	endpoint := machines.NewSSHEndpoint(host, port, fingerprint)
 
 	if v, ok := d.GetOk("account_id"); ok {
 		endpoint.AccountID = v.(string)
@@ -31,13 +31,13 @@ func expandSSHConnectionDeploymentTarget(d *schema.ResourceData) *octopusdeploy.
 	return deploymentTarget
 }
 
-func flattenSSHConnectionDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenSSHConnectionDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["account_id"] = endpointResource.AccountID
 	flattenedDeploymentTarget["dot_net_core_platform"] = endpointResource.DotNetCorePlatform
 	flattenedDeploymentTarget["fingerprint"] = endpointResource.Fingerprint
@@ -105,8 +105,8 @@ func getSSHConnectionDeploymentTargetSchema() map[string]*schema.Schema {
 	return sshConnectionDeploymentTargetSchema
 }
 
-func setSSHConnectionDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setSSHConnectionDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}

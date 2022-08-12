@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/userroles"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandScopedUserRole(d *schema.ResourceData) *octopusdeploy.ScopedUserRole {
-	var scopedUserRole = octopusdeploy.NewScopedUserRole(d.Get("user_role_id").(string))
+func expandScopedUserRole(d *schema.ResourceData) *userroles.ScopedUserRole {
+	var scopedUserRole = userroles.NewScopedUserRole(d.Get("user_role_id").(string))
 	scopedUserRole.ID = d.Get("id").(string)
 
 	scopedUserRole.TeamID = d.Get("team_id").(string)
@@ -30,7 +30,7 @@ func expandScopedUserRole(d *schema.ResourceData) *octopusdeploy.ScopedUserRole 
 	}
 	return scopedUserRole
 }
-func flattenScopedUserRoles(scopedUserRoles []*octopusdeploy.ScopedUserRole) []interface{} {
+func flattenScopedUserRoles(scopedUserRoles []*userroles.ScopedUserRole) []interface{} {
 	if scopedUserRoles == nil {
 		return nil
 	}
@@ -42,7 +42,7 @@ func flattenScopedUserRoles(scopedUserRoles []*octopusdeploy.ScopedUserRole) []i
 	return flattenedScopedUserRoles
 }
 
-func flattenScopedUserRole(scopedUserRole *octopusdeploy.ScopedUserRole) map[string]interface{} {
+func flattenScopedUserRole(scopedUserRole *userroles.ScopedUserRole) map[string]interface{} {
 	if scopedUserRole == nil {
 		return nil
 	}
@@ -58,7 +58,7 @@ func flattenScopedUserRole(scopedUserRole *octopusdeploy.ScopedUserRole) map[str
 	}
 }
 
-func setScopedUserRole(ctx context.Context, d *schema.ResourceData, scopedUserRole *octopusdeploy.ScopedUserRole) error {
+func setScopedUserRole(ctx context.Context, d *schema.ResourceData, scopedUserRole *userroles.ScopedUserRole) error {
 	if err := d.Set("environment_ids", scopedUserRole.EnvironmentIDs); err != nil {
 		return fmt.Errorf("error setting environment_ids: %s", err)
 	}

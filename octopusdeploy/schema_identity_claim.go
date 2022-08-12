@@ -1,16 +1,16 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandIdentityClaims(claims []interface{}) map[string]octopusdeploy.IdentityClaim {
-	expandedClaims := make(map[string]octopusdeploy.IdentityClaim, len(claims))
+func expandIdentityClaims(claims []interface{}) map[string]users.IdentityClaim {
+	expandedClaims := make(map[string]users.IdentityClaim, len(claims))
 	for _, claim := range claims {
 		claimMap := claim.(map[string]interface{})
 		name := claimMap["name"].(string)
-		identityClaim := octopusdeploy.IdentityClaim{
+		identityClaim := users.IdentityClaim{
 			IsIdentifyingClaim: claimMap["is_identifying_claim"].(bool),
 			Value:              claimMap["value"].(string),
 		}
@@ -19,7 +19,7 @@ func expandIdentityClaims(claims []interface{}) map[string]octopusdeploy.Identit
 	return expandedClaims
 }
 
-func flattenIdentityClaims(identityClaims map[string]octopusdeploy.IdentityClaim) []interface{} {
+func flattenIdentityClaims(identityClaims map[string]users.IdentityClaim) []interface{} {
 	if identityClaims == nil {
 		return nil
 	}

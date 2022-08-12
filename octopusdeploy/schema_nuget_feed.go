@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandNuGetFeed(d *schema.ResourceData) (*octopusdeploy.NuGetFeed, error) {
+func expandNuGetFeed(d *schema.ResourceData) (*feeds.NuGetFeed, error) {
 	name := d.Get("name").(string)
 	feedURI := d.Get("feed_uri").(string)
 
-	nuGetFeed, err := octopusdeploy.NewNuGetFeed(name, feedURI)
+	nuGetFeed, err := feeds.NewNuGetFeed(name, feedURI)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +38,7 @@ func expandNuGetFeed(d *schema.ResourceData) (*octopusdeploy.NuGetFeed, error) {
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		nuGetFeed.Password = octopusdeploy.NewSensitiveValue(v.(string))
+		nuGetFeed.Password = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("username"); ok {
@@ -91,7 +92,7 @@ func getNuGetFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setNuGetFeed(ctx context.Context, d *schema.ResourceData, nuGetFeed *octopusdeploy.NuGetFeed) error {
+func setNuGetFeed(ctx context.Context, d *schema.ResourceData, nuGetFeed *feeds.NuGetFeed) error {
 	d.Set("download_attempts", nuGetFeed.DownloadAttempts)
 	d.Set("download_retry_backoff_seconds", nuGetFeed.DownloadRetryBackoffSeconds)
 	d.Set("feed_uri", nuGetFeed.FeedURI)

@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -19,23 +20,23 @@ func dataSourceAccounts() *schema.Resource {
 }
 
 func dataSourceAccountsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := octopusdeploy.AccountsQuery{
-		AccountType: octopusdeploy.AccountType(d.Get("account_type").(string)),
+	query := accounts.AccountsQuery{
+		AccountType: accounts.AccountType(d.Get("account_type").(string)),
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
 
-	client := m.(*octopusdeploy.Client)
-	accounts, err := client.Accounts.Get(query)
+	client := m.(*client.Client)
+	existingAccounts, err := client.Accounts.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedAccounts := []interface{}{}
-	for _, account := range accounts.Items {
-		accountResource, err := octopusdeploy.ToAccountResource(account)
+	for _, account := range existingAccounts.Items {
+		accountResource, err := accounts.ToAccountResource(account)
 		if err != nil {
 			return diag.FromErr(err)
 		}

@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandGoogleCloudPlatformAccount(d *schema.ResourceData) *octopusdeploy.GoogleCloudPlatformAccount {
+func expandGoogleCloudPlatformAccount(d *schema.ResourceData) *accounts.GoogleCloudPlatformAccount {
 	name := d.Get("name").(string)
-	jsonKey := octopusdeploy.NewSensitiveValue(d.Get("json_key").(string))
+	jsonKey := core.NewSensitiveValue(d.Get("json_key").(string))
 
-	account, _ := octopusdeploy.NewGoogleCloudPlatformAccount(name, jsonKey)
+	account, _ := accounts.NewGoogleCloudPlatformAccount(name, jsonKey)
 	account.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -29,7 +30,7 @@ func expandGoogleCloudPlatformAccount(d *schema.ResourceData) *octopusdeploy.Goo
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		account.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		account.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("tenant_tags"); ok {
@@ -70,7 +71,7 @@ func getGoogleCloudPlatformAccountSchema() map[string]*schema.Schema {
 	}
 }
 
-func setGoogleCloudPlatformAccount(ctx context.Context, d *schema.ResourceData, account *octopusdeploy.GoogleCloudPlatformAccount) error {
+func setGoogleCloudPlatformAccount(ctx context.Context, d *schema.ResourceData, account *accounts.GoogleCloudPlatformAccount) error {
 	d.Set("description", account.GetDescription())
 	d.Set("name", account.GetName())
 	d.Set("space_id", account.GetSpaceID())

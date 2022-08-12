@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandTenant(d *schema.ResourceData) *octopusdeploy.Tenant {
+func expandTenant(d *schema.ResourceData) *tenants.Tenant {
 	name := d.Get("name").(string)
 
-	tenant := octopusdeploy.NewTenant(name)
+	tenant := tenants.NewTenant(name)
 	tenant.ID = d.Id()
 
 	if v, ok := d.GetOk("cloned_from_tenant_id"); ok {
@@ -37,7 +37,7 @@ func expandTenant(d *schema.ResourceData) *octopusdeploy.Tenant {
 	return tenant
 }
 
-func flattenTenant(tenant *octopusdeploy.Tenant) map[string]interface{} {
+func flattenTenant(tenant *tenants.Tenant) map[string]interface{} {
 	if tenant == nil {
 		return nil
 	}
@@ -112,7 +112,7 @@ func getTenantSchema() map[string]*schema.Schema {
 	}
 }
 
-func setTenant(ctx context.Context, d *schema.ResourceData, tenant *octopusdeploy.Tenant) error {
+func setTenant(ctx context.Context, d *schema.ResourceData, tenant *tenants.Tenant) error {
 	d.Set("cloned_from_tenant_id", tenant.ClonedFromTenantID)
 	d.Set("description", tenant.Description)
 	d.Set("id", tenant.GetID())

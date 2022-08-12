@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
+func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
 	clusterURL, _ := url.Parse(d.Get("cluster_url").(string))
 
-	endpoint := octopusdeploy.NewKubernetesEndpoint(clusterURL)
+	endpoint := machines.NewKubernetesEndpoint(clusterURL)
 
 	if v, ok := d.GetOk("authentication"); ok {
 		endpoint.Authentication = expandKubernetesStandardAuthentication(v)
@@ -63,13 +63,13 @@ func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *octopusdep
 	return deploymentTarget
 }
 
-func flattenKubernetesClusterDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenKubernetesClusterDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 
 	flattenedDeploymentTarget["cluster_certificate"] = endpointResource.ClusterCertificate
 	flattenedDeploymentTarget["container"] = flattenContainer(endpointResource.Container)
@@ -85,17 +85,17 @@ func flattenKubernetesClusterDeploymentTarget(deploymentTarget *octopusdeploy.De
 
 	switch endpointResource.Authentication.GetAuthenticationType() {
 	case "KubernetesAws":
-		flattenedDeploymentTarget["aws_account_authentication"] = flattenKubernetesAwsAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAwsAuthentication))
+		flattenedDeploymentTarget["aws_account_authentication"] = flattenKubernetesAwsAuthentication(endpointResource.Authentication.(*machines.KubernetesAwsAuthentication))
 	case "KubernetesAzure":
-		flattenedDeploymentTarget["azure_service_principal_authentication"] = flattenKubernetesAzureAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAzureAuthentication))
+		flattenedDeploymentTarget["azure_service_principal_authentication"] = flattenKubernetesAzureAuthentication(endpointResource.Authentication.(*machines.KubernetesAzureAuthentication))
 	case "KubernetesCertificate":
-		flattenedDeploymentTarget["certificate_authentication"] = flattenKubernetesCertificateAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesCertificateAuthentication))
+		flattenedDeploymentTarget["certificate_authentication"] = flattenKubernetesCertificateAuthentication(endpointResource.Authentication.(*machines.KubernetesCertificateAuthentication))
 	case "KubernetesGoogleCloud":
-		flattenedDeploymentTarget["gcp_account_authentication"] = flattenKubernetesGcpAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesGcpAuthentication))
+		flattenedDeploymentTarget["gcp_account_authentication"] = flattenKubernetesGcpAuthentication(endpointResource.Authentication.(*machines.KubernetesGcpAuthentication))
 	case "KubernetesStandard":
-		flattenedDeploymentTarget["authentication"] = flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))
+		flattenedDeploymentTarget["authentication"] = flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*machines.KubernetesStandardAuthentication))
 	case "None":
-		flattenedDeploymentTarget["authentication"] = flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))
+		flattenedDeploymentTarget["authentication"] = flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*machines.KubernetesStandardAuthentication))
 	}
 
 	return flattenedDeploymentTarget
@@ -220,8 +220,8 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	return kubernetesClusterDeploymentTargetSchema
 }
 
-func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}
@@ -244,27 +244,27 @@ func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.Resourc
 
 	switch endpointResource.Authentication.GetAuthenticationType() {
 	case "KubernetesAws":
-		if err := d.Set("aws_account_authentication", flattenKubernetesAwsAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAwsAuthentication))); err != nil {
+		if err := d.Set("aws_account_authentication", flattenKubernetesAwsAuthentication(endpointResource.Authentication.(*machines.KubernetesAwsAuthentication))); err != nil {
 			return fmt.Errorf("error setting aws_account_authentication: %s", err)
 		}
 	case "KubernetesAzure":
-		if err := d.Set("azure_service_principal_authentication", flattenKubernetesAzureAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesAzureAuthentication))); err != nil {
+		if err := d.Set("azure_service_principal_authentication", flattenKubernetesAzureAuthentication(endpointResource.Authentication.(*machines.KubernetesAzureAuthentication))); err != nil {
 			return fmt.Errorf("error setting azure_service_principal_authentication: %s", err)
 		}
 	case "KubernetesCertificate":
-		if err := d.Set("certificate_authentication", flattenKubernetesCertificateAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesCertificateAuthentication))); err != nil {
+		if err := d.Set("certificate_authentication", flattenKubernetesCertificateAuthentication(endpointResource.Authentication.(*machines.KubernetesCertificateAuthentication))); err != nil {
 			return fmt.Errorf("error setting certificate_authentication: %s", err)
 		}
 	case "KubernetesGoogleCloud":
-		if err := d.Set("gcp_account_authentication", flattenKubernetesGcpAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesGcpAuthentication))); err != nil {
+		if err := d.Set("gcp_account_authentication", flattenKubernetesGcpAuthentication(endpointResource.Authentication.(*machines.KubernetesGcpAuthentication))); err != nil {
 			return fmt.Errorf("error setting gcp_account_authentication: %s", err)
 		}
 	case "KubernetesStandard":
-		if err := d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))); err != nil {
+		if err := d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*machines.KubernetesStandardAuthentication))); err != nil {
 			return fmt.Errorf("error setting authentication: %s", err)
 		}
 	case "None":
-		if err := d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*octopusdeploy.KubernetesStandardAuthentication))); err != nil {
+		if err := d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*machines.KubernetesStandardAuthentication))); err != nil {
 			return fmt.Errorf("error setting authentication: %s", err)
 		}
 	}

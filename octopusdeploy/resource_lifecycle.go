@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceLifecycleCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	log.Printf("[INFO] creating lifecycle: %#v", lifecycle)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdLifecycle, err := client.Lifecycles.Add(lifecycle)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,7 +46,7 @@ func resourceLifecycleCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting lifecycle (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Lifecycles.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -58,17 +59,10 @@ func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m inte
 func resourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading lifecycle (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	lifecycle, err := client.Lifecycles.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] lifecycle (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "lifecycle")
 	}
 
 	if err := setLifecycle(ctx, d, lifecycle); err != nil {
@@ -84,7 +78,7 @@ func resourceLifecycleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	lifecycle := expandLifecycle(d)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedLifecycle, err := client.Lifecycles.Update(lifecycle)
 	if err != nil {
 		return diag.FromErr(err)

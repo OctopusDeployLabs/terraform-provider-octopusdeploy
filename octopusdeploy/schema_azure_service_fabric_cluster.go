@@ -1,14 +1,15 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 )
 
-func expandAzureServiceFabricCluster(flattenedMap map[string]interface{}) *octopusdeploy.AzureServiceFabricEndpoint {
-	endpoint := octopusdeploy.NewAzureServiceFabricEndpoint()
+func expandAzureServiceFabricCluster(flattenedMap map[string]interface{}) *machines.AzureServiceFabricEndpoint {
+	endpoint := machines.NewAzureServiceFabricEndpoint()
 	endpoint.AadClientCredentialSecret = flattenedMap["aad_client_credential_secret"].(string)
 	endpoint.AadCredentialType = flattenedMap["aad_credential_type"].(string)
-	endpoint.AadUserCredentialPassword = octopusdeploy.NewSensitiveValue(flattenedMap["aad_user_credential_password"].(string))
+	endpoint.AadUserCredentialPassword = core.NewSensitiveValue(flattenedMap["aad_user_credential_password"].(string))
 	endpoint.AadUserCredentialUsername = flattenedMap["aad_user_credential_username"].(string)
 	endpoint.CertificateStoreLocation = flattenedMap["certificate_store_location"].(string)
 	endpoint.CertificateStoreName = flattenedMap["certificate_store_name"].(string)

@@ -2,10 +2,11 @@ package octopusdeploy
 
 import (
 	"strconv"
-	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func addPrimaryPackageSchema(element *schema.Resource, required bool) error {
@@ -42,7 +43,7 @@ func addPackagesSchema(element *schema.Resource, primaryIsRequired bool) {
 	}
 }
 
-func flattenPackageReference(packageReference *octopusdeploy.PackageReference) map[string]interface{} {
+func flattenPackageReference(packageReference *packages.PackageReference) map[string]interface{} {
 	flattenedPackageReference := map[string]interface{}{
 		"acquisition_location": packageReference.AcquisitionLocation,
 		"feed_id":              packageReference.FeedID,
@@ -103,8 +104,8 @@ func getPackageSchema(required bool) *schema.Schema {
 	}
 }
 
-func expandPackageReference(tfPkg map[string]interface{}) *octopusdeploy.PackageReference {
-	pkg := &octopusdeploy.PackageReference{
+func expandPackageReference(tfPkg map[string]interface{}) *packages.PackageReference {
+	pkg := &packages.PackageReference{
 		AcquisitionLocation: tfPkg["acquisition_location"].(string),
 		FeedID:              tfPkg["feed_id"].(string),
 		Name:                getStringOrEmpty(tfPkg["name"]),
@@ -113,7 +114,7 @@ func expandPackageReference(tfPkg map[string]interface{}) *octopusdeploy.Package
 	}
 
 	if v, ok := tfPkg["extract_during_deployment"]; ok {
-		pkg.Properties["Extract"] = strings.Title(strconv.FormatBool(v.(bool)))
+		pkg.Properties["Extract"] = cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(v.(bool)))
 	}
 
 	if properties := tfPkg["properties"]; properties != nil {

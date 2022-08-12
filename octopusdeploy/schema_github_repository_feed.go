@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandGitHubRepositoryFeed(d *schema.ResourceData) (*octopusdeploy.GitHubRepositoryFeed, error) {
+func expandGitHubRepositoryFeed(d *schema.ResourceData) (*feeds.GitHubRepositoryFeed, error) {
 	name := d.Get("name").(string)
 
-	gitHubRepositoryFeed, err := octopusdeploy.NewGitHubRepositoryFeed(name)
+	gitHubRepositoryFeed, err := feeds.NewGitHubRepositoryFeed(name)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +37,7 @@ func expandGitHubRepositoryFeed(d *schema.ResourceData) (*octopusdeploy.GitHubRe
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		gitHubRepositoryFeed.Password = octopusdeploy.NewSensitiveValue(v.(string))
+		gitHubRepositoryFeed.Password = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("username"); ok {
@@ -83,7 +84,7 @@ func getGitHubRepositoryFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setGitHubRepositoryFeed(ctx context.Context, d *schema.ResourceData, githubRepositoryFeed *octopusdeploy.GitHubRepositoryFeed) error {
+func setGitHubRepositoryFeed(ctx context.Context, d *schema.ResourceData, githubRepositoryFeed *feeds.GitHubRepositoryFeed) error {
 	d.Set("download_attempts", githubRepositoryFeed.DownloadAttempts)
 	d.Set("download_retry_backoff_seconds", githubRepositoryFeed.DownloadRetryBackoffSeconds)
 	d.Set("feed_uri", githubRepositoryFeed.FeedURI)

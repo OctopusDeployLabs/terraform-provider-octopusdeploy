@@ -4,7 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -24,80 +26,73 @@ func resourceStaticWorkerPool() *schema.Resource {
 func resourceStaticWorkerPoolCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workerPool := expandStaticWorkerPool(d)
 
-	log.Printf("[INFO] creating dynamic worker pool: %#v", workerPool)
+	log.Printf("[INFO] creating static worker pool: %#v", workerPool)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdWorkerPool, err := client.WorkerPools.Add(workerPool)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	dynamicWorkerPool := createdWorkerPool.(*octopusdeploy.StaticWorkerPool)
-	if err := setStaticWorkerPool(ctx, d, dynamicWorkerPool); err != nil {
+	staticWorkerPool := createdWorkerPool.(*workerpools.StaticWorkerPool)
+	if err := setStaticWorkerPool(ctx, d, staticWorkerPool); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId(createdWorkerPool.GetID())
 
-	log.Printf("[INFO] dynamic worker pool created (%s)", d.Id())
+	log.Printf("[INFO] static worker pool created (%s)", d.Id())
 	return nil
 }
 
 func resourceStaticWorkerPoolDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] deleting dynamic worker pool (%s)", d.Id())
+	log.Printf("[INFO] deleting static worker pool (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.WorkerPools.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
 	d.SetId("")
 
-	log.Printf("[INFO] dynamic worker pool deleted")
+	log.Printf("[INFO] static worker pool deleted")
 	return nil
 }
 
 func resourceStaticWorkerPoolRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] reading dynamic worker pool (%s)", d.Id())
+	log.Printf("[INFO] reading static worker pool (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	workerPoolResource, err := client.WorkerPools.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] dynamic worker pool (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
+		return errors.ProcessApiError(ctx, d, err, "static worker pool")
+	}
+
+	staticWorkerPool := workerPoolResource.(*workerpools.StaticWorkerPool)
+	if err := setStaticWorkerPool(ctx, d, staticWorkerPool); err != nil {
 		return diag.FromErr(err)
 	}
 
-	dynamicWorkerPool := workerPoolResource.(*octopusdeploy.StaticWorkerPool)
-	if err := setStaticWorkerPool(ctx, d, dynamicWorkerPool); err != nil {
-		return diag.FromErr(err)
-	}
-
-	log.Printf("[INFO] dynamic worker pool read (%s)", d.Id())
+	log.Printf("[INFO] static worker pool read (%s)", d.Id())
 	return nil
 }
 
 func resourceStaticWorkerPoolUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	workerPool := expandStaticWorkerPool(d)
 
-	log.Printf("[INFO] updating dynamic worker pool (%s)", d.Id())
+	log.Printf("[INFO] updating static worker pool (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedWorkerPool, err := client.WorkerPools.Update(workerPool)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	dynamicWorkerPool := updatedWorkerPool.(*octopusdeploy.StaticWorkerPool)
-	if err := setStaticWorkerPool(ctx, d, dynamicWorkerPool); err != nil {
+	staticWorkerPool := updatedWorkerPool.(*workerpools.StaticWorkerPool)
+	if err := setStaticWorkerPool(ctx, d, staticWorkerPool); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] dynamic worker pool updated (%s)", d.Id())
+	log.Printf("[INFO] static worker pool updated (%s)", d.Id())
 	return nil
 }

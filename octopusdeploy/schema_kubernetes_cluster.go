@@ -3,13 +3,13 @@ package octopusdeploy
 import (
 	"net/url"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 )
 
-func expandKubernetesCluster(flattenedMap map[string]interface{}) *octopusdeploy.KubernetesEndpoint {
+func expandKubernetesCluster(flattenedMap map[string]interface{}) *machines.KubernetesEndpoint {
 	clusterURL, _ := url.Parse(flattenedMap["cluster_url"].(string))
 
-	endpoint := octopusdeploy.NewKubernetesEndpoint(clusterURL)
+	endpoint := machines.NewKubernetesEndpoint(clusterURL)
 	endpoint.Authentication = expandKubernetesAuthentication(flattenedMap["authentication"])
 	endpoint.ClusterCertificate = flattenedMap["cluster_certificate"].(string)
 	endpoint.Container = expandContainer(flattenedMap["container"])
@@ -31,9 +31,9 @@ func expandKubernetesCluster(flattenedMap map[string]interface{}) *octopusdeploy
 	// // Get the first element in the list, which is a map of the interfaces
 	// tfSchemaList := tfSchemaSet[0].(map[string]interface{})
 
-	// authenticationType := octopusdeploy.CommunicationStyle(tfSchemaList["authentication_type"].(string))
+	// authenticationType := machines.CommunicationStyle(tfSchemaList["authentication_type"].(string))
 
-	// var kubernetesAuthentication octopusdeploy.IKubernetesAuthentication
+	// var kubernetesAuthentication machines.IKubernetesAuthentication
 	// switch authenticationType {
 	// case "KubernetesAws":
 	// 	kubernetesAuthentication = expandKubernetesAwsAuthentication(d)

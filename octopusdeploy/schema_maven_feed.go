@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandMavenFeed(d *schema.ResourceData) (*octopusdeploy.MavenFeed, error) {
+func expandMavenFeed(d *schema.ResourceData) (*feeds.MavenFeed, error) {
 	name := d.Get("name").(string)
 
-	mavenFeed, err := octopusdeploy.NewMavenFeed(name)
+	mavenFeed, err := feeds.NewMavenFeed(name)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +37,7 @@ func expandMavenFeed(d *schema.ResourceData) (*octopusdeploy.MavenFeed, error) {
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		mavenFeed.Password = octopusdeploy.NewSensitiveValue(v.(string))
+		mavenFeed.Password = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("username"); ok {
@@ -83,7 +84,7 @@ func getMavenFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setMavenFeed(ctx context.Context, d *schema.ResourceData, mavenFeed *octopusdeploy.MavenFeed) error {
+func setMavenFeed(ctx context.Context, d *schema.ResourceData, mavenFeed *feeds.MavenFeed) error {
 	d.Set("download_attempts", mavenFeed.DownloadAttempts)
 	d.Set("download_retry_backoff_seconds", mavenFeed.DownloadRetryBackoffSeconds)
 	d.Set("feed_uri", mavenFeed.FeedURI)

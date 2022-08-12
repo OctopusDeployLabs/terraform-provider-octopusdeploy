@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +18,7 @@ func TestFlattenTenant(t *testing.T) {
 	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tenantTags := []string{acctest.RandStringFromCharSet(20, acctest.CharSetAlpha), acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)}
 
-	expectedExpanded := octopusdeploy.NewTenant(name)
+	expectedExpanded := tenants.NewTenant(name)
 	expectedExpanded.ClonedFromTenantID = clonedFromTenantID
 	expectedExpanded.Description = description
 	expectedExpanded.ID = id

@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandScriptModule(d *schema.ResourceData) *octopusdeploy.ScriptModule {
+func expandScriptModule(d *schema.ResourceData) *variables.ScriptModule {
 	name := d.Get("name").(string)
 
-	scriptModule := octopusdeploy.NewScriptModule(name)
+	scriptModule := variables.NewScriptModule(name)
 	scriptModule.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -45,7 +45,7 @@ func expandScriptModule(d *schema.ResourceData) *octopusdeploy.ScriptModule {
 	return scriptModule
 }
 
-func flattenScript(scriptModule *octopusdeploy.ScriptModule) []interface{} {
+func flattenScript(scriptModule *variables.ScriptModule) []interface{} {
 	if scriptModule == nil {
 		return nil
 	}
@@ -59,7 +59,7 @@ func flattenScript(scriptModule *octopusdeploy.ScriptModule) []interface{} {
 	return flattenedScriptModules
 }
 
-func flattenScriptModule(scriptModule *octopusdeploy.ScriptModule) map[string]interface{} {
+func flattenScriptModule(scriptModule *variables.ScriptModule) map[string]interface{} {
 	if scriptModule == nil {
 		return nil
 	}
@@ -137,7 +137,7 @@ func getScriptModuleSchema() map[string]*schema.Schema {
 	}
 }
 
-func setScriptModule(ctx context.Context, d *schema.ResourceData, scriptModule *octopusdeploy.ScriptModule) error {
+func setScriptModule(ctx context.Context, d *schema.ResourceData, scriptModule *variables.ScriptModule) error {
 	d.Set("description", scriptModule.Description)
 	d.Set("name", scriptModule.Name)
 

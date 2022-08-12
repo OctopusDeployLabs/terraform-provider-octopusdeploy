@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandOfflinePackageDropDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
-	endpoint := octopusdeploy.NewOfflinePackageDropEndpoint()
+func expandOfflinePackageDropDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
+	endpoint := machines.NewOfflinePackageDropEndpoint()
 
 	if v, ok := d.GetOk("applications_directory"); ok {
 		endpoint.ApplicationsDirectory = v.(string)
@@ -28,13 +28,13 @@ func expandOfflinePackageDropDeploymentTarget(d *schema.ResourceData) *octopusde
 	return deploymentTarget
 }
 
-func flattenOfflinePackageDropDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenOfflinePackageDropDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["applications_directory"] = endpointResource.ApplicationsDirectory
 	flattenedDeploymentTarget["destination"] = flattenOfflinePackageDropDestination(endpointResource.Destination)
 	flattenedDeploymentTarget["working_directory"] = endpointResource.WorkingDirectory
@@ -86,8 +86,8 @@ func getOfflinePackageDropDeploymentTargetSchema() map[string]*schema.Schema {
 	return offlinePackageDropDeploymentTargetSchema
 }
 
-func setOfflinePackageDropDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setOfflinePackageDropDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}

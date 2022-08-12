@@ -1,11 +1,11 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeploymentActionPackage(values interface{}) *octopusdeploy.DeploymentActionPackage {
+func expandDeploymentActionPackage(values interface{}) *packages.DeploymentActionPackage {
 	if values == nil {
 		return nil
 	}
@@ -17,21 +17,21 @@ func expandDeploymentActionPackage(values interface{}) *octopusdeploy.Deployment
 
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	return &octopusdeploy.DeploymentActionPackage{
+	return &packages.DeploymentActionPackage{
 		DeploymentAction: flattenedMap["deployment_action"].(string),
 		PackageReference: flattenedMap["package_reference"].(string),
 	}
 }
 
-func expandDeploymentActionPackages(values interface{}) []octopusdeploy.DeploymentActionPackage {
+func expandDeploymentActionPackages(values interface{}) []packages.DeploymentActionPackage {
 	if values == nil {
 		return nil
 	}
 
-	actionPackages := []octopusdeploy.DeploymentActionPackage{}
+	actionPackages := []packages.DeploymentActionPackage{}
 	for _, v := range values.([]interface{}) {
 		flattenedMap := v.(map[string]interface{})
-		actionPackages = append(actionPackages, octopusdeploy.DeploymentActionPackage{
+		actionPackages = append(actionPackages, packages.DeploymentActionPackage{
 			DeploymentAction: flattenedMap["deployment_action"].(string),
 			PackageReference: flattenedMap["package_reference"].(string),
 		})
@@ -39,7 +39,7 @@ func expandDeploymentActionPackages(values interface{}) []octopusdeploy.Deployme
 	return actionPackages
 }
 
-func flattenDeploymentActionPackage(deploymentActionPackage *octopusdeploy.DeploymentActionPackage) []interface{} {
+func flattenDeploymentActionPackage(deploymentActionPackage *packages.DeploymentActionPackage) []interface{} {
 	if deploymentActionPackage == nil {
 		return nil
 	}
@@ -50,7 +50,7 @@ func flattenDeploymentActionPackage(deploymentActionPackage *octopusdeploy.Deplo
 	return []interface{}{flattenedDeploymentActionPackage}
 }
 
-func flattenDeploymentActionPackages(deploymentActionPackages []octopusdeploy.DeploymentActionPackage) []interface{} {
+func flattenDeploymentActionPackages(deploymentActionPackages []packages.DeploymentActionPackage) []interface{} {
 	if len(deploymentActionPackages) == 0 {
 		return nil
 	}

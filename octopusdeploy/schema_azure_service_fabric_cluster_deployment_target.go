@@ -3,12 +3,13 @@ package octopusdeploy
 import (
 	"context"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandAzureServiceFabricClusterDeploymentTarget(d *schema.ResourceData) *octopusdeploy.DeploymentTarget {
-	endpoint := octopusdeploy.NewAzureServiceFabricEndpoint()
+func expandAzureServiceFabricClusterDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
+	endpoint := machines.NewAzureServiceFabricEndpoint()
 
 	if v, ok := d.GetOk("aad_client_credential_secret"); ok {
 		endpoint.AadClientCredentialSecret = v.(string)
@@ -19,7 +20,7 @@ func expandAzureServiceFabricClusterDeploymentTarget(d *schema.ResourceData) *oc
 	}
 
 	if v, ok := d.GetOk("aad_user_credential_password"); ok {
-		endpoint.AadUserCredentialPassword = octopusdeploy.NewSensitiveValue(v.(string))
+		endpoint.AadUserCredentialPassword = core.NewSensitiveValue(v.(string))
 	}
 
 	if v, ok := d.GetOk("aad_user_credential_username"); ok {
@@ -55,13 +56,13 @@ func expandAzureServiceFabricClusterDeploymentTarget(d *schema.ResourceData) *oc
 	return deploymentTarget
 }
 
-func flattenAzureServiceFabricClusterDeploymentTarget(deploymentTarget *octopusdeploy.DeploymentTarget) map[string]interface{} {
+func flattenAzureServiceFabricClusterDeploymentTarget(deploymentTarget *machines.DeploymentTarget) map[string]interface{} {
 	if deploymentTarget == nil {
 		return nil
 	}
 
 	flattenedDeploymentTarget := flattenDeploymentTarget(deploymentTarget)
-	endpointResource, _ := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+	endpointResource, _ := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	flattenedDeploymentTarget["aad_client_credential_secret"] = endpointResource.AadClientCredentialSecret
 	flattenedDeploymentTarget["aad_credential_type"] = endpointResource.AadCredentialType
 	flattenedDeploymentTarget["aad_user_credential_username"] = endpointResource.AadUserCredentialUsername
@@ -160,8 +161,8 @@ func getAzureServiceFabricClusterDeploymentTargetSchema() map[string]*schema.Sch
 	return azureServiceFabricClusterDeploymentTargetSchema
 }
 
-func setAzureServiceFabricClusterDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *octopusdeploy.DeploymentTarget) error {
-	endpointResource, err := octopusdeploy.ToEndpointResource(deploymentTarget.Endpoint)
+func setAzureServiceFabricClusterDeploymentTarget(ctx context.Context, d *schema.ResourceData, deploymentTarget *machines.DeploymentTarget) error {
+	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {
 		return err
 	}

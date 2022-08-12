@@ -1,12 +1,14 @@
 package octopusdeploy
 
-import "github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+import (
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+)
 
-func expandExtensionSettingsValues(extensionSettingsValues []interface{}) []octopusdeploy.ExtensionSettingsValues {
-	expandedExtensionSettingsValues := make([]octopusdeploy.ExtensionSettingsValues, len(extensionSettingsValues))
+func expandExtensionSettingsValues(extensionSettingsValues []interface{}) []projects.ExtensionSettingsValues {
+	expandedExtensionSettingsValues := make([]projects.ExtensionSettingsValues, len(extensionSettingsValues))
 	for _, extensionSettingsValue := range extensionSettingsValues {
 		extensionSettingsValueMap := extensionSettingsValue.(map[string]interface{})
-		expandedExtensionSettingsValues = append(expandedExtensionSettingsValues, octopusdeploy.ExtensionSettingsValues{
+		expandedExtensionSettingsValues = append(expandedExtensionSettingsValues, projects.ExtensionSettingsValues{
 			ExtensionID: extensionSettingsValueMap["extension_id"].(string),
 			Values:      extensionSettingsValueMap["values"].([]interface{}),
 		})

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -46,7 +46,7 @@ func testCertificateBasic(localName string, name string, certificateData string,
 
 func testCertificateExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		certificateID := s.RootModule().Resources[prefix].Primary.ID
 		if _, err := client.Certificates.GetByID(certificateID); err != nil {
 			return err
@@ -62,7 +62,7 @@ func testAccCertificateCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(*octopusdeploy.Client)
+		client := testAccProvider.Meta().(*client.Client)
 		certificate, err := client.Certificates.GetByID(rs.Primary.ID)
 		if err == nil && certificate != nil {
 			return fmt.Errorf("certificate (%s) still exists", rs.Primary.ID)

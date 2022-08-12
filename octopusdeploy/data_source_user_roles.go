@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/userroles"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,22 +19,22 @@ func dataSourceUserRoles() *schema.Resource {
 }
 
 func dataSourceUserRolesRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	query := octopusdeploy.UserRolesQuery{
+	query := userroles.UserRolesQuery{
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
 
-	client := meta.(*octopusdeploy.Client)
-	users, err := client.UserRoles.Get(query)
+	client := meta.(*client.Client)
+	existingUserRoles, err := client.UserRoles.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedUserRoles := []interface{}{}
-	for _, user := range users.Items {
-		flattenedUserRoles = append(flattenedUserRoles, flattenUserRole(user))
+	for _, userRole := range existingUserRoles.Items {
+		flattenedUserRoles = append(flattenedUserRoles, flattenUserRole(userRole))
 	}
 
 	d.Set("user_roles", flattenedUserRoles)

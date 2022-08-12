@@ -1,22 +1,22 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandVariableScope(flattenedVariableScope interface{}) octopusdeploy.VariableScope {
+func expandVariableScope(flattenedVariableScope interface{}) variables.VariableScope {
 	if flattenedVariableScope == nil {
-		return octopusdeploy.VariableScope{}
+		return variables.VariableScope{}
 	}
 
 	list := flattenedVariableScope.([]interface{})
 	if len(list) == 0 || list[0] == nil {
-		return octopusdeploy.VariableScope{}
+		return variables.VariableScope{}
 	}
 
 	if flattenedMap, ok := list[0].(map[string]interface{}); ok {
-		return octopusdeploy.VariableScope{
+		return variables.VariableScope{
 			Actions:      getSliceFromTerraformTypeList(flattenedMap["actions"]),
 			Channels:     getSliceFromTerraformTypeList(flattenedMap["channels"]),
 			Environments: getSliceFromTerraformTypeList(flattenedMap["environments"]),
@@ -26,10 +26,10 @@ func expandVariableScope(flattenedVariableScope interface{}) octopusdeploy.Varia
 		}
 	}
 
-	return octopusdeploy.VariableScope{}
+	return variables.VariableScope{}
 }
 
-func flattenVariableScope(scope octopusdeploy.VariableScope) []interface{} {
+func flattenVariableScope(scope variables.VariableScope) []interface{} {
 	if scope.IsEmpty() {
 		return nil
 	}

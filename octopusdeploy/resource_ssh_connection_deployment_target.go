@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,7 +27,7 @@ func resourceSSHConnectionDeploymentTargetCreate(ctx context.Context, d *schema.
 
 	log.Printf("[INFO] creating SSH connection deployment target: %#v", deploymentTarget)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdDeploymentTarget, err := client.Machines.Add(deploymentTarget)
 	if err != nil {
 		return diag.FromErr(err)
@@ -45,7 +46,7 @@ func resourceSSHConnectionDeploymentTargetCreate(ctx context.Context, d *schema.
 func resourceSSHConnectionDeploymentTargetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting SSH connection deployment target (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Machines.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -59,17 +60,10 @@ func resourceSSHConnectionDeploymentTargetDelete(ctx context.Context, d *schema.
 func resourceSSHConnectionDeploymentTargetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading SSH connection deployment target (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	deploymentTarget, err := client.Machines.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == 404 {
-				log.Printf("[INFO] SSH connection deployment target (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "SSH connection deployment target")
 	}
 
 	if err := setSSHConnectionDeploymentTarget(ctx, d, deploymentTarget); err != nil {
@@ -84,7 +78,7 @@ func resourceSSHConnectionDeploymentTargetUpdate(ctx context.Context, d *schema.
 	log.Printf("[INFO] updating SSH connection deployment target (%s)", d.Id())
 
 	deploymentTarget := expandSSHConnectionDeploymentTarget(d)
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	updatedDeploymentTarget, err := client.Machines.Update(deploymentTarget)
 	if err != nil {
 		return diag.FromErr(err)

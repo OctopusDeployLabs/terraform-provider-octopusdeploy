@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,7 @@ func dataSourceTenants() *schema.Resource {
 }
 
 func dataSourceTenantsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	query := octopusdeploy.TenantsQuery{
+	query := tenants.TenantsQuery{
 		ClonedFromTenantID: d.Get("cloned_from_tenant_id").(string),
 		IDs:                expandArray(d.Get("ids").([]interface{})),
 		IsClone:            d.Get("is_clone").(bool),
@@ -30,14 +31,14 @@ func dataSourceTenantsRead(ctx context.Context, d *schema.ResourceData, meta int
 		Take:               d.Get("take").(int),
 	}
 
-	client := meta.(*octopusdeploy.Client)
-	tenants, err := client.Tenants.Get(query)
+	client := meta.(*client.Client)
+	existingTenants, err := client.Tenants.Get(query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	flattenedTenants := []interface{}{}
-	for _, tenant := range tenants.Items {
+	for _, tenant := range existingTenants.Items {
 		flattenedTenants = append(flattenedTenants, flattenTenant(tenant))
 	}
 

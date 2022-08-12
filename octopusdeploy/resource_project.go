@@ -3,9 +3,10 @@ package octopusdeploy
 import (
 	"context"
 	"log"
-	"net/http"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -27,7 +28,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	log.Printf("[INFO] creating project: %#v", project)
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	createdProject, err := client.Projects.Add(project)
 	if err != nil {
 		return diag.FromErr(err)
@@ -64,7 +65,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting project (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	if err := client.Projects.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -77,17 +78,10 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading project (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	project, err := client.Projects.GetByID(d.Id())
 	if err != nil {
-		if apiError, ok := err.(*octopusdeploy.APIError); ok {
-			if apiError.StatusCode == http.StatusNotFound {
-				log.Printf("[INFO] project (%s) not found; deleting from state", d.Id())
-				d.SetId("")
-				return nil
-			}
-		}
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "project")
 	}
 
 	if err := setProject(ctx, d, project); err != nil {
@@ -101,9 +95,9 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] updating project (%s)", d.Id())
 
-	client := m.(*octopusdeploy.Client)
+	client := m.(*client.Client)
 	project := expandProject(d)
-	var updatedProject *octopusdeploy.Project
+	var updatedProject *projects.Project
 	var err error
 
 	projectLinks, err := client.Projects.GetByID(d.Id())

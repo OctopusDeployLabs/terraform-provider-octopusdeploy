@@ -2,24 +2,28 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func flattenDeploymentAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenDeploymentAction(action *deployments.DeploymentAction) map[string]interface{} {
 	flattenedDeploymentAction := flattenAction(action)
 
 	if len(action.ActionType) > 0 {
 		flattenedDeploymentAction["action_type"] = action.ActionType
 	}
 
-	if len(action.WorkerPoolID) > 0 {
-		flattenedDeploymentAction["worker_pool_id"] = action.WorkerPoolID
+	if len(action.WorkerPool) > 0 {
+		flattenedDeploymentAction["worker_pool_id"] = action.WorkerPool
 	}
 
 	if len(action.WorkerPoolVariable) > 0 {
@@ -34,7 +38,7 @@ func flattenDeploymentAction(action *octopusdeploy.DeploymentAction) map[string]
 	return flattenedDeploymentAction
 }
 
-func flattenAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenAction(action *deployments.DeploymentAction) map[string]interface{} {
 	if action == nil {
 		return nil
 	}
@@ -359,7 +363,7 @@ func addWorkerPoolVariableSchema(element *schema.Resource) {
 	}
 }
 
-func expandAction(flattenedAction map[string]interface{}) *octopusdeploy.DeploymentAction {
+func expandAction(flattenedAction map[string]interface{}) *deployments.DeploymentAction {
 	if len(flattenedAction) == 0 {
 		return nil
 	}
@@ -374,7 +378,7 @@ func expandAction(flattenedAction map[string]interface{}) *octopusdeploy.Deploym
 		actionType = v
 	}
 
-	action := octopusdeploy.NewDeploymentAction(name, actionType)
+	action := deployments.NewDeploymentAction(name, actionType)
 
 	// expand properties first
 	if v, ok := flattenedAction["properties"]; ok {
@@ -406,7 +410,7 @@ func expandAction(flattenedAction map[string]interface{}) *octopusdeploy.Deploym
 	}
 
 	if v, ok := flattenedAction["features"]; ok {
-		action.Properties["Octopus.Action.EnabledFeatures"] = octopusdeploy.NewPropertyValue(strings.Join(getSliceFromTerraformTypeList(v), ","), false)
+		action.Properties["Octopus.Action.EnabledFeatures"] = core.NewPropertyValue(strings.Join(getSliceFromTerraformTypeList(v), ","), false)
 	}
 
 	if v, ok := flattenedAction["is_disabled"]; ok {
@@ -423,16 +427,16 @@ func expandAction(flattenedAction map[string]interface{}) *octopusdeploy.Deploym
 
 	if v, ok := flattenedAction["run_on_server"]; ok {
 		runOnServer := v.(bool)
-		action.Properties["Octopus.Action.RunOnServer"] = octopusdeploy.NewPropertyValue(strings.Title(strconv.FormatBool(runOnServer)), false)
+		action.Properties["Octopus.Action.RunOnServer"] = core.NewPropertyValue(cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(runOnServer)), false)
 	}
 
 	if v, ok := flattenedAction["action_template"]; ok {
 		templateList := v.(*schema.Set).List()
 		if len(templateList) > 0 {
 			template := templateList[0].(map[string]interface{})
-			action.Properties["Octopus.Action.Template.Id"] = octopusdeploy.NewPropertyValue(template["id"].(string), false)
+			action.Properties["Octopus.Action.Template.Id"] = core.NewPropertyValue(template["id"].(string), false)
 			version := strconv.Itoa(template["version"].(int))
-			action.Properties["Octopus.Action.Template.Version"] = octopusdeploy.NewPropertyValue(version, false)
+			action.Properties["Octopus.Action.Template.Version"] = core.NewPropertyValue(version, false)
 		}
 	}
 
@@ -441,7 +445,7 @@ func expandAction(flattenedAction map[string]interface{}) *octopusdeploy.Deploym
 	}
 
 	if v, ok := flattenedAction["worker_pool_id"]; ok {
-		action.WorkerPoolID = v.(string)
+		action.WorkerPool = v.(string)
 	}
 
 	if v, ok := flattenedAction["primary_package"]; ok {
@@ -451,17 +455,17 @@ func expandAction(flattenedAction map[string]interface{}) *octopusdeploy.Deploym
 
 			switch primaryPackageReference.AcquisitionLocation {
 			case "Server":
-				action.Properties["Octopus.Action.Package.DownloadOnTentacle"] = octopusdeploy.NewPropertyValue("False", false)
+				action.Properties["Octopus.Action.Package.DownloadOnTentacle"] = core.NewPropertyValue("False", false)
 			default:
-				action.Properties["Octopus.Action.Package.DownloadOnTentacle"] = octopusdeploy.NewPropertyValue(primaryPackageReference.AcquisitionLocation, false)
+				action.Properties["Octopus.Action.Package.DownloadOnTentacle"] = core.NewPropertyValue(primaryPackageReference.AcquisitionLocation, false)
 			}
 
 			if len(primaryPackageReference.PackageID) > 0 {
-				action.Properties["Octopus.Action.Package.PackageId"] = octopusdeploy.NewPropertyValue(primaryPackageReference.PackageID, false)
+				action.Properties["Octopus.Action.Package.PackageId"] = core.NewPropertyValue(primaryPackageReference.PackageID, false)
 			}
 
 			if len(primaryPackageReference.FeedID) > 0 {
-				action.Properties["Octopus.Action.Package.FeedId"] = octopusdeploy.NewPropertyValue(primaryPackageReference.FeedID, false)
+				action.Properties["Octopus.Action.Package.FeedId"] = core.NewPropertyValue(primaryPackageReference.FeedID, false)
 			}
 
 			action.Packages = append(action.Packages, primaryPackageReference)

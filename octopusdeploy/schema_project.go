@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
+func expandProject(d *schema.ResourceData) *projects.Project {
 	name := d.Get("name").(string)
 	lifecycleID := d.Get("lifecycle_id").(string)
 	projectGroupID := d.Get("project_group_id").(string)
 
-	project := octopusdeploy.NewProject(name, lifecycleID, projectGroupID)
+	project := projects.NewProject(name, lifecycleID, projectGroupID)
 	project.ID = d.Id()
 
 	if v, ok := d.GetOk("auto_create_release"); ok {
@@ -22,7 +23,7 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	}
 
 	if v, ok := d.GetOk("auto_deploy_release_overrides"); ok {
-		project.AutoDeployReleaseOverrides = v.([]octopusdeploy.AutoDeployReleaseOverride)
+		project.AutoDeployReleaseOverrides = v.([]projects.AutoDeployReleaseOverride)
 	}
 
 	if v, ok := d.GetOk("cloned_from_project_id"); ok {
@@ -98,7 +99,7 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	}
 
 	if v, ok := d.GetOk("tenanted_deployment_participation"); ok {
-		project.TenantedDeploymentMode = octopusdeploy.TenantedDeploymentMode(v.(string))
+		project.TenantedDeploymentMode = core.TenantedDeploymentMode(v.(string))
 	}
 
 	if v, ok := d.GetOk("versioning_strategy"); ok {
@@ -108,7 +109,7 @@ func expandProject(d *schema.ResourceData) *octopusdeploy.Project {
 	return project
 }
 
-func flattenProject(project *octopusdeploy.Project) map[string]interface{} {
+func flattenProject(project *projects.Project) map[string]interface{} {
 	if project == nil {
 		return nil
 	}
@@ -379,7 +380,7 @@ func getProjectSchema() map[string]*schema.Schema {
 	}
 }
 
-func setProject(ctx context.Context, d *schema.ResourceData, project *octopusdeploy.Project) error {
+func setProject(ctx context.Context, d *schema.ResourceData, project *projects.Project) error {
 	d.Set("auto_create_release", project.AutoCreateRelease)
 
 	if err := d.Set("auto_deploy_release_overrides", project.AutoDeployReleaseOverrides); err != nil {

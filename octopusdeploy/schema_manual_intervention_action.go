@@ -1,11 +1,12 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func flattenManualIntervention(actionMap map[string]interface{}, properties map[string]octopusdeploy.PropertyValue) {
+func flattenManualIntervention(actionMap map[string]interface{}, properties map[string]core.PropertyValue) {
 	for propertyName, propertyValue := range properties {
 		switch propertyName {
 		case "Octopus.Action.Manual.Instructions":
@@ -16,7 +17,7 @@ func flattenManualIntervention(actionMap map[string]interface{}, properties map[
 	}
 }
 
-func flattenManualInterventionAction(action *octopusdeploy.DeploymentAction) map[string]interface{} {
+func flattenManualInterventionAction(action *deployments.DeploymentAction) map[string]interface{} {
 	flattenedAction := flattenAction(action)
 	flattenManualIntervention(flattenedAction, action.Properties)
 
@@ -41,14 +42,14 @@ func getManualInterventionActionSchema() *schema.Schema {
 	return actionSchema
 }
 
-func expandManualInterventionAction(tfAction map[string]interface{}) *octopusdeploy.DeploymentAction {
+func expandManualInterventionAction(tfAction map[string]interface{}) *deployments.DeploymentAction {
 	resource := expandAction(tfAction)
 	resource.ActionType = "Octopus.Manual"
-	resource.Properties["Octopus.Action.Manual.Instructions"] = octopusdeploy.NewPropertyValue(tfAction["instructions"].(string), false)
+	resource.Properties["Octopus.Action.Manual.Instructions"] = core.NewPropertyValue(tfAction["instructions"].(string), false)
 
 	responsibleTeams := tfAction["responsible_teams"]
 	if responsibleTeams != nil {
-		resource.Properties["Octopus.Action.Manual.ResponsibleTeamIds"] = octopusdeploy.NewPropertyValue(responsibleTeams.(string), false)
+		resource.Properties["Octopus.Action.Manual.ResponsibleTeamIds"] = core.NewPropertyValue(responsibleTeams.(string), false)
 	}
 
 	return resource

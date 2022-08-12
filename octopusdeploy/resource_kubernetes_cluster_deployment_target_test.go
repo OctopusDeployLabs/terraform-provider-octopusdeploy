@@ -24,7 +24,7 @@ func TestAccKubernetesClusterDeploymentTargetBasic(t *testing.T) {
 	newClusterURL := "http://www.example.com"
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccDeploymentTargetCheckDestroy,
+		CheckDestroy: testDeploymentTargetCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -54,7 +54,7 @@ func TestAccKubernetesClusterDeploymentTargetAws(t *testing.T) {
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccDeploymentTargetCheckDestroy,
+		CheckDestroy: testDeploymentTargetCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
@@ -94,7 +94,7 @@ func TestAccKubernetesClusterDeploymentTargetGcp(t *testing.T) {
 	region := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccDeploymentTargetCheckDestroy,
+		CheckDestroy: testDeploymentTargetCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{

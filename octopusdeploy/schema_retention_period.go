@@ -1,17 +1,17 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.RetentionPeriod {
+func expandRetentionPeriod(d *schema.ResourceData, key string) *core.RetentionPeriod {
 	if v, ok := d.GetOk(key); ok {
 		retentionPeriod := v.([]interface{})
 		if len(retentionPeriod) == 1 {
 			tfRetentionItem := retentionPeriod[0].(map[string]interface{})
-			retention := octopusdeploy.RetentionPeriod{
+			retention := core.RetentionPeriod{
 				QuantityToKeep:    int32(tfRetentionItem["quantity_to_keep"].(int)),
 				ShouldKeepForever: tfRetentionItem["should_keep_forever"].(bool),
 				Unit:              tfRetentionItem["unit"].(string),
@@ -23,7 +23,7 @@ func expandRetentionPeriod(d *schema.ResourceData, key string) *octopusdeploy.Re
 	return nil
 }
 
-func flattenRetentionPeriod(r octopusdeploy.RetentionPeriod) []interface{} {
+func flattenRetentionPeriod(r core.RetentionPeriod) []interface{} {
 	retentionPeriod := make(map[string]interface{})
 	retentionPeriod["quantity_to_keep"] = int(r.QuantityToKeep)
 	retentionPeriod["should_keep_forever"] = r.ShouldKeepForever
