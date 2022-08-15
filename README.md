@@ -1,5 +1,11 @@
 # 🐙 Terraform Provider for Octopus Deploy
 
+## :warning: Warning
+
+The Terraform Provider for Octopus Deploy is under active development. Its functionalty can and will change; it is a v0.* product until its robustness can be assured. Please be aware that types like resources can and will be modified over time. It is strongly recommended to `validate` and `plan` configuration prior to committing changes via `apply`.
+
+## About
+
 This repository contains the source code for the Terraform Provider for [Octopus Deploy](https://octopus.com). It supports provisioning/configuring of Octopus Deploy instances via [Terraform](https://www.terraform.io/). Documentation and guides for using this provider are located on the Terraform Registry: [Documentation](https://registry.terraform.io/providers/OctopusDeployLabs/octopusdeploy/latest/docs).
 
 ## 🪄 Installation and Configuration
@@ -23,9 +29,9 @@ data "octopusdeploy_space" "space" {
 
 provider "octopusdeploy" {
   # configuration options
-  address    = "https://octopus.example.com"     # (required; string) the service endpoint of the Octopus REST API
-  api_key    = "API-XXXXXXXXXXXXX"               # (required; string) the API key to use with the Octopus REST API
-  space_id   = data.octopusdeploy_space.space.id # (optional; string) the space ID in Octopus Deploy
+  address  = "https://octopus.example.com"     # (required; string) the service endpoint of the Octopus REST API
+  api_key  = "API-XXXXXXXXXXXXX"               # (required; string) the API key to use with the Octopus REST API
+  space_id = data.octopusdeploy_space.space.id # (optional; string) the space ID in Octopus Deploy
 }
 ```
 
