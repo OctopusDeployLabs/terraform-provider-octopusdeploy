@@ -5,7 +5,7 @@ description: |-
   This resource manages projects in Octopus Deploy.
 ---
 
-# octopusdeploy_project: Resource
+# octopusdeploy_project (Resource)
 
 This resource manages projects in Octopus Deploy.
 
@@ -183,4 +183,10 @@ Read-Only:
 - `extension_id` (String)
 - `values` (List of String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_project.<name> <project-id>
+```

@@ -5,7 +5,7 @@ description: |-
   This resource manages listening tentacle deployment targets in Octopus Deploy.
 ---
 
-# octopusdeploy_listening_tentacle_deployment_target: Resource
+# octopusdeploy_listening_tentacle_deployment_target (Resource)
 
 This resource manages listening tentacle deployment targets in Octopus Deploy.
 
@@ -69,4 +69,10 @@ Optional:
 - `upgrade_suggested` (Boolean)
 - `version` (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_listening_tentacle_deployment_target.<name> <machine-id>
+```

@@ -5,7 +5,7 @@ description: |-
   This resource manages a Docker Container Registry in Octopus Deploy.
 ---
 
-# octopusdeploy_docker_container_registry: Resource
+# octopusdeploy_docker_container_registry (Resource)
 
 This resource manages a Docker Container Registry in Octopus Deploy.
 
@@ -38,4 +38,10 @@ resource "octopusdeploy_docker_container_registry" "example" {
 - `space_id` (String) The space ID associated with this resource.
 - `username` (String, Sensitive) The username associated with this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_docker_container_registry.<name> <feed-id>
+```

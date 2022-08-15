@@ -6,7 +6,7 @@ description: |-
   This resource manages scoped user roles in Octopus Deploy.
 ---
 
-# octopusdeploy_scoped_user_role: Resource
+# octopusdeploy_scoped_user_role (Resource)
 
 This resource manages scoped user roles in Octopus Deploy.
 

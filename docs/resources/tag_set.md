@@ -42,22 +42,6 @@ resource "octopusdeploy_tag_set" "example" {
 - `id` (String) The unique ID for this resource.
 - `sort_order` (Number) The sort order associated with this resource.
 - `space_id` (String) The space ID associated with this resource.
-- `tag` (Block List) A list of tags. (see [below for nested schema](#nestedblock--tag))
-
-<a id="nestedblock--tag"></a>
-### Nested Schema for `tag`
-
-Required:
-
-- `color` (String)
-- `name` (String) The name of this resource.
-
-Optional:
-
-- `canonical_tag_name` (String)
-- `description` (String) The description of this tag.
-- `id` (String) The unique ID for this resource.
-- `sort_order` (Number)
 
 ## Import
 

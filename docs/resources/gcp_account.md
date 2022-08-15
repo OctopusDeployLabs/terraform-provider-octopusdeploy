@@ -5,7 +5,7 @@ description: |-
   This resource manages GCP accounts in Octopus Deploy.
 ---
 
-# octopusdeploy_gcp_account: Resource
+# octopusdeploy_gcp_account (Resource)
 
 This resource manages GCP accounts in Octopus Deploy.
 
@@ -38,4 +38,10 @@ resource "octopusdeploy_gcp_account" "example" {
 
 - `id` (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_gcp_account.<name> <account-id>
+```

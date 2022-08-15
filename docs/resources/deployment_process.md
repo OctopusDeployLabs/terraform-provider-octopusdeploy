@@ -156,7 +156,6 @@ Required:
 Optional:
 
 - `action` (Block List) (see [below for nested schema](#nestedblock--step--action))
-- `apply_terraform_action` (Block List, Deprecated) (see [below for nested schema](#nestedblock--step--apply_terraform_action))
 - `apply_terraform_template_action` (Block List) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action))
 - `condition` (String) When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'
 - `condition_expression` (String) The expression to evaluate to determine whether to run this step when 'condition' is 'Variable'
@@ -188,7 +187,6 @@ Optional:
 - `channels` (List of String) The channels associated with this deployment action.
 - `condition` (String) The condition associated with this deployment action.
 - `container` (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--action--container))
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
@@ -199,8 +197,6 @@ Optional:
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--package))
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--primary_package))
 - `properties` (Map of String) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `worker_pool_id` (String) The worker pool associated with this deployment action.
@@ -243,16 +239,6 @@ Optional:
 - `feed_id` (String) The feed ID associated with this package reference.
 - `id` (String) The unique ID for this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--action--package--property))
-
-<a id="nestedblock--step--action--package--property"></a>
-### Nested Schema for `step.action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
 
 
 <a id="nestedblock--step--action--primary_package"></a>
@@ -269,212 +255,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--action--primary_package--property))
-
-<a id="nestedblock--step--action--primary_package--property"></a>
-### Nested Schema for `step.action.primary_package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--action--property"></a>
-### Nested Schema for `step.action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--apply_terraform_action"></a>
-### Nested Schema for `step.apply_terraform_action`
-
-Required:
-
-- `advanced_options` (Block Set, Min: 1, Max: 1) Optional advanced options for Terraform (see [below for nested schema](#nestedblock--step--apply_terraform_action--advanced_options))
-- `name` (String) The name of this resource.
-
-Optional:
-
-- `action_template` (Block Set, Max: 1) Represents the template that is associated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_action--action_template))
-- `aws_account` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_action--aws_account))
-- `azure_account` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_action--azure_account))
-- `can_be_used_for_project_versioning` (Boolean)
-- `channels` (List of String) The channels associated with this deployment action.
-- `condition` (String) The condition associated with this deployment action.
-- `container` (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--apply_terraform_action--container))
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
-- `environments` (List of String) The environments within which this deployment action will run.
-- `excluded_environments` (List of String) The environments that this step will be skipped in
-- `features` (List of String) A list of enabled features for this action.
-- `google_cloud_account` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_action--google_cloud_account))
-- `id` (String) The unique ID for this resource.
-- `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
-- `is_required` (Boolean) Indicates the required status of this deployment action.
-- `notes` (String) The notes associated with this deployment action.
-- `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_action--package))
-- `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_action--primary_package))
-- `properties` (Map of String) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--apply_terraform_action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
-- `run_on_server` (Boolean) Whether this step runs on a worker or on the target
-- `template` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_action--template))
-- `template_parameters` (String)
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-
-<a id="nestedblock--step--apply_terraform_action--advanced_options"></a>
-### Nested Schema for `step.apply_terraform_action.advanced_options`
-
-Optional:
-
-- `allow_additional_plugin_downloads` (Boolean)
-- `apply_parameters` (String)
-- `init_parameters` (String)
-- `plugin_cache_directory` (String)
-- `workspace` (String)
-
-
-<a id="nestedblock--step--apply_terraform_action--action_template"></a>
-### Nested Schema for `step.apply_terraform_action.action_template`
-
-Optional:
-
-- `community_action_template_id` (String)
-- `version` (Number)
-
-Read-Only:
-
-- `id` (String) The ID of this resource.
-
-
-<a id="nestedblock--step--apply_terraform_action--aws_account"></a>
-### Nested Schema for `step.apply_terraform_action.aws_account`
-
-Optional:
-
-- `region` (String)
-- `role` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_action--aws_account--role))
-- `use_instance_role` (Boolean)
-- `variable` (String)
-
-<a id="nestedblock--step--apply_terraform_action--aws_account--role"></a>
-### Nested Schema for `step.apply_terraform_action.aws_account.variable`
-
-Optional:
-
-- `arn` (String)
-- `external_id` (String)
-- `role_session_name` (String)
-- `session_duration` (Number)
-
-
-
-<a id="nestedblock--step--apply_terraform_action--azure_account"></a>
-### Nested Schema for `step.apply_terraform_action.azure_account`
-
-Optional:
-
-- `variable` (String)
-
-
-<a id="nestedblock--step--apply_terraform_action--container"></a>
-### Nested Schema for `step.apply_terraform_action.container`
-
-Optional:
-
-- `feed_id` (String)
-- `image` (String)
-
-
-<a id="nestedblock--step--apply_terraform_action--google_cloud_account"></a>
-### Nested Schema for `step.apply_terraform_action.google_cloud_account`
-
-Optional:
-
-- `impersonate_service_account` (Boolean) Impersonate service accounts
-- `project` (String) This sets GOOGLE_PROJECT environment variable
-- `region` (String) This sets GOOGLE_REGION environment variable
-- `service_account_emails` (String) This sets GOOGLE_IMPERSONATE_SERVICE_ACCOUNT environment variable
-- `use_vm_service_account` (Boolean) When running in a Compute Engine virtual machine, use the associated VM service account
-- `variable` (String)
-- `zone` (String) This sets GOOGLE_ZONE environment variable
-
-
-<a id="nestedblock--step--apply_terraform_action--package"></a>
-### Nested Schema for `step.apply_terraform_action.package`
-
-Required:
-
-- `package_id` (String) The ID of the package.
-
-Optional:
-
-- `acquisition_location` (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- `feed_id` (String) The feed ID associated with this package reference.
-- `id` (String) The unique ID for this resource.
-- `name` (String) The name of this resource.
-- `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--apply_terraform_action--package--property))
-
-<a id="nestedblock--step--apply_terraform_action--package--property"></a>
-### Nested Schema for `step.apply_terraform_action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--apply_terraform_action--primary_package"></a>
-### Nested Schema for `step.apply_terraform_action.primary_package`
-
-Required:
-
-- `package_id` (String) The ID of the package.
-
-Optional:
-
-- `acquisition_location` (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
-- `feed_id` (String) The feed ID associated with this package reference.
-- `id` (String) The unique ID for this resource.
-- `name` (String) The name of this resource.
-- `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--apply_terraform_action--primary_package--property))
-
-<a id="nestedblock--step--apply_terraform_action--primary_package--property"></a>
-### Nested Schema for `step.apply_terraform_action.primary_package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--apply_terraform_action--property"></a>
-### Nested Schema for `step.apply_terraform_action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-<a id="nestedblock--step--apply_terraform_action--template"></a>
-### Nested Schema for `step.apply_terraform_action.template`
-
-Optional:
-
-- `additional_variable_files` (String)
-- `directory` (String)
-- `run_automatic_file_substitution` (Boolean)
-- `target_files` (String)
 
 
 
@@ -495,7 +275,6 @@ Optional:
 - `channels` (List of String) The channels associated with this deployment action.
 - `condition` (String) The condition associated with this deployment action.
 - `container` (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--container))
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
@@ -507,8 +286,6 @@ Optional:
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--package))
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--primary_package))
 - `properties` (Map of String) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
 - `template` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--template))
 - `template_parameters` (String)
@@ -550,7 +327,7 @@ Optional:
 - `variable` (String)
 
 <a id="nestedblock--step--apply_terraform_template_action--aws_account--role"></a>
-### Nested Schema for `step.apply_terraform_template_action.aws_account.variable`
+### Nested Schema for `step.apply_terraform_template_action.aws_account.role`
 
 Optional:
 
@@ -606,16 +383,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--package--property))
-
-<a id="nestedblock--step--apply_terraform_template_action--package--property"></a>
-### Nested Schema for `step.apply_terraform_template_action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
 
 
 <a id="nestedblock--step--apply_terraform_template_action--primary_package"></a>
@@ -632,25 +399,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--primary_package--property))
-
-<a id="nestedblock--step--apply_terraform_template_action--primary_package--property"></a>
-### Nested Schema for `step.apply_terraform_template_action.primary_package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--apply_terraform_template_action--property"></a>
-### Nested Schema for `step.apply_terraform_template_action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
 
 
 <a id="nestedblock--step--apply_terraform_template_action--template"></a>
@@ -681,7 +429,6 @@ Optional:
 - `channels` (List of String) The channels associated with this deployment action.
 - `condition` (String) The condition associated with this deployment action.
 - `container` (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--container))
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
@@ -691,8 +438,6 @@ Optional:
 - `notes` (String) The notes associated with this deployment action.
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
@@ -732,25 +477,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package--property))
-
-<a id="nestedblock--step--deploy_kubernetes_secret_action--package--property"></a>
-### Nested Schema for `step.deploy_kubernetes_secret_action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--deploy_kubernetes_secret_action--property"></a>
-### Nested Schema for `step.deploy_kubernetes_secret_action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
 
 
 
@@ -769,7 +495,6 @@ Optional:
 - `channels` (List of String) The channels associated with this deployment action.
 - `condition` (String) The condition associated with this deployment action.
 - `container` (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--deploy_package_action--container))
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
@@ -779,8 +504,6 @@ Optional:
 - `notes` (String) The notes associated with this deployment action.
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_package_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--deploy_package_action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `windows_service` (Block Set, Max: 1) Deploy a windows service feature (see [below for nested schema](#nestedblock--step--deploy_package_action--windows_service))
 
@@ -798,16 +521,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--deploy_package_action--primary_package--property))
-
-<a id="nestedblock--step--deploy_package_action--primary_package--property"></a>
-### Nested Schema for `step.deploy_package_action.primary_package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
 
 
 <a id="nestedblock--step--deploy_package_action--action_template"></a>
@@ -846,25 +559,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--deploy_package_action--package--property))
-
-<a id="nestedblock--step--deploy_package_action--package--property"></a>
-### Nested Schema for `step.deploy_package_action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--deploy_package_action--property"></a>
-### Nested Schema for `step.deploy_package_action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
 
 
 <a id="nestedblock--step--deploy_package_action--windows_service"></a>
@@ -912,7 +606,6 @@ Optional:
 - `custom_account_password` (String, Sensitive) The password for the custom account
 - `dependencies` (String) Any dependencies that the service has. Separate the names using forward slashes (/).
 - `description` (String) User-friendly description of the service (optional)
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
 - `display_name` (String) The display name of the service (optional)
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
@@ -923,8 +616,6 @@ Optional:
 - `notes` (String) The notes associated with this deployment action.
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
 - `service_account` (String) Which built-in account will the service run under. Can be LocalSystem, NT Authority\NetworkService, NT Authority\LocalService, _CUSTOM or an expression
 - `start_mode` (String) When will the service start. Can be auto, delayed-auto, manual, unchanged or an expression
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
@@ -943,16 +634,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--primary_package--property))
-
-<a id="nestedblock--step--deploy_windows_service_action--primary_package--property"></a>
-### Nested Schema for `step.deploy_windows_service_action.primary_package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
 
 
 <a id="nestedblock--step--deploy_windows_service_action--action_template"></a>
@@ -991,25 +672,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--package--property))
-
-<a id="nestedblock--step--deploy_windows_service_action--package--property"></a>
-### Nested Schema for `step.deploy_windows_service_action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--deploy_windows_service_action--property"></a>
-### Nested Schema for `step.deploy_windows_service_action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
 
 
 
@@ -1028,7 +690,6 @@ Optional:
 - `channels` (List of String) The channels associated with this deployment action.
 - `condition` (String) The condition associated with this deployment action.
 - `container` (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--manual_intervention_action--container))
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
@@ -1038,8 +699,6 @@ Optional:
 - `notes` (String) The notes associated with this deployment action.
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--manual_intervention_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--manual_intervention_action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
 - `responsible_teams` (String) The teams responsible to resolve this step. If no teams are specified, all users who have permission to deploy the project can resolve it.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
@@ -1079,25 +738,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--manual_intervention_action--package--property))
-
-<a id="nestedblock--step--manual_intervention_action--package--property"></a>
-### Nested Schema for `step.manual_intervention_action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--manual_intervention_action--property"></a>
-### Nested Schema for `step.manual_intervention_action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
 
 
 
@@ -1115,7 +755,6 @@ Optional:
 - `channels` (List of String) The channels associated with this deployment action.
 - `condition` (String) The condition associated with this deployment action.
 - `container` (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--container))
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
@@ -1126,8 +765,6 @@ Optional:
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package))
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package))
 - `properties` (Map of String) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
 - `script_file_name` (String) The script file name in the package
 - `script_parameters` (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
@@ -1171,16 +808,6 @@ Optional:
 - `feed_id` (String) The feed ID associated with this package reference.
 - `id` (String) The unique ID for this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package--property))
-
-<a id="nestedblock--step--run_kubectl_script_action--package--property"></a>
-### Nested Schema for `step.run_kubectl_script_action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
 
 
 <a id="nestedblock--step--run_kubectl_script_action--primary_package"></a>
@@ -1197,25 +824,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package--property))
-
-<a id="nestedblock--step--run_kubectl_script_action--primary_package--property"></a>
-### Nested Schema for `step.run_kubectl_script_action.primary_package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--run_kubectl_script_action--property"></a>
-### Nested Schema for `step.run_kubectl_script_action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
 
 
 
@@ -1233,7 +841,6 @@ Optional:
 - `channels` (List of String) The channels associated with this deployment action.
 - `condition` (String) The condition associated with this deployment action.
 - `container` (Block List) The deployment action container associated with this deployment action. (see [below for nested schema](#nestedblock--step--run_script_action--container))
-- `disabled` (Boolean, Deprecated) **Deprecated** Indicates the disabled status of this deployment action.
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
@@ -1244,8 +851,6 @@ Optional:
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--package))
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_script_action--primary_package))
 - `properties` (Map of String, Deprecated) The properties associated with this deployment action.
-- `property` (Block Set, Deprecated) **Deprecated** The properties associated with this deployment action. (see [below for nested schema](#nestedblock--step--run_script_action--property))
-- `required` (Boolean, Deprecated) **Deprecated** Indicates the required status of this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
 - `script_body` (String)
 - `script_file_name` (String) The script file name in the package
@@ -1294,16 +899,6 @@ Optional:
 - `feed_id` (String) The feed ID associated with this package reference.
 - `id` (String) The unique ID for this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--run_script_action--package--property))
-
-<a id="nestedblock--step--run_script_action--package--property"></a>
-### Nested Schema for `step.run_script_action.package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
 
 
 <a id="nestedblock--step--run_script_action--primary_package"></a>
@@ -1320,25 +915,6 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-- `property` (Block Set, Deprecated) (see [below for nested schema](#nestedblock--step--run_script_action--primary_package--property))
-
-<a id="nestedblock--step--run_script_action--primary_package--property"></a>
-### Nested Schema for `step.run_script_action.primary_package.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
-
-
-
-<a id="nestedblock--step--run_script_action--property"></a>
-### Nested Schema for `step.run_script_action.property`
-
-Required:
-
-- `key` (String) The name of the action
-- `value` (String) The type of action
 
 ## Import
 

@@ -6,7 +6,7 @@ description: |-
   This resource manages teams in Octopus Deploy.
 ---
 
-# octopusdeploy_team: Resource
+# octopusdeploy_team (Resource)
 
 This resource manages teams in Octopus Deploy.
 

@@ -5,7 +5,7 @@ description: |-
   This resource manages variables in Octopus Deploy.
 ---
 
-# octopusdeploy_variable: Resource
+# octopusdeploy_variable (Resource)
 
 This resource manages variables in Octopus Deploy.
 
@@ -131,4 +131,10 @@ Optional:
 - `roles` (List of String) A list of roles that are scoped to this variable value.
 - `tenant_tags` (List of String) A list of tenant tags that are scoped to this variable value.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_variable.<name> <variable-id>
+```

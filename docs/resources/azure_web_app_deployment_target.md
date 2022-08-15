@@ -5,7 +5,7 @@ description: |-
   This resource manages Azure web app deployment targets in Octopus Deploy.
 ---
 
-# octopusdeploy_azure_web_app_deployment_target: Resource
+# octopusdeploy_azure_web_app_deployment_target (Resource)
 
 This resource manages Azure web app deployment targets in Octopus Deploy.
 
@@ -161,4 +161,10 @@ Optional:
 - `upgrade_suggested` (Boolean)
 - `version` (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_azure_web_app_deployment_target.<name> <machine-id>
+```

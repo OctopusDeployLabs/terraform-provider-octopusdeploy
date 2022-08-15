@@ -5,7 +5,7 @@ description: |-
   This resource manages lifecycles in Octopus Deploy.
 ---
 
-# octopusdeploy_lifecycle: Resource
+# octopusdeploy_lifecycle (Resource)
 
 This resource manages lifecycles in Octopus Deploy.
 
@@ -126,4 +126,10 @@ Optional:
 - `should_keep_forever` (Boolean) Indicates if items should never be deleted. The default value is `false`.
 - `unit` (String) The unit of quantity to keep. Valid units are `Days` or `Items`. The default value is `Days`.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_lifecycle.<name> <lifecycle-id>
+```

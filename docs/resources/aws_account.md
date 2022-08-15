@@ -5,7 +5,7 @@ description: |-
   This resource manages AWS accounts in Octopus Deploy.
 ---
 
-# octopusdeploy_aws_account: Resource
+# octopusdeploy_aws_account (Resource)
 
 This resource manages AWS accounts in Octopus Deploy.
 
@@ -40,4 +40,10 @@ resource "octopusdeploy_aws_account" "example" {
 
 - `id` (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_aws_account.<name> <account-id>
+```

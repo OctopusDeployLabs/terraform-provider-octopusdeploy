@@ -5,7 +5,7 @@ description: |-
   This resource manages offline package drop deployment targets in Octopus Deploy.
 ---
 
-# octopusdeploy_offline_package_drop_deployment_target: Resource
+# octopusdeploy_offline_package_drop_deployment_target (Resource)
 
 This resource manages offline package drop deployment targets in Octopus Deploy.
 
@@ -170,4 +170,10 @@ Optional:
 - `upgrade_suggested` (Boolean)
 - `version` (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_listening_tentacle_deployment_target.<name> <machine-id>
+```
