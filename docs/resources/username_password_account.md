@@ -5,7 +5,7 @@ description: |-
   This resource manages username-password accounts in Octopus Deploy.
 ---
 
-# octopusdeploy_username_password_account: Resource
+# octopusdeploy_username_password_account (Resource)
 
 This resource manages username-password accounts in Octopus Deploy.
 
@@ -37,4 +37,10 @@ resource "octopusdeploy_username_password_account" "example" {
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_username_password_account.<name> <account-id>
+```

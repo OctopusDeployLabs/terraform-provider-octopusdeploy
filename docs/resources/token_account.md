@@ -5,7 +5,7 @@ description: |-
   
 ---
 
-# octopusdeploy_token_account: Resource
+# octopusdeploy_token_account (Resource)
 
 
 
@@ -35,4 +35,10 @@ resource "octopusdeploy_token_account" "example" {
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_token_account.<name> <account-id>
+```

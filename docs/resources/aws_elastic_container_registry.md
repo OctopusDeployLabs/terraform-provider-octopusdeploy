@@ -5,7 +5,7 @@ description: |-
   This resource manages an AWS Elastic Container Registry in Octopus Deploy.
 ---
 
-# octopusdeploy_aws_elastic_container_registry: Resource
+# octopusdeploy_aws_elastic_container_registry (Resource)
 
 This resource manages an AWS Elastic Container Registry in Octopus Deploy.
 
@@ -35,4 +35,10 @@ resource "octopusdeploy_aws_elastic_container_registry" "example" {
 - `package_acquisition_location_options` (List of String)
 - `space_id` (String) The space ID associated with this feed.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_aws_elastic_container_registry.<name> <feed-id>
+```

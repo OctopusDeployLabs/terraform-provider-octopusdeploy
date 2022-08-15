@@ -5,7 +5,7 @@ description: |-
   This resource manages SSH key accounts in Octopus Deploy.
 ---
 
-# octopusdeploy_ssh_key_account: Resource
+# octopusdeploy_ssh_key_account (Resource)
 
 This resource manages SSH key accounts in Octopus Deploy.
 
@@ -38,4 +38,10 @@ resource "octopusdeploy_ssh_key_account" "example" {
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_ssh_key_account.<name> <account-id>
+```

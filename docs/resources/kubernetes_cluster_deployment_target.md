@@ -5,7 +5,7 @@ description: |-
   This resource manages Kubernets cluster deployment targets in Octopus Deploy.
 ---
 
-# octopusdeploy_kubernetes_cluster_deployment_target: Resource
+# octopusdeploy_kubernetes_cluster_deployment_target (Resource)
 
 This resource manages Kubernets cluster deployment targets in Octopus Deploy.
 
@@ -245,4 +245,10 @@ Optional:
 - `use_vm_service_account` (Boolean)
 - `zone` (String)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_kubernetes_cluster_deployment_target.<name> <machine-id>
+```

@@ -5,7 +5,7 @@ description: |-
   This resource manages a NuGet feed in Octopus Deploy.
 ---
 
-# octopusdeploy_nuget_feed: Resource
+# octopusdeploy_nuget_feed (Resource)
 
 This resource manages a NuGet feed in Octopus Deploy.
 
@@ -41,4 +41,10 @@ resource "octopusdeploy_nuget_feed" "example" {
 - `space_id` (String) The space ID associated with this resource.
 - `username` (String, Sensitive) The username associated with this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_nuget_feed.<name> <feed-id>
+```

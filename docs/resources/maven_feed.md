@@ -5,7 +5,7 @@ description: |-
   This resource manages a Maven feed in Octopus Deploy.
 ---
 
-# octopusdeploy_maven_feed: Resource
+# octopusdeploy_maven_feed (Resource)
 
 This resource manages a Maven feed in Octopus Deploy.
 
@@ -39,4 +39,10 @@ resource "octopusdeploy_maven_feed" "example" {
 - `space_id` (String) The space ID associated with this resource.
 - `username` (String, Sensitive) The username associated with this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_maven_feed.<name> <feed-id>
+```

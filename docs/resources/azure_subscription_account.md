@@ -5,7 +5,7 @@ description: |-
   This resource manages Azure subscription accounts in Octopus Deploy.
 ---
 
-# octopusdeploy_azure_subscription_account: Resource
+# octopusdeploy_azure_subscription_account (Resource)
 
 This resource manages Azure subscription accounts in Octopus Deploy.
 
@@ -43,4 +43,10 @@ resource "octopusdeploy_azure_subscription_account" "example" {
 
 - `id` (String) The ID of this resource.
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_azure_subscription_account.<name> <account-id>
+```

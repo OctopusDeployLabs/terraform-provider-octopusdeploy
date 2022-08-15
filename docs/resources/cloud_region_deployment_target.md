@@ -5,7 +5,7 @@ description: |-
   This resource manages cloud region deployment targets in Octopus Deploy.
 ---
 
-# octopusdeploy_cloud_region_deployment_target: Resource
+# octopusdeploy_cloud_region_deployment_target (Resource)
 
 This resource manages cloud region deployment targets in Octopus Deploy.
 
@@ -52,4 +52,10 @@ resource "octopusdeploy_cloud_region_deployment_target" "example" {
 - `has_latest_calamari` (Boolean)
 - `is_in_process` (Boolean)
 
+## Import
 
+Import is supported using the following syntax:
+
+```shell
+terraform import [options] octopusdeploy_cloud_region_deployment_target.<name> <machine-id>
+```
