@@ -10,8 +10,6 @@ import (
 )
 
 func TestAccDataSourceChannels(t *testing.T) {
-	t.Parallel()
-
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := fmt.Sprintf("data.octopusdeploy_channels.%s", localName)
 	take := 10

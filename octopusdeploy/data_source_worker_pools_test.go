@@ -10,8 +10,6 @@ import (
 )
 
 func TestAccDataSourceWorkerPools(t *testing.T) {
-	t.Parallel()
-
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := fmt.Sprintf("data.octopusdeploy_worker_pools.%s", localName)
 	partialName := "W"
