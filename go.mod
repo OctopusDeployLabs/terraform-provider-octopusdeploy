@@ -3,7 +3,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.19
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.10.0
+	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.11.0
 	github.com/google/uuid v1.3.0
 	github.com/gruntwork-io/terratest v0.40.20
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -94,7 +94,7 @@ require (
 	github.com/zclconf/go-cty v1.11.1 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
-	golang.org/x/net v0.0.0-20221017152216-f25eb7ecb193 // indirect
+	golang.org/x/net v0.0.0-20221019024206-cb67ada4b0ad // indirect
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094 // indirect
 	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
