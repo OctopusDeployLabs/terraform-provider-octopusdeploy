@@ -1,9 +1,12 @@
 package octopusdeploy
 
 import (
+	"context"
 	"net/url"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandGitPersistenceSettings(values interface{}) projects.IPersistenceSettings {
@@ -23,27 +26,29 @@ func expandGitPersistenceSettings(values interface{}) projects.IPersistenceSetti
 		return nil
 	}
 
-	var credential projects.IGitCredential
+	var gitCredential credentials.IGitCredential
+	if v, ok := flattenedMap["git_credential_id"]; ok {
+		gitCredential = credentials.NewReference(v.(string))
+	}
+
 	if v, ok := flattenedMap["credentials"]; ok {
-		credential = expandGitCredential(v)
+		gitCredential = expandGitCredential(v)
 	} else {
-		credential = projects.NewAnonymousGitCredential()
+		gitCredential = credentials.NewAnonymous()
 	}
 
 	return projects.NewGitPersistenceSettings(
 		flattenedMap["base_path"].(string),
-		credential,
+		nil,
+		gitCredential,
 		flattenedMap["default_branch"].(string),
+		[]string{},
 		url,
 	)
 }
 
-func flattenGitPersistenceSettings(persistenceSettings projects.IPersistenceSettings, password string) []interface{} {
-	if persistenceSettings == nil {
-		return nil
-	}
-
-	if persistenceSettings.GetType() == "Database" {
+func flattenGitPersistenceSettings(ctx context.Context, d *schema.ResourceData, persistenceSettings projects.IPersistenceSettings) []interface{} {
+	if persistenceSettings == nil || persistenceSettings.GetType() == "Database" {
 		return nil
 	}
 
@@ -51,8 +56,15 @@ func flattenGitPersistenceSettings(persistenceSettings projects.IPersistenceSett
 
 	flattenedGitPersistenceSettings := make(map[string]interface{})
 	flattenedGitPersistenceSettings["base_path"] = gitPersistanceSettings.BasePath
-	flattenedGitPersistenceSettings["credentials"] = flattenGitCredential(gitPersistanceSettings.Credentials, password)
 	flattenedGitPersistenceSettings["default_branch"] = gitPersistanceSettings.DefaultBranch
+
+	switch gitPersistanceSettings.Credentials.GetType() {
+	case credentials.GitCredentialTypeReference:
+		referenceProjectGitCredential := gitPersistanceSettings.Credentials.(*credentials.Reference)
+		flattenedGitPersistenceSettings["git_credential_id"] = referenceProjectGitCredential.Id
+	case credentials.GitCredentialTypeUsernamePassword:
+		flattenedGitPersistenceSettings["credentials"] = flattenGitCredential(ctx, d, gitPersistanceSettings.Credentials)
+	}
 
 	if gitPersistanceSettings.URL != nil {
 		flattenedGitPersistenceSettings["url"] = gitPersistanceSettings.URL.String()

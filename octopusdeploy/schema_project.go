@@ -109,7 +109,7 @@ func expandProject(d *schema.ResourceData) *projects.Project {
 	return project
 }
 
-func flattenProject(project *projects.Project) map[string]interface{} {
+func flattenProject(ctx context.Context, d *schema.ResourceData, project *projects.Project) map[string]interface{} {
 	if project == nil {
 		return nil
 	}
@@ -145,7 +145,7 @@ func flattenProject(project *projects.Project) map[string]interface{} {
 
 	if project.PersistenceSettings != nil {
 		if project.PersistenceSettings.GetType() == "VersionControlled" {
-			projectMap["git_persistence_settings"] = flattenGitPersistenceSettings(project.PersistenceSettings, projectMap["git_persistence_settings.0.credentials.0.password"].(string))
+			projectMap["git_persistence_settings"] = flattenGitPersistenceSettings(ctx, d, project.PersistenceSettings)
 		}
 	}
 
@@ -256,20 +256,27 @@ func getProjectSchema() map[string]*schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"git_credential_id": {
+						ConflictsWith:    []string{"git_persistence_settings.0.credentials.0.password"},
+						Optional:         true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+					},
 					"credentials": {
-						Description: "The credentials associated with these version control settings.",
+						ConflictsWith: []string{"git_persistence_settings.0.git_credential_id"},
+						Description:   "The credentials associated with these version control settings.",
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								"password": {
 									Description:      "The password for the Git credential.",
-									Required:         true,
+									Optional:         true,
 									Sensitive:        true,
 									Type:             schema.TypeString,
 									ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 								},
 								"username": {
 									Description:      "The username for the Git credential.",
-									Required:         true,
+									Optional:         true,
 									Type:             schema.TypeString,
 									ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 								},
@@ -415,7 +422,7 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 
 	if project.PersistenceSettings != nil {
 		if project.PersistenceSettings.GetType() == "VersionControlled" {
-			if err := d.Set("git_persistence_settings", flattenGitPersistenceSettings(project.PersistenceSettings, d.Get("git_persistence_settings.0.credentials.0.password").(string))); err != nil {
+			if err := d.Set("git_persistence_settings", flattenGitPersistenceSettings(ctx, d, project.PersistenceSettings)); err != nil {
 				return fmt.Errorf("error setting git_persistence_settings: %s", err)
 			}
 		}
