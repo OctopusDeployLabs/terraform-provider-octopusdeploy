@@ -6,6 +6,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -19,6 +20,8 @@ func dataSourceProjects() *schema.Resource {
 }
 
 func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "reading projects")
+
 	query := projects.ProjectsQuery{
 		ClonedFromProjectID: d.Get("cloned_from_project_id").(string),
 		IDs:                 expandArray(d.Get("ids").([]interface{})),
@@ -37,7 +40,7 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	flattenedProjects := []interface{}{}
 	for _, project := range existingProjects.Items {
-		flattenedProjects = append(flattenedProjects, flattenProject(project))
+		flattenedProjects = append(flattenedProjects, flattenProject(ctx, d, project))
 	}
 
 	d.Set("projects", flattenedProjects)
