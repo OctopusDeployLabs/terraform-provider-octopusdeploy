@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -29,9 +28,6 @@ func TestAccTenantBasic(t *testing.T) {
 
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
-
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccTenantCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -43,7 +39,7 @@ func TestAccTenantBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 				),
-				Config: testAccTenantBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, description),
+				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, description),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -51,15 +47,20 @@ func TestAccTenantBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", newDescription),
 				),
-				Config: testAccTenantBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, newDescription),
+				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, newDescription),
 			},
 		},
 	})
 }
 
-func testAccTenantBasic(spaceID string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, localName string, name string, description string) string {
-	return fmt.Sprintf(testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
-		testAccEnvironment(environmentLocalName, environmentName)+"\n"+`
+func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, localName string, name string, description string) string {
+	allowDynamicInfrastructure := false
+	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	useGuidedFailure := false
+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
+		testAccEnvironment(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
 	resource "octopusdeploy_tenant" "%s" {
 		description = "%s"
 		name        = "%s"

@@ -35,17 +35,20 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "sort_order", strconv.Itoa(sortOrder)),
 					resource.TestCheckResourceAttr(prefix, "use_guided_failure", strconv.FormatBool(useGuidedFailure)),
 				),
-				Config: testEnvironmentBasic(localName, name, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure),
+				Config: testAccEnvironment(localName, name, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure),
 			},
 		},
 	})
 }
 
 func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
+	allowDynamicInfrastructure := false
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_environment." + localName
-
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	useGuidedFailure := false
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccEnvironmentCheckDestroy,
@@ -57,19 +60,13 @@ func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
 					testAccEnvironmentExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 				),
-				Config: testAccEnvironment(localName, name),
+				Config: testAccEnvironment(localName, name, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure),
 			},
 		},
 	})
 }
 
-func testAccEnvironment(localName string, name string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
-		name = "%s"
-	}`, localName, name)
-}
-
-func testEnvironmentBasic(localName string, name string, description string, allowDynamicInfrastructure bool, sortOrder int, useGuidedFailure bool) string {
+func testAccEnvironment(localName string, name string, description string, allowDynamicInfrastructure bool, sortOrder int, useGuidedFailure bool) string {
 	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
 		allow_dynamic_infrastructure = "%v"
 		description                  = "%s"

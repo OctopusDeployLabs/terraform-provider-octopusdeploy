@@ -49,14 +49,14 @@ func testAzureWebAppDeploymentTargetBasic(localName string, name string, tenante
 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	sortOrder := acctest.RandIntRange(0, 10)
+	sortOrder := acctest.RandIntRange(5, 10)
 	useGuidedFailure := false
 
 	return fmt.Sprintf(testAzureServicePrincipalAccountBasic(azureAccLocalName, azureAccName, azureAccDescription, azureAccAccountID, azureAccTenantID, azureAccSubscriptionID, azureAccPassword, azureAccTenantedDeploymentMode)+"\n"+
-		testEnvironmentBasic(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
+		testAccEnvironment(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
 		`resource "octopusdeploy_azure_web_app_deployment_target" "%s" {
-			account_id                        = "${octopusdeploy_azure_service_principal.%s.id}"
-			environments                      = ["${octopusdeploy_environment.%s.id}"]
+			account_id                        = octopusdeploy_azure_service_principal.%s.id
+			environments                      = [octopusdeploy_environment.%s.id]
 			name                              = "%s"
 			resource_group_name               = "%s"
 			roles                             = ["test role"]

@@ -6,49 +6,10 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-func TestAccTenantProjectVariableComplex(t *testing.T) {
-	sensitiveLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	sensitiveValue := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	value := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
-	prefix := "octopusdeploy_tenant_project_variable." + sensitiveLocalName
-
-	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccTenantProjectVariableCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Check: resource.ComposeTestCheckFunc(
-					testTenantProjectVariableExists(prefix),
-					resource.TestCheckResourceAttr(prefix, "value", sensitiveValue),
-				),
-				Config: fmt.Sprintf(`resource "octopusdeploy_tenant_project_variable" "%s" {
-					environment_id = "Environments-10981"
-					project_id     = "Projects-7341"
-					tenant_id      = "Tenants-5481"
-					template_id    = "c076f5f7-e678-4a29-8055-4dca46d480ff"
-					value          = "%s"
-				}
-
-				resource "octopusdeploy_tenant_project_variable" "%s" {
-					environment_id = "Environments-10981"
-					project_id     = "Projects-7341"
-					tenant_id      = "Tenants-5481"
-					template_id    = "6ded4b69-0fb2-44c1-8d44-267c0e5f1db9"
-					value          = "%s"
-				}`, sensitiveLocalName, sensitiveValue, localName, value),
-			},
-		},
-	})
-}
 
 func TestAccTenantProjectVariableBasic(t *testing.T) {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -87,7 +48,7 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(primaryResourceName, "value", primaryValue),
 					resource.TestCheckResourceAttr(secondaryResourceName, "value", secondaryValue),
 				),
-				Config: testAccTenantProjectVariableBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, primaryEnvironmentLocalName, primaryEnvironmentName, secondaryEnvironmentLocalName, secondaryEnvironmentName, tenantLocalName, tenantName, tenantDescription, primaryLocalName, primaryValue, secondaryLocalName, secondaryValue),
+				Config: testAccTenantProjectVariable(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, primaryEnvironmentLocalName, primaryEnvironmentName, secondaryEnvironmentLocalName, secondaryEnvironmentName, tenantLocalName, tenantName, tenantDescription, primaryLocalName, primaryValue, secondaryLocalName, secondaryValue),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -96,55 +57,47 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(primaryResourceName, "value", primaryValue),
 					resource.TestCheckResourceAttr(secondaryResourceName, "value", newValue),
 				),
-				Config: testAccTenantProjectVariableBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, primaryEnvironmentLocalName, primaryEnvironmentName, secondaryEnvironmentLocalName, secondaryEnvironmentName, tenantLocalName, tenantName, tenantDescription, primaryLocalName, primaryValue, secondaryLocalName, newValue),
+				Config: testAccTenantProjectVariable(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, primaryEnvironmentLocalName, primaryEnvironmentName, secondaryEnvironmentLocalName, secondaryEnvironmentName, tenantLocalName, tenantName, tenantDescription, primaryLocalName, primaryValue, secondaryLocalName, newValue),
 			},
 		},
 	})
 }
 
-func testAccTenantProjectVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, primaryEnvironmentLocalName string, primaryEnvironmentName string, secondaryEnvironmentLocalName string, secondaryEnvironmentName string, tenantLocalName string, tenantName string, tenantDescription string, primaryLocalName string, primaryValue string, secondaryLocalName string, secondaryValue string) string {
-	projectGroup := test.NewProjectGroupTestOptions()
+func testAccTenantProjectVariable(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, primaryEnvironmentLocalName string, primaryEnvironmentName string, secondaryEnvironmentLocalName string, secondaryEnvironmentName string, tenantLocalName string, tenantName string, tenantDescription string, primaryLocalName string, primaryValue string, secondaryLocalName string, secondaryValue string) string {
+	allowDynamicInfrastructure := false
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	useGuidedFailure := false
 
-	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
-		test.ProjectGroupConfiguration(projectGroup)+"\n"+
-		testAccEnvironment(primaryEnvironmentLocalName, primaryEnvironmentName)+"\n"+
-		testAccEnvironment(secondaryEnvironmentLocalName, secondaryEnvironmentName)+"\n"+`
-		resource "octopusdeploy_project" "%s" {
-			lifecycle_id                   = octopusdeploy_lifecycle.%s.id
-			name                           = "%s"
-			project_group_id               = octopusdeploy_project_group.%s.id
-
-			template {
-				name  = "project variable template name"
-				label = "project variable template label"
-
-				display_settings = {
-					"Octopus.ControlType" = "Sensitive"
-				}
-			}
-		}
-
-		resource "octopusdeploy_tenant" "%s" {
-			name = "%s"
-
-			project_environment {
-				project_id   = octopusdeploy_project.%s.id
-				environments = [octopusdeploy_environment.%s.id, octopusdeploy_environment.%s.id]
-			}
-		}`+"\n"+
-		testTenantProjectVariable(primaryLocalName, primaryEnvironmentLocalName, projectLocalName, tenantLocalName, projectLocalName, primaryValue)+"\n"+
-		testTenantProjectVariable(secondaryLocalName, secondaryEnvironmentLocalName, projectLocalName, tenantLocalName, projectLocalName, secondaryValue),
-		projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, primaryEnvironmentLocalName, secondaryEnvironmentLocalName)
+	return testAccLifecycle(lifecycleLocalName, lifecycleName) + "\n" +
+		testAccProjectGroup(projectGroupLocalName, projectGroupName) + "\n" +
+		testAccProjectWithTemplate(projectLocalName, projectName, lifecycleLocalName, projectGroupLocalName) + "\n" +
+		testAccEnvironment(primaryEnvironmentLocalName, primaryEnvironmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure) + "\n" +
+		testAccEnvironment(secondaryEnvironmentLocalName, secondaryEnvironmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure) + "\n" +
+		testAccTenantWithProjectEnvironment(tenantLocalName, tenantName, projectLocalName, primaryEnvironmentLocalName, secondaryEnvironmentLocalName) + "\n" +
+		testTenantProjectVariable(primaryLocalName, primaryEnvironmentLocalName, projectLocalName, tenantLocalName, projectLocalName, primaryValue) + "\n" +
+		testTenantProjectVariable(secondaryLocalName, secondaryEnvironmentLocalName, projectLocalName, tenantLocalName, projectLocalName, secondaryValue)
 }
 
-func testTenantProjectVariable(localName string, environmentID string, projectID string, tenantID string, templateID string, value string) string {
+func testAccTenantWithProjectEnvironment(localName string, name string, projectLocalName string, primaryEnvironmentLocalName string, secondaryEnvironmentLocalName string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_tenant" "%s" {
+		name = "%s"
+
+		project_environment {
+			project_id   = octopusdeploy_project.%s.id
+			environments = [octopusdeploy_environment.%s.id, octopusdeploy_environment.%s.id]
+		}
+	}`, localName, name, projectLocalName, primaryEnvironmentLocalName, secondaryEnvironmentLocalName)
+}
+
+func testTenantProjectVariable(localName string, environmentLocalName string, projectLocalName string, tenantLocalName string, templateLocalName string, value string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_tenant_project_variable" "%s" {
 		environment_id = octopusdeploy_environment.%s.id
 		project_id     = octopusdeploy_project.%s.id
 		tenant_id      = octopusdeploy_tenant.%s.id
 		template_id    = octopusdeploy_project.%s.template[0].id
 		value          = "%s"
-	}`, localName, environmentID, projectID, tenantID, templateID, value)
+	}`, localName, environmentLocalName, projectLocalName, tenantLocalName, templateLocalName, value)
 }
 
 func testTenantProjectVariableExists(prefix string) resource.TestCheckFunc {

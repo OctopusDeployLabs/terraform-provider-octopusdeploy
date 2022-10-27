@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -23,9 +22,6 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
-
 	resourceName := "octopusdeploy_channel." + localName
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -42,7 +38,7 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "description", description),
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
 				),
-				Config: testAccChannelBasic(spaceID, localName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, name, description),
+				Config: testAccChannelBasic(localName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, name, description),
 			},
 		},
 	})
@@ -57,9 +53,6 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
 
 	resourceName := "octopusdeploy_channel." + localName
 	const channelName = "Funky Channel"
@@ -76,7 +69,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", channelName),
 					resource.TestCheckResourceAttr(resourceName, "description", "this is funky"),
 				),
-				Config: testAccChannelBasic(spaceID, localName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, channelName, "this is funky"),
+				Config: testAccChannelBasic(localName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, channelName, "this is funky"),
 			},
 			// update channel with a new description
 			{
@@ -85,7 +78,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", channelName),
 					resource.TestCheckResourceAttr(resourceName, "description", "funky it is"),
 				),
-				Config: testAccChannelBasic(spaceID, localName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, channelName, "funky it is"),
+				Config: testAccChannelBasic(localName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, channelName, "funky it is"),
 			},
 		},
 	})
@@ -187,21 +180,12 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 	})
 }
 
-func testAccChannelBasic(spaceID string, localName string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, name string, description string) string {
-	return fmt.Sprintf(testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+`
+func testAccChannelBasic(localName string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, name string, description string) string {
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+`
 		resource "octopusdeploy_channel" "%s" {
 			description = "%s"
 			name        = "%s"
 			project_id  = octopusdeploy_project.%s.id
-
-			rule {
-			  version_range = "1.0.1"
-
-			  action_package {
-				deployment_action = "Run a Script"
-				package_reference = "Octopus.Cli"
-			  }
-		  }
 		}`, localName, description, name, projectLocalName)
 }
 
@@ -263,20 +247,19 @@ func testAccChannelWithOneRule(name, description, versionRange, actionName strin
 }
 
 func testAccChannelWithTwoRules(name, description, versionRange1, actionName1, versionRange2, actionName2 string) string {
-	return fmt.Sprintf(`
-		resource "octopusdeploy_project_group" "foo" {
-			name = "Integration Test Project Group"
-		}
+	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-		resource "octopusdeploy_project" "foo" {
-			name           	= "funky project"
-			lifecycle_id	= "Lifecycles-1"
-			project_group_id = "${octopusdeploy_project_group.foo.id}"
-			allow_deployments_to_no_targets = true
-		}
+	projectTestOptions := NewProjectTestOptions(projectGroupLocalName, lifecycleLocalName)
+	projectTestOptions.AllowDeploymentsToNoTargets = true
 
-		resource "octopusdeploy_deployment_process" "deploy_step_template" {
-			project_id          = "${octopusdeploy_project.foo.id}"
+	return testAccProjectGroup(projectGroupLocalName, projectGroupName) + "\n" +
+		testAccLifecycle(lifecycleLocalName, lifecycleName) + "\n" +
+		testAccProjectWithOptions(projectTestOptions) + "\n" +
+		fmt.Sprintf(`resource "octopusdeploy_deployment_process" "deploy_step_template" {
+			project_id          = octopusdeploy_project.`+projectTestOptions.LocalName+`.id
 			step {
 				name            = "step-1"
 				target_roles    = ["Webserver",]
@@ -305,24 +288,25 @@ func testAccChannelWithTwoRules(name, description, versionRange1, actionName1, v
 		}
 
 		resource "octopusdeploy_channel" "ch" {
-			name           	= "%s"
-			description    	= "%s"
-			project_id		= "${octopusdeploy_project.foo.id}"
+			description = "%s"
+			name        = "%s"
+			project_id  = octopusdeploy_project.`+projectTestOptions.LocalName+`.id
+
 			rule {
-				version_range 	= "%s"
-				actions 		= ["%s"]
+				actions       = ["%s"]
+				version_range = "%s"
 			}
 
 			rule {
-				version_range 	= "%s"
-				actions 		= ["%s"]
+				version_range = "%s"
+				actions       = ["%s"]
 			}
 
 			depends_on = ["octopusdeploy_deployment_process.deploy_step_template"]
 		}
 		`,
-		actionName1, actionName2, name, description, versionRange1, actionName1, versionRange2, actionName2,
-	)
+			actionName1, actionName2, name, description, versionRange1, actionName1, versionRange2, actionName2,
+		)
 }
 
 func testAccChannelExists(n string) resource.TestCheckFunc {

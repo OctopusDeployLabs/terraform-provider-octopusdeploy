@@ -57,10 +57,14 @@ func TestAccTenantCommonVariableBasic(t *testing.T) {
 
 func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, tenantLocalName string, tenantName string, tenantDescription string, localName string, value string) string {
 	projectGroup := test.NewProjectGroupTestOptions()
+	allowDynamicInfrastructure := false
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	useGuidedFailure := false
 
 	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
 		test.ProjectGroupConfiguration(projectGroup)+"\n"+
-		testAccEnvironment(environmentLocalName, environmentName)+"\n"+`
+		testAccEnvironment(environmentLocalName, environmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
 		resource "octopusdeploy_library_variable_set" "test-library-variable-set" {
 			name = "test"
 

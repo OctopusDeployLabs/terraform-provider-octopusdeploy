@@ -16,7 +16,7 @@ import (
 // 	options := test.NewDeploymentProcessTestOptions()
 // 	resourceName := "octopusdeploy_deployment_process." + options.LocalName
 
-// 	resource.Test(t, resource.TestCase{
+// 	resource.Test(t,resource.TestCase{
 // 		CheckDestroy: testAccDeploymentProcessCheckDestroy,
 // 		PreCheck:     func() { testAccPreCheck(t) },
 // 		Providers:    testAccProviders,
@@ -63,9 +63,6 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
 
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
-
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccDeploymentProcessCheckDestroy,
@@ -82,7 +79,7 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
 					resource.TestCheckResourceAttr(resourceName, "step.#", "2"),
 				),
-				Config: testAccDeploymentProcessBasic(spaceID, localName),
+				Config: testAccDeploymentProcessBasic(localName),
 			},
 		},
 	})
@@ -167,7 +164,7 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 	})
 }
 
-func testAccDeploymentProcessBasic(spaceID string, localName string) string {
+func testAccDeploymentProcessBasic(localName string) string {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -176,7 +173,7 @@ func testAccDeploymentProcessBasic(spaceID string, localName string) string {
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	return fmt.Sprintf(testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
 		`resource "octopusdeploy_deployment_process" "%s" {
 			project_id = octopusdeploy_project.%s.id
 
@@ -250,7 +247,7 @@ func testAccProcessWithImpliedPrimaryPackage(spaceID string, localName string) s
 
 	projectID := "octopusdeploy_project." + projectLocalName + ".id"
 
-	return fmt.Sprintf(testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, name, description)+"\n"+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, name, description)+"\n"+
 		`resource "octopusdeploy_deployment_process" "%s" {
 			project_id = %s
 
@@ -303,7 +300,7 @@ func testAccProcessWithActionTemplate(spaceID string, localName string) string {
 
 	projectID := "octopusdeploy_project." + projectLocalName + ".id"
 
-	return fmt.Sprintf(testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, name, description)+"\n"+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, name, description)+"\n"+
 		`resource "octopusdeploy_deployment_process" "%s" {
 			project_id = %s
 
@@ -341,10 +338,7 @@ func testAccBuildTestAction(action string) string {
 
 	projectID := "octopusdeploy_project." + localName + ".id"
 
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
-
-	return fmt.Sprintf(testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description)+"\n"+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description)+"\n"+
 		`resource "octopusdeploy_deployment_process" "test" {
 			project_id = %s
 

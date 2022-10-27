@@ -119,12 +119,17 @@ func TestAccKubernetesClusterDeploymentTargetGcp(t *testing.T) {
 }
 
 func testAccKubernetesClusterDeploymentTargetBasic(accountLocalName string, accountName string, accountUsername string, environmentLocalName string, environmentName string, userRoleLocalName string, userRoleName string, localName string, name string, clusterURL string) string {
+	allowDynamicInfrastructure := false
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	useGuidedFailure := false
+
 	usernamePasswordAccountID := "${octopusdeploy_username_password_account." + accountLocalName + ".id}"
 	environmentID := "${octopusdeploy_environment." + environmentLocalName + ".id}"
 	userRoleID := "${octopusdeploy_user_role." + userRoleLocalName + ".id}"
 
 	return fmt.Sprintf(testUsernamePasswordMinimum(accountLocalName, accountName, accountUsername)+"\n"+
-		testAccEnvironment(environmentLocalName, environmentName)+"\n"+
+		testAccEnvironment(environmentLocalName, environmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
 		testUserRoleMinimum(userRoleLocalName, userRoleName)+"\n"+
 		`resource "octopusdeploy_kubernetes_cluster_deployment_target" "%s" {
 		   cluster_url  = "%s"
@@ -157,8 +162,13 @@ func testAccKubernetesClusterDeploymentTargetGcp(
 	environmentID := "${octopusdeploy_environment." + environmentLocalName + ".id}"
 	userRoleID := "${octopusdeploy_user_role." + userRoleLocalName + ".id}"
 
+	allowDynamicInfrastructure := false
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	useGuidedFailure := false
+
 	return fmt.Sprintf(testGcpAccount(accountLocalName, accountName, accountJSONKey)+"\n"+
-		testAccEnvironment(environmentLocalName, environmentName)+"\n"+
+		testAccEnvironment(environmentLocalName, environmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
 		testUserRoleMinimum(userRoleLocalName, userRoleName)+"\n"+
 		`resource "octopusdeploy_kubernetes_cluster_deployment_target" "%s" {
 		   cluster_url  = "%s"
@@ -193,8 +203,13 @@ func testAccKubernetesClusterDeploymentTargetAws(
 	environmentID := "${octopusdeploy_environment." + environmentLocalName + ".id}"
 	userRoleID := "${octopusdeploy_user_role." + userRoleLocalName + ".id}"
 
+	allowDynamicInfrastructure := false
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	useGuidedFailure := false
+
 	return fmt.Sprintf(testAwsAccount(accountLocalName, accountName, accountAccessKey, accountSecretKey)+"\n"+
-		testAccEnvironment(environmentLocalName, environmentName)+"\n"+
+		testAccEnvironment(environmentLocalName, environmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
 		testUserRoleMinimum(userRoleLocalName, userRoleName)+"\n"+
 		`resource "octopusdeploy_kubernetes_cluster_deployment_target" "%s" {
 		   cluster_url  = "%s"
