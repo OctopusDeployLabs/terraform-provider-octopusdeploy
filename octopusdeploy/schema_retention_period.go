@@ -23,7 +23,7 @@ func expandRetentionPeriod(d *schema.ResourceData, key string) *core.RetentionPe
 	return nil
 }
 
-func flattenRetentionPeriod(r core.RetentionPeriod) []interface{} {
+func flattenRetentionPeriod(r *core.RetentionPeriod) []interface{} {
 	retentionPeriod := make(map[string]interface{})
 	retentionPeriod["quantity_to_keep"] = int(r.QuantityToKeep)
 	retentionPeriod["should_keep_forever"] = r.ShouldKeepForever

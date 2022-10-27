@@ -168,9 +168,14 @@ func testAccLifecycleComplex(localName string, name string) string {
 	environment3LocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environment3Name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	return fmt.Sprintf(testAccEnvironment(environment1LocalName, environment1Name)+"\n"+
-		testAccEnvironment(environment2LocalName, environment2Name)+"\n"+
-		testAccEnvironment(environment3LocalName, environment3Name)+"\n"+
+	allowDynamicInfrastructure := false
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	sortOrder := acctest.RandIntRange(0, 10)
+	useGuidedFailure := false
+
+	return fmt.Sprintf(testAccEnvironment(environment1LocalName, environment1Name, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
+		testAccEnvironment(environment2LocalName, environment2Name, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
+		testAccEnvironment(environment3LocalName, environment3Name, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+
 		`resource "octopusdeploy_lifecycle" "%s" {
 			name        = "%s"
 			description = "Funky Lifecycle description"
