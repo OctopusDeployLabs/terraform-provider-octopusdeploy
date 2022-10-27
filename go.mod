@@ -3,7 +3,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.19
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.11.0
+	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.11.1
 	github.com/google/uuid v1.3.0
 	github.com/gruntwork-io/terratest v0.40.20
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -11,8 +11,8 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
-	github.com/stretchr/testify v1.8.0
-	golang.org/x/exp v0.0.0-20221018221608-02f3b879a704
+	github.com/stretchr/testify v1.8.1
+	golang.org/x/exp v0.0.0-20221026153819-32f3d567a233
 	golang.org/x/text v0.4.0
 )
 
@@ -93,14 +93,14 @@ require (
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/zclconf/go-cty v1.11.1 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
-	golang.org/x/net v0.0.0-20221019024206-cb67ada4b0ad // indirect
+	golang.org/x/crypto v0.1.0 // indirect
+	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094 // indirect
 	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/api v0.94.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55 // indirect
+	google.golang.org/genproto v0.0.0-20221025140454-527a21cfbd71 // indirect
 	google.golang.org/grpc v1.50.1 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
