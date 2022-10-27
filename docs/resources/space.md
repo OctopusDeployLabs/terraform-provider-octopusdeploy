@@ -36,6 +36,7 @@ resource "octopusdeploy_space" "example" {
 - `id` (String) The unique ID for this resource.
 - `is_default` (Boolean) Specifies if this space is the default space in Octopus.
 - `is_task_queue_stopped` (Boolean) Specifies the status of the task queue for this space.
+- `slug` (String) The unique slug of this space.
 - `space_managers_team_members` (List of String) A list of user IDs designated to be managers of this space.
 - `space_managers_teams` (List of String) A list of team IDs designated to be managers of this space.
 

@@ -110,11 +110,12 @@ Optional:
 - `base_path` (String) The base path associated with these version control settings.
 - `credentials` (Block List, Max: 1) The credentials associated with these version control settings. (see [below for nested schema](#nestedblock--git_persistence_settings--credentials))
 - `default_branch` (String) The default branch associated with these version control settings.
+- `git_credential_id` (String)
 
 <a id="nestedblock--git_persistence_settings--credentials"></a>
 ### Nested Schema for `git_persistence_settings.credentials`
 
-Required:
+Optional:
 
 - `password` (String, Sensitive) The password for the Git credential.
 - `username` (String) The username for the Git credential.

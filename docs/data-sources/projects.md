@@ -105,6 +105,7 @@ Read-Only:
 - `base_path` (String)
 - `credentials` (List of Object) (see [below for nested schema](#nestedobjatt--projects--git_persistence_settings--credentials))
 - `default_branch` (String)
+- `git_credential_id` (String)
 - `url` (String)
 
 <a id="nestedobjatt--projects--git_persistence_settings--credentials"></a>

@@ -15,7 +15,6 @@ Provides information about existing spaces.
 ```terraform
 data "octopusdeploy_spaces" "spaces" {
   ids          = ["Spaces-123", "Spaces-321"]
-  name         = "Default"
   partial_name = "Defau"
   skip         = 5
   take         = 100
@@ -47,6 +46,7 @@ Read-Only:
 - `is_default` (Boolean) Specifies if this space is the default space in Octopus.
 - `is_task_queue_stopped` (Boolean) Specifies the status of the task queue for this space.
 - `name` (String) The name of this resource.
+- `slug` (String) The unique slug of this space.
 - `space_managers_team_members` (List of String) A list of user IDs designated to be managers of this space.
 - `space_managers_teams` (List of String) A list of team IDs designated to be managers of this space.
 
