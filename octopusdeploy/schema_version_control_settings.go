@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"net/url"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 )
 
@@ -29,11 +30,11 @@ func expandVersionControlSettings(values interface{}) *projects.VersionControlSe
 		return nil
 	}
 
-	var credential projects.IGitCredential
+	var credential credentials.IGitCredential
 	if v, ok := flattenedMap["credentials"]; ok {
 		credential = expandGitCredential(v)
 	} else {
-		credential = projects.NewAnonymousGitCredential()
+		credential = credentials.NewAnonymous()
 	}
 
 	return projects.NewVersionControlSettings(
