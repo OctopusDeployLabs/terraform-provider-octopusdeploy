@@ -21,7 +21,6 @@ func dataSourceAzureCloudServiceDeploymentTargets() *schema.Resource {
 func dataSourceAzureCloudServiceDeploymentTargetsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	query := machines.MachinesQuery{
 		CommunicationStyles: []string{"AzureCloudService"},
-		DeploymentID:        d.Get("deployment_id").(string),
 		EnvironmentIDs:      expandArray(d.Get("environments").([]interface{})),
 		HealthStatuses:      expandArray(d.Get("health_statuses").([]interface{})),
 		IDs:                 expandArray(d.Get("ids").([]interface{})),
