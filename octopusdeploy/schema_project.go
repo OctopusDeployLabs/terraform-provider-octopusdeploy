@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -107,6 +108,50 @@ func expandProject(d *schema.ResourceData) *projects.Project {
 	}
 
 	return project
+}
+
+func expandProjectGitCredential(values interface{}) credentials.IGitCredential {
+	if values == nil {
+		return credentials.NewAnonymous()
+	}
+
+	flattenedValues := values.([]interface{})
+	if len(flattenedValues) == 0 || flattenedValues[0] == nil {
+		return credentials.NewAnonymous()
+	}
+
+	flattenedMap := flattenedValues[0].(map[string]interface{})
+
+	if v, ok := flattenedMap["id"]; ok {
+		return credentials.NewReference(v.(string))
+	}
+
+	return credentials.NewUsernamePassword(
+		flattenedMap["username"].(string),
+		core.NewSensitiveValue(flattenedMap["password"].(string)),
+	)
+}
+
+func flattenProjectGitCredential(ctx context.Context, d *schema.ResourceData, gitCredential credentials.IGitCredential) []interface{} {
+	if gitCredential == nil {
+		return nil
+	}
+
+	switch gitCredential.GetType() {
+	case credentials.GitCredentialTypeReference:
+		referenceCredential := gitCredential.(*credentials.Reference)
+		return []interface{}{map[string]interface{}{
+			"id": referenceCredential.Id,
+		}}
+	case credentials.GitCredentialTypeUsernamePassword:
+		usernamePasswordCredential := gitCredential.(*credentials.UsernamePassword)
+		return []interface{}{map[string]interface{}{
+			"password": d.Get("git_persistence_settings.0.credentials.0.password").(string),
+			"username": usernamePasswordCredential.Username,
+		}}
+	}
+
+	return []interface{}{}
 }
 
 func flattenProject(ctx context.Context, d *schema.ResourceData, project *projects.Project) map[string]interface{} {
@@ -231,10 +276,11 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"description": {
-			Computed:    true,
-			Description: "The description of this project.",
-			Optional:    true,
-			Type:        schema.TypeString,
+			Computed:      true,
+			ConflictsWith: []string{"deployment_process_id"},
+			Description:   "The description of this project.",
+			Optional:      true,
+			Type:          schema.TypeString,
 		},
 		"discrete_channel_release": {
 			Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
@@ -256,17 +302,15 @@ func getProjectSchema() map[string]*schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
-					"git_credential_id": {
-						ConflictsWith:    []string{"git_persistence_settings.0.credentials.0.password"},
-						Optional:         true,
-						Type:             schema.TypeString,
-						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
-					},
 					"credentials": {
-						ConflictsWith: []string{"git_persistence_settings.0.git_credential_id"},
-						Description:   "The credentials associated with these version control settings.",
+						Description: "The credentials associated with these version control settings.",
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
+								"id": {
+									Optional:         true,
+									Type:             schema.TypeString,
+									ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+								},
 								"password": {
 									Description:      "The password for the Git credential.",
 									Optional:         true,

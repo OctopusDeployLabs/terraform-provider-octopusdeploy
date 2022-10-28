@@ -32,9 +32,13 @@ func expandVersionControlSettings(values interface{}) *projects.VersionControlSe
 
 	var credential credentials.IGitCredential
 	if v, ok := flattenedMap["credentials"]; ok {
-		credential = expandGitCredential(v)
+		credential = expandProjectGitCredential(v)
 	} else {
-		credential = credentials.NewAnonymous()
+		if v, ok := flattenedMap["git_credential_id"]; ok {
+			credential = credentials.NewReference(v.(string))
+		} else {
+			credential = credentials.NewAnonymous()
+		}
 	}
 
 	return projects.NewVersionControlSettings(

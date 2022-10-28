@@ -27,12 +27,8 @@ func expandGitPersistenceSettings(values interface{}) projects.IPersistenceSetti
 	}
 
 	var gitCredential credentials.IGitCredential
-	if v, ok := flattenedMap["git_credential_id"]; ok {
-		gitCredential = credentials.NewReference(v.(string))
-	}
-
 	if v, ok := flattenedMap["credentials"]; ok {
-		gitCredential = expandGitCredential(v)
+		gitCredential = expandProjectGitCredential(v)
 	} else {
 		gitCredential = credentials.NewAnonymous()
 	}
@@ -63,7 +59,7 @@ func flattenGitPersistenceSettings(ctx context.Context, d *schema.ResourceData, 
 		referenceProjectGitCredential := gitPersistanceSettings.Credentials.(*credentials.Reference)
 		flattenedGitPersistenceSettings["git_credential_id"] = referenceProjectGitCredential.Id
 	case credentials.GitCredentialTypeUsernamePassword:
-		flattenedGitPersistenceSettings["credentials"] = flattenGitCredential(ctx, d, gitPersistanceSettings.Credentials)
+		flattenedGitPersistenceSettings["credentials"] = flattenProjectGitCredential(ctx, d, gitPersistanceSettings.Credentials)
 	}
 
 	if gitPersistanceSettings.URL != nil {
