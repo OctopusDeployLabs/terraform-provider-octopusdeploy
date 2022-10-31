@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
@@ -11,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandProject(d *schema.ResourceData) *projects.Project {
+func expandProject(ctx context.Context, d *schema.ResourceData) *projects.Project {
 	name := d.Get("name").(string)
 	lifecycleID := d.Get("lifecycle_id").(string)
 	projectGroupID := d.Get("project_group_id").(string)
@@ -59,8 +60,20 @@ func expandProject(d *schema.ResourceData) *projects.Project {
 		project.ExtensionSettings = expandExtensionSettingsValues(v.(*schema.Set).List())
 	}
 
-	if v, ok := d.GetOk("git_persistence_settings"); ok {
-		project.PersistenceSettings = expandGitPersistenceSettings(v)
+	tflog.Info(ctx, "expanding persistence settings")
+
+	if v, ok := d.GetOk("git_library_persistence_settings"); ok {
+		project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandLibraryGitCredential)
+	}
+	if v, ok := d.GetOk("git_username_password_persistence_settings"); ok {
+		project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandUsernamePasswordGitCredential)
+	}
+	if v, ok := d.GetOk("git_anonymous_persistence_settings"); ok {
+		project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandAnonymousGitCredential)
+	}
+
+	if project.PersistenceSettings != nil {
+		tflog.Info(ctx, fmt.Sprintf("expanded persistence settings {%v}", project.PersistenceSettings))
 	}
 
 	if v, ok := d.GetOk("included_library_variable_sets"); ok {
@@ -110,50 +123,6 @@ func expandProject(d *schema.ResourceData) *projects.Project {
 	return project
 }
 
-func expandProjectGitCredential(values interface{}) credentials.IGitCredential {
-	if values == nil {
-		return credentials.NewAnonymous()
-	}
-
-	flattenedValues := values.([]interface{})
-	if len(flattenedValues) == 0 || flattenedValues[0] == nil {
-		return credentials.NewAnonymous()
-	}
-
-	flattenedMap := flattenedValues[0].(map[string]interface{})
-
-	if v, ok := flattenedMap["id"]; ok {
-		return credentials.NewReference(v.(string))
-	}
-
-	return credentials.NewUsernamePassword(
-		flattenedMap["username"].(string),
-		core.NewSensitiveValue(flattenedMap["password"].(string)),
-	)
-}
-
-func flattenProjectGitCredential(ctx context.Context, d *schema.ResourceData, gitCredential credentials.IGitCredential) []interface{} {
-	if gitCredential == nil {
-		return nil
-	}
-
-	switch gitCredential.GetType() {
-	case credentials.GitCredentialTypeReference:
-		referenceCredential := gitCredential.(*credentials.Reference)
-		return []interface{}{map[string]interface{}{
-			"id": referenceCredential.Id,
-		}}
-	case credentials.GitCredentialTypeUsernamePassword:
-		usernamePasswordCredential := gitCredential.(*credentials.UsernamePassword)
-		return []interface{}{map[string]interface{}{
-			"password": d.Get("git_persistence_settings.0.credentials.0.password").(string),
-			"username": usernamePasswordCredential.Username,
-		}}
-	}
-
-	return []interface{}{}
-}
-
 func flattenProject(ctx context.Context, d *schema.ResourceData, project *projects.Project) map[string]interface{} {
 	if project == nil {
 		return nil
@@ -189,8 +158,16 @@ func flattenProject(ctx context.Context, d *schema.ResourceData, project *projec
 	}
 
 	if project.PersistenceSettings != nil {
-		if project.PersistenceSettings.GetType() == "VersionControlled" {
-			projectMap["git_persistence_settings"] = flattenGitPersistenceSettings(ctx, d, project.PersistenceSettings)
+		if project.PersistenceSettings.GetType() == projects.PersistenceSettingsTypeVersionControlled {
+			gitCredentialType := project.PersistenceSettings.(projects.GitPersistenceSettings).GetCredential().GetType()
+			switch gitCredentialType {
+			case credentials.GitCredentialTypeReference:
+				projectMap["git_library_persistence_settings"] = flattenGitPersistenceSettings(ctx, project.PersistenceSettings)
+			case credentials.GitCredentialTypeUsernamePassword:
+				projectMap["git_username_password_persistence_settings"] = flattenGitPersistenceSettings(ctx, project.PersistenceSettings)
+			case credentials.GitCredentialTypeAnonymous:
+				projectMap["git_anonymous_persistence_settings"] = flattenGitPersistenceSettings(ctx, project.PersistenceSettings)
+			}
 		}
 	}
 
@@ -292,8 +269,9 @@ func getProjectSchema() map[string]*schema.Schema {
 			Elem:     &schema.Resource{Schema: getExtensionSettingsSchema()},
 			Type:     schema.TypeSet,
 		},
-		"git_persistence_settings": {
-			Description: "Provides Git-related persistence settings for a version-controlled project.",
+		"git_library_persistence_settings": {
+			ConflictsWith: []string{"git_username_password_persistence_settings", "git_anonymous_persistence_settings"},
+			Description:   "Provides Git-related persistence settings for a version-controlled project.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"base_path": {
@@ -302,33 +280,81 @@ func getProjectSchema() map[string]*schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
-					"credentials": {
-						Description: "The credentials associated with these version control settings.",
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"id": {
-									Optional:         true,
-									Type:             schema.TypeString,
-									ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
-								},
-								"password": {
-									Description:      "The password for the Git credential.",
-									Optional:         true,
-									Sensitive:        true,
-									Type:             schema.TypeString,
-									ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
-								},
-								"username": {
-									Description:      "The username for the Git credential.",
-									Optional:         true,
-									Type:             schema.TypeString,
-									ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-								},
-							},
-						},
-						MaxItems: 1,
-						Optional: true,
-						Type:     schema.TypeList,
+					"git_credential_id": {
+						Required:         true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+					},
+					"default_branch": {
+						Default:     "main",
+						Description: "The default branch associated with these version control settings.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"url": {
+						Description:      "The URL associated with these version control settings.",
+						Required:         true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
+					},
+				},
+			},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"git_username_password_persistence_settings": {
+			ConflictsWith: []string{"git_library_persistence_settings", "git_anonymous_persistence_settings"},
+			Description:   "Provides Git-related persistence settings for a version-controlled project.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"base_path": {
+						Default:     ".octopus",
+						Description: "The base path associated with these version control settings.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"password": {
+						Description:      "The password for the Git credential.",
+						Required:         true,
+						Sensitive:        true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+					},
+					"username": {
+						Description:      "The username for the Git credential.",
+						Required:         true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+					},
+					"default_branch": {
+						Default:     "main",
+						Description: "The default branch associated with these version control settings.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
+					"url": {
+						Description:      "The URL associated with these version control settings.",
+						Required:         true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
+					},
+				},
+			},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
+		},
+		"git_anonymous_persistence_settings": {
+			ConflictsWith: []string{"git_library_persistence_settings", "git_username_password_persistence_settings"},
+			Description:   "Provides Git-related persistence settings for a version-controlled project.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"base_path": {
+						Default:     ".octopus",
+						Description: "The base path associated with these version control settings.",
+						Optional:    true,
+						Type:        schema.TypeString,
 					},
 					"default_branch": {
 						Default:     "main",
@@ -465,9 +491,21 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 	d.Set("name", project.Name)
 
 	if project.PersistenceSettings != nil {
-		if project.PersistenceSettings.GetType() == "VersionControlled" {
-			if err := d.Set("git_persistence_settings", flattenGitPersistenceSettings(ctx, d, project.PersistenceSettings)); err != nil {
-				return fmt.Errorf("error setting git_persistence_settings: %s", err)
+		if project.PersistenceSettings.GetType() == projects.PersistenceSettingsTypeVersionControlled {
+			gitCredentialType := project.PersistenceSettings.(projects.GitPersistenceSettings).GetCredential().GetType()
+			switch gitCredentialType {
+			case credentials.GitCredentialTypeReference:
+				if err := d.Set("git_library_persistence_settings", flattenGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
+					return fmt.Errorf("error setting git_library_persistence_settings: %s", err)
+				}
+			case credentials.GitCredentialTypeUsernamePassword:
+				if err := d.Set("git_username_password_persistence_settings", flattenGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
+					return fmt.Errorf("error setting git_username_password_persistence_settings: %s", err)
+				}
+			case credentials.GitCredentialTypeAnonymous:
+				if err := d.Set("git_anonymous_persistence_settings", flattenGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
+					return fmt.Errorf("error setting git_anonymous_persistence_settings: %s", err)
+				}
 			}
 		}
 	}

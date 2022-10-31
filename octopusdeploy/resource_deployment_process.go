@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"log"
 	"regexp"
 	"strings"
@@ -66,7 +67,7 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	var current *deployments.DeploymentProcess
-	if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == "VersionControlled" {
+	if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == projects.PersistenceSettingsTypeVersionControlled {
 		current, err = client.DeploymentProcesses.Get(project, deploymentProcess.Branch)
 		if err != nil {
 			return diag.FromErr(err)
@@ -92,7 +93,7 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	id := createdDeploymentProcess.GetID()
-	if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == "VersionControlled" {
+	if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == projects.PersistenceSettingsTypeVersionControlled {
 		id = "deploymentprocess-" + createdDeploymentProcess.ProjectID + "-" + deploymentProcess.Branch
 	}
 

@@ -2,14 +2,15 @@ package octopusdeploy
 
 import (
 	"context"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandGitPersistenceSettings(values interface{}) projects.IPersistenceSettings {
+func expandGitPersistenceSettings(ctx context.Context, values interface{}, callback func(ctx context.Context, flattenedMap map[string]interface{}) credentials.IGitCredential) projects.GitPersistenceSettings {
 	if values == nil {
 		return nil
 	}
@@ -21,49 +22,66 @@ func expandGitPersistenceSettings(values interface{}) projects.IPersistenceSetti
 
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	url, err := url.Parse(flattenedMap["url"].(string))
+	tflog.Info(ctx, "expanding Git credentials")
+
+	gitUrl, err := url.Parse(flattenedMap["url"].(string))
 	if err != nil {
 		return nil
 	}
 
-	var gitCredential credentials.IGitCredential
-	if v, ok := flattenedMap["credentials"]; ok {
-		gitCredential = expandProjectGitCredential(v)
-	} else {
-		gitCredential = credentials.NewAnonymous()
-	}
+	gitCredential := callback(ctx, flattenedMap)
 
 	return projects.NewGitPersistenceSettings(
 		flattenedMap["base_path"].(string),
-		nil,
 		gitCredential,
 		flattenedMap["default_branch"].(string),
 		[]string{},
-		url,
+		gitUrl,
 	)
 }
 
-func flattenGitPersistenceSettings(ctx context.Context, d *schema.ResourceData, persistenceSettings projects.IPersistenceSettings) []interface{} {
-	if persistenceSettings == nil || persistenceSettings.GetType() == "Database" {
+func expandLibraryGitCredential(ctx context.Context, flattenedMap map[string]interface{}) credentials.IGitCredential {
+	tflog.Info(ctx, "expanding reference credential")
+	return credentials.NewReference(flattenedMap["git_credential_id"].(string))
+}
+
+func expandUsernamePasswordGitCredential(ctx context.Context, flattenedMap map[string]interface{}) credentials.IGitCredential {
+	tflog.Info(ctx, "expanding U/P credential")
+	return credentials.NewUsernamePassword(
+		flattenedMap["username"].(string),
+		core.NewSensitiveValue(flattenedMap["password"].(string)),
+	)
+}
+
+func expandAnonymousGitCredential(ctx context.Context, flattenedMap map[string]interface{}) credentials.IGitCredential {
+	tflog.Info(ctx, "expanding Anonymous credential")
+	return credentials.NewAnonymous()
+}
+
+func flattenGitPersistenceSettings(ctx context.Context, persistenceSettings projects.PersistenceSettings) []interface{} {
+	if persistenceSettings == nil || persistenceSettings.GetType() == projects.PersistenceSettingsTypeDatabase {
 		return nil
 	}
 
-	gitPersistanceSettings := persistenceSettings.(*projects.GitPersistenceSettings)
+	gitPersistenceSettings := persistenceSettings.(projects.GitPersistenceSettings)
 
 	flattenedGitPersistenceSettings := make(map[string]interface{})
-	flattenedGitPersistenceSettings["base_path"] = gitPersistanceSettings.BasePath
-	flattenedGitPersistenceSettings["default_branch"] = gitPersistanceSettings.DefaultBranch
+	flattenedGitPersistenceSettings["base_path"] = gitPersistenceSettings.GetBasePath()
+	flattenedGitPersistenceSettings["default_branch"] = gitPersistenceSettings.GetDefaultBranch()
 
-	switch gitPersistanceSettings.Credentials.GetType() {
+	credential := gitPersistenceSettings.GetCredential()
+	switch credential.GetType() {
 	case credentials.GitCredentialTypeReference:
-		referenceProjectGitCredential := gitPersistanceSettings.Credentials.(*credentials.Reference)
-		flattenedGitPersistenceSettings["git_credential_id"] = referenceProjectGitCredential.Id
+		tflog.Info(ctx, "flatten reference credential")
+		flattenedGitPersistenceSettings["git_credential_id"] = credential.(*credentials.Reference).Id
 	case credentials.GitCredentialTypeUsernamePassword:
-		flattenedGitPersistenceSettings["credentials"] = flattenProjectGitCredential(ctx, d, gitPersistanceSettings.Credentials)
+		tflog.Info(ctx, "flatten U/P credential")
+		flattenedGitPersistenceSettings["username"] = credential.(*credentials.UsernamePassword).Username
+		flattenedGitPersistenceSettings["password"] = credential.(*credentials.UsernamePassword).Password
 	}
 
-	if gitPersistanceSettings.URL != nil {
-		flattenedGitPersistenceSettings["url"] = gitPersistanceSettings.URL.String()
+	if gitPersistenceSettings.GetURL() != nil {
+		flattenedGitPersistenceSettings["url"] = gitPersistenceSettings.GetURL().String()
 	}
 
 	return []interface{}{flattenedGitPersistenceSettings}
