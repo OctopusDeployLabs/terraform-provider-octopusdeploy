@@ -158,8 +158,8 @@ func flattenProject(ctx context.Context, d *schema.ResourceData, project *projec
 	}
 
 	if project.PersistenceSettings != nil {
-		if project.PersistenceSettings.GetType() == projects.PersistenceSettingsTypeVersionControlled {
-			gitCredentialType := project.PersistenceSettings.(projects.GitPersistenceSettings).GetCredential().GetType()
+		if project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
+			gitCredentialType := project.PersistenceSettings.(projects.GitPersistenceSettings).Credential().Type()
 			switch gitCredentialType {
 			case credentials.GitCredentialTypeReference:
 				projectMap["git_library_persistence_settings"] = flattenGitPersistenceSettings(ctx, project.PersistenceSettings)
@@ -491,8 +491,8 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 	d.Set("name", project.Name)
 
 	if project.PersistenceSettings != nil {
-		if project.PersistenceSettings.GetType() == projects.PersistenceSettingsTypeVersionControlled {
-			gitCredentialType := project.PersistenceSettings.(projects.GitPersistenceSettings).GetCredential().GetType()
+		if project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
+			gitCredentialType := project.PersistenceSettings.(projects.GitPersistenceSettings).Credential().Type()
 			switch gitCredentialType {
 			case credentials.GitCredentialTypeReference:
 				if err := d.Set("git_library_persistence_settings", flattenGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
