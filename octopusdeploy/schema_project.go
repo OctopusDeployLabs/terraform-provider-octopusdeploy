@@ -491,8 +491,23 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 	d.Set("name", project.Name)
 
 	if project.PersistenceSettings != nil {
+		tflog.Info(ctx, "reading Persistence Settings")
 		if project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
-			gitCredentialType := project.PersistenceSettings.(projects.GitPersistenceSettings).Credential().Type()
+			credential := project.PersistenceSettings.(projects.GitPersistenceSettings).Credential()
+			tflog.Info(ctx, fmt.Sprintf("reading Git Persistence Settings - {%v}", credential))
+			gitCredentialType := credential.Type()
+			tflog.Info(ctx, fmt.Sprintf("reading Git Persistence Settings - {%s}", gitCredentialType))
+
+			if err := d.Set("git_library_persistence_settings", nil); err != nil {
+				return fmt.Errorf("error setting git_library_persistence_settings: %s", err)
+			}
+			if err := d.Set("git_username_password_persistence_settings", nil); err != nil {
+				return fmt.Errorf("error setting git_library_persistence_settings: %s", err)
+			}
+			if err := d.Set("git_anonymous_persistence_settings", nil); err != nil {
+				return fmt.Errorf("error setting git_library_persistence_settings: %s", err)
+			}
+
 			switch gitCredentialType {
 			case credentials.GitCredentialTypeReference:
 				if err := d.Set("git_library_persistence_settings", flattenGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
@@ -508,6 +523,8 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 				}
 			}
 		}
+	} else {
+		tflog.Info(ctx, "using Database Persistence Settings")
 	}
 
 	d.Set("project_group_id", project.ProjectGroupID)
