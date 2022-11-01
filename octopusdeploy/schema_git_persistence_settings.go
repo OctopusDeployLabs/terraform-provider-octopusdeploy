@@ -77,7 +77,6 @@ func flattenGitPersistenceSettings(ctx context.Context, persistenceSettings proj
 	case credentials.GitCredentialTypeUsernamePassword:
 		tflog.Info(ctx, "flatten U/P credential")
 		flattenedGitPersistenceSettings["username"] = credential.(*credentials.UsernamePassword).Username
-		flattenedGitPersistenceSettings["password"] = credential.(*credentials.UsernamePassword).Password
 	}
 
 	if gitPersistenceSettings.URL() != nil {
