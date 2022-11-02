@@ -29,13 +29,18 @@ func expandGitPersistenceSettings(ctx context.Context, values interface{}, callb
 		return nil
 	}
 
+	protectedBranches := []string{}
+	if flattenedMap["protected_branches"] != nil {
+		protectedBranches = getSliceFromTerraformTypeList(flattenedMap["protected_branches"])
+	}
+
 	gitCredential := callback(ctx, flattenedMap)
 
 	return projects.NewGitPersistenceSettings(
 		flattenedMap["base_path"].(string),
 		gitCredential,
 		flattenedMap["default_branch"].(string),
-		[]string{},
+		protectedBranches,
 		gitUrl,
 	)
 }
@@ -68,6 +73,7 @@ func flattenGitPersistenceSettings(ctx context.Context, persistenceSettings proj
 	flattenedGitPersistenceSettings := make(map[string]interface{})
 	flattenedGitPersistenceSettings["base_path"] = gitPersistenceSettings.BasePath()
 	flattenedGitPersistenceSettings["default_branch"] = gitPersistenceSettings.DefaultBranch()
+	flattenedGitPersistenceSettings["protected_branches"] = gitPersistenceSettings.ProtectedBranchNamePatterns()
 
 	credential := gitPersistenceSettings.Credential()
 	switch credential.Type() {

@@ -291,6 +291,13 @@ func getProjectSchema() map[string]*schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"protected_branches": {
+						Description: "A list of protected branch patterns.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+						MaxItems:    1,
+						Optional:    true,
+						Type:        schema.TypeList,
+					},
 					"url": {
 						Description:      "The URL associated with these version control settings.",
 						Required:         true,
@@ -333,6 +340,13 @@ func getProjectSchema() map[string]*schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"protected_branches": {
+						Description: "A list of protected branch patterns.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+						MaxItems:    1,
+						Optional:    true,
+						Type:        schema.TypeList,
+					},
 					"url": {
 						Description:      "The URL associated with these version control settings.",
 						Required:         true,
@@ -361,6 +375,13 @@ func getProjectSchema() map[string]*schema.Schema {
 						Description: "The default branch associated with these version control settings.",
 						Optional:    true,
 						Type:        schema.TypeString,
+					},
+					"protected_branches": {
+						Description: "A list of protected branch patterns.",
+						Elem:        &schema.Schema{Type: schema.TypeString},
+						MaxItems:    1,
+						Optional:    true,
+						Type:        schema.TypeList,
 					},
 					"url": {
 						Description:      "The URL associated with these version control settings.",
