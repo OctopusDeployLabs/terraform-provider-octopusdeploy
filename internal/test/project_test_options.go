@@ -60,11 +60,11 @@ func ProjectConfiguration(options *ProjectTestOptions) string {
 	}
 
 	if options.Resource.PersistenceSettings != nil {
-		if options.Resource.PersistenceSettings.GetType() == projects.PersistenceSettingsTypeVersionControlled {
+		if options.Resource.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 			gitPersistenceSettings := options.Resource.PersistenceSettings.(projects.GitPersistenceSettings)
 			configuration += `git_persistence_settings {` + "\n"
-			configuration += fmt.Sprintf(`base_path = "%s"`, gitPersistenceSettings.GetBasePath()) + "\n"
-			configuration += fmt.Sprintf(`url = "%s"`, gitPersistenceSettings.GetURL().String()) + "\n"
+			configuration += fmt.Sprintf(`base_path = "%s"`, gitPersistenceSettings.BasePath()) + "\n"
+			configuration += fmt.Sprintf(`url = "%s"`, gitPersistenceSettings.URL().String()) + "\n"
 			configuration += "}" + "\n"
 		}
 	}

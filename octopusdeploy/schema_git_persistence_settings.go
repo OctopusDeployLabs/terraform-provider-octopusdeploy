@@ -73,7 +73,7 @@ func flattenGitPersistenceSettings(ctx context.Context, persistenceSettings proj
 	switch credential.Type() {
 	case credentials.GitCredentialTypeReference:
 		tflog.Info(ctx, "flatten reference credential")
-		flattenedGitPersistenceSettings["git_credential_id"] = credential.(*credentials.Reference).Id
+		flattenedGitPersistenceSettings["git_credential_id"] = credential.(*credentials.Reference).ID
 	case credentials.GitCredentialTypeUsernamePassword:
 		tflog.Info(ctx, "flatten U/P credential")
 		flattenedGitPersistenceSettings["username"] = credential.(*credentials.UsernamePassword).Username
