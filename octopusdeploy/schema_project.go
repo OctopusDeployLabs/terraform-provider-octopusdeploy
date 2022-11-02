@@ -294,7 +294,6 @@ func getProjectSchema() map[string]*schema.Schema {
 					"protected_branches": {
 						Description: "A list of protected branch patterns.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
-						MaxItems:    1,
 						Optional:    true,
 						Type:        schema.TypeList,
 					},
@@ -343,7 +342,6 @@ func getProjectSchema() map[string]*schema.Schema {
 					"protected_branches": {
 						Description: "A list of protected branch patterns.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
-						MaxItems:    1,
 						Optional:    true,
 						Type:        schema.TypeList,
 					},
@@ -379,7 +377,6 @@ func getProjectSchema() map[string]*schema.Schema {
 					"protected_branches": {
 						Description: "A list of protected branch patterns.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
-						MaxItems:    1,
 						Optional:    true,
 						Type:        schema.TypeList,
 					},
@@ -519,6 +516,20 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 			gitCredentialType := credential.Type()
 			tflog.Info(ctx, fmt.Sprintf("reading Git Persistence Settings - {%s}", gitCredentialType))
 
+			// if the current settings are u/p, we need to keep the password value from state and put it back
+			// This is different to how this would be dealt with elsewhere, because of the way we have to reshape
+			// the internal objects into the schema.
+			if v, ok := d.GetOk("git_username_password_persistence_settings"); ok {
+				settings := expandGitPersistenceSettings(ctx, v, expandUsernamePasswordGitCredential)
+				if project.PersistenceSettings.(projects.GitPersistenceSettings).Credential().Type() == credentials.GitCredentialTypeUsernamePassword {
+					credential := project.PersistenceSettings.(projects.GitPersistenceSettings).Credential().(*credentials.UsernamePassword)
+					credential.Password.NewValue = settings.Credential().(*credentials.UsernamePassword).Password.NewValue
+				}
+			}
+
+			// Since you can switch to different types of settings, we nil out all of the existing things
+			// in state and then just write back what config now says. This is why we have to store the pwd above,
+			// in case we're staying on u/p and then we need to keep the value.
 			if err := d.Set("git_library_persistence_settings", nil); err != nil {
 				return fmt.Errorf("error setting git_library_persistence_settings: %s", err)
 			}
@@ -531,15 +542,15 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 
 			switch gitCredentialType {
 			case credentials.GitCredentialTypeReference:
-				if err := d.Set("git_library_persistence_settings", flattenGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
+				if err := d.Set("git_library_persistence_settings", setGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
 					return fmt.Errorf("error setting git_library_persistence_settings: %s", err)
 				}
 			case credentials.GitCredentialTypeUsernamePassword:
-				if err := d.Set("git_username_password_persistence_settings", flattenGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
+				if err := d.Set("git_username_password_persistence_settings", setGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
 					return fmt.Errorf("error setting git_username_password_persistence_settings: %s", err)
 				}
 			case credentials.GitCredentialTypeAnonymous:
-				if err := d.Set("git_anonymous_persistence_settings", flattenGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
+				if err := d.Set("git_anonymous_persistence_settings", setGitPersistenceSettings(ctx, project.PersistenceSettings)); err != nil {
 					return fmt.Errorf("error setting git_anonymous_persistence_settings: %s", err)
 				}
 			}
