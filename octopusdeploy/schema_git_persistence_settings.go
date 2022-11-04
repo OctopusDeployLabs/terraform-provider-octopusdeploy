@@ -31,7 +31,7 @@ func expandGitPersistenceSettings(ctx context.Context, values interface{}, callb
 	}
 
 	protectedBranches := []string{}
-	if flattenedMap["protected_branches"] != nil {
+	if flattenedMap["protected_branches"] != nil && len(flattenedMap["protected_branches"].([]interface{})) > 0 {
 		protectedBranches = getSliceFromTerraformTypeList(flattenedMap["protected_branches"])
 	}
 
