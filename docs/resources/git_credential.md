@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_git_credential Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages a Git credentials in Octopus Deploy.
+  This resource manages Git credentials in Octopus Deploy.
 ---
 
 # octopusdeploy_git_credential (Resource)
 
-This resource manages a Git credentials in Octopus Deploy.
+This resource manages Git credentials in Octopus Deploy.
 
 
 

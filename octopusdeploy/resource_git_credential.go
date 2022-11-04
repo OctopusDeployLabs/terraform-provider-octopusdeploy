@@ -15,7 +15,7 @@ func resourceGitCredential() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceGitCredentialCreate,
 		DeleteContext: resourceGitCredentialDelete,
-		Description:   "This resource manages a Git credentials in Octopus Deploy.",
+		Description:   "This resource manages Git credentials in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceGitCredentialRead,
 		Schema:        getGitCredentialSchema(),
