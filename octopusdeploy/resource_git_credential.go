@@ -59,7 +59,7 @@ func resourceGitCredentialDelete(ctx context.Context, d *schema.ResourceData, m 
 
 	d.SetId("")
 
-	tflog.Info(ctx, "Git credential feed deleted")
+	tflog.Info(ctx, "Git credential deleted")
 	return nil
 }
 
