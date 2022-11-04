@@ -2,10 +2,10 @@ package octopusdeploy
 
 import (
 	"context"
-	"fmt"
+	"net/url"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
@@ -91,8 +91,6 @@ func flattenGitPersistenceSettings(ctx context.Context, persistenceSettings proj
 		flattenedGitPersistenceSettings["url"] = gitPersistenceSettings.URL().String()
 	}
 
-	tflog.Info(ctx, fmt.Sprint("flattened settings - {%v}", flattenedGitPersistenceSettings))
-
 	return []interface{}{flattenedGitPersistenceSettings}
 }
 
@@ -122,8 +120,6 @@ func setGitPersistenceSettings(ctx context.Context, persistenceSettings projects
 	if gitPersistenceSettings.URL() != nil {
 		flattenedGitPersistenceSettings["url"] = gitPersistenceSettings.URL().String()
 	}
-
-	tflog.Info(ctx, fmt.Sprint("flattened settings - {%v}", flattenedGitPersistenceSettings))
 
 	return []interface{}{flattenedGitPersistenceSettings}
 }
