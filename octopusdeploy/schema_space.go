@@ -25,6 +25,10 @@ func expandSpace(d *schema.ResourceData) *spaces.Space {
 		space.IsDefault = v.(bool)
 	}
 
+	if v, ok := d.GetOk("slug"); ok {
+		space.Slug = v.(string)
+	}
+
 	if v, ok := d.GetOk("space_managers_team_members"); ok {
 		space.SpaceManagersTeamMembers = getSliceFromTerraformTypeList(v)
 	}
@@ -60,6 +64,7 @@ func flattenSpace(space *spaces.Space) map[string]interface{} {
 		"is_default":                  space.IsDefault,
 		"is_task_queue_stopped":       space.TaskQueueStopped,
 		"name":                        space.Name,
+		"slug":                        space.Slug,
 		"space_managers_team_members": space.SpaceManagersTeamMembers,
 		"space_managers_teams":        space.SpaceManagersTeams,
 	}
@@ -104,6 +109,12 @@ func getSpaceSchema() map[string]*schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"name": getNameSchema(true),
+		"slug": {
+			Computed:    true,
+			Description: "The unique slug of this space.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
 		"space_managers_team_members": {
 			Computed:    true,
 			Description: "A list of user IDs designated to be managers of this space.",
@@ -131,6 +142,7 @@ func setSpace(ctx context.Context, d *schema.ResourceData, space *spaces.Space) 
 	d.Set("id", space.GetID())
 	d.Set("is_default", space.IsDefault)
 	d.Set("name", space.Name)
+	d.Set("slug", space.Slug)
 
 	if err := d.Set("space_managers_team_members", space.SpaceManagersTeamMembers); err != nil {
 		return fmt.Errorf("error setting space_managers_team_members: %s", err)

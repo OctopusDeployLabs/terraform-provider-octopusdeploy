@@ -10,6 +10,10 @@ import (
 )
 
 func expandLifecycle(d *schema.ResourceData) *lifecycles.Lifecycle {
+	if d == nil {
+		return nil
+	}
+
 	name := d.Get("name").(string)
 
 	lifecycle := lifecycles.NewLifecycle(name)
@@ -19,18 +23,18 @@ func expandLifecycle(d *schema.ResourceData) *lifecycles.Lifecycle {
 		lifecycle.Description = v.(string)
 	}
 
+	releaseRetentionPolicy := expandRetentionPeriod(d, "release_retention_policy")
+	if releaseRetentionPolicy != nil {
+		lifecycle.ReleaseRetentionPolicy = releaseRetentionPolicy
+	}
+
 	if v, ok := d.GetOk("space_id"); ok {
 		lifecycle.SpaceID = v.(string)
 	}
 
-	releaseRetentionPolicy := expandRetentionPeriod(d, "release_retention_policy")
-	if releaseRetentionPolicy != nil {
-		lifecycle.ReleaseRetentionPolicy = *releaseRetentionPolicy
-	}
-
 	tentacleRetentionPolicy := expandRetentionPeriod(d, "tentacle_retention_policy")
 	if tentacleRetentionPolicy != nil {
-		lifecycle.TentacleRetentionPolicy = *tentacleRetentionPolicy
+		lifecycle.TentacleRetentionPolicy = tentacleRetentionPolicy
 	}
 
 	if attr, ok := d.GetOk("phase"); ok {
@@ -83,7 +87,6 @@ func getLifecycleDataSchema() map[string]*schema.Schema {
 func getLifecycleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"description": {
-			Computed:    true,
 			Description: "The description of this lifecycle.",
 			Optional:    true,
 			Type:        schema.TypeString,
@@ -121,24 +124,32 @@ func getLifecycleSchema() map[string]*schema.Schema {
 }
 
 func setLifecycle(ctx context.Context, d *schema.ResourceData, lifecycle *lifecycles.Lifecycle) error {
+	d.Set("name", lifecycle.Name)
 	d.Set("description", lifecycle.Description)
 	d.Set("id", lifecycle.GetID())
-	d.Set("name", lifecycle.Name)
-	d.Set("space_id", lifecycle.SpaceID)
 
-	if err := d.Set("phase", flattenPhases(lifecycle.Phases)); err != nil {
-		return fmt.Errorf("error setting phase: %s", err)
+	if len(lifecycle.SpaceID) > 0 {
+		d.Set("space_id", lifecycle.SpaceID)
 	}
 
-	if err := d.Set("release_retention_policy", flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy)); err != nil {
-		return fmt.Errorf("error setting release_retention_policy: %s", err)
+	if len(lifecycle.Phases) != 0 {
+		if err := d.Set("phase", flattenPhases(lifecycle.Phases)); err != nil {
+			return fmt.Errorf("error setting phase: %s", err)
+		}
 	}
 
-	if err := d.Set("tentacle_retention_policy", flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy)); err != nil {
-		return fmt.Errorf("error setting tentacle_retention_policy: %s", err)
+	if lifecycle.ReleaseRetentionPolicy != nil {
+		if err := d.Set("release_retention_policy", flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy)); err != nil {
+			return fmt.Errorf("error setting release_retention_policy: %s", err)
+		}
+	}
+
+	if lifecycle.TentacleRetentionPolicy != nil {
+		if err := d.Set("tentacle_retention_policy", flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy)); err != nil {
+			return fmt.Errorf("error setting tentacle_retention_policy: %s", err)
+		}
 	}
 
 	d.SetId(lifecycle.GetID())
-
 	return nil
 }

@@ -1,12 +1,17 @@
 package octopusdeploy
 
 import (
+	"context"
 	"net/url"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 )
 
-func expandGitPersistenceSettings(values interface{}) projects.IPersistenceSettings {
+func expandGitPersistenceSettings(ctx context.Context, values interface{}, callback func(ctx context.Context, flattenedMap map[string]interface{}) credentials.GitCredential) projects.GitPersistenceSettings {
 	if values == nil {
 		return nil
 	}
@@ -18,44 +23,102 @@ func expandGitPersistenceSettings(values interface{}) projects.IPersistenceSetti
 
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	url, err := url.Parse(flattenedMap["url"].(string))
+	tflog.Info(ctx, "expanding Git credentials")
+
+	gitUrl, err := url.Parse(flattenedMap["url"].(string))
 	if err != nil {
 		return nil
 	}
 
-	var credential projects.IGitCredential
-	if v, ok := flattenedMap["credentials"]; ok {
-		credential = expandGitCredential(v)
-	} else {
-		credential = projects.NewAnonymousGitCredential()
+	protectedBranches := []string{}
+	if flattenedMap["protected_branches"] != nil && len(flattenedMap["protected_branches"].([]interface{})) > 0 {
+		protectedBranches = getSliceFromTerraformTypeList(flattenedMap["protected_branches"])
 	}
+
+	gitCredential := callback(ctx, flattenedMap)
 
 	return projects.NewGitPersistenceSettings(
 		flattenedMap["base_path"].(string),
-		credential,
+		gitCredential,
 		flattenedMap["default_branch"].(string),
-		url,
+		protectedBranches,
+		gitUrl,
 	)
 }
 
-func flattenGitPersistenceSettings(persistenceSettings projects.IPersistenceSettings, password string) []interface{} {
-	if persistenceSettings == nil {
+func expandLibraryGitCredential(ctx context.Context, flattenedMap map[string]interface{}) credentials.GitCredential {
+	tflog.Info(ctx, "expanding reference credential")
+	return credentials.NewReference(flattenedMap["git_credential_id"].(string))
+}
+
+func expandUsernamePasswordGitCredential(ctx context.Context, flattenedMap map[string]interface{}) credentials.GitCredential {
+	tflog.Info(ctx, "expanding U/P credential")
+	return credentials.NewUsernamePassword(
+		flattenedMap["username"].(string),
+		core.NewSensitiveValue(flattenedMap["password"].(string)),
+	)
+}
+
+func expandAnonymousGitCredential(ctx context.Context, flattenedMap map[string]interface{}) credentials.GitCredential {
+	tflog.Info(ctx, "expanding Anonymous credential")
+	return credentials.NewAnonymous()
+}
+
+func flattenGitPersistenceSettings(ctx context.Context, persistenceSettings projects.PersistenceSettings) []interface{} {
+	if persistenceSettings == nil || persistenceSettings.Type() == projects.PersistenceSettingsTypeDatabase {
 		return nil
 	}
 
-	if persistenceSettings.GetType() == "Database" {
-		return nil
-	}
-
-	gitPersistanceSettings := persistenceSettings.(*projects.GitPersistenceSettings)
+	gitPersistenceSettings := persistenceSettings.(projects.GitPersistenceSettings)
 
 	flattenedGitPersistenceSettings := make(map[string]interface{})
-	flattenedGitPersistenceSettings["base_path"] = gitPersistanceSettings.BasePath
-	flattenedGitPersistenceSettings["credentials"] = flattenGitCredential(gitPersistanceSettings.Credentials, password)
-	flattenedGitPersistenceSettings["default_branch"] = gitPersistanceSettings.DefaultBranch
+	flattenedGitPersistenceSettings["base_path"] = gitPersistenceSettings.BasePath()
+	flattenedGitPersistenceSettings["default_branch"] = gitPersistenceSettings.DefaultBranch()
+	flattenedGitPersistenceSettings["protected_branches"] = gitPersistenceSettings.ProtectedBranchNamePatterns()
 
-	if gitPersistanceSettings.URL != nil {
-		flattenedGitPersistenceSettings["url"] = gitPersistanceSettings.URL.String()
+	credential := gitPersistenceSettings.Credential()
+	switch credential.Type() {
+	case credentials.GitCredentialTypeReference:
+		tflog.Info(ctx, "flatten reference credential")
+		flattenedGitPersistenceSettings["git_credential_id"] = credential.(*credentials.Reference).ID
+	case credentials.GitCredentialTypeUsernamePassword:
+		tflog.Info(ctx, "flatten U/P credential")
+		flattenedGitPersistenceSettings["username"] = credential.(*credentials.UsernamePassword).Username
+		flattenedGitPersistenceSettings["password"] = credential.(*credentials.UsernamePassword).Password.NewValue
+	}
+
+	if gitPersistenceSettings.URL() != nil {
+		flattenedGitPersistenceSettings["url"] = gitPersistenceSettings.URL().String()
+	}
+
+	return []interface{}{flattenedGitPersistenceSettings}
+}
+
+func setGitPersistenceSettings(ctx context.Context, persistenceSettings projects.PersistenceSettings) []interface{} {
+	if persistenceSettings == nil || persistenceSettings.Type() == projects.PersistenceSettingsTypeDatabase {
+		return nil
+	}
+
+	gitPersistenceSettings := persistenceSettings.(projects.GitPersistenceSettings)
+
+	flattenedGitPersistenceSettings := make(map[string]interface{})
+	flattenedGitPersistenceSettings["base_path"] = gitPersistenceSettings.BasePath()
+	flattenedGitPersistenceSettings["default_branch"] = gitPersistenceSettings.DefaultBranch()
+	flattenedGitPersistenceSettings["protected_branches"] = gitPersistenceSettings.ProtectedBranchNamePatterns()
+
+	credential := gitPersistenceSettings.Credential()
+	switch credential.Type() {
+	case credentials.GitCredentialTypeReference:
+		tflog.Info(ctx, "flatten reference credential")
+		flattenedGitPersistenceSettings["git_credential_id"] = credential.(*credentials.Reference).ID
+	case credentials.GitCredentialTypeUsernamePassword:
+		tflog.Info(ctx, "flatten U/P credential")
+		flattenedGitPersistenceSettings["username"] = credential.(*credentials.UsernamePassword).Username
+		flattenedGitPersistenceSettings["password"] = credential.(*credentials.UsernamePassword).Password.NewValue
+	}
+
+	if gitPersistenceSettings.URL() != nil {
+		flattenedGitPersistenceSettings["url"] = gitPersistenceSettings.URL().String()
 	}
 
 	return []interface{}{flattenedGitPersistenceSettings}

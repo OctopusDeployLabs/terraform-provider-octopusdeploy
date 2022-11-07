@@ -10,8 +10,6 @@ import (
 )
 
 func TestAccDataSourceTagSets(t *testing.T) {
-	t.Parallel()
-
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := fmt.Sprintf("data.octopusdeploy_tag_sets.%s", localName)
 	take := 10

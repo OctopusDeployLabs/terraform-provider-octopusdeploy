@@ -2,10 +2,12 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -58,7 +60,7 @@ func resourceTagSetDelete(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceTagSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] reading tag set (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("reading tag set (%s)", d.Id()))
 
 	octopus := m.(*client.Client)
 	tagSet, err := octopus.TagSets.GetByID(d.Id())
@@ -70,7 +72,7 @@ func resourceTagSetRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] tag set read: %#v", tagSet)
+	tflog.Info(ctx, fmt.Sprintf("tag set read (%s)", d.Id()))
 	return nil
 }
 

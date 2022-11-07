@@ -15,6 +15,7 @@ func TestAccSpaceImportBasic(t *testing.T) {
 	resourceName := "octopusdeploy_space." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	slug := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccSpaceCheckDestroy,
@@ -22,7 +23,7 @@ func TestAccSpaceImportBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testSpaceBasic(localName, name),
+				Config: testSpaceBasic(localName, name, slug),
 			},
 			{
 				ResourceName:      resourceName,
@@ -37,6 +38,7 @@ func TestAccSpaceBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	newName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	slug := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_space." + localName
 
 	resource.Test(t, resource.TestCase{
@@ -49,32 +51,34 @@ func TestAccSpaceBasic(t *testing.T) {
 					testSpaceExists(prefix),
 					resource.TestCheckResourceAttrSet(prefix, "id"),
 					resource.TestCheckResourceAttr(prefix, "name", name),
-					resource.TestCheckResourceAttr(prefix, "space_managers_teams.#", "2"),
+					resource.TestCheckResourceAttr(prefix, "slug", slug),
+					resource.TestCheckResourceAttr(prefix, "space_managers_teams.#", "1"),
 					resource.TestCheckResourceAttrSet(prefix, "space_managers_teams.0"),
 				),
-				Config: testSpaceBasic(localName, name),
+				Config: testSpaceBasic(localName, name, slug),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(prefix, "id"),
 					resource.TestCheckResourceAttr(prefix, "name", newName),
-					resource.TestCheckResourceAttr(prefix, "space_managers_teams.#", "2"),
+					resource.TestCheckResourceAttr(prefix, "slug", slug),
+					resource.TestCheckResourceAttr(prefix, "space_managers_teams.#", "1"),
 					resource.TestCheckResourceAttrSet(prefix, "space_managers_teams.0"),
 				),
-				Config: testSpaceDataSource(localName, newName),
+				Config: testSpaceDataSource(localName, newName, slug),
 			},
 		},
 	})
 }
 
-func testSpaceDataSource(localName string, name string) string {
-	return fmt.Sprintf(testSpaceBasic(localName, name)+"\n"+
+func testSpaceDataSource(localName string, name string, slug string) string {
+	return fmt.Sprintf(testSpaceBasic(localName, name, slug)+"\n"+
 		`data "octopusdeploy_spaces" "%s" {
-			name = "%s"
+			partial_name = "%s"
 		}`, localName, name)
 }
 
-func testSpaceBasic(localName string, name string) string {
+func testSpaceBasic(localName string, name string, slug string) string {
 	userLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	userDisplayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	userEmailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
@@ -84,12 +88,13 @@ func testSpaceBasic(localName string, name string) string {
 	return fmt.Sprintf(testAccUserBasic(userLocalName, userDisplayName, true, false, userPassword, userUsername, userEmailAddress)+"\n"+
 		`resource "octopusdeploy_space" "%s" {
 			name = "%s"
+			slug = "%s"
 			space_managers_teams  = ["teams-managers"]
 
 			lifecycle {
 			  ignore_changes = [space_managers_teams]
 			}
-		}`, localName, name)
+		}`, localName, name, slug)
 }
 
 func testSpaceExists(prefix string) resource.TestCheckFunc {

@@ -6,7 +6,7 @@ BINARY=terraform-provider-${NAME}
 VERSION=0.7.73
 
 ifeq ($(OS), Windows_NT)
-OS_ARCH?=windows_amd64
+OS_ARCH?=windows_386
 PROFILE=${APPDATA}/terraform.d
 EXT=.exe
 else

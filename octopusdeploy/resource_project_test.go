@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -18,7 +17,7 @@ func TestAccProjectBasic(t *testing.T) {
 	projectTestOptions := test.NewProjectTestOptions(lifecycleTestOptions, projectGroupTestOptions)
 	projectTestOptions.Resource.IsDisabled = true
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccProjectCheckDestroy,
 			testAccProjectGroupCheckDestroy,
@@ -45,6 +44,58 @@ func TestAccProjectBasic(t *testing.T) {
 	})
 }
 
+func testAccProject(localName string, name string, lifecycleLocalName string, projectGroupLocalName string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
+		lifecycle_id     = octopusdeploy_lifecycle.%s.id
+		name             = "%s"
+		project_group_id = octopusdeploy_project_group.%s.id
+	}`, localName, lifecycleLocalName, name, projectGroupLocalName)
+}
+
+type ProjectTestOptions struct {
+	AllowDeploymentsToNoTargets bool
+	LifecycleLocalName          string
+	LocalName                   string
+	Name                        string
+	ProjectGroupLocalName       string
+}
+
+func NewProjectTestOptions(projectGroupLocalName string, lifecycleLocalName string) *ProjectTestOptions {
+	return &ProjectTestOptions{
+		LifecycleLocalName:    lifecycleLocalName,
+		LocalName:             acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
+		Name:                  acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
+		ProjectGroupLocalName: projectGroupLocalName,
+	}
+}
+
+func testAccProjectWithOptions(opt *ProjectTestOptions) string {
+
+	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
+		allow_deployments_to_no_targets = %v
+		lifecycle_id                    = octopusdeploy_lifecycle.%s.id
+		name                            = "%s"
+		project_group_id                = octopusdeploy_project_group.%s.id
+	}`, opt.LocalName, opt.AllowDeploymentsToNoTargets, opt.LifecycleLocalName, opt.Name, opt.ProjectGroupLocalName)
+}
+
+func testAccProjectWithTemplate(localName string, name string, lifecycleLocalName string, projectGroupLocalName string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
+		lifecycle_id     = octopusdeploy_lifecycle.%s.id
+		name             = "%s"
+		project_group_id = octopusdeploy_project_group.%s.id
+
+		template {
+			name  = "project variable template name"
+			label = "project variable template label"
+
+			display_settings = {
+				"Octopus.ControlType" = "Sensitive"
+			}
+		}
+	}`, localName, lifecycleLocalName, name, projectGroupLocalName)
+}
+
 func TestAccProjectWithUpdate(t *testing.T) {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -55,9 +106,6 @@ func TestAccProjectWithUpdate(t *testing.T) {
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -73,7 +121,7 @@ func TestAccProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
-				Config: testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -84,13 +132,13 @@ func TestAccProjectWithUpdate(t *testing.T) {
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.1.step_name"),
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.iis_website.0.step_name"),
 				),
-				Config: testAccProjectBasic(spaceID, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
 			},
 		},
 	})
 }
 
-func testAccProjectBasic(spaceID string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string) string {
+func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string) string {
 	projectGroup := test.NewProjectGroupTestOptions()
 	projectGroup.LocalName = projectGroupLocalName
 	projectGroup.Resource.Name = projectGroupName
@@ -102,7 +150,6 @@ func testAccProjectBasic(spaceID string, lifecycleLocalName string, lifecycleNam
 			lifecycle_id     = octopusdeploy_lifecycle.%s.id
 			name             = "%s"
 			project_group_id = octopusdeploy_project_group.%s.id
-			space_id         = "%s"
 
 			template {
 				default_value = "default-value"
@@ -140,7 +187,7 @@ func testAccProjectBasic(spaceID string, lifecycleLocalName string, lifecycleNam
 		//   versioning_strategy {
 		//     template = "alskdjaslkdj"
 		//   }
-		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName, spaceID)
+		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
 }
 
 func testAccProjectCaC(spaceID string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string, basePath string, url string, password string, username string) string {

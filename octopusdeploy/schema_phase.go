@@ -5,13 +5,33 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandPhase(tfPhase map[string]interface{}) lifecycles.Phase {
-	phase := lifecycles.Phase{
-		AutomaticDeploymentTargets:         getSliceFromTerraformTypeList(tfPhase["automatic_deployment_targets"]),
-		IsOptionalPhase:                    tfPhase["is_optional_phase"].(bool),
-		MinimumEnvironmentsBeforePromotion: int32(tfPhase["minimum_environments_before_promotion"].(int)),
-		Name:                               tfPhase["name"].(string),
-		OptionalDeploymentTargets:          getSliceFromTerraformTypeList(tfPhase["optional_deployment_targets"]),
+func expandPhase(tfPhase map[string]interface{}) *lifecycles.Phase {
+	if tfPhase == nil {
+		return nil
+	}
+
+	name := tfPhase["name"].(string)
+
+	phase := lifecycles.NewPhase(name)
+
+	if v, ok := tfPhase["automatic_deployment_targets"]; ok {
+		phase.AutomaticDeploymentTargets = getSliceFromTerraformTypeList(v)
+	}
+
+	if v, ok := tfPhase["is_optional_phase"]; ok {
+		phase.IsOptionalPhase = v.(bool)
+	}
+
+	if v, ok := tfPhase["minimum_environments_before_promotion"]; ok {
+		if n, isInt32 := v.(int32); isInt32 {
+			phase.MinimumEnvironmentsBeforePromotion = n
+		} else {
+			phase.MinimumEnvironmentsBeforePromotion = int32(v.(int))
+		}
+	}
+
+	if v, ok := tfPhase["optional_deployment_targets"]; ok {
+		phase.OptionalDeploymentTargets = getSliceFromTerraformTypeList(v)
 	}
 
 	if phase.AutomaticDeploymentTargets == nil {
@@ -24,7 +44,7 @@ func expandPhase(tfPhase map[string]interface{}) lifecycles.Phase {
 	return phase
 }
 
-func flattenPhases(phases []lifecycles.Phase) []interface{} {
+func flattenPhases(phases []*lifecycles.Phase) []interface{} {
 	flattenedPhases := make([]interface{}, 0)
 	for _, phase := range phases {
 		p := make(map[string]interface{})
@@ -35,10 +55,10 @@ func flattenPhases(phases []lifecycles.Phase) []interface{} {
 		p["name"] = phase.Name
 		p["optional_deployment_targets"] = flattenArray(phase.OptionalDeploymentTargets)
 		if phase.ReleaseRetentionPolicy != nil {
-			p["release_retention_policy"] = flattenRetentionPeriod(*phase.ReleaseRetentionPolicy)
+			p["release_retention_policy"] = flattenRetentionPeriod(phase.ReleaseRetentionPolicy)
 		}
 		if phase.TentacleRetentionPolicy != nil {
-			p["tentacle_retention_policy"] = flattenRetentionPeriod(*phase.TentacleRetentionPolicy)
+			p["tentacle_retention_policy"] = flattenRetentionPeriod(phase.TentacleRetentionPolicy)
 		}
 		flattenedPhases = append(flattenedPhases, p)
 	}

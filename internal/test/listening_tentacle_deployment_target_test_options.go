@@ -19,7 +19,7 @@ func NewListeningTentacleDeploymentTargetTestOptions() *ListeningTentacleDeploym
 func ListeningTentacleDeploymentTargetConfiguration(options *ListeningTentacleDeploymentTargetTestOptions) string {
 	configuration := fmt.Sprintf(`"resource "%s" "%s" {`, options.ResourceName, options.LocalName)
 
-	if len(options.Resource.Name) > 0 {
+	if options.Resource != nil && len(options.Resource.Name) > 0 {
 		configuration += fmt.Sprintf(`name = "%s"`, options.Resource.Name)
 	}
 

@@ -63,6 +63,11 @@ func getSliceFromTerraformTypeList(list interface{}) []string {
 	if list == nil {
 		return nil
 	}
+
+	if v, ok := list.([]string); ok {
+		return v
+	}
+
 	terraformList, ok := list.([]interface{})
 	if !ok {
 		terraformSet, ok := list.(*schema.Set)

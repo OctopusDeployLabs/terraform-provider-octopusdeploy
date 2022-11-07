@@ -14,11 +14,12 @@ Provides information about existing cloud region deployment targets.
 
 ```terraform
 data "octopusdeploy_cloud_region_deployment_targets" "example" {
-  deployment_id = "Defau"
-  environments  = ["Environments-123", "Environments-321"]
-  ids = 
-  skip          = 5
-  take          = 100
+  environments = ["Environments-123", "Environments-321"]
+  ids          = ["Machines-123"]
+  name         = "Azure North America"
+  partial_name = "Azure Nor"
+  skip         = 5
+  take         = 100
 }
 ```
 

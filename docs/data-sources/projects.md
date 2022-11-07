@@ -59,7 +59,9 @@ Read-Only:
 - `description` (String) The description of this project.
 - `discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
 - `extension_settings` (Set of Object) (see [below for nested schema](#nestedatt--projects--extension_settings))
-- `git_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_persistence_settings))
+- `git_anonymous_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_anonymous_persistence_settings))
+- `git_library_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_library_persistence_settings))
+- `git_username_password_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_username_password_persistence_settings))
 - `id` (String) The unique ID for this resource.
 - `included_library_variable_sets` (List of String)
 - `is_disabled` (Boolean)
@@ -97,24 +99,40 @@ Read-Only:
 - `values` (List of String)
 
 
-<a id="nestedatt--projects--git_persistence_settings"></a>
-### Nested Schema for `projects.git_persistence_settings`
+<a id="nestedatt--projects--git_anonymous_persistence_settings"></a>
+### Nested Schema for `projects.git_anonymous_persistence_settings`
 
 Read-Only:
 
 - `base_path` (String)
-- `credentials` (List of Object) (see [below for nested schema](#nestedobjatt--projects--git_persistence_settings--credentials))
 - `default_branch` (String)
+- `protected_branches` (List of String)
 - `url` (String)
 
-<a id="nestedobjatt--projects--git_persistence_settings--credentials"></a>
-### Nested Schema for `projects.git_persistence_settings.credentials`
+
+<a id="nestedatt--projects--git_library_persistence_settings"></a>
+### Nested Schema for `projects.git_library_persistence_settings`
 
 Read-Only:
 
-- `password` (String)
-- `username` (String)
+- `base_path` (String)
+- `default_branch` (String)
+- `git_credential_id` (String)
+- `protected_branches` (List of String)
+- `url` (String)
 
+
+<a id="nestedatt--projects--git_username_password_persistence_settings"></a>
+### Nested Schema for `projects.git_username_password_persistence_settings`
+
+Read-Only:
+
+- `base_path` (String)
+- `default_branch` (String)
+- `password` (String)
+- `protected_branches` (List of String)
+- `url` (String)
+- `username` (String)
 
 
 <a id="nestedatt--projects--release_creation_strategy"></a>

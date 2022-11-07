@@ -67,7 +67,9 @@ resource "octopusdeploy_project" "example" {
 - `deployment_changes_template` (String)
 - `description` (String) The description of this project.
 - `discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
-- `git_persistence_settings` (Block List, Max: 1) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_persistence_settings))
+- `git_anonymous_persistence_settings` (Block List, Max: 1) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_anonymous_persistence_settings))
+- `git_library_persistence_settings` (Block List, Max: 1) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_library_persistence_settings))
+- `git_username_password_persistence_settings` (Block List, Max: 1) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_username_password_persistence_settings))
 - `id` (String) The unique ID for this resource.
 - `included_library_variable_sets` (List of String)
 - `is_disabled` (Boolean)
@@ -98,8 +100,8 @@ Optional:
 - `target_roles` (List of String)
 
 
-<a id="nestedblock--git_persistence_settings"></a>
-### Nested Schema for `git_persistence_settings`
+<a id="nestedblock--git_anonymous_persistence_settings"></a>
+### Nested Schema for `git_anonymous_persistence_settings`
 
 Required:
 
@@ -108,17 +110,39 @@ Required:
 Optional:
 
 - `base_path` (String) The base path associated with these version control settings.
-- `credentials` (Block List, Max: 1) The credentials associated with these version control settings. (see [below for nested schema](#nestedblock--git_persistence_settings--credentials))
 - `default_branch` (String) The default branch associated with these version control settings.
+- `protected_branches` (List of String) A list of protected branch patterns.
 
-<a id="nestedblock--git_persistence_settings--credentials"></a>
-### Nested Schema for `git_persistence_settings.credentials`
+
+<a id="nestedblock--git_library_persistence_settings"></a>
+### Nested Schema for `git_library_persistence_settings`
+
+Required:
+
+- `git_credential_id` (String)
+- `url` (String) The URL associated with these version control settings.
+
+Optional:
+
+- `base_path` (String) The base path associated with these version control settings.
+- `default_branch` (String) The default branch associated with these version control settings.
+- `protected_branches` (List of String) A list of protected branch patterns.
+
+
+<a id="nestedblock--git_username_password_persistence_settings"></a>
+### Nested Schema for `git_username_password_persistence_settings`
 
 Required:
 
 - `password` (String, Sensitive) The password for the Git credential.
+- `url` (String) The URL associated with these version control settings.
 - `username` (String) The username for the Git credential.
 
+Optional:
+
+- `base_path` (String) The base path associated with these version control settings.
+- `default_branch` (String) The default branch associated with these version control settings.
+- `protected_branches` (List of String) A list of protected branch patterns.
 
 
 <a id="nestedblock--release_creation_strategy"></a>

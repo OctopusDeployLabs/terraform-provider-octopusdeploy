@@ -1,46 +1,23 @@
 package octopusdeploy
 
 import (
-	"net/url"
-
+	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandVersionControlSettings(values interface{}) *projects.VersionControlSettings {
-	if values == nil {
-		return nil
+func expandVersionControlSettingsForProjectConversion(ctx context.Context, d *schema.ResourceData) projects.GitPersistenceSettings {
+
+	var persistenceSettings projects.GitPersistenceSettings
+	if v, ok := d.GetOk("git_library_persistence_settings"); ok {
+		persistenceSettings = expandGitPersistenceSettings(ctx, v, expandLibraryGitCredential)
+	}
+	if v, ok := d.GetOk("git_username_password_persistence_settings"); ok {
+		persistenceSettings = expandGitPersistenceSettings(ctx, v, expandUsernamePasswordGitCredential)
+	}
+	if v, ok := d.GetOk("git_anonymous_persistence_settings"); ok {
+		persistenceSettings = expandGitPersistenceSettings(ctx, v, expandAnonymousGitCredential)
 	}
 
-	flattenedValues := values.([]interface{})
-	if len(flattenedValues) == 0 || flattenedValues[0] == nil {
-		return nil
-	}
-
-	flattenedMap := flattenedValues[0].(map[string]interface{})
-
-	if flattenedMap["type"] == "Database" {
-		return &projects.VersionControlSettings{
-			Type: "Database",
-		}
-	}
-
-	url, err := url.Parse(flattenedMap["url"].(string))
-	if err != nil {
-		return nil
-	}
-
-	var credential projects.IGitCredential
-	if v, ok := flattenedMap["credentials"]; ok {
-		credential = expandGitCredential(v)
-	} else {
-		credential = projects.NewAnonymousGitCredential()
-	}
-
-	return projects.NewVersionControlSettings(
-		flattenedMap["base_path"].(string),
-		credential,
-		flattenedMap["default_branch"].(string),
-		"VersionControlled",
-		url,
-	)
+	return persistenceSettings
 }

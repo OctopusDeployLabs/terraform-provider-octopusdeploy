@@ -23,8 +23,8 @@ func expandDeploymentProcess(d *schema.ResourceData, client *client.Client) *dep
 			return nil
 		}
 
-		if project.PersistenceSettings != nil && project.PersistenceSettings.GetType() == "VersionControlled" {
-			deploymentProcess.Branch = project.PersistenceSettings.(*projects.GitPersistenceSettings).DefaultBranch
+		if project.PersistenceSettings != nil && project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
+			deploymentProcess.Branch = project.PersistenceSettings.(projects.GitPersistenceSettings).DefaultBranch()
 		}
 	}
 

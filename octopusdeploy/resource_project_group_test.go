@@ -30,6 +30,12 @@ func TestAccProjectGroup(t *testing.T) {
 	})
 }
 
+func testAccProjectGroup(localName string, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project_group" "%s" {
+		name = "%s"
+	}`, localName, name)
+}
+
 func testProjectGroupDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {

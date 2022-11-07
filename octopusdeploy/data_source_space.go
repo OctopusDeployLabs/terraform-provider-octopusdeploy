@@ -28,10 +28,11 @@ func dataSourceSpaceRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 	log.Printf("[INFO] Found space with name '%s', with ID '%s'", existingSpace.Name, existingSpace.ID)
 
-	d.Set("id", existingSpace.ID)
 	d.Set("description", existingSpace.Description)
+	d.Set("id", existingSpace.ID)
 	d.Set("is_default", existingSpace.IsDefault)
 	d.Set("is_task_queue_stopped", existingSpace.TaskQueueStopped)
+	d.Set("slug", existingSpace.Slug)
 	d.Set("space_managers_team_members", existingSpace.SpaceManagersTeamMembers)
 	d.Set("space_managers_teams", existingSpace.SpaceManagersTeams)
 	d.SetId(existingSpace.GetID())
