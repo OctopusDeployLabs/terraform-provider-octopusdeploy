@@ -55,15 +55,15 @@ func getGitCredentialDataSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"first_result": getQueryFirstResult(),
-		"name":         getQueryName(),
-		"skip":         getQuerySkip(),
-		"take":         getQueryTake(),
+		"name": getQueryName(),
+		"skip": getQuerySkip(),
+		"take": getQueryTake(),
 	}
 }
 
 func getGitCredentialSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"id":       getIDSchema(),
 		"space_id": getSpaceIDSchema(),
 		"name": {
 			Description:      "The name of the Git credential. This name must be unique.",
@@ -73,6 +73,11 @@ func getGitCredentialSchema() map[string]*schema.Schema {
 		},
 		"description": {
 			Description: "The description of this Git credential.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"type": {
+			Description: "The Git credential authentication type.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
