@@ -30,15 +30,59 @@ func expandGitCredential(d *schema.ResourceData) *credentials.Resource {
 	return resource
 }
 
+func flattenGitCredential(credential *credentials.Resource) map[string]interface{} {
+	if credential == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"id":          credential.GetID(),
+		"name":        credential.Name,
+		"description": credential.Description,
+		"type":        credential.Details.Type(),
+	}
+}
+
+func getGitCredentialDataSchema() map[string]*schema.Schema {
+	dataSchema := getGitCredentialSchema()
+	setDataSchema(&dataSchema)
+
+	return map[string]*schema.Schema{
+		"git_credentials": {
+			Computed:    true,
+			Description: "A list of Git Credentials that match the filter(s).",
+			Elem:        &schema.Resource{Schema: dataSchema},
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
+		"name": getQueryName(),
+		"skip": getQuerySkip(),
+		"take": getQueryTake(),
+	}
+}
+
 func getGitCredentialSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"id":       getIDSchema(),
+		"space_id": getSpaceIDSchema(),
+		"name": {
+			Description:      "The name of the Git credential. This name must be unique.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
 		"description": {
 			Description: "The description of this Git credential.",
 			Optional:    true,
 			Type:        schema.TypeString,
 		},
-		"name": {
-			Description:      "The name of the Git credential. This name must be unique.",
+		"type": {
+			Description: "The Git credential authentication type.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"username": {
+			Description:      "The username for the Git credential.",
 			Required:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -50,23 +94,15 @@ func getGitCredentialSchema() map[string]*schema.Schema {
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		},
-		"space_id": getSpaceIDSchema(),
-		"username": {
-			Description:      "The username for the Git credential.",
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-		},
 	}
 }
 
 func setGitCredential(ctx context.Context, d *schema.ResourceData, resource *credentials.Resource) error {
-	d.Set("description", resource.Description)
-	d.Set("name", resource.GetName())
 	d.Set("space_id", resource.SpaceID)
+	d.Set("name", resource.GetName())
+	d.Set("description", resource.Description)
 
 	usernamePassword := resource.Details.(*credentials.UsernamePassword)
-
 	d.Set("username", usernamePassword.Username)
 
 	return nil
