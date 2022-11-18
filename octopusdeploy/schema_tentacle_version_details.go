@@ -19,7 +19,7 @@ func expandTentacleVersionDetails(values interface{}) *machines.TentacleVersionD
 		UpgradeLocked:    flattenedTentacleVersionDetails["upgrade_locked"].(bool),
 		UpgradeRequired:  flattenedTentacleVersionDetails["upgrade_required"].(bool),
 		UpgradeSuggested: flattenedTentacleVersionDetails["upgrade_suggested"].(bool),
-		Version:          &version,
+		Version:          version,
 	}
 }
 

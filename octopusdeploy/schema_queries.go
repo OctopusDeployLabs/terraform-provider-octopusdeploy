@@ -313,15 +313,3 @@ func getQuerySpaces() *schema.Schema {
 		Type:        schema.TypeList,
 	}
 }
-
-func getQueryWorkerPoolType() *schema.Schema {
-	return &schema.Schema{
-		Description: "A filter to search by worker pool type. Valid feed types are `DynamicWorkerPool` or `StaticWorkerPool`.",
-		Optional:    true,
-		Type:        schema.TypeString,
-		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
-			"DynamicWorkerPool",
-			"StaticWorkerPool",
-		}, false)),
-	}
-}

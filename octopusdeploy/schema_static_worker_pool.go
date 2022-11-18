@@ -36,42 +36,6 @@ func expandStaticWorkerPool(d *schema.ResourceData) *workerpools.StaticWorkerPoo
 	return dynamicWorkerPool
 }
 
-func flattenStaticWorkerPool(staticWorkerPool *workerpools.StaticWorkerPool) map[string]interface{} {
-	if staticWorkerPool == nil {
-		return nil
-	}
-
-	return map[string]interface{}{
-		"can_add_workers": staticWorkerPool.CanAddWorkers,
-		"description":     staticWorkerPool.Description,
-		"id":              staticWorkerPool.GetID(),
-		"is_default":      staticWorkerPool.IsDefault,
-		"name":            staticWorkerPool.GetName(),
-		"space_id":        staticWorkerPool.SpaceID,
-		"sort_order":      staticWorkerPool.SortOrder,
-	}
-}
-
-func getStaticWorkerPoolDataSchema() map[string]*schema.Schema {
-	dataSchema := getStaticWorkerPoolSchema()
-	setDataSchema(&dataSchema)
-
-	return map[string]*schema.Schema{
-		"filter": getQueryFilter(),
-		"id":     getDataSchemaID(),
-		"ids":    getQueryIDs(),
-		"skip":   getQuerySkip(),
-		"take":   getQueryTake(),
-		"static_worker_pools": {
-			Computed:    true,
-			Description: "A list of static worker pools that match the filter(s).",
-			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-	}
-}
-
 func getStaticWorkerPoolSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"can_add_workers": {
