@@ -75,8 +75,10 @@ resource "octopusdeploy_project" "example" {
 - `is_disabled` (Boolean)
 - `is_discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
 - `is_version_controlled` (Boolean)
+- `jira_service_management_extension_settings` (Block List, Max: 1) Provides extension settings for the Jira Service Management (JSM) integration for this project. (see [below for nested schema](#nestedblock--jira_service_management_extension_settings))
 - `release_creation_strategy` (Block List, Max: 1) (see [below for nested schema](#nestedblock--release_creation_strategy))
 - `release_notes_template` (String)
+- `servicenow_extension_settings` (Block List, Max: 1) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedblock--servicenow_extension_settings))
 - `space_id` (String) The space ID associated with this project.
 - `template` (Block List) (see [below for nested schema](#nestedblock--template))
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
@@ -85,7 +87,6 @@ resource "octopusdeploy_project" "example" {
 ### Read-Only
 
 - `deployment_process_id` (String)
-- `extension_settings` (Block Set) (see [below for nested schema](#nestedblock--extension_settings))
 - `slug` (String)
 - `variable_set_id` (String)
 
@@ -145,6 +146,16 @@ Optional:
 - `protected_branches` (List of String) A list of protected branch patterns.
 
 
+<a id="nestedblock--jira_service_management_extension_settings"></a>
+### Nested Schema for `jira_service_management_extension_settings`
+
+Required:
+
+- `connection_id` (String) The connection identifier associated with the extension settings.
+- `is_enabled` (Boolean) Specifies whether or not this extension is enabled for this project.
+- `service_desk_project_name` (String) The project name associated with this extension.
+
+
 <a id="nestedblock--release_creation_strategy"></a>
 ### Nested Schema for `release_creation_strategy`
 
@@ -162,6 +173,17 @@ Optional:
 - `deployment_action` (String)
 - `package_reference` (String)
 
+
+
+<a id="nestedblock--servicenow_extension_settings"></a>
+### Nested Schema for `servicenow_extension_settings`
+
+Required:
+
+- `connection_id` (String) The connection identifier associated with the extension settings.
+- `is_enabled` (Boolean) Specifies whether or not this extension is enabled for this project.
+- `is_state_automatically_transitioned` (Boolean) Specifies whether or not this extension will automatically transition the state of a deployment for this project.
+- `standard_change_template_name` (String) The name of the standard change template associated with this extension.
 
 
 <a id="nestedblock--template"></a>
@@ -196,16 +218,6 @@ Optional:
 
 - `deployment_action` (String)
 - `package_reference` (String)
-
-
-
-<a id="nestedblock--extension_settings"></a>
-### Nested Schema for `extension_settings`
-
-Read-Only:
-
-- `extension_id` (String)
-- `values` (List of String)
 
 ## Import
 

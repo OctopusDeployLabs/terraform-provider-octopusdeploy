@@ -46,8 +46,36 @@ Read-Only:
 - `allow_dynamic_infrastructure` (Boolean)
 - `description` (String) The description of this environment.
 - `id` (String) The unique ID for this resource.
+- `jira_extension_settings` (List of Object) Provides extension settings for the Jira integration for this environment. (see [below for nested schema](#nestedatt--environments--jira_extension_settings))
+- `jira_service_management_extension_settings` (List of Object) Provides extension settings for the Jira Service Management (JSM) integration for this environment. (see [below for nested schema](#nestedatt--environments--jira_service_management_extension_settings))
 - `name` (String) The name of this resource.
+- `servicenow_extension_settings` (List of Object) Provides extension settings for the ServiceNow integration for this environment. (see [below for nested schema](#nestedatt--environments--servicenow_extension_settings))
+- `slug` (String)
 - `sort_order` (Number) The order number to sort an environment.
+- `space_id` (String) The space ID associated with this environment.
 - `use_guided_failure` (Boolean)
+
+<a id="nestedatt--environments--jira_extension_settings"></a>
+### Nested Schema for `environments.jira_extension_settings`
+
+Read-Only:
+
+- `environment_type` (String)
+
+
+<a id="nestedatt--environments--jira_service_management_extension_settings"></a>
+### Nested Schema for `environments.jira_service_management_extension_settings`
+
+Read-Only:
+
+- `is_enabled` (Boolean)
+
+
+<a id="nestedatt--environments--servicenow_extension_settings"></a>
+### Nested Schema for `environments.servicenow_extension_settings`
+
+Read-Only:
+
+- `is_enabled` (Boolean)
 
 
