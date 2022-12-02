@@ -3,11 +3,14 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/extensions"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	prj "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -56,10 +59,6 @@ func expandProject(ctx context.Context, d *schema.ResourceData) *projects.Projec
 		project.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk("extension_settings"); ok {
-		project.ExtensionSettings = expandExtensionSettingsValues(v.(*schema.Set).List())
-	}
-
 	tflog.Info(ctx, "expanding persistence settings")
 
 	if v, ok := d.GetOk("git_library_persistence_settings"); ok {
@@ -90,6 +89,14 @@ func expandProject(ctx context.Context, d *schema.ResourceData) *projects.Projec
 
 	if v, ok := d.GetOk("is_version_controlled"); ok {
 		project.IsVersionControlled = v.(bool)
+	}
+
+	if v, ok := d.GetOk("jira_service_management_extension_settings"); ok {
+		project.ExtensionSettings = append(project.ExtensionSettings, prj.ExpandJiraServiceManagementExtensionSettings(v))
+	}
+
+	if v, ok := d.GetOk("servicenow_extension_settings"); ok {
+		project.ExtensionSettings = append(project.ExtensionSettings, prj.ExpandServiceNowExtensionSettings(v))
 	}
 
 	if v, ok := d.GetOk("release_creation_strategy"); ok {
@@ -138,7 +145,6 @@ func flattenProject(ctx context.Context, d *schema.ResourceData, project *projec
 		"deployment_changes_template":          project.DeploymentChangesTemplate,
 		"deployment_process_id":                project.DeploymentProcessID,
 		"description":                          project.Description,
-		"extension_settings":                   project.ExtensionSettings,
 		"id":                                   project.GetID(),
 		"included_library_variable_sets":       project.IncludedLibraryVariableSets,
 		"is_disabled":                          project.IsDisabled,
@@ -155,6 +161,21 @@ func flattenProject(ctx context.Context, d *schema.ResourceData, project *projec
 		"tenanted_deployment_participation":    project.TenantedDeploymentMode,
 		"variable_set_id":                      project.VariableSetID,
 		"versioning_strategy":                  flattenVersioningStrategy(project.VersioningStrategy),
+	}
+
+	if len(project.ExtensionSettings) != 0 {
+		for _, extensionSettings := range project.ExtensionSettings {
+			switch extensionSettings.ExtensionID() {
+			case extensions.ExtensionIDJiraServiceManagement:
+				if jiraServiceManagementExtensionSettings, ok := extensionSettings.(*projects.JiraServiceManagementExtensionSettings); ok {
+					projectMap["jira_service_management_extension_settings"] = prj.FlattenJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings)
+				}
+			case extensions.ExtensionIDServiceNow:
+				if serviceNowExtensionSettings, ok := extensionSettings.(*projects.ServiceNowExtensionSettings); ok {
+					projectMap["servicenow_extension_settings"] = prj.FlattenServiceNowExtensionSettings(serviceNowExtensionSettings)
+				}
+			}
+		}
 	}
 
 	if project.PersistenceSettings != nil {
@@ -263,11 +284,6 @@ func getProjectSchema() map[string]*schema.Schema {
 			Description: "Treats releases of different channels to the same environment as a separate deployment dimension",
 			Optional:    true,
 			Type:        schema.TypeBool,
-		},
-		"extension_settings": {
-			Optional: true,
-			Elem:     &schema.Resource{Schema: getExtensionSettingsSchema()},
-			Type:     schema.TypeSet,
 		},
 		"git_library_persistence_settings": {
 			ConflictsWith: []string{"git_username_password_persistence_settings", "git_anonymous_persistence_settings"},
@@ -415,6 +431,13 @@ func getProjectSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeBool,
 		},
+		"jira_service_management_extension_settings": {
+			Description: "Provides extension settings for the Jira Service Management (JSM) integration for this project.",
+			Elem:        &schema.Resource{Schema: prj.GetJiraServiceManagementExtensionSettingsSchema()},
+			MaxItems:    1,
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
 		"lifecycle_id": {
 			Description:      "The lifecycle ID associated with this project.",
 			Required:         true,
@@ -444,6 +467,13 @@ func getProjectSchema() map[string]*schema.Schema {
 			Computed: true,
 			Optional: true,
 			Type:     schema.TypeString,
+		},
+		"servicenow_extension_settings": {
+			Description: "Provides extension settings for the ServiceNow integration for this project.",
+			Elem:        &schema.Resource{Schema: prj.GetServiceNowExtensionSettingsSchema()},
+			MaxItems:    1,
+			Optional:    true,
+			Type:        schema.TypeList,
 		},
 		"slug": {
 			Computed: true,
@@ -494,8 +524,10 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 	d.Set("deployment_process_id", project.DeploymentProcessID)
 	d.Set("description", project.Description)
 
-	if err := d.Set("extension_settings", project.ExtensionSettings); err != nil {
-		return fmt.Errorf("error setting extension_settings: %s", err)
+	if len(project.ExtensionSettings) != 0 {
+		if err := prj.SetExtensionSettings(d, project.ExtensionSettings); err != nil {
+			return fmt.Errorf("error setting extension settings: %s", err)
+		}
 	}
 
 	if err := d.Set("included_library_variable_sets", project.IncludedLibraryVariableSets); err != nil {
