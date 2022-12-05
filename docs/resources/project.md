@@ -34,6 +34,19 @@ resource "octopusdeploy_project" "example" {
     skip_machine_behavior           = "SkipUnavailableMachines"
   }
 
+  jira_service_management_extension_settings {
+    connection_id             = "133d7fe602514060a48bc42ee9870f99"
+    is_enabled                = false
+    service_desk_project_name = "Test Service Desk Project (OK to Delete)"
+  }
+
+  servicenow_extension_settings {
+    connection_id                       = "989034685e2c48c4b06a29286c9ef5cc"
+    is_enabled                          = false
+    is_state_automatically_transitioned = false
+    standard_change_template_name       = "Standard Change Template Name (OK to Delete)"
+  }
+
   template {
     default_value = "example-default-value"
     help_text     = "example-help-test"
