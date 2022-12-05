@@ -73,7 +73,7 @@ func FlattenServiceNowExtensionSettings(serviceNowExtensionSettings *environment
 func GetJiraExtensionSettingsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"environment_type": {
-			Description: "The Jira environment type of this Octopus deployment environment.",
+			Description: "The Jira environment type of this Octopus deployment environment. Valid values are `\"development\"`, `\"production\"`, `\"staging\"`, `\"testing\"`, or `\"unmapped\"`.",
 			Required:    true,
 			Type:        schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{

@@ -61,7 +61,7 @@ resource "octopusdeploy_environment" "example" {
 
 Required:
 
-- `environment_type` (String) The Jira environment type of this Octopus deployment environment.
+- `environment_type` (String) The Jira environment type of this Octopus deployment environment. Valid values are `"development"`, `"production"`, `"staging"`, `"testing"`, or `"unmapped"`.
 
 
 <a id="nestedblock--jira_service_management_extension_settings"></a>
