@@ -10,7 +10,7 @@ import (
 
 func expandDynamicWorkerPool(d *schema.ResourceData) *workerpools.DynamicWorkerPool {
 	name := d.Get("name").(string)
-	workerType := workerpools.WorkerType(d.Get("worker_type").(string))
+	workerType := d.Get("worker_type").(string)
 
 	dynamicWorkerPool := workerpools.NewDynamicWorkerPool(name, workerType)
 	dynamicWorkerPool.ID = d.Id()

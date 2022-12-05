@@ -18,6 +18,18 @@ resource "octopusdeploy_environment" "example" {
   description                  = "An environment for the development team."
   name                         = "Development Environment (OK to Delete)"
   use_guided_failure           = false
+
+  jira_extension_settings {
+    environment_type = "unmapped"
+  }
+
+  jira_service_management_extension_settings {
+    is_enabled = false
+  }
+
+  servicenow_extension_settings {
+    is_enabled = false
+  }
 }
 ```
 
@@ -33,8 +45,39 @@ resource "octopusdeploy_environment" "example" {
 - `allow_dynamic_infrastructure` (Boolean)
 - `description` (String) The description of this environment.
 - `id` (String) The unique ID for this resource.
+- `jira_extension_settings` (Block List, Max: 1) Provides extension settings for the Jira integration for this environment. (see [below for nested schema](#nestedblock--jira_extension_settings))
+- `jira_service_management_extension_settings` (Block List, Max: 1) Provides extension settings for the Jira Service Management (JSM) integration for this environment. (see [below for nested schema](#nestedblock--jira_service_management_extension_settings))
+- `servicenow_extension_settings` (Block List, Max: 1) Provides extension settings for the ServiceNow integration for this environment. (see [below for nested schema](#nestedblock--servicenow_extension_settings))
 - `sort_order` (Number) The order number to sort an environment.
+- `space_id` (String) The space ID associated with this environment.
 - `use_guided_failure` (Boolean)
+
+### Read-Only
+
+- `slug` (String)
+
+<a id="nestedblock--jira_extension_settings"></a>
+### Nested Schema for `jira_extension_settings`
+
+Required:
+
+- `environment_type` (String) The Jira environment type of this Octopus deployment environment. Valid values are `"development"`, `"production"`, `"staging"`, `"testing"`, or `"unmapped"`.
+
+
+<a id="nestedblock--jira_service_management_extension_settings"></a>
+### Nested Schema for `jira_service_management_extension_settings`
+
+Required:
+
+- `is_enabled` (Boolean) Specifies whether or not this extension is enabled for this project.
+
+
+<a id="nestedblock--servicenow_extension_settings"></a>
+### Nested Schema for `servicenow_extension_settings`
+
+Required:
+
+- `is_enabled` (Boolean) Specifies whether or not this extension is enabled for this project.
 
 ## Import
 

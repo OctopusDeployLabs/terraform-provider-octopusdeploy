@@ -58,7 +58,6 @@ Read-Only:
 - `deployment_process_id` (String)
 - `description` (String) The description of this project.
 - `discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
-- `extension_settings` (Set of Object) (see [below for nested schema](#nestedatt--projects--extension_settings))
 - `git_anonymous_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_anonymous_persistence_settings))
 - `git_library_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_library_persistence_settings))
 - `git_username_password_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_username_password_persistence_settings))
@@ -67,11 +66,13 @@ Read-Only:
 - `is_disabled` (Boolean)
 - `is_discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
 - `is_version_controlled` (Boolean)
+- `jira_service_management_extension_settings` (List of Object) Provides extension settings for the Jira Service Management (JSM) integration for this project. (see [below for nested schema](#nestedatt--projects--jira_service_management_extension_settings))
 - `lifecycle_id` (String) The lifecycle ID associated with this project.
 - `name` (String) The name of the project in Octopus Deploy. This name must be unique.
 - `project_group_id` (String) The project group ID associated with this project.
 - `release_creation_strategy` (List of Object) (see [below for nested schema](#nestedatt--projects--release_creation_strategy))
 - `release_notes_template` (String)
+- `servicenow_extension_settings` (List of Object) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedatt--projects--servicenow_extension_settings))
 - `slug` (String)
 - `space_id` (String) The space ID associated with this project.
 - `template` (List of Object) (see [below for nested schema](#nestedatt--projects--template))
@@ -88,15 +89,6 @@ Read-Only:
 - `exclude_unhealthy_targets` (Boolean)
 - `skip_machine_behavior` (String)
 - `target_roles` (List of String)
-
-
-<a id="nestedatt--projects--extension_settings"></a>
-### Nested Schema for `projects.extension_settings`
-
-Read-Only:
-
-- `extension_id` (String)
-- `values` (List of String)
 
 
 <a id="nestedatt--projects--git_anonymous_persistence_settings"></a>
@@ -135,6 +127,16 @@ Read-Only:
 - `username` (String)
 
 
+<a id="nestedatt--projects--jira_service_management_extension_settings"></a>
+### Nested Schema for `projects.jira_service_management_extension_settings`
+
+Read-Only:
+
+- `connection_id` (String)
+- `is_enabled` (Boolean)
+- `service_desk_project_name` (String)
+
+
 <a id="nestedatt--projects--release_creation_strategy"></a>
 ### Nested Schema for `projects.release_creation_strategy`
 
@@ -152,6 +154,17 @@ Read-Only:
 - `deployment_action` (String)
 - `package_reference` (String)
 
+
+
+<a id="nestedatt--projects--servicenow_extension_settings"></a>
+### Nested Schema for `projects.servicenow_extension_settings`
+
+Read-Only:
+
+- `connection_id` (String)
+- `is_enabled` (Boolean)
+- `is_state_automatically_transitioned` (Boolean)
+- `standard_change_template_name` (String)
 
 
 <a id="nestedatt--projects--template"></a>

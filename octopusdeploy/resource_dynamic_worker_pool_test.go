@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -17,7 +16,7 @@ func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
 	prefix := "octopusdeploy_dynamic_worker_pool." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	workerType := workerpools.WorkerType("UbuntuDefault")
+	workerType := "UbuntuDefault"
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	isDefault := false
 	sortOrder := acctest.RandIntRange(50, 100)
@@ -45,7 +44,7 @@ func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
 func testDynamicWorkerPoolBasic(
 	localName string,
 	name string,
-	workerType workerpools.WorkerType,
+	workerType string,
 	description string,
 	isDefault bool,
 	sortOrder int,
