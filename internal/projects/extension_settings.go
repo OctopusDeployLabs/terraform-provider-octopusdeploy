@@ -114,13 +114,13 @@ func GetServiceNowExtensionSettingsSchema() map[string]*schema.Schema {
 func SetExtensionSettings(d *schema.ResourceData, extensionSettingsCollection []extensions.ExtensionSettings) error {
 	for _, extensionSettings := range extensionSettingsCollection {
 		switch extensionSettings.ExtensionID() {
-		case extensions.ExtensionIDJiraServiceManagement:
+		case extensions.JiraServiceManagementExtensionID:
 			if jiraServiceManagementExtensionSettings, ok := extensionSettings.(*projects.JiraServiceManagementExtensionSettings); ok {
 				if err := d.Set("jira_service_management_extension_settings", FlattenJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings)); err != nil {
 					return fmt.Errorf("error setting extension settings for Jira Service Management (JSM): %s", err)
 				}
 			}
-		case extensions.ExtensionIDServiceNow:
+		case extensions.ServiceNowExtensionID:
 			if serviceNowExtensionSettings, ok := extensionSettings.(*projects.ServiceNowExtensionSettings); ok {
 				if err := d.Set("servicenow_extension_settings", FlattenServiceNowExtensionSettings(serviceNowExtensionSettings)); err != nil {
 					return fmt.Errorf("error setting extension settings for ServiceNow: %s", err)

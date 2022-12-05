@@ -166,11 +166,11 @@ func flattenProject(ctx context.Context, d *schema.ResourceData, project *projec
 	if len(project.ExtensionSettings) != 0 {
 		for _, extensionSettings := range project.ExtensionSettings {
 			switch extensionSettings.ExtensionID() {
-			case extensions.ExtensionIDJiraServiceManagement:
+			case extensions.JiraServiceManagementExtensionID:
 				if jiraServiceManagementExtensionSettings, ok := extensionSettings.(*projects.JiraServiceManagementExtensionSettings); ok {
 					projectMap["jira_service_management_extension_settings"] = prj.FlattenJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings)
 				}
-			case extensions.ExtensionIDServiceNow:
+			case extensions.ServiceNowExtensionID:
 				if serviceNowExtensionSettings, ok := extensionSettings.(*projects.ServiceNowExtensionSettings); ok {
 					projectMap["servicenow_extension_settings"] = prj.FlattenServiceNowExtensionSettings(serviceNowExtensionSettings)
 				}
