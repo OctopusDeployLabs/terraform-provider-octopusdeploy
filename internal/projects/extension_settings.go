@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+// ExpandJiraExtensionSettings deserializes the project extension settings for Jira Service Management (JSM) integration from its HCL representation.
 func ExpandJiraServiceManagementExtensionSettings(extensionSettings interface{}) extensions.ExtensionSettings {
 	values := extensionSettings.([]interface{})
 	valuesMap := values[0].(map[string]interface{})
@@ -19,6 +20,7 @@ func ExpandJiraServiceManagementExtensionSettings(extensionSettings interface{})
 	)
 }
 
+// ExpandJiraExtensionSettings deserializes the project extension settings for ServiceNow integration from its HCL representation.
 func ExpandServiceNowExtensionSettings(extensionSettings interface{}) extensions.ExtensionSettings {
 	values := extensionSettings.([]interface{})
 	valuesMap := values[0].(map[string]interface{})
@@ -30,6 +32,7 @@ func ExpandServiceNowExtensionSettings(extensionSettings interface{}) extensions
 	)
 }
 
+// FlattenJiraServiceManagementExtensionSettings serializes the project extension settings for Jira Service Management (JSM) integration into its HCL representation.
 func FlattenJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings *projects.JiraServiceManagementExtensionSettings) []interface{} {
 	if jiraServiceManagementExtensionSettings == nil {
 		return nil
@@ -42,6 +45,7 @@ func FlattenJiraServiceManagementExtensionSettings(jiraServiceManagementExtensio
 	return []interface{}{flattenedJiraServiceManagementExtensionSettings}
 }
 
+// FlattenServiceNowExtensionSettings serializes the project extension settings for ServiceNow integration into its HCL representation.
 func FlattenServiceNowExtensionSettings(serviceNowExtensionSettings *projects.ServiceNowExtensionSettings) []interface{} {
 	if serviceNowExtensionSettings == nil {
 		return nil
@@ -55,6 +59,7 @@ func FlattenServiceNowExtensionSettings(serviceNowExtensionSettings *projects.Se
 	return []interface{}{flattenedServiceNowExtensionSettings}
 }
 
+// GetJiraServiceManagementExtensionSettingsSchema returns the Terraform schema for Jira Service Management (JSM) integration with projects.
 func GetJiraServiceManagementExtensionSettingsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"connection_id": {
@@ -77,6 +82,7 @@ func GetJiraServiceManagementExtensionSettingsSchema() map[string]*schema.Schema
 	}
 }
 
+// GetServiceNowExtensionSettingsSchema returns the Terraform schema for ServiceNow integration with projects.
 func GetServiceNowExtensionSettingsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"connection_id": {
@@ -104,6 +110,7 @@ func GetServiceNowExtensionSettingsSchema() map[string]*schema.Schema {
 	}
 }
 
+// SetExtensionSettings sets the Terraform state of project settings collection for extensions.
 func SetExtensionSettings(d *schema.ResourceData, extensionSettingsCollection []extensions.ExtensionSettings) error {
 	for _, extensionSettings := range extensionSettingsCollection {
 		switch extensionSettings.ExtensionID() {
