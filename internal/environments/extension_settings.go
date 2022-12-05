@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+// ExpandJiraExtensionSettings deserializes the extension settings for Jira integration from its HCL representation.
 func ExpandJiraExtensionSettings(extensionSettings interface{}) extensions.ExtensionSettings {
 	values := extensionSettings.([]interface{})
 	valuesMap := values[0].(map[string]interface{})
@@ -17,6 +18,7 @@ func ExpandJiraExtensionSettings(extensionSettings interface{}) extensions.Exten
 	)
 }
 
+// ExpandJiraExtensionSettings deserializes the extension settings for Jira Service Management (JSM) integration from its HCL representation.
 func ExpandJiraServiceManagementExtensionSettings(extensionSettings interface{}) extensions.ExtensionSettings {
 	values := extensionSettings.([]interface{})
 	valuesMap := values[0].(map[string]interface{})
@@ -25,6 +27,7 @@ func ExpandJiraServiceManagementExtensionSettings(extensionSettings interface{})
 	)
 }
 
+// ExpandJiraExtensionSettings deserializes the extension settings for ServiceNow integration from its HCL representation.
 func ExpandServiceNowExtensionSettings(extensionSettings interface{}) extensions.ExtensionSettings {
 	values := extensionSettings.([]interface{})
 	valuesMap := values[0].(map[string]interface{})
@@ -33,6 +36,7 @@ func ExpandServiceNowExtensionSettings(extensionSettings interface{}) extensions
 	)
 }
 
+// GetJiraExtensionSettingsSchema returns the Terraform schema for Jira integration.
 func GetJiraExtensionSettingsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"environment_type": {
@@ -50,6 +54,7 @@ func GetJiraExtensionSettingsSchema() map[string]*schema.Schema {
 	}
 }
 
+// GetJiraServiceManagementExtensionSettingsSchema returns the Terraform schema for Jira Service Management (JSM) integration.
 func GetJiraServiceManagementExtensionSettingsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"is_enabled": {
@@ -60,6 +65,7 @@ func GetJiraServiceManagementExtensionSettingsSchema() map[string]*schema.Schema
 	}
 }
 
+// GetJiraServiceManagementExtensionSettingsSchema returns the Terraform schema for ServiceNow integration.
 func GetServiceNowExtensionSettingsSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"is_enabled": {
@@ -70,6 +76,7 @@ func GetServiceNowExtensionSettingsSchema() map[string]*schema.Schema {
 	}
 }
 
+// SetExtensionSettings sets the Terraform state of a settings collection for extensions.
 func SetExtensionSettings(d *schema.ResourceData, extensionSettingsCollection []extensions.ExtensionSettings) error {
 	for _, extensionSettings := range extensionSettingsCollection {
 		switch extensionSettings.ExtensionID() {
@@ -97,6 +104,7 @@ func SetExtensionSettings(d *schema.ResourceData, extensionSettingsCollection []
 	return nil
 }
 
+// ExpandJiraExtensionSettings serializes the extension settings for Jira integration into its HCL representation.
 func FlattenJiraExtensionSettings(jiraExtensionSettings *environments.JiraExtensionSettings) []interface{} {
 	if jiraExtensionSettings == nil {
 		return nil
@@ -107,6 +115,7 @@ func FlattenJiraExtensionSettings(jiraExtensionSettings *environments.JiraExtens
 	return []interface{}{flattenedJiraExtensionSettings}
 }
 
+// FlattenJiraServiceManagementExtensionSettings serializes the extension settings for Jira Service Management (JSM) integration into its HCL representation.
 func FlattenJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings *environments.JiraServiceManagementExtensionSettings) []interface{} {
 	if jiraServiceManagementExtensionSettings == nil {
 		return nil
@@ -117,6 +126,7 @@ func FlattenJiraServiceManagementExtensionSettings(jiraServiceManagementExtensio
 	return []interface{}{flattenedJiraServiceManagementExtensionSettings}
 }
 
+// FlattenServiceNowExtensionSettings serializes the extension settings for ServiceNow integration into its HCL representation.
 func FlattenServiceNowExtensionSettings(serviceNowExtensionSettings *environments.ServiceNowExtensionSettings) []interface{} {
 	if serviceNowExtensionSettings == nil {
 		return nil
