@@ -77,7 +77,7 @@ func flattenEnvironment(environment *environments.Environment) map[string]interf
 			switch extensionSettings.ExtensionID() {
 			case extensions.ExtensionIDJira:
 				if jiraExtensionSettings, ok := extensionSettings.(*environments.JiraExtensionSettings); ok {
-					environmentMap["jira_service_management_extension_settings"] = env.FlattenJiraExtensionSettings(jiraExtensionSettings)
+					environmentMap["jira_extension_settings"] = env.FlattenJiraExtensionSettings(jiraExtensionSettings)
 				}
 			case extensions.ExtensionIDJiraServiceManagement:
 				if jiraServiceManagementExtensionSettings, ok := extensionSettings.(*environments.JiraServiceManagementExtensionSettings); ok {
