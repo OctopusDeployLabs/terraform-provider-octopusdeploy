@@ -19,6 +19,8 @@ func TestAccOctopusDeployHelmFeed(t *testing.T) {
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
+	updatedName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testHelmFeedCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -33,6 +35,16 @@ func TestAccOctopusDeployHelmFeed(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "username", username),
 				),
 				Config: testHelmFeedBasic(localName, feedURI, name, username, password),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testHelmFeedExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "feed_uri", feedURI),
+					resource.TestCheckResourceAttr(prefix, "name", updatedName),
+					resource.TestCheckResourceAttr(prefix, "password", password),
+					resource.TestCheckResourceAttr(prefix, "username", username),
+				),
+				Config: testHelmFeedBasic(localName, feedURI, updatedName, username, password),
 			},
 		},
 	})
