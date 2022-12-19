@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -40,21 +39,11 @@ func expandVariable(d *schema.ResourceData) *variables.Variable {
 		variable.Value = d.Get("value").(string)
 	}
 
-	variable.ID = d.Id()
-
-	varPrompt, ok := d.GetOk("prompt")
-	if ok {
-		tfPromptSettings := varPrompt.(*schema.Set)
-		if len(tfPromptSettings.List()) == 1 {
-			tfPromptList := tfPromptSettings.List()[0].(map[string]interface{})
-			newPrompt := variables.VariablePromptOptions{
-				Description: tfPromptList["description"].(string),
-				Label:       tfPromptList["label"].(string),
-				IsRequired:  tfPromptList["is_required"].(bool),
-			}
-			variable.Prompt = &newPrompt
-		}
+	if v, ok := d.GetOk("prompt"); ok {
+		variable.Prompt = expandPromptedVariableSettings(v)
 	}
+
+	variable.ID = d.Id()
 
 	return variable
 }
@@ -116,7 +105,7 @@ func getVariableSchema() map[string]*schema.Schema {
 			Elem:     &schema.Resource{Schema: getVariablePromptOptionsSchema()},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"scope": {
 			Elem:     &schema.Resource{Schema: getVariableScopeSchema()},
@@ -154,6 +143,10 @@ func setVariable(ctx context.Context, d *schema.ResourceData, variable *variable
 		d.Set("value", nil)
 	} else {
 		d.Set("value", variable.Value)
+	}
+
+	if err := d.Set("prompt", flattenPromptedVariableSettings(variable.Prompt)); err != nil {
+		return fmt.Errorf("error setting prompted config: %s", err)
 	}
 
 	if err := d.Set("scope", flattenVariableScope(variable.Scope)); err != nil {
