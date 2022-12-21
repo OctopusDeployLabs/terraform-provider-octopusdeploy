@@ -2,11 +2,12 @@ package octopusdeploy
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,7 +30,7 @@ func resourceMavenFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] creating Maven feed: %s", mavenFeed.GetName())
+	tflog.Info(ctx, fmt.Sprintf("creating Maven feed: %s", mavenFeed.GetName()))
 
 	client := m.(*client.Client)
 	createdFeed, err := client.Feeds.Add(mavenFeed)
@@ -43,12 +44,12 @@ func resourceMavenFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	d.SetId(createdFeed.GetID())
 
-	log.Printf("[INFO] Maven feed created (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("Maven feed created (%s)", d.Id()))
 	return nil
 }
 
 func resourceMavenFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] deleting Maven feed (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("deleting Maven feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
 	err := client.Feeds.DeleteByID(d.Id())
@@ -58,30 +59,25 @@ func resourceMavenFeedDelete(ctx context.Context, d *schema.ResourceData, m inte
 
 	d.SetId("")
 
-	log.Printf("[INFO] Maven feed deleted")
+	tflog.Info(ctx, "Maven feed deleted")
 	return nil
 }
 
 func resourceMavenFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] reading Maven feed (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("reading Maven feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feedResource, err := client.Feeds.GetByID(d.Id())
+	feed, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "Maven feed")
 	}
 
-	feedResource, err = feeds.ToFeed(feedResource.(*feeds.FeedResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	mavenFeed := feedResource.(*feeds.MavenFeed)
+	mavenFeed := feed.(*feeds.MavenFeed)
 	if err := setMavenFeed(ctx, d, mavenFeed); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Maven feed read (%s)", mavenFeed.GetID())
+	tflog.Info(ctx, fmt.Sprintf("Maven feed read (%s)", mavenFeed.GetID()))
 	return nil
 }
 
@@ -91,7 +87,7 @@ func resourceMavenFeedUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] updating Maven feed (%s)", feed.GetID())
+	tflog.Info(ctx, fmt.Sprintf("updating Maven feed (%s)", feed.GetID()))
 
 	client := m.(*client.Client)
 	updatedFeed, err := client.Feeds.Update(feed)
@@ -99,15 +95,10 @@ func resourceMavenFeedUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	feedResource, err := feeds.ToFeed(updatedFeed.(*feeds.FeedResource))
-	if err != nil {
+	if err := setMavenFeed(ctx, d, updatedFeed.(*feeds.MavenFeed)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setMavenFeed(ctx, d, feedResource.(*feeds.MavenFeed)); err != nil {
-		return diag.FromErr(err)
-	}
-
-	log.Printf("[INFO] Maven feed updated (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("Maven feed updated (%s)", d.Id()))
 	return nil
 }

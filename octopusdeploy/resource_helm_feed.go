@@ -2,11 +2,12 @@ package octopusdeploy
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,7 +30,7 @@ func resourceHelmFeedCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] creating Helm feed, %s", feed.GetName())
+	tflog.Info(ctx, fmt.Sprintf("creating Helm feed, %s", feed.GetName()))
 
 	client := m.(*client.Client)
 	createdFeed, err := client.Feeds.Add(feed)
@@ -43,12 +44,12 @@ func resourceHelmFeedCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	d.SetId(createdFeed.GetID())
 
-	log.Printf("[INFO] Helm feed created (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("Helm feed created (%s)", d.Id()))
 	return nil
 }
 
 func resourceHelmFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] deleting Helm feed (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("deleting Helm feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
 	err := client.Feeds.DeleteByID(d.Id())
@@ -58,30 +59,25 @@ func resourceHelmFeedDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 	d.SetId("")
 
-	log.Printf("[INFO] Helm feed deleted")
+	tflog.Info(ctx, "Helm feed deleted")
 	return nil
 }
 
 func resourceHelmFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] reading Helm feed (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("reading Helm feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feedResource, err := client.Feeds.GetByID(d.Id())
+	feed, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "Helm feed")
 	}
 
-	feedResource, err = feeds.ToFeed(feedResource.(*feeds.FeedResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	helmFeed := feedResource.(*feeds.HelmFeed)
+	helmFeed := feed.(*feeds.HelmFeed)
 	if err := setHelmFeed(ctx, d, helmFeed); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Helm feed read (%s)", helmFeed.GetID())
+	tflog.Info(ctx, fmt.Sprintf("Helm feed read (%s)", helmFeed.GetID()))
 	return nil
 }
 
@@ -91,7 +87,7 @@ func resourceHelmFeedUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] updating Helm feed (%s)", feed.GetID())
+	tflog.Info(ctx, fmt.Sprintf("updating Helm feed (%s)", feed.GetID()))
 
 	client := m.(*client.Client)
 	updatedFeed, err := client.Feeds.Update(feed)
@@ -103,6 +99,6 @@ func resourceHelmFeedUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Helm feed updated (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("Helm feed updated (%s)", d.Id()))
 	return nil
 }

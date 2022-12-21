@@ -2,11 +2,12 @@ package octopusdeploy
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,7 +30,7 @@ func resourceGitHubRepositoryFeedCreate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] creating GitHub repository feed, %s", feed.GetName())
+	tflog.Info(ctx, fmt.Sprintf("creating GitHub repository feed, %s", feed.GetName()))
 
 	client := m.(*client.Client)
 	createdGitHubRepositoryFeed, err := client.Feeds.Add(feed)
@@ -43,12 +44,12 @@ func resourceGitHubRepositoryFeedCreate(ctx context.Context, d *schema.ResourceD
 
 	d.SetId(createdGitHubRepositoryFeed.GetID())
 
-	log.Printf("[INFO] GitHub repository feed created (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("GitHub repository feed created (%s)", d.Id()))
 	return nil
 }
 
 func resourceGitHubRepositoryFeedDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] deleting GitHub repository feed (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("deleting GitHub repository feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
 	err := client.Feeds.DeleteByID(d.Id())
@@ -58,30 +59,25 @@ func resourceGitHubRepositoryFeedDelete(ctx context.Context, d *schema.ResourceD
 
 	d.SetId("")
 
-	log.Printf("[INFO] GitHub repository feed deleted")
+	tflog.Info(ctx, "GitHub repository feed deleted")
 	return nil
 }
 
 func resourceGitHubRepositoryFeedRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] reading GitHub repository feed (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("reading GitHub repository feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feedResource, err := client.Feeds.GetByID(d.Id())
+	feed, err := client.Feeds.GetByID(d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "GitHub repository feed")
 	}
 
-	feedResource, err = feeds.ToFeed(feedResource.(*feeds.FeedResource))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	gitHubRepositoryFeed := feedResource.(*feeds.GitHubRepositoryFeed)
+	gitHubRepositoryFeed := feed.(*feeds.GitHubRepositoryFeed)
 	if err := setGitHubRepositoryFeed(ctx, d, gitHubRepositoryFeed); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] GitHub repository feed read (%s)", gitHubRepositoryFeed.GetID())
+	tflog.Info(ctx, fmt.Sprintf("GitHub repository feed read (%s)", gitHubRepositoryFeed.GetID()))
 	return nil
 }
 
@@ -91,7 +87,7 @@ func resourceGitHubRepositoryFeedUpdate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] updating GitHub repository feed (%s)", feed.GetID())
+	tflog.Info(ctx, fmt.Sprintf("updating GitHub repository feed (%s)", feed.GetID()))
 
 	client := m.(*client.Client)
 	updatedFeed, err := client.Feeds.Update(feed)
@@ -99,15 +95,10 @@ func resourceGitHubRepositoryFeedUpdate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	feedResource, err := feeds.ToFeed(updatedFeed.(*feeds.FeedResource))
-	if err != nil {
+	if err := setGitHubRepositoryFeed(ctx, d, updatedFeed.(*feeds.GitHubRepositoryFeed)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := setGitHubRepositoryFeed(ctx, d, feedResource.(*feeds.GitHubRepositoryFeed)); err != nil {
-		return diag.FromErr(err)
-	}
-
-	log.Printf("[INFO] GitHub repository feed updated (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("GitHub repository feed updated (%s)", d.Id()))
 	return nil
 }

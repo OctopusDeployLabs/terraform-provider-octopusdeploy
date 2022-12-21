@@ -13,38 +13,42 @@ import (
 func expandMavenFeed(d *schema.ResourceData) (*feeds.MavenFeed, error) {
 	name := d.Get("name").(string)
 
-	mavenFeed, err := feeds.NewMavenFeed(name)
+	feed, err := feeds.NewMavenFeed(name)
 	if err != nil {
 		return nil, err
 	}
 
-	mavenFeed.ID = d.Id()
+	feed.ID = d.Id()
 
 	if v, ok := d.GetOk("download_attempts"); ok {
-		mavenFeed.DownloadAttempts = v.(int)
+		feed.DownloadAttempts = v.(int)
 	}
 
 	if v, ok := d.GetOk("download_retry_backoff_seconds"); ok {
-		mavenFeed.DownloadRetryBackoffSeconds = v.(int)
+		feed.DownloadRetryBackoffSeconds = v.(int)
 	}
 
 	if v, ok := d.GetOk("feed_uri"); ok {
-		mavenFeed.FeedURI = v.(string)
+		feed.FeedURI = v.(string)
 	}
 
 	if v, ok := d.GetOk("package_acquisition_location_options"); ok {
-		mavenFeed.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
+		feed.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		mavenFeed.Password = core.NewSensitiveValue(v.(string))
+		feed.Password = core.NewSensitiveValue(v.(string))
+	}
+
+	if v, ok := d.GetOk("space_id"); ok {
+		feed.SpaceID = v.(string)
 	}
 
 	if v, ok := d.GetOk("username"); ok {
-		mavenFeed.Username = v.(string)
+		feed.Username = v.(string)
 	}
 
-	return mavenFeed, nil
+	return feed, nil
 }
 
 func getMavenFeedSchema() map[string]*schema.Schema {
@@ -84,19 +88,19 @@ func getMavenFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setMavenFeed(ctx context.Context, d *schema.ResourceData, mavenFeed *feeds.MavenFeed) error {
-	d.Set("download_attempts", mavenFeed.DownloadAttempts)
-	d.Set("download_retry_backoff_seconds", mavenFeed.DownloadRetryBackoffSeconds)
-	d.Set("feed_uri", mavenFeed.FeedURI)
-	d.Set("name", mavenFeed.Name)
-	d.Set("space_id", mavenFeed.SpaceID)
-	d.Set("username", mavenFeed.Username)
+func setMavenFeed(ctx context.Context, d *schema.ResourceData, feed *feeds.MavenFeed) error {
+	d.Set("download_attempts", feed.DownloadAttempts)
+	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
+	d.Set("feed_uri", feed.FeedURI)
+	d.Set("name", feed.Name)
+	d.Set("space_id", feed.SpaceID)
+	d.Set("username", feed.Username)
 
-	if err := d.Set("package_acquisition_location_options", mavenFeed.PackageAcquisitionLocationOptions); err != nil {
+	if err := d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions); err != nil {
 		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)
 	}
 
-	d.SetId(mavenFeed.GetID())
+	d.SetId(feed.GetID())
 
 	return nil
 }
