@@ -73,7 +73,7 @@ Read-Only:
 - `release_creation_strategy` (List of Object) (see [below for nested schema](#nestedatt--projects--release_creation_strategy))
 - `release_notes_template` (String)
 - `servicenow_extension_settings` (List of Object) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedatt--projects--servicenow_extension_settings))
-- `slug` (String)
+- `slug` (String) A human-readable, unique identifier, used to identify a project.
 - `space_id` (String) The space ID associated with this project.
 - `template` (List of Object) (see [below for nested schema](#nestedatt--projects--template))
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
