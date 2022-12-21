@@ -6,6 +6,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandVariable(d *schema.ResourceData) *variables.Variable {
@@ -40,21 +41,11 @@ func expandVariable(d *schema.ResourceData) *variables.Variable {
 		variable.Value = d.Get("value").(string)
 	}
 
-	variable.ID = d.Id()
-
-	varPrompt, ok := d.GetOk("prompt")
-	if ok {
-		tfPromptSettings := varPrompt.(*schema.Set)
-		if len(tfPromptSettings.List()) == 1 {
-			tfPromptList := tfPromptSettings.List()[0].(map[string]interface{})
-			newPrompt := variables.VariablePromptOptions{
-				Description: tfPromptList["description"].(string),
-				Label:       tfPromptList["label"].(string),
-				IsRequired:  tfPromptList["is_required"].(bool),
-			}
-			variable.Prompt = &newPrompt
-		}
+	if v, ok := d.GetOk("prompt"); ok {
+		variable.Prompt = expandPromptedVariableSettings(v)
 	}
+
+	variable.ID = d.Id()
 
 	return variable
 }
@@ -113,10 +104,61 @@ func getVariableSchema() map[string]*schema.Schema {
 			Type:          schema.TypeString,
 		},
 		"prompt": {
-			Elem:     &schema.Resource{Schema: getVariablePromptOptionsSchema()},
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"description": getDescriptionSchema("variable prompt option"),
+					"display_settings": {
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"control_type": {
+									Description: "The type of control for rendering this prompted variable. Valid types are `SingleLineText`, `MultiLineText`, `Checkbox`, `Select`.",
+									Required:    true,
+									Type:        schema.TypeString,
+									ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+										"Checkbox",
+										"MultiLineText",
+										"Select",
+										"SingleLineText",
+									}, false)),
+								},
+								"select_option": {
+									Elem: &schema.Resource{
+										Schema: map[string]*schema.Schema{
+											"value": {
+												Description: "The select value",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+											"display_name": {
+												Description: "The display name for the select value",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+										},
+									},
+									Description: "If the `control_type` is `Select`, then this value defines an option.",
+									Optional:    true,
+									Type:        schema.TypeList,
+								},
+							},
+						},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"is_required": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+					"label": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
 			MaxItems: 1,
 			Optional: true,
-			Type:     schema.TypeSet,
+			Type:     schema.TypeList,
 		},
 		"scope": {
 			Elem:     &schema.Resource{Schema: getVariableScopeSchema()},
@@ -154,6 +196,10 @@ func setVariable(ctx context.Context, d *schema.ResourceData, variable *variable
 		d.Set("value", nil)
 	} else {
 		d.Set("value", variable.Value)
+	}
+
+	if err := d.Set("prompt", flattenPromptedVariableSettings(variable.Prompt)); err != nil {
+		return fmt.Errorf("error setting prompted config: %s", err)
 	}
 
 	if err := d.Set("scope", flattenVariableScope(variable.Scope)); err != nil {

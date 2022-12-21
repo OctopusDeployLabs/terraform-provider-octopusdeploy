@@ -98,7 +98,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 - `owner_id` (String)
 - `pgp_key` (String, Sensitive)
 - `project_id` (String, Deprecated)
-- `prompt` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--prompt))
+- `prompt` (Block List, Max: 1) (see [below for nested schema](#nestedblock--prompt))
 - `scope` (Block List, Max: 1) (see [below for nested schema](#nestedblock--scope))
 - `sensitive_value` (String, Sensitive)
 - `value` (String)
@@ -115,8 +115,30 @@ resource "octopusdeploy_variable" "prompted_variable" {
 Optional:
 
 - `description` (String) The description of this variable prompt option.
+- `display_settings` (Block List, Max: 1) (see [below for nested schema](#nestedblock--prompt--display_settings))
 - `is_required` (Boolean)
 - `label` (String)
+
+<a id="nestedblock--prompt--display_settings"></a>
+### Nested Schema for `prompt.display_settings`
+
+Required:
+
+- `control_type` (String) The type of control for rendering this prompted variable. Valid types are `SingleLineText`, `MultiLineText`, `Checkbox`, `Select`.
+
+Optional:
+
+- `select_option` (Block List) If the `control_type` is `Select`, then this value defines an option. (see [below for nested schema](#nestedblock--prompt--display_settings--select_option))
+
+<a id="nestedblock--prompt--display_settings--select_option"></a>
+### Nested Schema for `prompt.display_settings.select_option`
+
+Required:
+
+- `display_name` (String) The display name for the select value
+- `value` (String) The select value
+
+
 
 
 <a id="nestedblock--scope"></a>
