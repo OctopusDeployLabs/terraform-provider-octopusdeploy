@@ -476,8 +476,11 @@ func getProjectSchema() map[string]*schema.Schema {
 			Type:        schema.TypeList,
 		},
 		"slug": {
-			Computed: true,
-			Type:     schema.TypeString,
+			Computed:         true,
+			Description:      "A human-readable, unique identifier, used to identify a project.",
+			Optional:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"space_id": {
 			Computed:         true,

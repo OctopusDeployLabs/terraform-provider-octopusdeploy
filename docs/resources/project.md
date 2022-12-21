@@ -92,6 +92,7 @@ resource "octopusdeploy_project" "example" {
 - `release_creation_strategy` (Block List, Max: 1) (see [below for nested schema](#nestedblock--release_creation_strategy))
 - `release_notes_template` (String)
 - `servicenow_extension_settings` (Block List, Max: 1) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedblock--servicenow_extension_settings))
+- `slug` (String) A human-readable, unique identifier, used to identify a project.
 - `space_id` (String) The space ID associated with this project.
 - `template` (Block List) (see [below for nested schema](#nestedblock--template))
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
@@ -100,7 +101,6 @@ resource "octopusdeploy_project" "example" {
 ### Read-Only
 
 - `deployment_process_id` (String)
-- `slug` (String)
 - `variable_set_id` (String)
 
 <a id="nestedblock--connectivity_policy"></a>
