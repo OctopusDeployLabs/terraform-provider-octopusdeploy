@@ -5,10 +5,10 @@ import (
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func expandGitPersistenceSettings(ctx context.Context, values interface{}, callback func(ctx context.Context, flattenedMap map[string]interface{}) credentials.GitCredential) projects.GitPersistenceSettings {
@@ -23,7 +23,7 @@ func expandGitPersistenceSettings(ctx context.Context, values interface{}, callb
 
 	flattenedMap := flattenedValues[0].(map[string]interface{})
 
-	tflog.Info(ctx, "expanding Git credentials")
+	tflog.Info(ctx, "expanding Git credentials...")
 
 	gitUrl, err := url.Parse(flattenedMap["url"].(string))
 	if err != nil {
@@ -31,8 +31,12 @@ func expandGitPersistenceSettings(ctx context.Context, values interface{}, callb
 	}
 
 	protectedBranches := []string{}
-	if flattenedMap["protected_branches"] != nil && len(flattenedMap["protected_branches"].([]interface{})) > 0 {
-		protectedBranches = getSliceFromTerraformTypeList(flattenedMap["protected_branches"])
+	if flattenedMap["protected_branches"] != nil {
+		list := flattenedMap["protected_branches"].(*schema.Set).List()
+		protectedBranches = make([]string, len(list))
+		for i, itemRaw := range list {
+			protectedBranches[i] = itemRaw.(string)
+		}
 	}
 
 	gitCredential := callback(ctx, flattenedMap)

@@ -13,38 +13,42 @@ import (
 func expandGitHubRepositoryFeed(d *schema.ResourceData) (*feeds.GitHubRepositoryFeed, error) {
 	name := d.Get("name").(string)
 
-	gitHubRepositoryFeed, err := feeds.NewGitHubRepositoryFeed(name)
+	feed, err := feeds.NewGitHubRepositoryFeed(name)
 	if err != nil {
 		return nil, err
 	}
 
-	gitHubRepositoryFeed.ID = d.Id()
+	feed.ID = d.Id()
 
 	if v, ok := d.GetOk("download_attempts"); ok {
-		gitHubRepositoryFeed.DownloadAttempts = v.(int)
+		feed.DownloadAttempts = v.(int)
 	}
 
 	if v, ok := d.GetOk("download_retry_backoff_seconds"); ok {
-		gitHubRepositoryFeed.DownloadRetryBackoffSeconds = v.(int)
+		feed.DownloadRetryBackoffSeconds = v.(int)
 	}
 
 	if v, ok := d.GetOk("feed_uri"); ok {
-		gitHubRepositoryFeed.FeedURI = v.(string)
+		feed.FeedURI = v.(string)
 	}
 
 	if v, ok := d.GetOk("package_acquisition_location_options"); ok {
-		gitHubRepositoryFeed.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
+		feed.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		gitHubRepositoryFeed.Password = core.NewSensitiveValue(v.(string))
+		feed.Password = core.NewSensitiveValue(v.(string))
+	}
+
+	if v, ok := d.GetOk("space_id"); ok {
+		feed.SpaceID = v.(string)
 	}
 
 	if v, ok := d.GetOk("username"); ok {
-		gitHubRepositoryFeed.Username = v.(string)
+		feed.Username = v.(string)
 	}
 
-	return gitHubRepositoryFeed, nil
+	return feed, nil
 }
 
 func getGitHubRepositoryFeedSchema() map[string]*schema.Schema {
@@ -84,19 +88,19 @@ func getGitHubRepositoryFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setGitHubRepositoryFeed(ctx context.Context, d *schema.ResourceData, githubRepositoryFeed *feeds.GitHubRepositoryFeed) error {
-	d.Set("download_attempts", githubRepositoryFeed.DownloadAttempts)
-	d.Set("download_retry_backoff_seconds", githubRepositoryFeed.DownloadRetryBackoffSeconds)
-	d.Set("feed_uri", githubRepositoryFeed.FeedURI)
-	d.Set("name", githubRepositoryFeed.Name)
-	d.Set("space_id", githubRepositoryFeed.SpaceID)
-	d.Set("username", githubRepositoryFeed.Username)
+func setGitHubRepositoryFeed(ctx context.Context, d *schema.ResourceData, feed *feeds.GitHubRepositoryFeed) error {
+	d.Set("download_attempts", feed.DownloadAttempts)
+	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
+	d.Set("feed_uri", feed.FeedURI)
+	d.Set("name", feed.Name)
+	d.Set("space_id", feed.SpaceID)
+	d.Set("username", feed.Username)
 
-	if err := d.Set("package_acquisition_location_options", githubRepositoryFeed.PackageAcquisitionLocationOptions); err != nil {
+	if err := d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions); err != nil {
 		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)
 	}
 
-	d.SetId(githubRepositoryFeed.GetID())
+	d.SetId(feed.GetID())
 
 	return nil
 }

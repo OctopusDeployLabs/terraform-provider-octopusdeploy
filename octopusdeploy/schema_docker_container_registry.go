@@ -13,42 +13,46 @@ import (
 func expandDockerContainerRegistry(d *schema.ResourceData) (*feeds.DockerContainerRegistry, error) {
 	name := d.Get("name").(string)
 
-	dockerContainerRegistry, err := feeds.NewDockerContainerRegistry(name)
+	feed, err := feeds.NewDockerContainerRegistry(name)
 	if err != nil {
 		return nil, err
 	}
 
-	dockerContainerRegistry.ID = d.Id()
+	feed.ID = d.Id()
 
 	if v, ok := d.GetOk("api_version"); ok {
-		dockerContainerRegistry.APIVersion = v.(string)
+		feed.APIVersion = v.(string)
 	}
 
 	if v, ok := d.GetOk("feed_uri"); ok {
-		dockerContainerRegistry.FeedURI = v.(string)
+		feed.FeedURI = v.(string)
 	}
 
 	if v, ok := d.GetOk("registry_path"); ok {
-		dockerContainerRegistry.RegistryPath = v.(string)
+		feed.RegistryPath = v.(string)
 	}
 
 	if v, ok := d.GetOk("space_id"); ok {
-		dockerContainerRegistry.SpaceID = v.(string)
+		feed.SpaceID = v.(string)
 	}
 
 	if v, ok := d.GetOk("package_acquisition_location_options"); ok {
-		dockerContainerRegistry.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
+		feed.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		dockerContainerRegistry.Password = core.NewSensitiveValue(v.(string))
+		feed.Password = core.NewSensitiveValue(v.(string))
+	}
+
+	if v, ok := d.GetOk("space_id"); ok {
+		feed.SpaceID = v.(string)
 	}
 
 	if v, ok := d.GetOk("username"); ok {
-		dockerContainerRegistry.Username = v.(string)
+		feed.Username = v.(string)
 	}
 
-	return dockerContainerRegistry, nil
+	return feed, nil
 }
 
 func getDockerContainerRegistrySchema() map[string]*schema.Schema {
@@ -86,19 +90,19 @@ func getDockerContainerRegistrySchema() map[string]*schema.Schema {
 	}
 }
 
-func setDockerContainerRegistry(ctx context.Context, d *schema.ResourceData, dockerContainerRegistry *feeds.DockerContainerRegistry) error {
-	d.Set("api_version", dockerContainerRegistry.APIVersion)
-	d.Set("feed_uri", dockerContainerRegistry.FeedURI)
-	d.Set("name", dockerContainerRegistry.Name)
-	d.Set("registry_path", dockerContainerRegistry.RegistryPath)
-	d.Set("space_id", dockerContainerRegistry.SpaceID)
-	d.Set("username", dockerContainerRegistry.Username)
+func setDockerContainerRegistry(ctx context.Context, d *schema.ResourceData, feed *feeds.DockerContainerRegistry) error {
+	d.Set("api_version", feed.APIVersion)
+	d.Set("feed_uri", feed.FeedURI)
+	d.Set("name", feed.Name)
+	d.Set("registry_path", feed.RegistryPath)
+	d.Set("space_id", feed.SpaceID)
+	d.Set("username", feed.Username)
 
-	if err := d.Set("package_acquisition_location_options", dockerContainerRegistry.PackageAcquisitionLocationOptions); err != nil {
+	if err := d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions); err != nil {
 		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)
 	}
 
-	d.SetId(dockerContainerRegistry.GetID())
+	d.SetId(feed.GetID())
 
 	return nil
 }

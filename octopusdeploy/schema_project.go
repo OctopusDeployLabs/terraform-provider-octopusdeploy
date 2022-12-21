@@ -296,22 +296,22 @@ func getProjectSchema() map[string]*schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
-					"git_credential_id": {
-						Required:         true,
-						Type:             schema.TypeString,
-						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
-					},
 					"default_branch": {
 						Default:     "main",
 						Description: "The default branch associated with these version control settings.",
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"git_credential_id": {
+						Required:         true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+					},
 					"protected_branches": {
 						Description: "A list of protected branch patterns.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						Optional:    true,
-						Type:        schema.TypeList,
+						Type:        schema.TypeSet,
 					},
 					"url": {
 						Description:      "The URL associated with these version control settings.",
@@ -336,6 +336,12 @@ func getProjectSchema() map[string]*schema.Schema {
 						Optional:    true,
 						Type:        schema.TypeString,
 					},
+					"default_branch": {
+						Default:     "main",
+						Description: "The default branch associated with these version control settings.",
+						Optional:    true,
+						Type:        schema.TypeString,
+					},
 					"password": {
 						Description:      "The password for the Git credential.",
 						Required:         true,
@@ -343,29 +349,23 @@ func getProjectSchema() map[string]*schema.Schema {
 						Type:             schema.TypeString,
 						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 					},
-					"username": {
-						Description:      "The username for the Git credential.",
-						Required:         true,
-						Type:             schema.TypeString,
-						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-					},
-					"default_branch": {
-						Default:     "main",
-						Description: "The default branch associated with these version control settings.",
-						Optional:    true,
-						Type:        schema.TypeString,
-					},
 					"protected_branches": {
 						Description: "A list of protected branch patterns.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						Optional:    true,
-						Type:        schema.TypeList,
+						Type:        schema.TypeSet,
 					},
 					"url": {
 						Description:      "The URL associated with these version control settings.",
 						Required:         true,
 						Type:             schema.TypeString,
 						ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
+					},
+					"username": {
+						Description:      "The username for the Git credential.",
+						Required:         true,
+						Type:             schema.TypeString,
+						ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 					},
 				},
 			},
@@ -394,7 +394,7 @@ func getProjectSchema() map[string]*schema.Schema {
 						Description: "A list of protected branch patterns.",
 						Elem:        &schema.Schema{Type: schema.TypeString},
 						Optional:    true,
-						Type:        schema.TypeList,
+						Type:        schema.TypeSet,
 					},
 					"url": {
 						Description:      "The URL associated with these version control settings.",

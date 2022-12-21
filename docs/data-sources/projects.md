@@ -98,7 +98,7 @@ Read-Only:
 
 - `base_path` (String)
 - `default_branch` (String)
-- `protected_branches` (List of String)
+- `protected_branches` (Set of String)
 - `url` (String)
 
 
@@ -110,7 +110,7 @@ Read-Only:
 - `base_path` (String)
 - `default_branch` (String)
 - `git_credential_id` (String)
-- `protected_branches` (List of String)
+- `protected_branches` (Set of String)
 - `url` (String)
 
 
@@ -122,7 +122,7 @@ Read-Only:
 - `base_path` (String)
 - `default_branch` (String)
 - `password` (String)
-- `protected_branches` (List of String)
+- `protected_branches` (Set of String)
 - `url` (String)
 - `username` (String)
 
