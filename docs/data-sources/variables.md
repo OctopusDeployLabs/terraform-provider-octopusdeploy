@@ -43,7 +43,7 @@ Read-Only:
 - `owner_id` (String)
 - `pgp_key` (String, Sensitive)
 - `project_id` (String, Deprecated)
-- `prompt` (Set of Object) (see [below for nested schema](#nestedatt--variables--prompt))
+- `prompt` (List of Object) (see [below for nested schema](#nestedatt--variables--prompt))
 - `scope` (List of Object) (see [below for nested schema](#nestedatt--variables--scope))
 - `sensitive_value` (String, Sensitive)
 - `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
@@ -55,8 +55,27 @@ Read-Only:
 Read-Only:
 
 - `description` (String)
+- `display_settings` (List of Object) (see [below for nested schema](#nestedobjatt--variables--prompt--display_settings))
 - `is_required` (Boolean)
 - `label` (String)
+
+<a id="nestedobjatt--variables--prompt--display_settings"></a>
+### Nested Schema for `variables.prompt.display_settings`
+
+Read-Only:
+
+- `control_type` (String)
+- `select_option` (List of Object) (see [below for nested schema](#nestedobjatt--variables--prompt--display_settings--select_option))
+
+<a id="nestedobjatt--variables--prompt--display_settings--select_option"></a>
+### Nested Schema for `variables.prompt.display_settings.select_option`
+
+Read-Only:
+
+- `display_name` (String)
+- `value` (String)
+
+
 
 
 <a id="nestedatt--variables--scope"></a>
