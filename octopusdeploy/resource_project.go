@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
@@ -41,8 +40,8 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	if persistenceSettings != nil && persistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
-		tflog.Info(ctx, fmt.Sprintf("converting project to use VCS (%s)", d.Id()))
-		vcsProject, err := client.Projects.ConvertToVcs(createdProject, "converting project to use VCS", persistenceSettings.(projects.GitPersistenceSettings))
+		tflog.Info(ctx, "converting project to use VCS")
+		vcsProject, err := client.Projects.ConvertToVcs(createdProject, "converting project to use VCS", "octopus-vcs-conversion", persistenceSettings.(projects.GitPersistenceSettings))
 		if err != nil {
 			client.Projects.DeleteByID(createdProject.GetID())
 			return diag.FromErr(err)
@@ -66,14 +65,14 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] deleting project (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("deleting project (%s)", d.Id()))
 
 	client := m.(*client.Client)
 	if err := client.Projects.DeleteByID(d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] project deleted (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("project deleted (%s)", d.Id()))
 	d.SetId("")
 	return nil
 }
@@ -113,9 +112,11 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 		if len(convertToVcsLink) != 0 {
 			versionControlSettings := expandVersionControlSettingsForProjectConversion(ctx, d)
+
 			tflog.Info(ctx, fmt.Sprintf("converting project to use VCS (%s)", d.Id()))
+
 			project.Links["ConvertToVcs"] = convertToVcsLink
-			vcsProject, err := client.Projects.ConvertToVcs(project, "converting project to use VCS", versionControlSettings)
+			vcsProject, err := client.Projects.ConvertToVcs(project, "converting project to use VCS", "octopus-vcs-conversion", versionControlSettings)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -134,6 +135,6 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] project updated (%s)", d.Id())
+	tflog.Info(ctx, fmt.Sprintf("project updated (%s)", d.Id()))
 	return nil
 }

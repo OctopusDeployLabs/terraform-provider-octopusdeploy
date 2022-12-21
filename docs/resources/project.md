@@ -125,7 +125,7 @@ Optional:
 
 - `base_path` (String) The base path associated with these version control settings.
 - `default_branch` (String) The default branch associated with these version control settings.
-- `protected_branches` (List of String) A list of protected branch patterns.
+- `protected_branches` (Set of String) A list of protected branch patterns.
 
 
 <a id="nestedblock--git_library_persistence_settings"></a>
@@ -140,7 +140,7 @@ Optional:
 
 - `base_path` (String) The base path associated with these version control settings.
 - `default_branch` (String) The default branch associated with these version control settings.
-- `protected_branches` (List of String) A list of protected branch patterns.
+- `protected_branches` (Set of String) A list of protected branch patterns.
 
 
 <a id="nestedblock--git_username_password_persistence_settings"></a>
@@ -156,7 +156,7 @@ Optional:
 
 - `base_path` (String) The base path associated with these version control settings.
 - `default_branch` (String) The default branch associated with these version control settings.
-- `protected_branches` (List of String) A list of protected branch patterns.
+- `protected_branches` (Set of String) A list of protected branch patterns.
 
 
 <a id="nestedblock--jira_service_management_extension_settings"></a>
