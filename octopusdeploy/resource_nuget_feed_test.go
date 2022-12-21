@@ -21,6 +21,8 @@ func TestAccOctopusDeployNuGetFeedBasic(t *testing.T) {
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
+	updatedName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -36,6 +38,17 @@ func TestAccOctopusDeployNuGetFeedBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "username", username),
 				),
 				Config: testAccNuGetFeed(localName, name, feedURI, username, password, isEnhancedMode),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testOctopusDeployNuGetFeedExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "feed_uri", feedURI),
+					resource.TestCheckResourceAttr(prefix, "is_enhanced_mode", strconv.FormatBool(isEnhancedMode)),
+					resource.TestCheckResourceAttr(prefix, "name", updatedName),
+					resource.TestCheckResourceAttr(prefix, "password", password),
+					resource.TestCheckResourceAttr(prefix, "username", username),
+				),
+				Config: testAccNuGetFeed(localName, updatedName, feedURI, username, password, isEnhancedMode),
 			},
 		},
 	})

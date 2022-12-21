@@ -16,22 +16,22 @@ func expandAwsElasticContainerRegistry(d *schema.ResourceData) (*feeds.AwsElasti
 	secretKey := core.NewSensitiveValue(d.Get("secret_key").(string))
 	region := d.Get("region").(string)
 
-	awsElasticContainerRegistry, err := feeds.NewAwsElasticContainerRegistry(name, accessKey, secretKey, region)
+	feed, err := feeds.NewAwsElasticContainerRegistry(name, accessKey, secretKey, region)
 	if err != nil {
 		return nil, err
 	}
 
-	awsElasticContainerRegistry.ID = d.Id()
+	feed.ID = d.Id()
 
 	if v, ok := d.GetOk("package_acquisition_location_options"); ok {
-		awsElasticContainerRegistry.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
+		feed.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("space_id"); ok {
-		awsElasticContainerRegistry.SpaceID = v.(string)
+		feed.SpaceID = v.(string)
 	}
 
-	return awsElasticContainerRegistry, nil
+	return feed, nil
 }
 
 func getAwsElasticContainerRegistrySchema() map[string]*schema.Schema {
@@ -79,17 +79,17 @@ func getAwsElasticContainerRegistrySchema() map[string]*schema.Schema {
 	}
 }
 
-func setAwsElasticContainerRegistry(ctx context.Context, d *schema.ResourceData, awsElasticContainerRegistry *feeds.AwsElasticContainerRegistry) error {
-	d.Set("access_key", awsElasticContainerRegistry.AccessKey)
-	d.Set("name", awsElasticContainerRegistry.Name)
-	d.Set("space_id", awsElasticContainerRegistry.SpaceID)
-	d.Set("region", awsElasticContainerRegistry.Region)
+func setAwsElasticContainerRegistry(ctx context.Context, d *schema.ResourceData, feed *feeds.AwsElasticContainerRegistry) error {
+	d.Set("access_key", feed.AccessKey)
+	d.Set("name", feed.Name)
+	d.Set("space_id", feed.SpaceID)
+	d.Set("region", feed.Region)
 
-	if err := d.Set("package_acquisition_location_options", awsElasticContainerRegistry.PackageAcquisitionLocationOptions); err != nil {
+	if err := d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions); err != nil {
 		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)
 	}
 
-	d.SetId(awsElasticContainerRegistry.GetID())
+	d.SetId(feed.GetID())
 
 	return nil
 }

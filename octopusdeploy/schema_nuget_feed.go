@@ -14,38 +14,42 @@ func expandNuGetFeed(d *schema.ResourceData) (*feeds.NuGetFeed, error) {
 	name := d.Get("name").(string)
 	feedURI := d.Get("feed_uri").(string)
 
-	nuGetFeed, err := feeds.NewNuGetFeed(name, feedURI)
+	feed, err := feeds.NewNuGetFeed(name, feedURI)
 	if err != nil {
 		return nil, err
 	}
 
-	nuGetFeed.ID = d.Id()
+	feed.ID = d.Id()
 
 	if v, ok := d.GetOk("download_attempts"); ok {
-		nuGetFeed.DownloadAttempts = v.(int)
+		feed.DownloadAttempts = v.(int)
 	}
 
 	if v, ok := d.GetOk("download_retry_backoff_seconds"); ok {
-		nuGetFeed.DownloadRetryBackoffSeconds = v.(int)
+		feed.DownloadRetryBackoffSeconds = v.(int)
 	}
 
 	if v, ok := d.GetOk("is_enhanced_mode"); ok {
-		nuGetFeed.EnhancedMode = v.(bool)
+		feed.EnhancedMode = v.(bool)
 	}
 
 	if v, ok := d.GetOk("package_acquisition_location_options"); ok {
-		nuGetFeed.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
+		feed.PackageAcquisitionLocationOptions = getSliceFromTerraformTypeList(v)
 	}
 
 	if v, ok := d.GetOk("password"); ok {
-		nuGetFeed.Password = core.NewSensitiveValue(v.(string))
+		feed.Password = core.NewSensitiveValue(v.(string))
+	}
+
+	if v, ok := d.GetOk("space_id"); ok {
+		feed.SpaceID = v.(string)
 	}
 
 	if v, ok := d.GetOk("username"); ok {
-		nuGetFeed.Username = v.(string)
+		feed.Username = v.(string)
 	}
 
-	return nuGetFeed, nil
+	return feed, nil
 }
 
 func getNuGetFeedSchema() map[string]*schema.Schema {
@@ -92,19 +96,20 @@ func getNuGetFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setNuGetFeed(ctx context.Context, d *schema.ResourceData, nuGetFeed *feeds.NuGetFeed) error {
-	d.Set("download_attempts", nuGetFeed.DownloadAttempts)
-	d.Set("download_retry_backoff_seconds", nuGetFeed.DownloadRetryBackoffSeconds)
-	d.Set("feed_uri", nuGetFeed.FeedURI)
-	d.Set("is_enhanced_mode", nuGetFeed.EnhancedMode)
-	d.Set("name", nuGetFeed.Name)
-	d.Set("username", nuGetFeed.Username)
+func setNuGetFeed(ctx context.Context, d *schema.ResourceData, feed *feeds.NuGetFeed) error {
+	d.Set("download_attempts", feed.DownloadAttempts)
+	d.Set("download_retry_backoff_seconds", feed.DownloadRetryBackoffSeconds)
+	d.Set("feed_uri", feed.FeedURI)
+	d.Set("is_enhanced_mode", feed.EnhancedMode)
+	d.Set("name", feed.Name)
+	d.Set("space_id", feed.SpaceID)
+	d.Set("username", feed.Username)
 
-	if err := d.Set("package_acquisition_location_options", nuGetFeed.PackageAcquisitionLocationOptions); err != nil {
+	if err := d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions); err != nil {
 		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)
 	}
 
-	d.SetId(nuGetFeed.GetID())
+	d.SetId(feed.GetID())
 
 	return nil
 }
