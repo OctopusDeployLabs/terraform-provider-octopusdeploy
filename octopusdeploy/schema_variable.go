@@ -3,8 +3,10 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func expandVariable(d *schema.ResourceData) *variables.Variable {
@@ -102,7 +104,58 @@ func getVariableSchema() map[string]*schema.Schema {
 			Type:          schema.TypeString,
 		},
 		"prompt": {
-			Elem:     &schema.Resource{Schema: getVariablePromptOptionsSchema()},
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"description": getDescriptionSchema("variable prompt option"),
+					"display_settings": {
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"control_type": {
+									Description: "The type of control for rendering this prompted variable. Valid types are `SingleLineText`, `MultiLineText`, `Checkbox`, `Select`.",
+									Required:    true,
+									Type:        schema.TypeString,
+									ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+										"Checkbox",
+										"MultiLineText",
+										"Select",
+										"SingleLineText",
+									}, false)),
+								},
+								"select_option": {
+									Elem: &schema.Resource{
+										Schema: map[string]*schema.Schema{
+											"value": {
+												Description: "The select value",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+											"display_name": {
+												Description: "The display name for the select value",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+										},
+									},
+									Description: "If the `control_type` is `Select`, then this value defines an option.",
+									Optional:    true,
+									Type:        schema.TypeList,
+								},
+							},
+						},
+						MaxItems: 1,
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"is_required": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+					"label": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
 			MaxItems: 1,
 			Optional: true,
 			Type:     schema.TypeList,
