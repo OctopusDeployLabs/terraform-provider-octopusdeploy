@@ -41,7 +41,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if persistenceSettings != nil && persistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 		tflog.Info(ctx, "converting project to use VCS")
-		vcsProject, err := client.Projects.ConvertToVcs(createdProject, "converting project to use VCS", "octopus-vcs-conversion", persistenceSettings.(projects.GitPersistenceSettings))
+		vcsProject, err := client.Projects.ConvertToVcs(createdProject, "converting project to use VCS", "", persistenceSettings.(projects.GitPersistenceSettings))
 		if err != nil {
 			client.Projects.DeleteByID(createdProject.GetID())
 			return diag.FromErr(err)
