@@ -162,6 +162,13 @@ func addTerraformTemplateParametersSchema(element *schema.Resource) {
 	}
 }
 
+func addTerraformInlineTemplateSchema(element *schema.Resource) {
+	element.Schema["inline_template"] = &schema.Schema{
+		Optional: true,
+		Type:     schema.TypeString,
+	}
+}
+
 func addTerraformTemplateSchema(element *schema.Resource) {
 	element.Schema["template"] = &schema.Schema{
 		Elem: &schema.Resource{
@@ -241,6 +248,10 @@ func expandApplyTerraformTemplateAction(flattenedAction map[string]interface{}) 
 
 	if v, ok := flattenedAction["template_parameters"]; ok {
 		action.Properties["Octopus.Action.Terraform.TemplateParameters"] = core.NewPropertyValue(v.(string), false)
+	}
+
+	if v, ok := flattenedAction["inline_template"]; ok {
+		action.Properties["Octopus.Action.Terraform.Template"] = core.NewPropertyValue(v.(string), false)
 	}
 
 	if _, ok := flattenedAction["primary_package"]; ok {
@@ -507,7 +518,7 @@ func flattenApplyTerraformTemplateAction(action *deployments.DeploymentAction) m
 				flattenedAction["aws_account"] = flattenTerraformTemplateAwsAccount(action.Properties)
 			}
 		case "Octopus.Action.Terraform.Template":
-			flattenedAction["template"] = v.Value
+			flattenedAction["inline_template"] = v.Value
 		case "Octopus.Action.Terraform.TemplateParameters":
 			flattenedAction["template_parameters"] = v.Value
 		}
@@ -527,6 +538,7 @@ func getApplyTerraformTemplateActionSchema() *schema.Schema {
 	addTerraformTemplateGoogleAccountSchema(element)
 	addTerraformTemplateParametersSchema(element)
 	addTerraformTemplateSchema(element)
+	addTerraformInlineTemplateSchema(element)
 	addPrimaryPackageSchema(element, false)
 
 	return actionSchema
