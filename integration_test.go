@@ -1,18 +1,43 @@
 package main
 
+/*
+	To test the Octopus Terraform provider locally, save the following into a failed called ~/.terraformrc, replacing
+	/var/home/yourname/Code/terraform-provider-octopusdeploy with the directory containing your clone
+	of the git repo:
+
+		provider_installation {
+		  dev_overrides {
+			"octopusdeploylabs/octopusdeploy" = "/var/home/yourname/Code/terraform-provider-octopusdeploy"
+		  }
+
+		  direct {}
+		}
+
+	Then build the provider executable with the command:
+
+		go build -o terraform-provider-octopusdeploy main.go
+
+	Terraform will then use the local executable rather than download the provider from the registry.
+*/
+
 import (
 	"context"
 	"errors"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/filters"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tagsets"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
 	"github.com/avast/retry-go/v4"
@@ -1517,1691 +1542,1009 @@ func TestProjectChannelResource(t *testing.T) {
 	})
 }
 
-//// TestTagSetExport verifies that a tag set can be reimported with the correct settings
-//func TestTagSetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/21-tagset", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.TagSet]{}
-//		err = octopusClient.GetAllResources("TagSets", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "tag1"
-//		found := false
-//		for _, v := range collection.Items {
-//			if v.Name == resourceName {
-//				found = true
-//
-//				if strutil.EmptyIfNil(v.Description) != "Test tagset" {
-//					t.Fatal("The tag set must be have a description of \"Test tagset\" (was \"" + strutil.EmptyIfNil(v.Description) + "\")")
-//				}
-//
-//				if v.SortOrder != 0 {
-//					t.Fatal("The tag set must be have a sort order of \"0\" (was \"" + fmt.Sprint(v.SortOrder) + "\")")
-//				}
-//
-//				tagAFound := false
-//				for _, u := range v.Tags {
-//					if u.Name == "a" {
-//						tagAFound = true
-//
-//						if strutil.EmptyIfNil(u.Description) != "tag a" {
-//							t.Fatal("The tag a must be have a description of \"tag a\" (was \"" + strutil.EmptyIfNil(u.Description) + "\")")
-//						}
-//
-//						if u.Color != "#333333" {
-//							t.Fatal("The tag a must be have a color of \"#333333\" (was \"" + u.Color + "\")")
-//						}
-//
-//						if u.SortOrder != 2 {
-//							t.Fatal("The tag a must be have a sort order of \"2\" (was \"" + fmt.Sprint(u.SortOrder) + "\")")
-//						}
-//					}
-//				}
-//
-//				if !tagAFound {
-//					t.Fatal("Tag Set must have an tag called \"a\"")
-//				}
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an tag set called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestGitCredentialsExport verifies that a git credential can be reimported with the correct settings
-//func TestGitCredentialsExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/22-gitcredentialtest", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{
-//			"-var=gitcredential_test=whatever",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.GitCredentials]{}
-//		err = octopusClient.GetAllResources("Git-Credentials", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "test"
-//		found := false
-//		for _, v := range collection.Items {
-//			if v.Name == resourceName {
-//				found = true
-//
-//				if strutil.EmptyIfNil(v.Description) != "test git credential" {
-//					t.Fatal("The git credential must be have a description of \"test git credential\" (was \"" + strutil.EmptyIfNil(v.Description) + "\")")
-//				}
-//
-//				if v.Details.Username != "admin" {
-//					t.Fatal("The git credential must be have a username of \"admin\" (was \"" + v.Details.Username + "\")")
-//				}
-//
-//				if v.Details.Type != "UsernamePassword" {
-//					t.Fatal("The git credential must be have a credential type of \"UsernamePassword\" (was \"" + v.Details.Type + "\")")
-//				}
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an git credential called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestScriptModuleExport verifies that a script module set can be reimported with the correct settings
-//func TestScriptModuleExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/23-scriptmodule", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.LibraryVariableSet]{}
-//		err = octopusClient.GetAllResources("LibraryVariableSets", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test2"
-//		found := false
-//		for _, v := range collection.Items {
-//			if v.Name == resourceName {
-//				found = true
-//
-//				if strutil.EmptyIfNil(v.Description) != "Test script module" {
-//					t.Fatal("The library variable set must be have a description of \"Test script module\" (was \"" + strutil.EmptyIfNil(v.Description) + "\")")
-//				}
-//
-//				resource := octopus.VariableSet{}
-//				_, err = octopusClient.GetResourceById("Variables", v.VariableSetId, &resource)
-//
-//				if len(resource.Variables) != 2 {
-//					t.Fatal("The library variable set must have two associated variables")
-//				}
-//
-//				foundScript := false
-//				foundLanguage := false
-//				for _, u := range resource.Variables {
-//					if u.Name == "Octopus.Script.Module[Test2]" {
-//						foundScript = true
-//
-//						if u.Type != "String" {
-//							t.Fatal("The library variable set variable must have a type of \"String\"")
-//						}
-//
-//						if strutil.EmptyIfNil(u.Value) != "echo \"hi\"" {
-//							t.Fatal("The library variable set variable must have a value of \"\"echo \\\"hi\\\"\"\"")
-//						}
-//
-//						if u.IsSensitive {
-//							t.Fatal("The library variable set variable must not be sensitive")
-//						}
-//
-//						if !u.IsEditable {
-//							t.Fatal("The library variable set variable must be editable")
-//						}
-//					}
-//
-//					if u.Name == "Octopus.Script.Module.Language[Test2]" {
-//						foundLanguage = true
-//
-//						if u.Type != "String" {
-//							t.Fatal("The library variable set variable must have a type of \"String\"")
-//						}
-//
-//						if strutil.EmptyIfNil(u.Value) != "PowerShell" {
-//							t.Fatal("The library variable set variable must have a value of \"PowerShell\"")
-//						}
-//
-//						if u.IsSensitive {
-//							t.Fatal("The library variable set variable must not be sensitive")
-//						}
-//
-//						if !u.IsEditable {
-//							t.Fatal("The library variable set variable must be editable")
-//						}
-//					}
-//				}
-//
-//				if !foundLanguage || !foundScript {
-//					t.Fatal("Script module must create two variables for script and language")
-//				}
-//
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an library variable set called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestTenantsExport verifies that a git credential can be reimported with the correct settings
-//func TestTenantsExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/24-tenants", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.Tenant]{}
-//		err = octopusClient.GetAllResources("Tenants", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Team A"
-//		found := false
-//		for _, v := range collection.Items {
-//			if v.Name == resourceName {
-//				found = true
-//
-//				if strutil.EmptyIfNil(v.Description) != "Test tenant" {
-//					t.Fatal("The tenant must be have a description of \"tTest tenant\" (was \"" + strutil.EmptyIfNil(v.Description) + "\")")
-//				}
-//
-//				if len(v.TenantTags) != 2 {
-//					t.Fatal("The tenant must have two tags")
-//				}
-//
-//				if len(v.ProjectEnvironments) != 1 {
-//					t.Fatal("The tenant must have one project environment")
-//				}
-//
-//				for _, u := range v.ProjectEnvironments {
-//					if len(u) != 3 {
-//						t.Fatal("The tenant must have be linked to three environments")
-//					}
-//				}
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an tenant called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestCertificateExport verifies that a certificate can be reimported with the correct settings
-//func TestCertificateExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/25-certificates", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{
-//			"-var=certificate_test_data=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",
-//			"-var=certificate_test_password=Password01!",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.Certificate]{}
-//		err = octopusClient.GetAllResources("Certificates", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		found := false
-//		for _, v := range collection.Items {
-//			if v.Name == resourceName {
-//				found = true
-//
-//				if v.Notes != "A test certificate" {
-//					t.Fatal("The tenant must be have a description of \"A test certificate\" (was \"" + v.Notes + "\")")
-//				}
-//
-//				if v.TenantedDeploymentParticipation != "Untenanted" {
-//					t.Fatal("The tenant must be have a tenant participation of \"Untenanted\" (was \"" + v.TenantedDeploymentParticipation + "\")")
-//				}
-//
-//				if v.SubjectDistinguishedName != "CN=test.com" {
-//					t.Fatal("The tenant must be have a subject distinguished name of \"CN=test.com\" (was \"" + v.SubjectDistinguishedName + "\")")
-//				}
-//
-//				if len(v.EnvironmentIds) != 0 {
-//					t.Fatal("The tenant must have one project environment")
-//				}
-//
-//				if len(v.TenantTags) != 0 {
-//					t.Fatal("The tenant must have no tenant tags")
-//				}
-//
-//				if len(v.TenantIds) != 0 {
-//					t.Fatal("The tenant must have no tenants")
-//				}
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an tenant called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestTenantVariablesExport verifies that a tenant variables can be reimported with the correct settings
-//func TestTenantVariablesExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/26-tenant_variables", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := []octopus.TenantVariable{}
-//		err = octopusClient.GetAllResources("TenantVariables/All", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		found := false
-//		for _, tenantVariable := range collection {
-//			for _, project := range tenantVariable.ProjectVariables {
-//				if project.ProjectName == resourceName {
-//					for _, variables := range project.Variables {
-//						for _, value := range variables {
-//							// we expect one project variable to be defined
-//							found = true
-//							if value != "my value" {
-//								t.Fatal("The tenant project variable must have a value of \"my value\" (was \"" + value + "\")")
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an tenant project variable for the project called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestMachinePolicyExport verifies that a machine policies can be reimported with the correct settings
-//func TestMachinePolicyExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/27-machinepolicy", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.MachinePolicy]{}
-//		err = octopusClient.GetAllResources("MachinePolicies", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Testing"
-//		found := false
-//		for _, machinePolicy := range collection.Items {
-//			if machinePolicy.Name == resourceName {
-//				found = true
-//
-//				if strutil.EmptyIfNil(machinePolicy.Description) != "test machine policy" {
-//					t.Fatal("The machine policy must have a description of \"test machine policy\" (was \"" + strutil.EmptyIfNil(machinePolicy.Description) + "\")")
-//				}
-//
-//				if machinePolicy.ConnectionConnectTimeout != "00:01:00" {
-//					t.Fatal("The machine policy must have a ConnectionConnectTimeout of \"00:01:00\" (was \"" + machinePolicy.ConnectionConnectTimeout + "\")")
-//				}
-//
-//				if *machinePolicy.ConnectionRetryCountLimit != 5 {
-//					t.Fatal("The machine policy must have a ConnectionRetryCountLimit of \"5\" (was \"" + fmt.Sprint(machinePolicy.ConnectionRetryCountLimit) + "\")")
-//				}
-//
-//				if machinePolicy.ConnectionRetrySleepInterval != "00:00:01" {
-//					t.Fatal("The machine policy must have a ConnectionRetrySleepInterval of \"00:00:01\" (was \"" + machinePolicy.ConnectionRetrySleepInterval + "\")")
-//				}
-//
-//				if machinePolicy.ConnectionRetryTimeLimit != "00:05:00" {
-//					t.Fatal("The machine policy must have a ConnectionRetryTimeLimit of \"00:05:00\" (was \"" + machinePolicy.ConnectionRetryTimeLimit + "\")")
-//				}
-//
-//				if machinePolicy.PollingRequestMaximumMessageProcessingTimeout != "00:10:00" {
-//					t.Fatal("The machine policy must have a PollingRequestMaximumMessageProcessingTimeout of \"00:10:00\" (was \"" + machinePolicy.PollingRequestMaximumMessageProcessingTimeout + "\")")
-//				}
-//
-//				if machinePolicy.MachineCleanupPolicy.DeleteMachinesElapsedTimeSpan != "00:20:00" {
-//					t.Fatal("The machine policy must have a DeleteMachinesElapsedTimeSpan of \"00:20:00\" (was \"" + machinePolicy.MachineCleanupPolicy.DeleteMachinesElapsedTimeSpan + "\")")
-//				}
-//
-//				if machinePolicy.MachineCleanupPolicy.DeleteMachinesBehavior != "DeleteUnavailableMachines" {
-//					t.Fatal("The machine policy must have a MachineCleanupPolicy.DeleteMachinesBehavior of \"DeleteUnavailableMachines\" (was \"" + machinePolicy.MachineCleanupPolicy.DeleteMachinesBehavior + "\")")
-//				}
-//
-//				if machinePolicy.MachineConnectivityPolicy.MachineConnectivityBehavior != "ExpectedToBeOnline" {
-//					t.Fatal("The machine policy must have a MachineConnectivityPolicy.MachineConnectivityBehavior of \"ExpectedToBeOnline\" (was \"" + machinePolicy.MachineConnectivityPolicy.MachineConnectivityBehavior + "\")")
-//				}
-//
-//				if machinePolicy.MachineHealthCheckPolicy.BashHealthCheckPolicy.RunType != "Inline" {
-//					t.Fatal("The machine policy must have a MachineHealthCheckPolicy.BashHealthCheckPolicy.RunType of \"Inline\" (was \"" + machinePolicy.MachineHealthCheckPolicy.BashHealthCheckPolicy.RunType + "\")")
-//				}
-//
-//				if machinePolicy.MachineHealthCheckPolicy.BashHealthCheckPolicy.ScriptBody != "" {
-//					t.Fatal("The machine policy must have a MachineHealthCheckPolicy.BashHealthCheckPolicy.ScriptBody of \"\" (was \"" + machinePolicy.MachineHealthCheckPolicy.BashHealthCheckPolicy.ScriptBody + "\")")
-//				}
-//
-//				if machinePolicy.MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.RunType != "Inline" {
-//					t.Fatal("The machine policy must have a MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.RunType of \"Inline\" (was \"" + machinePolicy.MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.RunType + "\")")
-//				}
-//
-//				if strings.HasPrefix(machinePolicy.MachineHealthCheckPolicy.BashHealthCheckPolicy.ScriptBody, "$freeDiskSpaceThreshold") {
-//					t.Fatal("The machine policy must have a MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.ScriptBody to start with \"$freeDiskSpaceThreshold\" (was \"" + machinePolicy.MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.ScriptBody + "\")")
-//				}
-//
-//				if strutil.EmptyIfNil(machinePolicy.MachineHealthCheckPolicy.HealthCheckCronTimezone) != "UTC" {
-//					t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckCronTimezone of \"UTC\" (was \"" + strutil.EmptyIfNil(machinePolicy.MachineHealthCheckPolicy.HealthCheckCronTimezone) + "\")")
-//				}
-//
-//				if strutil.EmptyIfNil(machinePolicy.MachineHealthCheckPolicy.HealthCheckCron) != "" {
-//					t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckCron of \"\" (was \"" + strutil.EmptyIfNil(machinePolicy.MachineHealthCheckPolicy.HealthCheckCron) + "\")")
-//				}
-//
-//				if strutil.EmptyIfNil(machinePolicy.MachineHealthCheckPolicy.HealthCheckType) != "RunScript" {
-//					t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckType of \"RunScript\" (was \"" + strutil.EmptyIfNil(machinePolicy.MachineHealthCheckPolicy.HealthCheckType) + "\")")
-//				}
-//
-//				if strutil.EmptyIfNil(machinePolicy.MachineHealthCheckPolicy.HealthCheckInterval) != "00:10:00" {
-//					t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckInterval of \"00:10:00\" (was \"" + strutil.EmptyIfNil(machinePolicy.MachineHealthCheckPolicy.HealthCheckInterval) + "\")")
-//				}
-//
-//				if strutil.EmptyIfNil(machinePolicy.MachineUpdatePolicy.CalamariUpdateBehavior) != "UpdateOnDeployment" {
-//					t.Fatal("The machine policy must have a MachineUpdatePolicy.CalamariUpdateBehavior of \"UpdateOnDeployment\" (was \"" + strutil.EmptyIfNil(machinePolicy.MachineUpdatePolicy.CalamariUpdateBehavior) + "\")")
-//				}
-//
-//				if strutil.EmptyIfNil(machinePolicy.MachineUpdatePolicy.TentacleUpdateBehavior) != "NeverUpdate" {
-//					t.Fatal("The machine policy must have a MachineUpdatePolicy.TentacleUpdateBehavior of \"NeverUpdate\" (was \"" + strutil.EmptyIfNil(machinePolicy.MachineUpdatePolicy.CalamariUpdateBehavior) + "\")")
-//				}
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an machine policy for the project called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestProjectTriggerExport verifies that a project trigger can be reimported with the correct settings
-//func TestProjectTriggerExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/28-projecttrigger", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.Project]{}
-//		err = octopusClient.GetAllResources("Projects", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		foundProject := false
-//		foundTrigger := false
-//		for _, project := range collection.Items {
-//			if project.Name == resourceName {
-//				foundProject = true
-//
-//				triggers := octopus.GeneralCollection[octopus.ProjectTrigger]{}
-//				err = octopusClient.GetAllResources("Projects/"+project.Id+"/Triggers", &triggers)
-//
-//				for _, trigger := range triggers.Items {
-//					foundTrigger = true
-//
-//					if trigger.Name != "test" {
-//						t.Fatal("The project must have a trigger called \"test\" (was \"" + trigger.Name + "\")")
-//					}
-//
-//					if trigger.Filter.FilterType != "MachineFilter" {
-//						t.Fatal("The project trigger must have Filter.FilterType set to \"MachineFilter\" (was \"" + trigger.Filter.FilterType + "\")")
-//					}
-//
-//					if trigger.Filter.EventGroups[0] != "MachineAvailableForDeployment" {
-//						t.Fatal("The project trigger must have Filter.EventGroups[0] set to \"MachineFilter\" (was \"" + trigger.Filter.EventGroups[0] + "\")")
-//					}
-//				}
-//			}
-//		}
-//
-//		if !foundProject {
-//			t.Fatal("Space must have an project \"" + resourceName + "\"")
-//		}
-//
-//		if !foundTrigger {
-//			t.Fatal("Project must have a trigger")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestK8sTargetExport verifies that a k8s machine can be reimported with the correct settings
-//func TestK8sTargetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/29-k8starget", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{
-//			"-var=account_aws_account=whatever",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.KubernetesEndpointResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if strutil.EmptyIfNil(machine.Endpoint.ClusterUrl) != "https://cluster" {
-//					t.Fatal("The machine must have a Endpoint.ClusterUrl of \"https://cluster\" (was \"" + strutil.EmptyIfNil(machine.Endpoint.ClusterUrl) + "\")")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestSshTargetExport verifies that a ssh machine can be reimported with the correct settings
-//func TestSshTargetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/30-sshtarget", []string{
-//			"-var=account_ec2_sydney=LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpNSUlKbkRCT0Jna3Foa2lHOXcwQkJRMHdRVEFwQmdrcWhraUc5dzBCQlF3d0hBUUlwNEUxV1ZrejJEd0NBZ2dBCk1Bd0dDQ3FHU0liM0RRSUpCUUF3RkFZSUtvWklodmNOQXdjRUNIemFuVE1QbHA4ZkJJSUpTSncrdW5BL2ZaVFUKRGdrdWk2QnhOY0REUFg3UHZJZmNXU1dTc3V3YWRhYXdkVEdjY1JVd3pGNTNmRWJTUXJBYzJuWFkwUWVVcU1wcAo4QmdXUUthWlB3MEdqck5OQVJaTy9QYklxaU5ERFMybVRSekZidzREcFY5aDdlblZjL1ZPNlhJdzlxYVYzendlCnhEejdZSkJ2ckhmWHNmTmx1blErYTZGdlRUVkVyWkE1Ukp1dEZUVnhUWVR1Z3lvWWNXZzAzQWlsMDh3eDhyTHkKUkgvTjNjRlEzaEtLcVZuSHQvdnNZUUhTMnJJYkt0RTluelFPWDRxRDdVYXM3Z0c0L2ZkcmZQZjZFWTR1aGpBcApUeGZRTDUzcTBQZG85T09MZlRReFRxakVNaFpidjV1aEN5d0N2VHdWTmVLZ2MzN1pqdDNPSjI3NTB3U2t1TFZvCnllR0VaQmtML1VONjJjTUJuYlFsSTEzR2FXejBHZ0NJNGkwS3UvRmE4aHJZQTQwcHVFdkEwZFBYcVFGMDhYbFYKM1RJUEhGRWdBWlJpTmpJWmFyQW00THdnL1F4Z203OUR1SVM3VHh6RCtpN1pNSmsydjI1ck14Ly9MMXNNUFBtOQpWaXBwVnpLZmpqRmpwTDVjcVJucC9UdUZSVWpHaDZWMFBXVVk1eTVzYjJBWHpuSGZVd1lqeFNoUjBKWXpXejAwCjNHbklwNnlJa1UvL3dFVGJLcVliMjd0RjdETm1WMUxXQzl0ell1dm4yK2EwQkpnU0Jlc3c4WFJ1WWorQS92bVcKWk1YbkF2anZXR3RBUzA4d0ZOV3F3QUtMbzJYUHBXWGVMa3BZUHo1ZnY2QnJaNVNwYTg4UFhsa1VmOVF0VHRobwprZFlGOWVMdk5hTXpSSWJhbmRGWjdLcHUvN2I3L0tDWE9rMUhMOUxvdEpwY2tJdTAxWS81TnQwOHp5cEVQQ1RzClVGWG5DODNqK2tWMktndG5XcXlEL2k3Z1dwaHJSK0IrNE9tM3VZU1RuY042a2d6ZkV3WldpUVA3ZkpiNlYwTHoKc29yU09sK2g2WDRsMC9oRVdScktVQTBrOXpPZU9TQXhlbmpVUXFReWdUd0RqQTJWbTdSZXI2ZElDMVBwNmVETgpBVEJ0ME1NZjJJTytxbTJtK0VLd1FVSXY4ZXdpdEpab016MFBaOHB6WEM0ZFMyRTErZzZmbnE2UGJ5WWRISDJnCmVraXk4Y2duVVJmdHJFaVoyMUxpMWdpdTJaeVM5QUc0Z1ZuT0E1Y05oSzZtRDJUaGl5UUl2M09yUDA0aDFTNlEKQUdGeGJONEhZK0tCYnVITTYwRG1PQXR5c3o4QkJheHFwWjlXQkVhV01ubFB6eEI2SnFqTGJrZ1BkQ2wycytUWAphcWx0UDd6QkpaenVTeVNQc2tQR1NBREUvaEF4eDJFM1RQeWNhQlhQRVFUM2VkZmNsM09nYXRmeHBSYXJLV09PCnFHM2lteW42ZzJiNjhWTlBDSnBTYTNKZ1Axb0NNVlBpa2RCSEdSVUV3N2dXTlJVOFpXRVJuS292M2c0MnQ4dkEKU2Z0a3VMdkhoUnlPQW91SUVsNjJIems0WC9CeVVOQ2J3MW50RzFQeHpSaERaV2dPaVhPNi94WFByRlpKa3BtcQpZUUE5dW83OVdKZy9zSWxucFJCdFlUbUh4eU9mNk12R2svdXlkZExkcmZ6MHB6QUVmWm11YTVocWh5M2Y4YlNJCmpxMlJwUHE3eHJ1Y2djbFAwTWFjdHkrbm9wa0N4M0lNRUE4NE9MQ3dxZjVtemtwY0U1M3hGaU1hcXZTK0dHZmkKZlZnUGpXTXRzMFhjdEtCV2tUbVFFN3MxSE5EV0g1dlpJaDY2WTZncXR0cjU2VGdtcHRLWHBVdUJ1MEdERFBQbwp1aGI4TnVRRjZwNHNoM1dDbXlzTU9uSW5jaXRxZWE4NTFEMmloK2lIY3VqcnJidkVYZGtjMnlxUHBtK3Q3SXBvCm1zWkxVemdXRlZpNWY3KzZiZU56dGJ3T2tmYmdlQVAyaklHTzdtR1pKWWM0L1d1eXBqeVRKNlBQVC9IMUc3K3QKUTh5R3FDV3BzNFdQM2srR3hrbW90cnFROFcxa0J1RDJxTEdmSTdMMGZUVE9lWk0vQUZ1VDJVSkcxKzQ2czJVVwp2RlF2VUJmZ0dTWlh3c1VUeGJRTlZNaTJib1BCRkNxbUY2VmJTcmw2YVgrSm1NNVhySUlqUUhGUFZWVGxzeUtpClVDUC9PQTJOWlREdW9IcC9EM0s1Qjh5MlIyUTlqZlJ0RkcwL0dnMktCbCtObzdTbXlPcWlsUlNkZ1VJb0p5QkcKRGovZXJ4ZkZNMlc3WTVsNGZ2ZlNpdU1OZmlUTVdkY3cxSStnVkpGMC9mTHRpYkNoUlg0OTlIRWlXUHZkTGFKMwppcDJEYU9ReS9QZG5zK3hvaWlMNWtHV25BVUVwanNjWno0YU5DZFowOXRUb1FhK2RZd3g1R1ovNUtmbnVpTURnClBrWjNXalFpOVlZRWFXbVIvQ2JmMjAyRXdoNjdIZzVqWE5kb0RNendXT0V4RFNkVFFYZVdzUUI0LzNzcjE2S2MKeitGN2xhOXhHVEVhTDllQitwcjY5L2JjekJLMGVkNXUxYUgxcXR3cjcrMmliNmZDdlMyblRGQTM1ZG50YXZlUwp4VUJVZ0NzRzVhTTl4b2pIQ0o4RzRFMm9iRUEwUDg2SFlqZEJJSXF5U0txZWtQYmFybW4xR1JrdUVlbU5hTVdyCkM2bWZqUXR5V2ZMWnlSbUlhL1dkSVgzYXhqZHhYa3kydm4yNVV6MXZRNklrNnRJcktPYUJnRUY1cmYwY014dTUKN1BYeTk0dnc1QjE0Vlcra2JqQnkyY3hIajJhWnJEaE53UnVQNlpIckg5MHZuN2NmYjYwU0twRWxxdmZwdlN0VQpvQnVXQlFEUUE3bHpZajhhT3BHend3LzlYTjI5MGJrUnd4elVZRTBxOVl4bS9VSHJTNUlyRWtKSml2SUlEb3hICjF4VTVLd2ErbERvWDJNcERrZlBQVE9XSjVqZG8wbXNsN0dBTmc1WGhERnBpb2hFMEdSS2lGVytYcjBsYkJKU2oKUkxibytrbzhncXU2WHB0OWU4U0Y5OEJ4bFpEcFBVMG5PcGRrTmxwTVpKYVlpaUUzRjRFRG9DcE56bmxpY2JrcApjZ2FrcGVrbS9YS21RSlJxWElXci8wM29SdUVFTXBxZzlRbjdWRG8zR0FiUTlnNUR5U1Bid0xvT25xQ0V3WGFJCkF6alFzWU4rc3VRd2FqZHFUcEthZ1FCbWRaMmdNZDBTMTV1Ukt6c2wxOHgzK1JabmRiNWoxNjNuV0NkMlQ5VDgKald3NURISDgvVUFkSGZoOHh0RTJ6bWRHbEg5T3I5U2hIMzViMWgxVm8rU2pNMzRPeWpwVjB3TmNVL1psOTBUdAp1WnJwYnBwTXZCZUVmRzZTczVXVGhySm9LaGl0RkNwWlVqaDZvdnk3Mzd6ditKaUc4aDRBNG1GTmRPSUtBd0I0Cmp2Nms3V3poUVlEa2Q0ZXRoajNndVJCTGZQNThNVEJKaWhZemVINkUzclhjSGE5b0xnREgzczd4bU8yVEtUY24Kd3VIM3AvdC9WWFN3UGJ0QXBXUXdTRFNKSnA5WkF4S0Q1eVdmd3lTU2ZQVGtwM2c1b2NmKzBhSk1Kc2FkU3lwNQpNR1Vic1oxd1hTN2RXMDhOYXZ2WmpmbElNUm8wUFZDbkRVcFp1bjJuekhTRGJDSjB1M0ZYd1lFQzFFejlJUnN0ClJFbDdpdTZQRlVMSldSU0V0SzBKY1lLS0ltNXhQWHIvbTdPc2duMUNJL0F0cTkrWEFjODk1MGVxeTRwTFVQYkYKZkhFOFhVYWFzUU82MDJTeGpnOTZZaWJ3ZnFyTDF2Vjd1MitUYzJleUZ1N3oxUGRPZDQyWko5M2wvM3lOUW92egora0JuQVdObzZ3WnNKSitHNDZDODNYRVBLM0h1bGw1dFg2UDU4NUQ1b3o5U1oyZGlTd1FyVFN1THVSL0JCQUpVCmd1K2FITkJGRmVtUXNEL2QxMllud1h3d3FkZXVaMDVmQlFiWUREdldOM3daUjJJeHZpd1E0bjZjZWl3OUZ4QmcKbWlzMFBGY2NZOWl0SnJrYXlWQVVZUFZ3Sm5XSmZEK2pQNjJ3UWZJWmhhbFQrZDJpUzVQaDEwdWlMNHEvY1JuYgo1c1Mvc2o0Tm5QYmpxc1ZmZWlKTEh3PT0KLS0tLS1FTkQgRU5DUllQVEVEIFBSSVZBVEUgS0VZLS0tLS0K",
-//			"-var=account_ec2_sydney_cert=whatever",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act - Note the private key password is actually the key file
-//		// See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/blob/main/octopusdeploy/schema_ssh_key_account.go#L16
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{
-//			"-var=account_ec2_sydney=LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpNSUlKbkRCT0Jna3Foa2lHOXcwQkJRMHdRVEFwQmdrcWhraUc5dzBCQlF3d0hBUUlwNEUxV1ZrejJEd0NBZ2dBCk1Bd0dDQ3FHU0liM0RRSUpCUUF3RkFZSUtvWklodmNOQXdjRUNIemFuVE1QbHA4ZkJJSUpTSncrdW5BL2ZaVFUKRGdrdWk2QnhOY0REUFg3UHZJZmNXU1dTc3V3YWRhYXdkVEdjY1JVd3pGNTNmRWJTUXJBYzJuWFkwUWVVcU1wcAo4QmdXUUthWlB3MEdqck5OQVJaTy9QYklxaU5ERFMybVRSekZidzREcFY5aDdlblZjL1ZPNlhJdzlxYVYzendlCnhEejdZSkJ2ckhmWHNmTmx1blErYTZGdlRUVkVyWkE1Ukp1dEZUVnhUWVR1Z3lvWWNXZzAzQWlsMDh3eDhyTHkKUkgvTjNjRlEzaEtLcVZuSHQvdnNZUUhTMnJJYkt0RTluelFPWDRxRDdVYXM3Z0c0L2ZkcmZQZjZFWTR1aGpBcApUeGZRTDUzcTBQZG85T09MZlRReFRxakVNaFpidjV1aEN5d0N2VHdWTmVLZ2MzN1pqdDNPSjI3NTB3U2t1TFZvCnllR0VaQmtML1VONjJjTUJuYlFsSTEzR2FXejBHZ0NJNGkwS3UvRmE4aHJZQTQwcHVFdkEwZFBYcVFGMDhYbFYKM1RJUEhGRWdBWlJpTmpJWmFyQW00THdnL1F4Z203OUR1SVM3VHh6RCtpN1pNSmsydjI1ck14Ly9MMXNNUFBtOQpWaXBwVnpLZmpqRmpwTDVjcVJucC9UdUZSVWpHaDZWMFBXVVk1eTVzYjJBWHpuSGZVd1lqeFNoUjBKWXpXejAwCjNHbklwNnlJa1UvL3dFVGJLcVliMjd0RjdETm1WMUxXQzl0ell1dm4yK2EwQkpnU0Jlc3c4WFJ1WWorQS92bVcKWk1YbkF2anZXR3RBUzA4d0ZOV3F3QUtMbzJYUHBXWGVMa3BZUHo1ZnY2QnJaNVNwYTg4UFhsa1VmOVF0VHRobwprZFlGOWVMdk5hTXpSSWJhbmRGWjdLcHUvN2I3L0tDWE9rMUhMOUxvdEpwY2tJdTAxWS81TnQwOHp5cEVQQ1RzClVGWG5DODNqK2tWMktndG5XcXlEL2k3Z1dwaHJSK0IrNE9tM3VZU1RuY042a2d6ZkV3WldpUVA3ZkpiNlYwTHoKc29yU09sK2g2WDRsMC9oRVdScktVQTBrOXpPZU9TQXhlbmpVUXFReWdUd0RqQTJWbTdSZXI2ZElDMVBwNmVETgpBVEJ0ME1NZjJJTytxbTJtK0VLd1FVSXY4ZXdpdEpab016MFBaOHB6WEM0ZFMyRTErZzZmbnE2UGJ5WWRISDJnCmVraXk4Y2duVVJmdHJFaVoyMUxpMWdpdTJaeVM5QUc0Z1ZuT0E1Y05oSzZtRDJUaGl5UUl2M09yUDA0aDFTNlEKQUdGeGJONEhZK0tCYnVITTYwRG1PQXR5c3o4QkJheHFwWjlXQkVhV01ubFB6eEI2SnFqTGJrZ1BkQ2wycytUWAphcWx0UDd6QkpaenVTeVNQc2tQR1NBREUvaEF4eDJFM1RQeWNhQlhQRVFUM2VkZmNsM09nYXRmeHBSYXJLV09PCnFHM2lteW42ZzJiNjhWTlBDSnBTYTNKZ1Axb0NNVlBpa2RCSEdSVUV3N2dXTlJVOFpXRVJuS292M2c0MnQ4dkEKU2Z0a3VMdkhoUnlPQW91SUVsNjJIems0WC9CeVVOQ2J3MW50RzFQeHpSaERaV2dPaVhPNi94WFByRlpKa3BtcQpZUUE5dW83OVdKZy9zSWxucFJCdFlUbUh4eU9mNk12R2svdXlkZExkcmZ6MHB6QUVmWm11YTVocWh5M2Y4YlNJCmpxMlJwUHE3eHJ1Y2djbFAwTWFjdHkrbm9wa0N4M0lNRUE4NE9MQ3dxZjVtemtwY0U1M3hGaU1hcXZTK0dHZmkKZlZnUGpXTXRzMFhjdEtCV2tUbVFFN3MxSE5EV0g1dlpJaDY2WTZncXR0cjU2VGdtcHRLWHBVdUJ1MEdERFBQbwp1aGI4TnVRRjZwNHNoM1dDbXlzTU9uSW5jaXRxZWE4NTFEMmloK2lIY3VqcnJidkVYZGtjMnlxUHBtK3Q3SXBvCm1zWkxVemdXRlZpNWY3KzZiZU56dGJ3T2tmYmdlQVAyaklHTzdtR1pKWWM0L1d1eXBqeVRKNlBQVC9IMUc3K3QKUTh5R3FDV3BzNFdQM2srR3hrbW90cnFROFcxa0J1RDJxTEdmSTdMMGZUVE9lWk0vQUZ1VDJVSkcxKzQ2czJVVwp2RlF2VUJmZ0dTWlh3c1VUeGJRTlZNaTJib1BCRkNxbUY2VmJTcmw2YVgrSm1NNVhySUlqUUhGUFZWVGxzeUtpClVDUC9PQTJOWlREdW9IcC9EM0s1Qjh5MlIyUTlqZlJ0RkcwL0dnMktCbCtObzdTbXlPcWlsUlNkZ1VJb0p5QkcKRGovZXJ4ZkZNMlc3WTVsNGZ2ZlNpdU1OZmlUTVdkY3cxSStnVkpGMC9mTHRpYkNoUlg0OTlIRWlXUHZkTGFKMwppcDJEYU9ReS9QZG5zK3hvaWlMNWtHV25BVUVwanNjWno0YU5DZFowOXRUb1FhK2RZd3g1R1ovNUtmbnVpTURnClBrWjNXalFpOVlZRWFXbVIvQ2JmMjAyRXdoNjdIZzVqWE5kb0RNendXT0V4RFNkVFFYZVdzUUI0LzNzcjE2S2MKeitGN2xhOXhHVEVhTDllQitwcjY5L2JjekJLMGVkNXUxYUgxcXR3cjcrMmliNmZDdlMyblRGQTM1ZG50YXZlUwp4VUJVZ0NzRzVhTTl4b2pIQ0o4RzRFMm9iRUEwUDg2SFlqZEJJSXF5U0txZWtQYmFybW4xR1JrdUVlbU5hTVdyCkM2bWZqUXR5V2ZMWnlSbUlhL1dkSVgzYXhqZHhYa3kydm4yNVV6MXZRNklrNnRJcktPYUJnRUY1cmYwY014dTUKN1BYeTk0dnc1QjE0Vlcra2JqQnkyY3hIajJhWnJEaE53UnVQNlpIckg5MHZuN2NmYjYwU0twRWxxdmZwdlN0VQpvQnVXQlFEUUE3bHpZajhhT3BHend3LzlYTjI5MGJrUnd4elVZRTBxOVl4bS9VSHJTNUlyRWtKSml2SUlEb3hICjF4VTVLd2ErbERvWDJNcERrZlBQVE9XSjVqZG8wbXNsN0dBTmc1WGhERnBpb2hFMEdSS2lGVytYcjBsYkJKU2oKUkxibytrbzhncXU2WHB0OWU4U0Y5OEJ4bFpEcFBVMG5PcGRrTmxwTVpKYVlpaUUzRjRFRG9DcE56bmxpY2JrcApjZ2FrcGVrbS9YS21RSlJxWElXci8wM29SdUVFTXBxZzlRbjdWRG8zR0FiUTlnNUR5U1Bid0xvT25xQ0V3WGFJCkF6alFzWU4rc3VRd2FqZHFUcEthZ1FCbWRaMmdNZDBTMTV1Ukt6c2wxOHgzK1JabmRiNWoxNjNuV0NkMlQ5VDgKald3NURISDgvVUFkSGZoOHh0RTJ6bWRHbEg5T3I5U2hIMzViMWgxVm8rU2pNMzRPeWpwVjB3TmNVL1psOTBUdAp1WnJwYnBwTXZCZUVmRzZTczVXVGhySm9LaGl0RkNwWlVqaDZvdnk3Mzd6ditKaUc4aDRBNG1GTmRPSUtBd0I0Cmp2Nms3V3poUVlEa2Q0ZXRoajNndVJCTGZQNThNVEJKaWhZemVINkUzclhjSGE5b0xnREgzczd4bU8yVEtUY24Kd3VIM3AvdC9WWFN3UGJ0QXBXUXdTRFNKSnA5WkF4S0Q1eVdmd3lTU2ZQVGtwM2c1b2NmKzBhSk1Kc2FkU3lwNQpNR1Vic1oxd1hTN2RXMDhOYXZ2WmpmbElNUm8wUFZDbkRVcFp1bjJuekhTRGJDSjB1M0ZYd1lFQzFFejlJUnN0ClJFbDdpdTZQRlVMSldSU0V0SzBKY1lLS0ltNXhQWHIvbTdPc2duMUNJL0F0cTkrWEFjODk1MGVxeTRwTFVQYkYKZkhFOFhVYWFzUU82MDJTeGpnOTZZaWJ3ZnFyTDF2Vjd1MitUYzJleUZ1N3oxUGRPZDQyWko5M2wvM3lOUW92egora0JuQVdObzZ3WnNKSitHNDZDODNYRVBLM0h1bGw1dFg2UDU4NUQ1b3o5U1oyZGlTd1FyVFN1THVSL0JCQUpVCmd1K2FITkJGRmVtUXNEL2QxMllud1h3d3FkZXVaMDVmQlFiWUREdldOM3daUjJJeHZpd1E0bjZjZWl3OUZ4QmcKbWlzMFBGY2NZOWl0SnJrYXlWQVVZUFZ3Sm5XSmZEK2pQNjJ3UWZJWmhhbFQrZDJpUzVQaDEwdWlMNHEvY1JuYgo1c1Mvc2o0Tm5QYmpxc1ZmZWlKTEh3PT0KLS0tLS1FTkQgRU5DUllQVEVEIFBSSVZBVEUgS0VZLS0tLS0K",
-//			"-var=account_ec2_sydney_cert=whatever",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.SshEndpointResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if machine.Endpoint.Host != "3.25.215.87" {
-//					t.Fatal("The machine must have a Endpoint.Host of \"3.25.215.87\" (was \"" + machine.Endpoint.Host + "\")")
-//				}
-//
-//				if machine.Endpoint.DotNetCorePlatform != "linux-x64" {
-//					t.Fatal("The machine must have a Endpoint.DotNetCorePlatform of \"linux-x64\" (was \"" + machine.Endpoint.DotNetCorePlatform + "\")")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestListeningTargetExport verifies that a listening machine can be reimported with the correct settings
-//func TestListeningTargetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/31-listeningtarget", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.ListeningEndpointResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if machine.Uri != "https://tentacle/" {
-//					t.Fatal("The machine must have a Uri of \"https://tentacle/\" (was \"" + machine.Uri + "\")")
-//				}
-//
-//				if machine.Thumbprint != "55E05FD1B0F76E60F6DA103988056CE695685FD1" {
-//					t.Fatal("The machine must have a Thumbprint of \"55E05FD1B0F76E60F6DA103988056CE695685FD1\" (was \"" + machine.Thumbprint + "\")")
-//				}
-//
-//				if len(machine.Roles) != 1 {
-//					t.Fatal("The machine must have 1 role")
-//				}
-//
-//				if machine.Roles[0] != "vm" {
-//					t.Fatal("The machine must have a role of \"vm\" (was \"" + machine.Roles[0] + "\")")
-//				}
-//
-//				if machine.TenantedDeploymentParticipation != "Untenanted" {
-//					t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + machine.TenantedDeploymentParticipation + "\")")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestPollingTargetExport verifies that a polling machine can be reimported with the correct settings
-//func TestPollingTargetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/32-pollingtarget", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.PollingEndpointResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if machine.Endpoint.Uri != "poll://abcdefghijklmnopqrst/" {
-//					t.Fatal("The machine must have a Uri of \"poll://abcdefghijklmnopqrst/\" (was \"" + machine.Endpoint.Uri + "\")")
-//				}
-//
-//				if machine.Thumbprint != "1854A302E5D9EAC1CAA3DA1F5249F82C28BB2B86" {
-//					t.Fatal("The machine must have a Thumbprint of \"1854A302E5D9EAC1CAA3DA1F5249F82C28BB2B86\" (was \"" + machine.Thumbprint + "\")")
-//				}
-//
-//				if len(machine.Roles) != 1 {
-//					t.Fatal("The machine must have 1 role")
-//				}
-//
-//				if machine.Roles[0] != "vm" {
-//					t.Fatal("The machine must have a role of \"vm\" (was \"" + machine.Roles[0] + "\")")
-//				}
-//
-//				if machine.TenantedDeploymentParticipation != "Untenanted" {
-//					t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + machine.TenantedDeploymentParticipation + "\")")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestCloudRegionTargetExport verifies that a cloud region can be reimported with the correct settings
-//func TestCloudRegionTargetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/33-cloudregiontarget", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.CloudRegionResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if len(machine.Roles) != 1 {
-//					t.Fatal("The machine must have 1 role")
-//				}
-//
-//				if machine.Roles[0] != "cloud" {
-//					t.Fatal("The machine must have a role of \"cloud\" (was \"" + machine.Roles[0] + "\")")
-//				}
-//
-//				if machine.TenantedDeploymentParticipation != "Untenanted" {
-//					t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + machine.TenantedDeploymentParticipation + "\")")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestOfflineDropTargetExport verifies that an offline drop can be reimported with the correct settings
-//func TestOfflineDropTargetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/34-offlinedroptarget", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.OfflineDropResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if len(machine.Roles) != 1 {
-//					t.Fatal("The machine must have 1 role")
-//				}
-//
-//				if machine.Roles[0] != "offline" {
-//					t.Fatal("The machine must have a role of \"offline\" (was \"" + machine.Roles[0] + "\")")
-//				}
-//
-//				if machine.TenantedDeploymentParticipation != "Untenanted" {
-//					t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + machine.TenantedDeploymentParticipation + "\")")
-//				}
-//
-//				if machine.Endpoint.ApplicationsDirectory != "c:\\temp" {
-//					t.Fatal("The machine must have a Endpoint.ApplicationsDirectory of \"c:\\temp\" (was \"" + machine.Endpoint.ApplicationsDirectory + "\")")
-//				}
-//
-//				if machine.Endpoint.OctopusWorkingDirectory != "c:\\temp" {
-//					t.Fatal("The machine must have a Endpoint.OctopusWorkingDirectory of \"c:\\temp\" (was \"" + machine.Endpoint.OctopusWorkingDirectory + "\")")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestAzureCloudServiceTargetExport verifies that a azure cloud service target can be reimported with the correct settings
-//func TestAzureCloudServiceTargetExport(t *testing.T) {
-//	// I could not figure out a combination of properties that made the octopusdeploy_azure_subscription_account resource work
-//	return
-//
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/35-azurecloudservicetarget", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{
-//			"-var=account_subscription_cert=LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUJGd0FBQUFkemMyZ3RjbgpOaEFBQUFBd0VBQVFBQUFRRUF5c25PVXhjN0tJK2pIRUc5RVEwQXFCMllGRWE5ZnpZakZOY1pqY1dwcjJQRkRza25oOUpTCm1NVjVuZ2VrbTRyNHJVQU5tU2dQMW1ZTGo5TFR0NUVZa0N3OUdyQ0paNitlQTkzTEowbEZUamFkWEJuQnNmbmZGTlFWYkcKZ2p3U1o4SWdWQ2oySXE0S1hGZm0vbG1ycEZQK2Jqa2V4dUxwcEh5dko2ZmxZVjZFMG13YVlneVNHTWdLYy9ubXJaMTY0WApKMStJL1M5NkwzRWdOT0hNZmo4QjM5eEhZQ0ZUTzZEQ0pLQ3B0ZUdRa0gwTURHam84d3VoUlF6c0IzVExsdXN6ZG0xNmRZCk16WXZBSWR3emZ3bzh1ajFBSFFOendDYkIwRmR6bnFNOEpLV2ZrQzdFeVVrZUl4UXZmLzJGd1ZyS0xEZC95ak5PUmNoa3EKb2owNncySXFad0FBQThpS0tqT3dpaW96c0FBQUFBZHpjMmd0Y25OaEFBQUJBUURLeWM1VEZ6c29qNk1jUWIwUkRRQ29IWgpnVVJyMS9OaU1VMXhtTnhhbXZZOFVPeVNlSDBsS1l4WG1lQjZTYml2aXRRQTJaS0EvV1pndVAwdE8za1JpUUxEMGFzSWxuCnI1NEQzY3NuU1VWT05wMWNHY0d4K2Q4VTFCVnNhQ1BCSm53aUJVS1BZaXJncGNWK2IrV2F1a1UvNXVPUjdHNHVta2ZLOG4KcCtWaFhvVFNiQnBpREpJWXlBcHorZWF0blhyaGNuWDRqOUwzb3ZjU0EwNGN4K1B3SGYzRWRnSVZNN29NSWtvS20xNFpDUQpmUXdNYU9qekM2RkZET3dIZE11VzZ6TjJiWHAxZ3pOaThBaDNETi9Dank2UFVBZEEzUEFKc0hRVjNPZW96d2twWitRTHNUCkpTUjRqRkM5Ly9ZWEJXc29zTjMvS00wNUZ5R1NxaVBUckRZaXBuQUFBQUF3RUFBUUFBQVFFQXdRZzRqbitlb0kyYUJsdk4KVFYzRE1rUjViMU9uTG1DcUpEeGM1c2N4THZNWnNXbHBaN0NkVHk4ckJYTGhEZTdMcUo5QVVub0FHV1lwdTA1RW1vaFRpVwptVEFNVHJCdmYwd2xsdCtJZVdvVXo3bmFBbThQT1psb29MbXBYRzh5VmZKRU05aUo4NWtYNDY4SkF6VDRYZ1JXUFRYQ1JpCi9abCtuWUVUZVE4WTYzWlJhTVE3SUNmK2FRRWxRenBYb21idkxYM1RaNmNzTHh5Z3Eza01aSXNJU0lUcEk3Y0tsQVJ0Rm4KcWxKRitCL2JlUEJkZ3hIRVpqZDhDV0NIR1ZRUDh3Z3B0d0Rrak9NTzh2b2N4YVpOT0hZZnBwSlBCTkVjMEVKbmduN1BXSgorMVZSTWZKUW5SemVubmE3VHdSUSsrclZmdkVaRmhqamdSUk85RitrMUZvSWdRQUFBSUVBbFFybXRiV2V0d3RlWlZLLys4CklCUDZkcy9MSWtPb3pXRS9Wckx6cElBeHEvV1lFTW1QK24wK1dXdWRHNWpPaTFlZEJSYVFnU0owdTRxcE5JMXFGYTRISFYKY2oxL3pzenZ4RUtSRElhQkJGaU81Y3QvRVQvUTdwanozTnJaZVdtK0dlUUJKQ0diTEhSTlQ0M1ZpWVlLVG82ZGlGVTJteApHWENlLzFRY2NqNjVZQUFBQ0JBUHZodmgzb2Q1MmY4SFVWWGoxeDNlL1ZFenJPeVloTi9UQzNMbWhHYnRtdHZ0L0J2SUhxCndxWFpTT0lWWkZiRnVKSCtORHNWZFFIN29yUW1VcGJxRllDd0IxNUZNRGw0NVhLRm0xYjFyS1c1emVQK3d0M1hyM1p0cWsKRkdlaUlRMklSZklBQjZneElvNTZGemdMUmx6QnB0bzhkTlhjMXhtWVgyU2Rhb3ZwSkRBQUFBZ1FET0dwVE9oOEFRMFoxUwpzUm9vVS9YRTRkYWtrSU5vMDdHNGI3M01maG9xbkV1T01LM0ZRVStRRWUwYWpvdWs5UU1QNWJzZU1CYnJNZVNNUjBRWVBCClQ4Z0Z2S2VISWN6ZUtJTjNPRkRaRUF4TEZNMG9LbjR2bmdHTUFtTXUva2QwNm1PZnJUNDRmUUh1ajdGNWx1QVJHejRwYUwKLzRCTUVkMnFTRnFBYzZ6L0RRQUFBQTF0WVhSMGFFQk5ZWFIwYUdWM0FRSURCQT09Ci0tLS0tRU5EIE9QRU5TU0ggUFJJVkFURSBLRVktLS0tLQo=",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.AzureCloudServiceResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Azure"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if len(machine.Roles) != 1 {
-//					t.Fatal("The machine must have 1 role")
-//				}
-//
-//				if machine.Roles[0] != "cloud" {
-//					t.Fatal("The machine must have a role of \"cloud\" (was \"" + machine.Roles[0] + "\")")
-//				}
-//
-//				if machine.TenantedDeploymentParticipation != "Untenanted" {
-//					t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + machine.TenantedDeploymentParticipation + "\")")
-//				}
-//
-//				if machine.Endpoint.CloudServiceName != "servicename" {
-//					t.Fatal("The machine must have a Endpoint.CloudServiceName of \"c:\\temp\" (was \"" + machine.Endpoint.CloudServiceName + "\")")
-//				}
-//
-//				if machine.Endpoint.StorageAccountName != "accountname" {
-//					t.Fatal("The machine must have a Endpoint.StorageAccountName of \"accountname\" (was \"" + machine.Endpoint.StorageAccountName + "\")")
-//				}
-//
-//				if !machine.Endpoint.UseCurrentInstanceCount {
-//					t.Fatal("The machine must have Endpoint.UseCurrentInstanceCount set")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestAzureServiceFabricTargetExport verifies that a service fabric target can be reimported with the correct settings
-//func TestAzureServiceFabricTargetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/36-servicefabrictarget", []string{
-//			"-var=target_service_fabric=whatever",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{
-//			"-var=target_service_fabric=whatever",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.AzureServiceFabricResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Service Fabric"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if len(machine.Roles) != 1 {
-//					t.Fatal("The machine must have 1 role")
-//				}
-//
-//				if machine.Roles[0] != "cloud" {
-//					t.Fatal("The machine must have a role of \"cloud\" (was \"" + machine.Roles[0] + "\")")
-//				}
-//
-//				if machine.TenantedDeploymentParticipation != "Untenanted" {
-//					t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + machine.TenantedDeploymentParticipation + "\")")
-//				}
-//
-//				if machine.Endpoint.ConnectionEndpoint != "http://endpoint" {
-//					t.Fatal("The machine must have a Endpoint.ConnectionEndpoint of \"http://endpoint\" (was \"" + machine.Endpoint.ConnectionEndpoint + "\")")
-//				}
-//
-//				if machine.Endpoint.AadCredentialType != "UserCredential" {
-//					t.Fatal("The machine must have a Endpoint.AadCredentialType of \"UserCredential\" (was \"" + machine.Endpoint.AadCredentialType + "\")")
-//				}
-//
-//				if machine.Endpoint.AadUserCredentialUsername != "username" {
-//					t.Fatal("The machine must have a Endpoint.AadUserCredentialUsername of \"username\" (was \"" + machine.Endpoint.AadUserCredentialUsername + "\")")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestAzureWebAppTargetExport verifies that a web app target can be reimported with the correct settings
-//func TestAzureWebAppTargetExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/37-webapptarget", []string{
-//			"-var=account_sales_account=whatever",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{
-//			"-var=account_sales_account=whatever",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.AzureWebAppResource]{}
-//		err = octopusClient.GetAllResources("Machines", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Web App"
-//		foundResource := false
-//
-//		for _, machine := range collection.Items {
-//			if machine.Name == resourceName {
-//				foundResource = true
-//
-//				if len(machine.Roles) != 1 {
-//					t.Fatal("The machine must have 1 role")
-//				}
-//
-//				if machine.Roles[0] != "cloud" {
-//					t.Fatal("The machine must have a role of \"cloud\" (was \"" + machine.Roles[0] + "\")")
-//				}
-//
-//				if machine.TenantedDeploymentParticipation != "Untenanted" {
-//					t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + machine.TenantedDeploymentParticipation + "\")")
-//				}
-//
-//				if machine.Endpoint.ResourceGroupName != "mattc-webapp" {
-//					t.Fatal("The machine must have a Endpoint.ResourceGroupName of \"mattc-webapp\" (was \"" + machine.Endpoint.ResourceGroupName + "\")")
-//				}
-//
-//				if machine.Endpoint.WebAppName != "mattc-webapp" {
-//					t.Fatal("The machine must have a Endpoint.WebAppName of \"mattc-webapp\" (was \"" + machine.Endpoint.WebAppName + "\")")
-//				}
-//
-//				if machine.Endpoint.WebAppSlotName != "slot1" {
-//					t.Fatal("The machine must have a Endpoint.WebAppSlotName of \"slot1\" (was \"" + machine.Endpoint.WebAppSlotName + "\")")
-//				}
-//			}
-//		}
-//
-//		if !foundResource {
-//			t.Fatal("Space must have a target \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestSingleProjectGroupExport verifies that a single project can be reimported with the correct settings.
-//// This is one of the larger tests, verifying that the graph of resources linked to a project have been exported,
-//// and that unrelated resources were not exported.
-//func TestSingleProjectGroupExport(t *testing.T) {
-//	if os.Getenv("GIT_CREDENTIAL") == "" {
-//		t.Fatalf("the GIT_CREDENTIAL environment variable must be set to a GitHub access key")
-//	}
-//
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		terraformDir := "./test/terraform/38-multipleprojects"
-//
-//		// Act
-//		newSpaceId, err := act(t, container, terraformDir, []string{
-//			"-var=gitcredential_matt=" + os.Getenv("GIT_CREDENTIAL"),
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := actProjectExport(t, container, terraformDir, newSpaceId, []string{
-//			"-var=gitcredential_matt=" + os.Getenv("GIT_CREDENTIAL"),
-//			"-var=project_test_git_base_path=.octopus/integrationtestimport",
-//		}, "octopus_project_1")
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		// Test that the project exported its project group
-//		err = func() error {
-//			collection := octopus.GeneralCollection[octopus.ProjectGroup]{}
-//			err = octopusClient.GetAllResources("ProjectGroups", &collection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			found := false
-//			for _, v := range collection.Items {
-//				if v.Name == "Test" {
-//					found = true
-//					if *v.Description != "Test Description" {
-//						t.Fatalf("The project group must be have a description of \"Test Description\"")
-//					}
-//				}
-//			}
-//
-//			if !found {
-//				t.Fatalf("Space must have a project group called \"Test\"")
-//			}
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Verify that the single project was exported
-//		err = func() error {
-//			projectCollection := octopus.GeneralCollection[octopus.Project]{}
-//			err = octopusClient.GetAllResources("Projects", &projectCollection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			if len(projectCollection.Items) != 1 {
-//				t.Fatalf("There must only be one project")
-//			}
-//
-//			if projectCollection.Items[0].Name != "Test" {
-//				t.Fatalf("The project must be called \"Test\"")
-//			}
-//
-//			// Verify that the variable set was imported
-//
-//			if projectCollection.Items[0].VariableSetId == nil {
-//				t.Fatalf("The project must have a variable set")
-//			}
-//
-//			variableSet := octopus.VariableSet{}
-//			_, err = octopusClient.GetResourceById("Variables", *projectCollection.Items[0].VariableSetId, &variableSet)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			if len(variableSet.Variables) != 1 {
-//				t.Fatalf("The project must have 1 variable")
-//			}
-//
-//			if variableSet.Variables[0].Name != "Test" {
-//				t.Fatalf("The project must have 1 variable called \"Test\"")
-//			}
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Verify that the single channel was exported
-//		err = func() error {
-//			channelsCollection := octopus.GeneralCollection[octopus.Channel]{}
-//			err = octopusClient.GetAllResources("Channels", &channelsCollection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			foundChannel := false
-//			for _, v := range channelsCollection.Items {
-//				if v.Name == "Test 1" {
-//					foundChannel = true
-//				}
-//
-//				if v.Name == "Test 2" {
-//					t.Fatalf("The second channel must not have been exported")
-//				}
-//			}
-//
-//			if !foundChannel {
-//				t.Fatalf("The space must have a channel called \"Test 1\"")
-//			}
-//
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Verify that the single trigger was exported
-//		err = func() error {
-//			triggersCollection := octopus.GeneralCollection[octopus.ProjectTrigger]{}
-//			err = octopusClient.GetAllResources("ProjectTriggers", &triggersCollection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			foundTrigger := false
-//			for _, v := range triggersCollection.Items {
-//				if v.Name == "Test 1" {
-//					foundTrigger = true
-//				}
-//
-//				if v.Name == "Test 2" {
-//					t.Fatalf("The second trigger must not have been exported")
-//				}
-//			}
-//
-//			if !foundTrigger {
-//				t.Fatalf("The space must have a trigger called \"Test 1\"")
-//			}
-//
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Verify that the single tenant was exported
-//		err = func() error {
-//			tenantsCollection := octopus.GeneralCollection[octopus.Tenant]{}
-//			err = octopusClient.GetAllResources("Tenants", &tenantsCollection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			foundTenant := false
-//			for _, v := range tenantsCollection.Items {
-//				if v.Name == "Team A" {
-//					foundTenant = true
-//				}
-//
-//				if v.Name == "Team B" {
-//					t.Fatalf("The second tenant must not have been exported")
-//				}
-//			}
-//
-//			if !foundTenant {
-//				t.Fatalf("The space must have a tenant called \"Team A\"")
-//			}
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Verify that the tenant tags were exported
-//		err = func() error {
-//			tagsCollection := octopus.GeneralCollection[octopus.TagSet]{}
-//			err = octopusClient.GetAllResources("TagSets", &tagsCollection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			foundTag := false
-//			for _, v := range tagsCollection.Items {
-//				if v.Name == "tag1" {
-//					foundTag = true
-//				}
-//
-//				if v.Name == "tag2" {
-//					t.Fatalf("The space must not have a tagset called \"tag2\"")
-//				}
-//			}
-//
-//			if !foundTag {
-//				t.Fatalf("The space must have a tagset called \"tag1\"")
-//			}
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Verify that the environments were exported
-//		err = func() error {
-//			environmentsCollection := octopus.GeneralCollection[octopus.Tenant]{}
-//			err = octopusClient.GetAllResources("Environments", &environmentsCollection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			foundEnvironmentDev := false
-//			foundEnvironmentTest := false
-//			foundEnvironmentProduction := false
-//			for _, v := range environmentsCollection.Items {
-//				if v.Name == "Development" {
-//					foundEnvironmentDev = true
-//				}
-//
-//				if v.Name == "Test" {
-//					foundEnvironmentTest = true
-//				}
-//
-//				if v.Name == "Production" {
-//					foundEnvironmentProduction = true
-//				}
-//
-//				if v.Name == "Blah" {
-//					t.Fatalf("The environment called \"Blah\" must not been exported")
-//				}
-//			}
-//
-//			if !foundEnvironmentDev {
-//				t.Fatalf("The space must have a space called \"Deveopment\"")
-//			}
-//
-//			if !foundEnvironmentTest {
-//				t.Fatalf("The space must have a space called \"Test\"")
-//			}
-//
-//			if !foundEnvironmentProduction {
-//				t.Fatalf("The space must have a space called \"Production\"")
-//			}
-//
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Verify that the library variable set was exported
-//		err = func() error {
-//			libraryVariableSetCollection := octopus.GeneralCollection[octopus.LibraryVariableSet]{}
-//			err = octopusClient.GetAllResources("LibraryVariableSets", &libraryVariableSetCollection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			foundLibraryVariableSet := false
-//			for _, v := range libraryVariableSetCollection.Items {
-//				if v.Name == "Test" {
-//					foundLibraryVariableSet = true
-//				}
-//
-//				if v.Name == "Test2" {
-//					t.Fatalf("The library variable set called \"Test2\" must not been exported")
-//				}
-//			}
-//
-//			if !foundLibraryVariableSet {
-//				t.Fatalf("The space must have a library variable called \"Test\"")
-//			}
-//
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Verify that the library variable set was exported
-//		err = func() error {
-//			collection := octopus.GeneralCollection[octopus.Lifecycle]{}
-//			err = octopusClient.GetAllResources("Lifecycles", &collection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			found := false
-//			for _, v := range collection.Items {
-//				if v.Name == "Simple" {
-//					found = true
-//				}
-//
-//				if v.Name == "Simple2" {
-//					t.Fatalf("The lifecycle called \"Simple2\" must not been exported")
-//				}
-//			}
-//
-//			if !found {
-//				t.Fatalf("The space must have a lifecycle called \"Simple\"")
-//			}
-//
-//			return nil
-//		}()
-//
-//		// Verify that the git credential was exported
-//		err = func() error {
-//			collection := octopus.GeneralCollection[octopus.GitCredentials]{}
-//			err = octopusClient.GetAllResources("Git-Credentials", &collection)
-//
-//			if err != nil {
-//				return err
-//			}
-//
-//			found := false
-//			for _, v := range collection.Items {
-//				if v.Name == "matt" {
-//					found = true
-//				}
-//			}
-//
-//			if !found {
-//				t.Fatalf("The space must have a git credential called \"matt\"")
-//			}
-//
-//			return nil
-//		}()
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestProjectWithGitUsernameExport verifies that a project can be reimported with the correct git settings
-//func TestProjectWithGitUsernameExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/39-projectgitusername", []string{
-//			"-var=project_git_password=" + os.Getenv("GIT_CREDENTIAL"),
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{
-//			"-var=project_test_git_password=" + os.Getenv("GIT_CREDENTIAL"),
-//			"-var=project_test_git_base_path=.octopus/projectgitusername",
-//		})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.Project]{}
-//		err = octopusClient.GetAllResources("Projects", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		found := false
-//		for _, v := range collection.Items {
-//			if v.Name == resourceName {
-//				found = true
-//
-//				if v.PersistenceSettings.Credentials.Type != "UsernamePassword" {
-//					t.Fatal("The project must be have a git credential type of \"UsernamePassword\" (was \"" + v.PersistenceSettings.Credentials.Type + "\")")
-//				}
-//
-//				if v.PersistenceSettings.Credentials.Username != "mcasperson" {
-//					t.Fatal("The project must be have a git username of \"mcasperson\" (was \"" + v.PersistenceSettings.Credentials.Username + "\")")
-//				}
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an project called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestProjectWithDollarSignsExport verifies that a project can be reimported with terraform string interpolation
-//func TestProjectWithDollarSignsExport(t *testing.T) {
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/40-escapedollar", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.Project]{}
-//		err = octopusClient.GetAllResources("Projects", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		found := false
-//		for _, v := range collection.Items {
-//			if v.Name == resourceName {
-//				found = true
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an project called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
-//
-//// TestProjectTerraformInlineScriptExport verifies that a project can be reimported with a terraform inline template step
-//func TestProjectTerraformInlineScriptExport(t *testing.T) {
-//	// This test will pass when https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/478 is addressed
-//	//return
-//
-//	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
-//		// Act
-//		newSpaceId, err := act(t, container, "./test/terraform/41-terraforminlinescript", []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Act
-//		recreatedSpaceId, err := act(t, container, newSpaceId, []string{})
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		// Assert
-//		octopusClient := createClient(container, recreatedSpaceId)
-//
-//		collection := octopus.GeneralCollection[octopus.Project]{}
-//		err = octopusClient.GetAllResources("Projects", &collection)
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		resourceName := "Test"
-//		found := false
-//		for _, v := range collection.Items {
-//			if v.Name == resourceName {
-//				found = true
-//			}
-//		}
-//
-//		if !found {
-//			t.Fatal("Space must have an project called \"" + resourceName + "\"")
-//		}
-//
-//		return nil
-//	})
-//}
+// TestTagSetResource verifies that a tag set can be reimported with the correct settings
+func TestTagSetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/21-tagset", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := tagsets.TagSetsQuery{
+			PartialName: "tag1",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.TagSets.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a tag set called \"tag1\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "Test tagset" {
+			t.Fatal("The tag set must be have a description of \"Test tagset\" (was \"" + resource.Description + "\")")
+		}
+
+		if resource.SortOrder != 0 {
+			t.Fatal("The tag set must be have a sort order of \"0\" (was \"" + fmt.Sprint(resource.SortOrder) + "\")")
+		}
+
+		tagAFound := false
+		for _, u := range resource.Tags {
+			if u.Name == "a" {
+				tagAFound = true
+
+				if u.Description != "tag a" {
+					t.Fatal("The tag a must be have a description of \"tag a\" (was \"" + u.Description + "\")")
+				}
+
+				if u.Color != "#333333" {
+					t.Fatal("The tag a must be have a color of \"#333333\" (was \"" + u.Color + "\")")
+				}
+
+				if u.SortOrder != 2 {
+					t.Fatal("The tag a must be have a sort order of \"2\" (was \"" + fmt.Sprint(u.SortOrder) + "\")")
+				}
+			}
+		}
+
+		if !tagAFound {
+			t.Fatal("Tag Set must have an tag called \"a\"")
+		}
+
+		return nil
+	})
+}
+
+// TestGitCredentialsResource verifies that a git credential can be reimported with the correct settings
+func TestGitCredentialsResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		_, err := act(t, container, "./test/terraform/22-gitcredentialtest", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Octopus client does not expose git credentials, so we just test that they can be imported
+
+		return nil
+	})
+}
+
+// TestScriptModuleResource verifies that a script module set can be reimported with the correct settings
+func TestScriptModuleResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/23-scriptmodule", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := variables.LibraryVariablesQuery{
+			PartialName: "Test2",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.LibraryVariableSets.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a library variable set called \"Test2\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "Test script module" {
+			t.Fatal("The library variable set must be have a description of \"Test script module\" (was \"" + resource.Description + "\")")
+		}
+
+		variables, err := client.Variables.GetAll(resource.ID)
+
+		if len(variables.Variables) != 2 {
+			t.Fatal("The library variable set must have two associated variables")
+		}
+
+		foundScript := false
+		foundLanguage := false
+		for _, u := range variables.Variables {
+			if u.Name == "Octopus.Script.Module[Test2]" {
+				foundScript = true
+
+				if u.Type != "String" {
+					t.Fatal("The library variable set variable must have a type of \"String\"")
+				}
+
+				if u.Value != "echo \"hi\"" {
+					t.Fatal("The library variable set variable must have a value of \"\"echo \\\"hi\\\"\"\"")
+				}
+
+				if u.IsSensitive {
+					t.Fatal("The library variable set variable must not be sensitive")
+				}
+
+				if !u.IsEditable {
+					t.Fatal("The library variable set variable must be editable")
+				}
+			}
+
+			if u.Name == "Octopus.Script.Module.Language[Test2]" {
+				foundLanguage = true
+
+				if u.Type != "String" {
+					t.Fatal("The library variable set variable must have a type of \"String\"")
+				}
+
+				if u.Value != "PowerShell" {
+					t.Fatal("The library variable set variable must have a value of \"PowerShell\"")
+				}
+
+				if u.IsSensitive {
+					t.Fatal("The library variable set variable must not be sensitive")
+				}
+
+				if !u.IsEditable {
+					t.Fatal("The library variable set variable must be editable")
+				}
+			}
+		}
+
+		if !foundLanguage || !foundScript {
+			t.Fatal("Script module must create two variables for script and language")
+		}
+
+		return nil
+	})
+}
+
+// TestTenantsResource verifies that a git credential can be reimported with the correct settings
+func TestTenantsResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/24-tenants", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := tenants.TenantsQuery{
+			PartialName: "Team A",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Tenants.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a tenant called \"Team A\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "Test tenant" {
+			t.Fatal("The tenant must be have a description of \"tTest tenant\" (was \"" + resource.Description + "\")")
+		}
+
+		if len(resource.TenantTags) != 2 {
+			t.Fatal("The tenant must have two tags")
+		}
+
+		if len(resource.ProjectEnvironments) != 1 {
+			t.Fatal("The tenant must have one project environment")
+		}
+
+		for _, u := range resource.ProjectEnvironments {
+			if len(u) != 3 {
+				t.Fatal("The tenant must have be linked to three environments")
+			}
+		}
+
+		return nil
+	})
+}
+
+// TestCertificateResource verifies that a certificate can be reimported with the correct settings
+func TestCertificateResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/25-certificates", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := certificates.CertificatesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Certificates.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a certificate called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Notes != "A test certificate" {
+			t.Fatal("The tenant must be have a description of \"A test certificate\" (was \"" + resource.Notes + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The tenant must be have a tenant participation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		if resource.SubjectDistinguishedName != "CN=test.com" {
+			t.Fatal("The tenant must be have a subject distinguished name of \"CN=test.com\" (was \"" + resource.SubjectDistinguishedName + "\")")
+		}
+
+		if len(resource.EnvironmentIDs) != 0 {
+			t.Fatal("The tenant must have one project environment")
+		}
+
+		if len(resource.TenantTags) != 0 {
+			t.Fatal("The tenant must have no tenant tags")
+		}
+
+		if len(resource.TenantIDs) != 0 {
+			t.Fatal("The tenant must have no tenants")
+		}
+
+		return nil
+	})
+}
+
+// TestTenantVariablesResource verifies that a tenant variables can be reimported with the correct settings
+func TestTenantVariablesResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/26-tenant_variables", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		collection, err := client.TenantVariables.GetAll()
+		if err != nil {
+			return err
+		}
+
+		resourceName := "Test"
+		found := false
+		for _, tenantVariable := range collection {
+			for _, project := range tenantVariable.ProjectVariables {
+				if project.ProjectName == resourceName {
+					for _, variables := range project.Variables {
+						for _, value := range variables {
+							// we expect one project variable to be defined
+							found = true
+							if value.Value != "my value" {
+								t.Fatal("The tenant project variable must have a value of \"my value\" (was \"" + value.Value + "\")")
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if !found {
+			t.Fatal("Space must have an tenant project variable for the project called \"" + resourceName + "\"")
+		}
+
+		return nil
+	})
+}
+
+// TestMachinePolicyResource verifies that a machine policies can be reimported with the correct settings
+func TestMachinePolicyResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/27-machinepolicy", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinePoliciesQuery{
+			PartialName: "Testing",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.MachinePolicies.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine policy called \"Testing\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "test machine policy" {
+			t.Fatal("The machine policy must have a description of \"test machine policy\" (was \"" + resource.Description + "\")")
+		}
+
+		if resource.ConnectionConnectTimeout.Minutes() != 1 {
+			t.Fatal("The machine policy must have a ConnectionConnectTimeout of \"00:01:00\" (was \"" + fmt.Sprint(resource.ConnectionConnectTimeout) + "\")")
+		}
+
+		if resource.ConnectionRetryCountLimit != 5 {
+			t.Fatal("The machine policy must have a ConnectionRetryCountLimit of \"5\" (was \"" + fmt.Sprint(resource.ConnectionRetryCountLimit) + "\")")
+		}
+
+		if resource.ConnectionRetrySleepInterval.Seconds() != 1 {
+			t.Fatal("The machine policy must have a ConnectionRetrySleepInterval of \"00:00:01\" (was \"" + fmt.Sprint(resource.ConnectionRetrySleepInterval) + "\")")
+		}
+
+		if resource.ConnectionRetryTimeLimit.Minutes() != 5 {
+			t.Fatal("The machine policy must have a ConnectionRetryTimeLimit of \"00:05:00\" (was \"" + fmt.Sprint(resource.ConnectionRetryTimeLimit) + "\")")
+		}
+
+		if resource.PollingRequestMaximumMessageProcessingTimeout.Minutes() != 10 {
+			t.Fatal("The machine policy must have a PollingRequestMaximumMessageProcessingTimeout of \"00:10:00\" (was \"" + fmt.Sprint(resource.PollingRequestMaximumMessageProcessingTimeout) + "\")")
+		}
+
+		if resource.MachineCleanupPolicy.DeleteMachinesElapsedTimeSpan.Minutes() != 20 {
+			t.Fatal("The machine policy must have a DeleteMachinesElapsedTimeSpan of \"00:20:00\" (was \"" + fmt.Sprint(resource.MachineCleanupPolicy.DeleteMachinesElapsedTimeSpan) + "\")")
+		}
+
+		if resource.MachineCleanupPolicy.DeleteMachinesBehavior != "DeleteUnavailableMachines" {
+			t.Fatal("The machine policy must have a MachineCleanupPolicy.DeleteMachinesBehavior of \"DeleteUnavailableMachines\" (was \"" + resource.MachineCleanupPolicy.DeleteMachinesBehavior + "\")")
+		}
+
+		if resource.MachineConnectivityPolicy.MachineConnectivityBehavior != "ExpectedToBeOnline" {
+			t.Fatal("The machine policy must have a MachineConnectivityPolicy.MachineConnectivityBehavior of \"ExpectedToBeOnline\" (was \"" + resource.MachineConnectivityPolicy.MachineConnectivityBehavior + "\")")
+		}
+
+		if resource.MachineHealthCheckPolicy.BashHealthCheckPolicy.RunType != "Inline" {
+			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.BashHealthCheckPolicy.RunType of \"Inline\" (was \"" + resource.MachineHealthCheckPolicy.BashHealthCheckPolicy.RunType + "\")")
+		}
+
+		if *resource.MachineHealthCheckPolicy.BashHealthCheckPolicy.ScriptBody != "" {
+			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.BashHealthCheckPolicy.ScriptBody of \"\" (was \"" + *resource.MachineHealthCheckPolicy.BashHealthCheckPolicy.ScriptBody + "\")")
+		}
+
+		if resource.MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.RunType != "Inline" {
+			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.RunType of \"Inline\" (was \"" + resource.MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.RunType + "\")")
+		}
+
+		if strings.HasPrefix(*resource.MachineHealthCheckPolicy.BashHealthCheckPolicy.ScriptBody, "$freeDiskSpaceThreshold") {
+			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.ScriptBody to start with \"$freeDiskSpaceThreshold\" (was \"" + *resource.MachineHealthCheckPolicy.PowerShellHealthCheckPolicy.ScriptBody + "\")")
+		}
+
+		if resource.MachineHealthCheckPolicy.HealthCheckCronTimezone != "UTC" {
+			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckCronTimezone of \"UTC\" (was \"" + resource.MachineHealthCheckPolicy.HealthCheckCronTimezone + "\")")
+		}
+
+		if resource.MachineHealthCheckPolicy.HealthCheckCron != "" {
+			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckCron of \"\" (was \"" + resource.MachineHealthCheckPolicy.HealthCheckCron + "\")")
+		}
+
+		if resource.MachineHealthCheckPolicy.HealthCheckType != "RunScript" {
+			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckType of \"RunScript\" (was \"" + resource.MachineHealthCheckPolicy.HealthCheckType + "\")")
+		}
+
+		if resource.MachineHealthCheckPolicy.HealthCheckInterval.Minutes() != 10 {
+			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckInterval of \"00:10:00\" (was \"" + fmt.Sprint(resource.MachineHealthCheckPolicy.HealthCheckInterval) + "\")")
+		}
+
+		if resource.MachineUpdatePolicy.CalamariUpdateBehavior != "UpdateOnDeployment" {
+			t.Fatal("The machine policy must have a MachineUpdatePolicy.CalamariUpdateBehavior of \"UpdateOnDeployment\" (was \"" + resource.MachineUpdatePolicy.CalamariUpdateBehavior + "\")")
+		}
+
+		if resource.MachineUpdatePolicy.TentacleUpdateBehavior != "NeverUpdate" {
+			t.Fatal("The machine policy must have a MachineUpdatePolicy.TentacleUpdateBehavior of \"NeverUpdate\" (was \"" + resource.MachineUpdatePolicy.CalamariUpdateBehavior + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestProjectTriggerResource verifies that a project trigger can be reimported with the correct settings
+func TestProjectTriggerResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/28-projecttrigger", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Projects.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		trigger, err := client.ProjectTriggers.GetByProjectID(resource.ID)
+
+		if err != nil {
+			return err
+		}
+
+		if trigger[0].Name != "test" {
+			t.Fatal("The project must have a trigger called \"test\" (was \"" + trigger[0].Name + "\")")
+		}
+
+		if trigger[0].Filter.GetFilterType() != filters.MachineFilter {
+			t.Fatal("The project trigger must have Filter.FilterType set to \"MachineFilter\" (was \"" + fmt.Sprint(trigger[0].Filter.GetFilterType()) + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestK8sTargetResource verifies that a k8s machine can be reimported with the correct settings
+func TestK8sTargetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/29-k8starget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) != "https://cluster" {
+			t.Fatal("The machine must have a Endpoint.ClusterUrl of \"https://cluster\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestSshTargetResource verifies that a ssh machine can be reimported with the correct settings
+func TestSshTargetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/30-sshtarget", []string{
+			"-var=account_ec2_sydney=LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpNSUlKbkRCT0Jna3Foa2lHOXcwQkJRMHdRVEFwQmdrcWhraUc5dzBCQlF3d0hBUUlwNEUxV1ZrejJEd0NBZ2dBCk1Bd0dDQ3FHU0liM0RRSUpCUUF3RkFZSUtvWklodmNOQXdjRUNIemFuVE1QbHA4ZkJJSUpTSncrdW5BL2ZaVFUKRGdrdWk2QnhOY0REUFg3UHZJZmNXU1dTc3V3YWRhYXdkVEdjY1JVd3pGNTNmRWJTUXJBYzJuWFkwUWVVcU1wcAo4QmdXUUthWlB3MEdqck5OQVJaTy9QYklxaU5ERFMybVRSekZidzREcFY5aDdlblZjL1ZPNlhJdzlxYVYzendlCnhEejdZSkJ2ckhmWHNmTmx1blErYTZGdlRUVkVyWkE1Ukp1dEZUVnhUWVR1Z3lvWWNXZzAzQWlsMDh3eDhyTHkKUkgvTjNjRlEzaEtLcVZuSHQvdnNZUUhTMnJJYkt0RTluelFPWDRxRDdVYXM3Z0c0L2ZkcmZQZjZFWTR1aGpBcApUeGZRTDUzcTBQZG85T09MZlRReFRxakVNaFpidjV1aEN5d0N2VHdWTmVLZ2MzN1pqdDNPSjI3NTB3U2t1TFZvCnllR0VaQmtML1VONjJjTUJuYlFsSTEzR2FXejBHZ0NJNGkwS3UvRmE4aHJZQTQwcHVFdkEwZFBYcVFGMDhYbFYKM1RJUEhGRWdBWlJpTmpJWmFyQW00THdnL1F4Z203OUR1SVM3VHh6RCtpN1pNSmsydjI1ck14Ly9MMXNNUFBtOQpWaXBwVnpLZmpqRmpwTDVjcVJucC9UdUZSVWpHaDZWMFBXVVk1eTVzYjJBWHpuSGZVd1lqeFNoUjBKWXpXejAwCjNHbklwNnlJa1UvL3dFVGJLcVliMjd0RjdETm1WMUxXQzl0ell1dm4yK2EwQkpnU0Jlc3c4WFJ1WWorQS92bVcKWk1YbkF2anZXR3RBUzA4d0ZOV3F3QUtMbzJYUHBXWGVMa3BZUHo1ZnY2QnJaNVNwYTg4UFhsa1VmOVF0VHRobwprZFlGOWVMdk5hTXpSSWJhbmRGWjdLcHUvN2I3L0tDWE9rMUhMOUxvdEpwY2tJdTAxWS81TnQwOHp5cEVQQ1RzClVGWG5DODNqK2tWMktndG5XcXlEL2k3Z1dwaHJSK0IrNE9tM3VZU1RuY042a2d6ZkV3WldpUVA3ZkpiNlYwTHoKc29yU09sK2g2WDRsMC9oRVdScktVQTBrOXpPZU9TQXhlbmpVUXFReWdUd0RqQTJWbTdSZXI2ZElDMVBwNmVETgpBVEJ0ME1NZjJJTytxbTJtK0VLd1FVSXY4ZXdpdEpab016MFBaOHB6WEM0ZFMyRTErZzZmbnE2UGJ5WWRISDJnCmVraXk4Y2duVVJmdHJFaVoyMUxpMWdpdTJaeVM5QUc0Z1ZuT0E1Y05oSzZtRDJUaGl5UUl2M09yUDA0aDFTNlEKQUdGeGJONEhZK0tCYnVITTYwRG1PQXR5c3o4QkJheHFwWjlXQkVhV01ubFB6eEI2SnFqTGJrZ1BkQ2wycytUWAphcWx0UDd6QkpaenVTeVNQc2tQR1NBREUvaEF4eDJFM1RQeWNhQlhQRVFUM2VkZmNsM09nYXRmeHBSYXJLV09PCnFHM2lteW42ZzJiNjhWTlBDSnBTYTNKZ1Axb0NNVlBpa2RCSEdSVUV3N2dXTlJVOFpXRVJuS292M2c0MnQ4dkEKU2Z0a3VMdkhoUnlPQW91SUVsNjJIems0WC9CeVVOQ2J3MW50RzFQeHpSaERaV2dPaVhPNi94WFByRlpKa3BtcQpZUUE5dW83OVdKZy9zSWxucFJCdFlUbUh4eU9mNk12R2svdXlkZExkcmZ6MHB6QUVmWm11YTVocWh5M2Y4YlNJCmpxMlJwUHE3eHJ1Y2djbFAwTWFjdHkrbm9wa0N4M0lNRUE4NE9MQ3dxZjVtemtwY0U1M3hGaU1hcXZTK0dHZmkKZlZnUGpXTXRzMFhjdEtCV2tUbVFFN3MxSE5EV0g1dlpJaDY2WTZncXR0cjU2VGdtcHRLWHBVdUJ1MEdERFBQbwp1aGI4TnVRRjZwNHNoM1dDbXlzTU9uSW5jaXRxZWE4NTFEMmloK2lIY3VqcnJidkVYZGtjMnlxUHBtK3Q3SXBvCm1zWkxVemdXRlZpNWY3KzZiZU56dGJ3T2tmYmdlQVAyaklHTzdtR1pKWWM0L1d1eXBqeVRKNlBQVC9IMUc3K3QKUTh5R3FDV3BzNFdQM2srR3hrbW90cnFROFcxa0J1RDJxTEdmSTdMMGZUVE9lWk0vQUZ1VDJVSkcxKzQ2czJVVwp2RlF2VUJmZ0dTWlh3c1VUeGJRTlZNaTJib1BCRkNxbUY2VmJTcmw2YVgrSm1NNVhySUlqUUhGUFZWVGxzeUtpClVDUC9PQTJOWlREdW9IcC9EM0s1Qjh5MlIyUTlqZlJ0RkcwL0dnMktCbCtObzdTbXlPcWlsUlNkZ1VJb0p5QkcKRGovZXJ4ZkZNMlc3WTVsNGZ2ZlNpdU1OZmlUTVdkY3cxSStnVkpGMC9mTHRpYkNoUlg0OTlIRWlXUHZkTGFKMwppcDJEYU9ReS9QZG5zK3hvaWlMNWtHV25BVUVwanNjWno0YU5DZFowOXRUb1FhK2RZd3g1R1ovNUtmbnVpTURnClBrWjNXalFpOVlZRWFXbVIvQ2JmMjAyRXdoNjdIZzVqWE5kb0RNendXT0V4RFNkVFFYZVdzUUI0LzNzcjE2S2MKeitGN2xhOXhHVEVhTDllQitwcjY5L2JjekJLMGVkNXUxYUgxcXR3cjcrMmliNmZDdlMyblRGQTM1ZG50YXZlUwp4VUJVZ0NzRzVhTTl4b2pIQ0o4RzRFMm9iRUEwUDg2SFlqZEJJSXF5U0txZWtQYmFybW4xR1JrdUVlbU5hTVdyCkM2bWZqUXR5V2ZMWnlSbUlhL1dkSVgzYXhqZHhYa3kydm4yNVV6MXZRNklrNnRJcktPYUJnRUY1cmYwY014dTUKN1BYeTk0dnc1QjE0Vlcra2JqQnkyY3hIajJhWnJEaE53UnVQNlpIckg5MHZuN2NmYjYwU0twRWxxdmZwdlN0VQpvQnVXQlFEUUE3bHpZajhhT3BHend3LzlYTjI5MGJrUnd4elVZRTBxOVl4bS9VSHJTNUlyRWtKSml2SUlEb3hICjF4VTVLd2ErbERvWDJNcERrZlBQVE9XSjVqZG8wbXNsN0dBTmc1WGhERnBpb2hFMEdSS2lGVytYcjBsYkJKU2oKUkxibytrbzhncXU2WHB0OWU4U0Y5OEJ4bFpEcFBVMG5PcGRrTmxwTVpKYVlpaUUzRjRFRG9DcE56bmxpY2JrcApjZ2FrcGVrbS9YS21RSlJxWElXci8wM29SdUVFTXBxZzlRbjdWRG8zR0FiUTlnNUR5U1Bid0xvT25xQ0V3WGFJCkF6alFzWU4rc3VRd2FqZHFUcEthZ1FCbWRaMmdNZDBTMTV1Ukt6c2wxOHgzK1JabmRiNWoxNjNuV0NkMlQ5VDgKald3NURISDgvVUFkSGZoOHh0RTJ6bWRHbEg5T3I5U2hIMzViMWgxVm8rU2pNMzRPeWpwVjB3TmNVL1psOTBUdAp1WnJwYnBwTXZCZUVmRzZTczVXVGhySm9LaGl0RkNwWlVqaDZvdnk3Mzd6ditKaUc4aDRBNG1GTmRPSUtBd0I0Cmp2Nms3V3poUVlEa2Q0ZXRoajNndVJCTGZQNThNVEJKaWhZemVINkUzclhjSGE5b0xnREgzczd4bU8yVEtUY24Kd3VIM3AvdC9WWFN3UGJ0QXBXUXdTRFNKSnA5WkF4S0Q1eVdmd3lTU2ZQVGtwM2c1b2NmKzBhSk1Kc2FkU3lwNQpNR1Vic1oxd1hTN2RXMDhOYXZ2WmpmbElNUm8wUFZDbkRVcFp1bjJuekhTRGJDSjB1M0ZYd1lFQzFFejlJUnN0ClJFbDdpdTZQRlVMSldSU0V0SzBKY1lLS0ltNXhQWHIvbTdPc2duMUNJL0F0cTkrWEFjODk1MGVxeTRwTFVQYkYKZkhFOFhVYWFzUU82MDJTeGpnOTZZaWJ3ZnFyTDF2Vjd1MitUYzJleUZ1N3oxUGRPZDQyWko5M2wvM3lOUW92egora0JuQVdObzZ3WnNKSitHNDZDODNYRVBLM0h1bGw1dFg2UDU4NUQ1b3o5U1oyZGlTd1FyVFN1THVSL0JCQUpVCmd1K2FITkJGRmVtUXNEL2QxMllud1h3d3FkZXVaMDVmQlFiWUREdldOM3daUjJJeHZpd1E0bjZjZWl3OUZ4QmcKbWlzMFBGY2NZOWl0SnJrYXlWQVVZUFZ3Sm5XSmZEK2pQNjJ3UWZJWmhhbFQrZDJpUzVQaDEwdWlMNHEvY1JuYgo1c1Mvc2o0Tm5QYmpxc1ZmZWlKTEh3PT0KLS0tLS1FTkQgRU5DUllQVEVEIFBSSVZBVEUgS0VZLS0tLS0K",
+			"-var=account_ec2_sydney_cert=whatever",
+		})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Endpoint.(*machines.SSHEndpoint).Host != "3.25.215.87" {
+			t.Fatal("The machine must have a Endpoint.Host of \"3.25.215.87\" (was \"" + resource.Endpoint.(*machines.SSHEndpoint).Host + "\")")
+		}
+
+		if resource.Endpoint.(*machines.SSHEndpoint).DotNetCorePlatform != "linux-x64" {
+			t.Fatal("The machine must have a Endpoint.DotNetCorePlatform of \"linux-x64\" (was \"" + resource.Endpoint.(*machines.SSHEndpoint).DotNetCorePlatform + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestListeningTargetResource verifies that a listening machine can be reimported with the correct settings
+func TestListeningTargetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/31-listeningtarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.URI != "https://tentacle/" {
+			t.Fatal("The machine must have a Uri of \"https://tentacle/\" (was \"" + resource.URI + "\")")
+		}
+
+		if resource.Thumbprint != "55E05FD1B0F76E60F6DA103988056CE695685FD1" {
+			t.Fatal("The machine must have a Thumbprint of \"55E05FD1B0F76E60F6DA103988056CE695685FD1\" (was \"" + resource.Thumbprint + "\")")
+		}
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "vm" {
+			t.Fatal("The machine must have a role of \"vm\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestPollingTargetResource verifies that a polling machine can be reimported with the correct settings
+func TestPollingTargetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/32-pollingtarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Endpoint.(*machines.PollingTentacleEndpoint).URI.Host != "abcdefghijklmnopqrst" {
+			t.Fatal("The machine must have a Uri of \"poll://abcdefghijklmnopqrst/\" (was \"" + resource.Endpoint.(*machines.PollingTentacleEndpoint).URI.Host + "\")")
+		}
+
+		if resource.Thumbprint != "1854A302E5D9EAC1CAA3DA1F5249F82C28BB2B86" {
+			t.Fatal("The machine must have a Thumbprint of \"1854A302E5D9EAC1CAA3DA1F5249F82C28BB2B86\" (was \"" + resource.Thumbprint + "\")")
+		}
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "vm" {
+			t.Fatal("The machine must have a role of \"vm\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestCloudRegionTargetResource verifies that a cloud region can be reimported with the correct settings
+func TestCloudRegionTargetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/33-cloudregiontarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "cloud" {
+			t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestOfflineDropTargetResource verifies that an offline drop can be reimported with the correct settings
+func TestOfflineDropTargetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/34-offlinedroptarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "offline" {
+			t.Fatal("The machine must have a role of \"offline\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		if resource.Endpoint.(*machines.OfflinePackageDropEndpoint).ApplicationsDirectory != "c:\\temp" {
+			t.Fatal("The machine must have a Endpoint.ApplicationsDirectory of \"c:\\temp\" (was \"" + resource.Endpoint.(*machines.OfflinePackageDropEndpoint).ApplicationsDirectory + "\")")
+		}
+
+		if resource.Endpoint.(*machines.OfflinePackageDropEndpoint).WorkingDirectory != "c:\\temp" {
+			t.Fatal("The machine must have a Endpoint.OctopusWorkingDirectory of \"c:\\temp\" (was \"" + resource.Endpoint.(*machines.OfflinePackageDropEndpoint).WorkingDirectory + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestAzureCloudServiceTargetResource verifies that a azure cloud service target can be reimported with the correct settings
+func TestAzureCloudServiceTargetResource(t *testing.T) {
+	// I could not figure out a combination of properties that made the octopusdeploy_azure_subscription_account resource work
+	return
+
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/35-azurecloudservicetarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Azure",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Azure\"")
+		}
+		resource := resources.Items[0]
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "cloud" {
+			t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureCloudServiceEndpoint).CloudServiceName != "servicename" {
+			t.Fatal("The machine must have a Endpoint.CloudServiceName of \"c:\\temp\" (was \"" + resource.Endpoint.(*machines.AzureCloudServiceEndpoint).CloudServiceName + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureCloudServiceEndpoint).StorageAccountName != "accountname" {
+			t.Fatal("The machine must have a Endpoint.StorageAccountName of \"accountname\" (was \"" + resource.Endpoint.(*machines.AzureCloudServiceEndpoint).StorageAccountName + "\")")
+		}
+
+		if !resource.Endpoint.(*machines.AzureCloudServiceEndpoint).UseCurrentInstanceCount {
+			t.Fatal("The machine must have Endpoint.UseCurrentInstanceCount set")
+		}
+
+		return nil
+	})
+}
+
+// TestAzureServiceFabricTargetResource verifies that a service fabric target can be reimported with the correct settings
+func TestAzureServiceFabricTargetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/36-servicefabrictarget", []string{
+			"-var=target_service_fabric=whatever",
+		})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Service Fabric",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Service Fabric\"")
+		}
+		resource := resources.Items[0]
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "cloud" {
+			t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureServiceFabricEndpoint).ConnectionEndpoint != "http://endpoint" {
+			t.Fatal("The machine must have a Endpoint.ConnectionEndpoint of \"http://endpoint\" (was \"" + resource.Endpoint.(*machines.AzureServiceFabricEndpoint).ConnectionEndpoint + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureServiceFabricEndpoint).AadCredentialType != "UserCredential" {
+			t.Fatal("The machine must have a Endpoint.AadCredentialType of \"UserCredential\" (was \"" + resource.Endpoint.(*machines.AzureServiceFabricEndpoint).AadCredentialType + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureServiceFabricEndpoint).AadUserCredentialUsername != "username" {
+			t.Fatal("The machine must have a Endpoint.AadUserCredentialUsername of \"username\" (was \"" + resource.Endpoint.(*machines.AzureServiceFabricEndpoint).AadUserCredentialUsername + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestAzureWebAppTargetResource verifies that a web app target can be reimported with the correct settings
+func TestAzureWebAppTargetResource(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/37-webapptarget", []string{
+			"-var=account_sales_account=whatever",
+		})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := machines.MachinesQuery{
+			PartialName: "Web App",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Web App\"")
+		}
+		resource := resources.Items[0]
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "cloud" {
+			t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureWebAppEndpoint).ResourceGroupName != "mattc-webapp" {
+			t.Fatal("The machine must have a Endpoint.ResourceGroupName of \"mattc-webapp\" (was \"" + resource.Endpoint.(*machines.AzureWebAppEndpoint).ResourceGroupName + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureWebAppEndpoint).WebAppName != "mattc-webapp" {
+			t.Fatal("The machine must have a Endpoint.WebAppName of \"mattc-webapp\" (was \"" + resource.Endpoint.(*machines.AzureWebAppEndpoint).WebAppName + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureWebAppEndpoint).WebAppSlotName != "slot1" {
+			t.Fatal("The machine must have a Endpoint.WebAppSlotName of \"slot1\" (was \"" + resource.Endpoint.(*machines.AzureWebAppEndpoint).WebAppSlotName + "\")")
+		}
+
+		return nil
+	})
+}
+
+// TestProjectWithGitUsernameExport verifies that a project can be reimported with the correct git settings
+func TestProjectWithGitUsernameExport(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		_, err := act(t, container, "./test/terraform/39-projectgitusername", []string{
+			"-var=project_git_password=" + os.Getenv("GIT_CREDENTIAL"),
+		})
+
+		if err != nil {
+			return err
+		}
+
+		// The client does not expose git credentials, so just test the import worked ok
+
+		return nil
+	})
+}
+
+// TestProjectWithDollarSignsExport verifies that a project can be reimported with terraform string interpolation
+func TestProjectWithDollarSignsExport(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/40-escapedollar", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Projects.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test\"")
+		}
+
+		return nil
+	})
+}
+
+// TestProjectTerraformInlineScriptExport verifies that a project can be reimported with a terraform inline template step.
+// See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/478
+func TestProjectTerraformInlineScriptExport(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/41-terraforminlinescript", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Projects.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test\"")
+		}
+
+		return nil
+	})
+}

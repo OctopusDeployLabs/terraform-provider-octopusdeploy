@@ -3,7 +3,7 @@ resource "octopusdeploy_machine_policy" "machinepolicy_testing" {
   description                                        = "test machine policy"
   connection_connect_timeout                         = 60000000000
   connection_retry_count_limit                       = 5
-  connection_retry_sleep_interval                    = 100000000
+  connection_retry_sleep_interval                    = 1000000000
   connection_retry_time_limit                        = 300000000000
   polling_request_maximum_message_processing_timeout = 600000000000
 
