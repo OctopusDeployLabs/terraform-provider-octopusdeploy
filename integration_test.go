@@ -57,11 +57,6 @@ import (
 
 const ApiKey = "API-ABCDEFGHIJKLMNOPQURTUVWXYZ12345"
 
-// DisableTerraformInit can be set to true to disable Terraform downloads.
-// This is useful if the terraform repo is down, as you can often just use
-// cached plugins.
-const DisableTerraformInit = false
-
 type octopusContainer struct {
 	testcontainers.Container
 	URI string
@@ -109,10 +104,11 @@ func getProvider() testcontainers.ProviderType {
 	return testcontainers.ProviderDocker
 }
 
+// setupNetwork creates an internal network for Octopus and MS SQL
 func setupNetwork(ctx context.Context) (testcontainers.Network, error) {
 	return testcontainers.GenericNetwork(ctx, testcontainers.GenericNetworkRequest{
 		NetworkRequest: testcontainers.NetworkRequest{
-			Name:           "octoterra",
+			Name:           "octopusterraformtests",
 			CheckDuplicate: true,
 			SkipReaper:     getReaperSkipped(),
 		},
@@ -135,7 +131,7 @@ func setupDatabase(ctx context.Context) (*mysqlContainer, error) {
 			}),
 		SkipReaper: getReaperSkipped(),
 		Networks: []string{
-			"octoterra",
+			"octopusterraformtests",
 		},
 	}
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -187,7 +183,7 @@ func setupOctopus(ctx context.Context, connString string) (*octopusContainer, er
 		WaitingFor: wait.ForLog("Listening for HTTP requests on").WithStartupTimeout(30 * time.Minute),
 		SkipReaper: getReaperSkipped(),
 		Networks: []string{
-			"octoterra",
+			"octopusterraformtests",
 		},
 	}
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -314,31 +310,26 @@ func initialiseOctopus(t *testing.T, container *octopusContainer, terraformDir s
 	spaceId := "Spaces-1"
 	for i, terraformProjectDir := range terraformProjectDirs {
 
-		if !DisableTerraformInit {
-			os.Remove(filepath.Join(terraformProjectDir, ".terraform.lock.hcl"))
-		}
-
+		os.Remove(filepath.Join(terraformProjectDir, ".terraform.lock.hcl"))
 		os.Remove(filepath.Join(terraformProjectDir, "terraform.tfstate"))
 
-		if !DisableTerraformInit {
-			args := []string{"init", "-no-color"}
-			cmnd := exec.Command("terraform", args...)
-			cmnd.Dir = terraformProjectDir
-			out, err := cmnd.Output()
+		args := []string{"init", "-no-color"}
+		cmnd := exec.Command("terraform", args...)
+		cmnd.Dir = terraformProjectDir
+		out, err := cmnd.Output()
 
-			if err != nil {
-				exitError, ok := err.(*exec.ExitError)
-				if ok {
-					t.Log(string(exitError.Stderr))
-				} else {
-					t.Log(err.Error())
-				}
-
-				return err
+		if err != nil {
+			exitError, ok := err.(*exec.ExitError)
+			if ok {
+				t.Log(string(exitError.Stderr))
+			} else {
+				t.Log(err.Error())
 			}
 
-			t.Log(string(out))
+			return err
 		}
+
+		t.Log(string(out))
 
 		// when initialising the new space, we need to define a new space name as a variable
 		vars := []string{}
@@ -357,9 +348,9 @@ func initialiseOctopus(t *testing.T, container *octopusContainer, terraformDir s
 			"-var=octopus_space_id=" + spaceId,
 		}, vars...)
 
-		cmnd := exec.Command("terraform", newArgs...)
+		cmnd = exec.Command("terraform", newArgs...)
 		cmnd.Dir = terraformProjectDir
-		out, err := cmnd.Output()
+		out, err = cmnd.Output()
 
 		if err != nil {
 			exitError, ok := err.(*exec.ExitError)
@@ -413,6 +404,7 @@ func getOutputVariable(t *testing.T, terraformDir string, outputVar string) (str
 	return string(out), nil
 }
 
+// createClient creates a Octopus client to the given url
 func createClient(uri string, spaceId string) (*client.Client, error) {
 	url, err := url.Parse(uri)
 
@@ -983,15 +975,16 @@ func TestDockerFeedResource(t *testing.T) {
 
 // TestEcrFeedResource verifies that a ecr feed can be reimported with the correct settings
 func TestEcrFeedResource(t *testing.T) {
+	if os.Getenv("ECR_ACCESS_KEY") == "" {
+		t.Fatal("The ECR_ACCESS_KEY environment variable must be set a valid AWS access key")
+	}
+
+	if os.Getenv("ECR_SECRET_KEY") == "" {
+		t.Fatal("The ECR_SECRET_KEY environment variable must be set a valid AWS secret key")
+	}
+
 	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
 		// Act
-		if os.Getenv("ECR_ACCESS_KEY") == "" {
-			return errors.New("the ECR_ACCESS_KEY environment variable must be set a valid AWS access key")
-		}
-
-		if os.Getenv("ECR_SECRET_KEY") == "" {
-			return errors.New("the ECR_SECRET_KEY environment variable must be set a valid AWS secret key")
-		}
 
 		newSpaceId, err := act(t, container, "./test/terraform/12-ecrfeed", []string{
 			"-var=feed_ecr_access_key=" + os.Getenv("ECR_ACCESS_KEY"),
@@ -2470,10 +2463,19 @@ func TestAzureWebAppTargetResource(t *testing.T) {
 
 // TestProjectWithGitUsernameExport verifies that a project can be reimported with the correct git settings
 func TestProjectWithGitUsernameExport(t *testing.T) {
+	if os.Getenv("GIT_CREDENTIAL") == "" {
+		t.Fatal("The GIT_CREDENTIAL environment variable must be set")
+	}
+
+	if os.Getenv("GIT_USERNAME") == "" {
+		t.Fatal("The GIT_USERNAME environment variable must be set")
+	}
+
 	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
 		// Act
 		_, err := act(t, container, "./test/terraform/39-projectgitusername", []string{
 			"-var=project_git_password=" + os.Getenv("GIT_CREDENTIAL"),
+			"-var=project_git_username=" + os.Getenv("GIT_USERNAME"),
 		})
 
 		if err != nil {
@@ -2543,6 +2545,13 @@ func TestProjectTerraformInlineScriptExport(t *testing.T) {
 
 		if len(resources.Items) == 0 {
 			t.Fatalf("Space must have a project called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		deploymentProcess, err := client.DeploymentProcesses.GetByID(resource.DeploymentProcessID)
+
+		if deploymentProcess.Steps[0].Actions[0].Properties["Octopus.Action.Terraform.Template"].Value != "#test" {
+			t.Fatalf("The inline Terraform template must be set to \"#test\"")
 		}
 
 		return nil

@@ -33,7 +33,7 @@ resource "octopusdeploy_project" "deploy_frontend_project" {
 
   git_username_password_persistence_settings {
     url                = "https://github.com/mcasperson/octogittest.git"
-    username           = "mcasperson"
+    username           = "${var.project_git_username}"
     password           = "${var.project_git_password}"
     base_path          = ".octopus/projectest"
     default_branch     = "main"
@@ -46,4 +46,11 @@ variable "project_git_password" {
   nullable    = false
   sensitive   = true
   description = "The git password for the project"
+}
+
+variable "project_git_username" {
+  type        = string
+  nullable    = false
+  sensitive   = true
+  description = "The git username for the project"
 }
