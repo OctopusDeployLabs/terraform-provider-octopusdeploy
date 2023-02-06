@@ -168,7 +168,7 @@ func setupOctopus(ctx context.Context, connString string) (*octopusContainer, er
 	req := testcontainers.ContainerRequest{
 		// Be aware that later versions of Octopus killed Github Actions.
 		// I think maybe they used more memory? 2022.2 works fine though.
-		Image:        "octopusdeploy/octopusdeploy:2022.2",
+		Image:        "octopusdeploy/octopusdeploy:latest",
 		ExposedPorts: []string{"8080/tcp"},
 		Env: map[string]string{
 			"ACCEPT_EULA":                   "Y",
