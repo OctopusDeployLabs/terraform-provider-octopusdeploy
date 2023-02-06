@@ -19,6 +19,9 @@ jobs:
       - name: Build Provider
         run: go build -o terraform-provider-octopusdeploy main.go
         shell: bash
+      - name: PWD
+        run: pwd
+        shell: bash
       - name: Use Local Provider
         run: cp .terraformrc ~
         shell: bash
