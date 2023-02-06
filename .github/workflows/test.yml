@@ -32,5 +32,5 @@ jobs:
           ECR_SECRET_KEY: ${{ secrets.ECR_SECRET_KEY }}
           GIT_CREDENTIAL: ${{ secrets.GIT_CREDENTIAL }}
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
-        run: go test integration_test.go -timeout 0
+        run: go test integration_test.go -timeout 0 -v
         shell: bash
