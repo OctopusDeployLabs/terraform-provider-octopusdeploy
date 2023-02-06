@@ -46,3 +46,6 @@ examples/provider.tf
 
 # goreleaser
 dist/
+
+terraform-provider-octopusdeploy
+main
