@@ -1,0 +1,7 @@
+provider_installation {
+  dev_overrides {
+    "octopusdeploylabs/octopusdeploy" = "/var/home/yourname/Code/terraform-provider-octopusdeploy"
+  }
+
+  direct {}
+}
