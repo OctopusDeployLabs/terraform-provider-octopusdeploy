@@ -77,6 +77,7 @@ func getWorkerPoolSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"Ubuntu1804",
+				"Ubuntu2204",
 				"UbuntuDefault",
 				"Windows2016",
 				"Windows2019",
