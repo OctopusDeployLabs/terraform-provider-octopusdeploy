@@ -109,7 +109,7 @@ func setupNetwork(ctx context.Context) (testcontainers.Network, error) {
 	return testcontainers.GenericNetwork(ctx, testcontainers.GenericNetworkRequest{
 		NetworkRequest: testcontainers.NetworkRequest{
 			Name:           "octopusterraformtests",
-			CheckDuplicate: true,
+			CheckDuplicate: false,
 			SkipReaper:     getReaperSkipped(),
 		},
 		ProviderType: getProvider(),
