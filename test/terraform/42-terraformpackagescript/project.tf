@@ -84,15 +84,17 @@ resource "octopusdeploy_deployment_process" "deploy_backend" {
       channels              = []
       tenant_tags           = []
       features              = []
+
+        primary_package {
+          package_id           = "terraform"
+          acquisition_location = "Server"
+          feed_id              = "${data.octopusdeploy_feeds.built_in_feed.feeds[0].id}"
+          id                   = "bae99f4e-6f11-46a2-b21a-b86244d41334"
+          properties           = { SelectionMode = "immediate" }
+        }
     }
 
-      primary_package {
-        package_id           = "terraform"
-        acquisition_location = "Server"
-        feed_id              = "${data.octopusdeploy_feeds.built_in_feed.feeds[0].id}"
-        id                   = "bae99f4e-6f11-46a2-b21a-b86244d41334"
-        properties           = { SelectionMode = "immediate" }
-      }
+
 
     properties   = {}
     target_roles = []
