@@ -2557,3 +2557,46 @@ func TestProjectTerraformInlineScriptExport(t *testing.T) {
 		return nil
 	})
 }
+
+// TestProjectTerraformPackageScriptExport verifies that a project can be reimported with a terraform package template step.
+// See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/478
+func TestProjectTerraformPackageScriptExport(t *testing.T) {
+	arrangeTest(t, func(t *testing.T, container *octopusContainer) error {
+		// Act
+		newSpaceId, err := act(t, container, "./test/terraform/42-terraformpackagescript", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := createClient(container.URI, newSpaceId)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Projects.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		deploymentProcess, err := client.DeploymentProcesses.GetByID(resource.DeploymentProcessID)
+
+		if deploymentProcess.Steps[0].Actions[0].Properties["Octopus.Action.Script.ScriptSource"].Value != "Package" {
+			t.Fatalf("The Terraform template must be set deploy files from a package")
+		}
+
+		if deploymentProcess.Steps[0].Actions[0].Properties["Octopus.Action.Terraform.TemplateDirectory"].Value != "blah" {
+			t.Fatalf("The Terraform template directory must be set to \"blah\"")
+		}
+
+		return nil
+	})
+}
