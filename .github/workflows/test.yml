@@ -1,0 +1,36 @@
+name: Go Test
+'on':
+  workflow_dispatch: {}
+  push: {}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ^1.19
+      - name: Install Dependencies
+        run: go get ./...
+        shell: bash
+      - name: Build Provider
+        run: go build -o terraform-provider-octopusdeploy main.go
+        shell: bash
+      - name: PWD
+        run: pwd
+        shell: bash
+      - name: Use Local Provider
+        run: cp .terraformrc ~
+        shell: bash
+      - name: Run tests
+        env:
+          LICENSE: ${{ secrets.LICENSE }}
+          ECR_ACCESS_KEY: ${{ secrets.ECR_ACCESS_KEY }}
+          ECR_SECRET_KEY: ${{ secrets.ECR_SECRET_KEY }}
+          GIT_CREDENTIAL: ${{ secrets.GIT_CREDENTIAL }}
+          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+        run: go test integration_test.go -timeout 0 -v
+        shell: bash

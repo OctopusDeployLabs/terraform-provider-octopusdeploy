@@ -288,6 +288,7 @@ Optional:
 - `properties` (Map of String) The properties associated with this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
 - `template` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--template))
+- `inline_template` (String) The inline Terraform configuration.
 - `template_parameters` (String)
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
