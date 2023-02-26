@@ -3,19 +3,25 @@ HOSTNAME=octopus.com
 NAMESPACE=com
 NAME=octopusdeploy
 BINARY=terraform-provider-${NAME}
-VERSION=0.7.73
+VERSION=0.7.82
 
 ifeq ($(OS), Windows_NT)
-OS_ARCH?=windows_386
-PROFILE=${APPDATA}/terraform.d
-EXT=.exe
+	OS_ARCH?=windows_386
+	PROFILE=${APPDATA}/terraform.d
+	EXT=.exe
 else
-PROFILE=~/.terraform.d
-ifeq ($(shell uname), Linux)
-OS_ARCH?=linux_amd64
-else
-OS_ARCH?=darwin_amd64
-endif
+ 	PROFILE=~/.terraform.d
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S), Linux)
+		OS_ARCH?=linux_amd64
+	else
+		UNAME_P := $(shell uname -p)
+		ifeq ($(UNAME_P), arm)
+			OS_ARCH?=darwin_arm64
+		else
+			OS_ARCH?=darwin_amd64
+		endif
+	endif
 endif
 
 default: install
@@ -28,6 +34,7 @@ docs:
 
 release:
 	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
+	GOOS=darwin GOARCH=arm64 go build -o ./bin/${BINARY}_${VERSION}_darwin_arm64
 	GOOS=freebsd GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_freebsd_386
 	GOOS=freebsd GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_freebsd_amd64
 	GOOS=freebsd GOARCH=arm go build -o ./bin/${BINARY}_${VERSION}_freebsd_arm
