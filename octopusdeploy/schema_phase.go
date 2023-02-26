@@ -37,8 +37,23 @@ func expandPhase(tfPhase map[string]interface{}) *lifecycles.Phase {
 	if phase.AutomaticDeploymentTargets == nil {
 		phase.AutomaticDeploymentTargets = []string{}
 	}
+
 	if phase.OptionalDeploymentTargets == nil {
 		phase.OptionalDeploymentTargets = []string{}
+	}
+
+	if v, ok := tfPhase["release_retention_policy"]; ok {
+		retentionPolicy := v.([]interface{})
+		if len(retentionPolicy) == 1 {
+			phase.ReleaseRetentionPolicy = expandRetentionPeriod(retentionPolicy[0].(map[string]interface{}))
+		}
+	}
+
+	if v, ok := tfPhase["tentacle_retention_policy"]; ok {
+		retentionPolicy := v.([]interface{})
+		if len(retentionPolicy) == 1 {
+			phase.TentacleRetentionPolicy = expandRetentionPeriod(retentionPolicy[0].(map[string]interface{}))
+		}
 	}
 
 	return phase

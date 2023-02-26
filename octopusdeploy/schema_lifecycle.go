@@ -23,18 +23,22 @@ func expandLifecycle(d *schema.ResourceData) *lifecycles.Lifecycle {
 		lifecycle.Description = v.(string)
 	}
 
-	releaseRetentionPolicy := expandRetentionPeriod(d, "release_retention_policy")
-	if releaseRetentionPolicy != nil {
-		lifecycle.ReleaseRetentionPolicy = releaseRetentionPolicy
-	}
-
 	if v, ok := d.GetOk("space_id"); ok {
 		lifecycle.SpaceID = v.(string)
 	}
 
-	tentacleRetentionPolicy := expandRetentionPeriod(d, "tentacle_retention_policy")
-	if tentacleRetentionPolicy != nil {
-		lifecycle.TentacleRetentionPolicy = tentacleRetentionPolicy
+	if v, ok := d.GetOk("tentacle_retention_policy"); ok {
+		retentionPeriod := v.([]interface{})
+		if len(retentionPeriod) == 1 {
+			lifecycle.TentacleRetentionPolicy = expandRetentionPeriod(retentionPeriod[0].(map[string]interface{}))
+		}
+	}
+
+	if v, ok := d.GetOk("release_retention_policy"); ok {
+		retentionPeriod := v.([]interface{})
+		if len(retentionPeriod) == 1 {
+			lifecycle.ReleaseRetentionPolicy = expandRetentionPeriod(retentionPeriod[0].(map[string]interface{}))
+		}
 	}
 
 	if attr, ok := d.GetOk("phase"); ok {

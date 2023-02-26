@@ -20,12 +20,25 @@ func TestExpandPhase(t *testing.T) {
 	isOptionalPhase := true
 	minimumEnvironmentsBeforePromotion := acctest.RandIntRange(1, 1000)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
+	releaseRetention := []interface{}{
+		map[string]interface{}{
+			"quantity_to_keep":    0,
+			"should_keep_forever": true,
+			"unit":                "Days",
+		}}
+	tentacleRetention := []interface{}{
+		map[string]interface{}{
+			"quantity_to_keep":    2,
+			"should_keep_forever": false,
+			"unit":                "Items",
+		}}
 	resourceMap := map[string]interface{}{
 		"automatic_deployment_targets":          automaticDeploymentTargets,
 		"is_optional_phase":                     isOptionalPhase,
 		"minimum_environments_before_promotion": minimumEnvironmentsBeforePromotion,
 		"name":                                  name,
+		"release_retention_policy":              releaseRetention,
+		"tentacle_retention_policy":             tentacleRetention,
 	}
 
 	phase := expandPhase(resourceMap)
@@ -35,6 +48,10 @@ func TestExpandPhase(t *testing.T) {
 	require.Equal(t, isOptionalPhase, phase.IsOptionalPhase)
 	require.EqualValues(t, minimumEnvironmentsBeforePromotion, phase.MinimumEnvironmentsBeforePromotion)
 	require.Equal(t, name, phase.Name)
-	require.Nil(t, phase.ReleaseRetentionPolicy)
-	require.Nil(t, phase.TentacleRetentionPolicy)
+	require.EqualValues(t, phase.ReleaseRetentionPolicy.QuantityToKeep, 0)
+	require.EqualValues(t, phase.TentacleRetentionPolicy.QuantityToKeep, 2)
+	require.EqualValues(t, phase.ReleaseRetentionPolicy.ShouldKeepForever, true)
+	require.EqualValues(t, phase.TentacleRetentionPolicy.ShouldKeepForever, false)
+	require.EqualValues(t, phase.ReleaseRetentionPolicy.Unit, "Days")
+	require.EqualValues(t, phase.TentacleRetentionPolicy.Unit, "Items")
 }
