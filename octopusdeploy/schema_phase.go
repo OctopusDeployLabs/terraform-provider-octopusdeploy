@@ -5,24 +5,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandPhase(tfPhase map[string]interface{}) *lifecycles.Phase {
-	if tfPhase == nil {
+func expandPhase(flattenedPhase interface{}) *lifecycles.Phase {
+	if flattenedPhase == nil {
 		return nil
 	}
 
-	name := tfPhase["name"].(string)
+	if _, ok := flattenedPhase.(map[string]interface{}); !ok {
+		return nil
+	}
 
+	flattenedValues := flattenedPhase.(map[string]interface{})
+	if len(flattenedValues) == 0 {
+		return nil
+	}
+
+	name := flattenedValues["name"].(string)
 	phase := lifecycles.NewPhase(name)
 
-	if v, ok := tfPhase["automatic_deployment_targets"]; ok {
+	if v, ok := flattenedValues["automatic_deployment_targets"]; ok {
 		phase.AutomaticDeploymentTargets = getSliceFromTerraformTypeList(v)
 	}
 
-	if v, ok := tfPhase["is_optional_phase"]; ok {
+	if v, ok := flattenedValues["is_optional_phase"]; ok {
 		phase.IsOptionalPhase = v.(bool)
 	}
 
-	if v, ok := tfPhase["minimum_environments_before_promotion"]; ok {
+	if v, ok := flattenedValues["minimum_environments_before_promotion"]; ok {
 		if n, isInt32 := v.(int32); isInt32 {
 			phase.MinimumEnvironmentsBeforePromotion = n
 		} else {
@@ -30,8 +38,16 @@ func expandPhase(tfPhase map[string]interface{}) *lifecycles.Phase {
 		}
 	}
 
-	if v, ok := tfPhase["optional_deployment_targets"]; ok {
+	if v, ok := flattenedValues["optional_deployment_targets"]; ok {
 		phase.OptionalDeploymentTargets = getSliceFromTerraformTypeList(v)
+	}
+
+	if v, ok := flattenedValues["release_retention_policy"]; ok {
+		phase.ReleaseRetentionPolicy = expandRetentionPeriod(v)
+	}
+
+	if v, ok := flattenedValues["tentacle_retention_policy"]; ok {
+		phase.TentacleRetentionPolicy = expandRetentionPeriod(v)
 	}
 
 	if phase.AutomaticDeploymentTargets == nil {
@@ -42,40 +58,35 @@ func expandPhase(tfPhase map[string]interface{}) *lifecycles.Phase {
 		phase.OptionalDeploymentTargets = []string{}
 	}
 
-	if v, ok := tfPhase["release_retention_policy"]; ok {
-		retentionPolicy := v.([]interface{})
-		if len(retentionPolicy) == 1 {
-			phase.ReleaseRetentionPolicy = expandRetentionPeriod(retentionPolicy[0].(map[string]interface{}))
-		}
-	}
-
-	if v, ok := tfPhase["tentacle_retention_policy"]; ok {
-		retentionPolicy := v.([]interface{})
-		if len(retentionPolicy) == 1 {
-			phase.TentacleRetentionPolicy = expandRetentionPeriod(retentionPolicy[0].(map[string]interface{}))
-		}
-	}
-
 	return phase
+}
+
+func flattenPhase(phase *lifecycles.Phase) interface{} {
+	if phase == nil {
+		return nil
+	}
+
+	flattenedPhase := make(map[string]interface{})
+	flattenedPhase["automatic_deployment_targets"] = flattenArray(phase.AutomaticDeploymentTargets)
+	flattenedPhase["id"] = phase.ID
+	flattenedPhase["is_optional_phase"] = phase.IsOptionalPhase
+	flattenedPhase["minimum_environments_before_promotion"] = int(phase.MinimumEnvironmentsBeforePromotion)
+	flattenedPhase["name"] = phase.Name
+	flattenedPhase["optional_deployment_targets"] = flattenArray(phase.OptionalDeploymentTargets)
+	if phase.ReleaseRetentionPolicy != nil {
+		flattenedPhase["release_retention_policy"] = flattenRetentionPeriod(phase.ReleaseRetentionPolicy)
+	}
+	if phase.TentacleRetentionPolicy != nil {
+		flattenedPhase["tentacle_retention_policy"] = flattenRetentionPeriod(phase.TentacleRetentionPolicy)
+	}
+
+	return flattenedPhase
 }
 
 func flattenPhases(phases []*lifecycles.Phase) []interface{} {
 	flattenedPhases := make([]interface{}, 0)
 	for _, phase := range phases {
-		p := make(map[string]interface{})
-		p["automatic_deployment_targets"] = flattenArray(phase.AutomaticDeploymentTargets)
-		p["id"] = phase.ID
-		p["is_optional_phase"] = phase.IsOptionalPhase
-		p["minimum_environments_before_promotion"] = int(phase.MinimumEnvironmentsBeforePromotion)
-		p["name"] = phase.Name
-		p["optional_deployment_targets"] = flattenArray(phase.OptionalDeploymentTargets)
-		if phase.ReleaseRetentionPolicy != nil {
-			p["release_retention_policy"] = flattenRetentionPeriod(phase.ReleaseRetentionPolicy)
-		}
-		if phase.TentacleRetentionPolicy != nil {
-			p["tentacle_retention_policy"] = flattenRetentionPeriod(phase.TentacleRetentionPolicy)
-		}
-		flattenedPhases = append(flattenedPhases, p)
+		flattenedPhases = append(flattenedPhases, flattenPhase(phase))
 	}
 	return flattenedPhases
 }
