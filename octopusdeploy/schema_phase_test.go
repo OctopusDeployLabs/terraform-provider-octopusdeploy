@@ -43,7 +43,7 @@ func TestExpandPhaseWithSensibleDefaults(t *testing.T) {
 	minimumEnvironmentsBeforePromotion := int32(acctest.RandIntRange(1, 1000))
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	releaseRetentionPolicy := core.NewRetentionPeriod(15, "Items", false)
-	tentacleRetentionPolicy := core.NewRetentionPeriod(5, "Days", true)
+	tentacleRetentionPolicy := core.NewRetentionPeriod(5, "Days", false)
 
 	actualPhase := lifecycles.NewPhase(name)
 	actualPhase.AutomaticDeploymentTargets = automaticDeploymentTargets
@@ -76,7 +76,7 @@ func TestExpandPhasesWithSensibleDefaults(t *testing.T) {
 	minimumEnvironmentsBeforePromotion := int32(acctest.RandIntRange(1, 1000))
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	releaseRetentionPolicy := core.NewRetentionPeriod(15, "Items", false)
-	tentacleRetentionPolicy := core.NewRetentionPeriod(5, "Days", true)
+	tentacleRetentionPolicy := core.NewRetentionPeriod(0, "Days", true)
 
 	actualPhase := lifecycles.NewPhase(name)
 	actualPhase.AutomaticDeploymentTargets = automaticDeploymentTargets
@@ -100,7 +100,7 @@ func TestExpandPhasesWithSensibleDefaults(t *testing.T) {
 	minimumEnvironmentsBeforePromotion = int32(acctest.RandIntRange(1, 1000))
 	name = acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	releaseRetentionPolicy = core.NewRetentionPeriod(15, "Items", false)
-	tentacleRetentionPolicy = core.NewRetentionPeriod(5, "Days", true)
+	tentacleRetentionPolicy = core.NewRetentionPeriod(0, "Days", true)
 
 	actualPhase = lifecycles.NewPhase(name)
 	actualPhase.AutomaticDeploymentTargets = automaticDeploymentTargets

@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -18,25 +19,14 @@ func TestExpandLifecycle(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	releaseRetention := []interface{}{
-		map[string]interface{}{
-			"quantity_to_keep":    0,
-			"should_keep_forever": true,
-			"unit":                "Days",
-		}}
-	tentacleRetention := []interface{}{
-		map[string]interface{}{
-			"quantity_to_keep":    2,
-			"should_keep_forever": false,
-			"unit":                "Items",
-		}}
-
+	releaseRetention := core.NewRetentionPeriod(0, "Days", true)
+	tentacleRetention := core.NewRetentionPeriod(2, "Items", false)
 	resourceMap := map[string]interface{}{
 		"description":               description,
 		"name":                      name,
 		"space_id":                  spaceID,
-		"release_retention_policy":  releaseRetention,
-		"tentacle_retention_policy": tentacleRetention,
+		"release_retention_policy":  flattenRetentionPeriod(releaseRetention),
+		"tentacle_retention_policy": flattenRetentionPeriod(tentacleRetention),
 	}
 
 	d := schema.TestResourceDataRaw(t, getLifecycleSchema(), resourceMap)
@@ -50,11 +40,7 @@ func TestExpandLifecycle(t *testing.T) {
 	require.Nil(t, lifecycle.ModifiedOn)
 	require.Equal(t, lifecycle.Name, name)
 	require.Empty(t, lifecycle.Phases)
-	require.EqualValues(t, lifecycle.ReleaseRetentionPolicy.QuantityToKeep, 0)
-	require.EqualValues(t, lifecycle.TentacleRetentionPolicy.QuantityToKeep, 2)
-	require.EqualValues(t, lifecycle.ReleaseRetentionPolicy.ShouldKeepForever, true)
-	require.EqualValues(t, lifecycle.TentacleRetentionPolicy.ShouldKeepForever, false)
-	require.EqualValues(t, lifecycle.ReleaseRetentionPolicy.Unit, "Days")
-	require.EqualValues(t, lifecycle.TentacleRetentionPolicy.Unit, "Items")
+	require.Equal(t, lifecycle.ReleaseRetentionPolicy, releaseRetention)
+	require.Equal(t, lifecycle.TentacleRetentionPolicy, tentacleRetention)
 	require.Equal(t, lifecycle.SpaceID, spaceID)
 }
