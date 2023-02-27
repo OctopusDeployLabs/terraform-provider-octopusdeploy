@@ -6,18 +6,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandRetentionPeriod(d *schema.ResourceData, key string) *core.RetentionPeriod {
-	if v, ok := d.GetOk(key); ok {
-		retentionPeriod := v.([]interface{})
-		if len(retentionPeriod) == 1 {
-			tfRetentionItem := retentionPeriod[0].(map[string]interface{})
-			retention := core.RetentionPeriod{
-				QuantityToKeep:    int32(tfRetentionItem["quantity_to_keep"].(int)),
-				ShouldKeepForever: tfRetentionItem["should_keep_forever"].(bool),
-				Unit:              tfRetentionItem["unit"].(string),
-			}
-			return &retention
-		}
+func expandRetentionPeriod(flattenedRetentionPeriod interface{}) *core.RetentionPeriod {
+	if flattenedRetentionPeriod == nil {
+		return nil
+	}
+
+	retentionPeriodProperties := flattenedRetentionPeriod.([]interface{})
+	if len(retentionPeriodProperties) == 1 {
+		retentionPeriodMap := retentionPeriodProperties[0].(map[string]interface{})
+		return core.NewRetentionPeriod(
+			int32(retentionPeriodMap["quantity_to_keep"].(int)),
+			retentionPeriodMap["unit"].(string),
+			retentionPeriodMap["should_keep_forever"].(bool),
+		)
 	}
 
 	return nil
