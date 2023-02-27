@@ -23,10 +23,6 @@ func expandLifecycle(d *schema.ResourceData) *lifecycles.Lifecycle {
 		lifecycle.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk("release_retention_policy"); ok {
-		lifecycle.ReleaseRetentionPolicy = expandRetentionPeriod(v)
-	}
-
 	if v, ok := d.GetOk("phase"); ok {
 		lifecycle.Phases = expandPhases(v)
 	}
