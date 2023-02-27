@@ -61,6 +61,27 @@ func expandPhase(flattenedPhase interface{}) *lifecycles.Phase {
 	return phase
 }
 
+func expandPhases(flattenedPhases interface{}) []*lifecycles.Phase {
+	if flattenedPhases == nil {
+		return nil
+	}
+
+	if _, ok := flattenedPhases.([]interface{}); !ok {
+		return nil
+	}
+
+	flattenedValues := flattenedPhases.([]interface{})
+	if len(flattenedValues) == 0 {
+		return nil
+	}
+
+	phases := []*lifecycles.Phase{}
+	for _, flattenedValues := range flattenedValues {
+		phases = append(phases, expandPhase(flattenedValues))
+	}
+	return phases
+}
+
 func flattenPhase(phase *lifecycles.Phase) interface{} {
 	if phase == nil {
 		return nil
