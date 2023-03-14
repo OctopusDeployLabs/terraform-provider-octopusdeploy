@@ -24,7 +24,7 @@ func resourceProjectDeploymentTargetTrigger() *schema.Resource {
 	}
 }
 
-func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*triggers.ProjectTrigger, error) {
+func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData, client *client.Client) (*triggers.ProjectTrigger, error) {
 	name := d.Get("name").(string)
 	projectID := d.Get("project_id").(string)
 	shouldRedeploy := d.Get("should_redeploy").(bool)
@@ -82,18 +82,24 @@ func buildProjectDeploymentTargetTriggerResource(d *schema.ResourceData) (*trigg
 		filter.Environments = getSliceFromTerraformTypeList(attr)
 	}
 
-	deploymentTargetTrigger := triggers.NewProjectTrigger(name, "", false, projectID, action, filter)
+	project, err := client.Projects.GetByID(projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	deploymentTargetTrigger := triggers.NewProjectTrigger(name, "", false, project, action, filter)
 
 	return deploymentTargetTrigger, nil
 }
 
 func resourceProjectDeploymentTargetTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
+	client := m.(*client.Client)
+
+	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d, client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	client := m.(*client.Client)
 	resource, err := client.ProjectTriggers.Add(projectTrigger)
 	if err != nil {
 		return diag.FromErr(err)
@@ -137,14 +143,14 @@ func resourceProjectDeploymentTargetTriggerRead(ctx context.Context, d *schema.R
 }
 
 func resourceProjectDeploymentTargetTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d)
+	client := m.(*client.Client)
+	projectTrigger, err := buildProjectDeploymentTargetTriggerResource(d, client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	projectTrigger.ID = d.Id() // set ID so Octopus API knows which project trigger to update
 
-	client := m.(*client.Client)
-	resource, err := client.ProjectTriggers.Update(*projectTrigger)
+	resource, err := client.ProjectTriggers.Update(projectTrigger)
 	if err != nil {
 		return diag.FromErr(err)
 	}
