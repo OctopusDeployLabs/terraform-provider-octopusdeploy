@@ -120,14 +120,14 @@ func getSpaceSchema() map[string]*schema.Schema {
 			Description: "A list of user IDs designated to be managers of this space.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			Optional:    true,
-			Type:        schema.TypeList,
+			Type:        schema.TypeSet,
 		},
 		"space_managers_teams": {
 			Computed:    true,
 			Description: "A list of team IDs designated to be managers of this space.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			Optional:    true,
-			Type:        schema.TypeList,
+			Type:        schema.TypeSet,
 		},
 		"is_task_queue_stopped": {
 			Description: "Specifies the status of the task queue for this space.",
