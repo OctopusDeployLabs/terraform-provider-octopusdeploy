@@ -249,7 +249,7 @@ func getActionSchema() (*schema.Schema, *schema.Resource) {
 	}
 
 	actionSchema := &schema.Schema{
-		Computed: true,
+		Computed: false,
 		Elem:     element,
 		Optional: true,
 		Type:     schema.TypeList,
