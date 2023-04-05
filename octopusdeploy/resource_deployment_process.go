@@ -3,13 +3,9 @@ package octopusdeploy
 import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
-	"reflect"
 	"regexp"
 	"strings"
-	"unsafe"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
@@ -20,55 +16,13 @@ import (
 
 func resourceDeploymentProcess() *schema.Resource {
 	return &schema.Resource{
-		Schema:               getDeploymentProcessSchema(),
-		SchemaVersion:        0,
-		MigrateState:         nil,
-		StateUpgraders:       nil,
-		Create:               nil,
-		Read:                 nil,
-		Update:               nil,
-		Delete:               nil,
-		Exists:               nil,
-		CreateContext:        resourceDeploymentProcessCreate,
-		ReadContext:          resourceDeploymentProcessRead,
-		UpdateContext:        resourceDeploymentProcessUpdate,
-		DeleteContext:        resourceDeploymentProcessDelete,
-		CreateWithoutTimeout: nil,
-		ReadWithoutTimeout:   nil,
-		UpdateWithoutTimeout: nil,
-		DeleteWithoutTimeout: nil,
-		CustomizeDiff: customdiff.All(
-			func(context context.Context, d *schema.ResourceDiff, meta interface{}) error {
-				rd := reflect.ValueOf(d).Elem()
-				rdiff := rd.FieldByName("diff")
-				diff := reflect.NewAt(rdiff.Type(), unsafe.Pointer(rdiff.UnsafeAddr())).Elem().Interface().(*terraform.InstanceDiff)
-
-				rstate := rd.FieldByName("state")
-				state := reflect.NewAt(rstate.Type(), unsafe.Pointer(rstate.UnsafeAddr())).Elem().Interface().(*terraform.InstanceState)
-
-				for k, v := range state.Attributes {
-					if (strings.HasPrefix(k, "step.0.run_script_action") || strings.HasPrefix(k, "step.1.run_script_action")) && !strings.HasSuffix(k, "#") {
-						diff.Attributes[k] = &terraform.ResourceAttrDiff{
-							Old:         v,
-							New:         "",
-							NewComputed: false,
-							NewRemoved:  true,
-							NewExtra:    nil,
-							RequiresNew: false,
-							Sensitive:   false,
-							Type:        0,
-						}
-					}
-				}
-
-				return nil
-			},
-		),
-		Importer:           getImporter(),
-		DeprecationMessage: "",
-		Timeouts:           nil,
-		Description:        "This resource manages deployment processes in Octopus Deploy.",
-		UseJSONNumber:      false,
+		CreateContext: resourceDeploymentProcessCreate,
+		DeleteContext: resourceDeploymentProcessDelete,
+		Description:   "This resource manages deployment processes in Octopus Deploy.",
+		Importer:      getImporter(),
+		ReadContext:   resourceDeploymentProcessRead,
+		Schema:        getDeploymentProcessSchema(),
+		UpdateContext: resourceDeploymentProcessUpdate,
 	}
 }
 
