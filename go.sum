@@ -61,6 +61,8 @@ github.com/Microsoft/go-winio v0.4.16 h1:FtSW/jqD+l4ba5iPBj9CODVtgfYAD8w2wS923g/
 github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugXOPRXwdLnMv0=
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.22.0 h1:V1srSWIspgzlCNHOZvDQqaROdCZM1J43CvRbVc3G00k=
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.22.0/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
+github.com/OctopusDeploy/go-octopusdeploy/v2 v2.23.1-0.20230413224539-cbb0228d3dac h1:bjeyxyt1yla/GgkNrk5GRI28HzW+nXN2yk4pQnkLLZ0=
+github.com/OctopusDeploy/go-octopusdeploy/v2 v2.23.1-0.20230413224539-cbb0228d3dac/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7/go.mod h1:z4/9nQmJSSwwds7ejkxaJwO37dru3geImFUdJlaLzQo=
 github.com/acomagu/bufpipe v1.0.3 h1:fxAGrHZTgQ9w5QqVItgzwj235/uYZYgbXitB+dLupOk=

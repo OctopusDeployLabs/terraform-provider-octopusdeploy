@@ -57,6 +57,10 @@ func expandRunbook(ctx context.Context, d *schema.ResourceData) *runbooks.Runboo
 		runbook.RunRetentionPolicy = expandRunbookRetentionPolicy(v.([]interface{}))
 	}
 
+	if v, ok := d.GetOk("force_package_download"); ok {
+		runbook.ForcePackageDownload = v.(bool)
+	}
+
 	return runbook
 }
 
@@ -144,6 +148,12 @@ func getRunbookSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeList,
 		},
+		"force_package_download": {
+			Description: "Whether to force packages to be re-downloaded or not",
+			Computed:    true,
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
 	}
 }
 
@@ -162,6 +172,7 @@ func setRunbook(ctx context.Context, d *schema.ResourceData, runbook *runbooks.R
 	d.Set("environment_scope", runbook.EnvironmentScope)
 	d.Set("environments", runbook.Environments)
 	d.Set("default_guided_failure_mode", runbook.DefaultGuidedFailureMode)
+	d.Set("force_package_download", runbook.ForcePackageDownload)
 
 	return nil
 }

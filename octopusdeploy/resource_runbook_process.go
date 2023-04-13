@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/newclient"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,10 +72,7 @@ func resourceRunbookProcessCreate(ctx context.Context, d *schema.ResourceData, m
 	runbookProcess.ProjectID = current.ProjectID
 	runbookProcess.RunbookID = current.RunbookID
 
-	createdRunbookProcess, err := newclient.Put[runbooks.RunbookProcess](
-		client.HttpSession(),
-		client.HttpSession().BaseURL.String()+"/Projects/"+runbook.ProjectID+"/RunbookProcesses/"+runbookProcess.ID,
-		runbookProcess)
+	createdRunbookProcess, err := client.RunbookProcesses.Update(runbookProcess)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -111,10 +107,7 @@ func resourceRunbookProcessDelete(ctx context.Context, d *schema.ResourceData, m
 	runbookProcess.Links = current.Links
 	runbookProcess.ID = d.Id()
 
-	_, err = newclient.Put[runbooks.RunbookProcess](
-		client.HttpSession(),
-		client.HttpSession().BaseURL.String()+"/RunbookProcesses/"+runbookProcess.ID,
-		runbookProcess)
+	_, err = client.RunbookProcesses.Update(runbookProcess)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -157,10 +150,7 @@ func resourceRunbookProcessUpdate(ctx context.Context, d *schema.ResourceData, m
 	runbookProcess.Links = current.Links
 	runbookProcess.Version = current.Version
 
-	updatedRunbookProcess, err := newclient.Put[runbooks.RunbookProcess](
-		client.HttpSession(),
-		client.HttpSession().BaseURL.String()+"/RunbookProcesses/"+runbookProcess.ID,
-		runbookProcess)
+	updatedRunbookProcess, err := client.RunbookProcesses.Update(runbookProcess)
 
 	if err != nil {
 		return diag.FromErr(err)
