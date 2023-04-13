@@ -62,6 +62,7 @@ func flattenRunbook(ctx context.Context, d *schema.ResourceData, runbook *runboo
 	}
 
 	runbookMap := map[string]interface{}{
+		"id":                            runbook.ID,
 		"name":                          runbook.Name,
 		"project_id":                    runbook.ProjectID,
 		"description":                   runbook.Description,
@@ -100,6 +101,7 @@ func getRunbookDataSchema() map[string]*schema.Schema {
 
 func getRunbookSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"id": getIDSchema(),
 		"name": {
 			Description:      "The name of the project in Octopus Deploy. This name must be unique.",
 			Required:         true,
@@ -113,17 +115,17 @@ func getRunbookSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"project_id": {
-			Description: "The project that this runbook belongs to",
+			Description: "The project that this runbook belongs to.",
 			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"runbook_process_id": {
-			Description: "The runbook process ID",
+			Description: "The runbook process ID.",
 			Computed:    true,
 			Type:        schema.TypeString,
 		},
 		"published_runbook_snapshot_id": {
-			Description: "The published snapshot ID",
+			Description: "The published snapshot ID.",
 			Computed:    true,
 			Type:        schema.TypeString,
 		},
@@ -167,7 +169,7 @@ func getRunbookSchema() map[string]*schema.Schema {
 }
 
 func setRunbook(ctx context.Context, d *schema.ResourceData, runbook *runbooks.Runbook) error {
-	d.Set("id", runbook.ID)
+	d.Set("id", runbook.GetID())
 	d.Set("name", runbook.Name)
 	d.Set("project_id", runbook.ProjectID)
 	d.Set("description", runbook.Description)

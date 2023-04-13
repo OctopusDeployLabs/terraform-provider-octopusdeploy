@@ -10,10 +10,16 @@ import (
 )
 
 func expandRunbookProcess(d *schema.ResourceData, client *client.Client) *runbooks.RunbookProcess {
-	projectID := d.Get("project_id").(string)
 	runbookProcess := runbooks.NewRunbookProcess()
-	runbookProcess.ProjectID = projectID
 	runbookProcess.ID = d.Id()
+
+	if v, ok := d.GetOk("project_id"); ok {
+		runbookProcess.ProjectID = v.(string)
+	}
+
+	if v, ok := d.GetOk("runbook_id"); ok {
+		runbookProcess.RunbookID = v.(string)
+	}
 
 	if v, ok := d.GetOk("last_snapshot_id"); ok {
 		runbookProcess.LastSnapshotID = v.(string)
@@ -42,6 +48,7 @@ func expandRunbookProcess(d *schema.ResourceData, client *client.Client) *runboo
 func setRunbookProcess(ctx context.Context, d *schema.ResourceData, RunbookProcess *runbooks.RunbookProcess) error {
 	d.Set("last_snapshot_id", RunbookProcess.LastSnapshotID)
 	d.Set("project_id", RunbookProcess.ProjectID)
+	d.Set("runbook_id", RunbookProcess.RunbookID)
 	d.Set("space_id", RunbookProcess.SpaceID)
 	d.Set("version", RunbookProcess.Version)
 
