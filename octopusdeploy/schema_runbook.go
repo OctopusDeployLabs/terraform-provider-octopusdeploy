@@ -53,50 +53,11 @@ func expandRunbook(ctx context.Context, d *schema.ResourceData) *runbooks.Runboo
 		runbook.DefaultGuidedFailureMode = v.(string)
 	}
 
+	if v, ok := d.GetOk("retention_policy"); ok {
+		runbook.RunRetentionPolicy = expandRunbookRetentionPolicy(v.([]interface{}))
+	}
+
 	return runbook
-}
-
-func flattenRunbook(ctx context.Context, d *schema.ResourceData, runbook *runbooks.Runbook) map[string]interface{} {
-	if runbook == nil {
-		return nil
-	}
-
-	runbookMap := map[string]interface{}{
-		"id":                            runbook.ID,
-		"name":                          runbook.Name,
-		"project_id":                    runbook.ProjectID,
-		"description":                   runbook.Description,
-		"runbook_process_id":            runbook.RunbookProcessID,
-		"published_runbook_snapshot_id": runbook.PublishedRunbookSnapshotID,
-		"space_id":                      runbook.SpaceID,
-		"multi_tenancy_mode":            runbook.MultiTenancyMode,
-		"connectivity_policy":           runbook.ConnectivityPolicy,
-		"environment_scope":             runbook.EnvironmentScope,
-		"environments":                  runbook.Environments,
-		"default_guided_failure_mode":   runbook.DefaultGuidedFailureMode,
-	}
-
-	return runbookMap
-}
-
-func getRunbookDataSchema() map[string]*schema.Schema {
-	dataSchema := getProjectSchema()
-	setDataSchema(&dataSchema)
-
-	return map[string]*schema.Schema{
-		"id":           getDataSchemaID(),
-		"ids":          getQueryIDs(),
-		"partial_name": getQueryPartialName(),
-		"runbooks": {
-			Computed:    true,
-			Description: "A list of runbooks that match the filter(s).",
-			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"skip": getQuerySkip(),
-		"take": getQueryTake(),
-	}
 }
 
 func getRunbookSchema() map[string]*schema.Schema {
@@ -148,6 +109,11 @@ func getRunbookSchema() map[string]*schema.Schema {
 			Computed: true,
 			Optional: true,
 			Type:     schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+				"All",
+				"Specified",
+				"FromProjectLifecycles",
+			}, false)),
 		},
 		"environments": {
 			Computed: true,
@@ -164,6 +130,19 @@ func getRunbookSchema() map[string]*schema.Schema {
 				"Off",
 				"On",
 			}, false)),
+		},
+		"retention_policy": {
+			Computed: true,
+			DefaultFunc: func() (interface{}, error) {
+				return flattenRunbookRetentionPeriod(&runbooks.RunbookRetentionPeriod{
+					QuantityToKeep:    100,
+					ShouldKeepForever: false,
+				}), nil
+			},
+			Elem:     &schema.Resource{Schema: getRunbookRetentionPeriodSchema()},
+			MaxItems: 1,
+			Optional: true,
+			Type:     schema.TypeList,
 		},
 	}
 }
