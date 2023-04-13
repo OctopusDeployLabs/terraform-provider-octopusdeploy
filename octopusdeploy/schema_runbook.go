@@ -100,20 +100,32 @@ func getRunbookDataSchema() map[string]*schema.Schema {
 
 func getRunbookSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"name": {
+			Description:      "The name of the project in Octopus Deploy. This name must be unique.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
 		"description": {
-			Computed:      true,
-			ConflictsWith: []string{"deployment_process_id"},
-			Description:   "The description of this project.",
-			Optional:      true,
-			Type:          schema.TypeString,
+			Computed:    true,
+			Description: "The description of this runbook.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"project_id": {
+			Description: "The project that this runbook belongs to",
+			Required:    true,
+			Type:        schema.TypeString,
 		},
 		"runbook_process_id": {
-			Computed: true,
-			Type:     schema.TypeString,
+			Description: "The runbook process ID",
+			Computed:    true,
+			Type:        schema.TypeString,
 		},
 		"published_runbook_snapshot_id": {
-			Computed: true,
-			Type:     schema.TypeString,
+			Description: "The published snapshot ID",
+			Computed:    true,
+			Type:        schema.TypeString,
 		},
 		"space_id": {
 			Computed:         true,
@@ -122,7 +134,7 @@ func getRunbookSchema() map[string]*schema.Schema {
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
-		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
+		"multi_tenancy_mode": getTenantedDeploymentSchema(),
 		"connectivity_policy": {
 			Computed: true,
 			Elem:     &schema.Resource{Schema: getConnectivityPolicySchema()},
@@ -132,10 +144,12 @@ func getRunbookSchema() map[string]*schema.Schema {
 		},
 		"environment_scope": {
 			Computed: true,
+			Optional: true,
 			Type:     schema.TypeString,
 		},
 		"environments": {
 			Computed: true,
+			Optional: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Type:     schema.TypeList,
 		},
@@ -166,7 +180,7 @@ func setRunbook(ctx context.Context, d *schema.ResourceData, runbook *runbooks.R
 	}
 	d.Set("environment_scope", runbook.EnvironmentScope)
 	d.Set("environments", runbook.Environments)
-	d.Set("default_guided_failure_modedefault_guided_failure_mode", runbook.DefaultGuidedFailureMode)
+	d.Set("default_guided_failure_mode", runbook.DefaultGuidedFailureMode)
 
 	return nil
 }
