@@ -2,8 +2,9 @@ package octopusdeploy
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/newclient"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -51,19 +52,29 @@ func resourceRunbookProcessCreate(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[INFO] creating runbook process: %#v", runbookProcess)
 
-	project, err := client.Projects.GetByID(runbookProcess.ProjectID)
+	runbook, err := client.Runbooks.GetByID(runbookProcess.RunbookID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	var current *runbooks.RunbookProcess
-	current, err = client.RunbookProcesses.GetByID(project.DeploymentProcessID)
+	current, err = client.RunbookProcesses.GetByID(runbook.RunbookProcessID)
 
 	runbookProcess.ID = current.ID
 	runbookProcess.Links = current.Links
 	runbookProcess.Version = current.Version
 
-	createdRunbookProcess, err := client.RunbookProcesses.Update(runbookProcess)
+	json, err := json.Marshal(runbookProcess)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	createdRunbookProcess, err := newclient.Post[runbooks.RunbookProcess](
+		client.HttpSession(),
+		client.HttpSession().BaseURL.String()+"/RunbookProcesses/"+runbookProcess.ID,
+		json)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -73,9 +84,6 @@ func resourceRunbookProcessCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	id := createdRunbookProcess.GetID()
-	if project.PersistenceSettings != nil && project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
-		id = "runbookProcess-" + createdRunbookProcess.ProjectID + "-" + runbookProcess.Branch
-	}
 
 	d.SetId(id)
 
@@ -100,7 +108,17 @@ func resourceRunbookProcessDelete(ctx context.Context, d *schema.ResourceData, m
 	runbookProcess.Links = current.Links
 	runbookProcess.ID = d.Id()
 
-	_, err = client.RunbookProcesses.Update(runbookProcess)
+	json, err := json.Marshal(runbookProcess)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	_, err = newclient.Post[runbooks.RunbookProcess](
+		client.HttpSession(),
+		client.HttpSession().BaseURL.String()+"/RunbookProcesses/"+runbookProcess.ID,
+		json)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -142,7 +160,17 @@ func resourceRunbookProcessUpdate(ctx context.Context, d *schema.ResourceData, m
 	runbookProcess.Links = current.Links
 	runbookProcess.Version = current.Version
 
-	updatedRunbookProcess, err := client.RunbookProcesses.Update(runbookProcess)
+	json, err := json.Marshal(runbookProcess)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	updatedRunbookProcess, err := newclient.Post[runbooks.RunbookProcess](
+		client.HttpSession(),
+		client.HttpSession().BaseURL.String()+"/RunbookProcesses/"+runbookProcess.ID,
+		json)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
