@@ -69,8 +69,6 @@ func resourceRunbookProcessCreate(ctx context.Context, d *schema.ResourceData, m
 	runbookProcess.ID = current.ID
 	runbookProcess.Links = current.Links
 	runbookProcess.Version = current.Version
-	runbookProcess.ProjectID = current.ProjectID
-	runbookProcess.RunbookID = current.RunbookID
 
 	createdRunbookProcess, err := client.RunbookProcesses.Update(runbookProcess)
 
