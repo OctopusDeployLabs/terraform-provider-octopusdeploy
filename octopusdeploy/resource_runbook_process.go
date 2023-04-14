@@ -25,8 +25,9 @@ func getRunbookProcessSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"id": getIDSchema(),
 		"last_snapshot_id": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "Read only value containing the last snapshot ID.",
+			Optional:    true,
+			Type:        schema.TypeString,
 		},
 		"project_id": {
 			Description: "The project ID associated with this deployment process.",

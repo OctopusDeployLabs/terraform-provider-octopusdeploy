@@ -110,9 +110,10 @@ func getRunbookSchema() map[string]*schema.Schema {
 			Type:     schema.TypeList,
 		},
 		"environment_scope": {
-			Computed: true,
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "Determines how the runbook is scoped to environments.",
+			Computed:    true,
+			Optional:    true,
+			Type:        schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"All",
 				"Specified",
@@ -120,15 +121,17 @@ func getRunbookSchema() map[string]*schema.Schema {
 			}, false)),
 		},
 		"environments": {
-			Computed: true,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			Type:     schema.TypeList,
+			Description: "When environment_scope is set to \"Specified\", this is the list of environments the runbook can be run against.",
+			Computed:    true,
+			Optional:    true,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Type:        schema.TypeList,
 		},
 		"default_guided_failure_mode": {
-			Computed: true,
-			Optional: true,
-			Type:     schema.TypeString,
+			Description: "Sets the runbook guided failure mode.",
+			Computed:    true,
+			Optional:    true,
+			Type:        schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 				"EnvironmentDefault",
 				"Off",
@@ -136,7 +139,8 @@ func getRunbookSchema() map[string]*schema.Schema {
 			}, false)),
 		},
 		"retention_policy": {
-			Computed: true,
+			Description: "Sets the runbook retention policy",
+			Computed:    true,
 			DefaultFunc: func() (interface{}, error) {
 				return flattenRunbookRetentionPeriod(&runbooks.RunbookRetentionPeriod{
 					QuantityToKeep:    100,
