@@ -75,6 +75,8 @@ func Provider() *schema.Provider {
 			"octopusdeploy_project":                                        resourceProject(),
 			"octopusdeploy_project_deployment_target_trigger":              resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_project_group":                                  resourceProjectGroup(),
+			"octopusdeploy_runbook":                                        resourceRunbook(),
+			"octopusdeploy_runbook_process":                                resourceRunbookProcess(),
 			"octopusdeploy_scoped_user_role":                               resourceScopedUserRole(),
 			"octopusdeploy_script_module":                                  resourceScriptModule(),
 			"octopusdeploy_space":                                          resourceSpace(),
