@@ -40,10 +40,11 @@ func getRunbookRetentionPeriodSchema() map[string]*schema.Schema {
 			ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 		},
 		"should_keep_forever": {
-			Default:     false,
-			Description: "Indicates if items should never be deleted. The default value is `false`.",
-			Optional:    true,
-			Type:        schema.TypeBool,
+			Default:       false,
+			Description:   "Indicates if items should never be deleted. The default value is `false`.",
+			Optional:      true,
+			Type:          schema.TypeBool,
+			ConflictsWith: []string{"retention_policy.quantity_to_keep"},
 		},
 	}
 }
