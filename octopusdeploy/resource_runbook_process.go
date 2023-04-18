@@ -30,13 +30,13 @@ func getRunbookProcessSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"project_id": {
-			Description: "The project ID associated with this deployment process.",
+			Description: "The project ID associated with this runbook process.",
 			Optional:    true,
 			Computed:    true,
 			Type:        schema.TypeString,
 		},
 		"runbook_id": {
-			Description: "The runbook ID associated with this deployment process.",
+			Description: "The runbook ID associated with this runbook process.",
 			Required:    true,
 			Type:        schema.TypeString,
 		},
@@ -44,7 +44,7 @@ func getRunbookProcessSchema() map[string]*schema.Schema {
 		"step":     getDeploymentStepSchema(),
 		"version": {
 			Computed:    true,
-			Description: "The version number of this deployment process.",
+			Description: "The version number of this runbook process.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},

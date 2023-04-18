@@ -68,7 +68,7 @@ func getRunbookSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"id": getIDSchema(),
 		"name": {
-			Description:      "The name of the project in Octopus Deploy. This name must be unique.",
+			Description:      "The name of the runbook in Octopus Deploy. This name must be unique.",
 			Required:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -96,7 +96,7 @@ func getRunbookSchema() map[string]*schema.Schema {
 		},
 		"space_id": {
 			Computed:         true,
-			Description:      "The space ID associated with this project.",
+			Description:      "The space ID associated with this runbook.",
 			Optional:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
