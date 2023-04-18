@@ -44,7 +44,7 @@ func getRunbookProcessSchema() map[string]*schema.Schema {
 		"step":     getDeploymentStepSchema(),
 		"version": {
 			Computed:    true,
-			Description: "The version number of this deployment process.",
+			Description: "The version number of this runbook process.",
 			Optional:    true,
 			Type:        schema.TypeInt,
 		},
