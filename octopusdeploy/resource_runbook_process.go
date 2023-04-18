@@ -30,7 +30,7 @@ func getRunbookProcessSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"project_id": {
-			Description: "The project ID associated with this deployment process.",
+			Description: "The project ID associated with this runbook process.",
 			Optional:    true,
 			Computed:    true,
 			Type:        schema.TypeString,
