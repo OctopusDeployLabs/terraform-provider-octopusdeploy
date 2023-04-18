@@ -34,7 +34,7 @@ func getRunbookRetentionPeriodSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"quantity_to_keep": {
 			Default:          100,
-			Description:      "The number of days/releases to keep. The default value is `100`. If `0` then all are kept.",
+			Description:      "How many runs to keep per environment.",
 			Optional:         true,
 			Type:             schema.TypeInt,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
