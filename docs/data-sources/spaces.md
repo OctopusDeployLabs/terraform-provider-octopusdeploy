@@ -47,7 +47,7 @@ Read-Only:
 - `is_task_queue_stopped` (Boolean) Specifies the status of the task queue for this space.
 - `name` (String) The name of this resource.
 - `slug` (String) The unique slug of this space.
-- `space_managers_team_members` (List of String) A list of user IDs designated to be managers of this space.
-- `space_managers_teams` (List of String) A list of team IDs designated to be managers of this space.
+- `space_managers_team_members` (Set of String) A list of user IDs designated to be managers of this space.
+- `space_managers_teams` (Set of String) A list of team IDs designated to be managers of this space.
 
 
