@@ -96,7 +96,7 @@ func getRunbookSchema() map[string]*schema.Schema {
 		},
 		"space_id": {
 			Computed:         true,
-			Description:      "The space ID associated with this project.",
+			Description:      "The space ID associated with this runbook.",
 			Optional:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
