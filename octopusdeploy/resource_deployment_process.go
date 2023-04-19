@@ -2,13 +2,13 @@ package octopusdeploy
 
 import (
 	"context"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"log"
 	"regexp"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -133,9 +133,7 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	r, _ = regexp.Compile(`\d+-\w+`)
-	gitRef := strings.SplitAfter(r.FindString(d.Id()), "-")[1]
-
+	gitRef := getGitRef(d)
 	current, err = client.DeploymentProcesses.Get(project, gitRef)
 	if err != nil {
 		return diag.FromErr(err)
@@ -179,9 +177,7 @@ func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, 
 		return errors.ProcessApiError(ctx, d, err, "project")
 	}
 
-	r, _ = regexp.Compile(`\d+-\w+`)
-	gitRef := strings.SplitAfter(r.FindString(d.Id()), "-")[1]
-
+	gitRef := getGitRef(d)
 	deploymentProcess, err = client.DeploymentProcesses.Get(project, gitRef)
 	if err == nil {
 		if err := setDeploymentProcess(ctx, d, deploymentProcess); err != nil {
@@ -210,9 +206,10 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 			return diag.FromErr(err)
 		}
 
-		r, _ = regexp.Compile(`\d+-\w+`)
-		gitRef := strings.SplitAfter(r.FindString(d.Id()), "-")[1]
-
+		gitRef := getGitRef(d)
+		if deploymentProcess.Branch != gitRef {
+			return diag.Errorf("you cannot change a deployment processes branch. instead create a new resource with the new branch and, if required, destroy the previous one")
+		}
 		current, err = client.DeploymentProcesses.Get(project, gitRef)
 		if err != nil {
 			return diag.FromErr(err)
@@ -233,4 +230,10 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] deployment process updated (%s)", d.Id())
 	return nil
+}
+
+func getGitRef(d *schema.ResourceData) string {
+	r, _ := regexp.Compile(`\d+-\w+`)
+	gitRef := strings.SplitAfter(r.FindString(d.Id()), "-")[1]
+	return gitRef
 }
