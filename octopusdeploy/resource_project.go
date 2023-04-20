@@ -41,7 +41,8 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	if persistenceSettings != nil && persistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 		tflog.Info(ctx, "converting project to use VCS")
-		vcsProject, err := client.Projects.ConvertToVcs(createdProject, "converting project to use VCS", "octopus-vcs-conversion", persistenceSettings.(projects.GitPersistenceSettings))
+
+		vcsProject, err := client.Projects.ConvertToVcs(createdProject, "converting project to use VCS", "", persistenceSettings.(projects.GitPersistenceSettings))
 		if err != nil {
 			client.Projects.DeleteByID(createdProject.GetID())
 			return diag.FromErr(err)
@@ -116,7 +117,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			tflog.Info(ctx, fmt.Sprintf("converting project to use VCS (%s)", d.Id()))
 
 			project.Links["ConvertToVcs"] = convertToVcsLink
-			vcsProject, err := client.Projects.ConvertToVcs(project, "converting project to use VCS", "octopus-vcs-conversion", versionControlSettings)
+			vcsProject, err := client.Projects.ConvertToVcs(project, "converting project to use VCS", "", versionControlSettings)
 			if err != nil {
 				return diag.FromErr(err)
 			}
