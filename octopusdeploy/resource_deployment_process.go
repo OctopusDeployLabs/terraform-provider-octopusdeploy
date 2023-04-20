@@ -207,10 +207,17 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 		}
 
 		gitRef := getGitRef(d)
-		if deploymentProcess.Branch != gitRef {
+		if deploymentProcess.Branch != gitRef && gitRef != "" { //if gitRef is empty, its likely this is a conversion of an existing deployment process
 			return diag.Errorf("you cannot change a deployment processes branch. instead create a new resource with the new branch and, if required, destroy the previous one")
 		}
-		current, err = client.DeploymentProcesses.Get(project, gitRef)
+
+		if project.PersistenceSettings != nil && project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
+			deploymentProcess.ID = "deploymentprocess-" + projectID + "-" + deploymentProcess.Branch
+			d.SetId(deploymentProcess.ID)
+		}
+
+		current, err = client.DeploymentProcesses.Get(project, deploymentProcess.Branch)
+
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -234,6 +241,9 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 
 func getGitRef(d *schema.ResourceData) string {
 	r, _ := regexp.Compile(`\d+-\w+`)
-	gitRef := strings.SplitAfter(r.FindString(d.Id()), "-")[1]
-	return gitRef
+	parts := strings.SplitAfter(r.FindString(d.Id()), "-")
+	if len(parts) > 2 {
+		return parts[1]
+	}
+	return ""
 }
