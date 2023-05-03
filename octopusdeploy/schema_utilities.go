@@ -228,7 +228,7 @@ func getNameSchema(isRequired bool) *schema.Schema {
 
 func getNameSchemaWithMaxLength(isRequired bool, maxLength int) *schema.Schema {
 	schema := &schema.Schema{
-		Description:      "The name of this resource.",
+		Description:      fmt.Sprintf("The name of this resource, no more than %d characters long", maxLength),
 		Type:             schema.TypeString,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(1, maxLength)),
 	}

@@ -17,7 +17,7 @@ Provides information about an existing space.
 
 ### Required
 
-- `name` (String) The name of this resource.
+- `name` (String) The name of this resource, no more than 20 characters long
 
 ### Read-Only
 
