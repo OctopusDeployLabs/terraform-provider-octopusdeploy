@@ -226,6 +226,22 @@ func getNameSchema(isRequired bool) *schema.Schema {
 	return schema
 }
 
+func getNameSchemaWithMaxLength(isRequired bool, maxLength int) *schema.Schema {
+	schema := &schema.Schema{
+		Description:      "The name of this resource.",
+		Type:             schema.TypeString,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(1, maxLength)),
+	}
+
+	if isRequired {
+		schema.Required = true
+	} else {
+		schema.Optional = true
+	}
+
+	return schema
+}
+
 func getResourceManagerEndpointSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
 		Description:      "The resource manager endpoint URI for this resource.",

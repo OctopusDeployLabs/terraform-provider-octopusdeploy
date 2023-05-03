@@ -74,7 +74,7 @@ func getSpaceDataSourceSchema() map[string]*schema.Schema {
 	dataSchema := getSpaceSchema()
 	setDataSchema(&dataSchema)
 
-	dataSchema["name"] = getNameSchema(true)
+	dataSchema["name"] = getNameSchemaWithMaxLength(true, 20)
 
 	return dataSchema
 }
@@ -108,7 +108,7 @@ func getSpaceSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
-		"name": getNameSchema(true),
+		"name": getNameSchemaWithMaxLength(true, 20),
 		"slug": {
 			Computed:    true,
 			Description: "The unique slug of this space.",
