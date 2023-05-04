@@ -26,6 +26,10 @@ func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *machines.D
 		endpoint.Authentication = expandKubernetesAzureAuthentication(v)
 	}
 
+	if v, ok := d.GetOk("certificate_authentication"); ok {
+		endpoint.Authentication = expandKubernetesCertificateAuthentication(v)
+	}
+
 	if v, ok := d.GetOk("cluster_certificate"); ok {
 		endpoint.ClusterCertificate = v.(string)
 	}
@@ -162,7 +166,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
-		Type:         schema.TypeSet,
+		Type:         schema.TypeList,
 	}
 
 	kubernetesClusterDeploymentTargetSchema["cluster_certificate"] = &schema.Schema{
