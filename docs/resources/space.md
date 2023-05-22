@@ -15,7 +15,7 @@ This resource manages spaces in Octopus Deploy.
 ```terraform
 resource "octopusdeploy_space" "example" {
   description                 = "A space for the development team."
-  name                        = "Development Team Space"
+  name                        = "Dev Team Space"
   is_default                  = false
   is_task_queue_stopped       = false
   space_managers_team_members = ["Users-123", "Users-321"]
@@ -28,7 +28,7 @@ resource "octopusdeploy_space" "example" {
 
 ### Required
 
-- `name` (String) The name of this resource.
+- `name` (String) The name of this resource, no more than 20 characters long
 
 ### Optional
 

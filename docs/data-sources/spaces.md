@@ -45,7 +45,7 @@ Read-Only:
 - `id` (String) The unique ID for this resource.
 - `is_default` (Boolean) Specifies if this space is the default space in Octopus.
 - `is_task_queue_stopped` (Boolean) Specifies the status of the task queue for this space.
-- `name` (String) The name of this resource.
+- `name` (String) The name of this resource, no more than 20 characters long
 - `slug` (String) The unique slug of this space.
 - `space_managers_team_members` (Set of String) A list of user IDs designated to be managers of this space.
 - `space_managers_teams` (Set of String) A list of team IDs designated to be managers of this space.
