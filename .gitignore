@@ -46,3 +46,12 @@ examples/provider.tf
 
 # goreleaser
 dist/
+
+# Ignore lock and state files in the terraform test directory
+terraform/**/.terraform.lock.hcl
+terraform/**/.terraform.tfstate.lock.info
+terraform/**/terrform.tfstate
+terraform/**/.terraform/*
+
+# Ignore the test results file
+results.xml
