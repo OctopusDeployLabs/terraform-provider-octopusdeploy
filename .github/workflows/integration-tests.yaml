@@ -31,7 +31,7 @@ jobs:
           }
           EOT
       - name: Test
-        run: go install gotest.tools/gotestsum@latest; gotestsum --junitfile results.xml -- -v -timeout 0 -json ./...
+        run: go install gotest.tools/gotestsum@latest; gotestsum --junitfile results.xml -- -v -timeout 0 -json integration_test.go
         shell: bash
         env:
           LICENSE: ${{ secrets.LICENSE }}
