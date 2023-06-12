@@ -42,6 +42,7 @@ jobs:
           OCTODISABLEOCTOCONTAINERLOGGING: true
           OCTOTESTSKIPINIT: true
           GOMAXPROCS: 1
+          OCTOTESTVERSION: 2023.2
       - if: always()
         name: Report
         uses: dorny/test-reporter@v1
