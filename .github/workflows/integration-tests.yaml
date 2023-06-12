@@ -34,7 +34,7 @@ jobs:
         run: go install gotest.tools/gotestsum@latest; gotestsum --junitfile results.xml -- -v -timeout 0 -json integration_test.go
         shell: bash
         env:
-          LICENSE: ${{ secrets.LICENSE }}
+          LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
           ECR_ACCESS_KEY: ${{ secrets.ECR_ACCESS_KEY }}
           ECR_SECRET_KEY: ${{ secrets.ECR_SECRET_KEY }}
           GIT_CREDENTIAL: ${{ secrets.GIT_CREDENTIAL }}
