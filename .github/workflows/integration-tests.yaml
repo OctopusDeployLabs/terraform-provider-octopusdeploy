@@ -41,6 +41,7 @@ jobs:
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
           OCTODISABLEOCTOCONTAINERLOGGING: true
           OCTOTESTSKIPINIT: true
+          GOMAXPROCS: 1
       - if: always()
         name: Report
         uses: dorny/test-reporter@v1
