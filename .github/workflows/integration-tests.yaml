@@ -37,6 +37,8 @@ jobs:
           LICENSE: ${{ secrets.LICENSE }}
           ECR_ACCESS_KEY: ${{ secrets.ECR_ACCESS_KEY }}
           ECR_SECRET_KEY: ${{ secrets.ECR_SECRET_KEY }}
+          # The git credentials need access to modify the repo at
+          # https://github.com/OctopusDeployLabs/TerraformProviderIntegrationTestRepo.git
           GIT_CREDENTIAL: ${{ secrets.GIT_CREDENTIAL }}
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
           OCTODISABLEOCTOCONTAINERLOGGING: true
