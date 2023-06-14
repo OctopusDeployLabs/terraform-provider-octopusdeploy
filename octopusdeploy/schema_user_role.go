@@ -22,10 +22,14 @@ func expandUserRole(d *schema.ResourceData) *userroles.UserRole {
 
 	if v, ok := d.GetOk("granted_space_permissions"); ok {
 		userRole.GrantedSpacePermissions = getSliceFromTerraformTypeList(v)
+	} else {
+		userRole.GrantedSpacePermissions = []string{}
 	}
 
 	if v, ok := d.GetOk("granted_system_permissions"); ok {
 		userRole.GrantedSystemPermissions = getSliceFromTerraformTypeList(v)
+	} else {
+		userRole.GrantedSystemPermissions = []string{}
 	}
 
 	if v, ok := d.GetOk("name"); ok {
