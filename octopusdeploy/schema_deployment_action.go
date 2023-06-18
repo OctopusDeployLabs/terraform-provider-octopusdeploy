@@ -244,6 +244,12 @@ func getActionSchema() (*schema.Schema, *schema.Resource) {
 				Type:             schema.TypeMap,
 				ValidateDiagFunc: warnIfIncludesRunOnServer(),
 			},
+			"sort_order": {
+				Description: "Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     -1,
+			},
 			"tenant_tags": getTenantTagsSchema(),
 		},
 	}

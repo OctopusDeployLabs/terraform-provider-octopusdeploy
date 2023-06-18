@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"log"
+	"sort"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -42,60 +44,41 @@ func expandDeploymentStep(flattenedStep map[string]interface{}) *deployments.Dep
 		step.Properties["Octopus.Action.MaxParallelism"] = core.NewPropertyValue(windowSize.(string), false)
 	}
 
-	if v, ok := flattenedStep["action"]; ok {
-		for _, tfAction := range v.([]interface{}) {
-			action := expandAction(tfAction.(map[string]interface{}))
-			step.Actions = append(step.Actions, action)
+	var sort_order map[string]int = make(map[string]int)
+
+	step_expansion := func(step_type_name string, step_type_action func(map[string]interface{}) *deployments.DeploymentAction) {
+		if v, ok := flattenedStep[step_type_name]; ok {
+			for _, tfAction := range v.([]interface{}) {
+				flattenedAction := tfAction.(map[string]interface{})
+				action := step_type_action(flattenedAction)
+				step.Actions = append(step.Actions, action)
+
+				// Pull out the sort_order if it exists. This is used to sort the actions later
+				if posn, ok := flattenedAction["sort_order"].(int); ok && posn >= 0 {
+					name := flattenedAction["name"].(string)
+					sort_order[name] = posn
+				}
+			}
 		}
 	}
 
-	if v, ok := flattenedStep["manual_intervention_action"]; ok {
-		for _, tfAction := range v.([]interface{}) {
-			action := expandManualInterventionAction(tfAction.(map[string]interface{}))
-			step.Actions = append(step.Actions, action)
-		}
-	}
+	step_expansion("action", expandAction)
+	step_expansion("manual_intervention_action", expandManualInterventionAction)
+	step_expansion("apply_terraform_template_action", expandApplyTerraformTemplateAction)
+	step_expansion("deploy_package_action", expandDeployPackageAction)
+	step_expansion("deploy_windows_service_action", expandDeployWindowsServiceAction)
+	step_expansion("run_script_action", expandRunScriptAction)
+	step_expansion("run_kubectl_script_action", expandRunKubectlScriptAction)
+	step_expansion("deploy_kubernetes_secret_action", expandDeployKubernetesSecretAction)
 
-	if v, ok := flattenedStep["apply_terraform_template_action"]; ok {
-		for _, tfAction := range v.([]interface{}) {
-			action := expandApplyTerraformTemplateAction(tfAction.(map[string]interface{}))
-			step.Actions = append(step.Actions, action)
+	// Now that we have extracted all the steps off each of the properties into a single array, sort the array by the sort_order if provided
+	if len(sort_order) > 0 {
+		if len(sort_order) != len(step.Actions) {
+			log.Printf("[WARN] Not all actions on step '%s' have a `sort_order` parameter so they may be sorted in an unexpected order", step.Name)
 		}
-	}
-
-	if v, ok := flattenedStep["deploy_package_action"]; ok {
-		for _, tfAction := range v.([]interface{}) {
-			action := expandDeployPackageAction(tfAction.(map[string]interface{}))
-			step.Actions = append(step.Actions, action)
-		}
-	}
-
-	if v, ok := flattenedStep["deploy_windows_service_action"]; ok {
-		for _, tfAction := range v.([]interface{}) {
-			action := expandDeployWindowsServiceAction(tfAction.(map[string]interface{}))
-			step.Actions = append(step.Actions, action)
-		}
-	}
-
-	if v, ok := flattenedStep["run_script_action"]; ok {
-		for _, tfAction := range v.([]interface{}) {
-			action := expandRunScriptAction(tfAction.(map[string]interface{}))
-			step.Actions = append(step.Actions, action)
-		}
-	}
-
-	if v, ok := flattenedStep["run_kubectl_script_action"]; ok {
-		for _, tfAction := range v.([]interface{}) {
-			action := expandRunKubectlScriptAction(tfAction.(map[string]interface{}))
-			step.Actions = append(step.Actions, action)
-		}
-	}
-
-	if v, ok := flattenedStep["deploy_kubernetes_secret_action"]; ok {
-		for _, tfAction := range v.([]interface{}) {
-			action := expandDeployKubernetesSecretAction(tfAction.(map[string]interface{}))
-			step.Actions = append(step.Actions, action)
-		}
+		sort.SliceStable(step.Actions, func(i, j int) bool {
+			return sort_order[step.Actions[i].Name] < sort_order[step.Actions[j].Name]
+		})
 	}
 
 	return step
@@ -108,45 +91,59 @@ func flattenDeploymentSteps(deploymentSteps []*deployments.DeploymentStep) []map
 
 	var flattenedDeploymentSteps = make([]map[string]interface{}, len(deploymentSteps))
 	for key, deploymentStep := range deploymentSteps {
-		flattenedDeploymentSteps[key] = map[string]interface{}{}
-		flattenedDeploymentSteps[key]["condition"] = deploymentStep.Condition
-		flattenedDeploymentSteps[key]["id"] = deploymentStep.ID
-		flattenedDeploymentSteps[key]["name"] = deploymentStep.Name
-		flattenedDeploymentSteps[key]["package_requirement"] = deploymentStep.PackageRequirement
-		flattenedDeploymentSteps[key]["properties"] = flattenProperties(deploymentStep.Properties)
-		flattenedDeploymentSteps[key]["start_trigger"] = deploymentStep.StartTrigger
+		flattenedDeploymentStep := map[string]interface{}{}
+		flattenedDeploymentStep["condition"] = deploymentStep.Condition
+		flattenedDeploymentStep["id"] = deploymentStep.ID
+		flattenedDeploymentStep["name"] = deploymentStep.Name
+		flattenedDeploymentStep["package_requirement"] = deploymentStep.PackageRequirement
+		flattenedDeploymentStep["properties"] = flattenProperties(deploymentStep.Properties)
+		flattenedDeploymentStep["start_trigger"] = deploymentStep.StartTrigger
 
 		for propertyName, propertyValue := range deploymentStep.Properties {
 			switch propertyName {
 			case "Octopus.Action.TargetRoles":
-				flattenedDeploymentSteps[key]["target_roles"] = strings.Split(propertyValue.Value, ",")
+				flattenedDeploymentStep["target_roles"] = strings.Split(propertyValue.Value, ",")
 			case "Octopus.Action.MaxParallelism":
-				flattenedDeploymentSteps[key]["window_size"] = propertyValue.Value
+				flattenedDeploymentStep["window_size"] = propertyValue.Value
 			case "Octopus.Step.ConditionVariableExpression":
-				flattenedDeploymentSteps[key]["condition_expression"] = propertyValue.Value
+				flattenedDeploymentStep["condition_expression"] = propertyValue.Value
 			}
+		}
+
+		flatten_action_func := func(step_type_name string, i int, fp func(*deployments.DeploymentAction) map[string]interface{}) {
+
+			if _, ok := flattenedDeploymentStep[step_type_name]; !ok {
+				flattenedDeploymentStep[step_type_name] = make([]map[string]interface{}, 0)
+			}
+
+			action := fp(deploymentStep.Actions[i])
+			action["sort_order"] = i + 1
+			flattenedDeploymentStep[step_type_name] = append(flattenedDeploymentStep[step_type_name].([]map[string]interface{}), action)
 		}
 
 		for i := range deploymentStep.Actions {
 			switch deploymentStep.Actions[i].ActionType {
 			case "Octopus.KubernetesDeploySecret":
-				flattenedDeploymentSteps[key]["deploy_kubernetes_secret_action"] = []interface{}{flattenDeployKubernetesSecretAction(deploymentStep.Actions[i])}
+				flatten_action_func("deploy_kubernetes_secret_action", i, flattenDeployKubernetesSecretAction)
 			case "Octopus.KubernetesRunScript":
-				flattenedDeploymentSteps[key]["run_kubectl_script_action"] = []interface{}{flattenKubernetesRunScriptAction(deploymentStep.Actions[i])}
+				flatten_action_func("run_kubectl_script_action", i, flattenKubernetesRunScriptAction)
 			case "Octopus.Manual":
-				flattenedDeploymentSteps[key]["manual_intervention_action"] = []interface{}{flattenManualInterventionAction(deploymentStep.Actions[i])}
+				flatten_action_func("manual_intervention_action", i, flattenManualInterventionAction)
 			case "Octopus.Script":
-				flattenedDeploymentSteps[key]["run_script_action"] = []interface{}{flattenRunScriptAction(deploymentStep.Actions[i])}
+				flatten_action_func("run_script_action", i, flattenRunScriptAction)
 			case "Octopus.TentaclePackage":
-				flattenedDeploymentSteps[key]["deploy_package_action"] = []interface{}{flattenDeployPackageAction(deploymentStep.Actions[i])}
+				flatten_action_func("deploy_package_action", i, flattenDeployPackageAction)
 			case "Octopus.TerraformApply":
-				flattenedDeploymentSteps[key]["apply_terraform_template_action"] = []interface{}{flattenApplyTerraformTemplateAction(deploymentStep.Actions[i])}
+				flatten_action_func("apply_terraform_template_action", i, flattenApplyTerraformTemplateAction)
 			case "Octopus.WindowsService":
-				flattenedDeploymentSteps[key]["deploy_windows_service_action"] = []interface{}{flattenDeployWindowsServiceAction(deploymentStep.Actions[i])}
+				flatten_action_func("deploy_windows_service_action", i, flattenDeployWindowsServiceAction)
 			default:
-				flattenedDeploymentSteps[key]["action"] = []interface{}{flattenDeploymentAction(deploymentStep.Actions[i])}
+				flatten_action_func("action", i, flattenDeploymentAction)
 			}
+
 		}
+
+		flattenedDeploymentSteps[key] = flattenedDeploymentStep
 	}
 
 	return flattenedDeploymentSteps
