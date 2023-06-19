@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeploymentProcess(d *schema.ResourceData, client *client.Client) *deployments.DeploymentProcess {
+func expandDeploymentProcess(ctx context.Context, d *schema.ResourceData, client *client.Client) *deployments.DeploymentProcess {
 	projectID := d.Get("project_id").(string)
 	deploymentProcess := deployments.NewDeploymentProcess(projectID)
 	deploymentProcess.ID = d.Id()
@@ -43,7 +43,7 @@ func expandDeploymentProcess(d *schema.ResourceData, client *client.Client) *dep
 	if v, ok := d.GetOk("step"); ok {
 		steps := v.([]interface{})
 		for _, step := range steps {
-			deploymentStep := expandDeploymentStep(step.(map[string]interface{}))
+			deploymentStep := expandDeploymentStep(ctx, step.(map[string]interface{}))
 			deploymentProcess.Steps = append(deploymentProcess.Steps, deploymentStep)
 		}
 	}

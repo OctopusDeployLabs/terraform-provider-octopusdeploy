@@ -1,17 +1,19 @@
 package octopusdeploy
 
 import (
-	"log"
+	"context"
+	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandDeploymentStep(flattenedStep map[string]interface{}) *deployments.DeploymentStep {
+func expandDeploymentStep(ctx context.Context, flattenedStep map[string]interface{}) *deployments.DeploymentStep {
 	name := flattenedStep["name"].(string)
 	step := deployments.NewDeploymentStep(name)
 
@@ -73,9 +75,23 @@ func expandDeploymentStep(flattenedStep map[string]interface{}) *deployments.Dep
 
 	// Now that we have extracted all the steps off each of the properties into a single array, sort the array by the sort_order if provided
 	if len(sort_order) > 0 {
-		if len(sort_order) != len(step.Actions) {
-			log.Printf("[WARN] Not all actions on step '%s' have a `sort_order` parameter so they may be sorted in an unexpected order", step.Name)
+
+		sort_order_entries := make(map[int][]string)
+		// Validate there are no duplicate sort_order entries
+		for step_name, sort_order := range sort_order {
+			sort_order_entries[sort_order] = append(sort_order_entries[sort_order], step_name)
 		}
+		for _, matching_names := range sort_order_entries {
+			if len(matching_names) > 1 {
+				tflog.Warn(ctx, fmt.Sprintf("The following actions have the same sort_order: %v", matching_names))
+			}
+		}
+
+		// Validate that every step has a sort_order
+		if len(sort_order) != len(step.Actions) {
+			tflog.Warn(ctx, fmt.Sprintf("Not all actions on step '%s' have a `sort_order` parameter so they may be sorted in an unexpected order", step.Name))
+		}
+
 		sort.SliceStable(step.Actions, func(i, j int) bool {
 			return sort_order[step.Actions[i].Name] < sort_order[step.Actions[j].Name]
 		})

@@ -3,13 +3,14 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandRunbookProcess(d *schema.ResourceData, client *client.Client) *runbooks.RunbookProcess {
+func expandRunbookProcess(ctx context.Context, d *schema.ResourceData, client *client.Client) *runbooks.RunbookProcess {
 	runbookProcess := runbooks.NewRunbookProcess()
 	runbookProcess.ID = d.Id()
 
@@ -37,7 +38,7 @@ func expandRunbookProcess(d *schema.ResourceData, client *client.Client) *runboo
 	if v, ok := d.GetOk("step"); ok {
 		steps := v.([]interface{})
 		for _, step := range steps {
-			deploymentStep := expandDeploymentStep(step.(map[string]interface{}))
+			deploymentStep := expandDeploymentStep(ctx, step.(map[string]interface{}))
 			runbookProcess.Steps = append(runbookProcess.Steps, deploymentStep)
 		}
 	}

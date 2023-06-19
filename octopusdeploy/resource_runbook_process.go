@@ -2,12 +2,13 @@ package octopusdeploy
 
 import (
 	"context"
+	"log"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
 )
 
 func resourceRunbookProcess() *schema.Resource {
@@ -56,7 +57,7 @@ func getRunbookProcessSchema() map[string]*schema.Schema {
 // already, so this function retrieves the existing process and updates it.
 func resourceRunbookProcessCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	runbookProcess := expandRunbookProcess(d, client)
+	runbookProcess := expandRunbookProcess(ctx, d, client)
 
 	log.Printf("[INFO] creating runbook process: %#v", runbookProcess)
 
@@ -140,7 +141,7 @@ func resourceRunbookProcessUpdate(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[INFO] updating runbook process (%s)", d.Id())
 
 	client := m.(*client.Client)
-	runbookProcess := expandRunbookProcess(d, client)
+	runbookProcess := expandRunbookProcess(ctx, d, client)
 	current, err := client.RunbookProcesses.GetByID(d.Id())
 
 	if err != nil {
