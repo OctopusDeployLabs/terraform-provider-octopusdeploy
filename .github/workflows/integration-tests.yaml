@@ -28,7 +28,7 @@ jobs:
       - name: Generate an access token
         run: |
           curl \
-          --silent\
+          --silent \
           --request POST \
           --url "https://api.github.com/app/installations/${GH_APP_INSTALLATION_ID}/access_tokens" \
           --header "Accept: application/vnd.github+json" \
