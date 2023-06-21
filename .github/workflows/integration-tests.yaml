@@ -15,6 +15,27 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ^1.20
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Python JWT module
+        run: pip install jwt
+      - name: Generate a JWT
+        run: github-app-jwt.py >> "$GITHUB_ENV"
+        env:
+          GH_APP_ID: ${{ secrets.GH_APP_ID }}
+          GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
+      - name: Generate an access token
+        run: |
+          curl \
+          --silent\
+          --request POST \
+          --url "https://api.github.com/app/installations/${GH_APP_INSTALLATION_ID}/access_tokens" \
+          --header "Accept: application/vnd.github+json" \
+          --header "Authorization: Bearer ${{ env.jwt }}" \
+          --header "X-GitHub-Api-Version: 2022-11-28" | jq -r '"token=".token' > "$GITHUB_ENV"
+        env:
+          GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
       - name: Install Dependencies
         run: go get ./...
         shell: bash
@@ -39,8 +60,8 @@ jobs:
           ECR_SECRET_KEY: ${{ secrets.ECR_SECRET_KEY }}
           # The git credentials need access to modify the repo at
           # https://github.com/OctopusDeployLabs/TerraformProviderIntegrationTestRepo.git
-          GIT_CREDENTIAL: ${{ secrets.GIT_CREDENTIAL }}
-          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+          GIT_CREDENTIAL: ${{ env.token }}
+          GIT_USERNAME: x-access-token
           OCTODISABLEOCTOCONTAINERLOGGING: true
           OCTOTESTSKIPINIT: true
           GOMAXPROCS: 1
