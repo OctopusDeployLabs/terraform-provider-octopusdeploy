@@ -36,8 +36,6 @@ jobs:
           --header "X-GitHub-Api-Version: 2022-11-28" | jq -r '"GIT_CREDENTIAL=" + .token' > "$GITHUB_ENV"
         env:
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
-      - name: Debug
-        run: echo "${{ env.GIT_CREDENTIAL }}"
       - name: Install Dependencies
         run: go get ./...
         shell: bash
@@ -55,7 +53,7 @@ jobs:
           EOT
       # The token we generated is valid for an hour. The full test suite can run for longer than an hour.
       # So we first run the git tests, and the run the rest of the tests.
-      - name: Test Git Integration
+      - name: Test Git integration
         run: go install gotest.tools/gotestsum@latest; gotestsum --junitfile results.xml -- -v -timeout 0 -run "^\QTestProjectWithGitUsernameExport\E$" -json integration_test.go
         shell: bash
         env:
@@ -67,7 +65,7 @@ jobs:
           OCTOTESTSKIPINIT: true
           GOMAXPROCS: 1
           OCTOTESTVERSION: 2023.2
-      - name: Test
+      - name: Test everything else
         run: go install gotest.tools/gotestsum@latest; gotestsum --junitfile results.xml -- -v -timeout 0 -skip ^\QTestProjectWithGitUsernameExport\E$ -json integration_test.go
         shell: bash
         env:
