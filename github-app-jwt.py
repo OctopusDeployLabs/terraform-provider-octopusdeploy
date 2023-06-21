@@ -25,4 +25,4 @@ payload = {
 jwt_instance = jwt.JWT()
 encoded_jwt = jwt_instance.encode(payload, signing_key, alg='RS256')
 
-print('jwt='encoded_jwt)
+print('jwt=' + encoded_jwt)
