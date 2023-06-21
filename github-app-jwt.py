@@ -10,7 +10,7 @@ import os
 app_id = os.environ['GH_APP_ID']
 
 # Open PEM
-signing_key = jwt.jwk_from_pem(os.environ['GH_APP_PRIVATE_KEY'])
+signing_key = jwt.jwk_from_pem(os.environ['GH_APP_PRIVATE_KEY'].encode('utf-8'))
 
 payload = {
     # Issued at time
