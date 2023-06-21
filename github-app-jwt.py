@@ -4,7 +4,7 @@
 
 import jwt
 import time
-import sys
+import os
 
 # Get the App ID
 app_id = os.environ['GH_APP_ID']
