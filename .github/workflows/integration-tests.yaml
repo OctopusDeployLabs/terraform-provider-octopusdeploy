@@ -62,7 +62,7 @@ jobs:
       # The GitHub token we generated is valid for an hour. The full test suite can run for longer than an hour.
       # So we first run the git tests while the token is fresh, and the run the rest of the tests.
       - name: Test Git integration
-        run: gotestsum --junitfile results.xml -- -v -timeout 0 -run "^\\QTestProjectWithGitUsernameExport\\E$" -json integration_test.go
+        run: go -v -timeout 0 -run "^\\QTestProjectWithGitUsernameExport\\E$" integration_test.go
         shell: bash
         env:
           LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
