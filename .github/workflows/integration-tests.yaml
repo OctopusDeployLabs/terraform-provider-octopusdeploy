@@ -20,11 +20,16 @@ jobs:
           python-version: '3.10'
       - name: Install Python JWT module
         run: pip install jwt
+      # In order to test git integration, we need a token generated from a JWT.
+      # The first step is to generate a JWT from the GitHub App private key.
+      # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-python-to-generate-a-jwt
       - name: Generate a JWT
         run: ./github-app-jwt.py >> "$GITHUB_ENV"
         env:
           GH_APP_ID: ${{ secrets.GH_APP_ID }}
           GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
+      # The next step is to generate an access token from the JWT.
+      # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app#generating-an-installation-access-token
       - name: Generate an access token
         run: |
           curl \
@@ -54,10 +59,10 @@ jobs:
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@latest
         shell: bash
-      # The token we generated is valid for an hour. The full test suite can run for longer than an hour.
-      # So we first run the git tests, and the run the rest of the tests.
+      # The GitHub token we generated is valid for an hour. The full test suite can run for longer than an hour.
+      # So we first run the git tests while the token is fresh, and the run the rest of the tests.
       - name: Test Git integration
-        run: gotestsum --junitfile results.xml -- -v -timeout 0 -run "^\QTestProjectWithGitUsernameExport\E$" -json integration_test.go
+        run: gotestsum --junitfile results.xml -- -v -timeout 0 -run "^\\QTestProjectWithGitUsernameExport\\E$" -json integration_test.go
         shell: bash
         env:
           LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
@@ -69,7 +74,7 @@ jobs:
           GOMAXPROCS: 1
           OCTOTESTVERSION: 2023.2
       - name: Test everything else
-        run: gotestsum --junitfile results.xml -- -v -timeout 0 -skip "^\QTestProjectWithGitUsernameExport\E$" -json integration_test.go
+        run: gotestsum --junitfile results.xml -- -v -timeout 0 -skip "^\\QTestProjectWithGitUsernameExport\\E$" -json integration_test.go
         shell: bash
         env:
           LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
