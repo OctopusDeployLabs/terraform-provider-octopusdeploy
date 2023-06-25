@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
@@ -124,7 +125,7 @@ func resourceRunbookProcessRead(ctx context.Context, d *schema.ResourceData, m i
 	runbookProcess, err := client.RunbookProcesses.GetByID(d.Id())
 
 	if err != nil {
-		return diag.FromErr(err)
+		return errors.ProcessApiError(ctx, d, err, "runbook_process")
 	}
 
 	if err := setRunbookProcess(ctx, d, runbookProcess); err != nil {

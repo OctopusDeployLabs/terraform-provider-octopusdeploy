@@ -3057,9 +3057,11 @@ func TestRunbookResource(t *testing.T) {
 		}
 
 		found := false
+		runbookId := ""
 		for _, r := range resources {
 			if r.Name == "Runbook" {
 				found = true
+				runbookId = r.ID
 
 				if r.Description != "Test Runbook" {
 					t.Fatal("The runbook must be have a description of \"Test Runbook\" (was \"" + r.Description + "\")")
@@ -3123,6 +3125,15 @@ func TestRunbookResource(t *testing.T) {
 
 		if !found {
 			t.Fatalf("Space must have a runbook called \"Runbook\"")
+		}
+
+		// There was an issue where deleting a runbook and reapplying the terraform module caused an error, so
+		// verify this process works.
+		client.Runbooks.DeleteByID(runbookId)
+		err = testFramework.TerraformApply(t, "./terraform/46-runbooks", container.URI, newSpaceId, []string{})
+
+		if err != nil {
+			t.Fatal("Failed to reapply the runbooks after deleting them.")
 		}
 
 		// Verify the environment data lookups work
