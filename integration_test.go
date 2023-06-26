@@ -3045,11 +3045,11 @@ func TestProjectWithScriptActions(t *testing.T) {
 		if step.Actions[0].Name != "Pre Script Action" {
 			t.Fatal("The first Deployment Action should be name \"Pre Script Action\" (was \"" + step.Actions[0].Name + "\")")
 		}
-		if step.Actions[2].Name != "Hello world (using PowerShell)" {
-			t.Fatal("The first Deployment Action should be name \"Hello world (using PowerShell)\" (was \"" + step.Actions[1].Name + "\")")
+		if step.Actions[1].Name != "Hello world (using PowerShell)" {
+			t.Fatal("The second Deployment Action should be name \"Hello world (using PowerShell)\" (was \"" + step.Actions[1].Name + "\")")
 		}
-		if step.Actions[3].Name != "Post Script Action" {
-			t.Fatal("The first Deployment Action should be name \"Post Script Action\" (was \"" + step.Actions[2].Name + "\")")
+		if step.Actions[2].Name != "Post Script Action" {
+			t.Fatal("The third Deployment Action should be name \"Post Script Action\" (was \"" + step.Actions[2].Name + "\")")
 		}
 
 		return nil
