@@ -43,6 +43,7 @@ resource "octopusdeploy_deployment_process" "deployment_process_project_noopterr
 
     run_script_action {
       name          = "Pre Script Action"
+      sort_order    = 1
       features      = []
       run_on_server = false
       script_syntax = "Bash"
@@ -54,6 +55,7 @@ resource "octopusdeploy_deployment_process" "deployment_process_project_noopterr
     action {
       action_type                        = "Octopus.Script"
       name                               = "Hello world (using PowerShell)"
+      sort_order                         = 2
       condition                          = "Success"
       run_on_server                      = true
       is_disabled                        = false
@@ -74,6 +76,7 @@ resource "octopusdeploy_deployment_process" "deployment_process_project_noopterr
 
     run_script_action {
       name          = "Post Script Action"
+      sort_order    = 3
       features      = []
       run_on_server = false
       script_syntax = "Bash"
