@@ -41,6 +41,16 @@ resource "octopusdeploy_deployment_process" "deployment_process_project_noopterr
     package_requirement = "LetOctopusDecide"
     start_trigger       = "StartAfterPrevious"
 
+    run_script_action {
+      name          = "Pre Script Action"
+      features      = []
+      run_on_server = false
+      script_syntax = "Bash"
+      script_body   = <<-EOT
+          echo "Pre Script Action"
+        EOT
+    }
+
     action {
       action_type                        = "Octopus.Script"
       name                               = "Hello world (using PowerShell)"
@@ -60,6 +70,16 @@ resource "octopusdeploy_deployment_process" "deployment_process_project_noopterr
       channels                           = []
       tenant_tags                        = []
       features                           = []
+    }
+
+    run_script_action {
+      name          = "Post Script Action"
+      features      = []
+      run_on_server = false
+      script_syntax = "Bash"
+      script_body   = <<-EOT
+          echo "Post Script Action"
+        EOT
     }
 
     properties   = {}
