@@ -40,6 +40,8 @@ resource "octopusdeploy_deployment_process" "deployment_process_project_noopterr
     name                = "Hello world (using PowerShell)"
     package_requirement = "LetOctopusDecide"
     start_trigger       = "StartAfterPrevious"
+    properties          = {}
+    target_roles        = ["bread"]
 
     run_script_action {
       name          = "Pre Script Action"
@@ -81,8 +83,5 @@ resource "octopusdeploy_deployment_process" "deployment_process_project_noopterr
           echo "Post Script Action"
         EOT
     }
-
-    properties   = {}
-    target_roles = []
   }
 }
