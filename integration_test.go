@@ -3233,9 +3233,9 @@ func TestK8sPodAuthTargetResource(t *testing.T) {
 			t.Fatal("The machine must have a Endpoint.Authentication.TokenPath of \"/var/run/secrets/kubernetes.io/serviceaccount/token\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.(*machines.KubernetesPodAuthentication).TokenPath) + "\")")
 		}
 
-		//if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) != "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" {
-		//	t.Fatal("The machine must have a Endpoint.ClusterCertificatePath of \"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) + "\")")
-		//}
+		if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) != "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" {
+			t.Fatal("The machine must have a Endpoint.ClusterCertificatePath of \"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) + "\")")
+		}
 
 		return nil
 	})
