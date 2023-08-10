@@ -61,6 +61,7 @@ func flattenEndpointResource(endpoint *machines.EndpointResource) []interface{} 
 		"client_certificate_variable":     endpoint.ClientCertificateVariable,
 		"cloud_service_name":              endpoint.CloudServiceName,
 		"cluster_certificate":             endpoint.ClusterCertificate,
+		"cluster_certificate_path":        endpoint.ClusterCertificatePath,
 		"communication_style":             endpoint.CommunicationStyle,
 		"connection_endpoint":             endpoint.ConnectionEndpoint,
 		"container":                       flattenContainer(endpoint.Container),

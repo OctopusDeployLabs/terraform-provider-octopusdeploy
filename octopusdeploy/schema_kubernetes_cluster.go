@@ -12,6 +12,7 @@ func expandKubernetesCluster(flattenedMap map[string]interface{}) *machines.Kube
 	endpoint := machines.NewKubernetesEndpoint(clusterURL)
 	endpoint.Authentication = expandKubernetesAuthentication(flattenedMap["authentication"])
 	endpoint.ClusterCertificate = flattenedMap["cluster_certificate"].(string)
+	endpoint.ClusterCertificatePath = flattenedMap["cluster_certificate_path"].(string)
 	endpoint.Container = expandContainer(flattenedMap["container"])
 	endpoint.DefaultWorkerPoolID = flattenedMap["default_worker_pool_id"].(string)
 	endpoint.ID = flattenedMap["id"].(string)

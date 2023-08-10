@@ -30,6 +30,8 @@ func expandKubernetesAuthentication(values interface{}) machines.IKubernetesAuth
 		return expandKubernetesGcpAuthentication(flattenedMap)
 	case "KubernetesStandard":
 		return expandKubernetesStandardAuthentication(flattenedMap)
+	case "KubernetesPodService":
+		return expandKubernetesPodAuthentication(flattenedMap)
 	case "None":
 		return expandKubernetesStandardAuthentication(flattenedMap)
 	}

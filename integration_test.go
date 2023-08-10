@@ -3191,3 +3191,52 @@ func TestK8sTargetWithCertResource(t *testing.T) {
 		return nil
 	})
 }
+
+// TestK8sPodAuthTargetResource verifies that a k8s machine with pod auth can be reimported with the correct settings
+func TestK8sPodAuthTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "48-k8stargetpodauth", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) != "https://cluster" {
+			t.Fatal("The machine must have a Endpoint.ClusterUrl of \"https://cluster\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) + "\")")
+		}
+
+		if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.GetAuthenticationType()) != "KubernetesPodService" {
+			t.Fatal("The machine must have a Endpoint.Authentication.AuthenticationType of \"KubernetesPodService\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.GetAuthenticationType()) + "\")")
+		}
+
+		if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.(*machines.KubernetesPodAuthentication).TokenPath) != "/var/run/secrets/kubernetes.io/serviceaccount/token" {
+			t.Fatal("The machine must have a Endpoint.Authentication.TokenPath of \"/var/run/secrets/kubernetes.io/serviceaccount/token\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.(*machines.KubernetesPodAuthentication).TokenPath) + "\")")
+		}
+
+		if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) != "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" {
+			t.Fatal("The machine must have a Endpoint.ClusterCertificatePath of \"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) + "\")")
+		}
+
+		return nil
+	})
+}
