@@ -67,6 +67,8 @@ github.com/OctopusDeploy/go-octopusdeploy/v2 v2.24.0 h1:b6kyJL3SDbbViCSjkvrO1cb8
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.24.0/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.27.0 h1:LwevbGRiVZxDUG1YJ/Wnc70LqHMUihFK6ii93iwFhtE=
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.27.0/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
+github.com/OctopusDeploy/go-octopusdeploy/v2 v2.28.0 h1:7BegZkhNkY6MKgOf0ekNgsRNlvE4lBdzy84zVG+c1+0=
+github.com/OctopusDeploy/go-octopusdeploy/v2 v2.28.0/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230605032624-2acff93f126c h1:nJXjt8UFkyZ4iB/2Ba9aNSRgbnv3dQwO9UvTWnor2yk=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230605032624-2acff93f126c/go.mod h1:ltRYzU6Dw2WB09wDGB/zofUkB8Un13Qx30eqsw77SFw=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230605033112-566bb7c786fc h1:FJh2axO8HInjLrBZCfkBtNKzFy/BouERvouyaHH034o=
