@@ -18,6 +18,10 @@ func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *machines.D
 		endpoint.Authentication = expandKubernetesStandardAuthentication(v)
 	}
 
+	if v, ok := d.GetOk("pod_authentication"); ok {
+		endpoint.Authentication = expandKubernetesPodAuthentication(v)
+	}
+
 	if v, ok := d.GetOk("aws_account_authentication"); ok {
 		endpoint.Authentication = expandKubernetesAwsAuthentication(v)
 	}
@@ -48,10 +52,6 @@ func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *machines.D
 
 	if v, ok := d.GetOk("gcp_account_authentication"); ok {
 		endpoint.Authentication = expandKubernetesGcpAuthentication(v)
-	}
-
-	if v, ok := d.GetOk("pod_authentication"); ok {
-		endpoint.Authentication = expandKubernetesPodAuthentication(v)
 	}
 
 	if v, ok := d.GetOk("namespace"); ok {
@@ -143,7 +143,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesStandardAuthenticationSchema()},
-		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
+		ExactlyOneOf: []string{"pod_authentication", "authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -220,7 +220,7 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 	kubernetesClusterDeploymentTargetSchema["gcp_account_authentication"] = &schema.Schema{
 		Computed:     true,
 		Elem:         &schema.Resource{Schema: getKubernetesGcpAuthenticationSchema()},
-		ExactlyOneOf: []string{"authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
+		ExactlyOneOf: []string{"pod_authentication", "authentication", "aws_account_authentication", "azure_service_principal_authentication", "certificate_authentication", "gcp_account_authentication"},
 		MaxItems:     1,
 		MinItems:     0,
 		Optional:     true,
@@ -292,6 +292,10 @@ func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.Resourc
 		}
 	case "KubernetesStandard":
 		if err := d.Set("authentication", flattenKubernetesStandardAuthentication(endpointResource.Authentication.(*machines.KubernetesStandardAuthentication))); err != nil {
+			return fmt.Errorf("error setting authentication: %s", err)
+		}
+	case "KubernetesPodService":
+		if err := d.Set("authentication", flattenKubernetesPodAuthentication(endpointResource.Authentication.(*machines.KubernetesPodAuthentication))); err != nil {
 			return fmt.Errorf("error setting authentication: %s", err)
 		}
 	case "None":

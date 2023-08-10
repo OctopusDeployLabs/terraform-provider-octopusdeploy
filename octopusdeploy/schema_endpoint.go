@@ -158,6 +158,10 @@ func getEndpointSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
+		"cluster_certificate_path": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
 		"cluster_url": {
 			Optional: true,
 			Type:     schema.TypeString,

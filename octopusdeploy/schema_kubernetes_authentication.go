@@ -74,6 +74,8 @@ func flattenKubernetesAuthentication(kubernetesAuthentication machines.IKubernet
 		return flattenKubernetesGcpAuthentication(kubernetesAuthentication.(*machines.KubernetesGcpAuthentication))
 	case "KubernetesStandard":
 		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*machines.KubernetesStandardAuthentication))
+	case "KubernetesPodService":
+		return flattenKubernetesPodAuthentication(kubernetesAuthentication.(*machines.KubernetesPodAuthentication))
 	case "None":
 		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*machines.KubernetesStandardAuthentication))
 	}
@@ -137,6 +139,7 @@ func getKubernetesAuthenticationSchema() map[string]*schema.Schema {
 				"KubernetesCertificate",
 				"KubernetesGoogleCloud",
 				"KubernetesStandard",
+				"KubernetesPodService",
 				"None",
 			}, false)),
 		},
