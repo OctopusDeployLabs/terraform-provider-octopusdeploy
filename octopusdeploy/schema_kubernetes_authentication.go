@@ -183,5 +183,9 @@ func getKubernetesAuthenticationSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
+		"token_path": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
 	}
 }

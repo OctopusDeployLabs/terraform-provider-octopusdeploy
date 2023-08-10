@@ -295,7 +295,7 @@ func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.Resourc
 			return fmt.Errorf("error setting authentication: %s", err)
 		}
 	case "KubernetesPodService":
-		if err := d.Set("authentication", flattenKubernetesPodAuthentication(endpointResource.Authentication.(*machines.KubernetesPodAuthentication))); err != nil {
+		if err := d.Set("pod_authentication", flattenKubernetesPodAuthentication(endpointResource.Authentication.(*machines.KubernetesPodAuthentication))); err != nil {
 			return fmt.Errorf("error setting authentication: %s", err)
 		}
 	case "None":
