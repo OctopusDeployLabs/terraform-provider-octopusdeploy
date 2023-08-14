@@ -9,13 +9,10 @@ func expandKubernetesPodAuthentication(values interface{}) *machines.KubernetesP
 	flattenedValues := values.([]interface{})
 	flattenedAuthentication := flattenedValues[0].(map[string]interface{})
 
-	authentication := &machines.KubernetesPodAuthentication{
-		TokenPath: flattenedAuthentication["token_path"].(string),
+	return &machines.KubernetesPodAuthentication{
+		AuthenticationType: "KubernetesPodService",
+		TokenPath: flattenedAuthentication["token_path"].(string)
 	}
-
-	authentication.AuthenticationType = "KubernetesPodService"
-
-	return authentication
 }
 
 func flattenKubernetesPodAuthentication(KubernetesPodAuthentication *machines.KubernetesPodAuthentication) []interface{} {
