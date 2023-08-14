@@ -3,7 +3,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.20
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.27.0
+	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.30.1
 	github.com/google/uuid v1.3.0
 	github.com/gruntwork-io/terratest v0.41.11
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -11,8 +11,8 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.8.0
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.25.0
-	github.com/stretchr/testify v1.8.2
-	golang.org/x/exp v0.0.0-20230304125523-9ff063c70017
+	github.com/stretchr/testify v1.8.4
+	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 	golang.org/x/text v0.8.0
 	k8s.io/utils v0.0.0-20230505201702-9f6742963106
 )
@@ -28,7 +28,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/Microsoft/go-winio v0.6.0 // indirect
-	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230605033112-566bb7c786fc // indirect
+	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230705105638-f5ef7c07973b // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
@@ -45,7 +45,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dghubble/sling v1.4.1 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
-	github.com/docker/distribution v2.8.1+incompatible // indirect
+	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v23.0.5+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -82,7 +82,7 @@ require (
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
-	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/jhump/protoreflect v1.14.0 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -103,7 +103,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moby/patternmatcher v0.5.0 // indirect
 	github.com/moby/sys/sequential v0.5.0 // indirect
-	github.com/moby/term v0.0.0-20221205130635-1aeaba878587 // indirect
+	github.com/moby/term v0.5.0 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
@@ -116,7 +116,7 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/testcontainers/testcontainers-go v0.20.1 // indirect
+	github.com/testcontainers/testcontainers-go v0.21.0 // indirect
 	github.com/tmccombs/hcl2json v0.3.6 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
@@ -130,7 +130,7 @@ require (
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/term v0.6.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect

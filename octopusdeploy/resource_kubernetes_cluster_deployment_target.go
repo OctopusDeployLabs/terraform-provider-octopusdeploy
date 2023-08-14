@@ -14,7 +14,7 @@ func resourceKubernetesClusterDeploymentTarget() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceKubernetesClusterDeploymentTargetCreate,
 		DeleteContext: resourceKubernetesClusterDeploymentTargetDelete,
-		Description:   "This resource manages Kubernets cluster deployment targets in Octopus Deploy.",
+		Description:   "This resource manages Kubernetes cluster deployment targets in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceKubernetesClusterDeploymentTargetRead,
 		Schema:        getKubernetesClusterDeploymentTargetSchema(),

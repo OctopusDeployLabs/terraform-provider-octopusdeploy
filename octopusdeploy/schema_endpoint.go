@@ -61,6 +61,7 @@ func flattenEndpointResource(endpoint *machines.EndpointResource) []interface{} 
 		"client_certificate_variable":     endpoint.ClientCertificateVariable,
 		"cloud_service_name":              endpoint.CloudServiceName,
 		"cluster_certificate":             endpoint.ClusterCertificate,
+		"cluster_certificate_path":        endpoint.ClusterCertificatePath,
 		"communication_style":             endpoint.CommunicationStyle,
 		"connection_endpoint":             endpoint.ConnectionEndpoint,
 		"container":                       flattenContainer(endpoint.Container),
@@ -154,6 +155,10 @@ func getEndpointSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"cluster_certificate": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"cluster_certificate_path": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},

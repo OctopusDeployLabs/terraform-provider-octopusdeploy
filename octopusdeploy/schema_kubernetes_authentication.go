@@ -30,6 +30,8 @@ func expandKubernetesAuthentication(values interface{}) machines.IKubernetesAuth
 		return expandKubernetesGcpAuthentication(flattenedMap)
 	case "KubernetesStandard":
 		return expandKubernetesStandardAuthentication(flattenedMap)
+	case "KubernetesPodService":
+		return expandKubernetesPodAuthentication(flattenedMap)
 	case "None":
 		return expandKubernetesStandardAuthentication(flattenedMap)
 	}
@@ -72,6 +74,8 @@ func flattenKubernetesAuthentication(kubernetesAuthentication machines.IKubernet
 		return flattenKubernetesGcpAuthentication(kubernetesAuthentication.(*machines.KubernetesGcpAuthentication))
 	case "KubernetesStandard":
 		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*machines.KubernetesStandardAuthentication))
+	case "KubernetesPodService":
+		return flattenKubernetesPodAuthentication(kubernetesAuthentication.(*machines.KubernetesPodAuthentication))
 	case "None":
 		return flattenKubernetesStandardAuthentication(kubernetesAuthentication.(*machines.KubernetesStandardAuthentication))
 	}
@@ -135,6 +139,7 @@ func getKubernetesAuthenticationSchema() map[string]*schema.Schema {
 				"KubernetesCertificate",
 				"KubernetesGoogleCloud",
 				"KubernetesStandard",
+				"KubernetesPodService",
 				"None",
 			}, false)),
 		},
@@ -175,6 +180,10 @@ func getKubernetesAuthenticationSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 		"zone": {
+			Optional: true,
+			Type:     schema.TypeString,
+		},
+		"token_path": {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
