@@ -25,6 +25,7 @@ func dataSourceWorkerPoolsRead(ctx context.Context, d *schema.ResourceData, m in
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
+	name := d.Get("name").(string)
 
 	client := m.(*client.Client)
 	workerPools, err := client.WorkerPools.Get(query)
@@ -39,7 +40,10 @@ func dataSourceWorkerPoolsRead(ctx context.Context, d *schema.ResourceData, m in
 			return diag.FromErr(err)
 		}
 
-		flattenedWorkerPools = append(flattenedWorkerPools, flattenWorkerPool(workerPoolResource))
+		// Octopus currently doesn't support filtering by name, so we have to do it ourselves
+		if name != "" && workerPoolResource.Name == name {
+			flattenedWorkerPools = append(flattenedWorkerPools, flattenWorkerPool(workerPoolResource))
+		}
 	}
 
 	d.Set("worker_pools", flattenedWorkerPools)
