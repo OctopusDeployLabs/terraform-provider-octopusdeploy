@@ -36,6 +36,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
@@ -57,10 +62,6 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"k8s.io/utils/strings/slices"
-	"os"
-	"path/filepath"
-	"strings"
-	"testing"
 )
 
 // TestSpaceResource verifies that a space can be reimported with the correct settings
@@ -3026,6 +3027,29 @@ func TestProjectWithScriptActions(t *testing.T) {
 
 		if resource.ConnectivityPolicy.SkipMachineBehavior != "SkipUnavailableMachines" {
 			t.Log("BUG: The project must be have a ConnectivityPolicy.SkipMachineBehavior of \"SkipUnavailableMachines\" (was \"" + resource.ConnectivityPolicy.SkipMachineBehavior + "\") - Known issue where the value returned by /api/Spaces-#/ProjectGroups/ProjectGroups-#/projects is different to /api/Spaces-/Projects")
+		}
+
+		deploymentProcess, err := client.DeploymentProcesses.GetByID(resource.DeploymentProcessID)
+		if err != nil {
+			return err
+		}
+		if len(deploymentProcess.Steps) != 1 {
+			t.Fatal("The DeploymentProcess should have a single Deployment Step")
+		}
+		step := deploymentProcess.Steps[0]
+
+		if len(step.Actions) != 3 {
+			t.Fatal("The DeploymentProcess should have a three Deployment Actions")
+		}
+
+		if step.Actions[0].Name != "Pre Script Action" {
+			t.Fatal("The first Deployment Action should be name \"Pre Script Action\" (was \"" + step.Actions[0].Name + "\")")
+		}
+		if step.Actions[1].Name != "Hello world (using PowerShell)" {
+			t.Fatal("The second Deployment Action should be name \"Hello world (using PowerShell)\" (was \"" + step.Actions[1].Name + "\")")
+		}
+		if step.Actions[2].Name != "Post Script Action" {
+			t.Fatal("The third Deployment Action should be name \"Post Script Action\" (was \"" + step.Actions[2].Name + "\")")
 		}
 
 		return nil

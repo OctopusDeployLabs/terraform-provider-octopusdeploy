@@ -57,7 +57,7 @@ func getDeploymentProcessSchema() map[string]*schema.Schema {
 
 func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	deploymentProcess := expandDeploymentProcess(d, client)
+	deploymentProcess := expandDeploymentProcess(ctx, d, client)
 
 	log.Printf("[INFO] creating deployment process: %#v", deploymentProcess)
 
@@ -195,7 +195,7 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 	log.Printf("[INFO] updating deployment process (%s)", d.Id())
 
 	client := m.(*client.Client)
-	deploymentProcess := expandDeploymentProcess(d, client)
+	deploymentProcess := expandDeploymentProcess(ctx, d, client)
 	current, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err != nil {
 		r, _ := regexp.Compile(`Projects-\d+`)
