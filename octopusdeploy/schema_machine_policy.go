@@ -132,7 +132,7 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Default:     time.Minute,
 			Optional:    true,
 			Type:        schema.TypeInt,
-			Description: "In nanoseconds, no less than 10 seconds (10000000000)",
+			Description: "In nanoseconds. Minimum value: 10000000000 (10 seconds).",
 		},
 		"connection_retry_count_limit": {
 			Default:  5,
