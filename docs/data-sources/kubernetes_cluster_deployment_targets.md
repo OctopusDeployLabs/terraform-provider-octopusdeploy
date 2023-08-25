@@ -45,7 +45,7 @@ Read-Only:
 - `authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--authentication))
 - `aws_account_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--aws_account_authentication))
 - `azure_service_principal_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--azure_service_principal_authentication))
-- `certificate_authentication` (Set of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--certificate_authentication))
+- `certificate_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--certificate_authentication))
 - `cluster_certificate` (String)
 - `cluster_url` (String)
 - `container` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--container))

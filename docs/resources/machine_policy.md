@@ -21,7 +21,7 @@ This resource manages machine policies in Octopus Deploy.
 
 ### Optional
 
-- `connection_connect_timeout` (Number)
+- `connection_connect_timeout` (Number) In nanoseconds, no less than 10 seconds (10000000000)
 - `connection_retry_count_limit` (Number)
 - `connection_retry_sleep_interval` (Number)
 - `connection_retry_time_limit` (Number)
