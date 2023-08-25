@@ -45,8 +45,9 @@ Read-Only:
 - `authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--authentication))
 - `aws_account_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--aws_account_authentication))
 - `azure_service_principal_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--azure_service_principal_authentication))
-- `certificate_authentication` (Set of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--certificate_authentication))
+- `certificate_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--certificate_authentication))
 - `cluster_certificate` (String)
+- `cluster_certificate_path` (String)
 - `cluster_url` (String)
 - `container` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--container))
 - `default_worker_pool_id` (String)
@@ -62,6 +63,7 @@ Read-Only:
 - `name` (String) The name of this resource.
 - `namespace` (String)
 - `operating_system` (String)
+- `pod_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--pod_authentication))
 - `proxy_id` (String)
 - `roles` (List of String)
 - `running_in_container` (Boolean)
@@ -144,6 +146,7 @@ Read-Only:
 - `client_certificate_variable` (String)
 - `cloud_service_name` (String)
 - `cluster_certificate` (String)
+- `cluster_certificate_path` (String)
 - `cluster_url` (String)
 - `communication_style` (String)
 - `connection_endpoint` (String)
@@ -193,6 +196,7 @@ Read-Only:
 - `project` (String)
 - `region` (String)
 - `service_account_emails` (String)
+- `token_path` (String)
 - `use_instance_role` (Boolean)
 - `use_vm_service_account` (Boolean)
 - `zone` (String)
@@ -241,5 +245,13 @@ Read-Only:
 - `service_account_emails` (String)
 - `use_vm_service_account` (Boolean)
 - `zone` (String)
+
+
+<a id="nestedatt--kubernetes_cluster_deployment_targets--pod_authentication"></a>
+### Nested Schema for `kubernetes_cluster_deployment_targets.pod_authentication`
+
+Read-Only:
+
+- `token_path` (String)
 
 

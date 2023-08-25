@@ -129,9 +129,10 @@ func getMachinePolicyDataSchema() map[string]*schema.Schema {
 func getMachinePolicySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"connection_connect_timeout": {
-			Default:  time.Minute,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     time.Minute,
+			Optional:    true,
+			Type:        schema.TypeInt,
+			Description: "In nanoseconds, no less than 10 seconds (10000000000)",
 		},
 		"connection_retry_count_limit": {
 			Default:  5,
