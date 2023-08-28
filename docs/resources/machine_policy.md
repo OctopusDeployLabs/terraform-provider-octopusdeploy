@@ -23,16 +23,16 @@ This resource manages machine policies in Octopus Deploy.
 
 - `connection_connect_timeout` (Number) In nanoseconds. Minimum value: 10000000000 (10 seconds).
 - `connection_retry_count_limit` (Number)
-- `connection_retry_sleep_interval` (Number)
-- `connection_retry_time_limit` (Number)
+- `connection_retry_sleep_interval` (Number) In nanoseconds.
+- `connection_retry_time_limit` (Number) In nanoseconds.
 - `description` (String) The description of this machine policy.
 - `id` (String) The unique ID for this resource.
 - `machine_cleanup_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_cleanup_policy))
 - `machine_connectivity_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_connectivity_policy))
 - `machine_health_check_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy))
 - `machine_update_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_update_policy))
-- `polling_request_maximum_message_processing_timeout` (Number)
-- `polling_request_queue_timeout` (Number)
+- `polling_request_maximum_message_processing_timeout` (Number) In nanoseconds.
+- `polling_request_queue_timeout` (Number) In nanoseconds.
 - `space_id` (String) The space ID associated with this resource.
 
 ### Read-Only
@@ -45,7 +45,7 @@ This resource manages machine policies in Octopus Deploy.
 Optional:
 
 - `delete_machines_behavior` (String)
-- `delete_machines_elapsed_timespan` (Number)
+- `delete_machines_elapsed_timespan` (Number) In nanoseconds.
 
 
 <a id="nestedblock--machine_connectivity_policy"></a>
@@ -68,7 +68,7 @@ Optional:
 
 - `health_check_cron` (String)
 - `health_check_cron_timezone` (String)
-- `health_check_interval` (Number)
+- `health_check_interval` (Number) In nanoseconds.
 - `health_check_type` (String)
 
 <a id="nestedblock--machine_health_check_policy--bash_health_check_policy"></a>
