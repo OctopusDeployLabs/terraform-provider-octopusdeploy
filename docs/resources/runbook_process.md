@@ -80,6 +80,7 @@ Optional:
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--action--primary_package))
 - `properties` (Map of String) The properties associated with this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
+- `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `worker_pool_id` (String) The worker pool associated with this deployment action.
 - `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
@@ -170,6 +171,7 @@ Optional:
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--primary_package))
 - `properties` (Map of String) The properties associated with this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
+- `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `template` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--template))
 - `template_parameters` (String)
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
@@ -322,6 +324,7 @@ Optional:
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
+- `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
 <a id="nestedblock--step--deploy_kubernetes_secret_action--action_template"></a>
@@ -387,6 +390,7 @@ Optional:
 - `notes` (String) The notes associated with this deployment action.
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_package_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.
+- `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `windows_service` (Block Set, Max: 1) Deploy a windows service feature (see [below for nested schema](#nestedblock--step--deploy_package_action--windows_service))
 
@@ -500,6 +504,7 @@ Optional:
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.
 - `service_account` (String) Which built-in account will the service run under. Can be LocalSystem, NT Authority\NetworkService, NT Authority\LocalService, _CUSTOM or an expression
+- `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `start_mode` (String) When will the service start. Can be auto, delayed-auto, manual, unchanged or an expression
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
@@ -583,6 +588,7 @@ Optional:
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--manual_intervention_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.
 - `responsible_teams` (String) The teams responsible to resolve this step. If no teams are specified, all users who have permission to deploy the project can resolve it.
+- `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
 <a id="nestedblock--step--manual_intervention_action--action_template"></a>
@@ -652,6 +658,7 @@ Optional:
 - `script_file_name` (String) The script file name in the package
 - `script_parameters` (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
 - `script_source` (String)
+- `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
 <a id="nestedblock--step--run_kubectl_script_action--action_template"></a>
@@ -740,6 +747,7 @@ Optional:
 - `script_parameters` (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
 - `script_source` (String)
 - `script_syntax` (String)
+- `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `variable_substitution_in_files` (String) A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.
 - `worker_pool_id` (String) The worker pool associated with this deployment action.

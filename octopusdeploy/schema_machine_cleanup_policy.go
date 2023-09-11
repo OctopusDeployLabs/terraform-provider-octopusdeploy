@@ -55,9 +55,10 @@ func getMachineCleanupPolicySchema() map[string]*schema.Schema {
 			}, false)),
 		},
 		"delete_machines_elapsed_timespan": {
-			Computed: true,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Computed:    true,
+			Optional:    true,
+			Type:        schema.TypeInt,
+			Description: "In nanoseconds.",
 		},
 	}
 }

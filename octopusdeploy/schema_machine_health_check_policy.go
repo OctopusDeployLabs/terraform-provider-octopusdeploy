@@ -87,9 +87,10 @@ func getMachineHealthCheckPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"health_check_interval": {
-			Default:  24 * time.Hour,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     24 * time.Hour,
+			Optional:    true,
+			Type:        schema.TypeInt,
+			Description: "In nanoseconds.",
 		},
 		"health_check_type": {
 			Default:  "RunScript",

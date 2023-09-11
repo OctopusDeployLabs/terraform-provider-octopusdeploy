@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_kubernetes_cluster_deployment_target Resource - terraform-provider-octopusdeploy"
 subcategory: "Deployment Targets"
 description: |-
-  This resource manages Kubernets cluster deployment targets in Octopus Deploy.
+  This resource manages Kubernetes cluster deployment targets in Octopus Deploy.
 ---
 
 # octopusdeploy_kubernetes_cluster_deployment_target (Resource)
 
-This resource manages Kubernets cluster deployment targets in Octopus Deploy.
+This resource manages Kubernetes cluster deployment targets in Octopus Deploy.
 
 ## Example Usage
 
@@ -40,8 +40,9 @@ resource "octopusdeploy_kubernetes_cluster_deployment_target" "k8s-target" {
 - `authentication` (Block List, Max: 1) (see [below for nested schema](#nestedblock--authentication))
 - `aws_account_authentication` (Block List, Max: 1) (see [below for nested schema](#nestedblock--aws_account_authentication))
 - `azure_service_principal_authentication` (Block List, Max: 1) (see [below for nested schema](#nestedblock--azure_service_principal_authentication))
-- `certificate_authentication` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--certificate_authentication))
+- `certificate_authentication` (Block List, Max: 1) (see [below for nested schema](#nestedblock--certificate_authentication))
 - `cluster_certificate` (String)
+- `cluster_certificate_path` (String)
 - `container` (Block List) (see [below for nested schema](#nestedblock--container))
 - `default_worker_pool_id` (String)
 - `endpoint` (Block List) (see [below for nested schema](#nestedblock--endpoint))
@@ -52,6 +53,7 @@ resource "octopusdeploy_kubernetes_cluster_deployment_target" "k8s-target" {
 - `machine_policy_id` (String)
 - `namespace` (String)
 - `operating_system` (String)
+- `pod_authentication` (Block List, Max: 1) (see [below for nested schema](#nestedblock--pod_authentication))
 - `proxy_id` (String)
 - `running_in_container` (Boolean)
 - `shell_name` (String)
@@ -145,6 +147,7 @@ Optional:
 - `client_certificate_variable` (String)
 - `cloud_service_name` (String)
 - `cluster_certificate` (String)
+- `cluster_certificate_path` (String)
 - `cluster_url` (String)
 - `connection_endpoint` (String)
 - `container` (Block List) (see [below for nested schema](#nestedblock--endpoint--container))
@@ -193,6 +196,7 @@ Optional:
 - `project` (String)
 - `region` (String)
 - `service_account_emails` (String)
+- `token_path` (String)
 - `use_instance_role` (Boolean)
 - `use_vm_service_account` (Boolean)
 - `zone` (String)
@@ -244,6 +248,14 @@ Optional:
 - `service_account_emails` (String)
 - `use_vm_service_account` (Boolean)
 - `zone` (String)
+
+
+<a id="nestedblock--pod_authentication"></a>
+### Nested Schema for `pod_authentication`
+
+Required:
+
+- `token_path` (String)
 
 ## Import
 

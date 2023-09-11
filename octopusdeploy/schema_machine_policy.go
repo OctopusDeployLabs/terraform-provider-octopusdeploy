@@ -129,9 +129,10 @@ func getMachinePolicyDataSchema() map[string]*schema.Schema {
 func getMachinePolicySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"connection_connect_timeout": {
-			Default:  time.Minute,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     time.Minute,
+			Optional:    true,
+			Type:        schema.TypeInt,
+			Description: "In nanoseconds. Minimum value: 10000000000 (10 seconds).",
 		},
 		"connection_retry_count_limit": {
 			Default:  5,
@@ -139,14 +140,16 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeInt,
 		},
 		"connection_retry_sleep_interval": {
-			Default:  time.Second,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     time.Second,
+			Optional:    true,
+			Type:        schema.TypeInt,
+			Description: "In nanoseconds.",
 		},
 		"connection_retry_time_limit": {
-			Default:  5 * time.Minute,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     5 * time.Minute,
+			Optional:    true,
+			Type:        schema.TypeInt,
+			Description: "In nanoseconds.",
 		},
 		"description": getDescriptionSchema("machine policy"),
 		"id":          getIDSchema(),
@@ -184,14 +187,16 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 		},
 		"name": getNameSchema(true),
 		"polling_request_maximum_message_processing_timeout": {
-			Default:  10 * time.Minute,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     10 * time.Minute,
+			Optional:    true,
+			Type:        schema.TypeInt,
+			Description: "In nanoseconds.",
 		},
 		"polling_request_queue_timeout": {
-			Default:  2 * time.Minute,
-			Optional: true,
-			Type:     schema.TypeInt,
+			Default:     2 * time.Minute,
+			Optional:    true,
+			Type:        schema.TypeInt,
+			Description: "In nanoseconds.",
 		},
 		"space_id": getSpaceIDSchema(),
 	}
