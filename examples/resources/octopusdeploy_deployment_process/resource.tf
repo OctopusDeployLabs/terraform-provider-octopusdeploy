@@ -51,11 +51,12 @@ resource "octopusdeploy_deployment_process" "child_step_example" {
     start_trigger       = "StartAfterPrevious"
     target_roles        = [ "hello-world" ]
     run_script_action {
+      name                               = "Hello world (using PowerShell)"
+      sort_order                         = 1
       can_be_used_for_project_versioning = false
       condition                          = "Success"
       is_disabled                        = false
       is_required                        = true
-      name                               = "Hello world (using PowerShell)"
       script_body                        = <<-EOT
           Write-Host 'Hello world, using PowerShell'
           #TODO: Experiment with steps of your own :)
@@ -63,11 +64,12 @@ resource "octopusdeploy_deployment_process" "child_step_example" {
         EOT
     }
     run_script_action {
+      name                               = "Hello world (using Bash)"
+      sort_order                         = 2
       can_be_used_for_project_versioning = false
       condition                          = "Success"
       is_disabled                        = false
       is_required                        = true
-      name                               = "Hello world (using Bash)"
       script_body                        = <<-EOT
           echo 'Hello world, using Bash'
           #TODO: Experiment with steps of your own :)
@@ -88,11 +90,12 @@ resource "octopusdeploy_deployment_process" "child_step_rolling_deployment_examp
     target_roles        = [ "hello-world" ]
     window_size         = 2
     run_script_action {
+      name                               = "Hello world (using PowerShell)"
+      sort_order                         = 1
       can_be_used_for_project_versioning = false
       condition                          = "Success"
       is_disabled                        = false
       is_required                        = true
-      name                               = "Hello world (using PowerShell)"
       script_body                        = <<-EOT
           Write-Host 'Hello world, using PowerShell'
           #TODO: Experiment with steps of your own :)
@@ -100,11 +103,12 @@ resource "octopusdeploy_deployment_process" "child_step_rolling_deployment_examp
         EOT
     }
     run_script_action {
+      name                               = "Hello world (using Bash)"
+      sort_order                         = 2
       can_be_used_for_project_versioning = false
       condition                          = "Success"
       is_disabled                        = false
       is_required                        = true
-      name                               = "Hello world (using Bash)"
       script_body                        = <<-EOT
           echo 'Hello world, using Bash'
           #TODO: Experiment with steps of your own :)
