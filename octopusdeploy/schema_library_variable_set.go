@@ -18,6 +18,10 @@ func expandLibraryVariableSet(d *schema.ResourceData) *variables.LibraryVariable
 		libraryVariableSet.Description = v.(string)
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		libraryVariableSet.SpaceID = v.(string)
+	}
+
 	if attr, ok := d.GetOk("template"); ok {
 		tfTemplates := attr.([]interface{})
 
