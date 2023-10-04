@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"net/http"
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -21,7 +22,19 @@ func (c *Config) Client() (*client.Client, diag.Diagnostics) {
 		return nil, diag.FromErr(err)
 	}
 
-	octopus, err := client.NewClient(nil, apiURL, c.APIKey, "")
+	// This is intentional on the feature branch - Todo: remove when merging to main branch
+	proxyStr := "http://127.0.0.1:8866"
+	proxyURL, err := url.Parse(proxyStr)
+	if err != nil {
+		return nil, nil
+	}
+
+	tr := &http.Transport{
+		Proxy: http.ProxyURL(proxyURL),
+	}
+	httpClient := http.Client{Transport: tr}
+
+	octopus, err := client.NewClient(&httpClient, apiURL, c.APIKey, "")
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
@@ -32,7 +45,7 @@ func (c *Config) Client() (*client.Client, diag.Diagnostics) {
 			return nil, diag.FromErr(err)
 		}
 
-		octopus, err = client.NewClient(nil, apiURL, c.APIKey, space.GetID())
+		octopus, err = client.NewClient(&httpClient, apiURL, c.APIKey, space.GetID())
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}

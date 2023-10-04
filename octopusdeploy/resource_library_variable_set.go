@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/libraryvariableset"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,8 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[INFO] creating library variable set: %#v", libraryVariableSet)
 
 	client := m.(*client.Client)
-	createdLibraryVariableSet, err := client.LibraryVariableSets.Add(libraryVariableSet)
+
+	createdLibraryVariableSet, err := libraryvariableset.Add(client, libraryVariableSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
