@@ -48,8 +48,13 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting library variable set (%s)", d.Id())
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	client := m.(*client.Client)
-	err := client.LibraryVariableSets.DeleteByID(d.Id())
+	err := libraryvariableset.DeleteByID(client, spaceID, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -62,8 +67,13 @@ func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceDat
 func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading library variable set (%s)", d.Id())
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	client := m.(*client.Client)
-	libraryVariableSet, err := client.LibraryVariableSets.GetByID(d.Id())
+	libraryVariableSet, err := libraryvariableset.GetByID(client, spaceID, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "library variable set")
 	}
@@ -82,7 +92,7 @@ func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceDat
 	libraryVariableSet := expandLibraryVariableSet(d)
 
 	client := m.(*client.Client)
-	updatedLibraryVariableSet, err := client.LibraryVariableSets.Update(libraryVariableSet)
+	updatedLibraryVariableSet, err := libraryvariableset.Update(client, libraryVariableSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
