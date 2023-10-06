@@ -104,6 +104,7 @@ func getDynamicWorkerPoolSchema() map[string]*schema.Schema {
 				"UbuntuDefault",
 				"Windows2016",
 				"Windows2019",
+				"Windows2022",
 				"WindowsDefault",
 			}, false)),
 		},
