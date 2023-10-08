@@ -385,6 +385,7 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 	}
 
 	action := deployments.NewDeploymentAction(name, actionType)
+	action.ID = flattenedAction["id"].(string)
 
 	// expand properties first
 	if v, ok := flattenedAction["properties"]; ok {
