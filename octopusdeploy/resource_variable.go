@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -49,6 +50,11 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	projectID, projectOk := d.GetOk("project_id")
 	ownerID, ownerOk := d.GetOk("owner_id")
 
@@ -69,7 +75,7 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] creating variable: %#v", variable)
 
 	client := m.(*client.Client)
-	variableSet, err := client.Variables.AddSingle(variableOwnerID, variable)
+	variableSet, err := variables.AddSingle(client, spaceID, variableOwnerID, variable)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -97,6 +103,11 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 
 	id := d.Id()
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	projectID, projectOk := d.GetOk("project_id")
 	ownerID, ownerOk := d.GetOk("owner_id")
 
@@ -113,7 +124,7 @@ func resourceVariableRead(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	client := m.(*client.Client)
-	variable, err := client.Variables.GetByID(variableOwnerID, id)
+	variable, err := variables.GetByID(client, spaceID, variableOwnerID, id)
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "variable")
 	}
@@ -138,6 +149,11 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	variable := expandVariable(d)
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	projectID, projectOk := d.GetOk("project_id")
 	ownerID, ownerOk := d.GetOk("owner_id")
 
@@ -154,7 +170,7 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	client := m.(*client.Client)
-	variableSet, err := client.Variables.UpdateSingle(variableOwnerID, variable)
+	variableSet, err := variables.UpdateSingle(client, spaceID, variableOwnerID, variable)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -182,6 +198,11 @@ func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] deleting variable (%s)", d.Id())
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	projectID, projectOk := d.GetOk("project_id")
 	ownerID, ownerOk := d.GetOk("owner_id")
 
@@ -198,7 +219,7 @@ func resourceVariableDelete(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	client := m.(*client.Client)
-	_, err := client.Variables.DeleteSingle(variableOwnerID, d.Id())
+	_, err := variables.DeleteSingle(client, spaceID, variableOwnerID, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "variable")
 	}
