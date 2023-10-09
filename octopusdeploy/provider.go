@@ -110,7 +110,7 @@ func Provider() *schema.Provider {
 			},
 			"space_id": {
 				Description: "The space ID to target",
-				Required:    true,
+				Optional:    true,
 				Type:        schema.TypeString,
 			},
 		},
@@ -123,7 +123,9 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	config := Config{
 		Address: d.Get("address").(string),
 		APIKey:  d.Get("api_key").(string),
-		SpaceID: d.Get("space_id").(string),
+	}
+	if spaceID, ok := d.GetOk("space_id"); ok {
+		config.SpaceID = spaceID.(string)
 	}
 
 	return config.Client()
