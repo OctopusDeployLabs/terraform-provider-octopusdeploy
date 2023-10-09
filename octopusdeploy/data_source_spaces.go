@@ -31,7 +31,7 @@ func dataSourceSpacesRead(ctx context.Context, d *schema.ResourceData, m interfa
 		Take:        d.Get("take").(int),
 	}
 
-	existingSpaces, err := client.Spaces.Get(query)
+	existingSpaces, err := spaces.Get(client, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
