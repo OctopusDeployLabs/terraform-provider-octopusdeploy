@@ -391,6 +391,10 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 		action.Properties = expandProperties(v)
 	}
 
+	if v, ok := flattenedAction["id"]; ok {
+		action.ID = v.(string)
+	}
+
 	if v, ok := flattenedAction["can_be_used_for_project_versioning"]; ok {
 		action.CanBeUsedForProjectVersioning = v.(bool)
 	}
