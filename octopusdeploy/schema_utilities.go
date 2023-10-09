@@ -289,6 +289,7 @@ func getSpaceIDSchema() *schema.Schema {
 		Description: "The space ID associated with this resource.",
 		Optional:    true,
 		Type:        schema.TypeString,
+		ForceNew:    true,
 	}
 }
 
