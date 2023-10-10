@@ -48,6 +48,7 @@ func getProjectGroupDataSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"id":           getDataSchemaID(),
+		"space_id":     getQuerySpaceID(),
 		"ids":          getQueryIDs(),
 		"partial_name": getQueryPartialName(),
 		"project_groups": {

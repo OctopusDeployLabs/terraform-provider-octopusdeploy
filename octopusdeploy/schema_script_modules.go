@@ -79,8 +79,9 @@ func getScriptModuleDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id":  getDataSchemaID(),
-		"ids": getQueryIDs(),
+		"id":       getDataSchemaID(),
+		"space_id": getQuerySpaceID(),
+		"ids":      getQueryIDs(),
 		"script_modules": {
 			Computed:    true,
 			Description: "A list of script modules that match the filter(s).",

@@ -59,8 +59,9 @@ func getVariableDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id":  getDataSchemaID(),
-		"ids": getQueryIDs(),
+		"id":       getDataSchemaID(),
+		"space_id": getQuerySpaceID(),
+		"ids":      getQueryIDs(),
 		"variables": {
 			Computed:    true,
 			Description: "A list of variables that match the filter(s).",

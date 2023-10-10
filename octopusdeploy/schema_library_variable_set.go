@@ -56,6 +56,7 @@ func getLibraryVariableSetDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"content_type": getQueryContentType(),
 		"id":           getDataSchemaID(),
+		"space_id":     getQuerySpaceID(),
 		"ids":          getQueryIDs(),
 		"library_variable_sets": {
 			Computed:    true,
