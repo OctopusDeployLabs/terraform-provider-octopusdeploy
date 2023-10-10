@@ -82,7 +82,7 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	for _, v := range variableSet.Variables {
 		if v.Name == variable.Name && v.Type == variable.Type && (v.IsSensitive || v.Value == variable.Value) && v.Description == variable.Description && v.IsSensitive == variable.IsSensitive {
-			scopeMatches, _, err := client.Variables.MatchesScope(v.Scope, &variable.Scope)
+			scopeMatches, _, err := variables.MatchesScope(v.Scope, &variable.Scope)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -177,7 +177,7 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	for _, v := range variableSet.Variables {
 		if v.Name == variable.Name && v.Type == variable.Type && (v.IsSensitive || v.Value == variable.Value) && v.Description == variable.Description && v.IsSensitive == variable.IsSensitive {
-			scopeMatches, _, _ := client.Variables.MatchesScope(v.Scope, &variable.Scope)
+			scopeMatches, _, _ := variables.MatchesScope(v.Scope, &variable.Scope)
 			if scopeMatches {
 				if err := setVariable(ctx, d, v); err != nil {
 					return diag.FromErr(err)
