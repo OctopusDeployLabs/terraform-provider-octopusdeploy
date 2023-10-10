@@ -202,6 +202,7 @@ func getProjectDataSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"cloned_from_project_id": getQueryClonedFromProjectID(),
 		"id":                     getDataSchemaID(),
+		"space_id":               getQuerySpaceID(),
 		"ids":                    getQueryIDs(),
 		"is_clone":               getQueryIsClone(),
 		"name":                   getQueryName(),
