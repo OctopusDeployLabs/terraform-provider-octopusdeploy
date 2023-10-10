@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/libraryvariableset"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/libraryvariablesets"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -30,7 +30,7 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 
 	client := m.(*client.Client)
 
-	createdLibraryVariableSet, err := libraryvariableset.Add(client, libraryVariableSet)
+	createdLibraryVariableSet, err := libraryvariablesets.Add(client, libraryVariableSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -54,7 +54,7 @@ func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceDat
 	}
 
 	client := m.(*client.Client)
-	err := libraryvariableset.DeleteByID(client, spaceID, d.Id())
+	err := libraryvariablesets.DeleteByID(client, spaceID, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -73,7 +73,7 @@ func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	client := m.(*client.Client)
-	libraryVariableSet, err := libraryvariableset.GetByID(client, spaceID, d.Id())
+	libraryVariableSet, err := libraryvariablesets.GetByID(client, spaceID, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "library variable set")
 	}
@@ -92,7 +92,7 @@ func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceDat
 	libraryVariableSet := expandLibraryVariableSet(d)
 
 	client := m.(*client.Client)
-	updatedLibraryVariableSet, err := libraryvariableset.Update(client, libraryVariableSet)
+	updatedLibraryVariableSet, err := libraryvariablesets.Update(client, libraryVariableSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
