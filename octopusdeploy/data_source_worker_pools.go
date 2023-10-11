@@ -27,7 +27,7 @@ func dataSourceWorkerPoolsRead(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	client := m.(*client.Client)
-	workerPools, err := client.WorkerPools.Get(query)
+	workerPools, err := workerpools.Get(client, d.Get("space_id").(string), query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
