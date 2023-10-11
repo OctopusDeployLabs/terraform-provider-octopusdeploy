@@ -386,13 +386,14 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 
 	action := deployments.NewDeploymentAction(name, actionType)
 
+	// Retain the existing id as older channel rules might still be referencing the action by id
+	if v, ok := flattenedAction["id"]; ok {
+		action.ID = v.(string)
+	}
+
 	// expand properties first
 	if v, ok := flattenedAction["properties"]; ok {
 		action.Properties = expandProperties(v)
-	}
-
-	if v, ok := flattenedAction["id"]; ok {
-		action.ID = v.(string)
 	}
 
 	if v, ok := flattenedAction["can_be_used_for_project_versioning"]; ok {
