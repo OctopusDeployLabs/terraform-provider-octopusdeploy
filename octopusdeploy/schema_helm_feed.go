@@ -36,6 +36,10 @@ func expandHelmFeed(d *schema.ResourceData) (*feeds.HelmFeed, error) {
 		helmFeed.Username = v.(string)
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		helmFeed.SpaceID = v.(string)
+	}
+
 	return helmFeed, nil
 }
 
@@ -64,17 +68,17 @@ func getHelmFeedSchema() map[string]*schema.Schema {
 	}
 }
 
-func setHelmFeed(ctx context.Context, d *schema.ResourceData, mavenFeed *feeds.HelmFeed) error {
-	d.Set("feed_uri", mavenFeed.FeedURI)
-	d.Set("name", mavenFeed.Name)
-	d.Set("space_id", mavenFeed.SpaceID)
-	d.Set("username", mavenFeed.Username)
+func setHelmFeed(ctx context.Context, d *schema.ResourceData, helmFeed *feeds.HelmFeed) error {
+	d.Set("feed_uri", helmFeed.FeedURI)
+	d.Set("name", helmFeed.Name)
+	d.Set("space_id", helmFeed.SpaceID)
+	d.Set("username", helmFeed.Username)
 
-	if err := d.Set("package_acquisition_location_options", mavenFeed.PackageAcquisitionLocationOptions); err != nil {
+	if err := d.Set("package_acquisition_location_options", helmFeed.PackageAcquisitionLocationOptions); err != nil {
 		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)
 	}
 
-	d.SetId(mavenFeed.GetID())
+	d.SetId(helmFeed.GetID())
 
 	return nil
 }
