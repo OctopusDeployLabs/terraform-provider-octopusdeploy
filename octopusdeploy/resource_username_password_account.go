@@ -29,7 +29,7 @@ func resourceUsernamePasswordAccountCreate(ctx context.Context, d *schema.Resour
 	log.Printf("[INFO] creating username-password account: %#v", account)
 
 	client := m.(*client.Client)
-	createdAccount, err := client.Accounts.Add(account)
+	createdAccount, err := accounts.Add(client, account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -48,7 +48,7 @@ func resourceUsernamePasswordAccountDelete(ctx context.Context, d *schema.Resour
 	log.Printf("[INFO] deleting username-password account (%s)", d.Id())
 
 	client := m.(*client.Client)
-	if err := client.Accounts.DeleteByID(d.Id()); err != nil {
+	if err := accounts.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -62,7 +62,7 @@ func resourceUsernamePasswordAccountRead(ctx context.Context, d *schema.Resource
 	log.Printf("[INFO] reading username-password account (%s)", d.Id())
 
 	client := m.(*client.Client)
-	accountResource, err := client.Accounts.GetByID(d.Id())
+	accountResource, err := accounts.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "username-password account")
 	}
@@ -81,7 +81,7 @@ func resourceUsernamePasswordAccountUpdate(ctx context.Context, d *schema.Resour
 	log.Printf("[INFO] updating username-password account: %#v", account)
 
 	client := m.(*client.Client)
-	updatedAccount, err := client.Accounts.Update(account)
+	updatedAccount, err := accounts.Update(client, account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
