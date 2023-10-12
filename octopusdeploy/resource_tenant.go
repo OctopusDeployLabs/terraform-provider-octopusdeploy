@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,7 @@ func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] creating tenant: %#v", tenant)
 
 	client := m.(*client.Client)
-	createdTenant, err := client.Tenants.Add(tenant)
+	createdTenant, err := tenants.Add(client, tenant)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -47,7 +48,7 @@ func resourceTenantDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] deleting tenant (%s)", d.Id())
 
 	client := m.(*client.Client)
-	if err := client.Tenants.DeleteByID(d.Id()); err != nil {
+	if err := tenants.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -60,7 +61,7 @@ func resourceTenantRead(ctx context.Context, d *schema.ResourceData, m interface
 	log.Printf("[INFO] reading tenant (%s)", d.Id())
 
 	client := m.(*client.Client)
-	tenant, err := client.Tenants.GetByID(d.Id())
+	tenant, err := tenants.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "tenant")
 	}
@@ -78,7 +79,7 @@ func resourceTenantUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	tenant := expandTenant(d)
 	client := m.(*client.Client)
-	updatedTenant, err := client.Tenants.Update(tenant)
+	updatedTenant, err := tenants.Update(client, tenant)
 	if err != nil {
 		return diag.FromErr(err)
 	}
