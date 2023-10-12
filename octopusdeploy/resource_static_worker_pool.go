@@ -29,7 +29,7 @@ func resourceStaticWorkerPoolCreate(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[INFO] creating static worker pool: %#v", workerPool)
 
 	client := m.(*client.Client)
-	createdWorkerPool, err := workerpools.Add(client, workerPool.SpaceID, workerPool)
+	createdWorkerPool, err := workerpools.Add(client, workerPool)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -85,7 +85,7 @@ func resourceStaticWorkerPoolUpdate(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[INFO] updating static worker pool (%s)", d.Id())
 
 	client := m.(*client.Client)
-	updatedWorkerPool, err := workerpools.Update(client, workerPool.SpaceID, workerPool)
+	updatedWorkerPool, err := workerpools.Update(client, workerPool)
 	if err != nil {
 		return diag.FromErr(err)
 	}
