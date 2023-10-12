@@ -33,7 +33,7 @@ func resourceGitHubRepositoryFeedCreate(ctx context.Context, d *schema.ResourceD
 	tflog.Info(ctx, fmt.Sprintf("creating GitHub repository feed, %s", feed.GetName()))
 
 	client := m.(*client.Client)
-	createdGitHubRepositoryFeed, err := client.Feeds.Add(feed)
+	createdGitHubRepositoryFeed, err := feeds.Add(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -52,7 +52,7 @@ func resourceGitHubRepositoryFeedDelete(ctx context.Context, d *schema.ResourceD
 	tflog.Info(ctx, fmt.Sprintf("deleting GitHub repository feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	err := client.Feeds.DeleteByID(d.Id())
+	err := feeds.DeleteByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +67,7 @@ func resourceGitHubRepositoryFeedRead(ctx context.Context, d *schema.ResourceDat
 	tflog.Info(ctx, fmt.Sprintf("reading GitHub repository feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feed, err := client.Feeds.GetByID(d.Id())
+	feed, err := feeds.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "GitHub repository feed")
 	}
@@ -90,7 +90,7 @@ func resourceGitHubRepositoryFeedUpdate(ctx context.Context, d *schema.ResourceD
 	tflog.Info(ctx, fmt.Sprintf("updating GitHub repository feed (%s)", feed.GetID()))
 
 	client := m.(*client.Client)
-	updatedFeed, err := client.Feeds.Update(feed)
+	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
