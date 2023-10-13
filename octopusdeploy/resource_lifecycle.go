@@ -61,7 +61,7 @@ func resourceLifecycleRead(ctx context.Context, d *schema.ResourceData, m interf
 	log.Printf("[INFO] reading lifecycle (%s)", d.Id())
 
 	client := m.(*client.Client)
-	lifecycle, err := client.Lifecycles.GetByID(d.Id())
+	lifecycle, err := lifecycles.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "lifecycle")
 	}
@@ -80,7 +80,7 @@ func resourceLifecycleUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	lifecycle := expandLifecycle(d)
 
 	client := m.(*client.Client)
-	updatedLifecycle, err := client.Lifecycles.Update(lifecycle)
+	updatedLifecycle, err := lifecycles.Update(client, lifecycle)
 	if err != nil {
 		return diag.FromErr(err)
 	}
