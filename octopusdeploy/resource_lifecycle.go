@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,7 @@ func resourceLifecycleCreate(ctx context.Context, d *schema.ResourceData, m inte
 	log.Printf("[INFO] creating lifecycle: %#v", lifecycle)
 
 	client := m.(*client.Client)
-	createdLifecycle, err := client.Lifecycles.Add(lifecycle)
+	createdLifecycle, err := lifecycles.Add(client, lifecycle)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -47,7 +48,7 @@ func resourceLifecycleDelete(ctx context.Context, d *schema.ResourceData, m inte
 	log.Printf("[INFO] deleting lifecycle (%s)", d.Id())
 
 	client := m.(*client.Client)
-	if err := client.Lifecycles.DeleteByID(d.Id()); err != nil {
+	if err := lifecycles.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
