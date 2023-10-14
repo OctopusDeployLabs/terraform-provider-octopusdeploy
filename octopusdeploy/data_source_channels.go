@@ -25,9 +25,10 @@ func dataSourceChannelsRead(ctx context.Context, d *schema.ResourceData, m inter
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
+	spaceID := d.Get("space_id").(string)
 
 	client := m.(*client.Client)
-	existingChannels, err := client.Channels.Get(query)
+	existingChannels, err := channels.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

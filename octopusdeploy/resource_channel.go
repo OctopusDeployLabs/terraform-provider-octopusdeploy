@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -32,7 +33,7 @@ func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interf
 	tflog.Info(ctx, fmt.Sprintf("creating channel: %#v", channel))
 
 	client := m.(*client.Client)
-	createdChannel, err := client.Channels.Add(channel)
+	createdChannel, err := channels.Add(client, channel)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -54,7 +55,7 @@ func resourceChannelDelete(ctx context.Context, d *schema.ResourceData, m interf
 	tflog.Info(ctx, fmt.Sprintf("deleting channel (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	if err := client.Channels.DeleteByID(d.Id()); err != nil {
+	if err := channels.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -68,7 +69,7 @@ func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interfac
 	tflog.Info(ctx, fmt.Sprintf("reading channel (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	channel, err := client.Channels.GetByID(d.Id())
+	channel, err := channels.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "channel")
 	}
@@ -89,7 +90,7 @@ func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	channel := expandChannel(d)
 	client := m.(*client.Client)
-	updatedChannel, err := client.Channels.Update(channel)
+	updatedChannel, err := channels.Update(client, channel)
 	if err != nil {
 		return diag.FromErr(err)
 	}
