@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -28,7 +29,7 @@ func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m in
 	log.Printf("[INFO] creating certificate: %#v", certificate)
 
 	client := m.(*client.Client)
-	createdCertificate, err := client.Certificates.Add(certificate)
+	createdCertificate, err := certificates.Add(client, certificate)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -46,8 +47,9 @@ func resourceCertificateCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceCertificateDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting certificate (%s)", d.Id())
 
+	spaceID := d.Get("space_id").(string)
 	client := m.(*client.Client)
-	if err := client.Certificates.DeleteByID(d.Id()); err != nil {
+	if err := certificates.DeleteByID(client, spaceID, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -60,8 +62,9 @@ func resourceCertificateDelete(ctx context.Context, d *schema.ResourceData, m in
 func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading certificate (%s)", d.Id())
 
+	spaceID := d.Get("space_id").(string)
 	client := m.(*client.Client)
-	certificate, err := client.Certificates.GetByID(d.Id())
+	certificate, err := certificates.GetByID(client, spaceID, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "certificate")
 	}
@@ -79,7 +82,7 @@ func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	certificate := expandCertificate(d)
 	client := m.(*client.Client)
-	updatedCertificate, err := client.Certificates.Update(*certificate)
+	updatedCertificate, err := certificates.Update(client, certificate)
 	if err != nil {
 		return diag.FromErr(err)
 	}
