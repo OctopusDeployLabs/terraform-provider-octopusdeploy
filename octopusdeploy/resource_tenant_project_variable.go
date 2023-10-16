@@ -8,6 +8,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -37,6 +38,11 @@ func resourceTenantProjectVariable() *schema.Resource {
 				Required: true,
 				Type:     schema.TypeString,
 			},
+			"space_id": {
+				Optional: true,
+				Computed: true,
+				Type:     schema.TypeString,
+			},
 			"value": {
 				Default:   "",
 				Optional:  true,
@@ -55,6 +61,7 @@ func resourceTenantProjectVariableCreate(ctx context.Context, d *schema.Resource
 	environmentID := d.Get("environment_id").(string)
 	projectID := d.Get("project_id").(string)
 	templateID := d.Get("template_id").(string)
+	spaceID := d.Get("space_id").(string)
 	tenantID := d.Get("tenant_id").(string)
 	value := d.Get("value").(string)
 
@@ -63,7 +70,7 @@ func resourceTenantProjectVariableCreate(ctx context.Context, d *schema.Resource
 	log.Printf("[INFO] creating tenant project variable (%s)", id)
 
 	client := m.(*client.Client)
-	tenant, err := client.Tenants.GetByID(tenantID)
+	tenant, err := tenants.GetByID(client, spaceID, tenantID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
