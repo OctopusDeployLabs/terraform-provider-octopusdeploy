@@ -23,7 +23,7 @@ func (c *Config) Client() (*client.Client, diag.Diagnostics) {
 	}
 
 	// This is intentional on the feature branch - Todo: remove when merging to main branch
-	proxyStr := "http://172.21.224.1:8866"
+	proxyStr := "http://127.0.0.1:8866"
 	proxyURL, err := url.Parse(proxyStr)
 	if err != nil {
 		return nil, nil
