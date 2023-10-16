@@ -28,7 +28,7 @@ func dataSourceEnvironmentsRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	client := m.(*client.Client)
-	existingEnvironments, err := client.Environments.Get(query)
+	existingEnvironments, err := environments.Get(client, d.Get("space_id").(string), query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
