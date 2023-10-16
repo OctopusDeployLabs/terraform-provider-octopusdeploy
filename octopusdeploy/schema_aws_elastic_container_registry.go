@@ -75,6 +75,7 @@ func getAwsElasticContainerRegistrySchema() map[string]*schema.Schema {
 			Description: "The space ID associated with this feed.",
 			Optional:    true,
 			Type:        schema.TypeString,
+			ForceNew:    true,
 		},
 	}
 }
