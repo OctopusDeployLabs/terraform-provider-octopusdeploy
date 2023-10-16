@@ -24,9 +24,10 @@ func dataSourceGitCredentialsRead(ctx context.Context, d *schema.ResourceData, m
 		Skip: d.Get("skip").(int),
 		Take: d.Get("take").(int),
 	}
+	spaceID := d.Get("space_id").(string)
 
 	client := m.(*client.Client)
-	existingGitCredentials, err := client.GitCredentials.Get(query)
+	existingGitCredentials, err := credentials.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -55,9 +55,10 @@ func getGitCredentialDataSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"name": getQueryName(),
-		"skip": getQuerySkip(),
-		"take": getQueryTake(),
+		"name":     getQueryName(),
+		"skip":     getQuerySkip(),
+		"take":     getQueryTake(),
+		"space_id": getSpaceIDSchema(),
 	}
 }
 
