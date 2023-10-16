@@ -31,8 +31,9 @@ func dataSourceCertificatesRead(ctx context.Context, d *schema.ResourceData, m i
 		Tenant:      d.Get("tenant").(string),
 	}
 
+	spaceID := d.Get("space_id").(string)
 	client := m.(*client.Client)
-	existingCertificates, err := client.Certificates.Get(query)
+	existingCertificates, err := certificates.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
