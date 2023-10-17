@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machinepolicies"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -19,15 +19,16 @@ func dataSourceMachinePolicies() *schema.Resource {
 }
 
 func dataSourceMachinePoliciesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	query := machines.MachinePoliciesQuery{
+	query := machinepolicies.MachinePoliciesQuery{
 		IDs:         expandArray(d.Get("ids").([]interface{})),
 		PartialName: d.Get("partial_name").(string),
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
 
+	spaceID := d.Get("space_id").(string)
 	client := m.(*client.Client)
-	existingMachinePolicies, err := client.MachinePolicies.Get(query)
+	existingMachinePolicies, err := machinepolicies.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
