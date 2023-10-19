@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machinepolicies"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandMachinePolicy(d *schema.ResourceData) *machines.MachinePolicy {
+func expandMachinePolicy(d *schema.ResourceData) *machinepolicies.MachinePolicy {
 	name := d.Get("name").(string)
 
-	machinePolicy := machines.NewMachinePolicy(name)
+	machinePolicy := machinepolicies.NewMachinePolicy(name)
 	machinePolicy.ID = d.Id()
 
 	if v, ok := d.GetOk("connection_connect_timeout"); ok {
@@ -83,7 +83,7 @@ func expandMachinePolicy(d *schema.ResourceData) *machines.MachinePolicy {
 
 }
 
-func flattenMachinePolicy(machinePolicy *machines.MachinePolicy) map[string]interface{} {
+func flattenMachinePolicy(machinePolicy *machinepolicies.MachinePolicy) map[string]interface{} {
 	if machinePolicy == nil {
 		return nil
 	}
@@ -123,6 +123,7 @@ func getMachinePolicyDataSchema() map[string]*schema.Schema {
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),
 		"take":         getQueryTake(),
+		"space_id":     getSpaceIDSchema(),
 	}
 }
 
@@ -202,7 +203,7 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 	}
 }
 
-func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy *machines.MachinePolicy) error {
+func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy *machinepolicies.MachinePolicy) error {
 	d.Set("connection_connect_timeout", machinePolicy.ConnectionConnectTimeout)
 	d.Set("connection_retry_count_limit", machinePolicy.ConnectionRetryCountLimit)
 	d.Set("connection_retry_sleep_interval", machinePolicy.ConnectionRetrySleepInterval)
