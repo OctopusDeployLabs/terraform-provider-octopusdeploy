@@ -79,7 +79,7 @@ func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	environment := expandEnvironment(d)
 	client := m.(*client.Client)
-	updatedEnvironment, err := environments.Update(client, d.Get("space_id").(string), environment)
+	updatedEnvironment, err := environments.Update(client, environment)
 	if err != nil {
 		return diag.FromErr(err)
 	}
