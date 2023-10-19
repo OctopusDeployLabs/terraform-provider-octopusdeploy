@@ -37,6 +37,14 @@ func flattenDeployKubernetesSecretAction(action *deployments.DeploymentAction) m
 		flattenedAction["secret_name"] = v.Value
 	}
 
+	if len(action.WorkerPool) > 0 {
+		flattenedAction["worker_pool_id"] = action.WorkerPool
+	}
+
+	if len(action.WorkerPoolVariable) > 0 {
+		flattenedAction["worker_pool_variable"] = action.WorkerPoolVariable
+	}
+
 	if v, ok := action.Properties["Octopus.Action.KubernetesContainers.SecretValues"]; ok {
 		var secretKeyValues map[string]string
 		json.Unmarshal([]byte(v.Value), &secretKeyValues)
@@ -50,6 +58,8 @@ func flattenDeployKubernetesSecretAction(action *deployments.DeploymentAction) m
 func getDeployKubernetesSecretActionSchema() *schema.Schema {
 	actionSchema, element := getActionSchema()
 	addExecutionLocationSchema(element)
+	addWorkerPoolSchema(element)
+	addWorkerPoolVariableSchema(element)
 	element.Schema["secret_name"] = &schema.Schema{
 		Description: "The name of the secret resource",
 		Required:    true,
