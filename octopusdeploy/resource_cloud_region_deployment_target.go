@@ -80,7 +80,7 @@ func resourceCloudRegionDeploymentTargetUpdate(ctx context.Context, d *schema.Re
 
 	deploymentTarget := expandCloudRegionDeploymentTarget(d)
 	client := m.(*client.Client)
-	updatedDeploymentTarget, err := machines.Update(client, d.Get("space_id").(string), deploymentTarget)
+	updatedDeploymentTarget, err := machines.Update(client, deploymentTarget)
 	if err != nil {
 		return diag.FromErr(err)
 	}
