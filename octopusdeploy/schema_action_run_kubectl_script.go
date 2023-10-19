@@ -12,6 +12,8 @@ func getRunKubectlScriptSchema() *schema.Schema {
 	actionSchema, element := getActionSchema()
 	addExecutionLocationSchema(element)
 	addScriptFromPackageSchema(element)
+	addWorkerPoolSchema(element)
+	addWorkerPoolVariableSchema(element)
 	addPackagesSchema(element, false)
 	return actionSchema
 }
@@ -28,7 +30,7 @@ func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) *deplo
 }
 
 func flattenKubernetesRunScriptAction(action *deployments.DeploymentAction) map[string]interface{} {
-	flattenedAction := flattenAction(action)
+	flattenedAction := flattenDeploymentAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
 		runOnServer, _ := strconv.ParseBool(v.Value)
