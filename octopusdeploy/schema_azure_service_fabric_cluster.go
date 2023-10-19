@@ -9,7 +9,11 @@ func expandAzureServiceFabricCluster(flattenedMap map[string]interface{}) *machi
 	endpoint := machines.NewAzureServiceFabricEndpoint()
 	endpoint.AadClientCredentialSecret = flattenedMap["aad_client_credential_secret"].(string)
 	endpoint.AadCredentialType = flattenedMap["aad_credential_type"].(string)
-	endpoint.AadUserCredentialPassword = core.NewSensitiveValue(flattenedMap["aad_user_credential_password"].(string))
+
+	if userCredential, ok := flattenedMap["aad_user_credential_password"]; ok {
+		endpoint.AadUserCredentialPassword = core.NewSensitiveValue(userCredential.(string))
+	}
+
 	endpoint.AadUserCredentialUsername = flattenedMap["aad_user_credential_username"].(string)
 	endpoint.CertificateStoreLocation = flattenedMap["certificate_store_location"].(string)
 	endpoint.CertificateStoreName = flattenedMap["certificate_store_name"].(string)

@@ -37,7 +37,7 @@ func dataSourceAzureCloudServiceDeploymentTargetsRead(ctx context.Context, d *sc
 	}
 
 	client := m.(*client.Client)
-	existingDeploymentTargets, err := client.Machines.Get(query)
+	existingDeploymentTargets, err := machines.Get(client, d.Get("space_id").(string), query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
