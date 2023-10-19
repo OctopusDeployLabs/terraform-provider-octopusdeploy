@@ -30,11 +30,19 @@ func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) *deplo
 }
 
 func flattenKubernetesRunScriptAction(action *deployments.DeploymentAction) map[string]interface{} {
-	flattenedAction := flattenDeploymentAction(action)
+	flattenedAction := flattenAction(action)
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
 		runOnServer, _ := strconv.ParseBool(v.Value)
 		flattenedAction["run_on_server"] = runOnServer
+	}
+
+	if len(action.WorkerPool) > 0 {
+		flattenedAction["worker_pool_id"] = action.WorkerPool
+	}
+
+	if len(action.WorkerPoolVariable) > 0 {
+		flattenedAction["worker_pool_variable"] = action.WorkerPoolVariable
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptFileName"]; ok {
