@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandDeploymentProcess(ctx context.Context, d *schema.ResourceData, client *client.Client) *deployments.DeploymentProcess {
+func expandDeploymentProcess(ctx context.Context, d *schema.ResourceData, client *client.Client) (*deployments.DeploymentProcess, error) {
 	projectID := d.Get("project_id").(string)
 	deploymentProcess := deployments.NewDeploymentProcess(projectID)
 	deploymentProcess.ID = d.Id()
@@ -20,7 +20,7 @@ func expandDeploymentProcess(ctx context.Context, d *schema.ResourceData, client
 	} else {
 		project, err := client.Projects.GetByID(projectID)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 
 		if project.PersistenceSettings != nil && project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
@@ -48,7 +48,7 @@ func expandDeploymentProcess(ctx context.Context, d *schema.ResourceData, client
 		}
 	}
 
-	return deploymentProcess
+	return deploymentProcess, nil
 }
 
 func setDeploymentProcess(ctx context.Context, d *schema.ResourceData, deploymentProcess *deployments.DeploymentProcess) error {
