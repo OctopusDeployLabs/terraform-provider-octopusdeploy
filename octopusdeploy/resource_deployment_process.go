@@ -114,6 +114,7 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 	current, err := client.DeploymentProcesses.GetByID(d.Id())
 	if err == nil {
 		deploymentProcess := &deployments.DeploymentProcess{
+			Steps:   []*deployments.DeploymentStep{},
 			Version: current.Version,
 		}
 		deploymentProcess.Links = current.Links
