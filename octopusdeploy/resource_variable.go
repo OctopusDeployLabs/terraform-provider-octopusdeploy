@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -76,7 +77,7 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	for _, v := range variableSet.Variables {
 		if v.Name == variable.Name && v.Type == variable.Type && (v.IsSensitive || v.Value == variable.Value) && v.Description == variable.Description && v.IsSensitive == variable.IsSensitive {
-			scopeMatches, _, err := client.Variables.MatchesScope(v.Scope, &variable.Scope)
+			scopeMatches, _, err := matchesScope(v.Scope, &variable.Scope)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -161,7 +162,7 @@ func resourceVariableUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	for _, v := range variableSet.Variables {
 		if v.Name == variable.Name && v.Type == variable.Type && (v.IsSensitive || v.Value == variable.Value) && v.Description == variable.Description && v.IsSensitive == variable.IsSensitive {
-			scopeMatches, _, _ := client.Variables.MatchesScope(v.Scope, &variable.Scope)
+			scopeMatches, _, _ := matchesScope(v.Scope, &variable.Scope)
 			if scopeMatches {
 				if err := setVariable(ctx, d, v); err != nil {
 					return diag.FromErr(err)
@@ -224,4 +225,73 @@ func validateVariable(d *schema.ResourceData) error {
 	}
 
 	return nil
+}
+
+func matchesScope(variableScope variables.VariableScope, definedScope *variables.VariableScope) (bool, *variables.VariableScope, error) {
+	if definedScope == nil {
+		return true, &variables.VariableScope{}, nil
+	}
+
+	if definedScope.IsEmpty() {
+		return true, &variables.VariableScope{}, nil
+	}
+
+	var matchedScopes variables.VariableScope
+	var matched bool
+
+	for _, e1 := range definedScope.Environments {
+		for _, e2 := range variableScope.Environments {
+			if e1 == e2 {
+				matched = true
+				matchedScopes.Environments = append(matchedScopes.Environments, e1)
+			}
+		}
+	}
+
+	for _, r1 := range definedScope.Roles {
+		for _, r2 := range variableScope.Roles {
+			if r1 == r2 {
+				matched = true
+				matchedScopes.Roles = append(matchedScopes.Roles, r1)
+			}
+		}
+	}
+
+	for _, m1 := range definedScope.Machines {
+		for _, m2 := range variableScope.Machines {
+			if m1 == m2 {
+				matched = true
+				matchedScopes.Machines = append(matchedScopes.Machines, m1)
+			}
+		}
+	}
+
+	for _, a1 := range definedScope.Actions {
+		for _, a2 := range variableScope.Actions {
+			if a1 == a2 {
+				matched = true
+				matchedScopes.Actions = append(matchedScopes.Actions, a1)
+			}
+		}
+	}
+
+	for _, c1 := range definedScope.Channels {
+		for _, c2 := range variableScope.Channels {
+			if c1 == c2 {
+				matched = true
+				matchedScopes.Channels = append(matchedScopes.Channels, c1)
+			}
+		}
+	}
+
+	for _, p1 := range definedScope.ProcessOwners {
+		for _, p2 := range variableScope.ProcessOwners {
+			if p1 == p2 {
+				matched = true
+				matchedScopes.ProcessOwners = append(matchedScopes.ProcessOwners, p1)
+			}
+		}
+	}
+
+	return matched, &matchedScopes, nil
 }
