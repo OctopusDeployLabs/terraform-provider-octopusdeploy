@@ -27,9 +27,10 @@ func dataSourceAccountsRead(ctx context.Context, d *schema.ResourceData, m inter
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
+	spaceID := d.Get("space_id").(string)
 
 	client := m.(*client.Client)
-	existingAccounts, err := client.Accounts.Get(query)
+	existingAccounts, err := accounts.Get(client, spaceID, &query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

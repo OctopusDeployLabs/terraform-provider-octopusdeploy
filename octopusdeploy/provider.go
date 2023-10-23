@@ -124,7 +124,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		Address: d.Get("address").(string),
 		APIKey:  d.Get("api_key").(string),
 	}
-
 	if spaceID, ok := d.GetOk("space_id"); ok {
 		config.SpaceID = spaceID.(string)
 	}

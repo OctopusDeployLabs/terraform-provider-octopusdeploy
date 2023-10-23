@@ -25,9 +25,10 @@ func dataSourceLifecyclesRead(ctx context.Context, d *schema.ResourceData, m int
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
+	spaceID := d.Get("space_id").(string)
 
 	client := m.(*client.Client)
-	existingLifecycles, err := client.Lifecycles.Get(query)
+	existingLifecycles, err := lifecycles.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

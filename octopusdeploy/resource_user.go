@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 	log.Printf("[DEBUG] creating user")
 
 	client := m.(*client.Client)
-	createdUser, err := client.Users.Add(user)
+	createdUser, err := users.Add(client, user)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -47,7 +48,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface
 	log.Printf("[INFO] deleting user (%s)", d.Id())
 
 	client := m.(*client.Client)
-	if err := client.Users.DeleteByID(d.Id()); err != nil {
+	if err := users.DeleteByID(client, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -61,7 +62,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	log.Printf("[INFO] reading user (%s)", d.Id())
 
 	client := m.(*client.Client)
-	user, err := client.Users.GetByID(d.Id())
+	user, err := users.GetByID(client, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "user")
 	}
@@ -79,7 +80,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 
 	user := expandUser(d)
 	client := m.(*client.Client)
-	updatedUser, err := client.Users.Update(user)
+	updatedUser, err := users.Update(client, user)
 	if err != nil {
 		return diag.FromErr(err)
 	}

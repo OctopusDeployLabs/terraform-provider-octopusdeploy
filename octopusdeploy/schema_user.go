@@ -64,11 +64,12 @@ func getUserDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"filter": getQueryFilter(),
-		"id":     getDataSchemaID(),
-		"ids":    getQueryIDs(),
-		"skip":   getQuerySkip(),
-		"take":   getQueryTake(),
+		"filter":   getQueryFilter(),
+		"id":       getDataSchemaID(),
+		"ids":      getQueryIDs(),
+		"skip":     getQuerySkip(),
+		"take":     getQueryTake(),
+		"space_id": getQuerySpaceID(),
 		"users": {
 			Computed:    true,
 			Description: "A list of users that match the filter(s).",

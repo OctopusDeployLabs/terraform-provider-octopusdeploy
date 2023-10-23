@@ -10,7 +10,11 @@ func expandOfflinePackageDrop(flattenedMap map[string]interface{}) *machines.Off
 	endpoint.ApplicationsDirectory = flattenedMap["applications_directory"].(string)
 	endpoint.Destination = expandOfflinePackageDropDestination(flattenedMap["destination"])
 	endpoint.ID = flattenedMap["id"].(string)
-	endpoint.SensitiveVariablesEncryptionPassword = core.NewSensitiveValue(flattenedMap["sensitive_variables_encryption_password"].(string))
+
+	if encryptedPassword, ok := flattenedMap["sensitive_variables_encryption_password"]; ok {
+		endpoint.SensitiveVariablesEncryptionPassword = core.NewSensitiveValue(encryptedPassword.(string))
+	}
+
 	endpoint.WorkingDirectory = flattenedMap["working_directory"].(string)
 
 	return endpoint

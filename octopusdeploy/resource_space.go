@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -50,7 +51,7 @@ func resourceSpaceDelete(ctx context.Context, d *schema.ResourceData, m interfac
 	space.TaskQueueStopped = true
 
 	client := m.(*client.Client)
-	updatedSpace, err := client.Spaces.Update(space)
+	updatedSpace, err := spaces.Update(client, space)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -69,7 +70,7 @@ func resourceSpaceRead(ctx context.Context, d *schema.ResourceData, m interface{
 	log.Printf("[INFO] reading space (%s)", d.Id())
 
 	client := m.(*client.Client)
-	space, err := client.Spaces.GetByID(d.Id())
+	space, err := spaces.GetByID(client, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "space")
 	}
@@ -87,7 +88,7 @@ func resourceSpaceUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	space := expandSpace(d)
 	client := m.(*client.Client)
-	updatedSpace, err := client.Spaces.Update(space)
+	updatedSpace, err := spaces.Update(client, space)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -33,8 +33,13 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	tflog.Info(ctx, fmt.Sprintf("creating project (%s)", project.Name))
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	client := m.(*client.Client)
-	createdProject, err := client.Projects.Add(project)
+	createdProject, err := projects.Add(client, project)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -42,15 +47,15 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	if persistenceSettings != nil && persistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 		tflog.Info(ctx, "converting project to use VCS")
 
-		vcsProject, err := client.Projects.ConvertToVcs(createdProject, "converting project to use VCS", "", persistenceSettings.(projects.GitPersistenceSettings))
+		vcsProject, err := projects.ConvertToVCS(client, createdProject, "converting project to use VCS", "", persistenceSettings.(projects.GitPersistenceSettings))
 		if err != nil {
-			client.Projects.DeleteByID(createdProject.GetID())
+			projects.DeleteByID(client, spaceID, createdProject.GetID())
 			return diag.FromErr(err)
 		}
 		createdProject.PersistenceSettings = vcsProject.PersistenceSettings
 	}
 
-	createdProject, err = client.Projects.GetByID(createdProject.GetID())
+	createdProject, err = projects.GetByID(client, spaceID, createdProject.GetID())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -68,8 +73,13 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	tflog.Info(ctx, fmt.Sprintf("deleting project (%s)", d.Id()))
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	client := m.(*client.Client)
-	if err := client.Projects.DeleteByID(d.Id()); err != nil {
+	if err := projects.DeleteByID(client, spaceID, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -81,8 +91,13 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	tflog.Info(ctx, fmt.Sprintf("reading project (%s)", d.Id()))
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	client := m.(*client.Client)
-	project, err := client.Projects.GetByID(d.Id())
+	project, err := projects.GetByID(client, spaceID, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "project")
 	}
@@ -103,7 +118,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	var updatedProject *projects.Project
 	var err error
 
-	projectLinks, err := client.Projects.GetByID(d.Id())
+	projectLinks, err := projects.GetByID(client, project.SpaceID, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -117,7 +132,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			tflog.Info(ctx, fmt.Sprintf("converting project to use VCS (%s)", d.Id()))
 
 			project.Links["ConvertToVcs"] = convertToVcsLink
-			vcsProject, err := client.Projects.ConvertToVcs(project, "converting project to use VCS", "", versionControlSettings)
+			vcsProject, err := projects.ConvertToVCS(client, project, "converting project to use VCS", "", versionControlSettings)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -127,7 +142,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	project.Links = projectLinks.Links
 
-	updatedProject, err = client.Projects.Update(project)
+	updatedProject, err = projects.Update(client, project)
 	if err != nil {
 		return diag.FromErr(err)
 	}

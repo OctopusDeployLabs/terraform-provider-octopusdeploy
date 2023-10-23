@@ -30,7 +30,7 @@ func resourceRunbookCreate(ctx context.Context, d *schema.ResourceData, m interf
 	tflog.Info(ctx, fmt.Sprintf("creating runbook (%s)", runbook.Name))
 
 	client := m.(*client.Client)
-	createdRunbook, err := client.Runbooks.Add(runbook)
+	createdRunbook, err := runbooks.Add(client, runbook)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -49,7 +49,7 @@ func resourceRunbookDelete(ctx context.Context, d *schema.ResourceData, m interf
 	tflog.Info(ctx, fmt.Sprintf("deleting runbook (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	if err := client.Runbooks.DeleteByID(d.Id()); err != nil {
+	if err := runbooks.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -62,7 +62,7 @@ func resourceRunbookRead(ctx context.Context, d *schema.ResourceData, m interfac
 	tflog.Info(ctx, fmt.Sprintf("reading runbook (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	runbook, err := client.Runbooks.GetByID(d.Id())
+	runbook, err := runbooks.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "runbook")
 	}
@@ -83,14 +83,14 @@ func resourceRunbookUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	var updatedRunbook *runbooks.Runbook
 	var err error
 
-	runbookLinks, err := client.Runbooks.GetByID(d.Id())
+	runbookLinks, err := runbooks.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	runbook.Links = runbookLinks.Links
 
-	updatedRunbook, err = client.Runbooks.Update(runbook)
+	updatedRunbook, err = runbooks.Update(client, runbook)
 	if err != nil {
 		return diag.FromErr(err)
 	}

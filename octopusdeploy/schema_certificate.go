@@ -114,6 +114,10 @@ func expandCertificate(d *schema.ResourceData) *certificates.CertificateResource
 		certificate.Version = v.(int)
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		certificate.SpaceID = v.(string)
+	}
+
 	return certificate
 }
 
@@ -178,6 +182,7 @@ func getCertificateDataSchema() map[string]*schema.Schema {
 		"skip":         getQuerySkip(),
 		"take":         getQueryTake(),
 		"tenant":       getQueryTenant(),
+		"space_id":     getSpaceIDSchema(),
 	}
 }
 
@@ -295,6 +300,11 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Computed: true,
 			Optional: true,
 			Type:     schema.TypeInt,
+		},
+		"space_id": {
+			Optional: true,
+			Computed: true,
+			Type:     schema.TypeString,
 		},
 	}
 }

@@ -26,8 +26,10 @@ func dataSourceUsersRead(ctx context.Context, d *schema.ResourceData, meta inter
 		Take:   d.Get("take").(int),
 	}
 
+	spaceID := d.Get("space_id").(string)
+
 	client := meta.(*client.Client)
-	existingUsers, err := client.Users.Get(query)
+	existingUsers, err := users.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

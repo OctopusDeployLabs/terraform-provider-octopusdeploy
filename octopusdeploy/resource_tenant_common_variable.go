@@ -8,6 +8,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,6 +34,11 @@ func resourceTenantCommonVariable() *schema.Resource {
 				Required: true,
 				Type:     schema.TypeString,
 			},
+			"space_id": {
+				Optional: true,
+				Computed: true,
+				Type:     schema.TypeString,
+			},
 			"value": {
 				Default:   "",
 				Optional:  true,
@@ -51,6 +57,7 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
 	templateID := d.Get("template_id").(string)
+	spaceID := d.Get("space_id").(string)
 	value := d.Get("value").(string)
 
 	id := tenantID + ":" + libraryVariableSetID + ":" + templateID
@@ -58,7 +65,7 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 	log.Printf("[INFO] creating tenant common variable (%s)", id)
 
 	client := m.(*client.Client)
-	tenant, err := client.Tenants.GetByID(tenantID)
+	tenant, err := tenants.GetByID(client, spaceID, tenantID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -94,6 +101,7 @@ func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceD
 
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
+	spaceID := d.Get("space_id").(string)
 	templateID := d.Get("template_id").(string)
 
 	id := tenantID + ":" + libraryVariableSetID + ":" + templateID
@@ -101,7 +109,7 @@ func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceD
 	log.Printf("[INFO] deleting tenant common variable (%s)", id)
 
 	client := m.(*client.Client)
-	tenant, err := client.Tenants.GetByID(tenantID)
+	tenant, err := tenants.GetByID(client, spaceID, tenantID)
 	if err != nil {
 		if apiError, ok := err.(*core.APIError); ok {
 			if apiError.StatusCode == 404 {
@@ -167,6 +175,7 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
+	spaceID := d.Get("space_id").(string)
 	templateID := d.Get("template_id").(string)
 
 	id := tenantID + ":" + libraryVariableSetID + ":" + templateID
@@ -174,7 +183,7 @@ func resourceTenantCommonVariableRead(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[INFO] reading tenant common variable (%s)", id)
 
 	client := m.(*client.Client)
-	tenant, err := client.Tenants.GetByID(tenantID)
+	tenant, err := tenants.GetByID(client, spaceID, tenantID)
 	if err != nil {
 		if apiError, ok := err.(*core.APIError); ok {
 			if apiError.StatusCode == 404 {
@@ -219,6 +228,7 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 
 	libraryVariableSetID := d.Get("library_variable_set_id").(string)
 	tenantID := d.Get("tenant_id").(string)
+	spaceID := d.Get("space_id").(string)
 	templateID := d.Get("template_id").(string)
 	value := d.Get("value").(string)
 
@@ -227,7 +237,7 @@ func resourceTenantCommonVariableUpdate(ctx context.Context, d *schema.ResourceD
 	log.Printf("[INFO] updating tenant common variable (%s)", id)
 
 	client := m.(*client.Client)
-	tenant, err := client.Tenants.GetByID(tenantID)
+	tenant, err := tenants.GetByID(client, spaceID, tenantID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

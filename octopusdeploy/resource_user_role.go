@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/userroles"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,7 @@ func resourceUserRoleCreate(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] creating user role: %#v", userRole)
 
 	client := m.(*client.Client)
-	createdUserRole, err := client.UserRoles.Add(userRole)
+	createdUserRole, err := userroles.Add(client, userRole)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -47,7 +48,7 @@ func resourceUserRoleDelete(ctx context.Context, d *schema.ResourceData, m inter
 	log.Printf("[INFO] deleting user role (%s)", d.Id())
 
 	client := m.(*client.Client)
-	if err := client.UserRoles.DeleteByID(d.Id()); err != nil {
+	if err := userroles.DeleteByID(client, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -61,7 +62,7 @@ func resourceUserRoleRead(ctx context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] reading user role (%s)", d.Id())
 
 	client := m.(*client.Client)
-	userRole, err := client.UserRoles.GetByID(d.Id())
+	userRole, err := userroles.GetByID(client, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "user role")
 	}
@@ -79,7 +80,7 @@ func resourceUserRoleUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	userRole := expandUserRole(d)
 	client := m.(*client.Client)
-	updatedUserRole, err := client.UserRoles.Update(userRole)
+	updatedUserRole, err := userroles.Update(client, userRole)
 	if err != nil {
 		return diag.FromErr(err)
 	}

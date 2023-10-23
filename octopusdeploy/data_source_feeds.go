@@ -26,9 +26,10 @@ func dataSourceFeedsRead(ctx context.Context, d *schema.ResourceData, m interfac
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
+	spaceID := d.Get("space_id").(string)
 
 	client := m.(*client.Client)
-	existingFeeds, err := client.Feeds.Get(query)
+	existingFeeds, err := feeds.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

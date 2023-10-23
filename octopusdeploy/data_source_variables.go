@@ -26,8 +26,13 @@ func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m
 		scope = expandVariableScope(v)
 	}
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	client := m.(*client.Client)
-	variables, err := client.Variables.GetByName(ownerID.(string), name.(string), &scope)
+	variables, err := variables.GetByName(client, spaceID, ownerID.(string), name.(string), &scope)
 	if err != nil {
 		return diag.Errorf("error reading variable with owner ID %s with name %s: %s", ownerID, name, err.Error())
 	}

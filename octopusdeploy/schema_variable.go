@@ -34,6 +34,10 @@ func expandVariable(d *schema.ResourceData) *variables.Variable {
 		variable.Scope = expandVariableScope(v)
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		variable.SpaceID = v.(string)
+	}
+
 	if variable.IsSensitive {
 		variable.Type = "Sensitive"
 		variable.Value = d.Get("sensitive_value").(string)
@@ -55,8 +59,9 @@ func getVariableDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
-		"id":  getDataSchemaID(),
-		"ids": getQueryIDs(),
+		"id":       getDataSchemaID(),
+		"space_id": getQuerySpaceID(),
+		"ids":      getQueryIDs(),
 		"variables": {
 			Computed:    true,
 			Description: "A list of variables that match the filter(s).",
@@ -172,7 +177,8 @@ func getVariableSchema() map[string]*schema.Schema {
 			Sensitive:     true,
 			Type:          schema.TypeString,
 		},
-		"type": getVariableTypeSchema(),
+		"type":     getVariableTypeSchema(),
+		"space_id": getSpaceIDSchema(),
 		"value": {
 			ConflictsWith: []string{"sensitive_value"},
 			Optional:      true,

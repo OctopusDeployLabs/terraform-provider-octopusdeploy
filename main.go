@@ -14,7 +14,8 @@ func main() {
 	flag.Parse()
 
 	opts := &plugin.ServeOpts{
-		ProviderFunc: octopusdeploy.Provider}
+		ProviderFunc: octopusdeploy.Provider,
+	}
 
 	if debugMode {
 		opts.Debug = true

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/libraryvariablesets"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -27,8 +28,10 @@ func dataSourceLibraryVariableSetReadByName(ctx context.Context, d *schema.Resou
 		Take:        d.Get("take").(int),
 	}
 
+	spaceID := d.Get("space_id").(string)
+
 	client := m.(*client.Client)
-	existingLibraryVariableSets, err := client.LibraryVariableSets.Get(query)
+	existingLibraryVariableSets, err := libraryvariablesets.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

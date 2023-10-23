@@ -40,6 +40,10 @@ func expandDeploymentTarget(d *schema.ResourceData) *machines.DeploymentTarget {
 		deploymentTarget.URI = v.(string)
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		deploymentTarget.SpaceID = v.(string)
+	}
+
 	return deploymentTarget
 }
 
@@ -102,6 +106,7 @@ func getDeploymentTargetDataSchema() map[string]*schema.Schema {
 		"tenants":         getQueryTenants(),
 		"tenant_tags":     getQueryTenantTags(),
 		"thumbprint":      getQueryThumbprint(),
+		"space_id":        getSpaceIDSchema(),
 	}
 }
 
@@ -198,6 +203,7 @@ func setDeploymentTarget(ctx context.Context, d *schema.ResourceData, deployment
 	d.Set("tenanted_deployment_participation", deploymentTarget.TenantedDeploymentMode)
 	d.Set("thumbprint", deploymentTarget.Thumbprint)
 	d.Set("uri", deploymentTarget.URI)
+	d.Set("space_id", deploymentTarget.SpaceID)
 
 	endpointResource, err := machines.ToEndpointResource(deploymentTarget.Endpoint)
 	if err != nil {

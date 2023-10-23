@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,7 @@ func resourceEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m in
 	log.Printf("[INFO] creating environment: %#v", environment)
 
 	client := m.(*client.Client)
-	createdEnvironment, err := client.Environments.Add(environment)
+	createdEnvironment, err := environments.Add(client, environment)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -47,7 +48,7 @@ func resourceEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m in
 	log.Printf("[INFO] deleting environment (%s)", d.Id())
 
 	client := m.(*client.Client)
-	if err := client.Environments.DeleteByID(d.Id()); err != nil {
+	if err := environments.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -60,7 +61,7 @@ func resourceEnvironmentRead(ctx context.Context, d *schema.ResourceData, m inte
 	log.Printf("[INFO] reading environment (%s)", d.Id())
 
 	client := m.(*client.Client)
-	environment, err := client.Environments.GetByID(d.Id())
+	environment, err := environments.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "environment")
 	}
@@ -78,7 +79,7 @@ func resourceEnvironmentUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	environment := expandEnvironment(d)
 	client := m.(*client.Client)
-	updatedEnvironment, err := client.Environments.Update(environment)
+	updatedEnvironment, err := environments.Update(client, environment)
 	if err != nil {
 		return diag.FromErr(err)
 	}

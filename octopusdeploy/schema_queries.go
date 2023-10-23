@@ -147,6 +147,14 @@ func getQueryHealthStatuses() *schema.Schema {
 	}
 }
 
+func getQuerySpaceID() *schema.Schema {
+	return &schema.Schema{
+		Description: "A Space ID to filter by. Will revert what is specified on the provider if not set.",
+		Optional:    true,
+		Type:        schema.TypeString,
+	}
+}
+
 func getDataSchemaID() *schema.Schema {
 	return &schema.Schema{
 		Computed:    true,

@@ -33,10 +33,17 @@ func resourceTagCreate(ctx context.Context, d *schema.ResourceData, m interface{
 
 	log.Printf("[INFO] creating tag")
 
+	return tagCreate(ctx, d, m)
+}
+
+func tagCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Printf("[INFO] creating tag")
+
 	tagSetID := d.Get("tag_set_id").(string)
+	tagSetSpaceID := d.Get("tag_set_space_id").(string)
 
 	octopus := m.(*client.Client)
-	tagSet, err := octopus.TagSets.GetByID(tagSetID)
+	tagSet, err := tagsets.GetByID(octopus, tagSetSpaceID, tagSetID)
 	if err != nil {
 		return processUnknownTagSetError(ctx, d, err)
 	}
@@ -50,14 +57,18 @@ func resourceTagCreate(ctx context.Context, d *schema.ResourceData, m interface{
 	}
 
 	tag := expandTag(d)
+	if tag.ID != "" {
+		tag.ID = tagSet.GetID() + "/" + strings.Split(tag.ID, "/")[1]
+	}
 	tagSet.Tags = append(tagSet.Tags, tag)
 
-	updatedTagSet, err := octopus.TagSets.Update(tagSet)
+	updatedTagSet, err := tagsets.Update(octopus, tagSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	return findByIdOrNameAndSetTag(ctx, d, tag, updatedTagSet)
+
 }
 
 func resourceTagDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -65,11 +76,12 @@ func resourceTagDelete(ctx context.Context, d *schema.ResourceData, m interface{
 	defer mutex.Unlock()
 
 	tagSetID := d.Get("tag_set_id").(string)
+	tagSetSpaceID := d.Get("tag_set_space_id").(string)
 
 	log.Printf("[INFO] deleting tag (%s)", d.Id())
 
 	octopus := m.(*client.Client)
-	tagSet, err := octopus.TagSets.GetByID(tagSetID)
+	tagSet, err := tagsets.GetByID(octopus, tagSetSpaceID, tagSetID)
 	if err != nil {
 		return processUnknownTagSetError(ctx, d, err)
 	}
@@ -77,7 +89,7 @@ func resourceTagDelete(ctx context.Context, d *schema.ResourceData, m interface{
 	tag := expandTag(d)
 
 	// verify tag is not associated with a tenant
-	isUsed, err := isTagUsedByTenants(ctx, octopus, tag)
+	isUsed, err := isTagUsedByTenants(ctx, octopus, tagSetSpaceID, tag)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
@@ -94,7 +106,7 @@ func resourceTagDelete(ctx context.Context, d *schema.ResourceData, m interface{
 		if tagSet.Tags[i].ID == d.Id() {
 			tagSet.Tags = slices.Delete(tagSet.Tags, i, i+1)
 
-			if _, err := octopus.TagSets.Update(tagSet); err != nil {
+			if _, err := tagsets.Update(octopus, tagSet); err != nil {
 				return diag.FromErr(err)
 			}
 
@@ -118,6 +130,7 @@ func resourceTagRead(ctx context.Context, d *schema.ResourceData, m interface{})
 
 	name := d.Get("name").(string)
 	tagSetID := d.Get("tag_set_id").(string)
+	tagSetSpaceID := d.Get("tag_set_space_id").(string)
 
 	// if name and tag set ID are empty then an import is underway
 	if name == "" && tagSetID == "" {
@@ -128,7 +141,7 @@ func resourceTagRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	}
 
 	octopus := m.(*client.Client)
-	tagSet, err := octopus.TagSets.GetByID(tagSetID)
+	tagSet, err := tagsets.GetByID(octopus, tagSetSpaceID, tagSetID)
 	if err != nil {
 		return processUnknownTagSetError(ctx, d, err)
 	}
@@ -143,6 +156,7 @@ func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 
 	name := d.Get("name").(string)
 	tagSetID := d.Get("tag_set_id").(string)
+	tagSetSpaceID := d.Get("tag_set_space_id").(string)
 
 	log.Printf("[INFO] updating tag (%s)", d.Id())
 
@@ -151,13 +165,18 @@ func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 	// if the tag is reassigned to another tag set
 	if d.HasChange("tag_set_id") {
 		sourceTagSetID, destinationTagSetID := d.GetChange("tag_set_id")
+		sourceTagSetSpaceID, destinationTagSetSpaceID := d.GetChange("tag_set_space_id")
 
-		sourceTagSet, err := octopus.TagSets.GetByID(sourceTagSetID.(string))
+		sourceTagSet, err := tagsets.GetByID(octopus, sourceTagSetSpaceID.(string), sourceTagSetID.(string))
 		if err != nil {
+			// if spaceID has change, tag has been deleted, recreate required
+			if d.HasChange("tag_set_space_id") {
+				return tagCreate(ctx, d, m)
+			}
 			return diag.FromErr(err)
 		}
 
-		destinationTagSet, err := octopus.TagSets.GetByID(destinationTagSetID.(string))
+		destinationTagSet, err := tagsets.GetByID(octopus, destinationTagSetSpaceID.(string), destinationTagSetID.(string))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -173,7 +192,7 @@ func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 		tag := expandTag(d)
 
 		// check to see that the tag is not applied to a tenant
-		isUsed, err := isTagUsedByTenants(ctx, octopus, tag)
+		isUsed, err := isTagUsedByTenants(ctx, octopus, sourceTagSetSpaceID.(string), tag)
 		if err != nil {
 			d.SetId("")
 			return diag.FromErr(err)
@@ -191,7 +210,7 @@ func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 			if sourceTagSet.Tags[i].ID == d.Id() {
 				sourceTagSet.Tags = slices.Delete(sourceTagSet.Tags, i, i+1)
 
-				if _, err := octopus.TagSets.Update(sourceTagSet); err != nil {
+				if _, err := tagsets.Update(octopus, sourceTagSet); err != nil {
 					return diag.FromErr(err)
 				}
 			}
@@ -201,7 +220,7 @@ func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 		tag.ID = destinationTagSet.GetID() + "/" + strings.Split(tag.ID, "/")[1]
 		destinationTagSet.Tags = append(destinationTagSet.Tags, tag)
 
-		updatedTagSet, err := octopus.TagSets.Update(destinationTagSet)
+		updatedTagSet, err := tagsets.Update(octopus, destinationTagSet)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -209,7 +228,7 @@ func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 		return findByIdOrNameAndSetTag(ctx, d, tag, updatedTagSet)
 	}
 
-	tagSet, err := octopus.TagSets.GetByID(tagSetID)
+	tagSet, err := tagsets.GetByID(octopus, tagSetSpaceID, tagSetID)
 	if err != nil {
 		return processUnknownTagSetError(ctx, d, err)
 	}
@@ -219,7 +238,7 @@ func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 		if tagSet.Tags[i].ID == d.Id() {
 			tagSet.Tags[i] = expandTag(d)
 
-			updatedTagSet, err := octopus.TagSets.Update(tagSet)
+			updatedTagSet, err := tagsets.Update(octopus, tagSet)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -231,9 +250,9 @@ func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 	return diag.Errorf("unable to update tag")
 }
 
-func isTagUsedByTenants(ctx context.Context, octopus *client.Client, tag *tagsets.Tag) (bool, error) {
-	tenants, err := octopus.Tenants.Get(tenants.TenantsQuery{
-		Tags: []string{tag.CanonicalTagName},
+func isTagUsedByTenants(ctx context.Context, octopus *client.Client, spaceID string, tag *tagsets.Tag) (bool, error) {
+	tenants, err := tenants.Get(octopus, spaceID, tenants.TenantsQuery{
+		Tags: []string{tag.ID},
 	})
 	if err != nil {
 		return false, err

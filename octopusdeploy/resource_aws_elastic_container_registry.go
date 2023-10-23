@@ -33,7 +33,7 @@ func resourceAwsElasticContainerRegistryCreate(ctx context.Context, d *schema.Re
 	tflog.Info(ctx, fmt.Sprintf("creating AWS Elastic Container Registry, %s", feed.GetName()))
 
 	client := m.(*client.Client)
-	createdFeed, err := client.Feeds.Add(feed)
+	createdFeed, err := feeds.Add(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -52,7 +52,7 @@ func resourceAwsElasticContainerRegistryDelete(ctx context.Context, d *schema.Re
 	tflog.Info(ctx, fmt.Sprintf("deleting AWS Elastic Container Registry (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	err := client.Feeds.DeleteByID(d.Id())
+	err := feeds.DeleteByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +67,7 @@ func resourceAwsElasticContainerRegistryRead(ctx context.Context, d *schema.Reso
 	tflog.Info(ctx, fmt.Sprintf("reading AWS Elastic Container Registry (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feed, err := client.Feeds.GetByID(d.Id())
+	feed, err := feeds.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "AWS Elastic Container Registry")
 	}
@@ -90,7 +90,7 @@ func resourceAwsElasticContainerRegistryUpdate(ctx context.Context, d *schema.Re
 	tflog.Info(ctx, fmt.Sprintf("updating AWS Elastic Container Registry (%s)", awsElasticContainerRegistry.GetID()))
 
 	client := m.(*client.Client)
-	updatedFeed, err := client.Feeds.Update(awsElasticContainerRegistry)
+	updatedFeed, err := feeds.Update(client, awsElasticContainerRegistry)
 	if err != nil {
 		return diag.FromErr(err)
 	}

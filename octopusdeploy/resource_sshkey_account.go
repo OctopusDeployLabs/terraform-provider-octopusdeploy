@@ -29,7 +29,7 @@ func resourceSSHKeyAccountCreate(ctx context.Context, d *schema.ResourceData, m 
 	log.Printf("[INFO] creating SSH key account: %#v", account)
 
 	client := m.(*client.Client)
-	createdAccount, err := client.Accounts.Add(account)
+	createdAccount, err := accounts.Add(client, account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -48,7 +48,7 @@ func resourceSSHKeyAccountDelete(ctx context.Context, d *schema.ResourceData, m 
 	log.Printf("[INFO] deleting SSH key account (%s)", d.Id())
 
 	client := m.(*client.Client)
-	if err := client.Accounts.DeleteByID(d.Id()); err != nil {
+	if err := accounts.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -62,7 +62,7 @@ func resourceSSHKeyAccountRead(ctx context.Context, d *schema.ResourceData, m in
 	log.Printf("[INFO] reading SSH key account (%s)", d.Id())
 
 	client := m.(*client.Client)
-	accountResource, err := client.Accounts.GetByID(d.Id())
+	accountResource, err := accounts.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "SSH key account")
 	}
@@ -81,7 +81,7 @@ func resourceSSHKeyAccountUpdate(ctx context.Context, d *schema.ResourceData, m 
 
 	account := expandSSHKeyAccount(d)
 	client := m.(*client.Client)
-	updatedAccount, err := client.Accounts.Update(account)
+	updatedAccount, err := accounts.Update(client, account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
