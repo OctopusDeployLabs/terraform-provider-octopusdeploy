@@ -87,6 +87,7 @@ Read-Only:
 - `channels` (List of String)
 - `environments` (List of String)
 - `machines` (List of String)
+- `processes` (List of String)
 - `roles` (List of String)
 - `tenant_tags` (List of String)
 

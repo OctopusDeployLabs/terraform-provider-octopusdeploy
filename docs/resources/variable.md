@@ -150,6 +150,7 @@ Optional:
 - `channels` (List of String) A list of channels that are scoped to this variable value.
 - `environments` (List of String) A list of environments that are scoped to this variable value.
 - `machines` (List of String) A list of machines that are scoped to this variable value.
+- `processes` (List of String) A list of processes that are scoped to this variable value.
 - `roles` (List of String) A list of roles that are scoped to this variable value.
 - `tenant_tags` (List of String) A list of tenant tags that are scoped to this variable value.
 
