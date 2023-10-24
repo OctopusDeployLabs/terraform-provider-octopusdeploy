@@ -14,5 +14,5 @@ variable "octopus_space_id" {
   type        = string
   nullable    = false
   sensitive   = false
-  description = "The space ID to populate"
+  description = "The space ID of the provider"
 }
