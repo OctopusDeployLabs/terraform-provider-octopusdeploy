@@ -17,7 +17,7 @@ func resourceTenantConnection() *schema.Resource {
 		Description:   "This resource manages tenant connections in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceTenantConnectionRead,
-		Schema:        getTenantSchema(),
+		Schema:        getTenantConnectionSchema(),
 		UpdateContext: resourceTenantConnectionUpdate,
 	}
 }

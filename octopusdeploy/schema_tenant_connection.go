@@ -7,7 +7,6 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"golang.org/x/exp/slices"
 )
 
 func expandTenantConnectionFromTenant(tenant *tenants.Tenant, projectID string) (*TenantConnection, error) {
@@ -65,22 +64,10 @@ func (tc *TenantConnection) GetID() string {
 	id := fmt.Sprintf("%s:%s", tc.TenantID, tc.ProjectID)
 
 	if len(tc.EnvironmentIDs) > 0 {
-		slices.Sort(tc.EnvironmentIDs)
 		id = fmt.Sprintf("%s:%s", id, strings.Join(tc.EnvironmentIDs, "+"))
 	}
 
 	return id
-}
-
-func expandTenantConnectionEnvironmentIDs(value interface{}) []string {
-	set := value.(*schema.Set)
-	var environmentIDs []string
-	for _, item := range set.List() {
-		environmentID := item.(string)
-		environmentIDs = append(environmentIDs, environmentID)
-	}
-
-	return environmentIDs
 }
 
 func expandTenantConnection(d *schema.ResourceData) *TenantConnection {
@@ -96,7 +83,8 @@ func expandTenantConnection(d *schema.ResourceData) *TenantConnection {
 	}
 
 	if v, ok := d.GetOk("environment_ids"); ok {
-		tenantConnection.EnvironmentIDs = expandTenantConnectionEnvironmentIDs(v)
+		list := v.(*schema.Set).List()
+		tenantConnection.EnvironmentIDs = expandArray(list)
 	}
 
 	return tenantConnection
