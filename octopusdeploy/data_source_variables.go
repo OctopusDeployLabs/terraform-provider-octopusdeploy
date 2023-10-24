@@ -18,7 +18,6 @@ func dataSourceVariable() *schema.Resource {
 }
 
 func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	ID := d.Get("id").(string)
 	spaceID := d.Get("space_id").(string)
 
 	ownerID := d.Get("owner_id").(string)
@@ -30,7 +29,7 @@ func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m
 	client := m.(*client.Client)
 	variables, err := variables.GetByName(client, spaceID, ownerID, name, &scope)
 	if err != nil {
-		return diag.Errorf("error reading variable with owner ID %s with ID %s: %s", ownerID, ID, err.Error())
+		return diag.Errorf("error reading variable with owner ID %s with name %s: %s", ownerID, name, err.Error())
 	}
 	if variables == nil {
 		return nil
