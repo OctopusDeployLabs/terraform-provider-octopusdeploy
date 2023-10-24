@@ -49,5 +49,5 @@ resource "octopusdeploy_tenant_connection" "example" {
 Import is supported using the following syntax:
 
 ```shell
-terraform import [options] octopusdeploy_tenant_connection.<name> <tenant-connection-id>
+terraform import [options] octopusdeploy_tenant_connection.<name> <tenant-id>:<project-id>[:environment-id-0[+environment-id-1[+environment-id-n]]]
 ```
