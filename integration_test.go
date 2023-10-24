@@ -1348,12 +1348,6 @@ func TestProjectInSpaceResource(t *testing.T) {
 			return err
 		}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("./terraform", "19b-projectspace"), newSpaceId, []string{})
-
-		if err != nil {
-			return err
-		}
-
 		// Assert
 		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
 
