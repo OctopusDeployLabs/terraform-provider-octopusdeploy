@@ -18,36 +18,29 @@ func dataSourceVariable() *schema.Resource {
 }
 
 func dataSourceVariableReadByName(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	ownerID := d.Get("owner_id")
-	name := d.Get("name")
-	scope := variables.VariableScope{}
+	ID := d.Get("id").(string)
+	spaceID := d.Get("space_id").(string)
 
-	if v, ok := d.GetOk("scope"); ok {
-		scope = expandVariableScope(v)
-	}
+	ownerID := d.Get("owner_id").(string)
 
-	var spaceID string
-	if v, ok := d.GetOk("space_id"); ok {
-		spaceID = v.(string)
-	}
+	name := d.Get("name").(string)
+
+	scope := expandVariableScope(d.Get("scope"))
 
 	client := m.(*client.Client)
-	variables, err := variables.GetByName(client, spaceID, ownerID.(string), name.(string), &scope)
+	variables, err := variables.GetByName(client, spaceID, ownerID, name, &scope)
 	if err != nil {
-		return diag.Errorf("error reading variable with owner ID %s with name %s: %s", ownerID, name, err.Error())
+		return diag.Errorf("error reading variable with owner ID %s with ID %s: %s", ownerID, ID, err.Error())
 	}
 	if variables == nil {
 		return nil
 	}
-	if len(variables) > 1 {
-		return diag.Errorf("found %v variables with owner ID %s with name %s, should match exactly 1", len(variables), ownerID, name)
+
+	if len(variables) != 1 {
+		return diag.Errorf("error could not find variable by name, expected to find 1 variable but got %d", len(variables))
 	}
 
-	d.SetId(variables[0].ID)
-	d.Set("name", variables[0].Name)
-	d.Set("type", variables[0].Type)
-	d.Set("value", variables[0].Value)
-	d.Set("description", variables[0].Description)
+	setVariable(ctx, d, variables[0])
 
 	return nil
 }
