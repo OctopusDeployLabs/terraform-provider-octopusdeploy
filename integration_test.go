@@ -38,6 +38,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -1331,6 +1332,91 @@ func TestProjectResource(t *testing.T) {
 
 		if lookup != resource.ID {
 			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+		}
+
+		return nil
+	})
+}
+
+func TestProjectInSpaceResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "19b-projectspace", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+
+		spaces, err := spaces.GetAll(client)
+
+		if err != nil {
+			return err
+		}
+		idx := sort.Search(len(spaces), func(i int) bool { return spaces[i].Name == "Project Space Test" })
+		space := spaces[idx]
+
+		query := projects.ProjectsQuery{
+			PartialName: "Test project in space",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := projects.Get(client, space.ID, query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test project in space\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "Test project in space" {
+			t.Fatal("The project must be have a description of \"Test project in space\" (was \"" + resource.Description + "\")")
+		}
+
+		if resource.AutoCreateRelease {
+			t.Fatal("The project must not have auto release create enabled")
+		}
+
+		if resource.DefaultGuidedFailureMode != "EnvironmentDefault" {
+			t.Fatal("The project must be have a DefaultGuidedFailureMode of \"EnvironmentDefault\" (was \"" + resource.DefaultGuidedFailureMode + "\")")
+		}
+
+		if resource.DefaultToSkipIfAlreadyInstalled {
+			t.Fatal("The project must not have DefaultToSkipIfAlreadyInstalled enabled")
+		}
+
+		if resource.IsDisabled {
+			t.Fatal("The project must not have IsDisabled enabled")
+		}
+
+		if resource.IsVersionControlled {
+			t.Fatal("The project must not have IsVersionControlled enabled")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The project must be have a TenantedDeploymentMode of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		if len(resource.IncludedLibraryVariableSets) != 0 {
+			t.Fatal("The project must not have any library variable sets")
+		}
+
+		if resource.ConnectivityPolicy.AllowDeploymentsToNoTargets {
+			t.Fatal("The project must not have ConnectivityPolicy.AllowDeploymentsToNoTargets enabled")
+		}
+
+		if resource.ConnectivityPolicy.ExcludeUnhealthyTargets {
+			t.Fatal("The project must not have ConnectivityPolicy.AllowDeploymentsToNoTargets enabled")
+		}
+
+		if resource.ConnectivityPolicy.SkipMachineBehavior != "SkipUnavailableMachines" {
+			t.Log("BUG: The project must be have a ConnectivityPolicy.SkipMachineBehavior of \"SkipUnavailableMachines\" (was \"" + resource.ConnectivityPolicy.SkipMachineBehavior + "\") - Known issue where the value returned by /api/Spaces-#/ProjectGroups/ProjectGroups-#/projects is different to /api/Spaces-/Projects")
 		}
 
 		return nil
