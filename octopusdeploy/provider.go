@@ -88,6 +88,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_team":                                           resourceTeam(),
 			"octopusdeploy_tenant":                                         resourceTenant(),
 			"octopusdeploy_tenant_common_variable":                         resourceTenantCommonVariable(),
+			"octopusdeploy_tenant_connection":                              resourceTenantConnection(),
 			"octopusdeploy_tenant_project_variable":                        resourceTenantProjectVariable(),
 			"octopusdeploy_token_account":                                  resourceTokenAccount(),
 			"octopusdeploy_user":                                           resourceUser(),
