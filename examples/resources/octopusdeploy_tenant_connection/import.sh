@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_tenant_connection.<name> <tenant-connection-id>
