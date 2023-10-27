@@ -47,6 +47,7 @@ resource "octopusdeploy_certificate" "example" {
 - `self_signed` (Boolean)
 - `serial_number` (String)
 - `signature_algorithm_name` (String)
+- `space_id` (String)
 - `subject_alternative_names` (List of String)
 - `subject_common_name` (String)
 - `subject_distinguished_name` (String)

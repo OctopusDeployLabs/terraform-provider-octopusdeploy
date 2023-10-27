@@ -23,10 +23,9 @@ This resource manages tenant common variables in Octopus Deploy.
 
 ### Optional
 
+- `space_id` (String)
 - `value` (String, Sensitive)
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

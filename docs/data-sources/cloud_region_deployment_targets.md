@@ -38,6 +38,7 @@ data "octopusdeploy_cloud_region_deployment_targets" "example" {
 - `roles` (List of String) A filter to search by a list of role IDs.
 - `shell_names` (List of String) A list of shell names to match in the query and/or search
 - `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) The space ID associated with this resource.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 - `tenant_tags` (List of String) A filter to search by a list of tenant tags.
 - `tenants` (List of String) A filter to search by a list of tenant IDs.
@@ -74,5 +75,3 @@ Read-Only:
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
 - `thumbprint` (String)
 - `uri` (String)
-
-

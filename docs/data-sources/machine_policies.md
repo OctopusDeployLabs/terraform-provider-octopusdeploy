@@ -20,6 +20,7 @@ Provides information about existing machine policies.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `partial_name` (String) A filter to search by the partial match of a name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) The space ID associated with this resource.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
@@ -104,5 +105,3 @@ Read-Only:
 - `calamari_update_behavior` (String)
 - `tentacle_update_account_id` (String)
 - `tentacle_update_behavior` (String)
-
-

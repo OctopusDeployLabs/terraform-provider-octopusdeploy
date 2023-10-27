@@ -31,7 +31,7 @@ This resource manages runbooks in Octopus Deploy.
 - `id` (String) The unique ID for this resource.
 - `multi_tenancy_mode` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `retention_policy` (Block List, Max: 1) Sets the runbook retention policy (see [below for nested schema](#nestedblock--retention_policy))
-- `space_id` (String) The space ID associated with this runbook.
+- `space_id` (String) The space ID associated with this resource.
 
 ### Read-Only
 
@@ -56,5 +56,3 @@ Optional:
 
 - `quantity_to_keep` (Number) How many runs to keep per environment.
 - `should_keep_forever` (Boolean) Indicates if items should never be deleted. The default value is `false`.
-
-
