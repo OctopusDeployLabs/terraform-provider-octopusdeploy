@@ -783,8 +783,10 @@ Optional:
 - `script_file_name` (String) The script file name in the package
 - `script_parameters` (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
 - `script_source` (String)
+- `script_syntax` (String)
 - `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `variable_substitution_in_files` (String) A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.
 - `worker_pool_id` (String) The worker pool associated with this deployment action.
 - `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
 
