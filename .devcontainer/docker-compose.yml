@@ -1,0 +1,43 @@
+version: "3.8"
+name: terraform-provider-octopusdeploy
+services:
+
+  sql_server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: MyVeryStrongPassword123!
+    healthcheck:
+      test: [ "CMD", "/opt/mssql-tools/bin/sqlcmd", "-U", "sa", "-P", "MyVeryStrongPassword123!", "-Q", "select 1"]
+      interval: 10s
+      retries: 10
+    ports:
+      - 8433:1433
+      
+  octopus:
+    depends_on:
+      sql_server:
+        condition: service_healthy
+    image: octopusdeploy/octopusdeploy
+    environment:
+      ACCEPT_EULA: "Y"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: "P@ssw0rd!"
+      ADMIN_API_KEY: API-L2GV2ELTCZDRANT1OQO045GPZHXFGWR
+      DB_CONNECTION_STRING: Server=sql_server;Database=octopus;User Id=sa;Password=MyVeryStrongPassword123!
+    ports:
+      - 8080:8080
+
+  dev_env:
+    depends_on:
+      sql_server:
+        condition: service_healthy
+      octopus:
+        condition: service_started
+    build:
+      context: .
+      dockerfile: dockerfile
+    command: sleep infinity
+    volumes:
+        - ../:/src
+  
