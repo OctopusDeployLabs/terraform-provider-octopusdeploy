@@ -1,0 +1,14 @@
+{
+	"name": "golang build env",
+    "dockerComposeFile" : [
+        "docker-compose.yml"
+    ],
+    "service" : "dev_env",
+    "workspaceFolder": "/src",
+	"forwardPorts": [
+		0
+	],
+	"extensions": [
+		"ms-azuretools.vscode-docker"
+	]
+}

@@ -28,9 +28,30 @@ func expandTagSet(d *schema.ResourceData) *tagsets.TagSet {
 	return tagSet
 }
 
+func flattenTag(tag *tagsets.Tag) map[string]interface{} {
+	if tag == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"canonical_tag_name": tag.CanonicalTagName,
+		"color": tag.Color,    
+		"description": tag.Description,
+		"name": tag.Name,    
+		"sort_order": tag.SortOrder,
+	}
+
+}
+
 func flattenTagSet(tagSet *tagsets.TagSet) map[string]interface{} {
 	if tagSet == nil {
 		return nil
+	}
+
+	flattened_tags := []interface{}{}
+
+	for _, tag := range tagSet.Tags {
+		flattened_tags = append(flattened_tags, flattenTag(tag))
 	}
 
 	return map[string]interface{}{
@@ -39,8 +60,9 @@ func flattenTagSet(tagSet *tagsets.TagSet) map[string]interface{} {
 		"name":        tagSet.Name,
 		"sort_order":  tagSet.SortOrder,
 		"space_id":    tagSet.SpaceID,
-	}
-}
+		"tags":        flattened_tags,
+		}}
+
 
 func getTagSetDataSchema() map[string]*schema.Schema {
 	dataSchema := getTagSetSchema()
@@ -62,13 +84,44 @@ func getTagSetDataSchema() map[string]*schema.Schema {
 	}
 }
 
+func getTagSchemaForTagSet() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"canonical_tag_name": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"color": {
+			Required: true,
+			Type:     schema.TypeString,
+		},
+		"description": getDescriptionSchema("tag"),
+		"name":        getNameSchema(true),
+		"sort_order": {
+			Computed: true,
+			Optional: true,
+			Type:     schema.TypeInt,
+		},
+	}
+}
+
 func getTagSetSchema() map[string]*schema.Schema {
+	tagSchema := getTagSchemaForTagSet() 
+	setDataSchema(&tagSchema)
+
+
 	return map[string]*schema.Schema{
 		"description": getDescriptionSchema("tag set"),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
 		"sort_order":  getSortOrderSchema(),
 		"space_id":    getSpaceIDSchema(),
+		"tags": 	   {
+			Computed:    true,
+			Description: "A list of tags within the tagset",
+			Elem:        &schema.Resource{Schema: tagSchema},
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
 	}
 }
 

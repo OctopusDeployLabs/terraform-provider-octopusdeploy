@@ -34,6 +34,7 @@ func dataSourceTagSetsRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	flattenedTagSets := []interface{}{}
+	
 	for _, tagSet := range existingTagSets.Items {
 		flattenedTagSets = append(flattenedTagSets, flattenTagSet(tagSet))
 	}

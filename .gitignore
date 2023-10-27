@@ -55,3 +55,7 @@ terraform/**/.terraform/*
 
 # Ignore the test results file
 results.xml
+
+## test container stuff
+**/*/terraform.lock*
+.devcontainer/integration_tests/
