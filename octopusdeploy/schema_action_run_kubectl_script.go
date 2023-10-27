@@ -10,6 +10,10 @@ import (
 
 func getRunKubectlScriptSchema() *schema.Schema {
 	actionSchema, element := getActionSchema()
+	element.Schema["script_body"] = &schema.Schema{
+		Optional: true,
+		Type:     schema.TypeString,
+	}
 	addExecutionLocationSchema(element)
 	addScriptFromPackageSchema(element)
 	addWorkerPoolSchema(element)
@@ -22,10 +26,29 @@ func expandRunKubectlScriptAction(flattenedAction map[string]interface{}) *deplo
 	action := expandAction(flattenedAction)
 	action.ActionType = "Octopus.KubernetesRunScript"
 
-	action.Properties["Octopus.Action.Script.ScriptFileName"] = core.NewPropertyValue(flattenedAction["script_file_name"].(string), false)
-	action.Properties["Octopus.Action.Script.ScriptParameters"] = core.NewPropertyValue(flattenedAction["script_parameters"].(string), false)
-	action.Properties["Octopus.Action.Script.ScriptSource"] = core.NewPropertyValue("Package", false)
+	if v, ok := flattenedAction["script_body"]; ok {
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.ScriptBody"] = core.NewPropertyValue(s, false)
+		}
+	}
 
+	if v, ok := flattenedAction["script_file_name"]; ok {
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.ScriptFileName"] = core.NewPropertyValue(s, false)
+		}
+	}
+
+	if v, ok := flattenedAction["script_parameters"]; ok {
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.ScriptParameters"] = core.NewPropertyValue(s, false)
+		}
+	}
+
+	if v, ok := flattenedAction["script_source"]; ok {
+		if s := v.(string); len(s) > 0 {
+			action.Properties["Octopus.Action.Script.ScriptSource"] = core.NewPropertyValue(s, false)
+		}
+	}
 	return action
 }
 
@@ -51,6 +74,10 @@ func flattenKubernetesRunScriptAction(action *deployments.DeploymentAction) map[
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptParameters"]; ok {
 		flattenedAction["script_parameters"] = v.Value
+	}
+
+	if v, ok := action.Properties["Octopus.Action.Script.ScriptBody"]; ok {
+		flattenedAction["script_body"] = v.Value
 	}
 
 	if v, ok := action.Properties["Octopus.Action.Script.ScriptSource"]; ok {
