@@ -326,6 +326,8 @@ Optional:
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
 - `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `worker_pool_id` (String) The worker pool associated with this deployment action.
+- `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
 
 <a id="nestedblock--step--deploy_kubernetes_secret_action--action_template"></a>
 ### Nested Schema for `step.deploy_kubernetes_secret_action.action_template`
@@ -655,11 +657,14 @@ Optional:
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package))
 - `properties` (Map of String) The properties associated with this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
+- `script_body` (String)
 - `script_file_name` (String) The script file name in the package
 - `script_parameters` (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
 - `script_source` (String)
 - `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `worker_pool_id` (String) The worker pool associated with this deployment action.
+- `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
 
 <a id="nestedblock--step--run_kubectl_script_action--action_template"></a>
 ### Nested Schema for `step.run_kubectl_script_action.action_template`
@@ -806,5 +811,3 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `properties` (Map of String) A list of properties associated with this package.
-
-

@@ -24,10 +24,9 @@ This resource manages tenant project variables in Octopus Deploy.
 
 ### Optional
 
+- `space_id` (String)
 - `value` (String, Sensitive)
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

@@ -35,5 +35,3 @@ Required:
 
 - `environments` (List of String) A list of environment IDs associated with this tenant through a project.
 - `project_id` (String) The project ID associated with this tenant.
-
-
