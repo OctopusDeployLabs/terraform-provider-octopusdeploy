@@ -246,7 +246,7 @@ func getCertificateSchema() map[string]*schema.Schema {
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"password": getPasswordSchema(true),
+		"password": getPasswordSchema(false),
 		"replaced_by": {
 			Computed: true,
 			Optional: true,
