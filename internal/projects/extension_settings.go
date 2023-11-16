@@ -104,8 +104,7 @@ func GetServiceNowExtensionSettingsSchema() map[string]*schema.Schema {
 		"standard_change_template_name": {
 			Description:      "The name of the standard change template associated with this extension.",
 			Required:         false,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			Type:             schema.TypeString
 		},
 	}
 }
