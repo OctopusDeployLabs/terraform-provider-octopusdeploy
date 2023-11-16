@@ -30,4 +30,10 @@ resource "octopusdeploy_project" "deploy_frontend_project" {
     exclude_unhealthy_targets       = false
     skip_machine_behavior           = "SkipUnavailableMachines"
   }
+
+    servicenow_extension_settings {
+    connection_id                       = "989034685e2c48c4b06a29286c9ef5cc"
+    is_enabled                          = false
+    is_state_automatically_transitioned = false
+  }
 }
