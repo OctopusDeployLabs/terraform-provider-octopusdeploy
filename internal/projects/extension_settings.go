@@ -102,8 +102,8 @@ func GetServiceNowExtensionSettingsSchema() map[string]*schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"standard_change_template_name": {
-			Description:      "The name of the standard change template associated with this extension.",
-			Required:         true,
+			Description:      "The name of the standard change template associated with this extension. If provided, deployments will create a standard change based on the provided template, otherwise a normal change will be created.",
+			Optional:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
