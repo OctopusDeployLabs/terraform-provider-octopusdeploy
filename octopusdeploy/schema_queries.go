@@ -14,6 +14,7 @@ func getQueryAccountType() *schema.Schema {
 			"AmazonWebServicesAccount",
 			"AmazonWebServicesRoleAccount",
 			"AzureServicePrincipal",
+			"AzureOIDC",
 			"AzureSubscription",
 			"None",
 			"SshKeyPair",

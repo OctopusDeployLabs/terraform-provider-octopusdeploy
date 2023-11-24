@@ -55,3 +55,5 @@ terraform/**/.terraform/*
 
 # Ignore the test results file
 results.xml
+
+.DS_Store

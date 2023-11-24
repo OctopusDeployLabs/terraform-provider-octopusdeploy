@@ -9,13 +9,14 @@ import (
 
 func getAccountTypeSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
-		Description: "Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
+		Description: "Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureOIDC`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
 		ForceNew:    true,
 		Type:        schema.TypeString,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"AmazonWebServicesAccount",
 			"AmazonWebServicesRoleAccount",
 			"AzureServicePrincipal",
+			"AzureOIDC",
 			"AzureSubscription",
 			"None",
 			"SshKeyPair",
@@ -449,5 +450,12 @@ func setDataSchema(schema *map[string]*schema.Schema) {
 		field.Optional = false
 		field.Required = false
 		field.ValidateDiagFunc = nil
+	}
+}
+
+func getSubjectKeysSchema() *schema.Schema {
+	return &schema.Schema{
+		Type: schema.TypeList,
+		Elem: &schema.Schema{Type: schema.TypeString},
 	}
 }

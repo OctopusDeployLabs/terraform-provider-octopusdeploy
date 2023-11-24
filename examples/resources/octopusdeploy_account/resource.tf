@@ -16,6 +16,18 @@ resource "octopusdeploy_account" "azure_service_principal_account" {
   tenant_id       = "00000000-0000-0000-0000-000000000000"
 }
 
+# create an Azure OpenID Connect account
+resource "octopusdeploy_account" "azure_openid_connect_account" {
+  account_type    = "AzureOIDC"
+  application_id  = "00000000-0000-0000-0000-000000000000"
+  name            = "Azure OpenID Connect Account (OK to Delete)"
+  subscription_id = "00000000-0000-0000-0000-000000000000"
+  tenant_id       = "00000000-0000-0000-0000-000000000000"
+  executions_subject_keys = ["space", "project"]
+  health_subject_keys = ["space", "target"]
+  account_test_subject_keys = ["space", "type"]
+}
+
 # create an Azure subscription account
 resource "octopusdeploy_account" "azure_subscription_account" {
   account_type    = "AzureSubscription"
