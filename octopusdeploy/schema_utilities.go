@@ -455,7 +455,8 @@ func setDataSchema(schema *map[string]*schema.Schema) {
 
 func getSubjectKeysSchema() *schema.Schema {
 	return &schema.Schema{
-		Type: schema.TypeList,
-		Elem: &schema.Schema{Type: schema.TypeString},
+		Optional: true,
+		Type:     schema.TypeList,
+		Elem:     &schema.Schema{Type: schema.TypeString},
 	}
 }
