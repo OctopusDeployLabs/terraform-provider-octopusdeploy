@@ -68,6 +68,10 @@ func expandAzureOpenIDConnectAccount(d *schema.ResourceData) *accounts.AzureOIDC
 		account.AccountTestSubjectKeys = getSliceFromTerraformTypeList(v)
 	}
 
+	if v, ok := d.GetOk("audience"); ok {
+		account.Audience = v.(string)
+	}
+
 	return account
 }
 
@@ -90,6 +94,7 @@ func getAzureOpenIdConnectAccountSchema() map[string]*schema.Schema {
 		"execution_subject_keys":            getSubjectKeysSchema(),
 		"health_subject_keys":               getSubjectKeysSchema(),
 		"account_test_subject_keys":         getSubjectKeysSchema(),
+		"audience":                          getOidcAudienceSchema(),
 	}
 }
 
@@ -105,6 +110,7 @@ func setAzureOpenIDConnectAccount(ctx context.Context, d *schema.ResourceData, a
 	d.Set("subscription_id", account.SubscriptionID.String())
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
 	d.Set("tenant_id", account.TenantID.String())
+	d.Set("audience", account.Audience)
 
 	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {
 		return fmt.Errorf("error setting environments: %s", err)

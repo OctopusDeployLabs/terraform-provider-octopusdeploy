@@ -460,3 +460,10 @@ func getSubjectKeysSchema() *schema.Schema {
 		Elem:     &schema.Schema{Type: schema.TypeString},
 	}
 }
+
+func getOidcAudienceSchema() *schema.Schema {
+	return &schema.Schema{
+		Optional: true,
+		Type:     schema.TypeString,
+	}
+}
