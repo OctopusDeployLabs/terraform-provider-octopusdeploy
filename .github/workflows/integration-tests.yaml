@@ -77,7 +77,9 @@ jobs:
           }
           EOT
       - name: Install gotestsum
-        run: go install gotest.tools/gotestsum@latest
+        run: |
+          sudo apt-get update
+          sudo apt-get install gotestsum
         shell: bash
       - name: Test Git integration
         run: gotestsum --junitfile node-summary.xml --format short-verbose -- -run "${{ steps.test_split.outputs.run }}" -timeout 0 integration_test.go
