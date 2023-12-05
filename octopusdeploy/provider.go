@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_azure_cloud_service_deployment_target":          resourceAzureCloudServiceDeploymentTarget(),
 			"octopusdeploy_azure_service_fabric_cluster_deployment_target": resourceAzureServiceFabricClusterDeploymentTarget(),
 			"octopusdeploy_azure_service_principal":                        resourceAzureServicePrincipalAccount(),
+			"octopusdeploy_azure_openid_connect":                           resourceAzureOpenIDConnectAccount(),
 			"octopusdeploy_azure_subscription_account":                     resourceAzureSubscriptionAccount(),
 			"octopusdeploy_azure_web_app_deployment_target":                resourceAzureWebAppDeploymentTarget(),
 			"octopusdeploy_certificate":                                    resourceCertificate(),
