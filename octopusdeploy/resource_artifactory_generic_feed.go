@@ -42,6 +42,7 @@ func resourceArtifactoryGenericFeedCreate(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("layout regex from created model: %s", createdFeed.(*feeds.ArtifactoryGenericFeed).LayoutRegex))
 	d.SetId(createdFeed.GetID())
 
 	tflog.Info(ctx, fmt.Sprintf("Artifactory Generic feed created (%s)", d.Id()))
@@ -84,9 +85,6 @@ func resourceArtifactoryGenericFeedRead(ctx context.Context, d *schema.ResourceD
 func resourceArtifactoryGenericFeedUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	feed, err := expandArtifactoryGenericFeed(d)
 
-	tflog.Debug(ctx, fmt.Sprintf("layout_regex from schema: %s", d.Get("layout_regex").(string)))
-
-	tflog.Debug(ctx, fmt.Sprintf("layout regex from feed model: %s", feed.LayoutRegex))
 	if err != nil {
 		return diag.FromErr(err)
 	}
