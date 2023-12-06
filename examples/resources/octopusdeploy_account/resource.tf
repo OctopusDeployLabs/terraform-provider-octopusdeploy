@@ -6,6 +6,16 @@ resource "octopusdeploy_account" "amazon_web_services_account" {
   secret_key   = "###########" # required; get from secure environment/store
 }
 
+resource "octopusdeploy_account" "amazon_web_services_openid_connect_account" {
+  account_type = "AwsOIDCAccount"
+  name         = "AWS OIDC Account (OK to Delete)"
+  role_arn = "arn:aws:iam::sourceAccountId:roleroleName"
+  session_duration = "3600"
+  execution_subject_keys = ["space", "project"]
+  health_subject_keys = ["space", "target"]
+  account_test_subject_keys = ["space", "type"]
+}
+
 # create an Azure service principal account
 resource "octopusdeploy_account" "azure_service_principal_account" {
   account_type    = "AzureServicePrincipal"
@@ -23,7 +33,7 @@ resource "octopusdeploy_account" "azure_openid_connect_account" {
   name            = "Azure OpenID Connect Account (OK to Delete)"
   subscription_id = "00000000-0000-0000-0000-000000000000"
   tenant_id       = "00000000-0000-0000-0000-000000000000"
-  executions_subject_keys = ["space", "project"]
+  execution_subject_keys = ["space", "project"]
   health_subject_keys = ["space", "target"]
   account_test_subject_keys = ["space", "type"]
 }

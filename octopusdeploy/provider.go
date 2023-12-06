@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_aws_account":                                    resourceAmazonWebServicesAccount(),
+			"octopusdeploy_aws_openid_connect_account":                     resourceAmazonWebServicesOpenIDConnectAccount(),
 			"octopusdeploy_aws_elastic_container_registry":                 resourceAwsElasticContainerRegistry(),
 			"octopusdeploy_azure_cloud_service_deployment_target":          resourceAzureCloudServiceDeploymentTarget(),
 			"octopusdeploy_azure_service_fabric_cluster_deployment_target": resourceAzureServiceFabricClusterDeploymentTarget(),

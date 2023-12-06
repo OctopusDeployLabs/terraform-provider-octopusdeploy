@@ -2,6 +2,10 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 
 go 1.20
 
+replace (
+	github.com/OctopusDeploy/go-octopusdeploy/v2 => ../go-octopusdeploy
+)
+
 require (
 	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.35.0
 	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230705105638-f5ef7c07973b

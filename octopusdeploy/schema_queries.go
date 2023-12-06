@@ -13,6 +13,7 @@ func getQueryAccountType() *schema.Schema {
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"AmazonWebServicesAccount",
 			"AmazonWebServicesRoleAccount",
+			"AwsOIDCAccount",
 			"AzureServicePrincipal",
 			"AzureOIDC",
 			"AzureSubscription",

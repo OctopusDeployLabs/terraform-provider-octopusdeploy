@@ -21,9 +21,9 @@ func TestAccOctopusDeployAzureOpenIDConnectAccountBasic(t *testing.T) {
 	tenantedDeploymentMode := core.TenantedDeploymentModeTenantedOrUntenanted
 	tenantID := uuid.New()
 
-	execution_keys := []string{"space"}
-	health_keys := []string{"target"}
-	account_keys := []string{"type"}
+	executionKeys := []string{"space"}
+	healthKeys := []string{"target"}
+	accountKeys := []string{"type"}
 	audience := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -42,12 +42,12 @@ func TestAccOctopusDeployAzureOpenIDConnectAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "subscription_id", subscriptionID.String()),
 					resource.TestCheckResourceAttr(prefix, "tenant_id", tenantID.String()),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
-					resource.TestCheckResourceAttr(prefix, "execution_subject_keys", execution_keys[0]),
-					resource.TestCheckResourceAttr(prefix, "health_subject_keys", health_keys[0]),
-					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys", account_keys[0]),
+					resource.TestCheckResourceAttr(prefix, "execution_subject_keys", executionKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "health_subject_keys", healthKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys", accountKeys[0]),
 					resource.TestCheckResourceAttr(prefix, "audience", audience),
 				),
-				Config: testAzureOpenIDConnectAccountBasic(localName, name, description, applicationID, tenantID, subscriptionID, tenantedDeploymentMode, execution_keys, health_keys, account_keys, audience),
+				Config: testAzureOpenIDConnectAccountBasic(localName, name, description, applicationID, tenantID, subscriptionID, tenantedDeploymentMode, executionKeys, healthKeys, accountKeys, audience),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -58,12 +58,12 @@ func TestAccOctopusDeployAzureOpenIDConnectAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "subscription_id", subscriptionID.String()),
 					resource.TestCheckResourceAttr(prefix, "tenant_id", tenantID.String()),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
-					resource.TestCheckResourceAttr(prefix, "execution_subject_keys", execution_keys[0]),
-					resource.TestCheckResourceAttr(prefix, "health_subject_keys", health_keys[0]),
-					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys", account_keys[0]),
+					resource.TestCheckResourceAttr(prefix, "execution_subject_keys", executionKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "health_subject_keys", healthKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys", accountKeys[0]),
 					resource.TestCheckResourceAttr(prefix, "audience", audience),
 				),
-				Config: testAzureOpenIDConnectAccountBasic(localName, name, newDescription, applicationID, tenantID, subscriptionID, tenantedDeploymentMode, execution_keys, health_keys, account_keys, audience),
+				Config: testAzureOpenIDConnectAccountBasic(localName, name, newDescription, applicationID, tenantID, subscriptionID, tenantedDeploymentMode, executionKeys, healthKeys, accountKeys, audience),
 			},
 		},
 	})
