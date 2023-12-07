@@ -81,7 +81,7 @@ jobs:
           }
           EOT
       - name: Setup gotestsum
-        uses: autero1/action-gotestsum@v2
+        uses: autero1/action-gotestsum@v1
       - name: Test integration tests
         run: gotestsum --junitfile node-summary.xml --format short-verbose -- -run "${{ steps.test_split.outputs.run }}" -timeout 0 integration_test.go
         shell: bash
