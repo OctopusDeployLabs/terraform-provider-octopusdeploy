@@ -1,10 +1,21 @@
+# This workflow splits the tests to run across multiple nodes. This significantly reduces the testing time, as the
+# tests require starting Octopus, MSSQL, and then running Terraform against the Octopus instance.
+# See # Refer to https://github.com/hashicorp-forge/go-test-split-action for more information on how the tests are split.
+
 name: Integration Tests
 'on':
   workflow_dispatch: {}
   push: {}
 jobs:
-  build:
+  tests:
+    name: Test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        parallel: [ 15 ]
+        index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ]
+
     steps:
       - uses: actions/checkout@v3
       - name: Install Terraform
@@ -13,8 +24,6 @@ jobs:
           terraform_wrapper: false
       - name: Set up Go
         uses: actions/setup-go@v2
-        with:
-          go-version: 1.20.5
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -41,6 +50,21 @@ jobs:
           --header "X-GitHub-Api-Version: 2022-11-28" | jq -r '"GIT_CREDENTIAL=" + .token' > "$GITHUB_ENV"
         env:
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
+      - name: Download JUnit Summary from Previous Workflow
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow_conclusion: success
+          name: junit-test-summary
+          if_no_artifact_found: warn
+          branch: main
+      - name: Split integration tests
+        id: test_split
+        uses: hashicorp-forge/go-test-split-action@v1
+        with:
+          index: ${{ matrix.index }}
+          total: ${{ matrix.parallel }}
+          junit-summary: ./junit-test-summary.xml
       - name: Install Dependencies
         run: go get ./...
         shell: bash
@@ -56,13 +80,10 @@ jobs:
             direct {}
           }
           EOT
-      - name: Install gotestsum
-        run: go install gotest.tools/gotestsum@latest
-        shell: bash
-      # The GitHub token we generated is valid for an hour. The full test suite can run for longer than an hour.
-      # So we first run the git tests while the token is fresh, and the run the rest of the tests.
-      - name: Test Git integration
-        run: go test -v -timeout 0 -run "^\\QTestProjectWithGitUsernameExport\\E$" integration_test.go
+      - name: Test integration tests
+        run: |
+          GOBIN=$PWD/bin go install gotest.tools/gotestsum@latest
+          ./bin/gotestsum --junitfile node-summary.xml --format short-verbose -- -run "${{ steps.test_split.outputs.run }}" -timeout 0 integration_test.go
         shell: bash
         env:
           LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
@@ -72,27 +93,62 @@ jobs:
           OCTODISABLEOCTOCONTAINERLOGGING: true
           OCTOTESTSKIPINIT: true
           GOMAXPROCS: 1
-          OCTOTESTVERSION: 2023.2
-      - name: Test everything else
-        run: gotestsum --junitfile results.xml -- -v -timeout 0 -skip "^\\QTestProjectWithGitUsernameExport\\E$" -json integration_test.go
-        shell: bash
-        env:
-          LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
-          ECR_ACCESS_KEY: ${{ secrets.ECR_ACCESS_KEY }}
-          ECR_SECRET_KEY: ${{ secrets.ECR_SECRET_KEY }}
-          GIT_USERNAME: x-access-token
-          OCTODISABLEOCTOCONTAINERLOGGING: true
-          OCTOTESTSKIPINIT: true
-          GOMAXPROCS: 1
-          OCTOTESTVERSION: 2023.2
-      - if: always()
-        name: Report
+          OCTOTESTVERSION: 2023.4
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-test-summary-${{ matrix.index }}
+          path: node-summary.xml
+          retention-days: 1
+
+  tests-combine-summaries:
+    name: Combine Test Reports
+    needs: [ tests ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Install junit-report-merger
+        run: npm install -g junit-report-merger
+
+      - name: Merge reports
+        run: >
+          jrm ./junit-test-summary.xml 
+          "junit-test-summary-0/*.xml" 
+          "junit-test-summary-1/*.xml" 
+          "junit-test-summary-2/*.xml" 
+          "junit-test-summary-3/*.xml" 
+          "junit-test-summary-4/*.xml" 
+          "junit-test-summary-5/*.xml" 
+          "junit-test-summary-6/*.xml" 
+          "junit-test-summary-7/*.xml" 
+          "junit-test-summary-8/*.xml" 
+          "junit-test-summary-9/*.xml"
+          "junit-test-summary-10/*.xml"
+          "junit-test-summary-11/*.xml"
+          "junit-test-summary-12/*.xml"
+          "junit-test-summary-13/*.xml"
+          "junit-test-summary-14/*.xml"
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-test-summary
+          path: ./junit-test-summary.xml
+
+      - name: Report
         uses: dorny/test-reporter@v1
         with:
           name: Go Tests
-          path: results.xml
+          path: junit-test-summary.xml
           reporter: java-junit
-          fail-on-error: 'false'
+          fail-on-error: 'true'
 permissions:
   id-token: write
   checks: write
