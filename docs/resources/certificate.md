@@ -27,7 +27,6 @@ resource "octopusdeploy_certificate" "example" {
 
 - `certificate_data` (String, Sensitive) The encoded data of the certificate.
 - `name` (String) The name of this resource.
-- `password` (String, Sensitive) The password associated with this resource.
 
 ### Optional
 
@@ -43,6 +42,7 @@ resource "octopusdeploy_certificate" "example" {
 - `not_after` (String)
 - `not_before` (String)
 - `notes` (String)
+- `password` (String, Sensitive) The password associated with this resource.
 - `replaced_by` (String)
 - `self_signed` (Boolean)
 - `serial_number` (String)
