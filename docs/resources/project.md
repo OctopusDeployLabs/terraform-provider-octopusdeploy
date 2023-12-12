@@ -196,7 +196,10 @@ Required:
 - `connection_id` (String) The connection identifier associated with the extension settings.
 - `is_enabled` (Boolean) Specifies whether or not this extension is enabled for this project.
 - `is_state_automatically_transitioned` (Boolean) Specifies whether or not this extension will automatically transition the state of a deployment for this project.
-- `standard_change_template_name` (String) The name of the standard change template associated with this extension.
+
+Optional:
+
+- `standard_change_template_name` (String) The name of the standard change template associated with this extension. If provided, deployments will create a standard change based on the provided template, otherwise a normal change will be created.
 
 
 <a id="nestedblock--template"></a>
