@@ -453,17 +453,20 @@ func setDataSchema(schema *map[string]*schema.Schema) {
 	}
 }
 
-func getSubjectKeysSchema() *schema.Schema {
+func getSubjectKeysSchema(description string) *schema.Schema {
+
 	return &schema.Schema{
-		Optional: true,
-		Type:     schema.TypeList,
-		Elem:     &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Description: description,
+		Type:        schema.TypeList,
+		Elem:        &schema.Schema{Type: schema.TypeString},
 	}
 }
 
 func getOidcAudienceSchema() *schema.Schema {
 	return &schema.Schema{
-		Optional: true,
-		Type:     schema.TypeString,
+		Description: "Federated credentials audience, this value is used to establish a connection between external workload identities and Microsoft Entra ID.",
+		Optional:    true,
+		Type:        schema.TypeString,
 	}
 }
