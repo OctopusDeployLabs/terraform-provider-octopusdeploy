@@ -12,13 +12,14 @@ import (
 
 func expandDeploymentProcess(ctx context.Context, d *schema.ResourceData, client *client.Client) (*deployments.DeploymentProcess, error) {
 	projectID := d.Get("project_id").(string)
+	spaceID := d.Get("space_id").(string)
 	deploymentProcess := deployments.NewDeploymentProcess(projectID)
 	deploymentProcess.ID = d.Id()
 
 	if v, ok := d.GetOk("branch"); ok {
 		deploymentProcess.Branch = v.(string)
 	} else {
-		project, err := client.Projects.GetByID(projectID)
+		project, err := projects.GetByID(client, spaceID, projectID)
 		if err != nil {
 			return nil, err
 		}
