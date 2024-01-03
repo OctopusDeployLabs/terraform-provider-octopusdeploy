@@ -60,6 +60,17 @@ func expandTag(d *schema.ResourceData) *tagsets.Tag {
 	return tag
 }
 
+func flattenTag(tag *tagsets.Tag) map[string]interface{} {
+	return map[string]interface{}{
+		"canonical_tag_name": tag.CanonicalTagName,
+		"color":              tag.Color,
+		"description":        tag.Description,
+		"id":                 tag.ID,
+		"name":               tag.Name,
+		"sort_order":         tag.SortOrder,
+	}
+}
+
 func setTag(ctx context.Context, d *schema.ResourceData, tag *tagsets.Tag, tagSet *tagsets.TagSet) error {
 	d.Set("canonical_tag_name", tag.CanonicalTagName)
 	d.Set("color", tag.Color)
