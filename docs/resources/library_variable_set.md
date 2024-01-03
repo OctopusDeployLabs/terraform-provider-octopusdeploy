@@ -44,5 +44,3 @@ Optional:
 - `help_text` (String) The help presented alongside the parameter input.
 - `id` (String) The unique ID for this resource.
 - `label` (String) The label shown beside the parameter when presented in the deployment process. Example: `Server name`.
-
-

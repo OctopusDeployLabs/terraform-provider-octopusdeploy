@@ -46,6 +46,7 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 - `roles` (List of String) A filter to search by a list of role IDs.
 - `shell_names` (List of String) A list of shell names to match in the query and/or search
 - `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) The space ID associated with this resource.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 - `tenant_tags` (List of String) A filter to search by a list of tenant tags.
 - `tenants` (List of String) A filter to search by a list of tenant IDs.
@@ -95,5 +96,3 @@ Read-Only:
 - `upgrade_required` (Boolean)
 - `upgrade_suggested` (Boolean)
 - `version` (String)
-
-

@@ -12,11 +12,11 @@ This resource manages polling tentacle deployment targets in Octopus Deploy.
 ## Example Usage
 
 ```terraform
-resource "octopusdeploy_listening_tentacle_deployment_target" "example" {
+resource "octopusdeploy_polling_tentacle_deployment_target" "example" {
   environments                      = ["Environments-123", "Environment-321"]
   is_disabled                       = true
-  machine_policy_id                 = "MachinePolicy-123"
-  name                              = "Listening Tentacle Deployment Target (OK to Delete)"
+  machine_policy_id                 = "MachinePolicies-123"
+  name                              = "Polling Tentacle Deployment Target (OK to Delete)"
   roles                             = ["Development Team", "System Administrators"]
   tenanted_deployment_participation = "Untenanted"
   tentacle_url                      = "https://example.com:1234/"

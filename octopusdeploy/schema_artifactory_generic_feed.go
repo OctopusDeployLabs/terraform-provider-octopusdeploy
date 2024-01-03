@@ -3,37 +3,24 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandDockerContainerRegistry(d *schema.ResourceData) (*feeds.DockerContainerRegistry, error) {
+func expandArtifactoryGenericFeed(d *schema.ResourceData) (*feeds.ArtifactoryGenericFeed, error) {
 	name := d.Get("name").(string)
 
-	feed, err := feeds.NewDockerContainerRegistry(name)
+	feed, err := feeds.NewArtifactoryGenericFeed(name)
 	if err != nil {
 		return nil, err
 	}
 
 	feed.ID = d.Id()
 
-	if v, ok := d.GetOk("api_version"); ok {
-		feed.APIVersion = v.(string)
-	}
-
 	if v, ok := d.GetOk("feed_uri"); ok {
 		feed.FeedURI = v.(string)
-	}
-
-	if v, ok := d.GetOk("registry_path"); ok {
-		feed.RegistryPath = v.(string)
-	}
-
-	if v, ok := d.GetOk("space_id"); ok {
-		feed.SpaceID = v.(string)
 	}
 
 	if v, ok := d.GetOk("package_acquisition_location_options"); ok {
@@ -44,24 +31,30 @@ func expandDockerContainerRegistry(d *schema.ResourceData) (*feeds.DockerContain
 		feed.Password = core.NewSensitiveValue(v.(string))
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		feed.SpaceID = v.(string)
+	}
+
 	if v, ok := d.GetOk("username"); ok {
 		feed.Username = v.(string)
+	}
+
+	if v, ok := d.GetOk("layout_regex"); ok {
+		feed.LayoutRegex = v.(string)
+	}
+
+	if v, ok := d.GetOk("repository"); ok {
+		feed.Repository = v.(string)
 	}
 
 	return feed, nil
 }
 
-func getDockerContainerRegistrySchema() map[string]*schema.Schema {
+func getArtifactoryGenericFeedSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"api_version": {
-			Optional: true,
-			Type:     schema.TypeString,
-		},
 		"feed_uri": {
-			Description:      "The URL to a Docker repository.",
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),
+			Required: true,
+			Type:     schema.TypeString,
 		},
 		"id": getIDSchema(),
 		"name": {
@@ -70,29 +63,36 @@ func getDockerContainerRegistrySchema() map[string]*schema.Schema {
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
 		},
-		"password": getPasswordSchema(false),
 		"package_acquisition_location_options": {
 			Computed: true,
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
 			Type:     schema.TypeList,
 		},
-		"registry_path": {
+		"password": getPasswordSchema(false),
+		"space_id": getSpaceIDSchema(),
+		"username": getUsernameSchema(false),
+		"repository": {
+			Computed: false,
+			Required: true,
+			Type:     schema.TypeString,
+		},
+		"layout_regex": {
+			Computed: false,
+			Required: false,
 			Optional: true,
 			Type:     schema.TypeString,
 		},
-		"space_id": getSpaceIDSchema(),
-		"username": getUsernameSchema(false),
 	}
 }
 
-func setDockerContainerRegistry(ctx context.Context, d *schema.ResourceData, feed *feeds.DockerContainerRegistry) error {
-	d.Set("api_version", feed.APIVersion)
+func setArtifactoryGenericFeed(ctx context.Context, d *schema.ResourceData, feed *feeds.ArtifactoryGenericFeed) error {
 	d.Set("feed_uri", feed.FeedURI)
 	d.Set("name", feed.Name)
-	d.Set("registry_path", feed.RegistryPath)
 	d.Set("space_id", feed.SpaceID)
 	d.Set("username", feed.Username)
+	d.Set("repository", feed.Repository)
+	d.Set("layout_regex", feed.LayoutRegex)
 
 	if err := d.Set("package_acquisition_location_options", feed.PackageAcquisitionLocationOptions); err != nil {
 		return fmt.Errorf("error setting package_acquisition_location_options: %s", err)

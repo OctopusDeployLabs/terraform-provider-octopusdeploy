@@ -2311,7 +2311,7 @@ func TestCloudRegionTargetResource(t *testing.T) {
 		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("./terraform", "33a-cloudregiontargetds"), newSpaceId, []string{})
 
 		if err != nil {
-			t.Log("BUG: cloud region data source does not appear to work")
+			t.Fatal("cloud region data source does not appear to work")
 		}
 
 		// Assert

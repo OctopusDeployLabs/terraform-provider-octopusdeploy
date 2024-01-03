@@ -101,6 +101,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 - `prompt` (Block List, Max: 1) (see [below for nested schema](#nestedblock--prompt))
 - `scope` (Block List, Max: 1) (see [below for nested schema](#nestedblock--scope))
 - `sensitive_value` (String, Sensitive)
+- `space_id` (String) The space ID associated with this resource.
 - `value` (String)
 
 ### Read-Only

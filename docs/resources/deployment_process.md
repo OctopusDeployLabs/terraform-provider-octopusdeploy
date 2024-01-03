@@ -66,11 +66,12 @@ resource "octopusdeploy_deployment_process" "child_step_example" {
     start_trigger       = "StartAfterPrevious"
     target_roles        = [ "hello-world" ]
     run_script_action {
+      name                               = "Hello world (using PowerShell)"
+      sort_order                         = 1
       can_be_used_for_project_versioning = false
       condition                          = "Success"
       is_disabled                        = false
       is_required                        = true
-      name                               = "Hello world (using PowerShell)"
       script_body                        = <<-EOT
           Write-Host 'Hello world, using PowerShell'
           #TODO: Experiment with steps of your own :)
@@ -78,11 +79,12 @@ resource "octopusdeploy_deployment_process" "child_step_example" {
         EOT
     }
     run_script_action {
+      name                               = "Hello world (using Bash)"
+      sort_order                         = 2
       can_be_used_for_project_versioning = false
       condition                          = "Success"
       is_disabled                        = false
       is_required                        = true
-      name                               = "Hello world (using Bash)"
       script_body                        = <<-EOT
           echo 'Hello world, using Bash'
           #TODO: Experiment with steps of your own :)
@@ -103,11 +105,12 @@ resource "octopusdeploy_deployment_process" "child_step_rolling_deployment_examp
     target_roles        = [ "hello-world" ]
     window_size         = 2
     run_script_action {
+      name                               = "Hello world (using PowerShell)"
+      sort_order                         = 1
       can_be_used_for_project_versioning = false
       condition                          = "Success"
       is_disabled                        = false
       is_required                        = true
-      name                               = "Hello world (using PowerShell)"
       script_body                        = <<-EOT
           Write-Host 'Hello world, using PowerShell'
           #TODO: Experiment with steps of your own :)
@@ -115,11 +118,12 @@ resource "octopusdeploy_deployment_process" "child_step_rolling_deployment_examp
         EOT
     }
     run_script_action {
+      name                               = "Hello world (using Bash)"
+      sort_order                         = 2
       can_be_used_for_project_versioning = false
       condition                          = "Success"
       is_disabled                        = false
       is_required                        = true
-      name                               = "Hello world (using Bash)"
       script_body                        = <<-EOT
           echo 'Hello world, using Bash'
           #TODO: Experiment with steps of your own :)
@@ -444,6 +448,8 @@ Optional:
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
 - `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `worker_pool_id` (String) The worker pool associated with this deployment action.
+- `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
 
 <a id="nestedblock--step--deploy_kubernetes_secret_action--action_template"></a>
 ### Nested Schema for `step.deploy_kubernetes_secret_action.action_template`
@@ -773,11 +779,16 @@ Optional:
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package))
 - `properties` (Map of String) The properties associated with this deployment action.
 - `run_on_server` (Boolean) Whether this step runs on a worker or on the target
+- `script_body` (String)
 - `script_file_name` (String) The script file name in the package
 - `script_parameters` (String) Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS
 - `script_source` (String)
+- `script_syntax` (String)
 - `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `variable_substitution_in_files` (String) A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.
+- `worker_pool_id` (String) The worker pool associated with this deployment action.
+- `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
 
 <a id="nestedblock--step--run_kubectl_script_action--action_template"></a>
 ### Nested Schema for `step.run_kubectl_script_action.action_template`
