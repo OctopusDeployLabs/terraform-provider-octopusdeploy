@@ -1508,7 +1508,7 @@ func TestTagSetResource(t *testing.T) {
 			return err
 		}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("./terraform", "21-tagset"), newSpaceId, []string{})
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("./terraform", "21a-tagsetds"), newSpaceId, []string{})
 
 		if err != nil {
 			return err
@@ -1564,7 +1564,7 @@ func TestTagSetResource(t *testing.T) {
 		}
 
 		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "21-tagset"), "data_lookup")
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "21a-tagsetds"), "data_lookup")
 
 		if err != nil {
 			return err
