@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -29,12 +30,12 @@ func resourceGitCredentialCreate(ctx context.Context, d *schema.ResourceData, m 
 	tflog.Info(ctx, fmt.Sprintf("creating Git credential, %s", resource.Name))
 
 	client := m.(*client.Client)
-	createdResource, err := client.GitCredentials.Add(resource)
+	createdResource, err := credentials.Add(client, resource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	createdResource, err = client.GitCredentials.GetByID(createdResource.GetID())
+	createdResource, err = credentials.GetByID(client, d.Get("space_id").(string), createdResource.GetID())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -53,7 +54,7 @@ func resourceGitCredentialDelete(ctx context.Context, d *schema.ResourceData, m 
 	tflog.Info(ctx, fmt.Sprintf("deleting Git credential (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	if err := client.GitCredentials.DeleteByID(d.Id()); err != nil {
+	if err := credentials.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -67,7 +68,7 @@ func resourceGitCredentialRead(ctx context.Context, d *schema.ResourceData, m in
 	tflog.Info(ctx, fmt.Sprintf("reading Git credential (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	resource, err := client.GitCredentials.GetByID(d.Id())
+	resource, err := credentials.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "Git credential")
 	}
@@ -86,7 +87,7 @@ func resourceGitCredentialUpdate(ctx context.Context, d *schema.ResourceData, m 
 	tflog.Info(ctx, fmt.Sprintf("updating Git credential (%s)", resource.GetID()))
 
 	client := m.(*client.Client)
-	updatedResource, err := client.GitCredentials.Update(resource)
+	updatedResource, err := credentials.Update(client, resource)
 	if err != nil {
 		return diag.FromErr(err)
 	}

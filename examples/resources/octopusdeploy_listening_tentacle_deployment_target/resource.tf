@@ -1,7 +1,7 @@
 resource "octopusdeploy_listening_tentacle_deployment_target" "example" {
   environments                      = ["Environments-123", "Environment-321"]
   is_disabled                       = true
-  machine_policy_id                 = "MachinePolicy-123"
+  machine_policy_id                 = "MachinePolicies-123"
   name                              = "Listening Tentacle Deployment Target (OK to Delete)"
   roles                             = ["Development Team", "System Administrators"]
   tenanted_deployment_participation = "Untenanted"

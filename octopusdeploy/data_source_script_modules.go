@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/scriptmodules"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -27,8 +28,10 @@ func dataSourceScriptModulesRead(ctx context.Context, d *schema.ResourceData, m 
 		Take:        d.Get("take").(int),
 	}
 
+	spaceID := d.Get("space_id").(string)
+
 	client := m.(*client.Client)
-	existingScriptModules, err := client.ScriptModules.Get(query)
+	existingScriptModules, err := scriptmodules.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

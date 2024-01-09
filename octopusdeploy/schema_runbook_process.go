@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbookprocess"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func expandRunbookProcess(ctx context.Context, d *schema.ResourceData, client *client.Client) *runbooks.RunbookProcess {
-	runbookProcess := runbooks.NewRunbookProcess()
+func expandRunbookProcess(ctx context.Context, d *schema.ResourceData, client *client.Client) *runbookprocess.RunbookProcess {
+	runbookProcess := runbookprocess.NewRunbookProcess()
 	runbookProcess.ID = d.Id()
 
 	if v, ok := d.GetOk("project_id"); ok {
@@ -46,7 +46,7 @@ func expandRunbookProcess(ctx context.Context, d *schema.ResourceData, client *c
 	return runbookProcess
 }
 
-func setRunbookProcess(ctx context.Context, d *schema.ResourceData, RunbookProcess *runbooks.RunbookProcess) error {
+func setRunbookProcess(ctx context.Context, d *schema.ResourceData, RunbookProcess *runbookprocess.RunbookProcess) error {
 	d.Set("last_snapshot_id", RunbookProcess.LastSnapshotID)
 	d.Set("project_id", RunbookProcess.ProjectID)
 	d.Set("runbook_id", RunbookProcess.RunbookID)

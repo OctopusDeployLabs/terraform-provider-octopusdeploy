@@ -34,6 +34,7 @@ func getWorkerPoolDataSchema() map[string]*schema.Schema {
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),
 		"take":         getQueryTake(),
+		"space_id":     getSpaceIDSchema(),
 		"worker_pools": {
 			Computed:    true,
 			Description: "A list of worker pools that match the filter(s).",

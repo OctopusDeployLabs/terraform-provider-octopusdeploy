@@ -29,6 +29,12 @@ func getTagSchema() map[string]*schema.Schema {
 			Required:    true,
 			Type:        schema.TypeString,
 		},
+		"tag_set_space_id": {
+			Description: "The Space ID of the associated tag set. Required if the tag set is not in the same space as what is configured on the provider",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+		},
 	}
 }
 
@@ -61,6 +67,7 @@ func setTag(ctx context.Context, d *schema.ResourceData, tag *tagsets.Tag, tagSe
 	d.Set("name", tag.Name)
 	d.Set("sort_order", tag.SortOrder)
 	d.Set("tag_set_id", tagSet.GetID())
+	d.Set("tag_set_space_id", tagSet.SpaceID)
 	d.SetId(tag.ID)
 
 	return nil

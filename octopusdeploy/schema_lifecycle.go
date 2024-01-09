@@ -74,6 +74,7 @@ func getLifecycleDataSchema() map[string]*schema.Schema {
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),
 		"take":         getQueryTake(),
+		"space_id":     getSpaceIDSchema(),
 	}
 }
 

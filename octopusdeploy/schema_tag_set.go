@@ -57,7 +57,8 @@ func getTagSetDataSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		"take": getQueryTake(),
+		"take":     getQueryTake(),
+		"space_id": getSpaceIDSchema(),
 	}
 }
 

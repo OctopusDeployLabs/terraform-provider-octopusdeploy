@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_azure_cloud_service_deployment_target":          resourceAzureCloudServiceDeploymentTarget(),
 			"octopusdeploy_azure_service_fabric_cluster_deployment_target": resourceAzureServiceFabricClusterDeploymentTarget(),
 			"octopusdeploy_azure_service_principal":                        resourceAzureServicePrincipalAccount(),
+			"octopusdeploy_azure_openid_connect":                           resourceAzureOpenIDConnectAccount(),
 			"octopusdeploy_azure_subscription_account":                     resourceAzureSubscriptionAccount(),
 			"octopusdeploy_azure_web_app_deployment_target":                resourceAzureWebAppDeploymentTarget(),
 			"octopusdeploy_certificate":                                    resourceCertificate(),
@@ -69,6 +70,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_listening_tentacle_deployment_target":           resourceListeningTentacleDeploymentTarget(),
 			"octopusdeploy_machine_policy":                                 resourceMachinePolicy(),
 			"octopusdeploy_maven_feed":                                     resourceMavenFeed(),
+			"octopusdeploy_artifactory_generic_feed":                       resourceArtifactoryGenericFeed(),
 			"octopusdeploy_nuget_feed":                                     resourceNuGetFeed(),
 			"octopusdeploy_offline_package_drop_deployment_target":         resourceOfflinePackageDropDeploymentTarget(),
 			"octopusdeploy_polling_tentacle_deployment_target":             resourcePollingTentacleDeploymentTarget(),
@@ -124,7 +126,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		Address: d.Get("address").(string),
 		APIKey:  d.Get("api_key").(string),
 	}
-
 	if spaceID, ok := d.GetOk("space_id"); ok {
 		config.SpaceID = spaceID.(string)
 	}

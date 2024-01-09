@@ -63,21 +63,23 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
+	spaceID := d.Get("space_id").(string)
+
 	log.Printf("[INFO] creating deployment process: %#v", deploymentProcess)
 
-	project, err := client.Projects.GetByID(deploymentProcess.ProjectID)
+	project, err := projects.GetByID(client, spaceID, deploymentProcess.ProjectID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	var current *deployments.DeploymentProcess
 	if project.PersistenceSettings != nil && project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
-		current, err = client.DeploymentProcesses.Get(project, deploymentProcess.Branch)
+		current, err = deployments.GetDeploymentProcessByGitRef(client, spaceID, project, deploymentProcess.Branch)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	} else {
-		current, err = client.DeploymentProcesses.GetByID(project.DeploymentProcessID)
+		current, err = deployments.GetDeploymentProcessByID(client, spaceID, project.DeploymentProcessID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -87,7 +89,7 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 	deploymentProcess.Links = current.Links
 	deploymentProcess.Version = current.Version
 
-	createdDeploymentProcess, err := client.DeploymentProcesses.Update(deploymentProcess)
+	createdDeploymentProcess, err := deployments.UpdateDeploymentProcess(client, deploymentProcess)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,17 +111,19 @@ func resourceDeploymentProcessCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting deployment process (%s)", d.Id())
+	spaceID := d.Get("space_id").(string)
 
 	client := m.(*client.Client)
-	current, err := client.DeploymentProcesses.GetByID(d.Id())
+	current, err := deployments.GetDeploymentProcessByID(client, spaceID, d.Id())
 	if err == nil {
 		deploymentProcess := &deployments.DeploymentProcess{
+			Steps:   []*deployments.DeploymentStep{},
 			Version: current.Version,
 		}
 		deploymentProcess.Links = current.Links
 		deploymentProcess.ID = d.Id()
 
-		_, err = client.DeploymentProcesses.Update(deploymentProcess)
+		_, err = deployments.UpdateDeploymentProcess(client, deploymentProcess)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -132,13 +136,13 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 	r, _ := regexp.Compile(`Projects-\d+`)
 	projectID := r.FindString(d.Id())
 
-	project, err := client.Projects.GetByID(projectID)
+	project, err := projects.GetByID(client, spaceID, projectID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	gitRef := getGitRef(d)
-	current, err = client.DeploymentProcesses.Get(project, gitRef)
+	current, err = deployments.GetDeploymentProcessByGitRef(client, spaceID, project, gitRef)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -149,7 +153,7 @@ func resourceDeploymentProcessDelete(ctx context.Context, d *schema.ResourceData
 	deploymentProcess.Links = current.Links
 	deploymentProcess.ID = d.Id()
 
-	_, err = client.DeploymentProcesses.Update(deploymentProcess)
+	_, err = deployments.UpdateDeploymentProcess(client, deploymentProcess)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -163,7 +167,9 @@ func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, 
 	log.Printf("[INFO] reading deployment process (%s)", d.Id())
 
 	client := m.(*client.Client)
-	deploymentProcess, err := client.DeploymentProcesses.GetByID(d.Id())
+	spaceID := d.Get("space_id").(string)
+
+	deploymentProcess, err := deployments.GetDeploymentProcessByID(client, spaceID, d.Id())
 	if err == nil {
 		if err := setDeploymentProcess(ctx, d, deploymentProcess); err != nil {
 			return diag.FromErr(err)
@@ -176,13 +182,13 @@ func resourceDeploymentProcessRead(ctx context.Context, d *schema.ResourceData, 
 	r, _ := regexp.Compile(`Projects-\d+`)
 	projectID := r.FindString(d.Id())
 
-	project, err := client.Projects.GetByID(projectID)
+	project, err := projects.GetByID(client, spaceID, projectID)
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "project")
 	}
 
 	gitRef := getGitRef(d)
-	deploymentProcess, err = client.DeploymentProcesses.Get(project, gitRef)
+	deploymentProcess, err = deployments.GetDeploymentProcessByGitRef(client, spaceID, project, gitRef)
 	if err == nil {
 		if err := setDeploymentProcess(ctx, d, deploymentProcess); err != nil {
 			return diag.FromErr(err)
@@ -205,12 +211,12 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	current, err := client.DeploymentProcesses.GetByID(d.Id())
+	current, err := deployments.GetDeploymentProcessByID(client, deploymentProcess.SpaceID, d.Id())
 	if err != nil {
 		r, _ := regexp.Compile(`Projects-\d+`)
 		projectID := r.FindString(d.Id())
 
-		project, err := client.Projects.GetByID(projectID)
+		project, err := projects.GetByID(client, deploymentProcess.SpaceID, projectID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -225,7 +231,7 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 			d.SetId(deploymentProcess.ID)
 		}
 
-		current, err = client.DeploymentProcesses.Get(project, deploymentProcess.Branch)
+		current, err = deployments.GetDeploymentProcessByGitRef(client, deploymentProcess.SpaceID, project, deploymentProcess.Branch)
 
 		if err != nil {
 			return diag.FromErr(err)
@@ -235,7 +241,7 @@ func resourceDeploymentProcessUpdate(ctx context.Context, d *schema.ResourceData
 	deploymentProcess.Links = current.Links
 	deploymentProcess.Version = current.Version
 
-	updatedDeploymentProcess, err := client.DeploymentProcesses.Update(deploymentProcess)
+	updatedDeploymentProcess, err := deployments.UpdateDeploymentProcess(client, deploymentProcess)
 	if err != nil {
 		return diag.FromErr(err)
 	}

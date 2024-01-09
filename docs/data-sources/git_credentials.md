@@ -19,6 +19,7 @@ Provides information about existing GitCredentials.
 
 - `name` (String) A filter to search by name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) The space ID associated with this resource.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
@@ -38,5 +39,3 @@ Read-Only:
 - `space_id` (String) The space ID associated with this resource.
 - `type` (String) The Git credential authentication type.
 - `username` (String) The username for the Git credential.
-
-

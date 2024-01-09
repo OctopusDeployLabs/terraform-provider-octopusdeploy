@@ -34,6 +34,10 @@ func expandVariable(d *schema.ResourceData) *variables.Variable {
 		variable.Scope = expandVariableScope(v)
 	}
 
+	if v, ok := d.GetOk("space_id"); ok {
+		variable.SpaceID = v.(string)
+	}
+
 	if variable.IsSensitive {
 		variable.Type = "Sensitive"
 		variable.Value = d.Get("sensitive_value").(string)
@@ -51,18 +55,107 @@ func expandVariable(d *schema.ResourceData) *variables.Variable {
 }
 
 func getVariableDataSchema() map[string]*schema.Schema {
-	dataSchema := getVariableSchema()
-	setDataSchema(&dataSchema)
-
 	return map[string]*schema.Schema{
-		"id":  getDataSchemaID(),
-		"ids": getQueryIDs(),
-		"variables": {
+		"id": {
 			Computed:    true,
-			Description: "A list of variables that match the filter(s).",
-			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
+			Description: "The identifier of the variable to find.",
+			Type:        schema.TypeString,
+		},
+		"name": {
+			Required:    true,
+			Description: "The name of variable to find.",
+			Type:        schema.TypeString,
+		},
+		"owner_id": {
+			Required:    true,
+			Description: "Owner ID for the variable to find.",
+			Type:        schema.TypeString,
+		},
+		"scope": {
+			Description: "As variable names can appear more than once under different scopes, a VariableScope must also be provided",
+			Elem:        &schema.Resource{Schema: getVariableScopeSchema()},
+			Required:    true,
 			Type:        schema.TypeList,
+			MaxItems:    1,
+		},
+		"space_id": getQuerySpaceID(),
+		"description": {
+			Description: "The description of this variable.",
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
+		"is_editable": {
+			Description: "Indicates whether or not this variable is considered editable.",
+			Computed:    true,
+			Type:        schema.TypeBool,
+		},
+		"is_sensitive": {
+			Description: "Indicates whether or not this resource is considered sensitive and should be kept secret.",
+			Computed:    true,
+			Type:        schema.TypeBool,
+		},
+		"type": {
+			Description: "The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.",
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
+		"sensitive_value": {
+			Computed:  true,
+			Sensitive: true,
+			Type:      schema.TypeString,
+		},
+		"value": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"prompt": {
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"description": getDescriptionSchema("variable prompt option"),
+					"display_settings": {
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"control_type": {
+									Description: "The type of control for rendering this prompted variable. Valid types are `SingleLineText`, `MultiLineText`, `Checkbox`, `Select`.",
+									Required:    true,
+									Type:        schema.TypeString,
+								},
+								"select_option": {
+									Elem: &schema.Resource{
+										Schema: map[string]*schema.Schema{
+											"value": {
+												Description: "The select value",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+											"display_name": {
+												Description: "The display name for the select value",
+												Required:    true,
+												Type:        schema.TypeString,
+											},
+										},
+									},
+									Description: "If the `control_type` is `Select`, then this value defines an option.",
+									Optional:    true,
+									Type:        schema.TypeList,
+								},
+							},
+						},
+						Optional: true,
+						Type:     schema.TypeList,
+					},
+					"is_required": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+					"label": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
+			Computed: true,
+			Type:     schema.TypeList,
 		},
 	}
 }
@@ -172,7 +265,8 @@ func getVariableSchema() map[string]*schema.Schema {
 			Sensitive:     true,
 			Type:          schema.TypeString,
 		},
-		"type": getVariableTypeSchema(),
+		"type":     getVariableTypeSchema(),
+		"space_id": getSpaceIDSchema(),
 		"value": {
 			ConflictsWith: []string{"sensitive_value"},
 			Optional:      true,

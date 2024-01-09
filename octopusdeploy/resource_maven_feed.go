@@ -33,7 +33,7 @@ func resourceMavenFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 	tflog.Info(ctx, fmt.Sprintf("creating Maven feed: %s", mavenFeed.GetName()))
 
 	client := m.(*client.Client)
-	createdFeed, err := client.Feeds.Add(mavenFeed)
+	createdFeed, err := feeds.Add(client, mavenFeed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -52,7 +52,7 @@ func resourceMavenFeedDelete(ctx context.Context, d *schema.ResourceData, m inte
 	tflog.Info(ctx, fmt.Sprintf("deleting Maven feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	err := client.Feeds.DeleteByID(d.Id())
+	err := feeds.DeleteByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +67,7 @@ func resourceMavenFeedRead(ctx context.Context, d *schema.ResourceData, m interf
 	tflog.Info(ctx, fmt.Sprintf("reading Maven feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feed, err := client.Feeds.GetByID(d.Id())
+	feed, err := feeds.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "Maven feed")
 	}
@@ -90,7 +90,7 @@ func resourceMavenFeedUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	tflog.Info(ctx, fmt.Sprintf("updating Maven feed (%s)", feed.GetID()))
 
 	client := m.(*client.Client)
-	updatedFeed, err := client.Feeds.Update(feed)
+	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}

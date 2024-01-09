@@ -52,6 +52,7 @@ func getAccountResourceDataSchema() map[string]*schema.Schema {
 			Type:        schema.TypeList,
 		},
 		"id":           getDataSchemaID(),
+		"space_id":     getQuerySpaceID(),
 		"ids":          getQueryIDs(),
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),

@@ -44,10 +44,6 @@ func expandDockerContainerRegistry(d *schema.ResourceData) (*feeds.DockerContain
 		feed.Password = core.NewSensitiveValue(v.(string))
 	}
 
-	if v, ok := d.GetOk("space_id"); ok {
-		feed.SpaceID = v.(string)
-	}
-
 	if v, ok := d.GetOk("username"); ok {
 		feed.Username = v.(string)
 	}
@@ -62,7 +58,7 @@ func getDockerContainerRegistrySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 		},
 		"feed_uri": {
-			Description:      "The URL to a Maven repository. This URL is the same value defined in the `repositories`/`repository`/`url` element of a Maven `settings.xml` file.",
+			Description:      "The URL to a Docker repository.",
 			Required:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPorHTTPS),

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,7 @@ func resourceListeningTentacleDeploymentTargetCreate(ctx context.Context, d *sch
 	log.Printf("[INFO] creating listening tentacle deployment target: %#v", deploymentTarget)
 
 	client := m.(*client.Client)
-	createdDeploymentTarget, err := client.Machines.Add(deploymentTarget)
+	createdDeploymentTarget, err := machines.Add(client, deploymentTarget)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -47,7 +48,7 @@ func resourceListeningTentacleDeploymentTargetDelete(ctx context.Context, d *sch
 	log.Printf("[INFO] deleting listening tentacle deployment target (%s)", d.Id())
 
 	client := m.(*client.Client)
-	if err := client.Machines.DeleteByID(d.Id()); err != nil {
+	if err := machines.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -61,7 +62,7 @@ func resourceListeningTentacleDeploymentTargetRead(ctx context.Context, d *schem
 	log.Printf("[INFO] reading listening tentacle deployment target (%s)", d.Id())
 
 	client := m.(*client.Client)
-	deploymentTarget, err := client.Machines.GetByID(d.Id())
+	deploymentTarget, err := machines.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "listening tentacle deployment target")
 	}
@@ -79,7 +80,7 @@ func resourceListeningTentacleDeploymentTargetUpdate(ctx context.Context, d *sch
 
 	deploymentTarget := expandListeningTentacleDeploymentTarget(d)
 	client := m.(*client.Client)
-	updatedDeploymentTarget, err := client.Machines.Update(deploymentTarget)
+	updatedDeploymentTarget, err := machines.Update(client, deploymentTarget)
 	if err != nil {
 		return diag.FromErr(err)
 	}

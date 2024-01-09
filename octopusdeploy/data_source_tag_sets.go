@@ -25,9 +25,10 @@ func dataSourceTagSetsRead(ctx context.Context, d *schema.ResourceData, m interf
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
+	spaceID := d.Get("space_id").(string)
 
 	octopus := m.(*client.Client)
-	existingTagSets, err := octopus.TagSets.Get(query)
+	existingTagSets, err := tagsets.Get(octopus, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

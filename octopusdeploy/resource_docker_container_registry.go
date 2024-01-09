@@ -33,7 +33,7 @@ func resourceDockerContainerRegistryCreate(ctx context.Context, d *schema.Resour
 	tflog.Info(ctx, fmt.Sprintf("creating Docker container registry, %s", dockerContainerRegistry.GetName()))
 
 	client := m.(*client.Client)
-	createdDockerContainerRegistry, err := client.Feeds.Add(dockerContainerRegistry)
+	createdDockerContainerRegistry, err := feeds.Add(client, dockerContainerRegistry)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +67,7 @@ func resourceDockerContainerRegistryRead(ctx context.Context, d *schema.Resource
 	tflog.Info(ctx, fmt.Sprintf("reading Docker container registry (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feed, err := client.Feeds.GetByID(d.Id())
+	feed, err := feeds.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "Docker container registry")
 	}
@@ -90,7 +90,7 @@ func resourceDockerContainerRegistryUpdate(ctx context.Context, d *schema.Resour
 	tflog.Info(ctx, fmt.Sprintf("updating Docker container registry (%s)", feed.GetID()))
 
 	client := m.(*client.Client)
-	updatedFeed, err := client.Feeds.Update(feed)
+	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}

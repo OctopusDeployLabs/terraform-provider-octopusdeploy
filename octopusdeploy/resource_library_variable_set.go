@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/libraryvariablesets"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,8 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[INFO] creating library variable set: %#v", libraryVariableSet)
 
 	client := m.(*client.Client)
-	createdLibraryVariableSet, err := client.LibraryVariableSets.Add(libraryVariableSet)
+
+	createdLibraryVariableSet, err := libraryvariablesets.Add(client, libraryVariableSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -46,8 +48,13 @@ func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceDat
 func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting library variable set (%s)", d.Id())
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	client := m.(*client.Client)
-	err := client.LibraryVariableSets.DeleteByID(d.Id())
+	err := libraryvariablesets.DeleteByID(client, spaceID, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -60,8 +67,13 @@ func resourceLibraryVariableSetDelete(ctx context.Context, d *schema.ResourceDat
 func resourceLibraryVariableSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading library variable set (%s)", d.Id())
 
+	var spaceID string
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
 	client := m.(*client.Client)
-	libraryVariableSet, err := client.LibraryVariableSets.GetByID(d.Id())
+	libraryVariableSet, err := libraryvariablesets.GetByID(client, spaceID, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "library variable set")
 	}
@@ -80,7 +92,7 @@ func resourceLibraryVariableSetUpdate(ctx context.Context, d *schema.ResourceDat
 	libraryVariableSet := expandLibraryVariableSet(d)
 
 	client := m.(*client.Client)
-	updatedLibraryVariableSet, err := client.LibraryVariableSets.Update(libraryVariableSet)
+	updatedLibraryVariableSet, err := libraryvariablesets.Update(client, libraryVariableSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}

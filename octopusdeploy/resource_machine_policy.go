@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machinepolicies"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,7 +29,7 @@ func resourceMachinePolicyCreate(ctx context.Context, d *schema.ResourceData, m 
 	log.Printf("[INFO] creating machine policy: %#v", machinePolicy)
 
 	client := m.(*client.Client)
-	createdMachinePolicy, err := client.MachinePolicies.Add(machinePolicy)
+	createdMachinePolicy, err := machinepolicies.Add(client, machinePolicy)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -46,8 +47,9 @@ func resourceMachinePolicyCreate(ctx context.Context, d *schema.ResourceData, m 
 func resourceMachinePolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting machine policy (%s)", d.Id())
 
+	spaceID := d.Get("space_id").(string)
 	client := m.(*client.Client)
-	if err := client.MachinePolicies.DeleteByID(d.Id()); err != nil {
+	if err := machinepolicies.DeleteByID(client, spaceID, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -60,8 +62,9 @@ func resourceMachinePolicyDelete(ctx context.Context, d *schema.ResourceData, m 
 func resourceMachinePolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading machine policy (%s)", d.Id())
 
+	spaceID := d.Get("space_id").(string)
 	client := m.(*client.Client)
-	machinePolicy, err := client.MachinePolicies.GetByID(d.Id())
+	machinePolicy, err := machinepolicies.GetByID(client, spaceID, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "machine policy")
 	}
@@ -79,7 +82,7 @@ func resourceMachinePolicyUpdate(ctx context.Context, d *schema.ResourceData, m 
 
 	machinePolicy := expandMachinePolicy(d)
 	client := m.(*client.Client)
-	updatedMachinePolicy, err := client.MachinePolicies.Update(machinePolicy)
+	updatedMachinePolicy, err := machinepolicies.Update(client, machinePolicy)
 	if err != nil {
 		return diag.FromErr(err)
 	}

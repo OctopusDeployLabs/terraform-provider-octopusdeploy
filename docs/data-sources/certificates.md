@@ -34,6 +34,7 @@ data "octopusdeploy_certificates" "example" {
 - `partial_name` (String) A filter to search by the partial match of a name.
 - `search` (String) A filter of terms used the search operation.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) The space ID associated with this resource.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 - `tenant` (String) A filter to search by a tenant ID.
 
@@ -66,6 +67,7 @@ Read-Only:
 - `self_signed` (Boolean)
 - `serial_number` (String)
 - `signature_algorithm_name` (String)
+- `space_id` (String)
 - `subject_alternative_names` (List of String)
 - `subject_common_name` (String)
 - `subject_distinguished_name` (String)
@@ -75,5 +77,3 @@ Read-Only:
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
 - `thumbprint` (String)
 - `version` (Number)
-
-

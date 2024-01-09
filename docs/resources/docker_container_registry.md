@@ -25,7 +25,7 @@ resource "octopusdeploy_docker_container_registry" "example" {
 
 ### Required
 
-- `feed_uri` (String) The URL to a Maven repository. This URL is the same value defined in the `repositories`/`repository`/`url` element of a Maven `settings.xml` file.
+- `feed_uri` (String) The URL to a Docker repository.
 - `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
 
 ### Optional

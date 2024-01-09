@@ -33,7 +33,7 @@ func resourceNuGetFeedCreate(ctx context.Context, d *schema.ResourceData, m inte
 	tflog.Info(ctx, fmt.Sprintf("creating NuGet feed: %s", feed.GetName()))
 
 	client := m.(*client.Client)
-	createdFeed, err := client.Feeds.Add(feed)
+	createdFeed, err := feeds.Add(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -52,7 +52,7 @@ func resourceNuGetFeedDelete(ctx context.Context, d *schema.ResourceData, m inte
 	tflog.Info(ctx, fmt.Sprintf("deleting NuGet feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	err := client.Feeds.DeleteByID(d.Id())
+	err := feeds.DeleteByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +67,7 @@ func resourceNuGetFeedRead(ctx context.Context, d *schema.ResourceData, m interf
 	tflog.Info(ctx, fmt.Sprintf("reading NuGet feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feed, err := client.Feeds.GetByID(d.Id())
+	feed, err := feeds.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "NuGet feed")
 	}
@@ -90,7 +90,7 @@ func resourceNuGetFeedUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	tflog.Info(ctx, fmt.Sprintf("updating NuGet feed (%s)", feed.GetID()))
 
 	client := m.(*client.Client)
-	updatedFeed, err := client.Feeds.Update(feed)
+	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}

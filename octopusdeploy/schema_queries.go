@@ -14,6 +14,7 @@ func getQueryAccountType() *schema.Schema {
 			"AmazonWebServicesAccount",
 			"AmazonWebServicesRoleAccount",
 			"AzureServicePrincipal",
+			"AzureOIDC",
 			"AzureSubscription",
 			"None",
 			"SshKeyPair",
@@ -144,6 +145,14 @@ func getQueryHealthStatuses() *schema.Schema {
 		},
 		Optional: true,
 		Type:     schema.TypeList,
+	}
+}
+
+func getQuerySpaceID() *schema.Schema {
+	return &schema.Schema{
+		Description: "A Space ID to filter by. Will revert what is specified on the provider if not set.",
+		Optional:    true,
+		Type:        schema.TypeString,
 	}
 }
 

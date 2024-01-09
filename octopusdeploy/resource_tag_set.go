@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tagsets"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -30,7 +31,7 @@ func resourceTagSetCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] creating tag set: %#v", tagSet)
 
 	octopus := m.(*client.Client)
-	createdTagSet, err := octopus.TagSets.Add(tagSet)
+	createdTagSet, err := tagsets.Add(octopus, tagSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -49,7 +50,7 @@ func resourceTagSetDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] deleting tag set (%s)", d.Id())
 
 	octopus := m.(*client.Client)
-	if err := octopus.TagSets.DeleteByID(d.Id()); err != nil {
+	if err := tagsets.DeleteByID(octopus, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -63,7 +64,7 @@ func resourceTagSetRead(ctx context.Context, d *schema.ResourceData, m interface
 	tflog.Info(ctx, fmt.Sprintf("reading tag set (%s)", d.Id()))
 
 	octopus := m.(*client.Client)
-	tagSet, err := octopus.TagSets.GetByID(d.Id())
+	tagSet, err := tagsets.GetByID(octopus, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "tag set")
 	}
@@ -82,13 +83,13 @@ func resourceTagSetUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	log.Printf("[INFO] updating tag set: %#v", tagSet)
 
 	octopus := m.(*client.Client)
-	existingTagSet, err := octopus.TagSets.GetByID(d.Id())
+	existingTagSet, err := tagsets.GetByID(octopus, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	tagSet.Tags = existingTagSet.Tags
 
-	updatedTagSet, err := octopus.TagSets.Update(tagSet)
+	updatedTagSet, err := tagsets.Update(octopus, tagSet)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -101,7 +102,7 @@ func testSpaceExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*client.Client)
 		spaceID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Spaces.GetByID(spaceID); err != nil {
+		if _, err := spaces.GetByID(client, spaceID); err != nil {
 			return err
 		}
 
@@ -113,7 +114,7 @@ func testAccSpaceCheckDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		spaceID := rs.Primary.ID
-		space, err := client.Spaces.GetByID(spaceID)
+		space, err := spaces.GetByID(client, spaceID)
 		if err == nil {
 			if space != nil {
 				return fmt.Errorf("space (%s) still exists", rs.Primary.ID)

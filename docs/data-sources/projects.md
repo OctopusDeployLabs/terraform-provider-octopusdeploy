@@ -35,6 +35,7 @@ data "octopusdeploy_projects" "example" {
 - `name` (String) A filter to search by name.
 - `partial_name` (String) A filter to search by the partial match of a name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
@@ -196,5 +197,3 @@ Read-Only:
 
 - `deployment_action` (String)
 - `package_reference` (String)
-
-

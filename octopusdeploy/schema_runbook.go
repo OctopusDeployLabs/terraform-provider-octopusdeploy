@@ -94,13 +94,7 @@ func getRunbookSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Type:        schema.TypeString,
 		},
-		"space_id": {
-			Computed:         true,
-			Description:      "The space ID associated with this runbook.",
-			Optional:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-		},
+		"space_id":           getSpaceIDSchema(),
 		"multi_tenancy_mode": getTenantedDeploymentSchema(),
 		"connectivity_policy": {
 			Computed: true,

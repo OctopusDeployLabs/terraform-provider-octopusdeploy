@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbookprocess"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -61,19 +62,19 @@ func resourceRunbookProcessCreate(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[INFO] creating runbook process: %#v", runbookProcess)
 
-	runbook, err := client.Runbooks.GetByID(runbookProcess.RunbookID)
+	runbook, err := runbooks.GetByID(client, d.Get("space_id").(string), runbookProcess.RunbookID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	var current *runbooks.RunbookProcess
-	current, err = client.RunbookProcesses.GetByID(runbook.RunbookProcessID)
+	var current *runbookprocess.RunbookProcess
+	current, err = runbookprocess.GetByID(client, d.Get("space_id").(string), runbook.RunbookProcessID)
 
 	runbookProcess.ID = current.ID
 	runbookProcess.Links = current.Links
 	runbookProcess.Version = current.Version
 
-	createdRunbookProcess, err := client.RunbookProcesses.Update(runbookProcess)
+	createdRunbookProcess, err := runbookprocess.Update(client, runbookProcess)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -96,19 +97,22 @@ func resourceRunbookProcessDelete(ctx context.Context, d *schema.ResourceData, m
 
 	// "Deleting" a runbook process just means to clear it out
 	client := m.(*client.Client)
-	current, err := client.RunbookProcesses.GetByID(d.Id())
+	current, err := runbookprocess.GetByID(client, d.Get("space_id").(string), d.Id())
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	runbookProcess := &runbooks.RunbookProcess{
+	runbookProcess := &runbookprocess.RunbookProcess{
 		Version: current.Version,
 	}
 	runbookProcess.Links = current.Links
 	runbookProcess.ID = d.Id()
+	if v, ok := d.GetOk("space_id"); ok {
+		runbookProcess.SpaceID = v.(string)
+	}
 
-	_, err = client.RunbookProcesses.Update(runbookProcess)
+	_, err = runbookprocess.Update(client, runbookProcess)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -123,7 +127,7 @@ func resourceRunbookProcessRead(ctx context.Context, d *schema.ResourceData, m i
 	log.Printf("[INFO] reading runbook process (%s)", d.Id())
 
 	client := m.(*client.Client)
-	runbookProcess, err := client.RunbookProcesses.GetByID(d.Id())
+	runbookProcess, err := runbookprocess.GetByID(client, d.Get("space_id").(string), d.Id())
 
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "runbook_process")
@@ -142,7 +146,7 @@ func resourceRunbookProcessUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	client := m.(*client.Client)
 	runbookProcess := expandRunbookProcess(ctx, d, client)
-	current, err := client.RunbookProcesses.GetByID(d.Id())
+	current, err := runbookprocess.GetByID(client, runbookProcess.SpaceID, d.Id())
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -151,7 +155,7 @@ func resourceRunbookProcessUpdate(ctx context.Context, d *schema.ResourceData, m
 	runbookProcess.Links = current.Links
 	runbookProcess.Version = current.Version
 
-	updatedRunbookProcess, err := client.RunbookProcesses.Update(runbookProcess)
+	updatedRunbookProcess, err := runbookprocess.Update(client, runbookProcess)
 
 	if err != nil {
 		return diag.FromErr(err)

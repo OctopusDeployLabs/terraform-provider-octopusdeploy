@@ -32,8 +32,10 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 		Take:                d.Get("take").(int),
 	}
 
+	spaceID := d.Get("space_id").(string)
+
 	client := m.(*client.Client)
-	existingProjects, err := client.Projects.Get(query)
+	existingProjects, err := projects.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -4,6 +4,7 @@ import (
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
@@ -27,7 +28,7 @@ func (c *Config) Client() (*client.Client, diag.Diagnostics) {
 	}
 
 	if len(c.SpaceID) > 0 {
-		space, err := octopus.Spaces.GetByID(c.SpaceID)
+		space, err := spaces.GetByID(octopus, c.SpaceID)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}

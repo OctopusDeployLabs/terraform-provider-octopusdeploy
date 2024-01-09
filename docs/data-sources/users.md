@@ -28,6 +28,7 @@ data "octopusdeploy_users" "example" {
 - `filter` (String) A filter with which to search.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
@@ -67,5 +68,3 @@ Read-Only:
 - `is_identifying_claim` (Boolean)
 - `name` (String)
 - `value` (String)
-
-

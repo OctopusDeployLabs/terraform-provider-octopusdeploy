@@ -29,7 +29,7 @@ func resourceDynamicWorkerPoolCreate(ctx context.Context, d *schema.ResourceData
 	log.Printf("[INFO] creating dynamic worker pool: %#v", workerPool)
 
 	client := m.(*client.Client)
-	createdWorkerPool, err := client.WorkerPools.Add(workerPool)
+	createdWorkerPool, err := workerpools.Add(client, workerPool)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -47,9 +47,10 @@ func resourceDynamicWorkerPoolCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceDynamicWorkerPoolDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] deleting dynamic worker pool (%s)", d.Id())
+	spaceID := d.Get("space_id").(string)
 
 	client := m.(*client.Client)
-	if err := client.WorkerPools.DeleteByID(d.Id()); err != nil {
+	if err := workerpools.DeleteByID(client, spaceID, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -62,8 +63,9 @@ func resourceDynamicWorkerPoolDelete(ctx context.Context, d *schema.ResourceData
 func resourceDynamicWorkerPoolRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] reading dynamic worker pool (%s)", d.Id())
 
+	spaceID := d.Get("space_id").(string)
 	client := m.(*client.Client)
-	workerPoolResource, err := client.WorkerPools.GetByID(d.Id())
+	workerPoolResource, err := workerpools.GetByID(client, spaceID, d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "dynamic worker pool")
 	}
@@ -83,7 +85,7 @@ func resourceDynamicWorkerPoolUpdate(ctx context.Context, d *schema.ResourceData
 	log.Printf("[INFO] updating dynamic worker pool (%s)", d.Id())
 
 	client := m.(*client.Client)
-	updatedWorkerPool, err := client.WorkerPools.Update(workerPool)
+	updatedWorkerPool, err := workerpools.Update(client, workerPool)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -33,7 +33,7 @@ func resourceHelmFeedCreate(ctx context.Context, d *schema.ResourceData, m inter
 	tflog.Info(ctx, fmt.Sprintf("creating Helm feed, %s", feed.GetName()))
 
 	client := m.(*client.Client)
-	createdFeed, err := client.Feeds.Add(feed)
+	createdFeed, err := feeds.Add(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -52,7 +52,7 @@ func resourceHelmFeedDelete(ctx context.Context, d *schema.ResourceData, m inter
 	tflog.Info(ctx, fmt.Sprintf("deleting Helm feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	err := client.Feeds.DeleteByID(d.Id())
+	err := feeds.DeleteByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +67,7 @@ func resourceHelmFeedRead(ctx context.Context, d *schema.ResourceData, m interfa
 	tflog.Info(ctx, fmt.Sprintf("reading Helm feed (%s)", d.Id()))
 
 	client := m.(*client.Client)
-	feed, err := client.Feeds.GetByID(d.Id())
+	feed, err := feeds.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "Helm feed")
 	}
@@ -90,7 +90,7 @@ func resourceHelmFeedUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	tflog.Info(ctx, fmt.Sprintf("updating Helm feed (%s)", feed.GetID()))
 
 	client := m.(*client.Client)
-	updatedFeed, err := client.Feeds.Update(feed)
+	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
 		return diag.FromErr(err)
 	}

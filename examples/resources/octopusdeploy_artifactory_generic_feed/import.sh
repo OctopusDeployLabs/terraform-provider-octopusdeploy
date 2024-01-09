@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_artifactory_generic_feed.<name> <feed-id>

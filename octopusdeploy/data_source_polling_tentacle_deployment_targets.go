@@ -38,7 +38,7 @@ func dataSourcePollingTentacleDeploymentTargetsRead(ctx context.Context, d *sche
 	}
 
 	client := m.(*client.Client)
-	existingDeploymentTargets, err := client.Machines.Get(query)
+	existingDeploymentTargets, err := machines.Get(client, d.Get("space_id").(string), query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
