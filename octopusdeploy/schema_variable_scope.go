@@ -17,13 +17,13 @@ func expandVariableScope(flattenedVariableScope interface{}) variables.VariableS
 
 	if flattenedMap, ok := list[0].(map[string]interface{}); ok {
 		return variables.VariableScope{
-			Actions:      getSliceFromTerraformTypeList(flattenedMap["actions"]),
-			Channels:     getSliceFromTerraformTypeList(flattenedMap["channels"]),
-			Environments: getSliceFromTerraformTypeList(flattenedMap["environments"]),
-			Machines:     getSliceFromTerraformTypeList(flattenedMap["machines"]),
+			Actions:       getSliceFromTerraformTypeList(flattenedMap["actions"]),
+			Channels:      getSliceFromTerraformTypeList(flattenedMap["channels"]),
+			Environments:  getSliceFromTerraformTypeList(flattenedMap["environments"]),
+			Machines:      getSliceFromTerraformTypeList(flattenedMap["machines"]),
 			ProcessOwners: getSliceFromTerraformTypeList(flattenedMap["processes"]),
-			Roles:        getSliceFromTerraformTypeList(flattenedMap["roles"]),
-			TenantTags:   getSliceFromTerraformTypeList(flattenedMap["tenant_tags"]),
+			Roles:         getSliceFromTerraformTypeList(flattenedMap["roles"]),
+			TenantTags:    getSliceFromTerraformTypeList(flattenedMap["tenant_tags"]),
 		}
 	}
 
@@ -94,7 +94,7 @@ func getVariableScopeSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-        "processes": {
+		"processes": {
 			Description: "A list of processes that are scoped to this variable value.",
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			Optional:    true,
