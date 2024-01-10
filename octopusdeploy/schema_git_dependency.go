@@ -60,7 +60,7 @@ func expandGitDependency(set *schema.Set) *gitdependencies.GitDependency {
 func getGitDependencySchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Computed:    !required,
-		Description: "Foobar",
+		Description: "Configuration for resource sourcing from a git repository.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"repository_uri": {
@@ -70,7 +70,7 @@ func getGitDependencySchema(required bool) *schema.Schema {
 					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				},
 				"default_branch": {
-					Description:      "Name of the default branch of the repository",
+					Description:      "Name of the default branch of the repository.",
 					Required:         true,
 					Type:             schema.TypeString,
 					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -88,7 +88,7 @@ func getGitDependencySchema(required bool) *schema.Schema {
 					Elem:        &schema.Schema{Type: schema.TypeString},
 				},
 				"git_credential_id": {
-					Description: "ID of an existing Git credential",
+					Description: "ID of an existing Git credential.",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
