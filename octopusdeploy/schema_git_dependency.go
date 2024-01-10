@@ -6,30 +6,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func flattenGitDependency(gitDependency *gitdependencies.GitDependency) *schema.Set {
-	//if gitDependency == nil {
-	//	return nil
-	//}
-	//fmt.Printf("%+v\n", gitDependency)
-	//
-	//return map[string]interface{}{
-	//	"repository_uri":                   gitDependency.RepositoryUri,
-	//	"default_branch":                   gitDependency.DefaultBranch,
-	//	"git_credential_type":              gitDependency.GitCredentialType,
-	//	"file_path_filters":                gitDependency.FilePathFilters,
-	//	"git_credential_id":                gitDependency.GitCredentialId,
-	//	"step_package_inputs_reference_id": gitDependency.StepPackageInputsReferenceId,
-	//}
-	flattened := new(schema.Set)
-	flattened.Add(map[string]interface{}{
+func flattenGitDependency(gitDependency *gitdependencies.GitDependency) []interface{} {
+	if gitDependency == nil {
+		return nil
+	}
+
+	return []interface{}{map[string]interface{}{
 		"repository_uri":                   gitDependency.RepositoryUri,
 		"default_branch":                   gitDependency.DefaultBranch,
 		"git_credential_type":              gitDependency.GitCredentialType,
-		"file_path_filters":                gitDependency.FilePathFilters,
+		"file_path_filters":                flattenArray(gitDependency.FilePathFilters),
 		"git_credential_id":                gitDependency.GitCredentialId,
 		"step_package_inputs_reference_id": gitDependency.StepPackageInputsReferenceId,
-	})
-	return flattened
+	}}
 }
 
 func expandGitDependency(set *schema.Set) *gitdependencies.GitDependency {
@@ -38,15 +27,6 @@ func expandGitDependency(set *schema.Set) *gitdependencies.GitDependency {
 	}
 
 	flattenedMap := set.List()[0].(map[string]interface{})
-
-	//if len(flattenedValues) == 0 || flattenedValues[0] == nil {
-	//	return nil
-	//}
-	//
-	//flattenedMap := flattenedValues[0].(map[string]interface{})
-	//if len(flattenedMap) == 0 {
-	//	return nil
-	//}
 
 	gitDependency := &gitdependencies.GitDependency{}
 
@@ -62,9 +42,9 @@ func expandGitDependency(set *schema.Set) *gitdependencies.GitDependency {
 		gitDependency.GitCredentialType = gitCredentialType.(string)
 	}
 
-	//if filePathFilters := flattenedMap["file_path_filters"]; filePathFilters != nil {
-	//	gitDependency.FilePathFilters = filePathFilters.([]string)
-	//}
+	if filePathFilters := flattenedMap["file_path_filters"]; filePathFilters != nil {
+		gitDependency.FilePathFilters = expandArray(filePathFilters.([]interface{}))
+	}
 
 	if gitCredentialId := flattenedMap["git_credential_id"]; gitCredentialId != nil {
 		gitDependency.GitCredentialId = gitCredentialId.(string)
@@ -128,19 +108,4 @@ func getGitDependencySchema(required bool) *schema.Schema {
 
 func addGitDependencySchema(element *schema.Resource) {
 	element.Schema["git_dependency"] = getGitDependencySchema(false)
-	//
-	//gitDependenciesElementSchema := element.Schema["git_dependencies"].Elem.(*schema.Resource).Schema
-	//
-	//gitDependenciesElementSchema["name"] = &schema.Schema{
-	//	Description: "The name of the package",
-	//	Required:    true,
-	//	Type:        schema.TypeString,
-	//}
-	//
-	//packageElementSchema["extract_during_deployment"] = &schema.Schema{
-	//	Computed:    true,
-	//	Description: "Whether to extract the package during deployment",
-	//	Optional:    true,
-	//	Type:        schema.TypeBool,
-	//}
 }

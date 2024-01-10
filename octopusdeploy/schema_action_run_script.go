@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/gitdependencies"
 	"strconv"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -88,6 +89,11 @@ func expandRunScriptAction(flattenedAction map[string]interface{}) *deployments.
 		action.WorkerPoolVariable = v.(string)
 	}
 
+	if v, ok := flattenedAction["git_dependency"]; ok {
+		action.GitDependencies = []*gitdependencies.GitDependency{expandGitDependency(v.(*schema.Set))}
+		action.Properties["Octopus.Action.GitRepository.Source"] = core.NewPropertyValue("External", false)
+	}
+
 	return action
 }
 
@@ -104,6 +110,10 @@ func flattenRunScriptAction(action *deployments.DeploymentAction) map[string]int
 
 	if len(action.WorkerPoolVariable) > 0 {
 		flattenedAction["worker_pool_variable"] = action.WorkerPoolVariable
+	}
+
+	if len(action.GitDependencies) > 0 {
+		flattenedAction["git_dependency"] = flattenGitDependency(action.GitDependencies[0])
 	}
 
 	if v, ok := action.Properties["Octopus.Action.RunOnServer"]; ok {
@@ -146,6 +156,7 @@ func getRunScriptActionSchema() *schema.Schema {
 	addPackagesSchema(element, false)
 	addWorkerPoolSchema(element)
 	addWorkerPoolVariableSchema(element)
+	addGitDependencySchema(element)
 
 	element.Schema["script_body"] = &schema.Schema{
 		Optional: true,
