@@ -70,7 +70,7 @@ resource "octopusdeploy_deployment_process" "test_deployment_process" {
 resource "octopusdeploy_channel" "test_channel" {
   depends_on  = [octopusdeploy_deployment_process.test_deployment_process]
   description = "Test Channel"
-  name = "Test Channel",
+  name = "Test Channel"
   project_id = octopusdeploy_project.test_project.id
 
   rule {
