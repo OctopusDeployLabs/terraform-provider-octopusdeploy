@@ -35,8 +35,6 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	deploymentProcessLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	deploymentProcessName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	// TODO: replace with client reference
 	spaceID := os.Getenv("OCTOPUS_SPACE")
@@ -58,7 +56,7 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "scope.0.%", "6"),
 					resource.TestCheckResourceAttr(prefix, "scope.0.environments.#", "1"),
 				),
-				Config: testVariableBasic(spaceID, environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, deploymentProcessLocalName, deploymentProcessName, channelLocalName, channelName, localName, name, description, isSensitive, value, variableType),
+				Config: testVariableBasic(spaceID, environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, channelLocalName, channelName, localName, name, description, isSensitive, value, variableType),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -72,7 +70,7 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "scope.0.%", "6"),
 					resource.TestCheckResourceAttr(prefix, "scope.0.environments.#", "1"),
 				),
-				Config: testVariableBasic(spaceID, environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, deploymentProcessLocalName, deploymentProcessName, channelLocalName, channelName, localName, name, description, isSensitive, newValue, variableType),
+				Config: testVariableBasic(spaceID, environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, channelLocalName, channelName, localName, name, description, isSensitive, newValue, variableType),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -90,7 +88,7 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 
 %s`,
 					testGcpAccount(localName, name, acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)),
-					testVariableBasic(spaceID, environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, deploymentProcessLocalName, deploymentProcessName, channelLocalName, channelName, localName, name, description, isSensitive, accountValue, accountVariableType)),
+					testVariableBasic(spaceID, environmentLocalName, environmentName, lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, channelLocalName, channelName, localName, name, description, isSensitive, accountValue, accountVariableType)),
 			},
 		},
 	})
@@ -98,10 +96,8 @@ func TestAccOctopusDeployVariableBasic(t *testing.T) {
 
 func testVariableBasic(spaceID string, environmentLocalName string,
 	environmentName string,
-	lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, deploymentProcessLocalName string, deploymentProcessName string, channelLocalName string, channelName string, localName string, name string, description string, isSensitive bool, value string, variableType string) string {
+	lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, channelLocalName string, channelName string, localName string, name string, description string, isSensitive bool, value string, variableType string) string {
 	return fmt.Sprintf(`%s
-
-		%s
 
 		%s
 
@@ -122,7 +118,6 @@ func testVariableBasic(spaceID string, environmentLocalName string,
 		  scope {
 			channels     = [octopusdeploy_channel.%s.id]
 		    environments = [octopusdeploy_environment.%s.id]
-		    processes 	 = [octopusdeploy_deployment_process.%s.id]
 			tenant_tags  = []
 		  }
 		}`,
@@ -130,7 +125,6 @@ func testVariableBasic(spaceID string, environmentLocalName string,
 		createLifecycle(lifecycleLocalName, lifecycleName),
 		createProjectGroup(projectGroupLocalName, projectGroupName),
 		createProject(spaceID, projectLocalName, projectName, lifecycleLocalName, projectGroupLocalName),
-		createDeploymentProcess(projectLocalName, spaceID, deploymentProcessLocalName, deploymentProcessName),
 		createChannel(channelLocalName, channelName, projectLocalName),
 		localName,
 		description,
@@ -141,7 +135,6 @@ func testVariableBasic(spaceID string, environmentLocalName string,
 		value,
 		channelLocalName,
 		environmentLocalName,
-		deploymentProcessLocalName,
 	)
 }
 
@@ -170,14 +163,6 @@ func createProject(spaceID string, localName, name, lifecycleLocal, projectGroup
 		project_group_id = octopusdeploy_project_group.%s.id
 		space_id 		 = "%s"
 	}`, localName, name, lifecycleLocal, projectGroupLocal, spaceID)
-}
-
-func createDeploymentProcess(projectLocalName string, spaceId string, localName, name string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_deployment_process" "%s" {
-		name             = "%s"
-		project_id       = octopusdeploy_project.%s.id
-		space_id 		 = "%s"
-	}`, localName, name, projectLocalName, spaceId)
 }
 
 func createChannel(localName, name, projectLocal string) string {
