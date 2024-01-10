@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/gitdependencies"
 	"strconv"
 	"strings"
 
@@ -128,6 +129,11 @@ func flattenAction(action *deployments.DeploymentAction) map[string]interface{} 
 		flattenedAction["package"] = flattenedPackageReferences
 	}
 
+	if len(action.GitDependencies) > 0 {
+		fmt.Printf("%+v\n", action.GitDependencies)
+		flattenedAction["git_dependency"] = flattenGitDependency(action.GitDependencies[0])
+	}
+
 	return flattenedAction
 }
 
@@ -138,6 +144,7 @@ func getDeploymentActionSchema() *schema.Schema {
 	addWorkerPoolSchema(element)
 	addWorkerPoolVariableSchema(element)
 	addPackagesSchema(element, false)
+	addGitDependencySchema(element)
 
 	return actionSchema
 }
@@ -216,7 +223,8 @@ func getActionSchema() (*schema.Schema, *schema.Resource) {
 				Optional:    true,
 				Type:        schema.TypeList,
 			},
-			"id": getIDSchema(),
+			"git_dependency": getGitDependencySchema(false),
+			"id":             getIDSchema(),
 			"is_disabled": {
 				Default:     false,
 				Description: "Indicates the disabled status of this deployment action.",
@@ -422,6 +430,11 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 
 	if v, ok := flattenedAction["features"]; ok {
 		action.Properties["Octopus.Action.EnabledFeatures"] = core.NewPropertyValue(strings.Join(getSliceFromTerraformTypeList(v), ","), false)
+	}
+
+	if v, ok := flattenedAction["git_dependency"]; ok {
+		action.GitDependencies = []*gitdependencies.GitDependency{expandGitDependency(v.(*schema.Set))}
+		action.Properties["Octopus.Action.GitRepository.Source"] = core.NewPropertyValue("External", false)
 	}
 
 	if v, ok := flattenedAction["is_disabled"]; ok {
