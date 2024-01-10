@@ -3350,3 +3350,30 @@ func TestK8sPodAuthTargetResource(t *testing.T) {
 		return nil
 	})
 }
+
+func TestVariableResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "49-variables", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		project, err := client.Projects.GetByName("Test")
+		variableSet, err := client.Variables.GetAll(project.ID)
+
+		if err != nil {
+			return err
+		}
+
+		if len(variableSet.Variables) == 7 {
+			t.Fatalf("Expected 7 variables to be created")
+		}
+
+		return nil
+	})
+}
