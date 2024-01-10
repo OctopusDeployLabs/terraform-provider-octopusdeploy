@@ -3370,7 +3370,7 @@ func TestVariableResource(t *testing.T) {
 			return err
 		}
 
-		if len(variableSet.Variables) == 7 {
+		if len(variableSet.Variables) != 7 {
 			t.Fatalf("Expected 7 variables to be created")
 		}
 
