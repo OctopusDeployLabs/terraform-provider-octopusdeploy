@@ -72,8 +72,4 @@ resource "octopusdeploy_channel" "test_channel" {
   description = "Test Channel"
   name = "Test Channel"
   project_id = octopusdeploy_project.test_project.id
-
-  rule {
-    version_range = "1.0"
-  }
 }
