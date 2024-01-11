@@ -31,7 +31,7 @@ resource "octopusdeploy_variable" "scoped_project_variable_environment" {
   name     = "EnvironmentScopedVariable"
   value    = "EnvironmentScopedVariable"
   scope {
-    channels = [octopusdeploy_environment.development_environment.id]
+    environments = [octopusdeploy_environment.development_environment.id]
   }
 }
 
