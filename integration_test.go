@@ -3371,7 +3371,40 @@ func TestVariableResource(t *testing.T) {
 		}
 
 		if len(variableSet.Variables) != 7 {
-			t.Fatalf("Expected 7 variables to be created")
+			t.Fatalf("Expected 7 variables to be created.")
+		}
+
+		for _, variable := range variableSet.Variables {
+			switch variable.Name {
+			case "UnscopedVariable":
+				if !variable.Scope.IsEmpty() {
+					t.Fatalf("Expected UnscopedVariable to have no scope values.")
+				}
+			case "ActionScopedVariable":
+				if len(variable.Scope.Actions) == 0 {
+					t.Fatalf("Expected ActionScopedVariable to have action scope.")
+				}
+			case "ChannelScopedVariable":
+				if len(variable.Scope.Channels) == 0 {
+					t.Fatalf("Expected ChannelScopedVariable to have channel scope.")
+				}
+			case "EnvironmentScopedVariable":
+				if len(variable.Scope.Environments) == 0 {
+					t.Fatalf("Expected EnvironmentScopedVariable to have environment scope.")
+				}
+			case "MachineScopedVariable":
+				if len(variable.Scope.Machines) == 0 {
+					t.Fatalf("Expected MachineScopedVariable to have machine scope.")
+				}
+			case "ProcessScopedVariable":
+				if len(variable.Scope.ProcessOwners) == 0 {
+					t.Fatalf("Expected ProcessScopedVariable to have process scope.")
+				}
+			case "RoleScopedVariable":
+				if len(variable.Scope.Roles) == 0 {
+					t.Fatalf("Expected RoleScopedVariable to have role scope.")
+				}
+			}
 		}
 
 		return nil
