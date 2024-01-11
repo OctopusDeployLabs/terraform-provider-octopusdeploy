@@ -36,6 +36,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"os"
 	"path/filepath"
 	"sort"
@@ -3403,6 +3404,58 @@ func TestVariableResource(t *testing.T) {
 			case "RoleScopedVariable":
 				if len(variable.Scope.Roles) == 0 {
 					t.Fatalf("Expected RoleScopedVariable to have role scope.")
+				}
+			}
+		}
+
+		return nil
+	})
+}
+
+func TestDeploymentProcessWithGitDependency(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "50-deploymentprocesswithgitdependency", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		project, err := client.Projects.GetByName("Test")
+		deploymentProcess, err := deployments.GetDeploymentProcessByID(client, newSpaceId, project.DeploymentProcessID)
+
+		if len(deploymentProcess.Steps) == 0 {
+			t.Fatalf("Expected deployment process to have steps.")
+		}
+
+		expectedGitUri := "https://github.com/OctopusSamples/OctoPetShop.git"
+		expectedDefaultBranch := "main"
+
+		for _, step := range deploymentProcess.Steps {
+			action := step.Actions[0]
+
+			if len(action.GitDependencies) == 0 {
+				t.Fatalf(fmt.Sprint(action.Name) + " - Expected action to have git dependency configured.")
+			}
+
+			gitDependency := action.GitDependencies[0]
+
+			if fmt.Sprint(gitDependency.RepositoryUri) != expectedGitUri {
+				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have repository uri equal to " + fmt.Sprint(expectedGitUri))
+			}
+
+			if fmt.Sprint(gitDependency.DefaultBranch) != expectedDefaultBranch {
+				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have default branch equal to " + fmt.Sprint(expectedDefaultBranch))
+			}
+
+			if fmt.Sprint(gitDependency.GitCredentialType) == "Library" {
+				if len(strings.TrimSpace(gitDependency.GitCredentialId)) == 0 {
+					t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency library type to have a defined git credential id.")
+				}
+			} else {
+				if len(strings.TrimSpace(gitDependency.GitCredentialId)) > 0 {
+					t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency of non-library type to not have a defined git credential id.")
 				}
 			}
 		}
