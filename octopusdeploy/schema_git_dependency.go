@@ -12,12 +12,11 @@ func flattenGitDependency(gitDependency *gitdependencies.GitDependency) []interf
 	}
 
 	return []interface{}{map[string]interface{}{
-		"repository_uri":                   gitDependency.RepositoryUri,
-		"default_branch":                   gitDependency.DefaultBranch,
-		"git_credential_type":              gitDependency.GitCredentialType,
-		"file_path_filters":                flattenArray(gitDependency.FilePathFilters),
-		"git_credential_id":                gitDependency.GitCredentialId,
-		"step_package_inputs_reference_id": gitDependency.StepPackageInputsReferenceId,
+		"repository_uri":      gitDependency.RepositoryUri,
+		"default_branch":      gitDependency.DefaultBranch,
+		"git_credential_type": gitDependency.GitCredentialType,
+		"file_path_filters":   flattenArray(gitDependency.FilePathFilters),
+		"git_credential_id":   gitDependency.GitCredentialId,
 	}}
 }
 
@@ -49,10 +48,6 @@ func expandGitDependency(set *schema.Set) *gitdependencies.GitDependency {
 		gitDependency.GitCredentialId = gitCredentialId.(string)
 	}
 
-	if stepPackageInputsReferenceId := flattenedMap["step_package_inputs_reference_id"]; stepPackageInputsReferenceId != nil {
-		gitDependency.StepPackageInputsReferenceId = stepPackageInputsReferenceId.(string)
-	}
-
 	return gitDependency
 }
 
@@ -81,18 +76,13 @@ func getGitDependencySchema(required bool) *schema.Schema {
 					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				},
 				"file_path_filters": {
-					Description: "TODO figure out what this is for",
+					Description: "List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.",
 					Optional:    true,
 					Type:        schema.TypeList,
 					Elem:        &schema.Schema{Type: schema.TypeString},
 				},
 				"git_credential_id": {
 					Description: "ID of an existing Git credential.",
-					Optional:    true,
-					Type:        schema.TypeString,
-				},
-				"step_package_inputs_reference_id": {
-					Description: "TODO figure out what this is",
 					Optional:    true,
 					Type:        schema.TypeString,
 				},
