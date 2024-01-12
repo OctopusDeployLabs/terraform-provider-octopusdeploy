@@ -22,7 +22,7 @@ func flattenGitDependency(gitDependency *gitdependencies.GitDependency) []interf
 }
 
 func expandGitDependency(set *schema.Set) *gitdependencies.GitDependency {
-	if set == nil {
+	if set == nil || len(set.List()) == 0 {
 		return nil
 	}
 
