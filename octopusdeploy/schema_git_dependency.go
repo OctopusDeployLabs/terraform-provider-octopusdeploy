@@ -27,7 +27,6 @@ func expandGitDependency(set *schema.Set) *gitdependencies.GitDependency {
 	}
 
 	flattenedMap := set.List()[0].(map[string]interface{})
-
 	gitDependency := &gitdependencies.GitDependency{}
 
 	if repositoryUri := flattenedMap["repository_uri"]; repositoryUri != nil {

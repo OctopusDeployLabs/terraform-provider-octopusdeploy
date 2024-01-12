@@ -498,8 +498,10 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 	}
 
 	if v, ok := flattenedAction["git_dependency"]; ok {
-		action.GitDependencies = []*gitdependencies.GitDependency{expandGitDependency(v.(*schema.Set))}
-		action.Properties["Octopus.Action.GitRepository.Source"] = core.NewPropertyValue("External", false)
+		expandedGitDependency := expandGitDependency(v.(*schema.Set))
+		if expandedGitDependency != nil {
+			action.GitDependencies = []*gitdependencies.GitDependency{expandedGitDependency}
+		}
 	}
 
 	return action
