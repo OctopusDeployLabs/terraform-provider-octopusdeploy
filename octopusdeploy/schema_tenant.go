@@ -67,6 +67,7 @@ func getTenantDataSchema() map[string]*schema.Schema {
 		"project_id":            getQueryProjectID(),
 		"skip":                  getQuerySkip(),
 		"tags":                  getQueryTags(),
+		"space_id":              getQuerySpaceID(),
 		"tenants": {
 			Computed:    true,
 			Description: "A list of tenants that match the filter(s).",
