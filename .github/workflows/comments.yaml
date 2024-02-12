@@ -1,9 +1,10 @@
 on: issue_comment
 
 jobs:
-  pr_commented:
-    name: PR comment
+  commented:
+    name: Comment Posted
     runs-on: ubuntu-latest
+    #if: ${{ github.event.issue.pull_request && github.event.pull_request.author_association != 'MEMBER' }}
     steps:
       - run: echo '${{ toJSON(github) }}'
       - run: echo '${{ github.event.comment.author_association }}'
