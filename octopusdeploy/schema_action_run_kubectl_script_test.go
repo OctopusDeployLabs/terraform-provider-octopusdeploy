@@ -42,6 +42,8 @@ func testAccRunKubectlScriptAction() string {
 
 			script_file_name = "Test.ps1"
 			script_parameters = "-Test 1"
+
+			namespace = "test-namespace"
     }
 	`)
 }
@@ -59,6 +61,10 @@ func testAccCheckRunKubectlScriptAction() resource.TestCheckFunc {
 
 		if action.ActionType != "Octopus.KubernetesRunScript" {
 			return fmt.Errorf("Action type is incorrect: %s", action.ActionType)
+		}
+
+		if action.Properties["Octopus.Action.KubernetesContainers.Namespace"].Value != "test-namespace" {
+			return fmt.Errorf("Kubernetes namespace is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.Namespace"].Value)
 		}
 
 		if action.Properties["Octopus.Action.Script.ScriptFileName"].Value != "Test.ps1" {
