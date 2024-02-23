@@ -1,10 +1,11 @@
 package octopusdeploy
 
 import (
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 )
 
-func expandPromptedDisplaySettings(values interface{}) *variables.DisplaySettings {
+func expandPromptedDisplaySettings(values interface{}) *resources.DisplaySettings {
 	if values == nil {
 		return nil
 	}
@@ -16,14 +17,14 @@ func expandPromptedDisplaySettings(values interface{}) *variables.DisplaySetting
 
 	promptedDisplaySettings := flattenedValues[0].(map[string]interface{})
 
-	controlType := variables.ControlType(promptedDisplaySettings["control_type"].(string))
+	controlType := resources.ControlType(promptedDisplaySettings["control_type"].(string))
 
-	var selectOptions []*variables.SelectOption
-	if controlType == variables.ControlTypeSelect {
+	var selectOptions []*resources.SelectOption
+	if controlType == resources.ControlTypeSelect {
 		selectOptions = expandSelectOptions(promptedDisplaySettings["select_option"])
 	}
 
-	return variables.NewDisplaySettings(controlType, selectOptions)
+	return resources.NewDisplaySettings(controlType, selectOptions)
 }
 
 func expandPromptedVariableSettings(values interface{}) *variables.VariablePromptOptions {
@@ -45,7 +46,7 @@ func expandPromptedVariableSettings(values interface{}) *variables.VariablePromp
 	}
 }
 
-func expandSelectOptions(values interface{}) []*variables.SelectOption {
+func expandSelectOptions(values interface{}) []*resources.SelectOption {
 	if values == nil {
 		return nil
 	}
@@ -55,11 +56,11 @@ func expandSelectOptions(values interface{}) []*variables.SelectOption {
 		return nil
 	}
 
-	selectOptions := make([]*variables.SelectOption, len(flattenedValues))
+	selectOptions := make([]*resources.SelectOption, len(flattenedValues))
 
 	for i := 0; i < len(flattenedValues); i++ {
 		item := flattenedValues[i].(map[string]interface{})
-		selectOptions[i] = &variables.SelectOption{
+		selectOptions[i] = &resources.SelectOption{
 			DisplayName: item["display_name"].(string),
 			Value:       item["value"].(string),
 		}
@@ -68,14 +69,14 @@ func expandSelectOptions(values interface{}) []*variables.SelectOption {
 	return selectOptions
 }
 
-func flattenPromptedVariableDisplaySettings(displaySettings *variables.DisplaySettings) []interface{} {
+func flattenPromptedVariableDisplaySettings(displaySettings *resources.DisplaySettings) []interface{} {
 	if displaySettings == nil {
 		return nil
 	}
 
 	flattenedDisplaySettings := map[string]interface{}{}
 	flattenedDisplaySettings["control_type"] = displaySettings.ControlType
-	if displaySettings.ControlType == variables.ControlTypeSelect {
+	if displaySettings.ControlType == resources.ControlTypeSelect {
 		flattenedDisplaySettings["select_option"] = flattenSelectOptions(displaySettings.SelectOptions)
 	}
 	return []interface{}{flattenedDisplaySettings}
@@ -99,7 +100,7 @@ func flattenPromptedVariableSettings(variablePromptOptions *variables.VariablePr
 	return []interface{}{flattenedPrompt}
 }
 
-func flattenSelectOptions(selectOptions []*variables.SelectOption) []map[string]interface{} {
+func flattenSelectOptions(selectOptions []*resources.SelectOption) []map[string]interface{} {
 	options := make([]map[string]interface{}, len(selectOptions))
 	for i := 0; i < len(selectOptions); i++ {
 		options[i] = map[string]interface{}{

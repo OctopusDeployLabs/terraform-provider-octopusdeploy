@@ -63,8 +63,8 @@ github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugX
 github.com/Microsoft/go-winio v0.6.0 h1:slsWYD/zyx7lCXoZVlvQrj0hPTM1HI4+v1sIda2yDvg=
 github.com/Microsoft/go-winio v0.6.0/go.mod h1:cTAf44im0RAYeL23bpB+fzCyDH2MJiz2BO69KH/soAE=
 github.com/Microsoft/hcsshim v0.9.7 h1:mKNHW/Xvv1aFH87Jb6ERDzXTJTLPlmzfZ28VBFD/bfg=
-github.com/OctopusDeploy/go-octopusdeploy/v2 v2.36.2 h1:ovLCSy+I1mN0nynxNtOkrxUuf4DL2jZc79kkBH6698g=
-github.com/OctopusDeploy/go-octopusdeploy/v2 v2.36.2/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
+github.com/OctopusDeploy/go-octopusdeploy/v2 v2.38.1 h1:XxaJaWRD+dyTYKkY+Rbw1kZS9G3KkNECvn2Hmk5Bsls=
+github.com/OctopusDeploy/go-octopusdeploy/v2 v2.38.1/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230705105638-f5ef7c07973b h1:XOBPcVHeDUYIpcag0yI8IYKiBL+5LLL8suysvlavQwI=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230705105638-f5ef7c07973b/go.mod h1:E0hYVpZd61fXhzTozkxjiWEy+/yTRxAnr2SIE7k8ZSM=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
