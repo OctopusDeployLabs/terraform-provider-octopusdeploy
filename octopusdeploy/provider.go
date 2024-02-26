@@ -76,6 +76,8 @@ func Provider() *schema.Provider {
 			"octopusdeploy_polling_tentacle_deployment_target":             resourcePollingTentacleDeploymentTarget(),
 			"octopusdeploy_project":                                        resourceProject(),
 			"octopusdeploy_project_deployment_target_trigger":              resourceProjectDeploymentTargetTrigger(),
+			"octopusdeploy_helm_feed_create_release_trigger":               resourceHelmFeedCreateReleaseTrigger(),
+			"octopusdeploy_container_feed_create_release_trigger":          resourceContainerFeedCreateReleaseTrigger(),
 			"octopusdeploy_project_group":                                  resourceProjectGroup(),
 			"octopusdeploy_runbook":                                        resourceRunbook(),
 			"octopusdeploy_runbook_process":                                resourceRunbookProcess(),
