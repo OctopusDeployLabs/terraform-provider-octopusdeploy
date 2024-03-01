@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
@@ -26,7 +27,7 @@ func TestExpandPromptedDisplaySettingsWithCheckbox(t *testing.T) {
 	}
 	result := expandPromptedDisplaySettings(input)
 	require.NotNil(t, result)
-	require.Equal(t, variables.ControlTypeCheckbox, result.ControlType)
+	require.Equal(t, resources.ControlTypeCheckbox, result.ControlType)
 }
 
 func TestExpandPromptedDisplaySettingsWithSelect(t *testing.T) {
