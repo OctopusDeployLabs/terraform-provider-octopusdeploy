@@ -1947,6 +1947,10 @@ func TestMachinePolicyResource(t *testing.T) {
 			t.Fatal("The machine policy must have a ConnectionRetryTimeLimit of \"00:05:00\" (was \"" + fmt.Sprint(resource.ConnectionRetryTimeLimit) + "\")")
 		}
 
+		if resource.PollingRequestMaximumMessageProcessingTimeout.Minutes() != 10 {
+			t.Fatal("The machine policy must have a PollingRequestMaximumMessageProcessingTimeout of \"00:10:00\" (was \"" + fmt.Sprint(resource.PollingRequestMaximumMessageProcessingTimeout) + "\")")
+		}
+
 		if resource.MachineCleanupPolicy.DeleteMachinesElapsedTimeSpan.Minutes() != 20 {
 			t.Fatal("The machine policy must have a DeleteMachinesElapsedTimeSpan of \"00:20:00\" (was \"" + fmt.Sprint(resource.MachineCleanupPolicy.DeleteMachinesElapsedTimeSpan) + "\")")
 		}
