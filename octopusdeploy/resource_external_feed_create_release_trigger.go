@@ -13,7 +13,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func buildPackageFeedCreateReleaseTriggerResource(d *schema.ResourceData, client *client.Client, feedCategory string) (*triggers.ProjectTrigger, error) {
+func resourceExternalFeedCreateReleaseTrigger() *schema.Resource {
+	return &schema.Resource{
+		CreateContext: resourceExternalFeedCreateReleaseTriggerCreate,
+		DeleteContext: resourceExternalFeedCreateReleaseTriggerDelete,
+		Importer:      getImporter(),
+		ReadContext:   resourceExternalFeedCreateReleaseTriggerRead,
+		Schema:        getExternalFeedCreateReleaseTriggerSchema(),
+		UpdateContext: resourceExternalFeedCreateReleaseTriggerUpdate,
+	}
+}
+
+func buildExternalFeedCreateReleaseTriggerResource(d *schema.ResourceData, client *client.Client) (*triggers.ProjectTrigger, error) {
 	name := d.Get("name").(string)
 	spaceId := d.Get("space_id").(string)
 	projectId := d.Get("project_id").(string)
@@ -28,7 +39,7 @@ func buildPackageFeedCreateReleaseTriggerResource(d *schema.ResourceData, client
 	packages := expandDeploymentActionPackages(flattenedPackages)
 
 	action := actions.NewCreateReleaseAction(channelId)
-	filter := filters.NewFeedTriggerFilter(feedCategory, packages)
+	filter := filters.NewFeedTriggerFilter(packages)
 
 	project, err := projects.GetByID(client, spaceId, projectId)
 	if err != nil {
@@ -40,10 +51,10 @@ func buildPackageFeedCreateReleaseTriggerResource(d *schema.ResourceData, client
 	return createReleaseTrigger, nil
 }
 
-func resourcePackageFeedCreateReleaseTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}, feedCategory string) diag.Diagnostics {
+func resourceExternalFeedCreateReleaseTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 
-	projectTrigger, err := buildPackageFeedCreateReleaseTriggerResource(d, client, feedCategory)
+	projectTrigger, err := buildExternalFeedCreateReleaseTriggerResource(d, client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -62,7 +73,7 @@ func resourcePackageFeedCreateReleaseTriggerCreate(ctx context.Context, d *schem
 	return nil
 }
 
-func resourcePackageFeedCreateReleaseTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceExternalFeedCreateReleaseTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	client := m.(*client.Client)
@@ -88,9 +99,9 @@ func resourcePackageFeedCreateReleaseTriggerRead(ctx context.Context, d *schema.
 	return nil
 }
 
-func resourcePackageFeedCreateReleaseTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}, feedCategory string) diag.Diagnostics {
+func resourceExternalFeedCreateReleaseTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	projectTrigger, err := buildPackageFeedCreateReleaseTriggerResource(d, client, feedCategory)
+	projectTrigger, err := buildExternalFeedCreateReleaseTriggerResource(d, client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -106,7 +117,7 @@ func resourcePackageFeedCreateReleaseTriggerUpdate(ctx context.Context, d *schem
 	return nil
 }
 
-func resourcePackageFeedCreateReleaseTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceExternalFeedCreateReleaseTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 	err := client.ProjectTriggers.DeleteByID(d.Id())
 	if err != nil {

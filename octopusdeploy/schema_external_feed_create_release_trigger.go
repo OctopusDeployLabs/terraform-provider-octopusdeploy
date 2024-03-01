@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func getPackageFeedCreateReleaseTriggerSchema() map[string]*schema.Schema {
+func getExternalFeedCreateReleaseTriggerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": getNameSchema(true),
 		"space_id": {
