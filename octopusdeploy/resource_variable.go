@@ -82,11 +82,27 @@ func resourceVariableCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	for _, v := range variableSet.Variables {
 		if v.Name == variable.Name && v.Type == variable.Type && (v.IsSensitive || v.Value == variable.Value) && v.Description == variable.Description && v.IsSensitive == variable.IsSensitive {
-			scopeMatches, _, err := variables.MatchesScope(v.Scope, &variable.Scope)
+			atleastOneScopeMatched, matchedScopes, err := variables.MatchesScope(v.Scope, &variable.Scope)
 			if err != nil {
 				return diag.FromErr(err)
 			}
-			if scopeMatches {
+
+			if atleastOneScopeMatched {
+				// when the variable is sensitive, make sure all the scopes are matching.
+				if v.IsSensitive {
+					_, allEnvironmentsMatch := validateAllSliceItemsInSlice(variable.Scope.Environments, matchedScopes.Environments)
+					_, allRolesMatch := validateAllSliceItemsInSlice(variable.Scope.Roles, matchedScopes.Roles)
+					_, allMachinesMatch := validateAllSliceItemsInSlice(variable.Scope.Machines, matchedScopes.Machines)
+					_, allActionsMatch := validateAllSliceItemsInSlice(variable.Scope.Actions, matchedScopes.Actions)
+					_, allChannelsMatch := validateAllSliceItemsInSlice(variable.Scope.Channels, matchedScopes.Channels)
+					_, allTenantTagsMatch := validateAllSliceItemsInSlice(variable.Scope.TenantTags, matchedScopes.TenantTags)
+					_, allProcessOwnersMatch := validateAllSliceItemsInSlice(variable.Scope.ProcessOwners, matchedScopes.ProcessOwners)
+
+					// if any one of the scopes does not match then continue to next variable in the variable set.
+					if !(allEnvironmentsMatch && allRolesMatch && allMachinesMatch && allActionsMatch && allChannelsMatch && allTenantTagsMatch && allProcessOwnersMatch) {
+						continue
+					}
+				}
 				d.SetId(v.ID)
 				log.Printf("[INFO] variable created (%s)", d.Id())
 				return nil
