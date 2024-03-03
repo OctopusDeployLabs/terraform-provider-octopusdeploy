@@ -3412,6 +3412,67 @@ func TestVariableResource(t *testing.T) {
 	})
 }
 
+// TestTerraformApplyStepWithWorkerPool verifies that a terraform apply step with a custom worker pool is deployed successfully
+// See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/601
+func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "50-applyterraformtemplateaction", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := projects.Get(client, newSpaceId, query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		// Get worker pool
+		wpQuery := workerpools.WorkerPoolsQuery{
+			PartialName: "Docker",
+			Skip:        0,
+			Take:        1,
+		}
+
+		workerpools, err := workerpools.Get(client, newSpaceId, wpQuery)
+		if err != nil {
+			return err
+		}
+
+		if len(workerpools.Items) == 0 {
+			t.Fatalf("Space must have a worker pool called \"Docker\"")
+		}
+
+		// Get deployment process
+		process, err := deployments.GetDeploymentProcessByID(client, "", resource.DeploymentProcessID)
+		if err != nil {
+			return err
+		}
+
+		// Worker pool must be assigned
+		if process.Steps[0].Actions[0].WorkerPool != workerpools.Items[0].GetID() {
+			t.Fatalf("Action must use the worker pool \"Docker\"")
+		}
+
+		return nil
+	})
+}
+
 func TestDeploymentProcessWithGitDependency(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
 	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {

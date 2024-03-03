@@ -31,8 +31,10 @@ func dataSourceTenantsRead(ctx context.Context, d *schema.ResourceData, meta int
 		Take:               d.Get("take").(int),
 	}
 
+	spaceID := d.Get("space_id").(string)
+
 	client := meta.(*client.Client)
-	existingTenants, err := client.Tenants.Get(query)
+	existingTenants, err := tenants.Get(client, spaceID, query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
