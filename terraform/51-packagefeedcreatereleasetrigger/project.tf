@@ -10,6 +10,12 @@ resource "octopusdeploy_project_group" "project_group_test" {
   description = "Test Description"
 }
 
+resource "octopusdeploy_channel" "test_channel" {
+    name = "Test Channel"
+    project_id = "${octopusdeploy_project.deploy_frontend_project.id}"
+    space_id = var.octopus_space_id
+    lifecycle_id = data.octopusdeploy_lifecycles.lifecycle_default_lifecycle.lifecycles[0].id
+}
 
 resource "octopusdeploy_project" "deploy_frontend_project" {
   auto_create_release                  = false
@@ -35,14 +41,4 @@ resource "octopusdeploy_project" "deploy_frontend_project" {
     exclude_unhealthy_targets       = false
     skip_machine_behavior           = "SkipUnavailableMachines"
   }
-}
-
-resource "octopusdeploy_project_deployment_target_trigger" "projecttrigger_test" {
-  name             = "test"
-  project_id       = "${octopusdeploy_project.deploy_frontend_project.id}"
-  event_categories = []
-  environment_ids  = []
-  event_groups     = ["MachineAvailableForDeployment"]
-  roles            = []
-  should_redeploy  = false
 }
