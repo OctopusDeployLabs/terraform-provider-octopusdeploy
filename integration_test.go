@@ -3472,3 +3472,49 @@ func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
 		return nil
 	})
 }
+
+func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "51-packagefeedcreatereleasetrigger", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Projects.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		triggers, err := client.ProjectTriggers.GetByProjectID(resource.ID)
+
+		if err != nil {
+			return err
+		}
+
+		if triggers[0].Name != "test" {
+			t.Fatal("The project must have a trigger called \"test\" (was \"" + triggers[0].Name + "\")")
+		}
+
+		if triggers[0].Filter.GetFilterType() != filters.FeedFilter {
+			t.Fatal("The project trigger must have Filter.FilterType set to \"MachineFilter\" (was \"" + fmt.Sprint(triggers[0].Filter.GetFilterType()) + "\")")
+		}
+
+		return nil
+	})
+}
