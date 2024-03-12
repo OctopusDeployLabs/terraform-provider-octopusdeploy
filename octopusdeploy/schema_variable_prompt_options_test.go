@@ -1,9 +1,9 @@
 package octopusdeploy
 
 import (
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"github.com/stretchr/testify/require"
 )
 

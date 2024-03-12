@@ -459,6 +459,10 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 		action.WorkerPool = v.(string)
 	}
 
+	if v, ok := flattenedAction["worker_pool_variable"]; ok {
+		action.WorkerPoolVariable = v.(string)
+	}
+
 	if v, ok := flattenedAction["primary_package"]; ok {
 		primaryPackages := v.([]interface{})
 		for _, primaryPackage := range primaryPackages {
