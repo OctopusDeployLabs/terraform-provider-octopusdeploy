@@ -93,7 +93,8 @@ jobs:
           OCTODISABLEOCTOCONTAINERLOGGING: true
           OCTOTESTSKIPINIT: true
           GOMAXPROCS: 1
-          OCTOTESTVERSION: 2023.4
+          OCTOTESTVERSION: latest
+          OCTOTESTIMAGEURL: docker.packages.octopushq.com/octopusdeploy/octopusdeploy
       - name: Upload test artifacts
         uses: actions/upload-artifact@v3
         with:
