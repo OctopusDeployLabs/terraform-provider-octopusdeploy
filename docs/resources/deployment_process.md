@@ -297,6 +297,8 @@ Optional:
 - `template` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--template))
 - `template_parameters` (String)
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `worker_pool_id` (String) The worker pool associated with this deployment action.
+- `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
 
 <a id="nestedblock--step--apply_terraform_template_action--advanced_options"></a>
 ### Nested Schema for `step.apply_terraform_template_action.advanced_options`
@@ -774,6 +776,7 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
+- `namespace` (String)
 - `notes` (String) The notes associated with this deployment action.
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--package))
 - `primary_package` (Block List, Max: 1) The package assocated with this action. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--primary_package))

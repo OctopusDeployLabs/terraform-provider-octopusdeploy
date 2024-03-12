@@ -24,6 +24,7 @@ Provides information about existing tenants.
 - `partial_name` (String) A filter to search by the partial match of a name.
 - `project_id` (String) A filter to search by a project ID.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
 - `tags` (List of String) A filter to search by a list of tags.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
