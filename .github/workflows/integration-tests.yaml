@@ -97,7 +97,6 @@ jobs:
           GOMAXPROCS: 1
           OCTOTESTVERSION: latest
           OCTOTESTIMAGEURL: docker.packages.octopushq.com/octopusdeploy/octopusdeploy
-          DOCKER_AUTH_CONFIG: '{"auths":{"docker:packages:octopushq:com":{"username":"${{ secrets.OCTOPUSHQ_DOCKER_REGISTRY_USER }}","password":"${{ secrets.OCTOPUSHQ_DOCKER_REGISTRY_PASSWORD }}"}}}'
       - name: Upload test artifacts
         uses: actions/upload-artifact@v3
         with:
