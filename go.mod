@@ -3,8 +3,8 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.21
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.39.0
-	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240314225537-8e0a92384cf9
+	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.40.0
+	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20230705105638-f5ef7c07973b
 	github.com/google/uuid v1.6.0
 	github.com/gruntwork-io/terratest v0.41.11
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -115,7 +115,6 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
-	github.com/otiai10/copy v1.14.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/posener/complete v1.2.3 // indirect

@@ -453,8 +453,13 @@ func setDataSchema(schema *map[string]*schema.Schema) {
 	}
 }
 
-func getSubjectKeysSchema(description string) *schema.Schema {
+const (
+	SchemaSubjectKeysDescriptionExecution   = "Keys to include in a deployment or runbook. Valid options are `space`, `environment`, `project`, `tenant`, `runbook`, `account`, `type`"
+	SchemaSubjectKeysDescriptionHealth      = "Keys to include in a health check. Valid options are `space`, `account`, `target`, `type`"
+	SchemaSubjectKeysDescriptionAccountTest = "Keys to include in an account test. Valid options are: `space`, `account`, `type`"
+)
 
+func getSubjectKeysSchema(description string) *schema.Schema {
 	return &schema.Schema{
 		Optional:    true,
 		Description: description,

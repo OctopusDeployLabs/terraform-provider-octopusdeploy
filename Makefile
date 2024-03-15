@@ -3,7 +3,7 @@ HOSTNAME=octopus.com
 NAMESPACE=com
 NAME=octopusdeploy
 BINARY=terraform-provider-${NAME}
-VERSION=0.7.99
+VERSION=0.7.102
 
 ifeq ($(OS), Windows_NT)
 	OS_ARCH?=windows_386
