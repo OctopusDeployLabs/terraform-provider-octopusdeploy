@@ -78,9 +78,9 @@ func getAmazonWebServicesOpenIDConnectAccountSchema() map[string]*schema.Schema 
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
 		"tenants":                           getTenantsSchema(),
 		"tenant_tags":                       getTenantTagsSchema(),
-		"execution_subject_keys":            getSubjectKeysSchema(),
-		"health_subject_keys":               getSubjectKeysSchema(),
-		"account_test_subject_keys":         getSubjectKeysSchema(),
+		"execution_subject_keys":            getSubjectKeysSchema(SchemaSubjectKeysDescriptionExecution),
+		"health_subject_keys":               getSubjectKeysSchema(SchemaSubjectKeysDescriptionHealth),
+		"account_test_subject_keys":         getSubjectKeysSchema(SchemaSubjectKeysDescriptionAccountTest),
 		"role_arn": {
 			Description: "The Amazon Resource Name (ARN) of the role that the caller is assuming.",
 			Required:    true,
