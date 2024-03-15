@@ -524,6 +524,14 @@ func flattenApplyTerraformTemplateAction(action *deployments.DeploymentAction) m
 		}
 	}
 
+	if len(action.WorkerPool) > 0 {
+		flattenedAction["worker_pool_id"] = action.WorkerPool
+	}
+
+	if len(action.WorkerPoolVariable) > 0 {
+		flattenedAction["worker_pool_variable"] = action.WorkerPoolVariable
+	}
+
 	flattenedAction["advanced_options"] = flattenTerraformTemplateAdvancedOptions(action.Properties)
 
 	return flattenedAction
@@ -539,6 +547,8 @@ func getApplyTerraformTemplateActionSchema() *schema.Schema {
 	addTerraformTemplateParametersSchema(element)
 	addTerraformTemplateSchema(element)
 	addTerraformInlineTemplateSchema(element)
+	addWorkerPoolSchema(element)
+	addWorkerPoolVariableSchema(element)
 	addPrimaryPackageSchema(element, false)
 
 	return actionSchema

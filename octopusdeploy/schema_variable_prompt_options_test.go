@@ -1,9 +1,9 @@
 package octopusdeploy
 
 import (
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +26,7 @@ func TestExpandPromptedDisplaySettingsWithCheckbox(t *testing.T) {
 	}
 	result := expandPromptedDisplaySettings(input)
 	require.NotNil(t, result)
-	require.Equal(t, variables.ControlTypeCheckbox, result.ControlType)
+	require.Equal(t, resources.ControlTypeCheckbox, result.ControlType)
 }
 
 func TestExpandPromptedDisplaySettingsWithSelect(t *testing.T) {
@@ -47,7 +47,7 @@ func TestExpandPromptedDisplaySettingsWithSelect(t *testing.T) {
 	}
 	result := expandPromptedDisplaySettings(input)
 	require.NotNil(t, result)
-	require.Equal(t, variables.ControlTypeSelect, result.ControlType)
+	require.Equal(t, resources.ControlTypeSelect, result.ControlType)
 	require.NotNil(t, result.SelectOptions)
 	require.Len(t, result.SelectOptions, 2)
 	require.Equal(t, "Name-1", result.SelectOptions[0].DisplayName)

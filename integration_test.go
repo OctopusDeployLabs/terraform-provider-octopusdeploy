@@ -36,6 +36,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"os"
 	"path/filepath"
 	"sort"
@@ -2311,7 +2312,7 @@ func TestCloudRegionTargetResource(t *testing.T) {
 		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("./terraform", "33a-cloudregiontargetds"), newSpaceId, []string{})
 
 		if err != nil {
-			t.Log("BUG: cloud region data source does not appear to work")
+			t.Fatal("cloud region data source does not appear to work")
 		}
 
 		// Assert
@@ -3345,6 +3346,127 @@ func TestK8sPodAuthTargetResource(t *testing.T) {
 
 		if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) != "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" {
 			t.Fatal("The machine must have a Endpoint.ClusterCertificatePath of \"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) + "\")")
+		}
+
+		return nil
+	})
+}
+
+func TestVariableResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "49-variables", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		project, err := client.Projects.GetByName("Test")
+		variableSet, err := client.Variables.GetAll(project.ID)
+
+		if err != nil {
+			return err
+		}
+
+		if len(variableSet.Variables) != 7 {
+			t.Fatalf("Expected 7 variables to be created.")
+		}
+
+		for _, variable := range variableSet.Variables {
+			switch variable.Name {
+			case "UnscopedVariable":
+				if !variable.Scope.IsEmpty() {
+					t.Fatalf("Expected UnscopedVariable to have no scope values.")
+				}
+			case "ActionScopedVariable":
+				if len(variable.Scope.Actions) == 0 {
+					t.Fatalf("Expected ActionScopedVariable to have action scope.")
+				}
+			case "ChannelScopedVariable":
+				if len(variable.Scope.Channels) == 0 {
+					t.Fatalf("Expected ChannelScopedVariable to have channel scope.")
+				}
+			case "EnvironmentScopedVariable":
+				if len(variable.Scope.Environments) == 0 {
+					t.Fatalf("Expected EnvironmentScopedVariable to have environment scope.")
+				}
+			case "MachineScopedVariable":
+				if len(variable.Scope.Machines) == 0 {
+					t.Fatalf("Expected MachineScopedVariable to have machine scope.")
+				}
+			case "ProcessScopedVariable":
+				if len(variable.Scope.ProcessOwners) == 0 {
+					t.Fatalf("Expected ProcessScopedVariable to have process scope.")
+				}
+			case "RoleScopedVariable":
+				if len(variable.Scope.Roles) == 0 {
+					t.Fatalf("Expected RoleScopedVariable to have role scope.")
+				}
+			}
+		}
+
+		return nil
+	})
+}
+
+// TestTerraformApplyStepWithWorkerPool verifies that a terraform apply step with a custom worker pool is deployed successfully
+// See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/601
+func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "50-applyterraformtemplateaction", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := projects.Get(client, newSpaceId, query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		// Get worker pool
+		wpQuery := workerpools.WorkerPoolsQuery{
+			PartialName: "Docker",
+			Skip:        0,
+			Take:        1,
+		}
+
+		workerpools, err := workerpools.Get(client, newSpaceId, wpQuery)
+		if err != nil {
+			return err
+		}
+
+		if len(workerpools.Items) == 0 {
+			t.Fatalf("Space must have a worker pool called \"Docker\"")
+		}
+
+		// Get deployment process
+		process, err := deployments.GetDeploymentProcessByID(client, "", resource.DeploymentProcessID)
+		if err != nil {
+			return err
+		}
+
+		// Worker pool must be assigned
+		if process.Steps[0].Actions[0].WorkerPool != workerpools.Items[0].GetID() {
+			t.Fatalf("Action must use the worker pool \"Docker\"")
 		}
 
 		return nil

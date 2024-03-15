@@ -87,9 +87,9 @@ func getAzureOpenIdConnectAccountSchema() map[string]*schema.Schema {
 		"tenants":                           getTenantsSchema(),
 		"tenant_id":                         getTenantIDSchema(true),
 		"tenant_tags":                       getTenantTagsSchema(),
-		"execution_subject_keys":            getSubjectKeysSchema(),
-		"health_subject_keys":               getSubjectKeysSchema(),
-		"account_test_subject_keys":         getSubjectKeysSchema(),
+		"execution_subject_keys":            getSubjectKeysSchema("Keys to include in a deployment or runbook. Valid options are `space`, `environment`, `project`, `tenant`, `runbook`, `account`, `type`"),
+		"health_subject_keys":               getSubjectKeysSchema("Keys to include in a health check. Valid options are `space`, `account`, `target`, `type`"),
+		"account_test_subject_keys":         getSubjectKeysSchema("Keys to include in an account test. Valid options are: `space`, `account`, `type`"),
 		"audience":                          getOidcAudienceSchema(),
 	}
 }
