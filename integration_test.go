@@ -1509,6 +1509,12 @@ func TestTagSetResource(t *testing.T) {
 			return err
 		}
 
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("./terraform", "21a-tagsetds"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
 		// Assert
 		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
 		query := tagsets.TagSetsQuery{
@@ -1556,6 +1562,17 @@ func TestTagSetResource(t *testing.T) {
 
 		if !tagAFound {
 			t.Fatal("Tag Set must have an tag called \"a\"")
+		}
+
+		// Verify the environment data lookups work
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "21a-tagsetds"), "data_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if lookup != resource.ID {
+			t.Fatal("The environment lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
 		}
 
 		return nil

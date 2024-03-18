@@ -25,6 +25,14 @@ func expandTagSet(d *schema.ResourceData) *tagsets.TagSet {
 		tagSet.SpaceID = v.(string)
 	}
 
+	if v, ok := d.GetOk("tags"); ok {
+		if tags, ok := v.([]*schema.ResourceData); ok {
+			for _, tag := range tags {
+				tagSet.Tags = append(tagSet.Tags, expandTag(tag))
+			}
+		}
+	}
+
 	return tagSet
 }
 
@@ -33,17 +41,35 @@ func flattenTagSet(tagSet *tagsets.TagSet) map[string]interface{} {
 		return nil
 	}
 
+	tags := make([]map[string]interface{}, len(tagSet.Tags))
+	for i, tag := range tagSet.Tags {
+		tags[i] = flattenTag(tag)
+	}
+
 	return map[string]interface{}{
 		"description": tagSet.Description,
 		"id":          tagSet.GetID(),
 		"name":        tagSet.Name,
 		"sort_order":  tagSet.SortOrder,
 		"space_id":    tagSet.SpaceID,
+		"tags":        tags,
 	}
 }
 
 func getTagSetDataSchema() map[string]*schema.Schema {
+	tagSchema := getTagSchema()
+	delete(tagSchema, "tag_set_id")
+	delete(tagSchema, "tag_set_space_id")
+	setDataSchema(&tagSchema)
+
 	dataSchema := getTagSetSchema()
+	dataSchema["tags"] = &schema.Schema{
+		Computed:    true,
+		Description: "A list of tags associated with this tag set.",
+		Elem:        &schema.Resource{Schema: tagSchema},
+		Optional:    true,
+		Type:        schema.TypeList,
+	}
 	setDataSchema(&dataSchema)
 
 	return map[string]*schema.Schema{
