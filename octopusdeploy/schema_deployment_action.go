@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/gitdependencies"
 	"strconv"
 	"strings"
 
@@ -128,6 +129,10 @@ func flattenAction(action *deployments.DeploymentAction) map[string]interface{} 
 		flattenedAction["package"] = flattenedPackageReferences
 	}
 
+	if len(action.GitDependencies) > 0 {
+		flattenedAction["git_dependency"] = flattenGitDependency(action.GitDependencies[0])
+	}
+
 	return flattenedAction
 }
 
@@ -138,6 +143,7 @@ func getDeploymentActionSchema() *schema.Schema {
 	addWorkerPoolSchema(element)
 	addWorkerPoolVariableSchema(element)
 	addPackagesSchema(element, false)
+	addGitDependencySchema(element)
 
 	return actionSchema
 }
@@ -216,7 +222,8 @@ func getActionSchema() (*schema.Schema, *schema.Resource) {
 				Optional:    true,
 				Type:        schema.TypeList,
 			},
-			"id": getIDSchema(),
+			"git_dependency": getGitDependencySchema(false),
+			"id":             getIDSchema(),
 			"is_disabled": {
 				Default:     false,
 				Description: "Indicates the disabled status of this deployment action.",
@@ -491,6 +498,13 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 		packageReferences := v.([]interface{})
 		for _, packageReference := range packageReferences {
 			action.Packages = append(action.Packages, expandPackageReference(packageReference.(map[string]interface{})))
+		}
+	}
+
+	if v, ok := flattenedAction["git_dependency"]; ok {
+		expandedGitDependency := expandGitDependency(v.(*schema.Set))
+		if expandedGitDependency != nil {
+			action.GitDependencies = []*gitdependencies.GitDependency{expandedGitDependency}
 		}
 	}
 
