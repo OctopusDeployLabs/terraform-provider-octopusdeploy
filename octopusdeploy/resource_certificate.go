@@ -82,10 +82,12 @@ func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	client := m.(*client.Client)
 	certificate := expandCertificate(d)
-	if certificate.CertificateData.NewValue != nil {
+	certificateData := d.Get("certificate_data").(string)
+	password := d.Get("password").(string)
+	if d.HasChanges("certificate_data", "password") {
 		newCert := &certificates.ReplacementCertificate{
-			CertificateData: *certificate.CertificateData.NewValue,
-			Password:        *certificate.Password.NewValue,
+			CertificateData: certificateData,
+			Password:        password,
 		}
 		replaceCertificate, err := client.Certificates.Replace(certificate.ID, newCert)
 		if err != nil {
@@ -96,7 +98,7 @@ func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m in
 			return diag.FromErr(err)
 		}
 	}
-	updatedCertificate, err := client.Certificates.Update(*certificate)
+	updatedCertificate, err := certificates.Update(client, certificate)
 	if err != nil {
 		return diag.FromErr(err)
 	}
