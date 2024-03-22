@@ -31,7 +31,6 @@ This resource manages machine policies in Octopus Deploy.
 - `machine_connectivity_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_connectivity_policy))
 - `machine_health_check_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_health_check_policy))
 - `machine_update_policy` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--machine_update_policy))
-- `polling_request_maximum_message_processing_timeout` (Number) In nanoseconds.
 - `polling_request_queue_timeout` (Number) In nanoseconds.
 - `space_id` (String) The space ID associated with this resource.
 
