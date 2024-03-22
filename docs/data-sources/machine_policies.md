@@ -45,7 +45,6 @@ Read-Only:
 - `machine_health_check_policy` (Set of Object) (see [below for nested schema](#nestedatt--machine_policies--machine_health_check_policy))
 - `machine_update_policy` (Set of Object) (see [below for nested schema](#nestedatt--machine_policies--machine_update_policy))
 - `name` (String) The name of this resource.
-- `polling_request_maximum_message_processing_timeout` (Number) In nanoseconds.
 - `polling_request_queue_timeout` (Number) In nanoseconds.
 - `space_id` (String) The space ID associated with this resource.
 

@@ -18,10 +18,6 @@ resource "octopusdeploy_user" "deployer" {
 resource "octopusdeploy_team" "deployers" {
   name  = "Deployers"
   users = [octopusdeploy_user.deployer.id]
-
-  external_security_group {
-
-  }
 }
 
 resource "octopusdeploy_scoped_user_role" "deploy" {

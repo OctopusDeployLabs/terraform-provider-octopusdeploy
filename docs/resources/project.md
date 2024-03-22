@@ -27,6 +27,8 @@ resource "octopusdeploy_project" "example" {
   name                                 = "Development Project (OK to Delete)"
   project_group_id                     = "ProjectGroups-123"
   tenanted_deployment_participation    = "TenantedOrUntenanted"
+  included_library_variable_sets       = [ "LibraryVariablesSets-456", "LibraryVariablesSets-789" ]
+
 
   connectivity_policy {
     allow_deployments_to_no_targets = false
