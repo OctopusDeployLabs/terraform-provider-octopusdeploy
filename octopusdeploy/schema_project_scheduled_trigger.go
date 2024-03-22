@@ -36,11 +36,7 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
-		"should_redeploy": {
-			Description: "Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.",
-			Optional:    true,
-			Type:        schema.TypeBool,
-		},
+
 		"timezone": {
 			Description: "The timezone for the trigger.",
 			Optional:    true,
@@ -76,6 +72,21 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 			MaxItems:    1,
 		},
 	}
+}
+func getDeployLatestReleaseActionSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"source_environment":      {},
+		"destination_environment": {},
+		"should_redeploy": {
+			Description: "Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
+	}
+}
+
+func getCreateNewReleaseActionSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{}
 }
 
 // OnceDailySchedule
