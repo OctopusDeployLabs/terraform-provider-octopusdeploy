@@ -194,6 +194,7 @@ Optional:
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
+- `git_dependency` (Block Set, Max: 1) Configuration for resource sourcing from a git repository. (see [below for nested schema](#nestedblock--step--action--git_dependency))
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
@@ -227,6 +228,21 @@ Optional:
 
 - `feed_id` (String)
 - `image` (String)
+
+
+<a id="nestedblock--step--action--git_dependency"></a>
+### Nested Schema for `step.action.git_dependency`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.
+- `git_credential_id` (String) ID of an existing Git credential.
 
 
 <a id="nestedblock--step--action--package"></a>
@@ -283,6 +299,7 @@ Optional:
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
+- `git_dependency` (Block Set, Max: 1) Configuration for resource sourcing from a git repository. (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--git_dependency))
 - `google_cloud_account` (Block Set, Max: 1) (see [below for nested schema](#nestedblock--step--apply_terraform_template_action--google_cloud_account))
 - `id` (String) The unique ID for this resource.
 - `inline_template` (String)
@@ -364,6 +381,21 @@ Optional:
 - `image` (String)
 
 
+<a id="nestedblock--step--apply_terraform_template_action--git_dependency"></a>
+### Nested Schema for `step.apply_terraform_template_action.git_dependency`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.
+- `git_credential_id` (String) ID of an existing Git credential.
+
+
 <a id="nestedblock--step--apply_terraform_template_action--google_cloud_account"></a>
 ### Nested Schema for `step.apply_terraform_template_action.google_cloud_account`
 
@@ -441,6 +473,7 @@ Optional:
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
+- `git_dependency` (Block Set, Max: 1) Configuration for resource sourcing from a git repository. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--git_dependency))
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
@@ -473,6 +506,21 @@ Optional:
 
 - `feed_id` (String)
 - `image` (String)
+
+
+<a id="nestedblock--step--deploy_kubernetes_secret_action--git_dependency"></a>
+### Nested Schema for `step.deploy_kubernetes_secret_action.git_dependency`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.
+- `git_credential_id` (String) ID of an existing Git credential.
 
 
 <a id="nestedblock--step--deploy_kubernetes_secret_action--package"></a>
@@ -510,6 +558,7 @@ Optional:
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
+- `git_dependency` (Block Set, Max: 1) Configuration for resource sourcing from a git repository. (see [below for nested schema](#nestedblock--step--deploy_package_action--git_dependency))
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
@@ -556,6 +605,21 @@ Optional:
 
 - `feed_id` (String)
 - `image` (String)
+
+
+<a id="nestedblock--step--deploy_package_action--git_dependency"></a>
+### Nested Schema for `step.deploy_package_action.git_dependency`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.
+- `git_credential_id` (String) ID of an existing Git credential.
 
 
 <a id="nestedblock--step--deploy_package_action--package"></a>
@@ -623,6 +687,7 @@ Optional:
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
+- `git_dependency` (Block Set, Max: 1) Configuration for resource sourcing from a git repository. (see [below for nested schema](#nestedblock--step--deploy_windows_service_action--git_dependency))
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
@@ -672,6 +737,21 @@ Optional:
 - `image` (String)
 
 
+<a id="nestedblock--step--deploy_windows_service_action--git_dependency"></a>
+### Nested Schema for `step.deploy_windows_service_action.git_dependency`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.
+- `git_credential_id` (String) ID of an existing Git credential.
+
+
 <a id="nestedblock--step--deploy_windows_service_action--package"></a>
 ### Nested Schema for `step.deploy_windows_service_action.package`
 
@@ -707,6 +787,7 @@ Optional:
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
+- `git_dependency` (Block Set, Max: 1) Configuration for resource sourcing from a git repository. (see [below for nested schema](#nestedblock--step--manual_intervention_action--git_dependency))
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
@@ -737,6 +818,21 @@ Optional:
 
 - `feed_id` (String)
 - `image` (String)
+
+
+<a id="nestedblock--step--manual_intervention_action--git_dependency"></a>
+### Nested Schema for `step.manual_intervention_action.git_dependency`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.
+- `git_credential_id` (String) ID of an existing Git credential.
 
 
 <a id="nestedblock--step--manual_intervention_action--package"></a>
@@ -773,6 +869,7 @@ Optional:
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
+- `git_dependency` (Block Set, Max: 1) Configuration for resource sourcing from a git repository. (see [below for nested schema](#nestedblock--step--run_kubectl_script_action--git_dependency))
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
@@ -813,6 +910,21 @@ Optional:
 
 - `feed_id` (String)
 - `image` (String)
+
+
+<a id="nestedblock--step--run_kubectl_script_action--git_dependency"></a>
+### Nested Schema for `step.run_kubectl_script_action.git_dependency`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.
+- `git_credential_id` (String) ID of an existing Git credential.
 
 
 <a id="nestedblock--step--run_kubectl_script_action--package"></a>
@@ -866,6 +978,7 @@ Optional:
 - `environments` (List of String) The environments within which this deployment action will run.
 - `excluded_environments` (List of String) The environments that this step will be skipped in
 - `features` (List of String) A list of enabled features for this action.
+- `git_dependency` (Block Set, Max: 1) Configuration for resource sourcing from a git repository. (see [below for nested schema](#nestedblock--step--run_script_action--git_dependency))
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
@@ -905,6 +1018,21 @@ Optional:
 
 - `feed_id` (String)
 - `image` (String)
+
+
+<a id="nestedblock--step--run_script_action--git_dependency"></a>
+### Nested Schema for `step.run_script_action.git_dependency`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.
+- `git_credential_id` (String) ID of an existing Git credential.
 
 
 <a id="nestedblock--step--run_script_action--package"></a>
