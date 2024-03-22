@@ -1,9 +1,251 @@
 package octopusdeploy
 
 import (
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actions"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/filters"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"time"
 )
+
+func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTrigger) map[string]interface{} {
+	flattenedProjectScheduledTrigger := map[string]interface{}{}
+	flattenedProjectScheduledTrigger["id"] = projectScheduledTrigger.GetID()
+	flattenedProjectScheduledTrigger["name"] = projectScheduledTrigger.Name
+	flattenedProjectScheduledTrigger["description"] = projectScheduledTrigger.Description
+	flattenedProjectScheduledTrigger["project_id"] = projectScheduledTrigger.ProjectID
+	flattenedProjectScheduledTrigger["space_id"] = projectScheduledTrigger.SpaceID
+	flattenedProjectScheduledTrigger["is_disabled"] = projectScheduledTrigger.IsDisabled
+
+	actionType := projectScheduledTrigger.Action.GetActionType()
+	if actionType == actions.DeployLatestRelease {
+		deployLatestReleaseAction := projectScheduledTrigger.Action.(*actions.DeployLatestReleaseAction)
+		flattenedProjectScheduledTrigger["deploy_latest_release_action"] = []map[string]interface{}{
+			{
+				"source_environment_id":      deployLatestReleaseAction.SourceEnvironments[0],
+				"destination_environment_id": deployLatestReleaseAction.DestinationEnvironment,
+				"should_redeploy":            deployLatestReleaseAction.ShouldRedeploy,
+			},
+		}
+
+	} else if actionType == actions.DeployNewRelease {
+		deployNewReleaseAction := projectScheduledTrigger.Action.(*actions.DeployNewReleaseAction)
+		flattenedProjectScheduledTrigger["deploy_new_release_action"] = []map[string]interface{}{
+			{
+				"destination_environment_id": deployNewReleaseAction.Environment,
+				"git_reference":              deployNewReleaseAction.VersionControlReference.GitRef,
+			},
+		}
+	}
+
+	filterType := projectScheduledTrigger.Filter.GetFilterType()
+	if filterType == filters.OnceDailySchedule {
+		onceDailyScheduleFilter := projectScheduledTrigger.Filter.(*filters.OnceDailyScheduledTriggerFilter)
+		days := onceDailyScheduleFilter.Days
+		parsedDays := make([]string, len(days))
+		for i := range days {
+			// TODO handle error case
+			parsedDays[i] = filters.Weekday.String(days[i])
+		}
+		flattenedProjectScheduledTrigger["once_daily_schedule"] = []map[string]interface{}{
+			{
+				"start_time":   onceDailyScheduleFilter.Start.String(),
+				"days_of_week": flattenArray(parsedDays),
+			},
+		}
+		flattenedProjectScheduledTrigger["timezone"] = onceDailyScheduleFilter.TimeZone
+
+	} else if filterType == filters.ContinuousDailySchedule {
+		continuousDailyScheduleFilter := projectScheduledTrigger.Filter.(*filters.ContinuousDailyScheduledTriggerFilter)
+		days := continuousDailyScheduleFilter.Days
+		parsedDays := make([]string, len(days))
+		for i := range days {
+			// TODO handle error case
+			parsedDays[i] = filters.Weekday.String(days[i])
+		}
+		flattenedProjectScheduledTrigger["continuous_daily_schedule"] = []map[string]interface{}{
+			{
+				"interval": continuousDailyScheduleFilter.Interval.String(),
+				// TODO handle the types
+				"hour_interval":   continuousDailyScheduleFilter.HourInterval,
+				"minute_interval": continuousDailyScheduleFilter.MinuteInterval,
+				"run_after":       continuousDailyScheduleFilter.RunAfter.String(),
+				"run_until":       continuousDailyScheduleFilter.RunUntil.String(),
+				"days_of_week":    flattenArray(parsedDays),
+			},
+		}
+		flattenedProjectScheduledTrigger["timezone"] = continuousDailyScheduleFilter.TimeZone
+	} else if filterType == filters.DaysPerMonthSchedule {
+
+	} else if filterType == filters.CronExpressionSchedule {
+		cronExpressionScheduleFilter := projectScheduledTrigger.Filter.(*filters.CronScheduledTriggerFilter)
+		flattenedProjectScheduledTrigger["cron_expression_schedule"] = []map[string]interface{}{
+			{
+				"cron_expression": cronExpressionScheduleFilter.CronExpression,
+			},
+		}
+		flattenedProjectScheduledTrigger["timezone"] = cronExpressionScheduleFilter.TimeZone
+	}
+
+	return flattenedProjectScheduledTrigger
+}
+
+func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData, client *client.Client) (*triggers.ProjectTrigger, error) {
+	name := projectScheduledTrigger.Get("name").(string)
+	description := projectScheduledTrigger.Get("description").(string)
+	isDisabled := projectScheduledTrigger.Get("is_disabled").(bool)
+	timezone := projectScheduledTrigger.Get("timezone").(string)
+
+	projectId := projectScheduledTrigger.Get("project_id").(string)
+	spaceId := projectScheduledTrigger.Get("space_id").(string)
+	// TODO handle error
+	project, _ := projects.GetByID(client, spaceId, projectId)
+
+	var action actions.ITriggerAction = nil
+	var filter filters.ITriggerFilter = nil
+
+	// Action configuration
+	if attr, ok := projectScheduledTrigger.GetOk("deploy_latest_release_action"); ok {
+		deployLatestReleaseActionList := attr.(*schema.Set).List()
+		deployLatestReleaseActionMap := deployLatestReleaseActionList[0].(map[string]interface{})
+		deploymentAction := actions.NewDeployLatestReleaseAction(
+			deployLatestReleaseActionMap["source_environment_id"].(string),
+			deployLatestReleaseActionMap["should_redeploy"].(bool),
+			[]string{deployLatestReleaseActionMap["destination_environment_id"].(string)},
+			"",
+		)
+
+		// Might need to add some validation here.
+		deploymentAction.Channel = projectScheduledTrigger.Get("channel_id").(string)
+		deploymentAction.Tenants = expandArray(projectScheduledTrigger.Get("tenant_ids").([]interface{}))
+
+		action = deploymentAction
+	}
+
+	if attr, ok := projectScheduledTrigger.GetOk("create_new_release_action"); ok {
+		// TODO Blow up if action isn't nil anymore
+
+		deployNewReleaseActionList := attr.(*schema.Set).List()
+		deployNewReleaseActionMap := deployNewReleaseActionList[0].(map[string]interface{})
+		deploymentAction := actions.NewDeployNewReleaseAction(
+			deployNewReleaseActionMap["destination_environment_id"].(string),
+			"",
+			&actions.VersionControlReference{GitRef: deployNewReleaseActionMap["git_reference"].(string)},
+		)
+
+		// Might need to add some validation here.
+		deploymentAction.Channel = projectScheduledTrigger.Get("channel_id").(string)
+		deploymentAction.Tenants = expandArray(projectScheduledTrigger.Get("tenant_ids").([]interface{}))
+		action = deploymentAction
+	}
+
+	// Filter configuration
+	if attr, ok := projectScheduledTrigger.GetOk("once_daily_schedule"); ok {
+		// TODO Blow up if filter isn't nil anymore
+
+		onceDailyScheduleFilterList := attr.(*schema.Set).List()
+		onceDailyScheduleFilterMap := onceDailyScheduleFilterList[0].(map[string]interface{})
+
+		// TODO handle error case
+		startTime, _ := time.Parse(filters.RFC3339NanoNoZone, onceDailyScheduleFilterMap["start_time"].(string))
+		days := expandArray(onceDailyScheduleFilterMap["days_of_week"].([]interface{}))
+
+		parsedDays := make([]filters.Weekday, len(days))
+		for i := range days {
+			// TODO handle error case
+			parsedDays[i], _ = filters.WeekdayString(days[i])
+		}
+
+		onceDailyScheduleFilter := filters.NewOnceDailyScheduledTriggerFilter(parsedDays, startTime)
+		onceDailyScheduleFilter.TimeZone = timezone
+		filter = onceDailyScheduleFilter
+	}
+
+	if attr, ok := projectScheduledTrigger.GetOk("continuous_daily_schedule"); ok {
+		// TODO Blow up if filter isn't nil anymore
+
+		continuousDailyScheduleFilterList := attr.(*schema.Set).List()
+		continuousDailyScheduleFilterMap := continuousDailyScheduleFilterList[0].(map[string]interface{})
+
+		// TODO handle error case
+		interval, _ := filters.DailyScheduledIntervalString(continuousDailyScheduleFilterMap["interval"].(string))
+		runAfter, _ := time.Parse(filters.RFC3339NanoNoZone, continuousDailyScheduleFilterMap["run_after"].(string))
+		runUntil, _ := time.Parse(filters.RFC3339NanoNoZone, continuousDailyScheduleFilterMap["run_until"].(string))
+
+		days := expandArray(continuousDailyScheduleFilterMap["days_of_week"].([]interface{}))
+		// TODO move into helper function
+		parsedDays := make([]filters.Weekday, len(days))
+		for i := range days {
+			// TODO handle error case
+			parsedDays[i], _ = filters.WeekdayString(days[i])
+		}
+
+		continuousDailyScheduleFilter := filters.NewContinuousDailyScheduledTriggerFilter(parsedDays, timezone)
+		continuousDailyScheduleFilter.Interval = &interval
+		continuousDailyScheduleFilter.RunAfter = &runAfter
+		continuousDailyScheduleFilter.RunUntil = &runUntil
+
+		if interval == filters.OnceHourly {
+			hourInterval := continuousDailyScheduleFilterMap["hour_interval"].(int16)
+			continuousDailyScheduleFilter.HourInterval = &hourInterval
+		} else if interval == filters.OnceEveryMinute {
+			minuteInterval := continuousDailyScheduleFilterMap["minute_interval"].(int16)
+			continuousDailyScheduleFilter.MinuteInterval = &minuteInterval
+		}
+
+		filter = continuousDailyScheduleFilter
+	}
+
+	// TODO
+	//if attr, ok := projectScheduledTrigger.GetOk("days_per_month_schedule"); ok {
+	//	// TODO Blow up if filter isn't nil anymore
+	//
+	//	daysPerMonthScheduleFilterList := attr.(*schema.Set).List()
+	//	daysPerMonthScheduleFilterMap := daysPerMonthScheduleFilterList[0].(map[string]interface{})
+	//
+	//	// TODO handle error case
+	//	interval, _ := filters.DailyScheduledIntervalString(daysPerMonthScheduleFilterMap["interval"].(string))
+	//	runAfter, _ := time.Parse(filters.RFC3339NanoNoZone, daysPerMonthScheduleFilterMap["run_after"].(string))
+	//	runUntil, _ := time.Parse(filters.RFC3339NanoNoZone, daysPerMonthScheduleFilterMap["run_until"].(string))
+	//
+	//	days := expandArray(daysPerMonthScheduleFilterMap["days_of_week"].([]interface{}))
+	//	parsedDays := make([]filters.Weekday, len(days))
+	//	for i := range days {
+	//		// TODO handle error case
+	//		parsedDays[i], _ = filters.WeekdayString(days[i])
+	//	}
+	//
+	//	continuousDailyScheduleFilter := filters.NewDaysPerMonthScheduledTriggerFilter(parsedDays, timezone)
+	//	continuousDailyScheduleFilter.Interval = &interval
+	//	continuousDailyScheduleFilter.RunAfter = &runAfter
+	//	continuousDailyScheduleFilter.RunUntil = &runUntil
+	//
+	//	if interval == filters.OnceHourly {
+	//		hourInterval := daysPerMonthScheduleFilterMap["hour_interval"].(int16)
+	//		continuousDailyScheduleFilter.HourInterval = &hourInterval
+	//	} else if interval == filters.OnceEveryMinute {
+	//		minuteInterval := daysPerMonthScheduleFilterMap["minute_interval"].(int16)
+	//		continuousDailyScheduleFilter.MinuteInterval = &minuteInterval
+	//	}
+	//
+	//	filter = continuousDailyScheduleFilter
+	//}
+
+	if attr, ok := projectScheduledTrigger.GetOk("cron_expression_schedule"); ok {
+		cronExpressionScheduleFilterList := attr.(*schema.Set).List()
+		cronExpressionScheduleFilterMap := cronExpressionScheduleFilterList[0].(map[string]interface{})
+
+		cronExpression := cronExpressionScheduleFilterMap["cron_expression"].(string)
+		cronExpressionScheduleFilter := filters.NewCronScheduledTriggerFilter(cronExpression, timezone)
+
+		filter = cronExpressionScheduleFilter
+	}
+
+	return triggers.NewProjectTrigger(name, description, isDisabled, project, action, filter), nil
+}
 
 func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
@@ -21,19 +263,41 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 		},
 		"space_id": {
 			Required:         true,
-			Description:      "The space ID associated with the project to attach the trigger.",
+			Description:      "The space ID where this trigger's project exists.",
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
-		"release_action":          {},
-		"channel":                 {},
-		"source_environment":      {},
-		"destination_environment": {},
-		"tenant_ids":              {},
-		"tenant_tags":             {},
+		"deploy_latest_release_action": {
+			Description: "Configuration for deploying the latest release. Can not be used with 'deploy_new_release_action'.",
+			Optional:    true,
+			Type:        schema.TypeSet,
+			Elem:        &schema.Resource{Schema: getDeployLatestReleaseActionSchema()},
+			MaxItems:    1,
+		},
+		"deploy_new_release_action": {
+			Description: "Configuration for deploying a new release. Can not be used with 'deploy_latest_release_action'.",
+			Optional:    true,
+			Type:        schema.TypeSet,
+			Elem:        &schema.Resource{Schema: getDeployNewReleaseActionSchema()},
+			MaxItems:    1,
+		},
+		"channel_id": {
+			Description:      "The channel ID to use when creating the release. Will use the default channel if left blank.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
+		"tenant_ids": {
+			Description: "The IDs of the tenants to deploy to.",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
+		},
+		//"tenant_tags": {}, Not actually sure if this is used
 		"is_disabled": {
 			Description: "Indicates whether the trigger is disabled.",
 			Optional:    true,
+			Default:     false,
 			Type:        schema.TypeBool,
 		},
 
@@ -73,10 +337,22 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 		},
 	}
 }
+
+// DeployLatestRelease
 func getDeployLatestReleaseActionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"source_environment":      {},
-		"destination_environment": {},
+		"source_environment_id": {
+			Required:         true,
+			Description:      "The environment ID to use when selecting the release to deploy from.",
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
+		"destination_environment_id": {
+			Required:         true,
+			Description:      "The environment ID to deploy the selected release to.",
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
 		"should_redeploy": {
 			Description: "Enable to re-deploy to the deployment targets even if they are already up-to-date with the current deployment.",
 			Optional:    true,
@@ -85,8 +361,21 @@ func getDeployLatestReleaseActionSchema() map[string]*schema.Schema {
 	}
 }
 
-func getCreateNewReleaseActionSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{}
+// DeployNewRelease
+func getDeployNewReleaseActionSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"destination_environment_id": {
+			Required:         true,
+			Description:      "The environment ID to deploy the selected release to.",
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+		},
+		"git_reference": {
+			Optional:    true,
+			Description: "The git reference to use when creating the release. Can be a branch, tag, or commit hash.",
+			Type:        schema.TypeString,
+		},
+	}
 }
 
 // OnceDailySchedule

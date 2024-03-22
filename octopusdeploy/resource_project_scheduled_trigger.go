@@ -1,19 +1,90 @@
 package octopusdeploy
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"context"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"log"
+)
 
 func resourceProjectScheduledTrigger() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceProjectDeploymentTargetTriggerCreate,
-		DeleteContext: resourceProjectDeploymentTargetTriggerDelete,
+		CreateContext: resourceProjectScheduledTriggerCreate,
+		DeleteContext: resourceProjectScheduledTriggerDelete,
 		Importer:      getImporter(),
-		ReadContext:   resourceProjectDeploymentTargetTriggerRead,
-		Schema:        getProjectDeploymentTargetTriggerSchema(),
-		UpdateContext: resourceProjectDeploymentTargetTriggerUpdate,
+		ReadContext:   resourceProjectScheduledTriggerRead,
+		Schema:        getProjectScheduledTriggerSchema(),
+		UpdateContext: resourceProjectScheduledTriggerUpdate,
 	}
 }
 
-func resourceProjectScheduledTriggerRead()
-func resourceProjectScheduledTriggerCreate()
-func resourceProjectScheduledTriggerUpdate()
-func resourceProjectScheduledTriggerDelete()
+func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*client.Client)
+
+	scheduledTrigger, err := client.ProjectTriggers.GetByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if scheduledTrigger == nil {
+		d.SetId("")
+		return nil
+	}
+
+	logResource("scheduled_project_trigger", scheduledTrigger)
+	flattenedScheduledTrigger := flattenProjectScheduledTrigger(scheduledTrigger)
+	for key, value := range flattenedScheduledTrigger {
+		d.Set(key, value)
+	}
+
+	return nil
+}
+
+func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*client.Client)
+	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	scheduledTrigger, err := client.ProjectTriggers.Add(expandedScheduledTrigger)
+
+	if isEmpty(scheduledTrigger.GetID()) {
+		log.Println("ID is nil")
+	} else {
+		d.SetId(scheduledTrigger.GetID())
+	}
+
+	return nil
+}
+
+func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*client.Client)
+	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, client)
+	expandedScheduledTrigger.ID = d.Id()
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	scheduledTrigger, err := client.ProjectTriggers.Update(expandedScheduledTrigger)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(scheduledTrigger.GetID())
+
+	return nil
+}
+
+func resourceProjectScheduledTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	client := m.(*client.Client)
+	err := client.ProjectTriggers.DeleteByID(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	return nil
+}
