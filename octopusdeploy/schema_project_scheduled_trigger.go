@@ -1,6 +1,7 @@
 package octopusdeploy
 
 import (
+	"errors"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actions"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/filters"
@@ -40,7 +41,6 @@ func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTri
 			},
 		}
 	}
-	// TODO throw error if action is nil
 
 	filterType := projectScheduledTrigger.Filter.GetFilterType()
 	if filterType == filters.OnceDailySchedule {
@@ -48,12 +48,11 @@ func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTri
 		days := onceDailyScheduleFilter.Days
 		parsedDays := make([]string, len(days))
 		for i := range days {
-			// TODO handle error case
 			parsedDays[i] = filters.Weekday.String(days[i])
 		}
 		flattenedProjectScheduledTrigger["once_daily_schedule"] = []map[string]interface{}{
 			{
-				"start_time":   onceDailyScheduleFilter.Start.String(),
+				"start_time":   onceDailyScheduleFilter.Start.Format(filters.RFC3339NanoNoZone),
 				"days_of_week": flattenArray(parsedDays),
 			},
 		}
@@ -64,14 +63,12 @@ func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTri
 		days := continuousDailyScheduleFilter.Days
 		parsedDays := make([]string, len(days))
 		for i := range days {
-			// TODO handle error case
 			parsedDays[i] = filters.Weekday.String(days[i])
 		}
 
 		flattenedProjectScheduledTrigger["continuous_daily_schedule"] = []map[string]interface{}{
 			{
-				"interval": continuousDailyScheduleFilter.Interval.String(),
-				// TODO handle the types
+				"interval":        continuousDailyScheduleFilter.Interval.String(),
 				"hour_interval":   continuousDailyScheduleFilter.HourInterval,
 				"minute_interval": continuousDailyScheduleFilter.MinuteInterval,
 				"run_after":       continuousDailyScheduleFilter.RunAfter.Format(filters.RFC3339NanoNoZone),
@@ -113,8 +110,11 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 
 	projectId := projectScheduledTrigger.Get("project_id").(string)
 	spaceId := projectScheduledTrigger.Get("space_id").(string)
-	// TODO handle error
-	project, _ := projects.GetByID(client, spaceId, projectId)
+	project, err := projects.GetByID(client, spaceId, projectId)
+
+	if err != nil {
+		return nil, err
+	}
 
 	var action actions.ITriggerAction = nil
 	var filter filters.ITriggerFilter = nil
@@ -138,7 +138,9 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 	}
 
 	if attr, ok := projectScheduledTrigger.GetOk("deploy_new_release_action"); ok {
-		// TODO Blow up if action isn't nil anymore
+		if action != nil {
+			return nil, errors.New("only one of 'deploy_latest_release_action' or 'deploy_new_release_action' can be set")
+		}
 
 		deployNewReleaseActionList := attr.(*schema.Set).List()
 		deployNewReleaseActionMap := deployNewReleaseActionList[0].(map[string]interface{})
@@ -156,18 +158,22 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 
 	// Filter configuration
 	if attr, ok := projectScheduledTrigger.GetOk("once_daily_schedule"); ok {
-		// TODO Blow up if filter isn't nil anymore
+		if filter != nil {
+			return nil, errors.New("only one of 'once_daily_schedule', 'continuous_daily_schedule', 'days_per_month_schedule', or 'cron_expression_schedule' can be set")
+		}
 
 		onceDailyScheduleFilterList := attr.(*schema.Set).List()
 		onceDailyScheduleFilterMap := onceDailyScheduleFilterList[0].(map[string]interface{})
 
-		// TODO handle error case
-		startTime, _ := time.Parse(filters.RFC3339NanoNoZone, onceDailyScheduleFilterMap["start_time"].(string))
+		startTime, err := time.Parse(filters.RFC3339NanoNoZone, onceDailyScheduleFilterMap["start_time"].(string))
+		if err != nil {
+			return nil, err
+		}
+
 		days := expandArray(onceDailyScheduleFilterMap["days_of_week"].([]interface{}))
 
 		parsedDays := make([]filters.Weekday, len(days))
 		for i := range days {
-			// TODO handle error case
 			parsedDays[i], _ = filters.WeekdayString(days[i])
 		}
 
@@ -177,12 +183,13 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 	}
 
 	if attr, ok := projectScheduledTrigger.GetOk("continuous_daily_schedule"); ok {
-		// TODO Blow up if filter isn't nil anymore
+		if filter != nil {
+			return nil, errors.New("only one of 'once_daily_schedule', 'continuous_daily_schedule', 'days_per_month_schedule', or 'cron_expression_schedule' can be set")
+		}
 
 		continuousDailyScheduleFilterList := attr.(*schema.Set).List()
 		continuousDailyScheduleFilterMap := continuousDailyScheduleFilterList[0].(map[string]interface{})
 
-		// TODO handle error case
 		interval, _ := filters.DailyScheduledIntervalString(continuousDailyScheduleFilterMap["interval"].(string))
 		runAfter, err := time.Parse(filters.RFC3339NanoNoZone, continuousDailyScheduleFilterMap["run_after"].(string))
 
@@ -197,10 +204,8 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 		}
 
 		days := expandArray(continuousDailyScheduleFilterMap["days_of_week"].([]interface{}))
-		// TODO move into helper function
 		parsedDays := make([]filters.Weekday, len(days))
 		for i := range days {
-			// TODO handle error case
 			parsedDays[i], _ = filters.WeekdayString(days[i])
 		}
 
@@ -221,7 +226,10 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 	}
 
 	if attr, ok := projectScheduledTrigger.GetOk("days_per_month_schedule"); ok {
-		// TODO Blow up if filter isn't nil anymore
+		if filter != nil {
+			return nil, errors.New("only one of 'once_daily_schedule', 'continuous_daily_schedule', 'days_per_month_schedule', or 'cron_expression_schedule' can be set")
+		}
+
 		daysPerMonthScheduleFilterList := attr.(*schema.Set).List()
 		daysPerMonthScheduleFilterMap := daysPerMonthScheduleFilterList[0].(map[string]interface{})
 
@@ -241,6 +249,10 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 	}
 
 	if attr, ok := projectScheduledTrigger.GetOk("cron_expression_schedule"); ok {
+		if filter != nil {
+			return nil, errors.New("only one of 'once_daily_schedule', 'continuous_daily_schedule', 'days_per_month_schedule', or 'cron_expression_schedule' can be set")
+		}
+
 		cronExpressionScheduleFilterList := attr.(*schema.Set).List()
 		cronExpressionScheduleFilterMap := cronExpressionScheduleFilterList[0].(map[string]interface{})
 
@@ -250,10 +262,10 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 		filter = cronExpressionScheduleFilter
 	}
 
-	// NewProjectTrigger doesn't set the description
+	// NewProjectTrigger doesn't actually use the description value
 	projectTriggerToCreate := triggers.NewProjectTrigger(name, description, isDisabled, project, action, filter)
-
 	projectTriggerToCreate.Description = description
+
 	return projectTriggerToCreate, nil
 }
 
@@ -293,7 +305,7 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 		},
 		"channel_id": {
 			Description:      "The channel ID to use when creating the release. Will use the default channel if left blank.",
-			Required:         true,
+			Optional:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
@@ -303,14 +315,12 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Type:        schema.TypeList,
 		},
-		//"tenant_tags": {}, Not actually sure if this is used
 		"is_disabled": {
 			Description: "Indicates whether the trigger is disabled.",
 			Optional:    true,
 			Default:     false,
 			Type:        schema.TypeBool,
 		},
-
 		"timezone": {
 			Description: "The timezone for the trigger.",
 			Optional:    true,
@@ -395,15 +405,12 @@ func getOnceDailyScheduleSchema() map[string]*schema.Schema {
 			Required:    true,
 			Description: "The time of day to start the trigger.",
 			Type:        schema.TypeString,
-			//ValidateFunc: validation.IsRFC3339Time,
 		},
 		"days_of_week": {
 			Required:    true,
 			Description: "The days of the week to run the trigger.",
 			Type:        schema.TypeList,
 			Elem:        &schema.Schema{Type: schema.TypeString},
-			//ValidateDiagFunc: validation.ToDiagFunc(validation.All(
-			//	validation.IsDayOfTheWeek(true))),
 		},
 	}
 }
@@ -437,28 +444,18 @@ func getContinuousDailyScheduleSchema() map[string]*schema.Schema {
 			Required:    true,
 			Description: "The time of day to start the trigger.",
 			Type:        schema.TypeString,
-			//ValidateFunc: validation.IsRFC3339Time,
-			// TODO handle supressing diff when the time component is the same
-			//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			//	if strings.ToLower(old) == strings.ToLower(new) {
-			//		return true
-			//	}
-			//	return false
-			//},
 		},
 		"run_until": {
 			Required:    true,
 			Description: "The time of day to end the trigger.",
 			Type:        schema.TypeString,
-			//ValidateFunc: validation.IsRFC3339Time,
 		},
+		// TODO ensure they are sorted when stored into state
 		"days_of_week": {
 			Required:    true,
 			Description: "The days of the week to run the trigger.",
 			Type:        schema.TypeList,
 			Elem:        &schema.Schema{Type: schema.TypeString},
-			//ValidateDiagFunc: validation.ToDiagFunc(validation.All(
-			//	validation.IsDayOfTheWeek(true))),
 		},
 	}
 }
@@ -470,7 +467,6 @@ func getDaysPerMonthScheduleSchema() map[string]*schema.Schema {
 			Required:    true,
 			Description: "The time of day to start the trigger.",
 			Type:        schema.TypeString,
-			//ValidateFunc: validation.IsRFC3339Time,
 		},
 		"monthly_schedule_type": {
 			Required:    true,
@@ -492,11 +488,12 @@ func getDaysPerMonthScheduleSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"day_of_week": {
+			// API defaults to Sunday which will cause this resource to have a diff if it is not set in state
+			Default:          "Sunday",
 			Optional:         true,
-			Description:      "Which day of the week to run the trigger on.",
+			Description:      "Which day of the week to run the trigger on. Required when monthly_schedule_type is set to 'DayOfMonth'.",
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.IsDayOfTheWeek(true)),
-			// TODO supress if monthly schedule type is not DayOfMonth
 		},
 	}
 }
