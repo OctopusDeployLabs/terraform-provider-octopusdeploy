@@ -2,7 +2,9 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
@@ -44,11 +46,18 @@ func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.Resource
 func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, client)
+
+	tflog.Info(ctx, fmt.Sprintf("Trigger (%v)", expandedScheduledTrigger))
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	scheduledTrigger, err := client.ProjectTriggers.Add(expandedScheduledTrigger)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if isEmpty(scheduledTrigger.GetID()) {
 		log.Println("ID is nil")
@@ -62,6 +71,11 @@ func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.Resour
 func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, client)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	expandedScheduledTrigger.ID = d.Id()
 
 	if err != nil {
