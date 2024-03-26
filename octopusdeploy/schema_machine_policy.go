@@ -67,10 +67,6 @@ func expandMachinePolicy(d *schema.ResourceData) *machinepolicies.MachinePolicy 
 		machinePolicy.Name = v.(string)
 	}
 
-	if v, ok := d.GetOk("polling_request_maximum_message_processing_timeout"); ok {
-		machinePolicy.PollingRequestMaximumMessageProcessingTimeout = time.Duration(v.(int))
-	}
-
 	if v, ok := d.GetOk("polling_request_queue_timeout"); ok {
 		machinePolicy.PollingRequestQueueTimeout = time.Duration(v.(int))
 	}
@@ -101,9 +97,8 @@ func flattenMachinePolicy(machinePolicy *machinepolicies.MachinePolicy) map[stri
 		"machine_health_check_policy":     flattenMachineHealthCheckPolicy(machinePolicy.MachineHealthCheckPolicy),
 		"machine_update_policy":           flattenMachineUpdatePolicy(machinePolicy.MachineUpdatePolicy),
 		"name":                            machinePolicy.Name,
-		"polling_request_maximum_message_processing_timeout": machinePolicy.PollingRequestMaximumMessageProcessingTimeout,
-		"polling_request_queue_timeout":                      machinePolicy.PollingRequestQueueTimeout,
-		"space_id":                                           machinePolicy.SpaceID,
+		"polling_request_queue_timeout":   machinePolicy.PollingRequestQueueTimeout,
+		"space_id":                        machinePolicy.SpaceID,
 	}
 }
 
@@ -187,12 +182,6 @@ func getMachinePolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeSet,
 		},
 		"name": getNameSchema(true),
-		"polling_request_maximum_message_processing_timeout": {
-			Default:     10 * time.Minute,
-			Optional:    true,
-			Type:        schema.TypeInt,
-			Description: "In nanoseconds.",
-		},
 		"polling_request_queue_timeout": {
 			Default:     2 * time.Minute,
 			Optional:    true,
@@ -212,7 +201,6 @@ func setMachinePolicy(ctx context.Context, d *schema.ResourceData, machinePolicy
 	d.Set("id", machinePolicy.GetID())
 	d.Set("is_default", machinePolicy.IsDefault)
 	d.Set("name", machinePolicy.Name)
-	d.Set("polling_request_maximum_message_processing_timeout", machinePolicy.PollingRequestMaximumMessageProcessingTimeout)
 	d.Set("polling_request_queue_timeout", machinePolicy.PollingRequestQueueTimeout)
 	d.Set("space_id", machinePolicy.SpaceID)
 

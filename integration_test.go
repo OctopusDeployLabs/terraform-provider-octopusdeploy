@@ -37,6 +37,7 @@ package main
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
 	"os"
 	"path/filepath"
 	"sort"
@@ -64,6 +65,7 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"k8s.io/utils/strings/slices"
+	stdslices "slices"
 )
 
 // TestSpaceResource verifies that a space can be reimported with the correct settings
@@ -1947,10 +1949,6 @@ func TestMachinePolicyResource(t *testing.T) {
 			t.Fatal("The machine policy must have a ConnectionRetryTimeLimit of \"00:05:00\" (was \"" + fmt.Sprint(resource.ConnectionRetryTimeLimit) + "\")")
 		}
 
-		if resource.PollingRequestMaximumMessageProcessingTimeout.Minutes() != 10 {
-			t.Fatal("The machine policy must have a PollingRequestMaximumMessageProcessingTimeout of \"00:10:00\" (was \"" + fmt.Sprint(resource.PollingRequestMaximumMessageProcessingTimeout) + "\")")
-		}
-
 		if resource.MachineCleanupPolicy.DeleteMachinesElapsedTimeSpan.Minutes() != 20 {
 			t.Fatal("The machine policy must have a DeleteMachinesElapsedTimeSpan of \"00:20:00\" (was \"" + fmt.Sprint(resource.MachineCleanupPolicy.DeleteMachinesElapsedTimeSpan) + "\")")
 		}
@@ -3476,7 +3474,7 @@ func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
 func TestDeploymentProcessWithGitDependency(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
 	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		newSpaceId, err := testFramework.Act(t, container, "./terraform", "50-deploymentprocesswithgitdependency", []string{})
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "51-deploymentprocesswithgitdependency", []string{})
 
 		if err != nil {
 			return err
@@ -3519,6 +3517,77 @@ func TestDeploymentProcessWithGitDependency(t *testing.T) {
 					t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency of non-library type to not have a defined git credential id.")
 				}
 			}
+		}
+
+		return nil
+	})
+}
+
+func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "52-packagefeedcreatereleasetrigger", []string{})
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Projects.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatal("Space must have a project called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		project_triggers, err := client.ProjectTriggers.GetByProjectID(resource.ID)
+
+		if err != nil {
+			return err
+		}
+
+		if len(project_triggers) != 2 {
+			t.Fatal("There must be exactly 2 project triggers")
+		}
+
+		tr1Name := "My first trigger"
+		tr2Name := "My second trigger"
+
+		tr1Index := stdslices.IndexFunc(project_triggers, func(t *triggers.ProjectTrigger) bool { return t.Name == tr1Name })
+		tr2Index := stdslices.IndexFunc(project_triggers, func(t *triggers.ProjectTrigger) bool { return t.Name == tr2Name })
+
+		if tr1Index == -1 || tr2Index == -1 {
+			t.Fatalf("Unable to find both triggers. Expecting there to be \"%s\" and \"%s\".", tr1Name, tr2Name)
+		}
+
+		if project_triggers[0].Filter.GetFilterType() != filters.FeedFilter || project_triggers[1].Filter.GetFilterType() != filters.FeedFilter {
+			t.Fatal("The project triggers must all be of \"FeedFilter\" type")
+		}
+
+		if project_triggers[tr1Index].IsDisabled {
+			t.Fatalf("The trigger \"%s\" should not be disabled", tr1Name)
+		}
+
+		if !project_triggers[tr2Index].IsDisabled {
+			t.Fatalf("The trigger \"%s\" should be disabled", tr2Name)
+		}
+
+		tr1Filter := project_triggers[tr1Index].Filter.(*filters.FeedTriggerFilter)
+		tr2Filter := project_triggers[tr2Index].Filter.(*filters.FeedTriggerFilter)
+
+		if len(tr1Filter.Packages) != 2 {
+			t.Fatalf("The trigger \"%s\" should have 2 package references", tr1Name)
+		}
+
+		if len(tr2Filter.Packages) != 1 {
+			t.Fatalf("The trigger \"%s\" should have 1 package reference", tr2Name)
 		}
 
 		return nil
