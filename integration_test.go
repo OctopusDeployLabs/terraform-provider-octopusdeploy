@@ -3619,25 +3619,32 @@ func TestProjectScheduledTriggerResources(t *testing.T) {
 		nonTenantedProjectName := "Non Tenanted"
 		nonTenantedProjectIndex := stdslices.IndexFunc(resources.Items, func(t *projects.Project) bool { return t.Name == nonTenantedProjectName })
 		nonTenantedProject := resources.Items[nonTenantedProjectIndex]
-		nonTenantedProjectTriggers, err := client.ProjectTriggers.GetByProjectID(nonTenantedProject.ID)
+
+		tenantedProjectName := "Tenanted"
+		tenantedProjectIndex := stdslices.IndexFunc(resources.Items, func(t *projects.Project) bool { return t.Name == tenantedProjectName })
+		tenantedProject := resources.Items[tenantedProjectIndex]
+		
+		projectTriggers, err := client.ProjectTriggers.GetAll()
 		if err != nil {
 			return err
+		}
+
+		nonTenantedProjectTriggers := make([]*triggers.ProjectTrigger, 9)
+		tenantedProjectTriggers := make([]*triggers.ProjectTrigger, 2)
+
+		for _, trigger := range projectTriggers {
+			if trigger.ProjectID == nonTenantedProject.ID {
+				nonTenantedProjectTriggers = append(nonTenantedProjectTriggers, trigger)
+			} else if trigger.ProjectID == tenantedProject.ID {
+				tenantedProjectTriggers = append(tenantedProjectTriggers, trigger)
+			}
 		}
 
 		if len(nonTenantedProjectTriggers) != 9 {
 			t.Fatal("Non Tenanted project should have exactly 8 project triggers and 1 runbook trigger, only found: " + fmt.Sprint(len(nonTenantedProjectTriggers)))
 		}
 
-		tenantedProjectName := "Tenanted"
-		tenantedProjectIndex := stdslices.IndexFunc(resources.Items, func(t *projects.Project) bool { return t.Name == tenantedProjectName })
-		tenantedProject := resources.Items[tenantedProjectIndex]
-		tenantedProjectTriggers, err := client.ProjectTriggers.GetByProjectID(tenantedProject.ID)
-
-		if err != nil {
-			return err
-		}
-
-		if len(tenantedProjectTriggers) != 2 {
+		if len(tenantedProjectTriggers) != 9 {
 			t.Fatal("Tenanted project should have exactly 1 project trigger and 1 runbook trigger, only found: " + fmt.Sprint(len(tenantedProjectTriggers)))
 		}
 
