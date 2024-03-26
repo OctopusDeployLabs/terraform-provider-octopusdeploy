@@ -3625,7 +3625,7 @@ func TestProjectScheduledTriggerResources(t *testing.T) {
 		}
 
 		if len(nonTenantedProjectTriggers) != 9 {
-			t.Fatal("Non Tenanted project should have exactly 8 project triggers and 1 runbook trigger")
+			t.Fatal("Non Tenanted project should have exactly 8 project triggers and 1 runbook trigger, only found: " + fmt.Sprint(len(nonTenantedProjectTriggers)))
 		}
 
 		tenantedProjectName := "Tenanted"
@@ -3637,8 +3637,8 @@ func TestProjectScheduledTriggerResources(t *testing.T) {
 			return err
 		}
 
-		if len(tenantedProjectTriggers) != 9 {
-			t.Fatal("Tenanted project should have exactly 1 project trigger and 1 runbook trigger")
+		if len(tenantedProjectTriggers) != 2 {
+			t.Fatal("Tenanted project should have exactly 1 project trigger and 1 runbook trigger, only found: " + fmt.Sprint(len(tenantedProjectTriggers)))
 		}
 
 		return nil
