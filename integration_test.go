@@ -3644,7 +3644,7 @@ func TestProjectScheduledTriggerResources(t *testing.T) {
 			t.Fatal("Non Tenanted project should have exactly 8 project triggers and 1 runbook trigger, only found: " + fmt.Sprint(len(nonTenantedProjectTriggers)))
 		}
 
-		if len(tenantedProjectTriggers) != 9 {
+		if len(tenantedProjectTriggers) != 2 {
 			t.Fatal("Tenanted project should have exactly 1 project trigger and 1 runbook trigger, only found: " + fmt.Sprint(len(tenantedProjectTriggers)))
 		}
 
