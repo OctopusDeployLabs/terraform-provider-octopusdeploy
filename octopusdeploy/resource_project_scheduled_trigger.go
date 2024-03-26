@@ -22,10 +22,7 @@ func resourceProjectScheduledTrigger() *schema.Resource {
 func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 
-	scheduledTrigger, err := client.ProjectTriggers.GetByID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	scheduledTrigger, _ := client.ProjectTriggers.GetByID(d.Id())
 
 	if scheduledTrigger == nil {
 		d.SetId("")

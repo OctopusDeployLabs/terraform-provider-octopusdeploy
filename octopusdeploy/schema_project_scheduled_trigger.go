@@ -24,6 +24,7 @@ func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTri
 	actionType := projectScheduledTrigger.Action.GetActionType()
 	if actionType == actions.DeployLatestRelease {
 		deployLatestReleaseAction := projectScheduledTrigger.Action.(*actions.DeployLatestReleaseAction)
+		flattenedProjectScheduledTrigger["tenant_ids"] = deployLatestReleaseAction.Tenants
 		flattenedProjectScheduledTrigger["deploy_latest_release_action"] = []map[string]interface{}{
 			{
 				"source_environment_id":      deployLatestReleaseAction.SourceEnvironments[0],
@@ -34,12 +35,23 @@ func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTri
 
 	} else if actionType == actions.DeployNewRelease {
 		deployNewReleaseAction := projectScheduledTrigger.Action.(*actions.DeployNewReleaseAction)
+		flattenedProjectScheduledTrigger["tenant_ids"] = deployNewReleaseAction.Tenants
 		flattenedProjectScheduledTrigger["deploy_new_release_action"] = []map[string]interface{}{
 			{
 				"destination_environment_id": deployNewReleaseAction.Environment,
 				"git_reference":              deployNewReleaseAction.VersionControlReference.GitRef,
 			},
 		}
+	} else if actionType == actions.RunRunbook {
+		runRunbookAction := projectScheduledTrigger.Action.(*actions.RunRunbookAction)
+		flattenedProjectScheduledTrigger["tenant_ids"] = runRunbookAction.Tenants
+		flattenedProjectScheduledTrigger["run_runbook_action"] = []map[string]interface{}{
+			{
+				"runbook_id":             runRunbookAction.Runbook,
+				"target_environment_ids": runRunbookAction.Environments,
+			},
+		}
+
 	}
 
 	filterType := projectScheduledTrigger.Filter.GetFilterType()
@@ -126,10 +138,6 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 	}
 
 	if attr, ok := projectScheduledTrigger.GetOk("deploy_new_release_action"); ok {
-		if action != nil {
-			return nil, errors.New("only one of 'deploy_latest_release_action' or 'deploy_new_release_action' can be set")
-		}
-
 		deployNewReleaseActionList := attr.(*schema.Set).List()
 		deployNewReleaseActionMap := deployNewReleaseActionList[0].(map[string]interface{})
 		deploymentAction := actions.NewDeployNewReleaseAction(
@@ -139,6 +147,17 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 		)
 
 		deploymentAction.Channel = projectScheduledTrigger.Get("channel_id").(string)
+		deploymentAction.Tenants = expandArray(projectScheduledTrigger.Get("tenant_ids").([]interface{}))
+		action = deploymentAction
+	}
+
+	if attr, ok := projectScheduledTrigger.GetOk("run_runbook_action"); ok {
+		runRunbookActionList := attr.(*schema.Set).List()
+		runRunbookActionMap := runRunbookActionList[0].(map[string]interface{})
+		deploymentAction := actions.NewRunRunbookAction()
+
+		deploymentAction.Runbook = runRunbookActionMap["runbook_id"].(string)
+		deploymentAction.Environments = expandArray(runRunbookActionMap["target_environment_ids"].([]interface{}))
 		deploymentAction.Tenants = expandArray(projectScheduledTrigger.Get("tenant_ids").([]interface{}))
 		action = deploymentAction
 	}
@@ -267,27 +286,37 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 			Required:         true,
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			ForceNew:         true,
 		},
 		"space_id": {
 			Required:         true,
 			Description:      "The space ID where this trigger's project exists.",
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			ForceNew:         true,
 		},
 		"deploy_latest_release_action": {
-			Description:   "Configuration for deploying the latest release. Can not be used with 'deploy_new_release_action'.",
+			Description:   "Configuration for deploying the latest release. Can not be used with 'deploy_new_release_action' or 'run_runbook_action'.",
 			Optional:      true,
 			Type:          schema.TypeSet,
 			Elem:          &schema.Resource{Schema: getDeployLatestReleaseActionSchema()},
-			ConflictsWith: []string{"deploy_new_release_action"},
+			ConflictsWith: []string{"deploy_new_release_action", "run_runbook_action"},
 			MaxItems:      1,
 		},
 		"deploy_new_release_action": {
-			Description:   "Configuration for deploying a new release. Can not be used with 'deploy_latest_release_action'.",
+			Description:   "Configuration for deploying a new release. Can not be used with 'deploy_latest_release_action' or 'run_runbook_action'.",
 			Optional:      true,
 			Type:          schema.TypeSet,
 			Elem:          &schema.Resource{Schema: getDeployNewReleaseActionSchema()},
-			ConflictsWith: []string{"deploy_latest_release_action"},
+			ConflictsWith: []string{"deploy_latest_release_action", "run_runbook_action"},
+			MaxItems:      1,
+		},
+		"run_runbook_action": {
+			Description:   "Configuration for running a runbook. Can not be used with 'deploy_latest_release_action' or 'deploy_new_release_action'.",
+			Optional:      true,
+			Type:          schema.TypeSet,
+			Elem:          &schema.Resource{Schema: getRunRunbookActionSchema()},
+			ConflictsWith: []string{"deploy_latest_release_action", "deploy_new_release_action"},
 			MaxItems:      1,
 		},
 		"channel_id": {
@@ -380,6 +409,23 @@ func getDeployNewReleaseActionSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "The git reference to use when creating the release. Can be a branch, tag, or commit hash.",
 			Type:        schema.TypeString,
+		},
+	}
+}
+
+func getRunRunbookActionSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"target_environment_ids": {
+			Required:    true,
+			Description: "The IDs of the environments to run the runbook in.",
+			Type:        schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+		"runbook_id": {
+			Required:         true,
+			Description:      "The ID of the runbook to run.",
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 	}
 }
