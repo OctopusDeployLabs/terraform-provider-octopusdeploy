@@ -60,7 +60,7 @@ func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.Resour
 		d.SetId(scheduledTrigger.GetID())
 	}
 
-	return resourceProjectScheduledTriggerRead(ctx, d, m)
+	return nil
 }
 
 func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -84,7 +84,7 @@ func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.Resour
 
 	d.SetId(scheduledTrigger.GetID())
 
-	return resourceProjectScheduledTriggerRead(ctx, d, m)
+	return nil
 }
 
 func resourceProjectScheduledTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
