@@ -2,9 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
-	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
@@ -34,10 +32,12 @@ func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.Resource
 		return nil
 	}
 
-	logResource("scheduled_project_trigger", scheduledTrigger)
 	flattenedScheduledTrigger := flattenProjectScheduledTrigger(scheduledTrigger)
 	for key, value := range flattenedScheduledTrigger {
-		d.Set(key, value)
+		err := d.Set(key, value)
+		if err != nil {
+			return nil
+		}
 	}
 
 	return nil
@@ -46,8 +46,6 @@ func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.Resource
 func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, client)
-
-	tflog.Info(ctx, fmt.Sprintf("Trigger (%v)", expandedScheduledTrigger))
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -65,7 +63,7 @@ func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.Resour
 		d.SetId(scheduledTrigger.GetID())
 	}
 
-	return nil
+	return resourceProjectScheduledTriggerRead(ctx, d, m)
 }
 
 func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -89,7 +87,7 @@ func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.Resour
 
 	d.SetId(scheduledTrigger.GetID())
 
-	return nil
+	return resourceProjectScheduledTriggerRead(ctx, d, m)
 }
 
 func resourceProjectScheduledTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

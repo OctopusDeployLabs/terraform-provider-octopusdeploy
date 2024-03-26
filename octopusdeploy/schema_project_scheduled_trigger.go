@@ -45,26 +45,15 @@ func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTri
 	filterType := projectScheduledTrigger.Filter.GetFilterType()
 	if filterType == filters.OnceDailySchedule {
 		onceDailyScheduleFilter := projectScheduledTrigger.Filter.(*filters.OnceDailyScheduledTriggerFilter)
-		days := onceDailyScheduleFilter.Days
-		parsedDays := make([]string, len(days))
-		for i := range days {
-			parsedDays[i] = filters.Weekday.String(days[i])
-		}
 		flattenedProjectScheduledTrigger["once_daily_schedule"] = []map[string]interface{}{
 			{
 				"start_time":   onceDailyScheduleFilter.Start.Format(filters.RFC3339NanoNoZone),
-				"days_of_week": flattenArray(parsedDays),
+				"days_of_week": onceDailyScheduleFilter.Days,
 			},
 		}
 		flattenedProjectScheduledTrigger["timezone"] = onceDailyScheduleFilter.TimeZone
-
 	} else if filterType == filters.ContinuousDailySchedule {
 		continuousDailyScheduleFilter := projectScheduledTrigger.Filter.(*filters.ContinuousDailyScheduledTriggerFilter)
-		days := continuousDailyScheduleFilter.Days
-		parsedDays := make([]string, len(days))
-		for i := range days {
-			parsedDays[i] = filters.Weekday.String(days[i])
-		}
 
 		flattenedProjectScheduledTrigger["continuous_daily_schedule"] = []map[string]interface{}{
 			{
@@ -73,7 +62,7 @@ func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTri
 				"minute_interval": continuousDailyScheduleFilter.MinuteInterval,
 				"run_after":       continuousDailyScheduleFilter.RunAfter.Format(filters.RFC3339NanoNoZone),
 				"run_until":       continuousDailyScheduleFilter.RunUntil.Format(filters.RFC3339NanoNoZone),
-				"days_of_week":    flattenArray(parsedDays),
+				"days_of_week":    continuousDailyScheduleFilter.Days,
 			},
 		}
 		flattenedProjectScheduledTrigger["timezone"] = continuousDailyScheduleFilter.TimeZone
@@ -130,7 +119,6 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 			"",
 		)
 
-		// Might need to add some validation here.
 		deploymentAction.Channel = projectScheduledTrigger.Get("channel_id").(string)
 		deploymentAction.Tenants = expandArray(projectScheduledTrigger.Get("tenant_ids").([]interface{}))
 
@@ -150,7 +138,6 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 			&actions.VersionControlReference{GitRef: deployNewReleaseActionMap["git_reference"].(string)},
 		)
 
-		// Might need to add some validation here.
 		deploymentAction.Channel = projectScheduledTrigger.Get("channel_id").(string)
 		deploymentAction.Tenants = expandArray(projectScheduledTrigger.Get("tenant_ids").([]interface{}))
 		action = deploymentAction
@@ -192,13 +179,11 @@ func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData,
 
 		interval, _ := filters.DailyScheduledIntervalString(continuousDailyScheduleFilterMap["interval"].(string))
 		runAfter, err := time.Parse(filters.RFC3339NanoNoZone, continuousDailyScheduleFilterMap["run_after"].(string))
-
 		if err != nil {
 			return nil, err
 		}
 
 		runUntil, err := time.Parse(filters.RFC3339NanoNoZone, continuousDailyScheduleFilterMap["run_until"].(string))
-
 		if err != nil {
 			return nil, err
 		}
@@ -290,18 +275,20 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"deploy_latest_release_action": {
-			Description: "Configuration for deploying the latest release. Can not be used with 'deploy_new_release_action'.",
-			Optional:    true,
-			Type:        schema.TypeSet,
-			Elem:        &schema.Resource{Schema: getDeployLatestReleaseActionSchema()},
-			MaxItems:    1,
+			Description:   "Configuration for deploying the latest release. Can not be used with 'deploy_new_release_action'.",
+			Optional:      true,
+			Type:          schema.TypeSet,
+			Elem:          &schema.Resource{Schema: getDeployLatestReleaseActionSchema()},
+			ConflictsWith: []string{"deploy_new_release_action"},
+			MaxItems:      1,
 		},
 		"deploy_new_release_action": {
-			Description: "Configuration for deploying a new release. Can not be used with 'deploy_latest_release_action'.",
-			Optional:    true,
-			Type:        schema.TypeSet,
-			Elem:        &schema.Resource{Schema: getDeployNewReleaseActionSchema()},
-			MaxItems:    1,
+			Description:   "Configuration for deploying a new release. Can not be used with 'deploy_latest_release_action'.",
+			Optional:      true,
+			Type:          schema.TypeSet,
+			Elem:          &schema.Resource{Schema: getDeployNewReleaseActionSchema()},
+			ConflictsWith: []string{"deploy_latest_release_action"},
+			MaxItems:      1,
 		},
 		"channel_id": {
 			Description:      "The channel ID to use when creating the release. Will use the default channel if left blank.",
@@ -318,7 +305,6 @@ func getProjectScheduledTriggerSchema() map[string]*schema.Schema {
 		"is_disabled": {
 			Description: "Indicates whether the trigger is disabled.",
 			Optional:    true,
-			Default:     false,
 			Type:        schema.TypeBool,
 		},
 		"timezone": {
@@ -430,15 +416,17 @@ func getContinuousDailyScheduleSchema() map[string]*schema.Schema {
 		},
 		"hour_interval": {
 			Optional:         true,
+			Default:          0,
 			Description:      "How often to run the trigger in hours. Only used when the interval is set to 'OnceHourly'.",
 			Type:             schema.TypeInt,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 		},
 		"minute_interval": {
 			Optional:         true,
+			Default:          0,
 			Description:      "How often to run the trigger in minutes. Only used when the interval is set to 'OnceEveryMinute'.",
 			Type:             schema.TypeInt,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+			ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 		},
 		"run_after": {
 			Required:    true,
@@ -450,7 +438,6 @@ func getContinuousDailyScheduleSchema() map[string]*schema.Schema {
 			Description: "The time of day to end the trigger.",
 			Type:        schema.TypeString,
 		},
-		// TODO ensure they are sorted when stored into state
 		"days_of_week": {
 			Required:    true,
 			Description: "The days of the week to run the trigger.",
