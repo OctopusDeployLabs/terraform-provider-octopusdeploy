@@ -3593,3 +3593,54 @@ func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
 		return nil
 	})
 }
+
+func TestProjectScheduledTriggerResources(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "53-scheduledprojecttrigger", []string{})
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := projects.ProjectsQuery{
+			Skip: 0,
+			Take: 2,
+		}
+
+		resources, err := client.Projects.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) != 2 {
+			t.Fatal("There must be exactly 2 projects in the space")
+		}
+
+		nonTenantedProjectName := "Non Tenanted"
+		nonTenantedProjectIndex := stdslices.IndexFunc(resources.Items, func(t *projects.Project) bool { return t.Name == nonTenantedProjectName })
+		nonTenantedProject := resources.Items[nonTenantedProjectIndex]
+		nonTenantedProjectTriggers, err := client.ProjectTriggers.GetByProjectID(nonTenantedProject.ID)
+		if err != nil {
+			return err
+		}
+
+		if len(nonTenantedProjectTriggers) != 9 {
+			t.Fatal("Non Tenanted project should have exactly 8 project triggers and 1 runbook trigger")
+		}
+
+		tenantedProjectName := "Tenanted"
+		tenantedProjectIndex := stdslices.IndexFunc(resources.Items, func(t *projects.Project) bool { return t.Name == tenantedProjectName })
+		tenantedProject := resources.Items[tenantedProjectIndex]
+		tenantedProjectTriggers, err := client.ProjectTriggers.GetByProjectID(tenantedProject.ID)
+
+		if err != nil {
+			return err
+		}
+
+		if len(tenantedProjectTriggers) != 9 {
+			t.Fatal("Tenanted project should have exactly 1 project trigger and 1 runbook trigger")
+		}
+
+		return nil
+	})
+}
