@@ -3623,14 +3623,14 @@ func TestProjectScheduledTriggerResources(t *testing.T) {
 		tenantedProjectName := "Tenanted"
 		tenantedProjectIndex := stdslices.IndexFunc(resources.Items, func(t *projects.Project) bool { return t.Name == tenantedProjectName })
 		tenantedProject := resources.Items[tenantedProjectIndex]
-		
+
 		projectTriggers, err := client.ProjectTriggers.GetAll()
 		if err != nil {
 			return err
 		}
 
-		nonTenantedProjectTriggers := make([]*triggers.ProjectTrigger, 9)
-		tenantedProjectTriggers := make([]*triggers.ProjectTrigger, 2)
+		nonTenantedProjectTriggers := make([]*triggers.ProjectTrigger, 0, 9)
+		tenantedProjectTriggers := make([]*triggers.ProjectTrigger, 0, 2)
 
 		for _, trigger := range projectTriggers {
 			if trigger.ProjectID == nonTenantedProject.ID {
