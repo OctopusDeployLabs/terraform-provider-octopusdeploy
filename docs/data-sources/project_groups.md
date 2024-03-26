@@ -47,3 +47,5 @@ Read-Only:
 - `name` (String) The name of this resource.
 - `retention_policy_id` (String) The ID of the retention policy associated with this project group.
 - `space_id` (String) The space ID associated with this project group.
+
+

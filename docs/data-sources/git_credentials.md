@@ -39,3 +39,5 @@ Read-Only:
 - `space_id` (String) The space ID associated with this resource.
 - `type` (String) The Git credential authentication type.
 - `username` (String) The username for the Git credential.
+
+
