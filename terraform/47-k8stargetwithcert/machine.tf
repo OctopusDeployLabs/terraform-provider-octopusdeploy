@@ -19,6 +19,7 @@ resource octopusdeploy_kubernetes_cluster_deployment_target test_eks{
   tenants                           = []
   thumbprint                        = ""
   uri                               = ""
+  container_options                 = "foobar"
 
   endpoint {
     communication_style    = "Kubernetes"
