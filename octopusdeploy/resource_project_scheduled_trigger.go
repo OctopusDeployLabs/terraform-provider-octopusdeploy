@@ -12,6 +12,7 @@ func resourceProjectScheduledTrigger() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectScheduledTriggerCreate,
 		DeleteContext: resourceProjectScheduledTriggerDelete,
+		Description:   "This resource manages a scheduled trigger for a project or runbook in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceProjectScheduledTriggerRead,
 		Schema:        getProjectScheduledTriggerSchema(),

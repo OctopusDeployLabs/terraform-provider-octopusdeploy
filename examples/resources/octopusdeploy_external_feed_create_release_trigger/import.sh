@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_external_feed_create_release_trigger.<name> <trigger-id>
