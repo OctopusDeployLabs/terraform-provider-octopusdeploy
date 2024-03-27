@@ -3629,23 +3629,23 @@ func TestProjectScheduledTriggerResources(t *testing.T) {
 			return err
 		}
 
-		nonTenantedProjectTriggers := make([]*triggers.ProjectTrigger, 0, 9)
-		tenantedProjectTriggers := make([]*triggers.ProjectTrigger, 0, 2)
+		nonTenantedProjectTriggersCount := 0
+		tenantedProjectTriggersCount := 0
 
 		for _, trigger := range projectTriggers {
 			if trigger.ProjectID == nonTenantedProject.ID {
-				nonTenantedProjectTriggers = append(nonTenantedProjectTriggers, trigger)
+				nonTenantedProjectTriggersCount++
 			} else if trigger.ProjectID == tenantedProject.ID {
-				tenantedProjectTriggers = append(tenantedProjectTriggers, trigger)
+				tenantedProjectTriggersCount++
 			}
 		}
 
-		if len(nonTenantedProjectTriggers) != 9 {
-			t.Fatal("Non Tenanted project should have exactly 8 project triggers and 1 runbook trigger, only found: " + fmt.Sprint(len(nonTenantedProjectTriggers)))
+		if nonTenantedProjectTriggersCount != 9 {
+			t.Fatal("Non Tenanted project should have exactly 8 project triggers and 1 runbook trigger, only found: " + fmt.Sprint(nonTenantedProjectTriggersCount))
 		}
 
-		if len(tenantedProjectTriggers) != 2 {
-			t.Fatal("Tenanted project should have exactly 1 project trigger and 1 runbook trigger, only found: " + fmt.Sprint(len(tenantedProjectTriggers)))
+		if tenantedProjectTriggersCount != 2 {
+			t.Fatal("Tenanted project should have exactly 1 project trigger and 1 runbook trigger, only found: " + fmt.Sprint(tenantedProjectTriggersCount))
 		}
 
 		return nil

@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"errors"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actions"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/filters"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
@@ -103,19 +102,11 @@ func flattenProjectScheduledTrigger(projectScheduledTrigger *triggers.ProjectTri
 	return flattenedProjectScheduledTrigger
 }
 
-func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData, client *client.Client) (*triggers.ProjectTrigger, error) {
+func expandProjectScheduledTrigger(projectScheduledTrigger *schema.ResourceData, project *projects.Project) (*triggers.ProjectTrigger, error) {
 	name := projectScheduledTrigger.Get("name").(string)
 	description := projectScheduledTrigger.Get("description").(string)
 	isDisabled := projectScheduledTrigger.Get("is_disabled").(bool)
 	timezone := projectScheduledTrigger.Get("timezone").(string)
-
-	projectId := projectScheduledTrigger.Get("project_id").(string)
-	spaceId := projectScheduledTrigger.Get("space_id").(string)
-	project, err := projects.GetByID(client, spaceId, projectId)
-
-	if err != nil {
-		return nil, err
-	}
 
 	var action actions.ITriggerAction = nil
 	var filter filters.ITriggerFilter = nil

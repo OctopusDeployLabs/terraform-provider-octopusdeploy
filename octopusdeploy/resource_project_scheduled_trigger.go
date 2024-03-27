@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
@@ -23,10 +24,14 @@ func resourceProjectScheduledTrigger() *schema.Resource {
 func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 
-	scheduledTrigger, _ := client.ProjectTriggers.GetByID(d.Id())
+	scheduledTrigger, err := client.ProjectTriggers.GetByID(d.Id())
 
 	if scheduledTrigger == nil {
 		d.SetId("")
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
 		return nil
 	}
 
@@ -43,7 +48,14 @@ func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.Resource
 
 func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, client)
+	projectId := d.Get("project_id").(string)
+	spaceId := d.Get("space_id").(string)
+	project, err := projects.GetByID(client, spaceId, projectId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, project)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -66,7 +78,14 @@ func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.Resour
 
 func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, client)
+	projectId := d.Get("project_id").(string)
+	spaceId := d.Get("space_id").(string)
+	project, err := projects.GetByID(client, spaceId, projectId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	expandedScheduledTrigger, err := expandProjectScheduledTrigger(d, project)
 
 	if err != nil {
 		return diag.FromErr(err)
