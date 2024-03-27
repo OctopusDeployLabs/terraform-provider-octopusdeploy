@@ -171,3 +171,5 @@ Read-Only:
 - `upgrade_required` (Boolean)
 - `upgrade_suggested` (Boolean)
 - `version` (String)
+
+

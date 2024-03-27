@@ -17,6 +17,7 @@ func resourceExternalFeedCreateReleaseTrigger() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceExternalFeedCreateReleaseTriggerCreate,
 		DeleteContext: resourceExternalFeedCreateReleaseTriggerDelete,
+		Description:   "This resource manages External feed triggers (release creation type) in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceExternalFeedCreateReleaseTriggerRead,
 		Schema:        getExternalFeedCreateReleaseTriggerSchema(),

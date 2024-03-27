@@ -77,6 +77,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_project":                                        resourceProject(),
 			"octopusdeploy_project_deployment_target_trigger":              resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_external_feed_create_release_trigger":           resourceExternalFeedCreateReleaseTrigger(),
+			"octopusdeploy_project_scheduled_trigger":                      resourceProjectScheduledTrigger(),
 			"octopusdeploy_project_group":                                  resourceProjectGroup(),
 			"octopusdeploy_runbook":                                        resourceRunbook(),
 			"octopusdeploy_runbook_process":                                resourceRunbookProcess(),

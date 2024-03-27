@@ -77,3 +77,5 @@ Read-Only:
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
 - `thumbprint` (String)
 - `version` (Number)
+
+
