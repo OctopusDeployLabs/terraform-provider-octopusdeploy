@@ -51,6 +51,7 @@ Read-Only:
 - `cluster_certificate_path` (String)
 - `cluster_url` (String)
 - `container` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--container))
+- `container_options` (String)
 - `default_worker_pool_id` (String)
 - `endpoint` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--endpoint))
 - `environments` (List of String) A list of environment IDs associated with this resource.
@@ -152,6 +153,7 @@ Read-Only:
 - `communication_style` (String)
 - `connection_endpoint` (String)
 - `container` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--endpoint--container))
+- `container_options` (String)
 - `default_worker_pool_id` (String)
 - `destination` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--endpoint--destination))
 - `dot_net_core_platform` (String)
