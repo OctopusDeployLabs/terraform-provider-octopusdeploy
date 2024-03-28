@@ -46,6 +46,10 @@ func expandKubernetesClusterDeploymentTarget(d *schema.ResourceData) *machines.D
 		endpoint.Container = expandContainer(v)
 	}
 
+	if v, ok := d.GetOk("container_options"); ok {
+		endpoint.ContainerOptions = v.(string)
+	}
+
 	if v, ok := d.GetOk("default_worker_pool_id"); ok {
 		endpoint.DefaultWorkerPoolID = v.(string)
 	}
@@ -86,6 +90,7 @@ func flattenKubernetesClusterDeploymentTarget(deploymentTarget *machines.Deploym
 	flattenedDeploymentTarget["cluster_certificate"] = endpointResource.ClusterCertificate
 	flattenedDeploymentTarget["cluster_certificate_path"] = endpointResource.ClusterCertificatePath
 	flattenedDeploymentTarget["container"] = flattenContainer(endpointResource.Container)
+	flattenedDeploymentTarget["container_options"] = endpointResource.ContainerOptions
 	flattenedDeploymentTarget["default_worker_pool_id"] = endpointResource.DefaultWorkerPoolID
 	flattenedDeploymentTarget["namespace"] = endpointResource.Namespace
 	flattenedDeploymentTarget["proxy_id"] = endpointResource.ProxyID
@@ -212,6 +217,11 @@ func getKubernetesClusterDeploymentTargetSchema() map[string]*schema.Schema {
 		Type:     schema.TypeList,
 	}
 
+	kubernetesClusterDeploymentTargetSchema["container_options"] = &schema.Schema{
+		Optional: true,
+		Type:     schema.TypeString,
+	}
+
 	kubernetesClusterDeploymentTargetSchema["default_worker_pool_id"] = &schema.Schema{
 		Optional: true,
 		Type:     schema.TypeString,
@@ -268,6 +278,7 @@ func setKubernetesClusterDeploymentTarget(ctx context.Context, d *schema.Resourc
 	d.Set("proxy_id", endpointResource.ProxyID)
 	d.Set("running_in_container", endpointResource.RunningInContainer)
 	d.Set("skip_tls_verification", endpointResource.SkipTLSVerification)
+	d.Set("container_options", endpointResource.ContainerOptions)
 
 	if endpointResource.ClusterURL != nil {
 		d.Set("cluster_url", endpointResource.ClusterURL.String())

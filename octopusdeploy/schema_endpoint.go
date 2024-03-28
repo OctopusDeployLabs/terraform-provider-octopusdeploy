@@ -65,6 +65,7 @@ func flattenEndpointResource(endpoint *machines.EndpointResource) []interface{} 
 		"communication_style":             endpoint.CommunicationStyle,
 		"connection_endpoint":             endpoint.ConnectionEndpoint,
 		"container":                       flattenContainer(endpoint.Container),
+		"container_options":               endpoint.ContainerOptions,
 		"default_worker_pool_id":          endpoint.DefaultWorkerPoolID,
 		"destination":                     flattenOfflinePackageDropDestination(endpoint.Destination),
 		"dot_net_core_platform":           endpoint.DotNetCorePlatform,
@@ -190,6 +191,10 @@ func getEndpointSchema() map[string]*schema.Schema {
 			Elem:     &schema.Resource{Schema: getDeploymentActionContainerSchema()},
 			Optional: true,
 			Type:     schema.TypeList,
+		},
+		"container_options": {
+			Optional: true,
+			Type:     schema.TypeString,
 		},
 		"default_worker_pool_id": {
 			Optional: true,

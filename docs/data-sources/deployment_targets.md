@@ -88,6 +88,7 @@ Read-Only:
 - `communication_style` (String)
 - `connection_endpoint` (String)
 - `container` (List of Object) (see [below for nested schema](#nestedobjatt--deployment_targets--endpoint--container))
+- `container_options` (String)
 - `default_worker_pool_id` (String)
 - `destination` (List of Object) (see [below for nested schema](#nestedobjatt--deployment_targets--endpoint--destination))
 - `dot_net_core_platform` (String)

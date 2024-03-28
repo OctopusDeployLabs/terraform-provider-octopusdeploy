@@ -88,6 +88,7 @@ Optional:
 - `cluster_url` (String)
 - `connection_endpoint` (String)
 - `container` (Block List) (see [below for nested schema](#nestedblock--endpoint--container))
+- `container_options` (String)
 - `default_worker_pool_id` (String)
 - `destination` (Block List) (see [below for nested schema](#nestedblock--endpoint--destination))
 - `dot_net_core_platform` (String)
