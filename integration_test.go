@@ -3651,3 +3651,55 @@ func TestProjectScheduledTriggerResources(t *testing.T) {
 		return nil
 	})
 }
+
+// TestUsernamePasswordVariableResource verifies that a project variable referencing a username/password account
+// can be created
+func TestUsernamePasswordVariableResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "54-usernamepasswordvariable", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := projects.ProjectsQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := projects.Get(client, newSpaceId, query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a project called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		projectVariables, err := variables.GetVariableSet(client, newSpaceId, resource.VariableSetID)
+
+		if err != nil {
+			return err
+		}
+
+		if len(projectVariables.Variables) != 1 {
+			t.Fatalf("The project must have 1 variable.")
+		}
+
+		if projectVariables.Variables[0].Name != "UsernamePasswordVariable" {
+			t.Fatalf("The variable must be called UsernamePasswordVariable.")
+		}
+
+		if projectVariables.Variables[0].Type != "UsernamePasswordAccount" {
+			t.Fatalf("The variable must have type of UsernamePasswordAccount.")
+		}
+
+		return nil
+	})
+}
