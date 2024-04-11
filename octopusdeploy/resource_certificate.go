@@ -80,8 +80,24 @@ func resourceCertificateRead(ctx context.Context, d *schema.ResourceData, m inte
 func resourceCertificateUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Printf("[INFO] updating certificate (%s)", d.Id())
 
-	certificate := expandCertificate(d)
 	client := m.(*client.Client)
+	certificate := expandCertificate(d)
+	certificateData := d.Get("certificate_data").(string)
+	password := d.Get("password").(string)
+	if d.HasChanges("certificate_data", "password") {
+		newCert := &certificates.ReplacementCertificate{
+			CertificateData: certificateData,
+			Password:        password,
+		}
+		replaceCertificate, err := client.Certificates.Replace(certificate.ID, newCert)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err := setCertificate(ctx, d, replaceCertificate); err != nil {
+			return diag.FromErr(err)
+		}
+	}
 	updatedCertificate, err := certificates.Update(client, certificate)
 	if err != nil {
 		return diag.FromErr(err)
