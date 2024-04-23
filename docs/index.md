@@ -28,12 +28,12 @@ provider "octopusdeploy" {
 }
 ```
 
-### Scoped to a Single Space
+### Scoped to a specific Space
 
 You can configure the Terraform Provider for Octopus Deploy to target a
 particular space. If this configuration is specified, resources managed by the
 provider will be scoped to this space. To scope the provider to a space, simply
-provide the _ID_ or _name_ of the space.
+provide the _ID_ of the space.
 
 Scoping the provider by the ID of a space is done as follows:
 
@@ -45,67 +45,30 @@ provider "octopusdeploy" {
 }
 ```
 
-Scoping the provider by the name of a space is done as follows:
-
-```terraform
-provider "octopusdeploy" "unscoped" {
-  address    = "https://octopus.example.com"
-  api_key    = "API-XXXXXXXXXXXXX"
-}
-
-data "octopusdeploy_space" "support" {
-  provider = octopusdeploy.unscoped
-  name     = "Support"
-}
-
-provider "octopusdeploy" {
-  address  = "https://octopus.example.com"
-  api_key  = "API-XXXXXXXXXXXXX"
-  space_id = data.octopusdeploy_space.support.id
-}
-```
-
-**Note:** System level resources such as Teams are not support on a Space-scoped provider.
-
 ### Multiple Spaces
 
 To manage resources in multiple spaces you can specify the space_id on the resource directly:
 
 ```terraform
-provider "octopusdeploy" "unscoped" {
+provider "octopusdeploy" {
   address = "https://octopus.example.com"
   api_key = "API-XXXXXXXXXXXXX"
 }
 
-data "octopusdeploy_space" "support" {
-  provider = octopusdeploy.unscoped
-  name     = "Support"
-}
-
 data "octopusdeploy_space" "dev" {
-  provider = octopusdeploy.unscoped
   name     = "Product Development"
 }
 
 /*
-This resource will use the default provider and the default space
+This resource will use the default space
 */
 resource "octopusdeploy_environment" "development-environment" {
   name = "TestEnv1"
 }
 
-/*
-This resource will use the provider aliased as "space_support"
-which is scoped to the space with the name, "support".
-*/
-resource "octopusdeploy_environment" "Env2" {
-  space_id = data.octopusdeploy_space.support.id
-  name     = "TestEnv2"
-}
 
 /*
-This resource will use the provider aliased as "space_product_development"
-which is scoped to the space named "Product Development".
+This resource will be scoped to the space named "Product Development".
 */
 resource "octopusdeploy_environment" "Env3" {
   space_id = data.octopusdeploy_space.dev.id
