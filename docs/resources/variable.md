@@ -21,7 +21,7 @@ resource "octopusdeploy_variable" "amazon_web_services_account_variable" {
 }
 
 # create an Azure service principal account variable
-resource "octopusdeploy_account" "azure_service_principal_account_variable" {
+resource "octopusdeploy_variable" "azure_service_principal_account_variable" {
   owner_id  = "Projects-123"
   type      = "AzureAccount"
   name      = "My Azure Service Principal Account (OK to Delete)"
