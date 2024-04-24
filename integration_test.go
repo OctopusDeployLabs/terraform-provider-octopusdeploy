@@ -36,14 +36,22 @@ package main
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
 	"net/url"
+=======
+>>>>>>> 6988f9c (Add test)
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
+
+	stdslices "slices"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
@@ -66,7 +74,6 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"k8s.io/utils/strings/slices"
-	stdslices "slices"
 )
 
 // TestSpaceResource verifies that a space can be reimported with the correct settings
@@ -421,6 +428,10 @@ func TestSshAccountResource(t *testing.T) {
 
 		if len(resource.TenantTags) != 0 {
 			t.Fatal("The account must be have no tenant tags")
+		}
+
+		if len(resource.EnvironmentIDs) != 0 {
+			t.Fatal("The account must have environments")
 		}
 
 		return nil
