@@ -38,6 +38,10 @@ func expandSSHKeyAccount(d *schema.ResourceData) *accounts.SSHKeyAccount {
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
+	if v, ok := d.GetOk("environments"); ok {
+		account.EnvironmentIDs = getSliceFromTerraformTypeList(v)
+	}
+
 	return account
 }
 
