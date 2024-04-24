@@ -425,7 +425,7 @@ func TestSshAccountResource(t *testing.T) {
 			t.Fatal("The account must be have no tenant tags")
 		}
 
-		if len(resource.EnvironmentIDs) != 0 {
+		if len(resource.EnvironmentIDs) == 0 {
 			t.Fatal("The account must have environments")
 		}
 
