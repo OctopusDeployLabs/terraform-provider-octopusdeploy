@@ -9,7 +9,7 @@ func getExternalFeedCreateReleaseTriggerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": getNameSchema(true),
 		"space_id": {
-			Required:         true,
+			Optional:         true,
 			Description:      "The space ID associated with the project to attach the trigger.",
 			Type:             schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
