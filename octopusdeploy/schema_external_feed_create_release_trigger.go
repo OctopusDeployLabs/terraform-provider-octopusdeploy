@@ -30,7 +30,7 @@ func getExternalFeedCreateReleaseTriggerSchema() map[string]*schema.Schema {
 			Description: "List of package references that will cause the trigger to fire. The triggering condition is if any of the packages are updated.",
 			Required:    true,
 			Type:        schema.TypeList,
-			Elem:        &schema.Resource{Schema: getDeploymentActionPackageSchema()},
+			Elem:        &schema.Resource{Schema: getDeploymentActionSlugPackageSchema()},
 		},
 		"is_disabled": {
 			Description: "Disables the trigger from being run when set.",
