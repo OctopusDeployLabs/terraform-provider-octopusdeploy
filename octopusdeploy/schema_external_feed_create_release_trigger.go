@@ -27,10 +27,16 @@ func getExternalFeedCreateReleaseTriggerSchema() map[string]*schema.Schema {
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"package": {
-			Description: "List of package references that will cause the trigger to fire. The triggering condition is if any of the packages are updated.",
-			Required:    true,
+			Description: "List of package references that will cause the trigger to fire. Will trigger if any of the packages are updated.",
+			Optional:    true,
 			Type:        schema.TypeList,
 			Elem:        &schema.Resource{Schema: getDeploymentActionSlugPackageSchema()},
+		},
+		"primary_package": {
+			Description: "List of primary package references (primary with respect to its corresponding deployment action). Will trigger if any of the primary packages are updated.",
+			Optional:    true,
+			Type:        schema.TypeList,
+			Elem:        &schema.Resource{Schema: getDeploymentActionSlugPrimaryPackageSchema()},
 		},
 		"is_disabled": {
 			Description: "Disables the trigger from being run when set.",
