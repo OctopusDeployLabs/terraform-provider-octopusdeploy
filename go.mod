@@ -3,7 +3,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.21
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.40.3
+	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.41.0
 	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240409225949-b27d14ff2bcb
 	github.com/google/uuid v1.6.0
 	github.com/gruntwork-io/terratest v0.41.11
