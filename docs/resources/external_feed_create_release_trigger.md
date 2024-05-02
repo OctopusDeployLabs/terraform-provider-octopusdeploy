@@ -34,13 +34,14 @@ resource "octopusdeploy_external_feed_create_release_trigger" "my_trigger" {
 
 - `channel_id` (String) The ID of the channel in which the release will be created if the action type is CreateRelease.
 - `name` (String) The name of this resource.
-- `package` (Block List, Min: 1) List of package references that will cause the trigger to fire. The triggering condition is if any of the packages are updated. (see [below for nested schema](#nestedblock--package))
 - `project_id` (String) The ID of the project to attach the trigger.
-- `space_id` (String) The space ID associated with the project to attach the trigger.
 
 ### Optional
 
 - `is_disabled` (Boolean) Disables the trigger from being run when set.
+- `package` (Block List) List of package references that will cause the trigger to fire. Will trigger if any of the packages are updated. (see [below for nested schema](#nestedblock--package))
+- `primary_package` (Block List) List of primary package references (primary with respect to its corresponding deployment action). Will trigger if any of the primary packages are updated. (see [below for nested schema](#nestedblock--primary_package))
+- `space_id` (String) The space ID associated with the project to attach the trigger.
 
 ### Read-Only
 
@@ -49,10 +50,18 @@ resource "octopusdeploy_external_feed_create_release_trigger" "my_trigger" {
 <a id="nestedblock--package"></a>
 ### Nested Schema for `package`
 
-Optional:
+Required:
 
-- `deployment_action` (String)
+- `deployment_action_slug` (String)
 - `package_reference` (String)
+
+
+<a id="nestedblock--primary_package"></a>
+### Nested Schema for `primary_package`
+
+Required:
+
+- `deployment_action_slug` (String)
 
 ## Import
 

@@ -88,7 +88,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 ### Required
 
 - `name` (String) The name of this resource.
-- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
+- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `UsernamePasswordAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
 
 ### Optional
 
