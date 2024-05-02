@@ -10,8 +10,22 @@ resource "octopusdeploy_project_group" "project_group_test" {
   description = "Test Description"
 }
 
-resource "octopusdeploy_channel" "test_channel" {
-    name = "Test Channel"
+resource "octopusdeploy_channel" "test_channel_1" {
+    name = "Test Channel 1"
+    project_id = "${octopusdeploy_project.deploy_frontend_project.id}"
+    space_id = var.octopus_space_id
+    lifecycle_id = data.octopusdeploy_lifecycles.lifecycle_default_lifecycle.lifecycles[0].id
+}
+
+resource "octopusdeploy_channel" "test_channel_2" {
+    name = "Test Channel 2"
+    project_id = "${octopusdeploy_project.deploy_frontend_project.id}"
+    space_id = var.octopus_space_id
+    lifecycle_id = data.octopusdeploy_lifecycles.lifecycle_default_lifecycle.lifecycles[0].id
+}
+
+resource "octopusdeploy_channel" "test_channel_3" {
+    name = "Test Channel 3"
     project_id = "${octopusdeploy_project.deploy_frontend_project.id}"
     space_id = var.octopus_space_id
     lifecycle_id = data.octopusdeploy_lifecycles.lifecycle_default_lifecycle.lifecycles[0].id
