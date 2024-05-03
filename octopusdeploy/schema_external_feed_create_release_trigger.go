@@ -27,7 +27,8 @@ func getExternalFeedCreateReleaseTriggerSchema() map[string]*schema.Schema {
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 		},
 		"package": {
-			Description: "List of package references that will cause the trigger to fire. Will trigger if any of the packages are updated.",
+			Description: "List of referenced package that will cause the trigger to fire. New versions of any of the packages you select will trigger release creation.
+ ",
 			Optional:    true,
 			Type:        schema.TypeList,
 			Elem:        &schema.Resource{Schema: getDeploymentActionSlugPackageSchema()},
