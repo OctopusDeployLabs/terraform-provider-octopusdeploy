@@ -34,7 +34,6 @@ func resourceKubernetesAgentDeploymentTargetCreate(ctx context.Context, d *schem
 }
 
 func resourceKubernetesAgentDeploymentTargetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
 	client := m.(*client.Client)
 	deploymentTarget, err := machines.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {

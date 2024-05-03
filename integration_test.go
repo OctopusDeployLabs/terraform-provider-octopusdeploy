@@ -38,6 +38,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy"
 	"os"
 	"path/filepath"
 	"sort"
@@ -3698,6 +3699,94 @@ func TestUsernamePasswordVariableResource(t *testing.T) {
 
 		if projectVariables.Variables[0].Type != "UsernamePasswordAccount" {
 			t.Fatalf("The variable must have type of UsernamePasswordAccount.")
+		}
+
+		return nil
+	})
+}
+
+func TestKubernetesDeploymentTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "55-kubernetesagentdeploymenttarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.MachinesQuery{
+			DeploymentTargetTypes: []string{"KubernetesTentacle"},
+			Skip:                  0,
+			Take:                  3,
+		}
+
+		resources, err := machines.Get(client, newSpaceId, query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) != 3 {
+			t.Fatalf("Space must have three deployment targets with type KubernetesTentacle")
+		}
+
+		minimumAgentName := "minimum-agent"
+		minimumAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == minimumAgentName })
+		minimumAgentDeploymentTarget := resources.Items[minimumAgentIndex]
+		minimumAgentEndpoint := minimumAgentDeploymentTarget.Endpoint.(*machines.KubernetesTentacleEndpoint)
+
+		if minimumAgentEndpoint.TentacleEndpointConfiguration.URI.String() != octopusdeploy.PlaceholderKubernetesTentacleUri {
+			t.Fatalf("Expected  \"%s\" to have a URI of \"%s\", instead has \"%s\"", minimumAgentName, octopusdeploy.PlaceholderKubernetesTentacleUri, minimumAgentEndpoint.TentacleEndpointConfiguration.URI.String())
+		}
+
+		if minimumAgentEndpoint.TentacleEndpointConfiguration.Thumbprint != octopusdeploy.PlaceholderKubernetesTentacleThumbprint {
+			t.Fatalf("Expected  \"%s\" to have a thumbprint of \"%s\", instead has \"%s\"", minimumAgentName, octopusdeploy.PlaceholderKubernetesTentacleThumbprint, minimumAgentEndpoint.TentacleEndpointConfiguration.Thumbprint)
+		}
+
+		optionalAgentName := "optional-agent"
+		optionalAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == optionalAgentName })
+		optionalAgentDeploymentTarget := resources.Items[optionalAgentIndex]
+		optionalAgentEndpoint := optionalAgentDeploymentTarget.Endpoint.(*machines.KubernetesTentacleEndpoint)
+
+		expectedUri := "poll://kcxzcv2fpsxkn6tk9u6d/"
+		if optionalAgentEndpoint.TentacleEndpointConfiguration.URI.String() != expectedUri {
+			t.Fatalf("Expected  \"%s\" to have a URI of \"%s\", instead has \"%s\"", optionalAgentName, expectedUri, optionalAgentEndpoint.TentacleEndpointConfiguration.URI.String())
+		}
+
+		expectedThumbprint := "96203ED84246201C26A2F4360D7CBC36AC1D232D"
+		if optionalAgentEndpoint.TentacleEndpointConfiguration.Thumbprint != expectedThumbprint {
+			t.Fatalf("Expected  \"%s\" to have a thumbprint of \"%s\", instead has \"%s\"", optionalAgentName, expectedThumbprint, optionalAgentEndpoint.TentacleEndpointConfiguration.Thumbprint)
+		}
+
+		expectedDefaultNamespace := "kubernetes-namespace"
+		if optionalAgentEndpoint.DefaultNamespace != expectedDefaultNamespace {
+			t.Fatalf("Expected  \"%s\" to have a default namespace of \"%s\", instead has \"%s\"", optionalAgentName, expectedDefaultNamespace, optionalAgentEndpoint.DefaultNamespace)
+		}
+
+		if !optionalAgentDeploymentTarget.IsDisabled {
+			t.Fatalf("Expected  \"%s\" to be disabled", optionalAgentName)
+		}
+
+		if !optionalAgentEndpoint.UpgradeLocked {
+			t.Fatalf("Expected  \"%s\" to have upgrade locked", optionalAgentName)
+		}
+
+		tenantedAgentName := "tenanted-agent"
+		tenantedAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == tenantedAgentName })
+		tenantedAgentDeploymentTarget := resources.Items[tenantedAgentIndex]
+
+		if tenantedAgentDeploymentTarget.TenantedDeploymentMode != "Tenanted" {
+			t.Fatalf("Expected \"%s\" to be tenanted, but it was \"%s\"", tenantedAgentName, tenantedAgentDeploymentTarget.TenantedDeploymentMode)
+		}
+
+		if len(tenantedAgentDeploymentTarget.TenantIDs) != 1 {
+			t.Fatalf("Expected \"%s\" to have 1 tenant, but it has %d", tenantedAgentName, len(tenantedAgentDeploymentTarget.TenantIDs))
+		}
+
+		if len(tenantedAgentDeploymentTarget.TenantTags) != 2 {
+			t.Fatalf("Expected \"%s\" to have 2 tenant tags, but it has %d", tenantedAgentName, len(tenantedAgentDeploymentTarget.TenantTags))
 		}
 
 		return nil
