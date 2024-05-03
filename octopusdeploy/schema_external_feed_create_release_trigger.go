@@ -34,7 +34,7 @@ func getExternalFeedCreateReleaseTriggerSchema() map[string]*schema.Schema {
 			Elem:        &schema.Resource{Schema: getDeploymentActionSlugPackageSchema()},
 		},
 		"primary_package": {
-			Description: "List of primary package references (primary with respect to its corresponding deployment action). Will trigger if any of the primary packages are updated.",
+			Description: "List of deployment actions for which the primary packages will cause the trigger to fire. New versions of any of the packages you select will trigger release creation.",
 			Optional:    true,
 			Type:        schema.TypeList,
 			Elem:        &schema.Resource{Schema: getDeploymentActionSlugPrimaryPackageSchema()},
