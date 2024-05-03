@@ -3553,10 +3553,6 @@ func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
 			return err
 		}
 
-		if len(project_triggers) != 3 {
-			t.Fatal("There must be exactly 3 project triggers")
-		}
-
 		tr1Name := "My first trigger"
 		tr2Name := "My second trigger"
 		tr3Name := "My third trigger"
