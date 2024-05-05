@@ -208,6 +208,10 @@ Optional:
 - `worker_pool_id` (String) The worker pool associated with this deployment action.
 - `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
 
+Read-Only:
+
+- `slug` (String) The human-readable unique identifier for this resource.
+
 <a id="nestedblock--step--action--action_template"></a>
 ### Nested Schema for `step.action.action_template`
 
@@ -316,6 +320,10 @@ Optional:
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `worker_pool_id` (String) The worker pool associated with this deployment action.
 - `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
+
+Read-Only:
+
+- `slug` (String) The human-readable unique identifier for this resource.
 
 <a id="nestedblock--step--apply_terraform_template_action--advanced_options"></a>
 ### Nested Schema for `step.apply_terraform_template_action.advanced_options`
@@ -486,6 +494,10 @@ Optional:
 - `worker_pool_id` (String) The worker pool associated with this deployment action.
 - `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
 
+Read-Only:
+
+- `slug` (String) The human-readable unique identifier for this resource.
+
 <a id="nestedblock--step--deploy_kubernetes_secret_action--action_template"></a>
 ### Nested Schema for `step.deploy_kubernetes_secret_action.action_template`
 
@@ -568,6 +580,10 @@ Optional:
 - `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `windows_service` (Block Set, Max: 1) Deploy a windows service feature (see [below for nested schema](#nestedblock--step--deploy_package_action--windows_service))
+
+Read-Only:
+
+- `slug` (String) The human-readable unique identifier for this resource.
 
 <a id="nestedblock--step--deploy_package_action--primary_package"></a>
 ### Nested Schema for `step.deploy_package_action.primary_package`
@@ -699,6 +715,10 @@ Optional:
 - `start_mode` (String) When will the service start. Can be auto, delayed-auto, manual, unchanged or an expression
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
+Read-Only:
+
+- `slug` (String) The human-readable unique identifier for this resource.
+
 <a id="nestedblock--step--deploy_windows_service_action--primary_package"></a>
 ### Nested Schema for `step.deploy_windows_service_action.primary_package`
 
@@ -798,6 +818,10 @@ Optional:
 - `sort_order` (Number) Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
+Read-Only:
+
+- `slug` (String) The human-readable unique identifier for this resource.
+
 <a id="nestedblock--step--manual_intervention_action--action_template"></a>
 ### Nested Schema for `step.manual_intervention_action.action_template`
 
@@ -889,6 +913,10 @@ Optional:
 - `variable_substitution_in_files` (String) A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.
 - `worker_pool_id` (String) The worker pool associated with this deployment action.
 - `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
+
+Read-Only:
+
+- `slug` (String) The human-readable unique identifier for this resource.
 
 <a id="nestedblock--step--run_kubectl_script_action--action_template"></a>
 ### Nested Schema for `step.run_kubectl_script_action.action_template`
@@ -997,6 +1025,10 @@ Optional:
 - `variable_substitution_in_files` (String) A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.
 - `worker_pool_id` (String) The worker pool associated with this deployment action.
 - `worker_pool_variable` (String) The worker pool variable associated with this deployment action.
+
+Read-Only:
+
+- `slug` (String) The human-readable unique identifier for this resource.
 
 <a id="nestedblock--step--run_script_action--action_template"></a>
 ### Nested Schema for `step.run_script_action.action_template`

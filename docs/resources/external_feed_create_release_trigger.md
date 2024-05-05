@@ -39,8 +39,8 @@ resource "octopusdeploy_external_feed_create_release_trigger" "my_trigger" {
 ### Optional
 
 - `is_disabled` (Boolean) Disables the trigger from being run when set.
-- `package` (Block List) List of package references that will cause the trigger to fire. Will trigger if any of the packages are updated. (see [below for nested schema](#nestedblock--package))
-- `primary_package` (Block List) List of primary package references (primary with respect to its corresponding deployment action). Will trigger if any of the primary packages are updated. (see [below for nested schema](#nestedblock--primary_package))
+- `package` (Block List) List of referenced packages that will cause the trigger to fire. New versions of any of the packages you select will trigger release creation. (see [below for nested schema](#nestedblock--package))
+- `primary_package` (Block List) List of deployment actions for which the primary packages will cause the trigger to fire. New versions of any of the packages you select will trigger release creation. (see [below for nested schema](#nestedblock--primary_package))
 - `space_id` (String) The space ID associated with the project to attach the trigger.
 
 ### Read-Only

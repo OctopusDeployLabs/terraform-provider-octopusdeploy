@@ -185,6 +185,14 @@ func getIDSchema() *schema.Schema {
 	}
 }
 
+func getSlugSchema() *schema.Schema {
+	return &schema.Schema{
+		Computed:    true,
+		Description: "The human-readable unique identifier for this resource.",
+		Type:        schema.TypeString,
+	}
+}
+
 func getIsSensitiveSchema() *schema.Schema {
 	return &schema.Schema{
 		Default:     false,
