@@ -3565,8 +3565,10 @@ func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
 			t.Fatalf("Unable to find all triggers. Expecting there to be \"%s\", \"%s\", and \"%s\".", tr1Name, tr2Name, tr3Name)
 		}
 
-		if project_triggers[0].Filter.GetFilterType() != filters.FeedFilter || project_triggers[1].Filter.GetFilterType() != filters.FeedFilter {
-			t.Fatal("The project triggers must all be of \"FeedFilter\" type")
+		for _, triggerIndex := range []int{tr1Index, tr2Index, tr3Index} {
+			if project_triggers[triggerIndex].Filter.GetFilterType() != filters.FeedFilter {
+				t.Fatal("The project triggers must all be of \"FeedFilter\" type")
+			}
 		}
 
 		if project_triggers[tr1Index].IsDisabled {
