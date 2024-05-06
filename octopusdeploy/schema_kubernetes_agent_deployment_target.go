@@ -109,7 +109,7 @@ func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"thumbprint": {
-			Description: "The thumbprint of the Kubernetes agent's certificate used by server to verify the identify of the agent. This is optional as a new installation of the agent will update this value when registers with the server.",
+			Description: "The thumbprint of the Kubernetes agent's certificate used by server to verify the identity of the agent. This is optional as a new installation of the agent will update this value when registers with the server.",
 			Optional:    true,
 			Computed:    true,
 			Type:        schema.TypeString,
@@ -127,7 +127,7 @@ func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"upgrade_locked": {
-			Description: "If enabled the Kubernetes agent will not automatically upgrade and will stay on it's current version, even if the associated machine policy is configured to automatically upgrade.",
+			Description: "If enabled the Kubernetes agent will not automatically upgrade and will stay on the currently installed version, even if the associated machine policy is configured to automatically upgrade.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
