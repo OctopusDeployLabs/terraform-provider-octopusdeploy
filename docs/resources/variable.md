@@ -36,6 +36,14 @@ resource "octopusdeploy_variable" "google_cloud_account_variable" {
   value     = "Accounts-123"
 }
 
+# Create a UsernamePassword account variable
+resource "octopusdeploy_variable" "usernamepassword_account_variable" {
+  owner_id = "Projects-123"
+  type     = "UsernamePasswordAccount"
+  name     = "UsernamePasswordVariable"
+  value    = octopusdeploy_username_password_account.account_user_pass.id
+}
+
 # create a Certificate variable
 resource "octopusdeploy_variable" "certificate_variable" {
   owner_id  = "Projects-123"
@@ -88,7 +96,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 ### Required
 
 - `name` (String) The name of this resource.
-- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
+- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `UsernamePasswordAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
 
 ### Optional
 

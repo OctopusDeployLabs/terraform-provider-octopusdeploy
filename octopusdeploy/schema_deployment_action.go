@@ -78,6 +78,10 @@ func flattenAction(action *deployments.DeploymentAction) map[string]interface{} 
 		flattenedAction["name"] = action.Name
 	}
 
+	if len(action.Slug) > 0 {
+		flattenedAction["slug"] = action.Slug
+	}
+
 	if len(action.Notes) > 0 {
 		flattenedAction["notes"] = action.Notes
 	}
@@ -257,6 +261,7 @@ func getActionSchema() (*schema.Schema, *schema.Resource) {
 				Optional:    true,
 				Default:     -1,
 			},
+			"slug":        getSlugSchema(),
 			"tenant_tags": getTenantTagsSchema(),
 		},
 	}
@@ -446,6 +451,10 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 	if v, ok := flattenedAction["run_on_server"]; ok {
 		runOnServer := v.(bool)
 		action.Properties["Octopus.Action.RunOnServer"] = core.NewPropertyValue(cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(runOnServer)), false)
+	}
+
+	if v, ok := flattenedAction["slug"]; ok {
+		action.Slug = v.(string)
 	}
 
 	if v, ok := flattenedAction["action_template"]; ok {

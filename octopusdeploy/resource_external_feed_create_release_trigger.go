@@ -37,7 +37,12 @@ func buildExternalFeedCreateReleaseTriggerResource(d *schema.ResourceData, clien
 	}
 
 	flattenedPackages := d.Get("package")
-	packages := expandDeploymentActionPackages(flattenedPackages)
+	packages := expandDeploymentActionSlugPackages(flattenedPackages)
+
+	flattenedPrimaryPackages := d.Get("primary_package")
+	primaryPackages := expandDeploymentActionSlugPrimaryPackages(flattenedPrimaryPackages)
+
+	packages = append(packages, primaryPackages...)
 
 	action := actions.NewCreateReleaseAction(channelId)
 	filter := filters.NewFeedTriggerFilter(packages)
@@ -95,7 +100,8 @@ func resourceExternalFeedCreateReleaseTriggerRead(ctx context.Context, d *schema
 	d.Set("project_id", projectTrigger.ProjectID)
 	d.Set("is_disabled", projectTrigger.IsDisabled)
 	d.Set("channel_id", action.ChannelID)
-	d.Set("package", flattenDeploymentActionPackages(filter.Packages))
+	d.Set("package", flattenDeploymentActionSlugPackages(filter.Packages))
+	d.Set("primary_package", flattenDeploymentActionSlugPrimaryPackages(filter.Packages))
 
 	return nil
 }

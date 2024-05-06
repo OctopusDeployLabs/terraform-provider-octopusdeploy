@@ -3554,22 +3554,22 @@ func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
 			return err
 		}
 
-		if len(project_triggers) != 2 {
-			t.Fatal("There must be exactly 2 project triggers")
-		}
-
 		tr1Name := "My first trigger"
 		tr2Name := "My second trigger"
+		tr3Name := "My third trigger"
 
 		tr1Index := stdslices.IndexFunc(project_triggers, func(t *triggers.ProjectTrigger) bool { return t.Name == tr1Name })
 		tr2Index := stdslices.IndexFunc(project_triggers, func(t *triggers.ProjectTrigger) bool { return t.Name == tr2Name })
+		tr3Index := stdslices.IndexFunc(project_triggers, func(t *triggers.ProjectTrigger) bool { return t.Name == tr3Name })
 
-		if tr1Index == -1 || tr2Index == -1 {
-			t.Fatalf("Unable to find both triggers. Expecting there to be \"%s\" and \"%s\".", tr1Name, tr2Name)
+		if tr1Index == -1 || tr2Index == -1 || tr3Index == -1 {
+			t.Fatalf("Unable to find all triggers. Expecting there to be \"%s\", \"%s\", and \"%s\".", tr1Name, tr2Name, tr3Name)
 		}
 
-		if project_triggers[0].Filter.GetFilterType() != filters.FeedFilter || project_triggers[1].Filter.GetFilterType() != filters.FeedFilter {
-			t.Fatal("The project triggers must all be of \"FeedFilter\" type")
+		for _, triggerIndex := range []int{tr1Index, tr2Index, tr3Index} {
+			if project_triggers[triggerIndex].Filter.GetFilterType() != filters.FeedFilter {
+				t.Fatal("The project triggers must all be of \"FeedFilter\" type")
+			}
 		}
 
 		if project_triggers[tr1Index].IsDisabled {
@@ -3580,8 +3580,13 @@ func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
 			t.Fatalf("The trigger \"%s\" should be disabled", tr2Name)
 		}
 
+		if project_triggers[tr3Index].IsDisabled {
+			t.Fatalf("The trigger \"%s\" should not be disabled", tr3Name)
+		}
+
 		tr1Filter := project_triggers[tr1Index].Filter.(*filters.FeedTriggerFilter)
 		tr2Filter := project_triggers[tr2Index].Filter.(*filters.FeedTriggerFilter)
+		tr3Filter := project_triggers[tr3Index].Filter.(*filters.FeedTriggerFilter)
 
 		if len(tr1Filter.Packages) != 2 {
 			t.Fatalf("The trigger \"%s\" should have 2 package references", tr1Name)
@@ -3589,6 +3594,10 @@ func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
 
 		if len(tr2Filter.Packages) != 1 {
 			t.Fatalf("The trigger \"%s\" should have 1 package reference", tr2Name)
+		}
+
+		if len(tr3Filter.Packages) != 3 {
+			t.Fatalf("The trigger \"%s\" should have 3 package reference", tr3Name)
 		}
 
 		return nil
