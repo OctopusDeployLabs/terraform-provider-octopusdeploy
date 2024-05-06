@@ -37,14 +37,16 @@ func resourceKubernetesAgentDeploymentTargetRead(ctx context.Context, d *schema.
 	client := m.(*client.Client)
 	deploymentTarget, err := machines.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
-		return errors.ProcessApiError(ctx, d, err, "listening tentacle deployment target")
+		return errors.ProcessApiError(ctx, d, err, "kubernetes tentacle deployment target")
 	}
 
 	flattenedKubernetesAgentDeploymentTarget := flattenKubernetesAgentDeploymentTarget(deploymentTarget)
 	for key, value := range flattenedKubernetesAgentDeploymentTarget {
-		err := d.Set(key, value)
-		if err != nil {
-			return nil
+		if key != "id" {
+			err := d.Set(key, value)
+			if err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 

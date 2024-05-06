@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run provider" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="terraform-provider-octopusdeploy" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="-debug true" />
+    <kind value="PACKAGE" />
+    <package value="github.com/OctopusDeploy/terraform-provider-octopusdeploy" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>

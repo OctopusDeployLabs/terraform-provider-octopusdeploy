@@ -127,8 +127,9 @@ func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"upgrade_locked": {
-			Optional: true,
-			Type:     schema.TypeBool,
+			Description: "If enabled the Kubernetes agent will not automatically upgrade and will stay on it's current version, even if the associated machine policy is configured to automatically upgrade.",
+			Optional:    true,
+			Type:        schema.TypeBool,
 		},
 		"is_disabled": {
 			Description: "Whether the Kubernetes agent is disabled. If the agent is disabled, it will not be included in any deployments.",
