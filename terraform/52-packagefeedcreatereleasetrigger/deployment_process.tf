@@ -65,4 +65,82 @@ resource "octopusdeploy_deployment_process" "example" {
       }
     }
   }
+  step {
+    condition           = "Success"
+    name                = "Helm one"
+    package_requirement = "LetOctopusDecide"
+    start_trigger       = "StartAfterPrevious"
+
+    action {
+      action_type                        = "Octopus.HelmChartUpgrade"
+      name                               = "Helm one"
+      condition                          = "Success"
+      run_on_server                      = true
+      is_disabled                        = false
+      can_be_used_for_project_versioning = true
+      is_required                        = false
+      worker_pool_id                     = ""
+      properties = {
+        "Octopus.Action.Helm.ClientVersion"         = "V3"
+        "Octopus.Action.Helm.Namespace"             = "dev"
+        "Octopus.Action.Package.DownloadOnTentacle" = "False"
+        "Octopus.Action.Helm.ResetValues"           = "True"
+      }
+      environments          = []
+      excluded_environments = []
+      channels              = []
+      tenant_tags           = []
+
+      primary_package {
+        package_id           = "redis"
+        acquisition_location = "Server"
+        feed_id              = "${octopusdeploy_helm_feed.feed_helm_charts.id}"
+        properties           = { SelectionMode = "immediate" }
+      }
+
+      features = []
+    }
+
+    properties   = {}
+    target_roles = ["k8s"]
+  }
+  step {
+    condition           = "Success"
+    name                = "Helm two"
+    package_requirement = "LetOctopusDecide"
+    start_trigger       = "StartAfterPrevious"
+
+    action {
+      action_type                        = "Octopus.HelmChartUpgrade"
+      name                               = "Helm two"
+      condition                          = "Success"
+      run_on_server                      = true
+      is_disabled                        = false
+      can_be_used_for_project_versioning = true
+      is_required                        = false
+      worker_pool_id                     = ""
+      properties = {
+        "Octopus.Action.Helm.ClientVersion"         = "V3"
+        "Octopus.Action.Helm.Namespace"             = "dev"
+        "Octopus.Action.Package.DownloadOnTentacle" = "False"
+        "Octopus.Action.Helm.ResetValues"           = "True"
+      }
+      environments          = []
+      excluded_environments = []
+      channels              = []
+      tenant_tags           = []
+
+      primary_package {
+        package_id           = "prometheus"
+        acquisition_location = "Server"
+        feed_id              = "${octopusdeploy_helm_feed.feed_helm_charts.id}"
+        properties           = { SelectionMode = "immediate" }
+      }
+
+      features = []
+    }
+
+    properties   = {}
+    target_roles = ["k8s"]
+  }
 }
