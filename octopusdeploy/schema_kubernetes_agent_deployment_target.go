@@ -75,10 +75,10 @@ func flattenKubernetesAgentDeploymentTarget(deploymentTarget *machines.Deploymen
 
 	if endpoint.KubernetesAgentDetails != nil {
 		flattenedDeploymentTarget["agent_version"] = endpoint.KubernetesAgentDetails.AgentVersion
-		flattenedDeploymentTarget["tentacle_version"] = endpoint.KubernetesAgentDetails.TentacleVersion
-		flattenedDeploymentTarget["upgrade_status"] = endpoint.KubernetesAgentDetails.UpgradeStatus
-		flattenedDeploymentTarget["helm_release_name"] = endpoint.KubernetesAgentDetails.HelmReleaseName
-		flattenedDeploymentTarget["kubernetes_namespace"] = endpoint.KubernetesAgentDetails.KubernetesNamespace
+		flattenedDeploymentTarget["agent_tentacle_version"] = endpoint.KubernetesAgentDetails.TentacleVersion
+		flattenedDeploymentTarget["agent_upgrade_status"] = endpoint.KubernetesAgentDetails.UpgradeStatus
+		flattenedDeploymentTarget["agent_helm_release_name"] = endpoint.KubernetesAgentDetails.HelmReleaseName
+		flattenedDeploymentTarget["agent_kubernetes_namespace"] = endpoint.KubernetesAgentDetails.KubernetesNamespace
 	}
 
 	return flattenedDeploymentTarget
