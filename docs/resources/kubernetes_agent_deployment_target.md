@@ -58,6 +58,7 @@ resource "octopusdeploy_kubernetes_agent_deployment_target" "tenanted_agent" {
 
 - `communication_mode` (String) The communication mode used by the Kubernetes agent to communicate with Octopus Server. Currently, the only supported value is 'Polling'.
 - `default_namespace` (String) Optional default namespace that will be used when using Kubernetes deployment steps, can be overrides within step configurations.
+- `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Whether the Kubernetes agent is disabled. If the agent is disabled, it will not be included in any deployments.
 - `machine_policy_id` (String) Optional ID of the machine policy that the Kubernetes agent will use. If not provided the default machine policy will be used.
 - `space_id` (String) The space ID associated with this resource.
@@ -70,7 +71,11 @@ resource "octopusdeploy_kubernetes_agent_deployment_target" "tenanted_agent" {
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `agent_helm_release_name` (String) Name of the Helm release that the agent belongs to.
+- `agent_kubernetes_namespace` (String) Name of the Kubernetes namespace where the agent is installed.
+- `agent_tentacle_version` (String) Current Tentacle version of the agent
+- `agent_upgrade_status` (String) Current upgrade availability status of the agent. One of 'NoUpgrades', 'UpgradeAvailable', 'UpgradeSuggested', 'UpgradeRequired'
+- `agent_version` (String) Current Helm chart version of the agent.
 
 ## Import
 

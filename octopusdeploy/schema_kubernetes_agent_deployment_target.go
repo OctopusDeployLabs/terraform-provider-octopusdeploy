@@ -60,6 +60,8 @@ func flattenKubernetesAgentDeploymentTarget(deploymentTarget *machines.Deploymen
 	flattenedDeploymentTarget["id"] = deploymentTarget.GetID()
 	flattenedDeploymentTarget["space_id"] = deploymentTarget.SpaceID
 	flattenedDeploymentTarget["name"] = deploymentTarget.Name
+	flattenedDeploymentTarget["environments"] = deploymentTarget.EnvironmentIDs
+	flattenedDeploymentTarget["roles"] = deploymentTarget.Roles
 	flattenedDeploymentTarget["machine_policy_id"] = deploymentTarget.MachinePolicyID
 	flattenedDeploymentTarget["is_disabled"] = deploymentTarget.IsDisabled
 	flattenedDeploymentTarget["tenanted_deployment_participation"] = deploymentTarget.TenantedDeploymentMode
@@ -71,11 +73,20 @@ func flattenKubernetesAgentDeploymentTarget(deploymentTarget *machines.Deploymen
 	flattenedDeploymentTarget["communication_mode"] = endpoint.TentacleEndpointConfiguration.CommunicationMode
 	flattenedDeploymentTarget["default_namespace"] = endpoint.DefaultNamespace
 
+	if endpoint.KubernetesAgentDetails != nil {
+		flattenedDeploymentTarget["agent_version"] = endpoint.KubernetesAgentDetails.AgentVersion
+		flattenedDeploymentTarget["tentacle_version"] = endpoint.KubernetesAgentDetails.TentacleVersion
+		flattenedDeploymentTarget["upgrade_status"] = endpoint.KubernetesAgentDetails.UpgradeStatus
+		flattenedDeploymentTarget["helm_release_name"] = endpoint.KubernetesAgentDetails.HelmReleaseName
+		flattenedDeploymentTarget["kubernetes_namespace"] = endpoint.KubernetesAgentDetails.KubernetesNamespace
+	}
+
 	return flattenedDeploymentTarget
 }
 
 func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
+		"id":       getIDSchema(),
 		"space_id": getSpaceIDSchema(),
 		"name":     getNameSchema(true),
 		"environments": {
@@ -137,5 +148,51 @@ func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
 			Default:     false,
 			Type:        schema.TypeBool,
 		},
+
+		// Read-only Values
+		"agent_version": {
+			Description: "Current Helm chart version of the agent.",
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
+		"agent_tentacle_version": {
+			Description: "Current Tentacle version of the agent",
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
+		"agent_upgrade_status": {
+			Description: "Current upgrade availability status of the agent. One of 'NoUpgrades', 'UpgradeAvailable', 'UpgradeSuggested', 'UpgradeRequired'",
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
+		"agent_helm_release_name": {
+			Description: "Name of the Helm release that the agent belongs to.",
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
+		"agent_kubernetes_namespace": {
+			Description: "Name of the Kubernetes namespace where the agent is installed.",
+			Computed:    true,
+			Type:        schema.TypeString,
+		},
 	}
+}
+
+func getKubernetesAgentDeploymentTargetDataSchema() map[string]*schema.Schema {
+	dataSchema := getKubernetesAgentDeploymentTargetSchema()
+	setDataSchema(&dataSchema)
+
+	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
+	deploymentTargetDataSchema["kubernetes_agent_deployment_targets"] = &schema.Schema{
+		Computed:    true,
+		Description: "A list of kubernetes agent deployment targets that match the filter(s).",
+		Elem:        &schema.Resource{Schema: dataSchema},
+		Optional:    true,
+		Type:        schema.TypeList,
+	}
+
+	delete(deploymentTargetDataSchema, "communication_styles")
+	delete(deploymentTargetDataSchema, "deployment_targets")
+	deploymentTargetDataSchema["id"] = getDataSchemaID()
+	return deploymentTargetDataSchema
 }
