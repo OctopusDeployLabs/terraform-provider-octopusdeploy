@@ -3801,3 +3801,44 @@ func TestKubernetesDeploymentTargetResource(t *testing.T) {
 		return nil
 	})
 }
+
+func TestKubernetesDeploymentTargetData(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "55-kubernetesagentdeploymenttarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("./terraform", "55a-kubernetesagentdeploymenttargetds"), newSpaceId, []string{})
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.MachinesQuery{
+			DeploymentTargetTypes: []string{"KubernetesTentacle"},
+			PartialName:           "minimum-agent",
+			Skip:                  0,
+			Take:                  1,
+		}
+
+		resources, err := machines.Get(client, newSpaceId, query)
+		if err != nil {
+			return err
+		}
+
+		var foundAgent = resources.Items[0]
+
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "55a-kubernetesagentdeploymenttargetds"), "data_lookup")
+		if err != nil {
+			return err
+		}
+
+		if lookup != foundAgent.ID {
+			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + foundAgent.ID + "\".")
+		}
+
+		return nil
+	})
+}
