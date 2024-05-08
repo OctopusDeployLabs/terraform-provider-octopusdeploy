@@ -8,22 +8,9 @@ import (
 	"net/url"
 )
 
-const PlaceholderKubernetesTentacleUri = "poll://aaaaaaaaaaaaaaaaaaaa/"
-const PlaceholderKubernetesTentacleThumbprint = "0000000"
-
 func expandKubernetesAgentDeploymentTarget(kubernetesAgent *schema.ResourceData) *machines.DeploymentTarget {
 	uri, _ := url.Parse(kubernetesAgent.Get("uri").(string))
 	thumbprint := kubernetesAgent.Get("thumbprint").(string)
-
-	// If the URI or thumbprint is empty, we set it to these placeholder values as we cannot create a KubernetesTentacleEndpoint on server without them
-	// Once the Agent with the same target name registers itself with server it will override these values with the correct ones
-	// We also want these values to be settable in TF to allow users to manage an existing installation of an Agent
-	if kubernetesAgent.Get("uri").(string) == "" {
-		uri, _ = url.Parse(PlaceholderKubernetesTentacleUri)
-	}
-	if kubernetesAgent.Get("thumbprint").(string) == "" {
-		thumbprint = PlaceholderKubernetesTentacleThumbprint
-	}
 
 	defaultNamespace := kubernetesAgent.Get("default_namespace").(string)
 	communicationsMode := kubernetesAgent.Get("communication_mode").(string)
@@ -120,15 +107,13 @@ func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"thumbprint": {
-			Description: "The thumbprint of the Kubernetes agent's certificate used by server to verify the identity of the agent. This is optional as a new installation of the agent will update this value when registers with the server.",
-			Optional:    true,
-			Computed:    true,
+			Description: "The thumbprint of the Kubernetes agent's certificate used by server to verify the identity of the agent. This is the same thumbprint that was used when installing the agent.",
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"uri": {
-			Description: "The URI of the Kubernetes agent's used by the server to queue messages. This is optional as a new installation of the agent will update this value when registers with the server.",
-			Optional:    true,
-			Computed:    true,
+			Description: "The URI of the Kubernetes agent's used by the server to queue messages. This is the same subscription uri that was used when installing the agent.",
+			Required:    true,
 			Type:        schema.TypeString,
 		},
 		"default_namespace": {

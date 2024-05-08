@@ -79,8 +79,8 @@ Read-Only:
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
-- `thumbprint` (String) The thumbprint of the Kubernetes agent's certificate used by server to verify the identity of the agent. This is optional as a new installation of the agent will update this value when registers with the server.
+- `thumbprint` (String) The thumbprint of the Kubernetes agent's certificate used by server to verify the identity of the agent. This is the same thumbprint that was used when installing the agent.
 - `upgrade_locked` (Boolean) If enabled the Kubernetes agent will not automatically upgrade and will stay on the currently installed version, even if the associated machine policy is configured to automatically upgrade.
-- `uri` (String) The URI of the Kubernetes agent's used by the server to queue messages. This is optional as a new installation of the agent will update this value when registers with the server.
+- `uri` (String) The URI of the Kubernetes agent's used by the server to queue messages. This is the same subscription uri that was used when installing the agent.
 
 

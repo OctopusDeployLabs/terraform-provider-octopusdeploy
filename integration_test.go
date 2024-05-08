@@ -35,10 +35,14 @@ package main
 */
 
 import (
+	"crypto/sha1"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -3741,33 +3745,10 @@ func TestKubernetesDeploymentTargetResource(t *testing.T) {
 			t.Fatalf("Space must have three deployment targets with type KubernetesTentacle")
 		}
 
-		minimumAgentName := "minimum-agent"
-		minimumAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == minimumAgentName })
-		minimumAgentDeploymentTarget := resources.Items[minimumAgentIndex]
-		minimumAgentEndpoint := minimumAgentDeploymentTarget.Endpoint.(*machines.KubernetesTentacleEndpoint)
-
-		if minimumAgentEndpoint.TentacleEndpointConfiguration.URI.String() != octopusdeploy.PlaceholderKubernetesTentacleUri {
-			t.Fatalf("Expected  \"%s\" to have a URI of \"%s\", instead has \"%s\"", minimumAgentName, octopusdeploy.PlaceholderKubernetesTentacleUri, minimumAgentEndpoint.TentacleEndpointConfiguration.URI.String())
-		}
-
-		if minimumAgentEndpoint.TentacleEndpointConfiguration.Thumbprint != octopusdeploy.PlaceholderKubernetesTentacleThumbprint {
-			t.Fatalf("Expected  \"%s\" to have a thumbprint of \"%s\", instead has \"%s\"", minimumAgentName, octopusdeploy.PlaceholderKubernetesTentacleThumbprint, minimumAgentEndpoint.TentacleEndpointConfiguration.Thumbprint)
-		}
-
 		optionalAgentName := "optional-agent"
 		optionalAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == optionalAgentName })
 		optionalAgentDeploymentTarget := resources.Items[optionalAgentIndex]
 		optionalAgentEndpoint := optionalAgentDeploymentTarget.Endpoint.(*machines.KubernetesTentacleEndpoint)
-
-		expectedUri := "poll://kcxzcv2fpsxkn6tk9u6d/"
-		if optionalAgentEndpoint.TentacleEndpointConfiguration.URI.String() != expectedUri {
-			t.Fatalf("Expected  \"%s\" to have a URI of \"%s\", instead has \"%s\"", optionalAgentName, expectedUri, optionalAgentEndpoint.TentacleEndpointConfiguration.URI.String())
-		}
-
-		expectedThumbprint := "96203ED84246201C26A2F4360D7CBC36AC1D232D"
-		if optionalAgentEndpoint.TentacleEndpointConfiguration.Thumbprint != expectedThumbprint {
-			t.Fatalf("Expected  \"%s\" to have a thumbprint of \"%s\", instead has \"%s\"", optionalAgentName, expectedThumbprint, optionalAgentEndpoint.TentacleEndpointConfiguration.Thumbprint)
-		}
 
 		expectedDefaultNamespace := "kubernetes-namespace"
 		if optionalAgentEndpoint.DefaultNamespace != expectedDefaultNamespace {
@@ -3837,6 +3818,80 @@ func TestKubernetesDeploymentTargetData(t *testing.T) {
 
 		if lookup != foundAgent.ID {
 			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + foundAgent.ID + "\".")
+		}
+
+		return nil
+	})
+}
+
+func TestPollingSubscriptionIdResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		_, err := testFramework.Act(t, container, "./terraform", "56-pollingsubscriptionid", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		baseIdLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "56-pollingsubscriptionid"), "base_id")
+		if err != nil {
+			return err
+		}
+
+		basePollingUriLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "56-pollingsubscriptionid"), "base_polling_uri")
+		if err != nil {
+			return err
+		}
+
+		parsedUri, err := url.Parse(basePollingUriLookup)
+		if parsedUri.Scheme != "poll" {
+			t.Fatalf("The polling URI scheme must be \"poll\" but instead received %s", parsedUri.Scheme)
+		}
+
+		if parsedUri.Host != baseIdLookup {
+			t.Fatalf("The polling URI host must be the Subscription ID but instead received %s", parsedUri.Host)
+		}
+
+		return nil
+	})
+}
+
+func TestTentacleCertificateResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		_, err := testFramework.Act(t, container, "./terraform", "57-tentaclecertificate", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		base64CertLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "57-tentaclecertificate"), "base_certificate")
+		if err != nil {
+			return err
+		}
+
+		certBytes, err := base64.StdEncoding.DecodeString(base64CertLookup)
+		if err != nil {
+			return err
+		}
+
+		parsedCert, err := x509.ParseCertificate(certBytes)
+		if err != nil {
+			return err
+		}
+
+		thumbprintLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "57-tentaclecertificate"), "base_certificate_thumbprint")
+		if err != nil {
+			return err
+		}
+
+		certSha := sha1.Sum(parsedCert.Raw)
+		expectedThumbprint := hex.EncodeToString(certSha[:])
+
+		if expectedThumbprint != thumbprintLookup {
+			t.Fatalf("The thumbprint of the certificate does not match the expected value. Expected: %s, Actual: %s", expectedThumbprint, thumbprintLookup)
 		}
 
 		return nil

@@ -16,30 +16,28 @@ resource "octopusdeploy_kubernetes_agent_deployment_target" "minimal" {
   name         = "agent-minimal"
   environments = ["environments-1"]
   roles        = ["role-1", "role-2"]
+  thumbprint   = "96203ED84246201C26A2F4360D7CBC36AC1D232D"
+  uri          = "poll://kcxzcv2fpsxkn6tk9u6d/"
 }
 
 resource "octopusdeploy_kubernetes_agent_deployment_target" "optionals" {
   name              = "agent-optionals"
   environments      = ["environments-1"]
   roles             = ["role-1", "role-2"]
+  thumbprint   = "96203ED84246201C26A2F4360D7CBC36AC1D232D"
+  uri          = "poll://kcxzcv2fpsxkn6tk9u6d/"
   machine_policy_id = "machinepolicies-1"
   default_namespace = "kubernetes-namespace"
   upgrade_locked    = true
   is_disabled       = true
 }
 
-resource "octopusdeploy_kubernetes_agent_deployment_target" "existing_installation" {
-  name         = "agent-existing"
-  environments = ["environments-1"]
-  roles        = ["role-1", "role-2"]
-  thumbprint   = "96203ED84246201C26A2F4360D7CBC36AC1D232D"
-  uri          = "poll://kcxzcv2fpsxkn6tk9u6d/"
-}
-
 resource "octopusdeploy_kubernetes_agent_deployment_target" "tenanted_agent" {
   name                              = "agent-tenanted"
   environments                      = ["environments-1"]
   roles                             = ["role-1", "role-2"]
+  thumbprint   = "96203ED84246201C26A2F4360D7CBC36AC1D232D"
+  uri          = "poll://kcxzcv2fpsxkn6tk9u6d/"
   tenanted_deployment_participation = "Tenanted"
   tenants                           = ["tenants-1"]
   tenant_tags                       = ["TagSets-1/Tags-1"]
@@ -53,6 +51,8 @@ resource "octopusdeploy_kubernetes_agent_deployment_target" "tenanted_agent" {
 - `environments` (List of String) A list of environment IDs this Kubernetes agent can deploy to.
 - `name` (String) The name of this resource.
 - `roles` (List of String) A list of target roles that are associated to this Kubernetes agent.
+- `thumbprint` (String) The thumbprint of the Kubernetes agent's certificate used by server to verify the identity of the agent. This is the same thumbprint that was used when installing the agent.
+- `uri` (String) The URI of the Kubernetes agent's used by the server to queue messages. This is the same subscription uri that was used when installing the agent.
 
 ### Optional
 
@@ -65,9 +65,7 @@ resource "octopusdeploy_kubernetes_agent_deployment_target" "tenanted_agent" {
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
-- `thumbprint` (String) The thumbprint of the Kubernetes agent's certificate used by server to verify the identity of the agent. This is optional as a new installation of the agent will update this value when registers with the server.
 - `upgrade_locked` (Boolean) If enabled the Kubernetes agent will not automatically upgrade and will stay on the currently installed version, even if the associated machine policy is configured to automatically upgrade.
-- `uri` (String) The URI of the Kubernetes agent's used by the server to queue messages. This is optional as a new installation of the agent will update this value when registers with the server.
 
 ### Read-Only
 
