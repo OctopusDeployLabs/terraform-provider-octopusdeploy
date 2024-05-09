@@ -6,6 +6,7 @@ func getTentacleCertificateSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"base64": {
 			Computed:    true,
+			Sensitive:   true,
 			Description: "The base64 encoded pfx certificate.",
 			Type:        schema.TypeString,
 		},
