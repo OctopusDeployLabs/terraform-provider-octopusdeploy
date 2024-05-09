@@ -40,7 +40,7 @@ resource "octopusdeploy_kubernetes_agent_deployment_target" "agent" {
 
 ### Read-Only
 
-- `base64` (String) The base64 encoded pfx certificate.
+- `base64` (String, Sensitive) The base64 encoded pfx certificate.
 - `id` (String) The ID of this resource.
 - `thumbprint` (String) The SHA1 sum of the certificate represented in hexadecimal.
 
