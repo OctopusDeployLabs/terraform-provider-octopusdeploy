@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"software.sslmate.com/src/go-pkcs12"
+	"strings"
 	"time"
 )
 
@@ -90,7 +91,7 @@ func generateCertificate(fullName string) (string, string, error) {
 	pkcs12Base64 := base64.StdEncoding.EncodeToString(pkcs12Bytes)
 
 	thumbprint := sha1.Sum(certBytes)
-	thumbprintStr := hex.EncodeToString(thumbprint[:])
+	thumbprintStr := strings.ToUpper(hex.EncodeToString(thumbprint[:]))
 
 	return pkcs12Base64, thumbprintStr, nil
 }
