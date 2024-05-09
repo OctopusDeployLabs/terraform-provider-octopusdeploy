@@ -29,7 +29,7 @@ func resourceAmazonWebServicesOpenIDConnectAccountCreate(ctx context.Context, d 
 	log.Printf("[INFO] creating AWS OIDC account")
 
 	client := m.(*client.Client)
-	createdAccount, err := client.Accounts.Add(account)
+	createdAccount, err := accounts.Add(client, account)
 	if err != nil {
 		return diag.FromErr(err)
 	}
