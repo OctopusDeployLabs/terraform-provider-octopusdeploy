@@ -28,6 +28,7 @@ func expandKubernetesAgentDeploymentTarget(kubernetesAgent *schema.ResourceData)
 	deploymentTarget.TenantedDeploymentMode = core.TenantedDeploymentMode(kubernetesAgent.Get("tenanted_deployment_participation").(string))
 	deploymentTarget.TenantIDs = expandArray(kubernetesAgent.Get("tenants").([]interface{}))
 	deploymentTarget.TenantTags = expandArray(kubernetesAgent.Get("tenant_tags").([]interface{}))
+	deploymentTarget.SpaceID = kubernetesAgent.Get("space_id").(string)
 
 	return deploymentTarget
 }
