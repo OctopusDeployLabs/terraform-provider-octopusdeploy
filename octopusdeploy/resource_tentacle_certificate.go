@@ -20,7 +20,7 @@ func resourceTentacleCertificate() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceTentacleCertificateCreate,
 		DeleteContext: resourceTentacleCertificateDelete,
-		Description:   "Generates a X509Certificate for use with a Octopus Deploy Tentacle.",
+		Description:   "Generates a X.509 self-signed certificate for use with a Octopus Deploy Tentacle.",
 		ReadContext:   resourceTentacleCertificateRead,
 		Schema:        getTentacleCertificateSchema(),
 	}
