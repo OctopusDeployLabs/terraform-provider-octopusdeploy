@@ -1,0 +1,31 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Octopus certificates
+The X.509 certificates generated are self-signed, 2048-bit private keys and intended for use [only between Octopus Server and Tentacle](https://octopus.com/docs/security/octopus-tentacle-communication#Octopus-Tentaclecommunication-Octopuscertificates) communications. There is an insightful discussion of [why Octopus uses self-signed certificates](https://octopus.com/blog/why-self-signed-certificates) by default.
+
+Instead of generating a new certificate through this resource you can use an existing certificate and simply reference the appropriate thumbprint when registering the target.
+
+### State Persistence
+This resource that is generated will be stored in the state file and cannot be retrieved later from the external Octopus Server or Tentacle.
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+{{ .SchemaMarkdown | trimspace }}
+
+{{ if .HasImport -}}
+## Import
+
+Import is supported using the following syntax:
+
+{{ codefile "shell" (printf "%s%s%s" "examples/resources/" .Name "/import.sh") }}
+{{- end }}

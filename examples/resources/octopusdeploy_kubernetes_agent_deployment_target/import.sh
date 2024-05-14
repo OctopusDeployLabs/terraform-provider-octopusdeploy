@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_kubernetes_agent_deployment_target.<name> <machine-id>

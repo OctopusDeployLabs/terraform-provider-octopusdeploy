@@ -38,6 +38,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -3707,6 +3708,168 @@ func TestUsernamePasswordVariableResource(t *testing.T) {
 
 		if projectVariables.Variables[0].Type != "UsernamePasswordAccount" {
 			t.Fatalf("The variable must have type of UsernamePasswordAccount.")
+		}
+
+		return nil
+	})
+}
+
+func TestKubernetesDeploymentTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "55-kubernetesagentdeploymenttarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.MachinesQuery{
+			DeploymentTargetTypes: []string{"KubernetesTentacle"},
+			Skip:                  0,
+			Take:                  3,
+		}
+
+		resources, err := machines.Get(client, newSpaceId, query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) != 3 {
+			t.Fatalf("Space must have three deployment targets with type KubernetesTentacle")
+		}
+
+		optionalAgentName := "optional-agent"
+		optionalAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == optionalAgentName })
+		optionalAgentDeploymentTarget := resources.Items[optionalAgentIndex]
+		optionalAgentEndpoint := optionalAgentDeploymentTarget.Endpoint.(*machines.KubernetesTentacleEndpoint)
+
+		expectedDefaultNamespace := "kubernetes-namespace"
+		if optionalAgentEndpoint.DefaultNamespace != expectedDefaultNamespace {
+			t.Fatalf("Expected  \"%s\" to have a default namespace of \"%s\", instead has \"%s\"", optionalAgentName, expectedDefaultNamespace, optionalAgentEndpoint.DefaultNamespace)
+		}
+
+		if !optionalAgentDeploymentTarget.IsDisabled {
+			t.Fatalf("Expected  \"%s\" to be disabled", optionalAgentName)
+		}
+
+		if !optionalAgentEndpoint.UpgradeLocked {
+			t.Fatalf("Expected  \"%s\" to have upgrade locked", optionalAgentName)
+		}
+
+		tenantedAgentName := "tenanted-agent"
+		tenantedAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == tenantedAgentName })
+		tenantedAgentDeploymentTarget := resources.Items[tenantedAgentIndex]
+
+		if tenantedAgentDeploymentTarget.TenantedDeploymentMode != "Tenanted" {
+			t.Fatalf("Expected \"%s\" to be tenanted, but it was \"%s\"", tenantedAgentName, tenantedAgentDeploymentTarget.TenantedDeploymentMode)
+		}
+
+		if len(tenantedAgentDeploymentTarget.TenantIDs) != 1 {
+			t.Fatalf("Expected \"%s\" to have 1 tenant, but it has %d", tenantedAgentName, len(tenantedAgentDeploymentTarget.TenantIDs))
+		}
+
+		if len(tenantedAgentDeploymentTarget.TenantTags) != 2 {
+			t.Fatalf("Expected \"%s\" to have 2 tenant tags, but it has %d", tenantedAgentName, len(tenantedAgentDeploymentTarget.TenantTags))
+		}
+
+		return nil
+	})
+}
+
+func TestKubernetesDeploymentTargetData(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "55-kubernetesagentdeploymenttarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("./terraform", "55a-kubernetesagentdeploymenttargetds"), newSpaceId, []string{})
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.MachinesQuery{
+			DeploymentTargetTypes: []string{"KubernetesTentacle"},
+			PartialName:           "minimum-agent",
+			Skip:                  0,
+			Take:                  1,
+		}
+
+		resources, err := machines.Get(client, newSpaceId, query)
+		if err != nil {
+			return err
+		}
+
+		var foundAgent = resources.Items[0]
+
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "55a-kubernetesagentdeploymenttargetds"), "data_lookup")
+		if err != nil {
+			return err
+		}
+
+		if lookup != foundAgent.ID {
+			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + foundAgent.ID + "\".")
+		}
+
+		return nil
+	})
+}
+
+func TestPollingSubscriptionIdResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		_, err := testFramework.Act(t, container, "./terraform", "56-pollingsubscriptionid", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		baseIdLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "56-pollingsubscriptionid"), "base_id")
+		if err != nil {
+			return err
+		}
+
+		basePollingUriLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "56-pollingsubscriptionid"), "base_polling_uri")
+		if err != nil {
+			return err
+		}
+
+		parsedUri, err := url.Parse(basePollingUriLookup)
+		if parsedUri.Scheme != "poll" {
+			t.Fatalf("The polling URI scheme must be \"poll\" but instead received %s", parsedUri.Scheme)
+		}
+
+		if parsedUri.Host != baseIdLookup {
+			t.Fatalf("The polling URI host must be the Subscription ID but instead received %s", parsedUri.Host)
+		}
+
+		return nil
+	})
+}
+
+func TestTentacleCertificateResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		_, err := testFramework.Act(t, container, "./terraform", "57-tentaclecertificate", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		thumbprintLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "57-tentaclecertificate"), "base_certificate_thumbprint")
+		if err != nil {
+			return err
+		}
+
+		if thumbprintLookup == "" {
+			t.Fatalf("Expected a thumbprint to be returned in Terraform output")
 		}
 
 		return nil
