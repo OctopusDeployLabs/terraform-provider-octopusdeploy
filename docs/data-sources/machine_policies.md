@@ -102,6 +102,7 @@ Read-Only:
 Read-Only:
 
 - `calamari_update_behavior` (String)
+- `kubernetes_agent_update_behavior` (String)
 - `tentacle_update_account_id` (String)
 - `tentacle_update_behavior` (String)
 

@@ -31,6 +31,10 @@ func expandMachineUpdatePolicy(values interface{}) *machinepolicies.MachineUpdat
 		machineUpdatePolicy.TentacleUpdateBehavior = v.(string)
 	}
 
+	if v, ok := flattenedMap["kubernetes_agent_update_behavior"]; ok {
+		machineUpdatePolicy.KubernetesAgentUpdateBehavior = v.(string)
+	}
+
 	return machineUpdatePolicy
 }
 
@@ -40,9 +44,10 @@ func flattenMachineUpdatePolicy(machineUpdatePolicy *machinepolicies.MachineUpda
 	}
 
 	return []interface{}{map[string]interface{}{
-		"calamari_update_behavior":   machineUpdatePolicy.CalamariUpdateBehavior,
-		"tentacle_update_account_id": machineUpdatePolicy.TentacleUpdateAccountID,
-		"tentacle_update_behavior":   machineUpdatePolicy.TentacleUpdateBehavior,
+		"calamari_update_behavior":         machineUpdatePolicy.CalamariUpdateBehavior,
+		"tentacle_update_account_id":       machineUpdatePolicy.TentacleUpdateAccountID,
+		"tentacle_update_behavior":         machineUpdatePolicy.TentacleUpdateBehavior,
+		"kubernetes_agent_update_behavior": machineUpdatePolicy.KubernetesAgentUpdateBehavior,
 	}}
 }
 
@@ -64,6 +69,15 @@ func getMachineUpdatePolicySchema() map[string]*schema.Schema {
 		},
 		"tentacle_update_behavior": {
 			Default:  "NeverUpdate",
+			Optional: true,
+			Type:     schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+				"NeverUpdate",
+				"Update",
+			}, false)),
+		},
+		"kubernetes_agent_update_behavior": {
+			Default:  "Update",
 			Optional: true,
 			Type:     schema.TypeString,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{

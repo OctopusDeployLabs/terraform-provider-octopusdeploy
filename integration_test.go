@@ -1994,12 +1994,16 @@ func TestMachinePolicyResource(t *testing.T) {
 			t.Fatal("The machine policy must have a MachineHealthCheckPolicy.HealthCheckInterval of \"00:10:00\" (was \"" + fmt.Sprint(resource.MachineHealthCheckPolicy.HealthCheckInterval) + "\")")
 		}
 
-		if resource.MachineUpdatePolicy.CalamariUpdateBehavior != "UpdateOnDeployment" {
-			t.Fatal("The machine policy must have a MachineUpdatePolicy.CalamariUpdateBehavior of \"UpdateOnDeployment\" (was \"" + resource.MachineUpdatePolicy.CalamariUpdateBehavior + "\")")
+		if resource.MachineUpdatePolicy.CalamariUpdateBehavior != "UpdateAlways" {
+			t.Fatal("The machine policy must have a MachineUpdatePolicy.CalamariUpdateBehavior of \"UpdateAlways\" (was \"" + resource.MachineUpdatePolicy.CalamariUpdateBehavior + "\")")
 		}
 
-		if resource.MachineUpdatePolicy.TentacleUpdateBehavior != "NeverUpdate" {
-			t.Fatal("The machine policy must have a MachineUpdatePolicy.TentacleUpdateBehavior of \"NeverUpdate\" (was \"" + resource.MachineUpdatePolicy.CalamariUpdateBehavior + "\")")
+		if resource.MachineUpdatePolicy.TentacleUpdateBehavior != "Update" {
+			t.Fatal("The machine policy must have a MachineUpdatePolicy.TentacleUpdateBehavior of \"Update\" (was \"" + resource.MachineUpdatePolicy.CalamariUpdateBehavior + "\")")
+		}
+
+		if resource.MachineUpdatePolicy.KubernetesAgentUpdateBehavior != "NeverUpdate" {
+			t.Fatal("The machine policy must have a MachineUpdatePolicy.KubernetesAgentUpdateBehavior of \"NeverUpdate\" (was \"" + resource.MachineUpdatePolicy.CalamariUpdateBehavior + "\")")
 		}
 
 		return nil
