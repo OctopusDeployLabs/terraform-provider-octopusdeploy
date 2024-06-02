@@ -87,6 +87,7 @@ resource "octopusdeploy_deployment_process" "test_deployment_process" {
     name                = "Kubectl Action"
     package_requirement = "LetOctopusDecide"
     start_trigger       = "StartAfterPrevious"
+    target_roles        = [ "mycluster" ]
     run_kubectl_script_action {
       name             = "Kubectl Action"
       run_on_server    = true
@@ -106,7 +107,7 @@ resource "octopusdeploy_deployment_process" "test_deployment_process" {
     name                = "Raw Yaml Action"
     package_requirement = "LetOctopusDecide"
     start_trigger       = "StartAfterPrevious"
-    properties          = { "Octopus.Action.TargetRoles" : "Qwerty" }
+    target_roles        = [ "mycluster" ]
     action {
       action_type = "Octopus.KubernetesDeployRawYaml"
       name        = "Raw Yaml Action"
@@ -138,7 +139,7 @@ resource "octopusdeploy_deployment_process" "test_deployment_process" {
     name                = "Deploy Secret"
     package_requirement = "LetOctopusDecide"
     start_trigger       = "StartAfterPrevious"
-    properties          = { "Octopus.Action.TargetRoles" : "Qwerty" }
+    target_roles        = [ "mycluster" ]
     deploy_kubernetes_secret_action {
       name          = "Deploy secret"
       secret_name   = "name"
