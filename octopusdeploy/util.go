@@ -112,3 +112,10 @@ func stringHashCode(s string) int {
 	}
 	return 0
 }
+
+func formatBoolForActionProperty(b bool) string {
+	if b {
+		return "True"
+	}
+	return "False"
+}

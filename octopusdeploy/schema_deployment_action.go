@@ -517,5 +517,24 @@ func expandAction(flattenedAction map[string]interface{}) *deployments.Deploymen
 		}
 	}
 
+	// Polyfill the Kubernetes Object status check to default to true if not specified for Kubernetes steps
+	switch actionType {
+	case "Octopus.KubernetesDeployContainers":
+		fallthrough
+	case "Octopus.KubernetesDeployRawYaml":
+		fallthrough
+	case "Octopus.KubernetesDeployService":
+		fallthrough
+	case "Octopus.KubernetesDeployIngress":
+		fallthrough
+	case "Octopus.KubernetesDeployConfigMap":
+		fallthrough
+	case "Octopus.Kustomize":
+		if _, exists := action.Properties["Octopus.Action.Kubernetes.ResourceStatusCheck"]; !exists {
+			action.Properties["Octopus.Action.Kubernetes.ResourceStatusCheck"] = core.NewPropertyValue(formatBoolForActionProperty(true), false)
+		}
+		break
+	}
+
 	return action
 }

@@ -23,7 +23,7 @@ func expandDeployKubernetesSecretAction(flattenedAction map[string]interface{}) 
 	}
 
 	if v, ok := flattenedAction["kubernetes_object_status_check_enabled"]; ok {
-		action.Properties["Octopus.Action.Kubernetes.ResourceStatusCheck"] = core.NewPropertyValue(strconv.FormatBool(v.(bool)), false)
+		action.Properties["Octopus.Action.Kubernetes.ResourceStatusCheck"] = core.NewPropertyValue(formatBoolForActionProperty(v.(bool)), false)
 	}
 
 	return action
@@ -79,6 +79,13 @@ func getDeployKubernetesSecretActionSchema() *schema.Schema {
 		Elem:     &schema.Schema{Type: schema.TypeString},
 		Required: true,
 		Type:     schema.TypeMap,
+	}
+
+	element.Schema["kubernetes_object_status_check_enabled"] = &schema.Schema{
+		Optional:    true,
+		Default:     true,
+		Type:        schema.TypeBool,
+		Description: "Indicates the status of the Kubernetes Object Status feature",
 	}
 
 	return actionSchema
