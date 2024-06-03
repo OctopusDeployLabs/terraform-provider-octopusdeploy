@@ -31,6 +31,10 @@ func expandMachineUpdatePolicy(values interface{}) *machinepolicies.MachineUpdat
 		machineUpdatePolicy.TentacleUpdateBehavior = v.(string)
 	}
 
+	if v, ok := flattenedMap["kubernetes_agent_update_behavior"]; ok {
+		machineUpdatePolicy.KubernetesAgentUpdateBehavior = v.(string)
+	}
+
 	return machineUpdatePolicy
 }
 
@@ -40,9 +44,10 @@ func flattenMachineUpdatePolicy(machineUpdatePolicy *machinepolicies.MachineUpda
 	}
 
 	return []interface{}{map[string]interface{}{
-		"calamari_update_behavior":   machineUpdatePolicy.CalamariUpdateBehavior,
-		"tentacle_update_account_id": machineUpdatePolicy.TentacleUpdateAccountID,
-		"tentacle_update_behavior":   machineUpdatePolicy.TentacleUpdateBehavior,
+		"calamari_update_behavior":         machineUpdatePolicy.CalamariUpdateBehavior,
+		"tentacle_update_account_id":       machineUpdatePolicy.TentacleUpdateAccountID,
+		"tentacle_update_behavior":         machineUpdatePolicy.TentacleUpdateBehavior,
+		"kubernetes_agent_update_behavior": machineUpdatePolicy.KubernetesAgentUpdateBehavior,
 	}}
 }
 
@@ -57,10 +62,12 @@ func getMachineUpdatePolicySchema() map[string]*schema.Schema {
 				"UpdateOnDeployment",
 				"UpdateOnNewMachine",
 			}, false)),
+			Description: "The behaviour of how Calamari is updated. Valid values are `UpdateAlways`, `UpdateOnDeployment` and `UpdateOnNewMachine`.",
 		},
 		"tentacle_update_account_id": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Optional:    true,
+			Type:        schema.TypeString,
+			Description: "The Account ID to perform any Tentacle updates under.",
 		},
 		"tentacle_update_behavior": {
 			Default:  "NeverUpdate",
@@ -70,6 +77,17 @@ func getMachineUpdatePolicySchema() map[string]*schema.Schema {
 				"NeverUpdate",
 				"Update",
 			}, false)),
+			Description: "The behaviour of how Tentacle machines are updated. Valid values are `NeverUpdate` and `Update`.",
+		},
+		"kubernetes_agent_update_behavior": {
+			Default:  "Update",
+			Optional: true,
+			Type:     schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+				"NeverUpdate",
+				"Update",
+			}, false)),
+			Description: "The behaviour of how Kubernetes agent machines are updated. Valid values are `NeverUpdate` and `Update`.",
 		},
 	}
 }

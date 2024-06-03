@@ -33,7 +33,8 @@ resource "octopusdeploy_machine_policy" "machinepolicy_testing" {
   }
 
   machine_update_policy {
-    calamari_update_behavior = "UpdateOnDeployment"
-    tentacle_update_behavior = "NeverUpdate"
+    calamari_update_behavior = "UpdateAlways"
+    tentacle_update_behavior = "Update"
+    kubernetes_agent_update_behavior = "NeverUpdate"
   }
 }
