@@ -94,9 +94,9 @@ Optional:
 
 Optional:
 
-- `calamari_update_behavior` (String)
-- `kubernetes_agent_update_behavior` (String)
-- `tentacle_update_account_id` (String)
-- `tentacle_update_behavior` (String)
+- `calamari_update_behavior` (String) The behaviour of how Calamari is updated. Valid values are `UpdateAlways`, `UpdateOnDeployment` and `UpdateOnNewMachine`.
+- `kubernetes_agent_update_behavior` (String) The behaviour of how Kubernetes agent machines are updated. Valid values are `NeverUpdate` and `Update`.
+- `tentacle_update_account_id` (String) The Account ID to perform any Tentacle updates under.
+- `tentacle_update_behavior` (String) The behaviour of how Tentacle machines are updated. Valid values are `NeverUpdate` and `Update`.
 
 

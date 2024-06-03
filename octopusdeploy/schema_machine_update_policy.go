@@ -62,10 +62,12 @@ func getMachineUpdatePolicySchema() map[string]*schema.Schema {
 				"UpdateOnDeployment",
 				"UpdateOnNewMachine",
 			}, false)),
+			Description: "The behaviour of how Calamari is updated. Valid values are `UpdateAlways`, `UpdateOnDeployment` and `UpdateOnNewMachine`.",
 		},
 		"tentacle_update_account_id": {
-			Optional: true,
-			Type:     schema.TypeString,
+			Optional:    true,
+			Type:        schema.TypeString,
+			Description: "The Account ID to perform any Tentacle updates under.",
 		},
 		"tentacle_update_behavior": {
 			Default:  "NeverUpdate",
@@ -75,6 +77,7 @@ func getMachineUpdatePolicySchema() map[string]*schema.Schema {
 				"NeverUpdate",
 				"Update",
 			}, false)),
+			Description: "The behaviour of how Tentacle machines are updated. Valid values are `NeverUpdate` and `Update`.",
 		},
 		"kubernetes_agent_update_behavior": {
 			Default:  "Update",
@@ -84,6 +87,7 @@ func getMachineUpdatePolicySchema() map[string]*schema.Schema {
 				"NeverUpdate",
 				"Update",
 			}, false)),
+			Description: "The behaviour of how Kubernetes agent machines are updated. Valid values are `NeverUpdate` and `Update`.",
 		},
 	}
 }
