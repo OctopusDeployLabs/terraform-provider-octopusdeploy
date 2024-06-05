@@ -30,6 +30,7 @@ func TestSSHKeyBasic(t *testing.T) {
 					testAccountExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "private_key_passphrase", passphrase),
+					resource.TestCheckResourceAttr(prefix, "private_key_file", privateKeyFile),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 					resource.TestCheckResourceAttr(prefix, "username", username),
 				),
