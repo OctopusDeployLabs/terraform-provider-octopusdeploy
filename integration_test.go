@@ -36,12 +36,7 @@ package main
 
 import (
 	"fmt"
-<<<<<<< HEAD
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
 	"net/url"
-=======
->>>>>>> 6988f9c (Add test)
 	"os"
 	"path/filepath"
 	"sort"
