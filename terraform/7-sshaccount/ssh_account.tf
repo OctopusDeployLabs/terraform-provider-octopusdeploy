@@ -1,7 +1,7 @@
 resource "octopusdeploy_ssh_key_account" "account_ssh" {
   description                       = "A test account"
   name                              = "SSH"
-  environments                      = null
+  environments                      = [octopusdeploy_environment.development_environment.id]
   tenant_tags                       = []
   tenants                           = null
   tenanted_deployment_participation = "Untenanted"
