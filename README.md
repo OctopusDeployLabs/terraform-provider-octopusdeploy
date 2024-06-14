@@ -17,21 +17,16 @@ terraform {
   required_providers {
     octopusdeploy = {
       source = "OctopusDeployLabs/octopusdeploy"
-      version = "version-number" # example: 0.7.62
+      version = "version-number" # example: 0.21.1
     }
   }
-}
-
-data "octopusdeploy_space" "space" {
-  provider = octopusdeploy.unscoped
-  name     = "Development Team"
 }
 
 provider "octopusdeploy" {
   # configuration options
   address  = "https://octopus.example.com"     # (required; string) the service endpoint of the Octopus REST API
   api_key  = "API-XXXXXXXXXXXXX"               # (required; string) the API key to use with the Octopus REST API
-  space_id = data.octopusdeploy_space.space.id # (optional; string) the space ID in Octopus Deploy
+  space_id = "Spaces-1"                        # (optional; string) the space ID in Octopus Deploy
 }
 ```
 
