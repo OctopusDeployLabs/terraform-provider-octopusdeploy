@@ -30,6 +30,10 @@ func expandPhase(flattenedPhase interface{}) *lifecycles.Phase {
 		phase.IsOptionalPhase = v.(bool)
 	}
 
+	if v, ok := flattenedValues["is_priority_phase"]; ok {
+		phase.IsPriorityPhase = v.(bool)
+	}
+
 	if v, ok := flattenedValues["minimum_environments_before_promotion"]; ok {
 		if n, isInt32 := v.(int32); isInt32 {
 			phase.MinimumEnvironmentsBeforePromotion = n
@@ -91,6 +95,7 @@ func flattenPhase(phase *lifecycles.Phase) interface{} {
 	flattenedPhase["automatic_deployment_targets"] = flattenArray(phase.AutomaticDeploymentTargets)
 	flattenedPhase["id"] = phase.ID
 	flattenedPhase["is_optional_phase"] = phase.IsOptionalPhase
+	flattenedPhase["is_priority_phase"] = phase.IsPriorityPhase
 	flattenedPhase["minimum_environments_before_promotion"] = int(phase.MinimumEnvironmentsBeforePromotion)
 	flattenedPhase["name"] = phase.Name
 	flattenedPhase["optional_deployment_targets"] = flattenArray(phase.OptionalDeploymentTargets)
@@ -124,6 +129,12 @@ func getPhaseSchema() map[string]*schema.Schema {
 		"is_optional_phase": {
 			Default:     false,
 			Description: "If false a release must be deployed to this phase before it can be deployed to the next phase.",
+			Optional:    true,
+			Type:        schema.TypeBool,
+		},
+		"is_priority_phase": {
+			Default:     false,
+			Description: "If true, deployments in this phase will be prioritized in the task queue.",
 			Optional:    true,
 			Type:        schema.TypeBool,
 		},
