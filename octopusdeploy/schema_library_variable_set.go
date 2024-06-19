@@ -82,6 +82,16 @@ func getLibraryVariableSetSchema() map[string]*schema.Schema {
 			Elem:     &schema.Resource{Schema: getActionTemplateParameterSchema()},
 			Type:     schema.TypeList,
 		},
+		// This field is based on the suggestion at
+		// https://discuss.hashicorp.com/t/custom-provider-how-to-reference-computed-attribute-of-typemap-list-set-defined-as-nested-block/22898/2
+		"template_ids": {
+			Type: schema.TypeMap,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+			Computed: true,
+			Optional: false,
+		},
 		"variable_set_id": {
 			Computed: true,
 			Type:     schema.TypeString,
@@ -94,9 +104,14 @@ func setLibraryVariableSet(ctx context.Context, d *schema.ResourceData, libraryV
 	d.Set("name", libraryVariableSet.Name)
 	d.Set("space_id", libraryVariableSet.SpaceID)
 	d.Set("variable_set_id", libraryVariableSet.VariableSetID)
+	d.Set("template_ids", nil)
 
 	if err := d.Set("template", flattenActionTemplateParameters(libraryVariableSet.Templates)); err != nil {
 		return fmt.Errorf("error setting template: %s", err)
+	}
+
+	if err := d.Set("template_ids", mapTemplateNamesToIds(libraryVariableSet.Templates)); err != nil {
+		return fmt.Errorf("error setting template_ids: %s", err)
 	}
 
 	d.SetId(libraryVariableSet.GetID())
