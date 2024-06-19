@@ -49,6 +49,14 @@ func flattenActionTemplateParameters(actionTemplateParameters []actiontemplates.
 	return flattenedActionTemplateParameters
 }
 
+func mapTemplateNamesToIds(actionTemplateParameters []actiontemplates.ActionTemplateParameter) map[string]string {
+	templateNameIds := map[string]string{}
+	for _, actionTemplateParameter := range actionTemplateParameters {
+		templateNameIds[actionTemplateParameter.Name] = actionTemplateParameter.ID
+	}
+	return templateNameIds
+}
+
 func getActionTemplateParameterSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"default_value": {

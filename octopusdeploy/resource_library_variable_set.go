@@ -20,7 +20,26 @@ func resourceLibraryVariableSet() *schema.Resource {
 		ReadContext:   resourceLibraryVariableSetRead,
 		Schema:        getLibraryVariableSetSchema(),
 		UpdateContext: resourceLibraryVariableSetUpdate,
+		CustomizeDiff: fixTemplateIds,
 	}
+}
+
+// fixTemplateIds uses the suggestion from https://github.com/hashicorp/terraform/issues/18863
+// to ensure that the template_ids field has keys to match the list of template names.
+func fixTemplateIds(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	templates := d.Get("template")
+	templateIds := map[string]string{}
+	if templates != nil {
+		for _, t := range templates.([]interface{}) {
+			template := t.(map[string]interface{})
+			templateIds[template["name"].(string)] = template["id"].(string)
+		}
+	}
+	if err := d.SetNew("template_ids", templateIds); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func resourceLibraryVariableSetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
