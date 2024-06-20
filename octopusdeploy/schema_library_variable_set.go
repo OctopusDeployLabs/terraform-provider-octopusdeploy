@@ -39,6 +39,13 @@ func flattenLibraryVariableSet(libraryVariableSet *variables.LibraryVariableSet)
 		return nil
 	}
 
+	templateIds := map[string]string{}
+	if libraryVariableSet.Templates != nil {
+		for _, template := range libraryVariableSet.Templates {
+			templateIds[template.Name] = template.GetID()
+		}
+	}
+
 	return map[string]interface{}{
 		"description":     libraryVariableSet.Description,
 		"id":              libraryVariableSet.GetID(),
@@ -46,6 +53,7 @@ func flattenLibraryVariableSet(libraryVariableSet *variables.LibraryVariableSet)
 		"space_id":        libraryVariableSet.SpaceID,
 		"template":        flattenActionTemplateParameters(libraryVariableSet.Templates),
 		"variable_set_id": libraryVariableSet.VariableSetID,
+		"template_ids":    templateIds,
 	}
 }
 
