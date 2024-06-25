@@ -39,6 +39,7 @@ Read-Only:
 - `name` (String) The name of this resource.
 - `space_id` (String) The space ID associated with this resource.
 - `template` (List of Object) (see [below for nested schema](#nestedatt--library_variable_sets--template))
+- `template_ids` (Map of String)
 - `variable_set_id` (String)
 
 <a id="nestedatt--library_variable_sets--template"></a>
