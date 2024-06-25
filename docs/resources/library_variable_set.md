@@ -28,6 +28,7 @@ This resource manages library variable sets in Octopus Deploy.
 
 ### Read-Only
 
+- `template_ids` (Map of String)
 - `variable_set_id` (String)
 
 <a id="nestedblock--template"></a>
