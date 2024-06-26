@@ -12,7 +12,7 @@ func resourceKubernetesAgentWorker() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceKubernetesAgentWorkerCreate,
 		DeleteContext: resourceKubernetesAgentWorkerDelete,
-		Description:   "This resource manages Kubernetes agent deployment targets in Octopus Deploy.",
+		Description:   "This resource manages Kubernetes agent workers in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceKubernetesAgentWorkerRead,
 		Schema:        getKubernetesAgentWorkerSchema(),
@@ -36,7 +36,7 @@ func resourceKubernetesAgentWorkerRead(ctx context.Context, d *schema.ResourceDa
 	client := m.(*client.Client)
 	Worker, err := client.Workers.GetByID(d.Id())
 	if err != nil {
-		return errors.ProcessApiError(ctx, d, err, "kubernetes tentacle deployment target")
+		return errors.ProcessApiError(ctx, d, err, "kubernetes tentacle worker")
 	}
 
 	flattenedKubernetesAgentWorker := flattenKubernetesAgentWorker(Worker)

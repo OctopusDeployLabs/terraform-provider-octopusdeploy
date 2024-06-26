@@ -11,9 +11,9 @@ import (
 
 func dataSourceKubernetesAgentWorkers() *schema.Resource {
 	return &schema.Resource{
-		Description: "Provides information about existing kubernetes agent deployment targets.",
-		ReadContext: dataSourceKubernetesAgentDeploymentTargetsRead,
-		Schema:      getKubernetesAgentDeploymentTargetDataSchema(),
+		Description: "Provides information about existing kubernetes agent workers.",
+		ReadContext: dataSourceKubernetesAgentWorkersRead,
+		Schema:      getKubernetesAgentWorkerDataSchema(),
 	}
 }
 
@@ -46,6 +46,6 @@ func dataSourceKubernetesAgentWorkersRead(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId("KubernetesAgentDeploymentWorkers " + time.Now().UTC().String())
+	d.SetId("KubernetesAgentWorkers " + time.Now().UTC().String())
 	return nil
 }

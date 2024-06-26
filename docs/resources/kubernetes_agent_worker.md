@@ -1,13 +1,13 @@
 ---
-page_title: "octopusdeploy_kubernetes_agent_deployment_target Resource - terraform-provider-octopusdeploy"
-subcategory: "Deployment Targets"
+page_title: "octopusdeploy_kubernetes_agent_worker Resource - terraform-provider-octopusdeploy"
+subcategory: "Workers"
 description: |-
-  This resource manages Kubernetes agent deployment targets in Octopus Deploy.
+  This resource manages Kubernetes agent workers in Octopus Deploy.
 ---
 
-# octopusdeploy_kubernetes_agent_deployment_target (Resource)
+# octopusdeploy_kubernetes_agent_worker (Resource)
 
-This resource manages Kubernetes agent deployment targets in Octopus Deploy.
+This resource manages Kubernetes agent workers in Octopus Deploy.
 
 ## Example Usage
 
@@ -20,12 +20,11 @@ resource "octopusdeploy_kubernetes_agent_worker" "minimal" {
 }
 
 resource "octopusdeploy_kubernetes_agent_worker" "optionals" {
-  name              = "agent-optionals"
+  name         = "agent-optionals"
   worker_pools = ["worker-pools-1"]
   thumbprint   = "96203ED84246201C26A2F4360D7CBC36AC1D232D"
   uri          = "poll://kcxzcv2fpsxkn6tk9u6d/"
   machine_policy_id = "machinepolicies-1"
-  default_namespace = "kubernetes-namespace"
   upgrade_locked    = true
   is_disabled       = true
 }
@@ -44,14 +43,10 @@ resource "octopusdeploy_kubernetes_agent_worker" "optionals" {
 ### Optional
 
 - `communication_mode` (String) The communication mode used by the Kubernetes agent to communicate with Octopus Server. Currently, the only supported value is 'Polling'.
-- `default_namespace` (String) Optional default namespace that will be used when using Kubernetes deployment steps, can be overrides within step configurations.
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Whether the Kubernetes agent is disabled. If the agent is disabled, it will not be included in any deployments.
 - `machine_policy_id` (String) Optional ID of the machine policy that the Kubernetes agent will use. If not provided the default machine policy will be used.
 - `space_id` (String) The space ID associated with this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
 - `upgrade_locked` (Boolean) If enabled the Kubernetes agent will not automatically upgrade and will stay on the currently installed version, even if the associated machine policy is configured to automatically upgrade.
 
 ### Read-Only

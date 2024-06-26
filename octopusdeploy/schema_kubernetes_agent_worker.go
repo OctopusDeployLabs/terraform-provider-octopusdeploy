@@ -49,7 +49,7 @@ func flattenKubernetesAgentWorker(Worker *machines.Worker) map[string]interface{
 	flattenedWorker["thumbprint"] = endpoint.TentacleEndpointConfiguration.Thumbprint
 	flattenedWorker["uri"] = endpoint.TentacleEndpointConfiguration.URI.String()
 	flattenedWorker["communication_mode"] = endpoint.TentacleEndpointConfiguration.CommunicationMode
-	flattenedWorker["default_namespace"] = endpoint.DefaultNamespace
+	flattenedWorker["default_namespace"] = ""
 	flattenedWorker["worker_pool_ids"] = Worker.WorkerPoolIDs
 
 	if endpoint.KubernetesAgentDetails != nil {
@@ -65,12 +65,9 @@ func flattenKubernetesAgentWorker(Worker *machines.Worker) map[string]interface{
 
 func getKubernetesAgentWorkerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"id":                                getIDSchema(),
-		"space_id":                          getSpaceIDSchema(),
-		"name":                              getNameSchema(true),
-		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
-		"tenants":                           getTenantsSchema(),
-		"tenant_tags":                       getTenantTagsSchema(),
+		"id":       getIDSchema(),
+		"space_id": getSpaceIDSchema(),
+		"name":     getNameSchema(true),
 		"communication_mode": {
 			Optional:         true,
 			Description:      "The communication mode used by the Kubernetes agent to communicate with Octopus Server. Currently, the only supported value is 'Polling'.",
