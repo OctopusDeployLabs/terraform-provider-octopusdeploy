@@ -67,5 +67,5 @@ resource "octopusdeploy_kubernetes_agent_worker" "optionals" {
 Import is supported using the following syntax:
 
 ```shell
-terraform import [options] octopusdeploy_kubernetes_agent_deployment_target.<name> <machine-id>
+terraform import [options] octopusdeploy_kubernetes_agent_worker.<name> <machine-id>
 ```

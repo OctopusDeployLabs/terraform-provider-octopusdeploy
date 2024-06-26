@@ -78,10 +78,9 @@ func getWorkerDataSchema() map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"communication_styles": getQueryCommunicationStyles(),
-		"deployment_id":        getQueryDeploymentID(),
 		"workers": {
 			Computed:    true,
-			Description: "A list of deployment targets that match the filter(s).",
+			Description: "A list of workers that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Optional:    true,
 			Type:        schema.TypeList,

@@ -65,23 +65,9 @@ func flattenKubernetesAgentWorker(Worker *machines.Worker) map[string]interface{
 
 func getKubernetesAgentWorkerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"id":       getIDSchema(),
-		"space_id": getSpaceIDSchema(),
-		"name":     getNameSchema(true),
-		"environments": {
-			Description: "A list of environment IDs this Kubernetes agent can deploy to.",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			MinItems:    1,
-			Required:    true,
-			Type:        schema.TypeList,
-		},
-		"roles": {
-			Description: "A list of target roles that are associated to this Kubernetes agent.",
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			MinItems:    1,
-			Required:    true,
-			Type:        schema.TypeList,
-		},
+		"id":                                getIDSchema(),
+		"space_id":                          getSpaceIDSchema(),
+		"name":                              getNameSchema(true),
 		"tenanted_deployment_participation": getTenantedDeploymentSchema(),
 		"tenants":                           getTenantsSchema(),
 		"tenant_tags":                       getTenantTagsSchema(),
@@ -108,12 +94,6 @@ func getKubernetesAgentWorkerSchema() map[string]*schema.Schema {
 			Required:    true,
 			Type:        schema.TypeString,
 		},
-		"default_namespace": {
-			Description: "Optional default namespace that will be used when using Kubernetes deployment steps, can be overrides within step configurations.",
-			Computed:    true,
-			Optional:    true,
-			Type:        schema.TypeString,
-		},
 		"upgrade_locked": {
 			Description: "If enabled the Kubernetes agent will not automatically upgrade and will stay on the currently installed version, even if the associated machine policy is configured to automatically upgrade.",
 			Optional:    true,
@@ -124,6 +104,12 @@ func getKubernetesAgentWorkerSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Default:     false,
 			Type:        schema.TypeBool,
+		},
+		"worker_pool_ids": {
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			MinItems: 1,
+			Required: true,
+			Type:     schema.TypeList,
 		},
 
 		// Read-only Values
@@ -160,16 +146,16 @@ func getKubernetesAgentWorkerDataSchema() map[string]*schema.Schema {
 	setDataSchema(&dataSchema)
 
 	WorkerDataSchema := getWorkerDataSchema()
-	WorkerDataSchema["kubernetes_agent_deployment_targets"] = &schema.Schema{
+	WorkerDataSchema["kubernetes_agent_workers"] = &schema.Schema{
 		Computed:    true,
-		Description: "A list of kubernetes agent deployment targets that match the filter(s).",
+		Description: "A list of kubernetes agent workers that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
 		Optional:    true,
 		Type:        schema.TypeList,
 	}
 
 	delete(WorkerDataSchema, "communication_styles")
-	delete(WorkerDataSchema, "deployment_targets")
+	delete(WorkerDataSchema, "workers")
 	WorkerDataSchema["id"] = getDataSchemaID()
 	return WorkerDataSchema
 }
