@@ -12,7 +12,6 @@ resource "octopusdeploy_kubernetes_agent_worker" "agent_with_optional" {
   communication_mode = "Polling"
   uri                = "poll://kcxzcv2fpsxkn6tk9u6d/"
   thumbprint         = "96203ED84246201C26A2F4360D7CBC36AC1D232D"
-  default_namespace  = "kubernetes-namespace"
   is_disabled        = true
-  upgrade_locked     = true
+  upgrade_locked     = false
 }
