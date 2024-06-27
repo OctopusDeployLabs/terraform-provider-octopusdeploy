@@ -3885,3 +3885,59 @@ func TestTentacleCertificateResource(t *testing.T) {
 		return nil
 	})
 }
+
+func TestKubernetesAgentWorkerResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "./terraform", "58-kubernetesagentworker", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.WorkersQuery{
+			CommunicationStyles: []string{"Polling"},
+			Skip:                0,
+			Take:                3,
+		}
+
+		resources, err := client.Workers.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) != 2 {
+			t.Fatalf("Space must have two workers (both KubernetesTentacles)")
+		}
+
+		optionalAgentName := "optional-agent"
+		optionalAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.Worker) bool { return t.Name == optionalAgentName })
+		optionalAgentWorker := resources.Items[optionalAgentIndex]
+		optionalAgentEndpoint := optionalAgentWorker.Endpoint.(*machines.KubernetesTentacleEndpoint)
+		if optionalAgentWorker.IsDisabled {
+			t.Fatalf("Expected  \"%s\" to not be disabled", optionalAgentName)
+		}
+
+		if !optionalAgentEndpoint.UpgradeLocked {
+			t.Fatalf("Expected  \"%s\" to have upgrade locked", optionalAgentName)
+		}
+
+		fullAgentName := "agent_with_optional"
+		fullAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.Worker) bool { return t.Name == fullAgentName })
+		fullAgentWorker := resources.Items[fullAgentIndex]
+
+		if !fullAgentWorker.IsDisabled {
+			t.Fatalf("Expected  \"%s\" to be disabled", fullAgentName)
+		}
+
+		fullAgentEndpoint := fullAgentWorker.Endpoint.(*machines.KubernetesTentacleEndpoint)
+		if fullAgentEndpoint.UpgradeLocked {
+			t.Fatalf("Expected  \"%s\" to not have upgrade locked", fullAgentName)
+		}
+
+		return nil
+	})
+}
