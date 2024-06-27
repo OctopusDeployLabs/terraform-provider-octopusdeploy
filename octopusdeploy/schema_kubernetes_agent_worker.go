@@ -10,8 +10,7 @@ import (
 func expandKubernetesAgentWorker(kubernetesAgent *schema.ResourceData) *machines.Worker {
 	uri, _ := url.Parse(kubernetesAgent.Get("uri").(string))
 	thumbprint := kubernetesAgent.Get("thumbprint").(string)
-
-	workerPoolIds := kubernetesAgent.Get("worker_pool_ids").([]string)
+	
 	communicationsMode := kubernetesAgent.Get("communication_mode").(string)
 	upgradeLocked := kubernetesAgent.Get("upgrade_locked").(bool)
 	var endpoint machines.IEndpoint = machines.NewKubernetesTentacleEndpoint(uri, thumbprint, upgradeLocked, communicationsMode, "")
@@ -21,7 +20,7 @@ func expandKubernetesAgentWorker(kubernetesAgent *schema.ResourceData) *machines
 
 	Worker.IsDisabled = kubernetesAgent.Get("is_disabled").(bool)
 	Worker.Thumbprint = thumbprint
-	Worker.WorkerPoolIDs = workerPoolIds
+	Worker.WorkerPoolIDs = getSliceFromTerraformTypeList(kubernetesAgent.Get("worker_pool_ids"))
 
 	Worker.SpaceID = kubernetesAgent.Get("space_id").(string)
 
@@ -49,7 +48,6 @@ func flattenKubernetesAgentWorker(Worker *machines.Worker) map[string]interface{
 	flattenedWorker["thumbprint"] = endpoint.TentacleEndpointConfiguration.Thumbprint
 	flattenedWorker["uri"] = endpoint.TentacleEndpointConfiguration.URI.String()
 	flattenedWorker["communication_mode"] = endpoint.TentacleEndpointConfiguration.CommunicationMode
-	flattenedWorker["default_namespace"] = ""
 	flattenedWorker["worker_pool_ids"] = Worker.WorkerPoolIDs
 
 	if endpoint.KubernetesAgentDetails != nil {
