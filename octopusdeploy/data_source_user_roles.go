@@ -26,10 +26,8 @@ func dataSourceUserRolesRead(ctx context.Context, d *schema.ResourceData, meta i
 		Take:        d.Get("take").(int),
 	}
 
-	spaceID := d.Get("space_id").(string)
-
 	client := meta.(*client.Client)
-	existingUserRoles, err := userroles.Get(client, spaceID, query)
+	existingUserRoles, err := userroles.Get(client, "", query)
 	if err != nil {
 		return diag.FromErr(err)
 	}
