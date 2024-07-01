@@ -71,6 +71,8 @@ import (
 	"k8s.io/utils/strings/slices"
 )
 
+replace github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240502041300-f71244db277d => /Users/kevintchang/Code/OctopusTerraformTestFramework
+
 // TestSpaceResource verifies that a space can be reimported with the correct settings
 func TestSpaceResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
