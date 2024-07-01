@@ -36,4 +36,11 @@ resource "octopusdeploy_lifecycle" "example" {
     name                        = "bar"
     optional_deployment_targets = ["Environments-321"]
   }
+
+  phase {
+    is_optional_phase           = true
+    name                        = "priority phase"
+    is_priority_phase           = true
+    optional_deployment_targets = ["Environments-321"]
+  }
 }
