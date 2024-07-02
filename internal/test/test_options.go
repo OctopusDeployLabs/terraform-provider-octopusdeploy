@@ -1,6 +1,6 @@
 package test
 
-import "github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 type TestOptions[T any] struct {
 	Resource      *T

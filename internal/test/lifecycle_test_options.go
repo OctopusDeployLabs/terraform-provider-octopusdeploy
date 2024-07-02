@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
 type LifecycleTestOptions struct {
