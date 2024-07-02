@@ -6,6 +6,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func New(version string) func() *schema.Provider {
+	return func() *schema.Provider {
+		return Provider()
+	}
+}
+
 // Provider is the plugin entry point for the Terraform provider for Octopus Deploy.
 func Provider() *schema.Provider {
 	return &schema.Provider{
