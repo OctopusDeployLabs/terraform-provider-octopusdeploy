@@ -1,4 +1,4 @@
-package octopusdeploy
+package octopusdeployv6
 
 import (
 	"context"
@@ -11,29 +11,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type octopusDeployProviderV6 struct {
+type OctopusDeployProviderV6 struct {
 	Address types.String `tfsdk:"address"`
 	ApiKey  types.String `tfsdk:"api_key"`
 	SpaceID types.String `tfsdk:"space_id"`
 }
 
-var _ provider.Provider = (*octopusDeployProviderV6)(nil)
-var _ provider.ProviderWithMetaSchema = (*octopusDeployProviderV6)(nil)
+var _ provider.Provider = (*OctopusDeployProviderV6)(nil)
+var _ provider.ProviderWithMetaSchema = (*OctopusDeployProviderV6)(nil)
 
-func NewOctopusDeployProviderV6() *octopusDeployProviderV6 {
-	return &octopusDeployProviderV6{}
+func NewOctopusDeployProviderV6() *OctopusDeployProviderV6 {
+	return &OctopusDeployProviderV6{}
 }
 
-func (p *octopusDeployProviderV6) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *OctopusDeployProviderV6) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "octopus-deploy"
 }
 
-func (p *octopusDeployProviderV6) MetaSchema(ctx context.Context, request provider.MetaSchemaRequest, response *provider.MetaSchemaResponse) {
+func (p *OctopusDeployProviderV6) MetaSchema(ctx context.Context, request provider.MetaSchemaRequest, response *provider.MetaSchemaResponse) {
 
 }
 
-func (p *octopusDeployProviderV6) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var providerData octopusDeployProviderV6
+func (p *OctopusDeployProviderV6) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var providerData OctopusDeployProviderV6
 	resp.Diagnostics.Append(req.Config.Get(ctx, &providerData)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -51,17 +51,17 @@ func (p *octopusDeployProviderV6) Configure(ctx context.Context, req provider.Co
 	resp.ResourceData = &config
 }
 
-func (p *octopusDeployProviderV6) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *OctopusDeployProviderV6) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{}
 }
 
-func (p *octopusDeployProviderV6) Resources(ctx context.Context) []func() resource.Resource {
+func (p *OctopusDeployProviderV6) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		project_group.NewProjectGroupResource,
 	}
 }
 
-func (p *octopusDeployProviderV6) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *OctopusDeployProviderV6) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
