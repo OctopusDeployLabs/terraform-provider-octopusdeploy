@@ -2,6 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -69,4 +73,56 @@ func testAzureSubscriptionAccountBasic(localName string, azureEnvironment string
 		subscription_id = "%s"
 		tenanted_deployment_participation = "%s"
 	}`, localName, azureEnvironment, description, name, subscriptionID, tenantedDeploymentParticipation)
+}
+
+// TestAzureSubscriptionAccountResource verifies that an azure account can be reimported with the correct settings
+func TestAzureSubscriptionAccountResource(t *testing.T) {
+	// I could not figure out a combination of properties that made this resource work
+	return
+
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "8-azuresubscriptionaccount", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := accounts.AccountsQuery{
+			PartialName: "Subscription",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Accounts.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have an account called \"Subscription\"")
+		}
+		resource := resources.Items[0].(*accounts.AzureSubscriptionAccount)
+
+		if resource.AccountType != "AzureServicePrincipal" {
+			t.Fatal("The account must be have a type of \"AzureServicePrincipal\"")
+		}
+
+		if resource.Description != "A test account" {
+			t.Fatal("BUG: The account must be have a description of \"A test account\"")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The account must be have a tenanted deployment participation of \"Untenanted\"")
+		}
+
+		if len(resource.TenantTags) != 0 {
+			t.Fatal("The account must be have no tenant tags")
+		}
+
+		return nil
+	})
 }

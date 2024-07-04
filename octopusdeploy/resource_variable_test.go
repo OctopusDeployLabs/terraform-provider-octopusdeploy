@@ -2,7 +2,11 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -220,4 +224,148 @@ func testVariableDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+// TestVariableSetResource verifies that a variable set can be reimported with the correct settings
+func TestVariableSetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "18-variableset", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "18a-variablesetds"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := variables.LibraryVariablesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.LibraryVariableSets.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a library variable set called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "Test variable set" {
+			t.Fatal("The library variable set must be have a description of \"Test variable set\" (was \"" + resource.Description + "\")")
+		}
+
+		variableSet, err := client.Variables.GetAll(resource.ID)
+
+		if len(variableSet.Variables) != 1 {
+			t.Fatal("The library variable set must have one associated variable")
+		}
+
+		if variableSet.Variables[0].Name != "Test.Variable" {
+			t.Fatal("The library variable set variable must have a name of \"Test.Variable\"")
+		}
+
+		if variableSet.Variables[0].Type != "String" {
+			t.Fatal("The library variable set variable must have a type of \"String\"")
+		}
+
+		if variableSet.Variables[0].Description != "Test variable" {
+			t.Fatal("The library variable set variable must have a description of \"Test variable\"")
+		}
+
+		if variableSet.Variables[0].Value != "test" {
+			t.Fatal("The library variable set variable must have a value of \"test\"")
+		}
+
+		if variableSet.Variables[0].IsSensitive {
+			t.Fatal("The library variable set variable must not be sensitive")
+		}
+
+		if !variableSet.Variables[0].IsEditable {
+			t.Fatal("The library variable set variable must be editable")
+		}
+
+		// Verify the environment data lookups work
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "18a-variablesetds"), "data_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if lookup != resource.ID {
+			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+		}
+
+		return nil
+	})
+}
+
+func TestVariableResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "49-variables", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		project, err := client.Projects.GetByName("Test")
+		variableSet, err := client.Variables.GetAll(project.ID)
+
+		if err != nil {
+			return err
+		}
+
+		if len(variableSet.Variables) != 7 {
+			t.Fatalf("Expected 7 variables to be created.")
+		}
+
+		for _, variable := range variableSet.Variables {
+			switch variable.Name {
+			case "UnscopedVariable":
+				if !variable.Scope.IsEmpty() {
+					t.Fatalf("Expected UnscopedVariable to have no scope values.")
+				}
+			case "ActionScopedVariable":
+				if len(variable.Scope.Actions) == 0 {
+					t.Fatalf("Expected ActionScopedVariable to have action scope.")
+				}
+			case "ChannelScopedVariable":
+				if len(variable.Scope.Channels) == 0 {
+					t.Fatalf("Expected ChannelScopedVariable to have channel scope.")
+				}
+			case "EnvironmentScopedVariable":
+				if len(variable.Scope.Environments) == 0 {
+					t.Fatalf("Expected EnvironmentScopedVariable to have environment scope.")
+				}
+			case "MachineScopedVariable":
+				if len(variable.Scope.Machines) == 0 {
+					t.Fatalf("Expected MachineScopedVariable to have machine scope.")
+				}
+			case "ProcessScopedVariable":
+				if len(variable.Scope.ProcessOwners) == 0 {
+					t.Fatalf("Expected ProcessScopedVariable to have process scope.")
+				}
+			case "RoleScopedVariable":
+				if len(variable.Scope.Roles) == 0 {
+					t.Fatalf("Expected RoleScopedVariable to have role scope.")
+				}
+			}
+		}
+
+		return nil
+	})
 }

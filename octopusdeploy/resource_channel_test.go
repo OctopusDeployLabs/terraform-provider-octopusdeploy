@@ -2,7 +2,11 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"net/http"
+	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -358,4 +362,78 @@ func destroyHelperChannel(s *terraform.State, client *client.Client) error {
 		return fmt.Errorf("channel still exists")
 	}
 	return nil
+}
+
+// TestProjectChannelResource verifies that a project channel can be reimported with the correct settings
+func TestProjectChannelResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "20-channel", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "20a-channelds"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := channels.Query{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Channels.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a channel called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "Test channel" {
+			t.Fatal("The channel must be have a description of \"Test channel\" (was \"" + resource.Description + "\")")
+		}
+
+		if !resource.IsDefault {
+			t.Fatal("The channel must be be the default")
+		}
+
+		if len(resource.Rules) != 1 {
+			t.Fatal("The channel must have one rule")
+		}
+
+		if resource.Rules[0].Tag != "^$" {
+			t.Fatal("The channel rule must be have a tag of \"^$\" (was \"" + resource.Rules[0].Tag + "\")")
+		}
+
+		if resource.Rules[0].ActionPackages[0].DeploymentAction != "Test" {
+			t.Fatal("The channel rule action step must be be set to \"Test\" (was \"" + resource.Rules[0].ActionPackages[0].DeploymentAction + "\")")
+		}
+
+		if resource.Rules[0].ActionPackages[0].PackageReference != "test" {
+			t.Fatal("The channel rule action package must be be set to \"test\" (was \"" + resource.Rules[0].ActionPackages[0].PackageReference + "\")")
+		}
+
+		// Verify the environment data lookups work
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "20a-channelds"), "data_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if lookup != resource.ID {
+			t.Fatal("The environment lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+		}
+
+		return nil
+	})
 }

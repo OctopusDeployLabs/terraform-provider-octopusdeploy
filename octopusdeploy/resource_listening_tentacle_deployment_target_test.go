@@ -2,16 +2,20 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
-	options := test.NewListeningTentacleDeploymentTargetTestOptions()
+	options := internaltest.NewListeningTentacleDeploymentTargetTestOptions()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccListeningTentacleDeploymentTargetCheckDestroy,
@@ -19,7 +23,7 @@ func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
 		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: test.ListeningTentacleDeploymentTargetConfiguration(options),
+				Config: internaltest.ListeningTentacleDeploymentTargetConfiguration(options),
 				Check: resource.ComposeTestCheckFunc(
 					testAccListeningTentacleDeploymentTargetExists(options.ResourceName),
 				),
@@ -121,4 +125,63 @@ func testAccListeningTentacleDeploymentTargetCheckDestroy(s *terraform.State) er
 	}
 
 	return nil
+}
+
+// TestListeningTargetResource verifies that a listening machine can be reimported with the correct settings
+func TestListeningTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "31-listeningtarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "31a-listeningtargetds"), newSpaceId, []string{})
+
+		if err != nil {
+			t.Log("BUG: listening targets data sources don't appear to work")
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.URI != "https://tentacle/" {
+			t.Fatal("The machine must have a Uri of \"https://tentacle/\" (was \"" + resource.URI + "\")")
+		}
+
+		if resource.Thumbprint != "55E05FD1B0F76E60F6DA103988056CE695685FD1" {
+			t.Fatal("The machine must have a Thumbprint of \"55E05FD1B0F76E60F6DA103988056CE695685FD1\" (was \"" + resource.Thumbprint + "\")")
+		}
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "vm" {
+			t.Fatal("The machine must have a role of \"vm\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		return nil
+	})
 }

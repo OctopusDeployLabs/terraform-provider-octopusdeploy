@@ -2,6 +2,11 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -63,4 +68,80 @@ func testAzureWebAppDeploymentTargetBasic(localName string, name string, tenante
 			tenanted_deployment_participation = "%s"
 			web_app_name                      = "%s"
 		}`, localName, azureAccLocalName, environmentLocalName, name, resourceGroupName, tenantedDeploymentParticipation, webAppName)
+}
+
+// TestAzureWebAppTargetResource verifies that a web app target can be reimported with the correct settings
+func TestAzureWebAppTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "37-webapptarget", []string{
+			"-var=account_sales_account=whatever",
+		})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "37a-webapptarget"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.MachinesQuery{
+			PartialName: "Web App",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Web App\"")
+		}
+		resource := resources.Items[0]
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "cloud" {
+			t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureWebAppEndpoint).ResourceGroupName != "mattc-webapp" {
+			t.Fatal("The machine must have a Endpoint.ResourceGroupName of \"mattc-webapp\" (was \"" + resource.Endpoint.(*machines.AzureWebAppEndpoint).ResourceGroupName + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureWebAppEndpoint).WebAppName != "mattc-webapp" {
+			t.Fatal("The machine must have a Endpoint.WebAppName of \"mattc-webapp\" (was \"" + resource.Endpoint.(*machines.AzureWebAppEndpoint).WebAppName + "\")")
+		}
+
+		if resource.Endpoint.(*machines.AzureWebAppEndpoint).WebAppSlotName != "slot1" {
+			t.Fatal("The machine must have a Endpoint.WebAppSlotName of \"slot1\" (was \"" + resource.Endpoint.(*machines.AzureWebAppEndpoint).WebAppSlotName + "\")")
+		}
+
+		// Verify the environment data lookups work
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "37a-webapptarget"), "data_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if lookup != resource.ID {
+			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+		}
+
+		return nil
+	})
 }

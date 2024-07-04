@@ -2,6 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -101,4 +105,66 @@ func testAccEnvironmentCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+// TestEnvironmentResource verifies that an environment can be reimported with the correct settings
+func TestEnvironmentResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "16-environment", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "16a-environmentlookup"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := environments.EnvironmentsQuery{
+			PartialName: "Development",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Environments.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have an environment called \"Development\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "A test environment" {
+			t.Fatal("The environment must be have a description of \"A test environment\" (was \"" + resource.Description + "\"")
+		}
+
+		if !resource.AllowDynamicInfrastructure {
+			t.Fatal("The environment must have dynamic infrastructure enabled.")
+		}
+
+		if resource.UseGuidedFailure {
+			t.Fatal("The environment must not have guided failure enabled.")
+		}
+
+		// Verify the environment data lookups work
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "16a-environmentlookup"), "data_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if lookup != resource.ID {
+			t.Fatal("The environment lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+		}
+
+		return nil
+	})
 }

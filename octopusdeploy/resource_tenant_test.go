@@ -2,6 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -102,4 +106,82 @@ func testAccTenantCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+// TestTenantsResource verifies that a git credential can be reimported with the correct settings
+func TestTenantsResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "24-tenants", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "24a-tenantsds"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := tenants.TenantsQuery{
+			PartialName: "Team A",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Tenants.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a tenant called \"Team A\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Description != "Test tenant" {
+			t.Fatal("The tenant must be have a description of \"tTest tenant\" (was \"" + resource.Description + "\")")
+		}
+
+		if len(resource.TenantTags) != 2 {
+			t.Fatal("The tenant must have two tags")
+		}
+
+		if len(resource.ProjectEnvironments) != 1 {
+			t.Fatal("The tenant must have one project environment")
+		}
+
+		for _, u := range resource.ProjectEnvironments {
+			if len(u) != 3 {
+				t.Fatal("The tenant must have be linked to three environments")
+			}
+		}
+
+		// Verify the environment data lookups work
+		tagsets, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "24a-tenantsds"), "tagsets")
+
+		if err != nil {
+			return err
+		}
+
+		if tagsets == "" {
+			t.Fatal("The tagset lookup failed.")
+		}
+
+		tenants, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "24a-tenantsds"), "tenants_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if tenants != resource.ID {
+			t.Fatal("The target lookup did not succeed. Lookup value was \"" + tenants + "\" while the resource value was \"" + resource.ID + "\".")
+		}
+
+		return nil
+	})
 }

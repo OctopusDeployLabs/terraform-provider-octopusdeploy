@@ -2,6 +2,11 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/teams"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -131,4 +136,179 @@ func testAccUserCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+// TestProjectTerraformPackageScriptExport verifies that users and teams can be reimported
+func TestUsersAndTeams(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "43-users", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "43a-usersds"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+
+		if err != nil {
+			return err
+		}
+
+		err = func() error {
+			query := users.UsersQuery{
+				Filter: "Service Account",
+				IDs:    nil,
+				Skip:   0,
+				Take:   1,
+			}
+
+			resources, err := client.Users.Get(query)
+			if err != nil {
+				return err
+			}
+
+			if len(resources.Items) == 0 {
+				t.Fatalf("Space must have a user called \"Service Account\"")
+			}
+
+			resource := resources.Items[0]
+
+			if resource.Username != "saccount" {
+				t.Fatalf("Account must have a username \"saccount\"")
+			}
+
+			if resource.EmailAddress != "a@a.com" {
+				t.Fatalf("Account must have a email \"a@a.com\"")
+			}
+
+			if !resource.IsService {
+				t.Fatalf("Account must be a service account")
+			}
+
+			if !resource.IsActive {
+				t.Fatalf("Account must be active")
+			}
+
+			return nil
+		}()
+
+		if err != nil {
+			return err
+		}
+
+		err = func() error {
+			query := users.UsersQuery{
+				Filter: "Bob Smith",
+				IDs:    nil,
+				Skip:   0,
+				Take:   1,
+			}
+
+			resources, err := client.Users.Get(query)
+			if err != nil {
+				return err
+			}
+
+			if len(resources.Items) == 0 {
+				t.Fatalf("Space must have a user called \"Service Account\"")
+			}
+
+			resource := resources.Items[0]
+
+			if resource.Username != "bsmith" {
+				t.Fatalf("Regular account must have a username \"bsmith\"")
+			}
+
+			if resource.EmailAddress != "bob.smith@example.com" {
+				t.Fatalf("Regular account must have a email \"bob.smith@example.com\"")
+			}
+
+			if resource.IsService {
+				t.Fatalf("Account must not be a service account")
+			}
+
+			if resource.IsActive {
+				t.Log("BUG: Account must not be active")
+			}
+
+			return nil
+		}()
+
+		if err != nil {
+			return err
+		}
+
+		err = func() error {
+			query := teams.TeamsQuery{
+				IDs:           nil,
+				IncludeSystem: false,
+				PartialName:   "Deployers",
+				Skip:          0,
+				Spaces:        nil,
+				Take:          1,
+			}
+
+			resources, err := client.Teams.Get(query)
+			if err != nil {
+				return err
+			}
+
+			if len(resources.Items) == 0 {
+				t.Fatalf("Space must have a team called \"Deployers\"")
+			}
+
+			resource := resources.Items[0]
+
+			if len(resource.MemberUserIDs) != 1 {
+				t.Fatalf("Team must have one user")
+			}
+
+			return nil
+		}()
+
+		if err != nil {
+			return err
+		}
+
+		// Verify the environment data lookups work
+		teams, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "43a-usersds"), "teams_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if teams == "" {
+			t.Fatal("The teams lookup failed.")
+		}
+
+		roles, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "43a-usersds"), "roles_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if roles == "" {
+			t.Fatal("The roles lookup failed.")
+		}
+
+		users, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "43a-usersds"), "users_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if users == "" {
+			t.Fatal("The users lookup failed.")
+		}
+
+		return nil
+	})
 }

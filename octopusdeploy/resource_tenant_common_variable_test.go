@@ -2,11 +2,13 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"strings"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	localtest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -56,14 +58,14 @@ func TestAccTenantCommonVariableBasic(t *testing.T) {
 }
 
 func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, tenantLocalName string, tenantName string, tenantDescription string, localName string, value string) string {
-	projectGroup := test.NewProjectGroupTestOptions()
+	projectGroup := localtest.NewProjectGroupTestOptions()
 	allowDynamicInfrastructure := false
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
 
 	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
-		test.ProjectGroupConfiguration(projectGroup)+"\n"+
+		localtest.ProjectGroupConfiguration(projectGroup)+"\n"+
 		testAccEnvironment(environmentLocalName, environmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
 		resource "octopusdeploy_library_variable_set" "test-library-variable-set" {
 			name = "test"
@@ -179,4 +181,48 @@ func testAccTenantCommonVariableCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+// TestTenantVariablesResource verifies that a tenant variables can be reimported with the correct settings
+func TestTenantVariablesResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "26-tenant_variables", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		collection, err := client.TenantVariables.GetAll()
+		if err != nil {
+			return err
+		}
+
+		resourceName := "Test"
+		found := false
+		for _, tenantVariable := range collection {
+			for _, project := range tenantVariable.ProjectVariables {
+				if project.ProjectName == resourceName {
+					for _, variables := range project.Variables {
+						for _, value := range variables {
+							// we expect one project variable to be defined
+							found = true
+							if value.Value != "my value" {
+								t.Fatal("The tenant project variable must have a value of \"my value\" (was \"" + value.Value + "\")")
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if !found {
+			t.Fatal("Space must have an tenant project variable for the project called \"" + resourceName + "\"")
+		}
+
+		return nil
+	})
 }

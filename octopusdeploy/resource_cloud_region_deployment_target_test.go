@@ -2,6 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -98,4 +102,55 @@ func testAccCloudRegionDeploymentTargetCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+// TestCloudRegionTargetResource verifies that a cloud region can be reimported with the correct settings
+func TestCloudRegionTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "33-cloudregiontarget", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "33a-cloudregiontargetds"), newSpaceId, []string{})
+
+		if err != nil {
+			t.Fatal("cloud region data source does not appear to work")
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := machines.MachinesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Machines.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a machine called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if len(resource.Roles) != 1 {
+			t.Fatal("The machine must have 1 role")
+		}
+
+		if resource.Roles[0] != "cloud" {
+			t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		return nil
+	})
 }

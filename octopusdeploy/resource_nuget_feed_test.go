@@ -2,6 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -90,4 +94,94 @@ func testOctopusDeployNuGetFeedDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+// TestNugetFeedResource verifies that a nuget feed can be reimported with the correct settings
+func TestNugetFeedResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "14-nugetfeed", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "14a-nugetfeedds"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := feeds.FeedsQuery{
+			PartialName: "Nuget",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Feeds.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have an feed called \"Nuget\"")
+		}
+		resource := resources.Items[0].(*feeds.NuGetFeed)
+
+		if resource.FeedType != "NuGet" {
+			t.Fatal("The feed must have a type of \"NuGet\"")
+		}
+
+		if !resource.EnhancedMode {
+			t.Fatal("The feed must have enhanced mode set to true")
+		}
+
+		if resource.Username != "username" {
+			t.Fatal("The feed must have a username of \"username\"")
+		}
+
+		if resource.DownloadAttempts != 5 {
+			t.Fatal("The feed must be have a downloads attempts set to \"5\"")
+		}
+
+		if resource.DownloadRetryBackoffSeconds != 10 {
+			t.Fatal("The feed must be have a downloads retry backoff set to \"10\"")
+		}
+
+		if resource.FeedURI != "https://index.docker.io" {
+			t.Fatal("The feed must be have a feed uri of \"https://index.docker.io\"")
+		}
+
+		foundExecutionTarget := false
+		foundServer := false
+		for _, o := range resource.PackageAcquisitionLocationOptions {
+			if o == "ExecutionTarget" {
+				foundExecutionTarget = true
+			}
+
+			if o == "Server" {
+				foundServer = true
+			}
+		}
+
+		if !(foundExecutionTarget && foundServer) {
+			t.Fatal("The feed must be have a PackageAcquisitionLocationOptions including \"ExecutionTarget\" and \"Server\"")
+		}
+
+		// Verify the environment data lookups work
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "14a-nugetfeedds"), "data_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if lookup != resource.ID {
+			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+		}
+
+		return nil
+	})
 }

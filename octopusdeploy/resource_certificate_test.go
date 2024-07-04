@@ -2,6 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -70,4 +74,78 @@ func testAccCertificateCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+// TestCertificateResource verifies that a certificate can be reimported with the correct settings
+func TestCertificateResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+		// Act
+		newSpaceId, err := testFramework.Act(t, container, "../terraform", "25-certificates", []string{})
+
+		if err != nil {
+			return err
+		}
+
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "25a-certificatesds"), newSpaceId, []string{})
+
+		if err != nil {
+			return err
+		}
+
+		// Assert
+		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+		query := certificates.CertificatesQuery{
+			PartialName: "Test",
+			Skip:        0,
+			Take:        1,
+		}
+
+		resources, err := client.Certificates.Get(query)
+		if err != nil {
+			return err
+		}
+
+		if len(resources.Items) == 0 {
+			t.Fatalf("Space must have a certificate called \"Test\"")
+		}
+		resource := resources.Items[0]
+
+		if resource.Notes != "A test certificate" {
+			t.Fatal("The tenant must be have a description of \"A test certificate\" (was \"" + resource.Notes + "\")")
+		}
+
+		if resource.TenantedDeploymentMode != "Untenanted" {
+			t.Fatal("The tenant must be have a tenant participation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+		}
+
+		if resource.SubjectDistinguishedName != "CN=test.com" {
+			t.Fatal("The tenant must be have a subject distinguished name of \"CN=test.com\" (was \"" + resource.SubjectDistinguishedName + "\")")
+		}
+
+		if len(resource.EnvironmentIDs) != 0 {
+			t.Fatal("The tenant must have one project environment")
+		}
+
+		if len(resource.TenantTags) != 0 {
+			t.Fatal("The tenant must have no tenant tags")
+		}
+
+		if len(resource.TenantIDs) != 0 {
+			t.Fatal("The tenant must have no tenants")
+		}
+
+		// Verify the environment data lookups work
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "25a-certificatesds"), "data_lookup")
+
+		if err != nil {
+			return err
+		}
+
+		if lookup != resource.ID {
+			t.Fatal("The environment lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+		}
+
+		return nil
+	})
 }
