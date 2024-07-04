@@ -3,13 +3,16 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
+
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeployv6"
+
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
-	"log"
 )
 
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
@@ -29,7 +32,7 @@ func main() {
 	}
 
 	providers := []func() tfprotov6.ProviderServer{
-		providerserver.NewProtocol6(octopusdeploy.NewOctopusDeployProviderV6()),
+		providerserver.NewProtocol6(octopusdeployv6.NewOctopusDeployProviderV6()),
 		func() tfprotov6.ProviderServer {
 			return upgradedSdkServer
 		},
