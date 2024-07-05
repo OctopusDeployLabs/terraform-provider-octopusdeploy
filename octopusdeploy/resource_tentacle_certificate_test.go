@@ -17,7 +17,7 @@ func TestTentacleCertificateResource(t *testing.T) {
 			return err
 		}
 
-		thumbprintLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "57-tentaclecertificate"), "base_certificate_thumbprint")
+		thumbprintLookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "57-tentaclecertificate"), "base_certificate_thumbprint")
 		if err != nil {
 			return err
 		}

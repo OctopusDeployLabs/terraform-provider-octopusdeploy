@@ -18,12 +18,12 @@ func TestPollingSubscriptionIdResource(t *testing.T) {
 			return err
 		}
 
-		baseIdLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "56-pollingsubscriptionid"), "base_id")
+		baseIdLookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "56-pollingsubscriptionid"), "base_id")
 		if err != nil {
 			return err
 		}
 
-		basePollingUriLookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "56-pollingsubscriptionid"), "base_polling_uri")
+		basePollingUriLookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "56-pollingsubscriptionid"), "base_polling_uri")
 		if err != nil {
 			return err
 		}

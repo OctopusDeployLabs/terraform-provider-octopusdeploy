@@ -20,7 +20,7 @@ func TestAwsAccountExport(t *testing.T) {
 			return err
 		}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "3a-awsaccountds"), newSpaceId, []string{})
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("..", "terraform", "3a-awsaccountds"), newSpaceId, []string{})
 
 		if err != nil {
 			return err
@@ -49,7 +49,7 @@ func TestAwsAccountExport(t *testing.T) {
 		}
 
 		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "3a-awsaccountds"), "data_lookup")
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "/terraform", "3a-awsaccountds"), "data_lookup")
 
 		if err != nil {
 			return err

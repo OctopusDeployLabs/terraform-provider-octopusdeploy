@@ -271,7 +271,7 @@ func TestK8sTargetResource(t *testing.T) {
 		}
 
 		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "29a-k8stargetds"), "data_lookup")
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "29a-k8stargetds"), "data_lookup")
 
 		if err != nil {
 			return err
@@ -403,7 +403,7 @@ func TestKubernetesDeploymentTargetData(t *testing.T) {
 
 		var foundAgent = resources.Items[0]
 
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "55a-kubernetesagentdeploymenttargetds"), "data_lookup")
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "55a-kubernetesagentdeploymenttargetds"), "data_lookup")
 		if err != nil {
 			return err
 		}

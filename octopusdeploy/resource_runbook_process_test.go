@@ -114,7 +114,7 @@ func TestRunbookResource(t *testing.T) {
 		}
 
 		// Verify the environment data lookups work
-		//lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "46a-runbooks"), "data_lookup")
+		//lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "46a-runbooks"), "data_lookup")
 		//
 		//if err != nil {
 		//	return err

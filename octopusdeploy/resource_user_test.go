@@ -279,7 +279,7 @@ func TestUsersAndTeams(t *testing.T) {
 		}
 
 		// Verify the environment data lookups work
-		teams, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "43a-usersds"), "teams_lookup")
+		teams, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "43a-usersds"), "teams_lookup")
 
 		if err != nil {
 			return err
@@ -289,7 +289,7 @@ func TestUsersAndTeams(t *testing.T) {
 			t.Fatal("The teams lookup failed.")
 		}
 
-		roles, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "43a-usersds"), "roles_lookup")
+		roles, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "43a-usersds"), "roles_lookup")
 
 		if err != nil {
 			return err
@@ -299,7 +299,7 @@ func TestUsersAndTeams(t *testing.T) {
 			t.Fatal("The roles lookup failed.")
 		}
 
-		users, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "43a-usersds"), "users_lookup")
+		users, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "43a-usersds"), "users_lookup")
 
 		if err != nil {
 			return err

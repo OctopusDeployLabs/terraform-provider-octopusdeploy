@@ -22,7 +22,7 @@ func TestAzureServiceFabricTargetResource(t *testing.T) {
 			return err
 		}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "36a-servicefabrictargetds"), newSpaceId, []string{})
+		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("..", "terraform", "36a-servicefabrictargetds"), newSpaceId, []string{})
 
 		if err != nil {
 			return err
@@ -71,7 +71,7 @@ func TestAzureServiceFabricTargetResource(t *testing.T) {
 		}
 
 		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "36a-servicefabrictargetds"), "data_lookup")
+		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "36a-servicefabrictargetds"), "data_lookup")
 
 		if err != nil {
 			return err

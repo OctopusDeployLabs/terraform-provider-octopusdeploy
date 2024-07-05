@@ -162,7 +162,7 @@ func TestTenantsResource(t *testing.T) {
 		}
 
 		// Verify the environment data lookups work
-		tagsets, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "24a-tenantsds"), "tagsets")
+		tagsets, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "24a-tenantsds"), "tagsets")
 
 		if err != nil {
 			return err
@@ -172,7 +172,7 @@ func TestTenantsResource(t *testing.T) {
 			t.Fatal("The tagset lookup failed.")
 		}
 
-		tenants, err := testFramework.GetOutputVariable(t, filepath.Join("terraform", "24a-tenantsds"), "tenants_lookup")
+		tenants, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "24a-tenantsds"), "tenants_lookup")
 
 		if err != nil {
 			return err
