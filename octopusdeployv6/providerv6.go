@@ -1,4 +1,4 @@
-package octopusdeploy
+package octopusdeployv6
 
 import (
 	"context"
@@ -52,7 +52,9 @@ func (p *octopusDeployProviderV6) Configure(ctx context.Context, req provider.Co
 }
 
 func (p *octopusDeployProviderV6) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		project_group.NewProjectGroupsDataSource,
+	}
 }
 
 func (p *octopusDeployProviderV6) Resources(ctx context.Context) []func() resource.Resource {
