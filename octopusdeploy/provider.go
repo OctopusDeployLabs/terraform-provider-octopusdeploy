@@ -30,7 +30,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_machine_policies":                                dataSourceMachinePolicies(),
 			"octopusdeploy_offline_package_drop_deployment_targets":         dataSourceOfflinePackageDropDeploymentTargets(),
 			"octopusdeploy_polling_tentacle_deployment_targets":             dataSourcePollingTentacleDeploymentTargets(),
-			"octopusdeploy_project_groups":                                  dataSourceProjectGroups(),
 			"octopusdeploy_projects":                                        dataSourceProjects(),
 			"octopusdeploy_script_modules":                                  dataSourceScriptModules(),
 			"octopusdeploy_space":                                           dataSourceSpace(),

@@ -1,4 +1,4 @@
-package project_group
+package octopusdeployv6
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"

@@ -1,4 +1,4 @@
-package project_group
+package octopusdeployv6
 
 import (
 	"context"
