@@ -22,13 +22,13 @@ func TestAccDataSourceProjectGroups(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectGroupsDataSourceID(prefix),
 				),
-				Config: testAccDataSourceProjectGroupsConfig(localName, take),
+				Config: providerVersion() + testAccDataSourceProjectGroupsConfig(localName, take),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectGroupsDataSourceID(prefix),
 				),
-				Config: testAccDataSourceProjectGroupsEmpty(localName),
+				Config: providerVersion() + testAccDataSourceProjectGroupsEmpty(localName),
 			},
 		},
 	})
@@ -57,4 +57,14 @@ func testAccDataSourceProjectGroupsConfig(localName string, take int) string {
 
 func testAccDataSourceProjectGroupsEmpty(localName string) string {
 	return fmt.Sprintf(`data "octopusdeploy_project_groups" "%s" {}`, localName)
+}
+
+func providerVersion() string {
+	return fmt.Sprintf(`terraform {
+  required_providers {
+    octopusdeploy = { source = "OctopusDeployLabs/octopusdeploy", version = "0.18.1" }
+  }
+}
+
+`)
 }
