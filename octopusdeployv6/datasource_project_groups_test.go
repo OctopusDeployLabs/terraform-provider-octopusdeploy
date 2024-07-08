@@ -15,20 +15,28 @@ func TestAccDataSourceProjectGroups(t *testing.T) {
 	take := 10
 
 	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-		PreCheck:                 func() { TestAccPreCheck(t) },
+		// It would be nice to use the ProtoV6ProviderFactories approach but I've had issues with the init functionality
+		// For now I'm sticking with the external providers and terraformrc over-write behaviour we use in the existing integration tests.
+		//ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"octopusdeploy": {
+				VersionConstraint: "0.18.1",
+				Source:            "OctopusDeployLabs/octopusdeploy",
+			},
+		},
+		PreCheck: func() { TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectGroupsDataSourceID(prefix),
 				),
-				Config: providerVersion() + testAccDataSourceProjectGroupsConfig(localName, take),
+				Config: testAccDataSourceProjectGroupsConfig(localName, take),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProjectGroupsDataSourceID(prefix),
 				),
-				Config: providerVersion() + testAccDataSourceProjectGroupsEmpty(localName),
+				Config: testAccDataSourceProjectGroupsEmpty(localName),
 			},
 		},
 	})
@@ -57,14 +65,4 @@ func testAccDataSourceProjectGroupsConfig(localName string, take int) string {
 
 func testAccDataSourceProjectGroupsEmpty(localName string) string {
 	return fmt.Sprintf(`data "octopusdeploy_project_groups" "%s" {}`, localName)
-}
-
-func providerVersion() string {
-	return fmt.Sprintf(`terraform {
-  required_providers {
-    octopusdeploy = { source = "OctopusDeployLabs/octopusdeploy", version = "0.18.1" }
-  }
-}
-
-`)
 }

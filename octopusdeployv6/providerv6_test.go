@@ -28,7 +28,7 @@ func checkEnvVar(t *testing.T, key string) {
 
 func ProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
 	return map[string]func() (tfprotov6.ProviderServer, error){
-		"v6": func() (tfprotov6.ProviderServer, error) {
+		"octopusdeploy": func() (tfprotov6.ProviderServer, error) {
 			ctx := context.Background()
 
 			upgradedSdkServer, err := tf5to6server.UpgradeServer(
