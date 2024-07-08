@@ -1,4 +1,5 @@
-//package terratest
+package terratest
+
 //
 //import (
 //	"fmt"
