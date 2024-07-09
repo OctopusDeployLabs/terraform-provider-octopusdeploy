@@ -1,4 +1,4 @@
-package octopusdeploy
+package octopusdeployv6
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -12,7 +12,6 @@ var network testcontainers.Network
 var sqlServerContainer *test.MysqlContainer
 var err error
 
-//
 //func TestMain(m *testing.M) {
 //	testFramework := test.OctopusContainerTest{}
 //	octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
