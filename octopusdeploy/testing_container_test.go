@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 var octoContainer *test.OctopusContainer
@@ -24,6 +25,9 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 	ctx := context.Background()
+
+	// Waiting for the container logs to clear.
+	time.Sleep(10000 * time.Millisecond)
 	err := testFramework.CleanUp(ctx, octoContainer, sqlServerContainer, network)
 
 	if err != nil {

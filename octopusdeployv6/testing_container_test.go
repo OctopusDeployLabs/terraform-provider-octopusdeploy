@@ -24,6 +24,7 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 	ctx := context.Background()
+	// Waiting for the container logs to clear.
 	err := testFramework.CleanUp(ctx, octoContainer, sqlServerContainer, network)
 
 	if err != nil {
