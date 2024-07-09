@@ -210,8 +210,7 @@ func testAccLifecycleComplex(localName string, name string) string {
 
 func testAccCheckLifecycleExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-		if err := existsHelperLifecycle(s, client); err != nil {
+		if err := existsHelperLifecycle(s, octoClient); err != nil {
 			return err
 		}
 		return nil
@@ -220,8 +219,7 @@ func testAccCheckLifecycleExists(n string) resource.TestCheckFunc {
 
 func testAccCheckLifecyclePhaseCount(name string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-		resourceList, err := client.Lifecycles.GetByPartialName(name)
+		resourceList, err := octoClient.Lifecycles.GetByPartialName(name)
 		if err != nil {
 			return err
 		}
@@ -253,8 +251,7 @@ func testAccLifecycleCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		lifecycle, err := client.Lifecycles.GetByID(rs.Primary.ID)
+		lifecycle, err := octoClient.Lifecycles.GetByID(rs.Primary.ID)
 		if err == nil && lifecycle != nil {
 			return fmt.Errorf("lifecycle (%s) still exists", rs.Primary.ID)
 		}

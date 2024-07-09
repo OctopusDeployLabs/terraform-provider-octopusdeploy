@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -60,9 +59,8 @@ func testDynamicWorkerPoolBasic(
 
 func testDynamicWorkerPoolExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		workerPoolID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.WorkerPools.GetByID(workerPoolID); err != nil {
+		if _, err := octoClient.WorkerPools.GetByID(workerPoolID); err != nil {
 			return err
 		}
 
@@ -71,10 +69,9 @@ func testDynamicWorkerPoolExists(prefix string) resource.TestCheckFunc {
 }
 
 func testDynamicWorkerPoolDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		workerPoolID := rs.Primary.ID
-		workerPool, err := client.WorkerPools.GetByID(workerPoolID)
+		workerPool, err := octoClient.WorkerPools.GetByID(workerPoolID)
 		if err == nil {
 			if workerPool != nil {
 				return fmt.Errorf("dynamic worker pool (%s) still exists", rs.Primary.ID)

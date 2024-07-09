@@ -82,9 +82,8 @@ func testAccEnvironment(localName string, name string, description string, allow
 
 func testAccEnvironmentExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		environmentID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Environments.GetByID(environmentID); err != nil {
+		if _, err := octoClient.Environments.GetByID(environmentID); err != nil {
 			return err
 		}
 
@@ -93,13 +92,12 @@ func testAccEnvironmentExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccEnvironmentCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_environment" {
 			continue
 		}
 
-		if environment, err := client.Environments.GetByID(rs.Primary.ID); err == nil {
+		if environment, err := octoClient.Environments.GetByID(rs.Primary.ID); err == nil {
 			return fmt.Errorf("environment (%s) still exists", environment.GetID())
 		}
 	}

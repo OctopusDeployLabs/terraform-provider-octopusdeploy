@@ -315,8 +315,7 @@ func testAccChannelWithTwoRules(name, description, versionRange1, actionName1, v
 
 func testAccChannelExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-		if err := existsHelperChannel(s, client); err != nil {
+		if err := existsHelperChannel(s, octoClient); err != nil {
 			return err
 		}
 		return nil
@@ -335,9 +334,7 @@ func existsHelperChannel(s *terraform.State, client *client.Client) error {
 }
 
 func testAccChannelCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
-
-	if err := destroyHelperChannel(s, client); err != nil {
+	if err := destroyHelperChannel(s, octoClient); err != nil {
 		return err
 	}
 	if err := testAccEnvironmentCheckDestroy(s); err != nil {

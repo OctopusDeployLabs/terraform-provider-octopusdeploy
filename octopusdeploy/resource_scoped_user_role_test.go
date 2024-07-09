@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -51,8 +50,7 @@ func testScopedUserRoleExists(prefix string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", prefix)
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		if _, err := client.ScopedUserRoles.GetByID(rs.Primary.ID); err != nil {
+		if _, err := octoClient.ScopedUserRoles.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
 
@@ -61,13 +59,12 @@ func testScopedUserRoleExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccScopedUserRoleCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_scoped_user_role" {
 			continue
 		}
 
-		_, err := client.ScopedUserRoles.GetByID(rs.Primary.ID)
+		_, err := octoClient.ScopedUserRoles.GetByID(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("scoped user role (%s) still exists", rs.Primary.ID)
 		}

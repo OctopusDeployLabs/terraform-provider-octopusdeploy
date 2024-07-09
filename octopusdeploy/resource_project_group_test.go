@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -37,10 +36,9 @@ func testAccProjectGroup(localName string, name string) string {
 }
 
 func testProjectGroupDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		projectGroupID := rs.Primary.ID
-		projectGroup, err := client.ProjectGroups.GetByID(projectGroupID)
+		projectGroup, err := octoClient.ProjectGroups.GetByID(projectGroupID)
 		if err == nil {
 			if projectGroup != nil {
 				return fmt.Errorf("project group (%s) still exists", rs.Primary.ID)
@@ -58,8 +56,7 @@ func testProjectGroupExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		if _, err := client.ProjectGroups.GetByID(rs.Primary.ID); err != nil {
+		if _, err := octoClient.ProjectGroups.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
 
@@ -68,13 +65,12 @@ func testProjectGroupExists(resourceName string) resource.TestCheckFunc {
 }
 
 func testAccProjectGroupCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_project_group" {
 			continue
 		}
 
-		if projectGroup, err := client.ProjectGroups.GetByID(rs.Primary.ID); err == nil {
+		if projectGroup, err := octoClient.ProjectGroups.GetByID(rs.Primary.ID); err == nil {
 			return fmt.Errorf("project group (%s) still exists", projectGroup.GetID())
 		}
 	}

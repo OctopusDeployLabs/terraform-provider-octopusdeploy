@@ -84,8 +84,7 @@ func testTenantExists(prefix string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", prefix)
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		if _, err := client.Tenants.GetByID(rs.Primary.ID); err != nil {
+		if _, err := octoClient.Tenants.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
 
@@ -94,13 +93,12 @@ func testTenantExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccTenantCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_tenant" {
 			continue
 		}
 
-		if tenant, err := client.Tenants.GetByID(rs.Primary.ID); err == nil {
+		if tenant, err := octoClient.Tenants.GetByID(rs.Primary.ID); err == nil {
 			return fmt.Errorf("tenant (%s) still exists", tenant.GetID())
 		}
 	}

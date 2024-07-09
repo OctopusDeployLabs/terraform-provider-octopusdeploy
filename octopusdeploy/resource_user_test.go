@@ -112,9 +112,8 @@ func testAccUserBasic(localName string, displayName string, isActive bool, isSer
 
 func testUserExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		userID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Users.GetByID(userID); err != nil {
+		if _, err := octoClient.Users.GetByID(userID); err != nil {
 			return err
 		}
 
@@ -123,13 +122,12 @@ func testUserExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccUserCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_user" {
 			continue
 		}
 
-		_, err := client.Users.GetByID(rs.Primary.ID)
+		_, err := octoClient.Users.GetByID(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("user (%s) still exists", rs.Primary.ID)
 		}

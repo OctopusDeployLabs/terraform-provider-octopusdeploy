@@ -70,9 +70,8 @@ func testAccNuGetFeed(localName string, name string, feedURI string, username st
 
 func testOctopusDeployNuGetFeedExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		feedID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Feeds.GetByID(feedID); err != nil {
+		if _, err := octoClient.Feeds.GetByID(feedID); err != nil {
 			return err
 		}
 
@@ -81,13 +80,12 @@ func testOctopusDeployNuGetFeedExists(prefix string) resource.TestCheckFunc {
 }
 
 func testOctopusDeployNuGetFeedDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_nuget_feed" {
 			continue
 		}
 
-		_, err := client.Feeds.GetByID(rs.Primary.ID)
+		_, err := octoClient.Feeds.GetByID(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("feed (%s) still exists", rs.Primary.ID)
 		}

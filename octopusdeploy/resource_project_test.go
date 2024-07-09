@@ -30,8 +30,8 @@ func TestAccProjectBasic(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -119,8 +119,8 @@ func TestAccProjectWithUpdate(t *testing.T) {
 			testAccProjectCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -222,13 +222,12 @@ func testAccProjectCaC(spaceID string, lifecycleLocalName string, lifecycleName 
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_project" {
 			continue
 		}
 
-		if project, err := client.Projects.GetByID(rs.Primary.ID); err == nil {
+		if project, err := octoClient.Projects.GetByID(rs.Primary.ID); err == nil {
 			return fmt.Errorf("project (%s) still exists", project.GetID())
 		}
 	}
@@ -238,11 +237,10 @@ func testAccProjectCheckDestroy(s *terraform.State) error {
 
 func testAccProjectCheckExists() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 
 		for _, r := range s.RootModule().Resources {
 			if r.Type == "octopusdeploy_project" {
-				if _, err := client.Projects.GetByID(r.Primary.ID); err != nil {
+				if _, err := octoClient.Projects.GetByID(r.Primary.ID); err != nil {
 					return fmt.Errorf("error retrieving project with ID %s: %s", r.Primary.ID, err)
 				}
 			}

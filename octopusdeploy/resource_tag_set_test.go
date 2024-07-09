@@ -70,9 +70,8 @@ func testTagSetComplete(localName string, name string, tagColor string, tagDescr
 
 func testTagSetExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		tagSetID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.TagSets.GetByID(tagSetID); err != nil {
+		if _, err := octoClient.TagSets.GetByID(tagSetID); err != nil {
 			return err
 		}
 
@@ -81,10 +80,9 @@ func testTagSetExists(prefix string) resource.TestCheckFunc {
 }
 
 func testTagSetDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		tagSetID := rs.Primary.ID
-		tagSet, err := client.TagSets.GetByID(tagSetID)
+		tagSet, err := octoClient.TagSets.GetByID(tagSetID)
 		if err == nil {
 			if tagSet != nil {
 				return fmt.Errorf("tag set (%s) still exists", rs.Primary.ID)

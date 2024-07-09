@@ -75,8 +75,8 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -104,8 +104,8 @@ func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -144,8 +144,8 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -358,9 +358,7 @@ func testAccBuildTestAction(action string) string {
 
 func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-
-		process, err := getDeploymentProcess(s, client)
+		process, err := getDeploymentProcess(s, octoClient)
 		if err != nil {
 			return err
 		}
@@ -395,8 +393,7 @@ func testAccDeploymentProcessExists(prefix string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", prefix)
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		if _, err := client.DeploymentProcesses.GetByID(rs.Primary.ID); err != nil {
+		if _, err := octoClient.DeploymentProcesses.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
 
@@ -405,13 +402,12 @@ func testAccDeploymentProcessExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccDeploymentProcessCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_deployment_process" {
 			continue
 		}
 
-		if deploymentProcess, err := client.DeploymentProcesses.GetByID(rs.Primary.ID); err == nil {
+		if deploymentProcess, err := octoClient.DeploymentProcesses.GetByID(rs.Primary.ID); err == nil {
 			return fmt.Errorf("deployment process (%s) still exists", deploymentProcess.GetID())
 		}
 	}

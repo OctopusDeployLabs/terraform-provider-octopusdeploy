@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -81,8 +80,7 @@ func testAccTeamCheckExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		if _, err := client.Teams.GetByID(rs.Primary.ID); err != nil {
+		if _, err := octoClient.Teams.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
 
@@ -91,13 +89,12 @@ func testAccTeamCheckExists(resourceName string) resource.TestCheckFunc {
 }
 
 func testAccTeamCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_team" {
 			continue
 		}
 
-		if team, err := client.Teams.GetByID(rs.Primary.ID); err == nil {
+		if team, err := octoClient.Teams.GetByID(rs.Primary.ID); err == nil {
 			return fmt.Errorf("team (%s) still exists", team.GetID())
 		}
 	}

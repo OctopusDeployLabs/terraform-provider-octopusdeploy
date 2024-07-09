@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -57,13 +56,12 @@ func testUserRolePermissions(localName string, name string) string {
 }
 
 func testAccUserRoleCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_user_role" {
 			continue
 		}
 
-		_, err := client.UserRoles.GetByID(rs.Primary.ID)
+		_, err := octoClient.UserRoles.GetByID(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("user role (%s) still exists", rs.Primary.ID)
 		}

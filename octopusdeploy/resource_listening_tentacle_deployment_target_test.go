@@ -101,9 +101,8 @@ func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
 
 func testAccListeningTentacleDeploymentTargetExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		deploymentTargetID := s.RootModule().Resources[resourceName].Primary.ID
-		if _, err := client.Machines.GetByID(deploymentTargetID); err != nil {
+		if _, err := octoClient.Machines.GetByID(deploymentTargetID); err != nil {
 			return fmt.Errorf("error retrieving deployment target: %s", err)
 		}
 
@@ -112,13 +111,12 @@ func testAccListeningTentacleDeploymentTargetExists(resourceName string) resourc
 }
 
 func testAccListeningTentacleDeploymentTargetCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_listening_tentacle_deployment_target" {
 			continue
 		}
 
-		_, err := client.Machines.GetByID(rs.Primary.ID)
+		_, err := octoClient.Machines.GetByID(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("deployment target (%s) still exists", rs.Primary.ID)
 		}

@@ -126,13 +126,12 @@ func testTenantCommonVariableExists(resourceName string) resource.TestCheckFunc 
 		libraryVariableSetID := importStrings[1]
 		templateID := importStrings[2]
 
-		client := testAccProvider.Meta().(*client.Client)
-		tenant, err := client.Tenants.GetByID(tenantID)
+		tenant, err := octoClient.Tenants.GetByID(tenantID)
 		if err != nil {
 			return err
 		}
 
-		tenantVariables, err := client.Tenants.GetVariables(tenant)
+		tenantVariables, err := octoClient.Tenants.GetVariables(tenant)
 		if err != nil {
 			return err
 		}
@@ -148,7 +147,6 @@ func testTenantCommonVariableExists(resourceName string) resource.TestCheckFunc 
 }
 
 func testAccTenantCommonVariableCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_tenant_common_variable" {
 			continue
@@ -163,12 +161,12 @@ func testAccTenantCommonVariableCheckDestroy(s *terraform.State) error {
 		libraryVariableSetID := importStrings[1]
 		templateID := importStrings[2]
 
-		tenant, err := client.Tenants.GetByID(tenantID)
+		tenant, err := octoClient.Tenants.GetByID(tenantID)
 		if err != nil {
 			return nil
 		}
 
-		tenantVariables, err := client.Tenants.GetVariables(tenant)
+		tenantVariables, err := octoClient.Tenants.GetVariables(tenant)
 		if err != nil {
 			return nil
 		}

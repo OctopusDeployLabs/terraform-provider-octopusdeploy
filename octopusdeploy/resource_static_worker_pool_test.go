@@ -60,9 +60,8 @@ func testStaticWorkerPoolBasic(
 
 func testStaticWorkerPoolExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		workerPoolID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.WorkerPools.GetByID(workerPoolID); err != nil {
+		if _, err := octoClient.WorkerPools.GetByID(workerPoolID); err != nil {
 			return err
 		}
 
@@ -71,10 +70,9 @@ func testStaticWorkerPoolExists(prefix string) resource.TestCheckFunc {
 }
 
 func testStaticWorkerPoolDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		workerPoolID := rs.Primary.ID
-		workerPool, err := client.WorkerPools.GetByID(workerPoolID)
+		workerPool, err := octoClient.WorkerPools.GetByID(workerPoolID)
 		if err == nil {
 			if workerPool != nil {
 				return fmt.Errorf("static worker pool (%s) still exists", rs.Primary.ID)

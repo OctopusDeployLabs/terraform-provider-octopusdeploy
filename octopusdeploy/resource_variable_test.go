@@ -192,8 +192,7 @@ func testAccCheckVariableExists() resource.TestCheckFunc {
 			}
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		if _, err := client.Variables.GetByID(ownerID, variableID); err != nil {
+		if _, err := octoClient.Variables.GetByID(ownerID, variableID); err != nil {
 			return fmt.Errorf("error retrieving variable %s", err)
 		}
 
@@ -215,8 +214,7 @@ func testVariableDestroy(s *terraform.State) error {
 		}
 	}
 
-	client := testAccProvider.Meta().(*client.Client)
-	variable, err := client.Variables.GetByID(ownerID, variableID)
+	variable, err := octoClient.Variables.GetByID(ownerID, variableID)
 	if err == nil {
 		if variable != nil {
 			return fmt.Errorf("variable (%s) still exists", variableID)

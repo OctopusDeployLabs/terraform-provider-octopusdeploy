@@ -56,10 +56,9 @@ func testScriptModule(localName string, name string, description string, body st
 }
 
 func testScriptModuleCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		scriptModuleID := rs.Primary.ID
-		if scriptModule, err := client.ScriptModules.GetByID(scriptModuleID); err == nil {
+		if scriptModule, err := octoClient.ScriptModules.GetByID(scriptModuleID); err == nil {
 			if scriptModule != nil {
 				return fmt.Errorf("script module (%s) still exists", rs.Primary.ID)
 			}
@@ -71,10 +70,9 @@ func testScriptModuleCheckDestroy(s *terraform.State) error {
 
 func testScriptModuleExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		for _, r := range s.RootModule().Resources {
 			if r.Type == "octopusdeploy_script_module" {
-				if _, err := client.ScriptModules.GetByID(r.Primary.ID); err != nil {
+				if _, err := octoClient.ScriptModules.GetByID(r.Primary.ID); err != nil {
 					return fmt.Errorf("error retrieving script module %s", err)
 				}
 			}
