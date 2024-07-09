@@ -6,7 +6,7 @@ replace github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework => 
 
 require (
 	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.45.0
-	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240622231527-24df7b6eaa48
+	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240709024343-2f1dc3f4a79e
 	github.com/google/uuid v1.6.0
 	github.com/gruntwork-io/terratest v0.41.11
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -19,6 +19,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
 	github.com/hashicorp/terraform-plugin-testing v1.8.0
 	github.com/stretchr/testify v1.9.0
+	github.com/testcontainers/testcontainers-go v0.32.0
 	golang.org/x/exp v0.0.0-20240707233637-46b078467d37
 	golang.org/x/text v0.16.0
 	k8s.io/utils v0.0.0-20230505201702-9f6742963106
@@ -134,7 +135,6 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/testcontainers/testcontainers-go v0.32.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.8.0 // indirect
 	github.com/tmccombs/hcl2json v0.3.6 // indirect
@@ -163,7 +163,7 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240528184218-531527333157 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240708141625-4ad9e859172b // indirect
 	google.golang.org/grpc v1.65.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

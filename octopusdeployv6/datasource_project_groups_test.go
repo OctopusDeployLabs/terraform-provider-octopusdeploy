@@ -17,14 +17,8 @@ func TestAccDataSourceProjectGroups(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		// It would be nice to use the ProtoV6ProviderFactories approach but I've had issues with the init functionality
 		// For now I'm sticking with the external providers and terraformrc over-write behaviour we use in the existing integration tests.
-		//ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"octopusdeploy": {
-				VersionConstraint: "0.18.1",
-				Source:            "OctopusDeployLabs/octopusdeploy",
-			},
-		},
-		PreCheck: func() { TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(

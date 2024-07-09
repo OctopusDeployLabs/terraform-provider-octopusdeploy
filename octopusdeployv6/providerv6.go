@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"os"
 )
 
 type octopusDeployProviderV6 struct {
@@ -40,7 +41,13 @@ func (p *octopusDeployProviderV6) Configure(ctx context.Context, req provider.Co
 
 	config := config.Config{}
 	config.ApiKey = providerData.ApiKey.ValueString()
+	if config.ApiKey == "" {
+		config.ApiKey = os.Getenv("OCTOPUS_APIKEY")
+	}
 	config.Address = providerData.Address.ValueString()
+	if config.Address == "" {
+		config.Address = os.Getenv("OCTOPUS_URL")
+	}
 	config.SpaceID = providerData.SpaceID.ValueString()
 	if err := config.GetClient(ctx); err != nil {
 		resp.Diagnostics.AddError("failed to load client", err.Error())
@@ -66,13 +73,11 @@ func (p *octopusDeployProviderV6) Schema(ctx context.Context, req provider.Schem
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				Optional:    false,
-				Required:    true,
+				Optional:    true,
 				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": schema.StringAttribute{
-				Optional:    false,
-				Required:    true,
+				Optional:    true,
 				Description: "The API key to use with the Octopus REST API",
 			},
 			"space_id": schema.StringAttribute{
