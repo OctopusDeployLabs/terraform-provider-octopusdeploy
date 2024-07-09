@@ -23,7 +23,7 @@ func NewOctopusDeployFrameworkProvider() *octopusDeployFrameworkProvider {
 }
 
 func (p *octopusDeployFrameworkProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "octopus-deploy"
+	resp.TypeName = "octopusdeploy"
 }
 
 func (p *octopusDeployFrameworkProvider) MetaSchema(ctx context.Context, request provider.MetaSchemaRequest, response *provider.MetaSchemaResponse) {
