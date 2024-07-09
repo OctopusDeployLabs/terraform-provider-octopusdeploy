@@ -11,20 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
-
-var ()
-var testAccProvider provider.Provider
-var testAccProviderFactories map[string]func() (provider.Provider, diag.Diagnostics)
-
-func checkEnvVar(t *testing.T, key string) {
-	if v := os.Getenv(key); v == "" {
-		t.Fatalf("%s must be set for acceptance tests", key)
-	}
-}
 
 func ProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
 	return map[string]func() (tfprotov6.ProviderServer, error){
