@@ -2,8 +2,6 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 
 go 1.21
 
-replace github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework => C:\Users\isaac\source\repos\OctopusTerraformTestFramework
-
 require (
 	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.45.0
 	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240709024343-2f1dc3f4a79e
