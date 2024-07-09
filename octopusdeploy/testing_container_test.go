@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 	os.Setenv("OCTOPUS_URL", octoContainer.URI)
 	os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
 
-	m.Run()
+	code := m.Run()
 	ctx := context.Background()
 	err := testFramework.CleanUp(ctx, octoContainer, sqlServerContainer, network)
 
@@ -30,4 +30,6 @@ func TestMain(m *testing.M) {
 		log.Println("Failed to clean up containers")
 		panic(m)
 	}
+
+	os.Exit(code)
 }
