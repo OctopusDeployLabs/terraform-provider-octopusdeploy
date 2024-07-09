@@ -29,6 +29,7 @@ func TestMain(m *testing.M) {
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
+		os.Setenv("TF_ACC", "1")
 
 		code := m.Run()
 		ctx := context.Background()
