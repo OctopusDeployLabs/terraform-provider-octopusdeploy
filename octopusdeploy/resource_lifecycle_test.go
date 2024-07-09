@@ -21,8 +21,8 @@ func TestAccLifecycleBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccLifecycleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccLifecycleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -54,8 +54,8 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccLifecycleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccLifecycleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create lifecycle with no description
@@ -125,8 +125,8 @@ func TestAccLifecycleComplex(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccLifecycleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccLifecycleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -263,77 +263,72 @@ func testAccLifecycleCheckDestroy(s *terraform.State) error {
 // TestLifecycleResource verifies that a lifecycle can be reimported with the correct settings
 func TestLifecycleResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "17-lifecycle", []string{})
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "17-lifecycle", []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "17a-lifecycleds"), newSpaceId, []string{})
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "17a-lifecycleds"), newSpaceId, []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := lifecycles.Query{
-			PartialName: "Simple",
-			Skip:        0,
-			Take:        1,
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := lifecycles.Query{
+		PartialName: "Simple",
+		Skip:        0,
+		Take:        1,
+	}
 
-		resources, err := client.Lifecycles.Get(query)
-		if err != nil {
-			return err
-		}
+	resources, err := client.Lifecycles.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have an environment called \"Simple\"")
-		}
-		resource := resources.Items[0]
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an environment called \"Simple\"")
+	}
+	resource := resources.Items[0]
 
-		if resource.Description != "A test lifecycle" {
-			t.Fatal("The lifecycle must be have a description of \"A test lifecycle\" (was \"" + resource.Description + "\")")
-		}
+	if resource.Description != "A test lifecycle" {
+		t.Fatal("The lifecycle must be have a description of \"A test lifecycle\" (was \"" + resource.Description + "\")")
+	}
 
-		if resource.TentacleRetentionPolicy.QuantityToKeep != 30 {
-			t.Fatal("The lifecycle must be have a tentacle retention policy of \"30\" (was \"" + fmt.Sprint(resource.TentacleRetentionPolicy.QuantityToKeep) + "\")")
-		}
+	if resource.TentacleRetentionPolicy.QuantityToKeep != 30 {
+		t.Fatal("The lifecycle must be have a tentacle retention policy of \"30\" (was \"" + fmt.Sprint(resource.TentacleRetentionPolicy.QuantityToKeep) + "\")")
+	}
 
-		if resource.TentacleRetentionPolicy.ShouldKeepForever {
-			t.Fatal("The lifecycle must be have a tentacle retention not set to keep forever")
-		}
+	if resource.TentacleRetentionPolicy.ShouldKeepForever {
+		t.Fatal("The lifecycle must be have a tentacle retention not set to keep forever")
+	}
 
-		if resource.TentacleRetentionPolicy.Unit != "Items" {
-			t.Fatal("The lifecycle must be have a tentacle retention unit set to \"Items\" (was \"" + resource.TentacleRetentionPolicy.Unit + "\")")
-		}
+	if resource.TentacleRetentionPolicy.Unit != "Items" {
+		t.Fatal("The lifecycle must be have a tentacle retention unit set to \"Items\" (was \"" + resource.TentacleRetentionPolicy.Unit + "\")")
+	}
 
-		if resource.ReleaseRetentionPolicy.QuantityToKeep != 1 {
-			t.Fatal("The lifecycle must be have a release retention policy of \"1\" (was \"" + fmt.Sprint(resource.ReleaseRetentionPolicy.QuantityToKeep) + "\")")
-		}
+	if resource.ReleaseRetentionPolicy.QuantityToKeep != 1 {
+		t.Fatal("The lifecycle must be have a release retention policy of \"1\" (was \"" + fmt.Sprint(resource.ReleaseRetentionPolicy.QuantityToKeep) + "\")")
+	}
 
-		if !resource.ReleaseRetentionPolicy.ShouldKeepForever {
-			t.Log("BUG: The lifecycle must be have a release retention set to keep forever (known bug - the provider creates this field as false)")
-		}
+	if !resource.ReleaseRetentionPolicy.ShouldKeepForever {
+		t.Log("BUG: The lifecycle must be have a release retention set to keep forever (known bug - the provider creates this field as false)")
+	}
 
-		if resource.ReleaseRetentionPolicy.Unit != "Days" {
-			t.Fatal("The lifecycle must be have a release retention unit set to \"Days\" (was \"" + resource.ReleaseRetentionPolicy.Unit + "\")")
-		}
+	if resource.ReleaseRetentionPolicy.Unit != "Days" {
+		t.Fatal("The lifecycle must be have a release retention unit set to \"Days\" (was \"" + resource.ReleaseRetentionPolicy.Unit + "\")")
+	}
 
-		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "17a-lifecycleds"), "data_lookup")
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "17a-lifecycleds"), "data_lookup")
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if lookup != resource.ID {
-			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
-		}
-
-		return nil
-	})
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }

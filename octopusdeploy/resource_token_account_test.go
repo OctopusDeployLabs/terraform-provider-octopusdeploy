@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"testing"
@@ -23,8 +22,8 @@ func TestTokenAccountBasic(t *testing.T) {
 	token := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccountCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -56,52 +55,47 @@ func testTokenAccountBasic(localName string, description string, name string, te
 // TestTokenAccountResource verifies that a token account can be reimported with the correct settings
 func TestTokenAccountResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "9-tokenaccount", []string{})
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "9-tokenaccount", []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := accounts.AccountsQuery{
-			PartialName: "Token",
-			Skip:        0,
-			Take:        1,
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := accounts.AccountsQuery{
+		PartialName: "Token",
+		Skip:        0,
+		Take:        1,
+	}
 
-		resources, err := client.Accounts.Get(query)
-		if err != nil {
-			return err
-		}
+	resources, err := client.Accounts.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have an account called \"Token\"")
-		}
-		resource := resources.Items[0].(*accounts.TokenAccount)
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an account called \"Token\"")
+	}
+	resource := resources.Items[0].(*accounts.TokenAccount)
 
-		if resource.AccountType != "Token" {
-			t.Fatal("The account must be have a type of \"Token\"")
-		}
+	if resource.AccountType != "Token" {
+		t.Fatal("The account must be have a type of \"Token\"")
+	}
 
-		if !resource.Token.HasValue {
-			t.Fatal("The account must be have a token")
-		}
+	if !resource.Token.HasValue {
+		t.Fatal("The account must be have a token")
+	}
 
-		if resource.Description != "A test account" {
-			t.Fatal("The account must be have a description of \"A test account\"")
-		}
+	if resource.Description != "A test account" {
+		t.Fatal("The account must be have a description of \"A test account\"")
+	}
 
-		if resource.TenantedDeploymentMode != "Untenanted" {
-			t.Fatal("The account must be have a tenanted deployment participation of \"Untenanted\"")
-		}
+	if resource.TenantedDeploymentMode != "Untenanted" {
+		t.Fatal("The account must be have a tenanted deployment participation of \"Untenanted\"")
+	}
 
-		if len(resource.TenantTags) != 0 {
-			t.Fatal("The account must be have no tenant tags")
-		}
-
-		return nil
-	})
+	if len(resource.TenantTags) != 0 {
+		t.Fatal("The account must be have no tenant tags")
+	}
 }

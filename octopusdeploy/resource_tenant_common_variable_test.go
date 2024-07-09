@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	localtest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -184,43 +183,38 @@ func testAccTenantCommonVariableCheckDestroy(s *terraform.State) error {
 // TestTenantVariablesResource verifies that a tenant variables can be reimported with the correct settings
 func TestTenantVariablesResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "26-tenant_variables", []string{})
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "26-tenant_variables", []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		collection, err := client.TenantVariables.GetAll()
-		if err != nil {
-			return err
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	collection, err := client.TenantVariables.GetAll()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		resourceName := "Test"
-		found := false
-		for _, tenantVariable := range collection {
-			for _, project := range tenantVariable.ProjectVariables {
-				if project.ProjectName == resourceName {
-					for _, variables := range project.Variables {
-						for _, value := range variables {
-							// we expect one project variable to be defined
-							found = true
-							if value.Value != "my value" {
-								t.Fatal("The tenant project variable must have a value of \"my value\" (was \"" + value.Value + "\")")
-							}
+	resourceName := "Test"
+	found := false
+	for _, tenantVariable := range collection {
+		for _, project := range tenantVariable.ProjectVariables {
+			if project.ProjectName == resourceName {
+				for _, variables := range project.Variables {
+					for _, value := range variables {
+						// we expect one project variable to be defined
+						found = true
+						if value.Value != "my value" {
+							t.Fatal("The tenant project variable must have a value of \"my value\" (was \"" + value.Value + "\")")
 						}
 					}
 				}
 			}
 		}
+	}
 
-		if !found {
-			t.Fatal("Space must have an tenant project variable for the project called \"" + resourceName + "\"")
-		}
-
-		return nil
-	})
+	if !found {
+		t.Fatal("Space must have an tenant project variable for the project called \"" + resourceName + "\"")
+	}
 }

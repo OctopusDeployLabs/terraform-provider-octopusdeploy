@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -24,8 +23,8 @@ func TestAccOctopusDeployScriptModuleBasic(t *testing.T) {
 	syntax := "Bash"
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testScriptModuleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testScriptModuleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -84,107 +83,102 @@ func testScriptModuleExists(n string) resource.TestCheckFunc {
 // TestScriptModuleResource verifies that a script module set can be reimported with the correct settings
 func TestScriptModuleResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "23-scriptmodule", []string{})
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "23-scriptmodule", []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "23a-scriptmoduleds"), newSpaceId, []string{})
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "23a-scriptmoduleds"), newSpaceId, []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := variables.LibraryVariablesQuery{
-			PartialName: "Test2",
-			Skip:        0,
-			Take:        1,
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := variables.LibraryVariablesQuery{
+		PartialName: "Test2",
+		Skip:        0,
+		Take:        1,
+	}
 
-		resources, err := client.LibraryVariableSets.Get(query)
-		if err != nil {
-			return err
-		}
+	resources, err := client.LibraryVariableSets.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have a library variable set called \"Test2\"")
-		}
-		resource := resources.Items[0]
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a library variable set called \"Test2\"")
+	}
+	resource := resources.Items[0]
 
-		if resource.Description != "Test script module" {
-			t.Fatal("The library variable set must be have a description of \"Test script module\" (was \"" + resource.Description + "\")")
-		}
+	if resource.Description != "Test script module" {
+		t.Fatal("The library variable set must be have a description of \"Test script module\" (was \"" + resource.Description + "\")")
+	}
 
-		variables, err := client.Variables.GetAll(resource.ID)
+	variables, err := client.Variables.GetAll(resource.ID)
 
-		if len(variables.Variables) != 2 {
-			t.Fatal("The library variable set must have two associated variables")
-		}
+	if len(variables.Variables) != 2 {
+		t.Fatal("The library variable set must have two associated variables")
+	}
 
-		foundScript := false
-		foundLanguage := false
-		for _, u := range variables.Variables {
-			if u.Name == "Octopus.Script.Module[Test2]" {
-				foundScript = true
+	foundScript := false
+	foundLanguage := false
+	for _, u := range variables.Variables {
+		if u.Name == "Octopus.Script.Module[Test2]" {
+			foundScript = true
 
-				if u.Type != "String" {
-					t.Fatal("The library variable set variable must have a type of \"String\"")
-				}
-
-				if u.Value != "echo \"hi\"" {
-					t.Fatal("The library variable set variable must have a value of \"\"echo \\\"hi\\\"\"\"")
-				}
-
-				if u.IsSensitive {
-					t.Fatal("The library variable set variable must not be sensitive")
-				}
-
-				if !u.IsEditable {
-					t.Fatal("The library variable set variable must be editable")
-				}
+			if u.Type != "String" {
+				t.Fatal("The library variable set variable must have a type of \"String\"")
 			}
 
-			if u.Name == "Octopus.Script.Module.Language[Test2]" {
-				foundLanguage = true
+			if u.Value != "echo \"hi\"" {
+				t.Fatal("The library variable set variable must have a value of \"\"echo \\\"hi\\\"\"\"")
+			}
 
-				if u.Type != "String" {
-					t.Fatal("The library variable set variable must have a type of \"String\"")
-				}
+			if u.IsSensitive {
+				t.Fatal("The library variable set variable must not be sensitive")
+			}
 
-				if u.Value != "PowerShell" {
-					t.Fatal("The library variable set variable must have a value of \"PowerShell\"")
-				}
-
-				if u.IsSensitive {
-					t.Fatal("The library variable set variable must not be sensitive")
-				}
-
-				if !u.IsEditable {
-					t.Fatal("The library variable set variable must be editable")
-				}
+			if !u.IsEditable {
+				t.Fatal("The library variable set variable must be editable")
 			}
 		}
 
-		if !foundLanguage || !foundScript {
-			t.Fatal("Script module must create two variables for script and language")
+		if u.Name == "Octopus.Script.Module.Language[Test2]" {
+			foundLanguage = true
+
+			if u.Type != "String" {
+				t.Fatal("The library variable set variable must have a type of \"String\"")
+			}
+
+			if u.Value != "PowerShell" {
+				t.Fatal("The library variable set variable must have a value of \"PowerShell\"")
+			}
+
+			if u.IsSensitive {
+				t.Fatal("The library variable set variable must not be sensitive")
+			}
+
+			if !u.IsEditable {
+				t.Fatal("The library variable set variable must be editable")
+			}
 		}
+	}
 
-		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "23a-scriptmoduleds"), "data_lookup")
+	if !foundLanguage || !foundScript {
+		t.Fatal("Script module must create two variables for script and language")
+	}
 
-		if err != nil {
-			return err
-		}
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "23a-scriptmoduleds"), "data_lookup")
 
-		if lookup != resource.ID {
-			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		return nil
-	})
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }

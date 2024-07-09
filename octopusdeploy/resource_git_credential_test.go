@@ -1,7 +1,6 @@
 package octopusdeploy
 
 import (
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"path/filepath"
 	"testing"
@@ -10,31 +9,27 @@ import (
 // TestGitCredentialsResource verifies that a git credential can be reimported with the correct settings
 func TestGitCredentialsResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "22-gitcredentialtest", []string{})
 
-		if err != nil {
-			return err
-		}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "22-gitcredentialtest", []string{})
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "22a-gitcredentialtestds"), newSpaceId, []string{})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if err != nil {
-			return err
-		}
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "22a-gitcredentialtestds"), newSpaceId, []string{})
 
-		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "22a-gitcredentialtestds"), "data_lookup")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if err != nil {
-			return err
-		}
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "22a-gitcredentialtestds"), "data_lookup")
 
-		if lookup == "" {
-			t.Fatal("The target lookup did not succeed.")
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		return nil
-	})
+	if lookup == "" {
+		t.Fatal("The target lookup did not succeed.")
+	}
 }

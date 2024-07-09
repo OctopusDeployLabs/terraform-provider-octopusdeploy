@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -21,8 +20,8 @@ func TestAccCloudRegionDeploymentTargetImportBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccCloudRegionDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccCloudRegionDeploymentTargetCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -44,8 +43,8 @@ func TestAccCloudRegionDeploymentTargetBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccCloudRegionDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccCloudRegionDeploymentTargetCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -105,50 +104,46 @@ func testAccCloudRegionDeploymentTargetCheckDestroy(s *terraform.State) error {
 // TestCloudRegionTargetResource verifies that a cloud region can be reimported with the correct settings
 func TestCloudRegionTargetResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "33-cloudregiontarget", []string{})
 
-		if err != nil {
-			return err
-		}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "33-cloudregiontarget", []string{})
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "33a-cloudregiontargetds"), newSpaceId, []string{})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if err != nil {
-			t.Fatal("cloud region data source does not appear to work")
-		}
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "33a-cloudregiontargetds"), newSpaceId, []string{})
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := machines.MachinesQuery{
-			PartialName: "Test",
-			Skip:        0,
-			Take:        1,
-		}
+	if err != nil {
+		t.Fatal("cloud region data source does not appear to work")
+	}
 
-		resources, err := client.Machines.Get(query)
-		if err != nil {
-			return err
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := machines.MachinesQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have a machine called \"Test\"")
-		}
-		resource := resources.Items[0]
+	resources, err := client.Machines.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if len(resource.Roles) != 1 {
-			t.Fatal("The machine must have 1 role")
-		}
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a machine called \"Test\"")
+	}
+	resource := resources.Items[0]
 
-		if resource.Roles[0] != "cloud" {
-			t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
-		}
+	if len(resource.Roles) != 1 {
+		t.Fatal("The machine must have 1 role")
+	}
 
-		if resource.TenantedDeploymentMode != "Untenanted" {
-			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
-		}
+	if resource.Roles[0] != "cloud" {
+		t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
+	}
 
-		return nil
-	})
+	if resource.TenantedDeploymentMode != "Untenanted" {
+		t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+	}
 }

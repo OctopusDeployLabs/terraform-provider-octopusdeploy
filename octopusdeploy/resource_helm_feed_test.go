@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -26,8 +25,8 @@ func TestAccOctopusDeployHelmFeed(t *testing.T) {
 	updatedName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testHelmFeedCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testHelmFeedCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -92,77 +91,73 @@ func testHelmFeedCheckDestroy(s *terraform.State) error {
 // TestHelmFeedResource verifies that a helm feed can be reimported with the correct settings
 func TestHelmFeedResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "10-helmfeed", []string{})
 
-		if err != nil {
-			return err
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "10-helmfeed", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "10a-helmfeedds"), newSpaceId, []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := feeds.FeedsQuery{
+		PartialName: "Helm",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Feeds.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an feed called \"Helm\"")
+	}
+	resource := resources.Items[0].(*feeds.HelmFeed)
+
+	if resource.FeedType != "Helm" {
+		t.Fatal("The feed must have a type of \"Helm\"")
+	}
+
+	if resource.Username != "username" {
+		t.Fatal("The feed must have a username of \"username\"")
+	}
+
+	if resource.FeedURI != "https://charts.helm.sh/stable/" {
+		t.Fatal("The feed must be have a URI of \"https://charts.helm.sh/stable/\"")
+	}
+
+	foundExecutionTarget := false
+	foundNotAcquired := false
+	for _, o := range resource.PackageAcquisitionLocationOptions {
+		if o == "ExecutionTarget" {
+			foundExecutionTarget = true
 		}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "10a-helmfeedds"), newSpaceId, []string{})
-
-		if err != nil {
-			return err
+		if o == "NotAcquired" {
+			foundNotAcquired = true
 		}
+	}
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := feeds.FeedsQuery{
-			PartialName: "Helm",
-			Skip:        0,
-			Take:        1,
-		}
+	if !(foundExecutionTarget && foundNotAcquired) {
+		t.Fatal("The feed must be have a PackageAcquisitionLocationOptions including \"ExecutionTarget\" and \"NotAcquired\"")
+	}
 
-		resources, err := client.Feeds.Get(query)
-		if err != nil {
-			return err
-		}
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "10a-helmfeedds"), "data_lookup")
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have an feed called \"Helm\"")
-		}
-		resource := resources.Items[0].(*feeds.HelmFeed)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if resource.FeedType != "Helm" {
-			t.Fatal("The feed must have a type of \"Helm\"")
-		}
-
-		if resource.Username != "username" {
-			t.Fatal("The feed must have a username of \"username\"")
-		}
-
-		if resource.FeedURI != "https://charts.helm.sh/stable/" {
-			t.Fatal("The feed must be have a URI of \"https://charts.helm.sh/stable/\"")
-		}
-
-		foundExecutionTarget := false
-		foundNotAcquired := false
-		for _, o := range resource.PackageAcquisitionLocationOptions {
-			if o == "ExecutionTarget" {
-				foundExecutionTarget = true
-			}
-
-			if o == "NotAcquired" {
-				foundNotAcquired = true
-			}
-		}
-
-		if !(foundExecutionTarget && foundNotAcquired) {
-			t.Fatal("The feed must be have a PackageAcquisitionLocationOptions including \"ExecutionTarget\" and \"NotAcquired\"")
-		}
-
-		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "10a-helmfeedds"), "data_lookup")
-
-		if err != nil {
-			return err
-		}
-
-		if lookup != resource.ID {
-			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
-		}
-
-		return nil
-	})
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }

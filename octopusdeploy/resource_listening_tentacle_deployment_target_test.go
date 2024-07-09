@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -18,8 +17,8 @@ func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
 	options := internaltest.NewListeningTentacleDeploymentTargetTestOptions()
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccListeningTentacleDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccListeningTentacleDeploymentTargetCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -128,58 +127,53 @@ func testAccListeningTentacleDeploymentTargetCheckDestroy(s *terraform.State) er
 // TestListeningTargetResource verifies that a listening machine can be reimported with the correct settings
 func TestListeningTargetResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "31-listeningtarget", []string{})
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "31-listeningtarget", []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "31a-listeningtargetds"), newSpaceId, []string{})
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "31a-listeningtargetds"), newSpaceId, []string{})
 
-		if err != nil {
-			t.Log("BUG: listening targets data sources don't appear to work")
-		}
+	if err != nil {
+		t.Log("BUG: listening targets data sources don't appear to work")
+	}
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := machines.MachinesQuery{
-			PartialName: "Test",
-			Skip:        0,
-			Take:        1,
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := machines.MachinesQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
 
-		resources, err := client.Machines.Get(query)
-		if err != nil {
-			return err
-		}
+	resources, err := client.Machines.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have a machine called \"Test\"")
-		}
-		resource := resources.Items[0]
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a machine called \"Test\"")
+	}
+	resource := resources.Items[0]
 
-		if resource.URI != "https://tentacle/" {
-			t.Fatal("The machine must have a Uri of \"https://tentacle/\" (was \"" + resource.URI + "\")")
-		}
+	if resource.URI != "https://tentacle/" {
+		t.Fatal("The machine must have a Uri of \"https://tentacle/\" (was \"" + resource.URI + "\")")
+	}
 
-		if resource.Thumbprint != "55E05FD1B0F76E60F6DA103988056CE695685FD1" {
-			t.Fatal("The machine must have a Thumbprint of \"55E05FD1B0F76E60F6DA103988056CE695685FD1\" (was \"" + resource.Thumbprint + "\")")
-		}
+	if resource.Thumbprint != "55E05FD1B0F76E60F6DA103988056CE695685FD1" {
+		t.Fatal("The machine must have a Thumbprint of \"55E05FD1B0F76E60F6DA103988056CE695685FD1\" (was \"" + resource.Thumbprint + "\")")
+	}
 
-		if len(resource.Roles) != 1 {
-			t.Fatal("The machine must have 1 role")
-		}
+	if len(resource.Roles) != 1 {
+		t.Fatal("The machine must have 1 role")
+	}
 
-		if resource.Roles[0] != "vm" {
-			t.Fatal("The machine must have a role of \"vm\" (was \"" + resource.Roles[0] + "\")")
-		}
+	if resource.Roles[0] != "vm" {
+		t.Fatal("The machine must have a role of \"vm\" (was \"" + resource.Roles[0] + "\")")
+	}
 
-		if resource.TenantedDeploymentMode != "Untenanted" {
-			t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
-		}
-
-		return nil
-	})
+	if resource.TenantedDeploymentMode != "Untenanted" {
+		t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+	}
 }

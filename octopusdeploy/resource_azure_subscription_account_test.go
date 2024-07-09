@@ -3,7 +3,6 @@ package octopusdeploy
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"testing"
@@ -29,8 +28,8 @@ func TestAccOctopusDeployAzureSubscriptionAccountBasic(t *testing.T) {
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccountCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -81,48 +80,44 @@ func TestAzureSubscriptionAccountResource(t *testing.T) {
 	return
 
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "8-azuresubscriptionaccount", []string{})
 
-		if err != nil {
-			return err
-		}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "8-azuresubscriptionaccount", []string{})
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := accounts.AccountsQuery{
-			PartialName: "Subscription",
-			Skip:        0,
-			Take:        1,
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		resources, err := client.Accounts.Get(query)
-		if err != nil {
-			return err
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := accounts.AccountsQuery{
+		PartialName: "Subscription",
+		Skip:        0,
+		Take:        1,
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have an account called \"Subscription\"")
-		}
-		resource := resources.Items[0].(*accounts.AzureSubscriptionAccount)
+	resources, err := client.Accounts.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if resource.AccountType != "AzureServicePrincipal" {
-			t.Fatal("The account must be have a type of \"AzureServicePrincipal\"")
-		}
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an account called \"Subscription\"")
+	}
+	resource := resources.Items[0].(*accounts.AzureSubscriptionAccount)
 
-		if resource.Description != "A test account" {
-			t.Fatal("BUG: The account must be have a description of \"A test account\"")
-		}
+	if resource.AccountType != "AzureServicePrincipal" {
+		t.Fatal("The account must be have a type of \"AzureServicePrincipal\"")
+	}
 
-		if resource.TenantedDeploymentMode != "Untenanted" {
-			t.Fatal("The account must be have a tenanted deployment participation of \"Untenanted\"")
-		}
+	if resource.Description != "A test account" {
+		t.Fatal("BUG: The account must be have a description of \"A test account\"")
+	}
 
-		if len(resource.TenantTags) != 0 {
-			t.Fatal("The account must be have no tenant tags")
-		}
+	if resource.TenantedDeploymentMode != "Untenanted" {
+		t.Fatal("The account must be have a tenanted deployment participation of \"Untenanted\"")
+	}
 
-		return nil
-	})
+	if len(resource.TenantTags) != 0 {
+		t.Fatal("The account must be have no tenant tags")
+	}
 }

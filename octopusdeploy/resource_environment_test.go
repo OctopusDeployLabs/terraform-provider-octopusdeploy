@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -26,8 +25,8 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 	useGuidedFailure := false
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccEnvironmentCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccEnvironmentCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -55,8 +54,8 @@ func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
 	useGuidedFailure := false
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccEnvironmentCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccEnvironmentCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -108,61 +107,57 @@ func testAccEnvironmentCheckDestroy(s *terraform.State) error {
 // TestEnvironmentResource verifies that an environment can be reimported with the correct settings
 func TestEnvironmentResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "16-environment", []string{})
 
-		if err != nil {
-			return err
-		}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "16-environment", []string{})
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "16a-environmentlookup"), newSpaceId, []string{})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if err != nil {
-			return err
-		}
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "16a-environmentlookup"), newSpaceId, []string{})
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := environments.EnvironmentsQuery{
-			PartialName: "Development",
-			Skip:        0,
-			Take:        1,
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		resources, err := client.Environments.Get(query)
-		if err != nil {
-			return err
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := environments.EnvironmentsQuery{
+		PartialName: "Development",
+		Skip:        0,
+		Take:        1,
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have an environment called \"Development\"")
-		}
-		resource := resources.Items[0]
+	resources, err := client.Environments.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if resource.Description != "A test environment" {
-			t.Fatal("The environment must be have a description of \"A test environment\" (was \"" + resource.Description + "\"")
-		}
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an environment called \"Development\"")
+	}
+	resource := resources.Items[0]
 
-		if !resource.AllowDynamicInfrastructure {
-			t.Fatal("The environment must have dynamic infrastructure enabled.")
-		}
+	if resource.Description != "A test environment" {
+		t.Fatal("The environment must be have a description of \"A test environment\" (was \"" + resource.Description + "\"")
+	}
 
-		if resource.UseGuidedFailure {
-			t.Fatal("The environment must not have guided failure enabled.")
-		}
+	if !resource.AllowDynamicInfrastructure {
+		t.Fatal("The environment must have dynamic infrastructure enabled.")
+	}
 
-		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "16a-environmentlookup"), "data_lookup")
+	if resource.UseGuidedFailure {
+		t.Fatal("The environment must not have guided failure enabled.")
+	}
 
-		if err != nil {
-			return err
-		}
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "16a-environmentlookup"), "data_lookup")
 
-		if lookup != resource.ID {
-			t.Fatal("The environment lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		return nil
-	})
+	if lookup != resource.ID {
+		t.Fatal("The environment lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }

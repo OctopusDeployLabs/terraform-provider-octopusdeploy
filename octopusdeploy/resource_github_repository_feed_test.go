@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -87,85 +86,81 @@ func testGitHubRepositoryFeedCheckDestroy(s *terraform.State) error {
 // TestGithubFeedResource verifies that a nuget feed can be reimported with the correct settings
 func TestGithubFeedResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "44-githubfeed", []string{})
 
-		if err != nil {
-			return err
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "44-githubfeed", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "44a-githubfeedds"), newSpaceId, []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := feeds.FeedsQuery{
+		PartialName: "Github",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Feeds.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an feed called \"Github\"")
+	}
+	resource := resources.Items[0].(*feeds.GitHubRepositoryFeed)
+
+	if resource.FeedType != "GitHub" {
+		t.Fatal("The feed must have a type of \"GitHub\"")
+	}
+
+	if resource.Username != "test-username" {
+		t.Fatal("The feed must have a username of \"test-username\"")
+	}
+
+	if resource.DownloadAttempts != 1 {
+		t.Fatal("The feed must be have a downloads attempts set to \"1\"")
+	}
+
+	if resource.DownloadRetryBackoffSeconds != 30 {
+		t.Fatal("The feed must be have a downloads retry backoff set to \"30\"")
+	}
+
+	if resource.FeedURI != "https://api.github.com" {
+		t.Fatal("The feed must be have a feed uri of \"https://api.github.com\"")
+	}
+
+	foundExecutionTarget := false
+	foundServer := false
+	for _, o := range resource.PackageAcquisitionLocationOptions {
+		if o == "ExecutionTarget" {
+			foundExecutionTarget = true
 		}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "44a-githubfeedds"), newSpaceId, []string{})
-
-		if err != nil {
-			return err
+		if o == "Server" {
+			foundServer = true
 		}
+	}
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := feeds.FeedsQuery{
-			PartialName: "Github",
-			Skip:        0,
-			Take:        1,
-		}
+	if !(foundExecutionTarget && foundServer) {
+		t.Fatal("The feed must be have a PackageAcquisitionLocationOptions including \"ExecutionTarget\" and \"Server\"")
+	}
 
-		resources, err := client.Feeds.Get(query)
-		if err != nil {
-			return err
-		}
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "44a-githubfeedds"), "data_lookup")
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have an feed called \"Github\"")
-		}
-		resource := resources.Items[0].(*feeds.GitHubRepositoryFeed)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if resource.FeedType != "GitHub" {
-			t.Fatal("The feed must have a type of \"GitHub\"")
-		}
-
-		if resource.Username != "test-username" {
-			t.Fatal("The feed must have a username of \"test-username\"")
-		}
-
-		if resource.DownloadAttempts != 1 {
-			t.Fatal("The feed must be have a downloads attempts set to \"1\"")
-		}
-
-		if resource.DownloadRetryBackoffSeconds != 30 {
-			t.Fatal("The feed must be have a downloads retry backoff set to \"30\"")
-		}
-
-		if resource.FeedURI != "https://api.github.com" {
-			t.Fatal("The feed must be have a feed uri of \"https://api.github.com\"")
-		}
-
-		foundExecutionTarget := false
-		foundServer := false
-		for _, o := range resource.PackageAcquisitionLocationOptions {
-			if o == "ExecutionTarget" {
-				foundExecutionTarget = true
-			}
-
-			if o == "Server" {
-				foundServer = true
-			}
-		}
-
-		if !(foundExecutionTarget && foundServer) {
-			t.Fatal("The feed must be have a PackageAcquisitionLocationOptions including \"ExecutionTarget\" and \"Server\"")
-		}
-
-		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "44a-githubfeedds"), "data_lookup")
-
-		if err != nil {
-			return err
-		}
-
-		if lookup != resource.ID {
-			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
-		}
-
-		return nil
-	})
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }

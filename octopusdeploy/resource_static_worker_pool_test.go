@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -25,9 +24,9 @@ func TestAccOctopusDeployStaticWorkerPoolBasic(t *testing.T) {
 	sortOrder := acctest.RandIntRange(50, 100)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-		CheckDestroy: testStaticWorkerPoolDestroy,
+		CheckDestroy:             testStaticWorkerPoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testStaticWorkerPoolBasic(localName, name, description, isDefault, sortOrder),
@@ -86,65 +85,60 @@ func testStaticWorkerPoolDestroy(s *terraform.State) error {
 // TestWorkerPoolResource verifies that a static worker pool can be reimported with the correct settings
 func TestWorkerPoolResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "15-workerpool", []string{})
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "15-workerpool", []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		err = testFramework.TerraformInitAndApply(t, container, filepath.Join("../terraform", "15a-workerpoolds"), newSpaceId, []string{})
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "15a-workerpoolds"), newSpaceId, []string{})
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := workerpools.WorkerPoolsQuery{
-			PartialName: "Docker",
-			Skip:        0,
-			Take:        1,
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := workerpools.WorkerPoolsQuery{
+		PartialName: "Docker",
+		Skip:        0,
+		Take:        1,
+	}
 
-		resources, err := client.WorkerPools.Get(query)
-		if err != nil {
-			return err
-		}
+	resources, err := client.WorkerPools.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have a worker pool called \"Docker\"")
-		}
-		resource := resources.Items[0].(*workerpools.StaticWorkerPool)
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a worker pool called \"Docker\"")
+	}
+	resource := resources.Items[0].(*workerpools.StaticWorkerPool)
 
-		if resource.WorkerPoolType != "StaticWorkerPool" {
-			t.Fatal("The worker pool must be have a type of \"StaticWorkerPool\" (was \"" + resource.WorkerPoolType + "\"")
-		}
+	if resource.WorkerPoolType != "StaticWorkerPool" {
+		t.Fatal("The worker pool must be have a type of \"StaticWorkerPool\" (was \"" + resource.WorkerPoolType + "\"")
+	}
 
-		if resource.Description != "A test worker pool" {
-			t.Fatal("The worker pool must be have a description of \"A test worker pool\" (was \"" + resource.Description + "\"")
-		}
+	if resource.Description != "A test worker pool" {
+		t.Fatal("The worker pool must be have a description of \"A test worker pool\" (was \"" + resource.Description + "\"")
+	}
 
-		if resource.SortOrder != 3 {
-			t.Fatal("The worker pool must be have a sort order of \"3\" (was \"" + fmt.Sprint(resource.SortOrder) + "\"")
-		}
+	if resource.SortOrder != 3 {
+		t.Fatal("The worker pool must be have a sort order of \"3\" (was \"" + fmt.Sprint(resource.SortOrder) + "\"")
+	}
 
-		if resource.IsDefault {
-			t.Fatal("The worker pool must be must not be the default")
-		}
+	if resource.IsDefault {
+		t.Fatal("The worker pool must be must not be the default")
+	}
 
-		// Verify the environment data lookups work
-		lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "15a-workerpoolds"), "data_lookup")
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "15a-workerpoolds"), "data_lookup")
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if lookup != resource.ID {
-			t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
-		}
-
-		return nil
-	})
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }

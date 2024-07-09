@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"testing"
@@ -11,48 +10,44 @@ import (
 // TestGcpAccountResource verifies that a GCP account can be reimported with the correct settings
 func TestGcpAccountResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "6-gcpaccount", []string{})
 
-		if err != nil {
-			return err
-		}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "6-gcpaccount", []string{})
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := accounts.AccountsQuery{
-			PartialName: "Google",
-			Skip:        0,
-			Take:        1,
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		resources, err := client.Accounts.Get(query)
-		if err != nil {
-			return err
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := accounts.AccountsQuery{
+		PartialName: "Google",
+		Skip:        0,
+		Take:        1,
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have an account called \"Google\"")
-		}
-		resource := resources.Items[0].(*accounts.GoogleCloudPlatformAccount)
+	resources, err := client.Accounts.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		if !resource.JsonKey.HasValue {
-			t.Fatalf("The account must be have a JSON key")
-		}
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an account called \"Google\"")
+	}
+	resource := resources.Items[0].(*accounts.GoogleCloudPlatformAccount)
 
-		if resource.Description != "A test account" {
-			t.Fatalf("The account must be have a description of \"A test account\"")
-		}
+	if !resource.JsonKey.HasValue {
+		t.Fatalf("The account must be have a JSON key")
+	}
 
-		if resource.TenantedDeploymentMode != "Untenanted" {
-			t.Fatalf("The account must be have a tenanted deployment participation of \"Untenanted\"")
-		}
+	if resource.Description != "A test account" {
+		t.Fatalf("The account must be have a description of \"A test account\"")
+	}
 
-		if len(resource.TenantTags) != 0 {
-			t.Fatalf("The account must be have no tenant tags")
-		}
+	if resource.TenantedDeploymentMode != "Untenanted" {
+		t.Fatalf("The account must be have a tenanted deployment participation of \"Untenanted\"")
+	}
 
-		return nil
-	})
+	if len(resource.TenantTags) != 0 {
+		t.Fatalf("The account must be have no tenant tags")
+	}
 }

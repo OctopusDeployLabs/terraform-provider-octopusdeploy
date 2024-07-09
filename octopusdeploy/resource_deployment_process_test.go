@@ -417,113 +417,106 @@ func testAccDeploymentProcessCheckDestroy(s *terraform.State) error {
 
 func TestDeploymentProcessWithGitDependency(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "51-deploymentprocesswithgitdependency", []string{})
 
-		if err != nil {
-			return err
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "51-deploymentprocesswithgitdependency", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	project, err := client.Projects.GetByName("Test")
+	deploymentProcess, err := deployments.GetDeploymentProcessByID(client, newSpaceId, project.DeploymentProcessID)
+
+	if len(deploymentProcess.Steps) == 0 {
+		t.Fatalf("Expected deployment process to have steps.")
+	}
+
+	expectedGitUri := "https://github.com/OctopusSamples/OctoPetShop.git"
+	expectedDefaultBranch := "main"
+
+	for _, step := range deploymentProcess.Steps {
+		action := step.Actions[0]
+
+		if len(action.GitDependencies) == 0 {
+			t.Fatalf(fmt.Sprint(action.Name) + " - Expected action to have git dependency configured.")
 		}
 
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		project, err := client.Projects.GetByName("Test")
-		deploymentProcess, err := deployments.GetDeploymentProcessByID(client, newSpaceId, project.DeploymentProcessID)
+		gitDependency := action.GitDependencies[0]
 
-		if len(deploymentProcess.Steps) == 0 {
-			t.Fatalf("Expected deployment process to have steps.")
+		if fmt.Sprint(gitDependency.RepositoryUri) != expectedGitUri {
+			t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have repository uri equal to " + fmt.Sprint(expectedGitUri))
 		}
 
-		expectedGitUri := "https://github.com/OctopusSamples/OctoPetShop.git"
-		expectedDefaultBranch := "main"
-
-		for _, step := range deploymentProcess.Steps {
-			action := step.Actions[0]
-
-			if len(action.GitDependencies) == 0 {
-				t.Fatalf(fmt.Sprint(action.Name) + " - Expected action to have git dependency configured.")
-			}
-
-			gitDependency := action.GitDependencies[0]
-
-			if fmt.Sprint(gitDependency.RepositoryUri) != expectedGitUri {
-				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have repository uri equal to " + fmt.Sprint(expectedGitUri))
-			}
-
-			if fmt.Sprint(gitDependency.DefaultBranch) != expectedDefaultBranch {
-				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have default branch equal to " + fmt.Sprint(expectedDefaultBranch))
-			}
-
-			if fmt.Sprint(gitDependency.GitCredentialType) == "Library" {
-				if len(strings.TrimSpace(gitDependency.GitCredentialId)) == 0 {
-					t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency library type to have a defined git credential id.")
-				}
-			} else {
-				if len(strings.TrimSpace(gitDependency.GitCredentialId)) > 0 {
-					t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency of non-library type to not have a defined git credential id.")
-				}
-			}
+		if fmt.Sprint(gitDependency.DefaultBranch) != expectedDefaultBranch {
+			t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have default branch equal to " + fmt.Sprint(expectedDefaultBranch))
 		}
 
-		return nil
-	})
+		if fmt.Sprint(gitDependency.GitCredentialType) == "Library" {
+			if len(strings.TrimSpace(gitDependency.GitCredentialId)) == 0 {
+				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency library type to have a defined git credential id.")
+			}
+		} else {
+			if len(strings.TrimSpace(gitDependency.GitCredentialId)) > 0 {
+				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency of non-library type to not have a defined git credential id.")
+			}
+		}
+	}
 }
 
 // TestTerraformApplyStepWithWorkerPool verifies that a terraform apply step with a custom worker pool is deployed successfully
 // See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/601
 func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "../terraform", "50-applyterraformtemplateaction", []string{})
 
-		if err != nil {
-			return err
-		}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "50-applyterraformtemplateaction", []string{})
 
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		query := projects.ProjectsQuery{
-			PartialName: "Test",
-			Skip:        0,
-			Take:        1,
-		}
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		resources, err := projects.Get(client, newSpaceId, query)
-		if err != nil {
-			return err
-		}
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := projects.ProjectsQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
 
-		if len(resources.Items) == 0 {
-			t.Fatalf("Space must have a project called \"Test\"")
-		}
-		resource := resources.Items[0]
+	resources, err := projects.Get(client, newSpaceId, query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		// Get worker pool
-		wpQuery := workerpools.WorkerPoolsQuery{
-			PartialName: "Docker",
-			Skip:        0,
-			Take:        1,
-		}
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a project called \"Test\"")
+	}
+	resource := resources.Items[0]
 
-		workerpools, err := workerpools.Get(client, newSpaceId, wpQuery)
-		if err != nil {
-			return err
-		}
+	// Get worker pool
+	wpQuery := workerpools.WorkerPoolsQuery{
+		PartialName: "Docker",
+		Skip:        0,
+		Take:        1,
+	}
 
-		if len(workerpools.Items) == 0 {
-			t.Fatalf("Space must have a worker pool called \"Docker\"")
-		}
+	workerpools, err := workerpools.Get(client, newSpaceId, wpQuery)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		// Get deployment process
-		process, err := deployments.GetDeploymentProcessByID(client, "", resource.DeploymentProcessID)
-		if err != nil {
-			return err
-		}
+	if len(workerpools.Items) == 0 {
+		t.Fatalf("Space must have a worker pool called \"Docker\"")
+	}
 
-		// Worker pool must be assigned
-		if process.Steps[0].Actions[0].WorkerPool != workerpools.Items[0].GetID() {
-			t.Fatalf("Action must use the worker pool \"Docker\"")
-		}
+	// Get deployment process
+	process, err := deployments.GetDeploymentProcessByID(client, "", resource.DeploymentProcessID)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		return nil
-	})
+	// Worker pool must be assigned
+	if process.Steps[0].Actions[0].WorkerPool != workerpools.Items[0].GetID() {
+		t.Fatalf("Action must use the worker pool \"Docker\"")
+	}
 }
