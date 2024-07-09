@@ -33,7 +33,7 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccChannelCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -64,7 +64,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccChannelCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create baseline channel
 			{
@@ -98,7 +98,7 @@ func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccChannelCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{ // create channel with one rule
 				Config: testAccChannelWithOneRule(channelName, channelDescription, versionRange, actionName),
@@ -128,7 +128,7 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccChannelCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{ // create baseline channel
 				Config: testAccChannelWithOneRule(channelName, channelDescription, versionRange, actionName),
@@ -165,7 +165,7 @@ func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		CheckDestroy: testAccChannelCheckDestroy,
 		Steps: []resource.TestStep{
 			{ // create channel with two rules

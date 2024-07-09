@@ -28,7 +28,7 @@ func TestAccUserImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccUserCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccUserBasic(localName, displayName, true, false, password, username, emailAddress),
@@ -57,7 +57,7 @@ func TestAccUserBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccUserCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(

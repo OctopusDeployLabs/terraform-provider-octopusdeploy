@@ -19,7 +19,7 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLibraryVariableSetDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testLibraryVariableSetBasic(localName, name),
@@ -42,7 +42,7 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLibraryVariableSetDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testLibraryVariableSetBasic(localName, name),
@@ -86,7 +86,7 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testLibraryVariableSetDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create variable set with no description
 			{

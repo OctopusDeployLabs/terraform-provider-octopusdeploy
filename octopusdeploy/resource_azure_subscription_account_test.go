@@ -31,7 +31,7 @@ func TestAccOctopusDeployAzureSubscriptionAccountBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccountCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(

@@ -26,7 +26,7 @@ func TestAccScopedUserRole(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccScopedUserRoleCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeAggregateTestCheckFunc(

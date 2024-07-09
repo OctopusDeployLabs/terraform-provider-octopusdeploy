@@ -26,7 +26,7 @@ func TestAccOctopusDeployScriptModuleBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testScriptModuleCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testScriptModule(localName, name, description, body, syntax),

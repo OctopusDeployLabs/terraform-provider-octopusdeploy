@@ -32,7 +32,7 @@ func TestAccKubernetesClusterDeploymentTargetBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testDeploymentTargetCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKubernetesClusterDeploymentTargetBasic(accountLocalName, accountName, accountUsername, environmentLocalName, environmentName, userRoleLocalName, userRoleName, localName, name, clusterURL),
@@ -62,7 +62,7 @@ func TestAccKubernetesClusterDeploymentTargetAws(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testDeploymentTargetCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKubernetesClusterDeploymentTargetAws(
@@ -102,7 +102,7 @@ func TestAccKubernetesClusterDeploymentTargetGcp(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testDeploymentTargetCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKubernetesClusterDeploymentTargetGcp(

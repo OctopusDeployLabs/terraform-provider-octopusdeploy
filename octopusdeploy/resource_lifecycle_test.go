@@ -23,7 +23,7 @@ func TestAccLifecycleBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccLifecycleCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -56,7 +56,7 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccLifecycleCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create lifecycle with no description
 			{
@@ -127,7 +127,7 @@ func TestAccLifecycleComplex(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccLifecycleCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(

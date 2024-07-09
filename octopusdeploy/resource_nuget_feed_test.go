@@ -28,9 +28,9 @@ func TestAccOctopusDeployNuGetFeedBasic(t *testing.T) {
 	updatedName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testOctopusDeployNuGetFeedDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		CheckDestroy:             testOctopusDeployNuGetFeedDestroy,
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(

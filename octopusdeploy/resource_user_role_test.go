@@ -16,7 +16,7 @@ func TestAccUserRoleBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccUserRoleCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testUserRoleMinimum(localName, name),
@@ -32,7 +32,7 @@ func TestAccUserRolePermissions(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccUserRoleCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testUserRolePermissions(localName, name),

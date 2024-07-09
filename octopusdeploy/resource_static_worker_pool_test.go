@@ -26,7 +26,7 @@ func TestAccOctopusDeployStaticWorkerPoolBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		CheckDestroy: testStaticWorkerPoolDestroy,
 		Steps: []resource.TestStep{
 			{

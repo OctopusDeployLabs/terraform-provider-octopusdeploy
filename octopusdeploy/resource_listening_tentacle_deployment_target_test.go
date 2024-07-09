@@ -20,7 +20,7 @@ func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccListeningTentacleDeploymentTargetCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: internaltest.ListeningTentacleDeploymentTargetConfiguration(options),
