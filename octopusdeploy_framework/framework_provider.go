@@ -60,11 +60,15 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 }
 
 func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewProjectGroupsDataSource,
+	}
 }
 
 func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewProjectGroupResource,
+	}
 }
 
 func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
