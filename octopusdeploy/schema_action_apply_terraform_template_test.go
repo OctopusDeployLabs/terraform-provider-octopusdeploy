@@ -56,6 +56,7 @@ func testAccApplyTerraformAction(name string, runOnServer bool, templateSource s
 	return testAccBuildTestAction(fmt.Sprintf(`
 		apply_terraform_template_action {
 			name          = "%s"
+			sort_order 	  = 1
 			run_on_server = %v
 
 			template {
