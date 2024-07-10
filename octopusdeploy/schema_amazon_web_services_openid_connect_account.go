@@ -7,7 +7,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strconv"
 )
 
 func expandAmazonWebServicesOpenIDConnectAccount(d *schema.ResourceData) *accounts.AwsOIDCAccount {
@@ -54,7 +53,7 @@ func expandAmazonWebServicesOpenIDConnectAccount(d *schema.ResourceData) *accoun
 	}
 
 	if v, ok := d.GetOk("session_duration"); ok {
-		account.SessionDuration = strconv.Itoa(v.(int))
+		account.SessionDuration = v.(string)
 	}
 
 	return account
@@ -101,14 +100,7 @@ func setAmazonWebServicesOpenIDConnectAccount(ctx context.Context, d *schema.Res
 	d.Set("space_id", account.GetSpaceID())
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
 	d.Set("role_arn", account.RoleArn)
-
-	var sessionDurationInt int
-	if sessionDuration, err := strconv.Atoi(account.SessionDuration); err == nil {
-		sessionDurationInt = sessionDuration
-	} else {
-		sessionDurationInt = 3600
-	}
-	d.Set("session_duration", sessionDurationInt)
+	d.Set("session_duration", account.SessionDuration)
 
 	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {
 		return fmt.Errorf("error setting environments: %s", err)

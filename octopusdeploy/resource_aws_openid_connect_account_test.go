@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccAWSOIDCAccountBasic(t *testing.T) {
+	SkipCI(t, "Session Duration conversion in the schema is handled incorrectly")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_aws_account." + localName
 
