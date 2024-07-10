@@ -192,6 +192,7 @@ func resourceConfiguration(req resource.ConfigureRequest, resp *resource.Configu
 
 	return p
 }
+
 func flattenLifecycleResource(lifecycle *lifecycles.Lifecycle) *lifecycleTypeResourceModel {
 	return &lifecycleTypeResourceModel{
 		ID:                      types.StringValue(lifecycle.ID),
@@ -288,6 +289,7 @@ func flattenStringList(list []string) types.List {
 	}
 	return types.ListValueMust(types.StringType, elements)
 }
+
 func expandRetentionPeriod(v types.List) *core.RetentionPeriod {
 	if v.IsNull() || v.IsUnknown() || len(v.Elements()) == 0 {
 		return nil

@@ -68,7 +68,6 @@ func (l *lifecyclesDataSource) Configure(ctx context.Context, req datasource.Con
 	tflog.Debug(ctx, "lifecycles datasource Configure")
 	l.Config = DataSourceConfiguration(req, resp)
 }
-
 func (l *lifecyclesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "lifecycles datasource Read")
 	var data lifecyclesDataSourceModel
@@ -90,44 +89,27 @@ func (l *lifecyclesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	// Map the retrieved lifecycles to the data model
-	lifecyclesList := make([]attr.Value, 0, len(lifecyclesResult.Items))
-	for _, lifecycle := range lifecyclesResult.Items {
-		lifecycleMap := map[string]attr.Value{
-			"id":          types.StringValue(lifecycle.ID),
-			"space_id":    types.StringValue(lifecycle.SpaceID),
-			"name":        types.StringValue(lifecycle.Name),
-			"description": types.StringValue(lifecycle.Description),
-		}
-
-		// Map phases
-		phases := make([]attr.Value, 0, len(lifecycle.Phases))
-		for _, phase := range lifecycle.Phases {
-			phaseMap := map[string]attr.Value{
-				"id":                                    types.StringValue(phase.ID),
-				"name":                                  types.StringValue(phase.Name),
-				"automatic_deployment_targets":          types.ListValueMust(types.StringType, util.ToValueSlice(phase.AutomaticDeploymentTargets)),
-				"optional_deployment_targets":           types.ListValueMust(types.StringType, util.ToValueSlice(phase.OptionalDeploymentTargets)),
-				"minimum_environments_before_promotion": types.Int64Value(int64(phase.MinimumEnvironmentsBeforePromotion)),
-				"is_optional_phase":                     types.BoolValue(phase.IsOptionalPhase),
-				"release_retention_policy":              flattenRetentionPeriod(phase.ReleaseRetentionPolicy),
-				"tentacle_retention_policy":             flattenRetentionPeriod(phase.TentacleRetentionPolicy),
-			}
-			phases = append(phases, types.ObjectValueMust(phaseObjectType(), phaseMap))
-		}
-		lifecycleMap["phase"] = types.ListValueMust(types.ObjectType{AttrTypes: phaseObjectType()}, phases)
-
-		// Map retention policies
-		lifecycleMap["release_retention_policy"] = flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy)
-		lifecycleMap["tentacle_retention_policy"] = flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy)
-
-		lifecyclesList = append(lifecyclesList, types.ObjectValueMust(lifecycleObjectType(), lifecycleMap))
-	}
-
-	data.Lifecycles = types.ListValueMust(types.ObjectType{AttrTypes: lifecycleObjectType()}, lifecyclesList)
+	data.Lifecycles = flattenLifecycles(lifecyclesResult.Items)
 	data.ID = types.StringValue("Lifecycles " + time.Now().UTC().String())
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func flattenLifecycles(items []*lifecycles.Lifecycle) types.List {
+	lifecyclesList := make([]attr.Value, 0, len(items))
+	for _, lifecycle := range items {
+		lifecycleMap := map[string]attr.Value{
+			"id":                        types.StringValue(lifecycle.ID),
+			"space_id":                  types.StringValue(lifecycle.SpaceID),
+			"name":                      types.StringValue(lifecycle.Name),
+			"description":               types.StringValue(lifecycle.Description),
+			"phase":                     flattenPhases(lifecycle.Phases),
+			"release_retention_policy":  flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy),
+			"tentacle_retention_policy": flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy),
+		}
+		lifecyclesList = append(lifecyclesList, types.ObjectValueMust(lifecycleObjectType(), lifecycleMap))
+	}
+	return types.ListValueMust(types.ObjectType{AttrTypes: lifecycleObjectType()}, lifecyclesList)
 }
 
 func getPhasesSchema() schema.ListNestedAttribute {
