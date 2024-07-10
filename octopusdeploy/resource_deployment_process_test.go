@@ -158,7 +158,7 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.container.#", "1"),
 					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.channels.0"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.condition", "Success"),
-					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.environments"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.environments.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.run_on_server", "false"),
 				),
 				Config: testAccProcessWithImpliedPrimaryPackage(spaceID, localName),
