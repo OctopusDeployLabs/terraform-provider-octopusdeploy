@@ -29,7 +29,7 @@ func NewSpacesDataSource() datasource.DataSource {
 }
 
 func (*spacesDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_spaces"
+	resp.TypeName = util.GetTypeName("spaces")
 }
 
 func (*spacesDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {

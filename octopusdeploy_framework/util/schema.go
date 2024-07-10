@@ -2,59 +2,62 @@ package util
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func GetQueryIDsDatasourceSchema() schema.Attribute {
-	return schema.ListAttribute{
+func GetQueryIDsDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.ListAttribute{
 		Description: "A filter to search by a list of IDs.",
 		ElementType: types.StringType,
 		Optional:    true,
 	}
 }
 
-func GetQueryPartialNameDatasourceSchema() schema.Attribute {
-	return schema.StringAttribute{
+func GetQueryPartialNameDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "A filter to search by a partial name.",
 		Optional:    true,
 	}
 }
 
-func GetQuerySkipDatasourceSchema() schema.Attribute {
-	return schema.Int64Attribute{
+func GetQuerySkipDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.Int64Attribute{
 		Description: "A filter to specify the number of items to skip in the response.",
 		Optional:    true,
 	}
 }
 
-func GetQueryTakeDatasourceSchema() schema.Attribute {
-	return schema.Int64Attribute{
+func GetQueryTakeDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.Int64Attribute{
 		Description: "A filter to specify the number of items to take (or return) in the response.",
 		Optional:    true,
 	}
 }
 
-func GetIdDatasourceSchema() schema.Attribute {
-	return schema.StringAttribute{
+func GetIdDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",
 		Computed:    true,
 		Optional:    true,
 	}
 }
 
-func GetSpaceIdDatasourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetSpaceIdDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "The space ID associated with this " + resourceDescription + ".",
 		Computed:    true,
 		Optional:    true,
 	}
 }
 
-func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) schema.Attribute {
-	s := schema.StringAttribute{
+func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The name of this resource, no more than %d characters long", maxLength),
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(1, maxLength),
@@ -70,8 +73,8 @@ func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) schema
 	return s
 }
 
-func GetNameDatasourceSchema(isRequired bool) schema.Attribute {
-	s := schema.StringAttribute{
+func GetNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
 		Description: "The name of this resource.",
 		Validators: []validator.String{
 			stringvalidator.LengthAtLeast(1),
@@ -87,32 +90,32 @@ func GetNameDatasourceSchema(isRequired bool) schema.Attribute {
 	return s
 }
 
-func GetDescriptionDatasourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
 		Optional:    true,
 		Computed:    true,
 	}
 }
 
-func GetIdResourceSchema() schema.Attribute {
-	return schema.StringAttribute{
+func GetIdResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",
 		Computed:    true,
 		Optional:    true,
 	}
 }
 
-func GetSpaceIdResourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetSpaceIdResourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
 		Description: "The space ID associated with this " + resourceDescription + ".",
 		Computed:    true,
 		Optional:    true,
 	}
 }
 
-func GetNameResourceSchema(isRequired bool) schema.Attribute {
-	s := schema.StringAttribute{
+func GetNameResourceSchema(isRequired bool) resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
 		Description: "The name of this resource.",
 		Validators: []validator.String{
 			stringvalidator.LengthAtLeast(1),
@@ -128,16 +131,24 @@ func GetNameResourceSchema(isRequired bool) schema.Attribute {
 	return s
 }
 
-func GetDescriptionResourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetDescriptionResourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
 		Optional:    true,
 		Computed:    true,
 	}
 }
 
-func GetSlugDatasourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetSlugDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
+		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
 		Optional:    true,
 		Computed:    true,
@@ -159,4 +170,8 @@ func GetNumber(val types.Int64) int {
 	}
 
 	return v
+}
+
+func GetTypeName(name string) string {
+	return fmt.Sprintf("%s_%s", octopusdeploy_framework.ProviderTypeName, name)
 }
