@@ -66,25 +66,7 @@ func (l *lifecyclesDataSource) Schema(ctx context.Context, req datasource.Schema
 
 func (l *lifecyclesDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	tflog.Debug(ctx, "lifecycles datasource Configure")
-	config, _ := req.ProviderData.(*Config)
-	l.Config = config
-}
-
-func dataSourceConfiguration(req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) *Config {
-	if req.ProviderData == nil {
-		return nil
-	}
-
-	config, ok := req.ProviderData.(*Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return nil
-	}
-
-	return config
+	l.Config = DataSourceConfiguration(req, resp)
 }
 
 func (l *lifecyclesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
