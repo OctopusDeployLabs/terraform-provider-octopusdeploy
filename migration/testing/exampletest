@@ -1,4 +1,4 @@
-package migrationTesting
+//package migrationTesting
 
 //
 //func protoV5ProviderFactories() map[string]func() (tfprotov5.ProviderServer, error) {

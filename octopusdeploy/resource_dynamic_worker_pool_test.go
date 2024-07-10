@@ -11,6 +11,7 @@ import (
 )
 
 func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
+	skipCI(t, "[The worker image specified does not exist.] ")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_dynamic_worker_pool." + localName
 
@@ -21,9 +22,9 @@ func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
 	sortOrder := acctest.RandIntRange(50, 100)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-		CheckDestroy: testDynamicWorkerPoolDestroy,
+		CheckDestroy:             testDynamicWorkerPoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testDynamicWorkerPoolBasic(localName, name, workerType, description, isDefault, sortOrder),
