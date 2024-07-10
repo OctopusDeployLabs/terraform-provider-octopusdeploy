@@ -29,8 +29,8 @@ func TestAccOctopusDeployAzureOpenIDConnectAccountBasic(t *testing.T) {
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccountCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -85,5 +85,5 @@ func testAzureOpenIDConnectAccountBasic(localName string, name string, descripti
 	
 	data "octopusdeploy_accounts" "test" {
 		ids = [octopusdeploy_azure_openid_connect.%s.id]
-	}`, localName, applicationID, description, name, subscriptionID, tenantID, tenantedDeploymentParticipation, execution_subject_keys, health_subject_keys, account_test_subject_keys, audience, localName)
+	}`, localName, applicationID, description, name, subscriptionID, tenantID, tenantedDeploymentParticipation, StringArrayToTerraformArrayFormat(execution_subject_keys), StringArrayToTerraformArrayFormat(health_subject_keys), StringArrayToTerraformArrayFormat(account_test_subject_keys), audience, localName)
 }
