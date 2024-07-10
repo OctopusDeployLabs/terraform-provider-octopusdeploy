@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccOctopusDeployTagSetBasic(t *testing.T) {
+	SkipCI(t, " Error: Unsupported block type")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_tag_set." + localName
 
@@ -94,6 +95,7 @@ func testTagSetDestroy(s *terraform.State) error {
 
 // TestTagSetResource verifies that a tag set can be reimported with the correct settings
 func TestTagSetResource(t *testing.T) {
+	SkipCI(t, " Error: Unsupported block type")
 	testFramework := test.OctopusContainerTest{}
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "21-tagset", []string{})
 

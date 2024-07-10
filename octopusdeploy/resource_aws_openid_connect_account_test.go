@@ -37,9 +37,9 @@ func TestAccAWSOIDCAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "role_arn", roleArn),
 					resource.TestCheckResourceAttr(prefix, "session_duration", sessionDuration),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
-					resource.TestCheckResourceAttr(prefix, "execution_subject_keys", executionKeys[0]),
-					resource.TestCheckResourceAttr(prefix, "health_subject_keys", healthKeys[0]),
-					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys", accountKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "execution_subject_keys.0", executionKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "health_subject_keys.0", healthKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys.0", accountKeys[0]),
 				),
 				Config: testAwsOIDCAccountBasic(localName, name, description, roleArn, sessionDuration, tenantedDeploymentParticipation, executionKeys, healthKeys, accountKeys),
 			},
@@ -51,9 +51,9 @@ func TestAccAWSOIDCAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "role_arn", roleArn),
 					resource.TestCheckResourceAttr(prefix, "session_duration", sessionDuration),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
-					resource.TestCheckResourceAttr(prefix, "execution_subject_keys", executionKeys[0]),
-					resource.TestCheckResourceAttr(prefix, "health_subject_keys", healthKeys[0]),
-					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys", accountKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "execution_subject_keys.0", executionKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "health_subject_keys.0", healthKeys[0]),
+					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys.0", accountKeys[0]),
 				),
 				Config: testAwsOIDCAccountBasic(localName, name, description, roleArn, sessionDuration, tenantedDeploymentParticipation, executionKeys, healthKeys, accountKeys),
 			},
@@ -70,7 +70,7 @@ func testAwsOIDCAccountBasic(localName string, name string, description string, 
 		execution_subject_keys = %s
 		health_subject_keys = %s
 		account_test_subject_keys = %s
-		session_duration = "%s"
+		session_duration = %s
 	}
 	
 	data "octopusdeploy_accounts" "test" {
@@ -82,7 +82,7 @@ func testAwsOIDCAccount(localName string, name string, roleArn string, sessionDu
 	return fmt.Sprintf(`resource "octopusdeploy_aws_openid_connect_account" "%s" {
 		name       = "%s"
 		role_arn   = "%s"
-		session_duration = "%s"
+		session_duration = %s
 	}`, localName, name, roleArn, sessionDuration)
 }
 

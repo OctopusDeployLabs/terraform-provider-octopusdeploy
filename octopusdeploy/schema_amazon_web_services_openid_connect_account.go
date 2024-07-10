@@ -101,7 +101,14 @@ func setAmazonWebServicesOpenIDConnectAccount(ctx context.Context, d *schema.Res
 	d.Set("space_id", account.GetSpaceID())
 	d.Set("tenanted_deployment_participation", account.GetTenantedDeploymentMode())
 	d.Set("role_arn", account.RoleArn)
-	d.Set("session_duration", account.SessionDuration)
+
+	var sessionDurationInt int
+	if sessionDuration, err := strconv.Atoi(account.SessionDuration); err == nil {
+		sessionDurationInt = sessionDuration
+	} else {
+		sessionDurationInt = 3600
+	}
+	d.Set("session_duration", sessionDurationInt)
 
 	if err := d.Set("environments", account.GetEnvironmentIDs()); err != nil {
 		return fmt.Errorf("error setting environments: %s", err)
