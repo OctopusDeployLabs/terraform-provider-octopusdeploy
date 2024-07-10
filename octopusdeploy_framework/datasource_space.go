@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 )
 
@@ -71,7 +70,6 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	mapSpace(ctx, &data, matchedSpace)
 
-	// set state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -83,8 +81,6 @@ func mapSpace(ctx context.Context, data *spaceModel, matchedSpace *spaces.Space)
 	data.IsDefault = types.BoolValue(matchedSpace.IsDefault)
 	data.SpaceManagersTeamMembers, _ = types.ListValueFrom(ctx, types.StringType, matchedSpace.SpaceManagersTeamMembers)
 	data.SpaceManagersTeams, _ = types.ListValueFrom(ctx, types.StringType, matchedSpace.SpaceManagersTeams)
-
-	tflog.Debug(ctx, "mapped space: "+data.Name.ValueString())
 }
 
 func getSpaceSchema() map[string]schema.Attribute {
