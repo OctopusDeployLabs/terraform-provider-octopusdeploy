@@ -32,6 +32,7 @@ func testAccManualInterventionAction() string {
 	return testAccBuildTestAction(`
 		manual_intervention_action {
 			name = "Test"
+			sort_order = 1
 			instructions = "Approve Me"
 			responsible_teams = "A Team"
 		}

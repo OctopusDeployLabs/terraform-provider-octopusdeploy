@@ -32,6 +32,7 @@ func testAccRunKubectlScriptAction() string {
 	return testAccBuildTestAction(`
 		run_kubectl_script_action {
       name = "Run Script"
+      sort_order = 1                         
       run_on_server = true
 
 			primary_package {

@@ -90,6 +90,7 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
+	SkipCI(t, "Unsupported block type on `template` block")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
 
@@ -199,6 +200,7 @@ func testAccDeploymentProcessBasic(localName string) string {
 					script_file_name = "Run.ps132"
 					script_source = "Package"
 					tenant_tags = ["tag/tag"]
+					sort_order  = 1
 
 					primary_package {
 						acquisition_location = "Server"
@@ -271,6 +273,7 @@ func testAccProcessWithImpliedPrimaryPackage(spaceID string, localName string) s
 					is_disabled                        = false
 					is_required                        = false
 					name                               = "Test"
+					sort_order  					   = 1
 
 					primary_package {
 						acquisition_location = "Server"

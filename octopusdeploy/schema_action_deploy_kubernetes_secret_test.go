@@ -32,6 +32,7 @@ func testAccDeployKubernetesSecretAction() string {
 	return testAccBuildTestAction(`
 		deploy_kubernetes_secret_action {
 			name          = "Run Script"
+			sort_order = 1
 			run_on_server = true
 			secret_name   = "secret name"
 			kubernetes_object_status_check_enabled = false

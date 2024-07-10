@@ -77,9 +77,9 @@ func testAzureOpenIDConnectAccountBasic(localName string, name string, descripti
 		subscription_id = "%s"
 		tenant_id = "%s"
 		tenanted_deployment_participation = "%s"
-		execution_subject_keys = "%s"
-		health_subject_keys = "%s"
-		account_test_subject_keys = "%s"
+		execution_subject_keys = %s
+		health_subject_keys = %s
+		account_test_subject_keys = %s
 		audience = "%s"
 	}
 	
