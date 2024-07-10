@@ -1,11 +1,10 @@
-package octopusdeployv6
+package octopusdeploy_framework
 
 import (
 	"context"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeployv6/config"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeployv6/util"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -15,7 +14,7 @@ import (
 )
 
 type projectGroupsDataSource struct {
-	*config.Config
+	*Config
 }
 
 type projectGroupsDataSourceModel struct {
@@ -150,12 +149,12 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func dataSourceConfiguration(req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) *config.Config {
+func dataSourceConfiguration(req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) *Config {
 	if req.ProviderData == nil {
 		return nil
 	}
 
-	config, ok := req.ProviderData.(*config.Config)
+	config, ok := req.ProviderData.(*Config)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",

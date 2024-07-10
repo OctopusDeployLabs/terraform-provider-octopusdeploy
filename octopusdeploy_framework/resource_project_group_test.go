@@ -1,4 +1,4 @@
-package octopusdeployv6
+package octopusdeploy_framework
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"

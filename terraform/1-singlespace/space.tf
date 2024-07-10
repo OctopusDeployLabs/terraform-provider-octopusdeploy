@@ -1,8 +1,8 @@
 resource "octopusdeploy_space" "octopus_space_test" {
-  name                  = "${var.octopus_space_name}"
+  name                  = var.octopus_space_name
   is_default            = false
   is_task_queue_stopped = false
-  description           = "${var.octopus_space_description}"
+  description           = var.octopus_space_description
   space_managers_teams  = ["teams-administrators"]
 }
 

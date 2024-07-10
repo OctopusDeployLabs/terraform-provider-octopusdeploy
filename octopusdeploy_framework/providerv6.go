@@ -1,8 +1,7 @@
-package octopusdeployv6
+package octopusdeploy_framework
 
 import (
 	"context"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeployv6/config"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -39,7 +38,7 @@ func (p *octopusDeployProviderV6) Configure(ctx context.Context, req provider.Co
 		return
 	}
 
-	config := config.Config{}
+	config := Config{}
 	config.ApiKey = providerData.ApiKey.ValueString()
 	if config.ApiKey == "" {
 		config.ApiKey = os.Getenv("OCTOPUS_APIKEY")

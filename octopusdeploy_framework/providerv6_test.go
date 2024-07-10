@@ -1,4 +1,4 @@
-package octopusdeployv6
+package octopusdeploy_framework
 
 import (
 	"context"
