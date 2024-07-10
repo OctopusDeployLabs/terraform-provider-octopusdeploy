@@ -70,7 +70,7 @@ func testAwsOIDCAccountBasic(localName string, name string, description string, 
 		execution_subject_keys = %s
 		health_subject_keys = %s
 		account_test_subject_keys = %s
-		session_duration = %s
+		session_duration = "%s"
 	}
 	
 	data "octopusdeploy_accounts" "test" {
@@ -82,7 +82,7 @@ func testAwsOIDCAccount(localName string, name string, roleArn string, sessionDu
 	return fmt.Sprintf(`resource "octopusdeploy_aws_openid_connect_account" "%s" {
 		name       = "%s"
 		role_arn   = "%s"
-		session_duration = %s
+		session_duration = "%s"
 	}`, localName, name, roleArn, sessionDuration)
 }
 

@@ -3,11 +3,11 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"strconv"
 )
 
 func expandAmazonWebServicesOpenIDConnectAccount(d *schema.ResourceData) *accounts.AwsOIDCAccount {
@@ -54,7 +54,7 @@ func expandAmazonWebServicesOpenIDConnectAccount(d *schema.ResourceData) *accoun
 	}
 
 	if v, ok := d.GetOk("session_duration"); ok {
-		account.SessionDuration = v.(string)
+		account.SessionDuration = strconv.Itoa(v.(int))
 	}
 
 	return account

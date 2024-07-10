@@ -104,7 +104,7 @@ func TestRunbookResource(t *testing.T) {
 	// There was an issue where deleting a runbook and reapplying the terraform module caused an error, so
 	// verify this process works.
 	client.Runbooks.DeleteByID(runbookId)
-	err = testFramework.TerraformApply(t, "./terraform/46-runbooks", octoContainer.URI, newSpaceId, []string{})
+	err = testFramework.TerraformApply(t, "../terraform/46-runbooks", octoContainer.URI, newSpaceId, []string{})
 
 	if err != nil {
 		t.Fatal("Failed to reapply the runbooks after deleting them.")
