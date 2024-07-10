@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccScopedUserRole(t *testing.T) {
-	skipCI(t, "Error: octopus deploy api returned an error on endpoint /api/scopeduserroles - [You cannot use a role with Space level permissions at the System level. Space level permissions: AccountCreate]")
+	SkipCI(t, "Error: octopus deploy api returned an error on endpoint /api/scopeduserroles - [You cannot use a role with Space level permissions at the System level. Space level permissions: AccountCreate]")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	teamResource := "octopusdeploy_team." + localName
 	environmentResource := "octopusdeploy_environment." + localName

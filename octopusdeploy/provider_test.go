@@ -70,8 +70,8 @@ func ProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, err
 	}
 }
 
-func skipCI(t *testing.T, reason string) {
-	if os.Getenv("Skip_Legacy_Tests") != "" {
+func SkipCI(t *testing.T, reason string) {
+	if os.Getenv("Skip_Legacy_Tests") == "" {
 		t.Skip(reason)
 	}
 }

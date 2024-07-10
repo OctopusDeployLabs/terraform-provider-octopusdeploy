@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
-	skipCI(t, "Error: Missing required argument")
+	SkipCI(t, "Error: Missing required argument")
 	options := internaltest.NewListeningTentacleDeploymentTargetTestOptions()
 
 	resource.Test(t, resource.TestCase{
