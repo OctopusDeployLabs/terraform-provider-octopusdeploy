@@ -12,8 +12,8 @@
 //
 //func protoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
 //	return map[string]func() (tfprotov6.ProviderServer, error){
-//		"v6": func() (tfprotov6.ProviderServer, error) {
-//			provider := providerserver.NewProtocol6(octopusdeployv6.NewOctopusDeployProviderV6())()
+//		"octopusdeploy": func() (tfprotov6.ProviderServer, error) {
+//			provider := providerserver.NewProtocol6(octopusdeploy_framework.NewOctopusDeployFrameworkProvider())()
 //			return provider, nil
 //		},
 //	}
