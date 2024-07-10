@@ -287,6 +287,8 @@ func testAccProcessWithImpliedPrimaryPackage(spaceID string, localName string) s
 
 					properties = {
 							"Octopus.Action.Package.TransferPath" = "/var"
+							"Octopus.Action.Package.FeedId": "feeds-builtin"
+							"Octopus.Action.RunOnServer": "False"
 							"Octopus.Action.Package.PackageId" = "test-package"
 							"Octopus.Action.Package.DownloadOnTentacle" = "False"
 					}
