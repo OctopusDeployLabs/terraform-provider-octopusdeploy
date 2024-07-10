@@ -3,8 +3,8 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -78,7 +78,7 @@ func (l *lifecyclesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	query := lifecycles.Query{
-		IDs:         getStringSlice(data.IDs),
+		IDs:         util.GetStringSlice(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        int(data.Skip.ValueInt64()),
 		Take:        int(data.Take.ValueInt64()),
@@ -106,20 +106,20 @@ func (l *lifecyclesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 			phaseMap := map[string]attr.Value{
 				"id":                                    types.StringValue(phase.ID),
 				"name":                                  types.StringValue(phase.Name),
-				"automatic_deployment_targets":          types.ListValueMust(types.StringType, toValueSlice(phase.AutomaticDeploymentTargets)),
-				"optional_deployment_targets":           types.ListValueMust(types.StringType, toValueSlice(phase.OptionalDeploymentTargets)),
+				"automatic_deployment_targets":          types.ListValueMust(types.StringType, util.ToValueSlice(phase.AutomaticDeploymentTargets)),
+				"optional_deployment_targets":           types.ListValueMust(types.StringType, util.ToValueSlice(phase.OptionalDeploymentTargets)),
 				"minimum_environments_before_promotion": types.Int64Value(int64(phase.MinimumEnvironmentsBeforePromotion)),
 				"is_optional_phase":                     types.BoolValue(phase.IsOptionalPhase),
-				"release_retention_policy":              mapRetentionPolicyList(phase.ReleaseRetentionPolicy),
-				"tentacle_retention_policy":             mapRetentionPolicyList(phase.TentacleRetentionPolicy),
+				"release_retention_policy":              flattenRetentionPeriod(phase.ReleaseRetentionPolicy),
+				"tentacle_retention_policy":             flattenRetentionPeriod(phase.TentacleRetentionPolicy),
 			}
 			phases = append(phases, types.ObjectValueMust(phaseObjectType(), phaseMap))
 		}
 		lifecycleMap["phase"] = types.ListValueMust(types.ObjectType{AttrTypes: phaseObjectType()}, phases)
 
 		// Map retention policies
-		lifecycleMap["release_retention_policy"] = mapRetentionPolicyList(lifecycle.ReleaseRetentionPolicy)
-		lifecycleMap["tentacle_retention_policy"] = mapRetentionPolicyList(lifecycle.TentacleRetentionPolicy)
+		lifecycleMap["release_retention_policy"] = flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy)
+		lifecycleMap["tentacle_retention_policy"] = flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy)
 
 		lifecyclesList = append(lifecyclesList, types.ObjectValueMust(lifecycleObjectType(), lifecycleMap))
 	}
@@ -192,39 +192,4 @@ func retentionPolicyObjectType() map[string]attr.Type {
 		"should_keep_forever": types.BoolType,
 		"unit":                types.StringType,
 	}
-}
-
-func toValueSlice(slice []string) []attr.Value {
-	values := make([]attr.Value, len(slice))
-	for i, s := range slice {
-		values[i] = types.StringValue(s)
-	}
-	return values
-}
-
-func mapRetentionPolicyList(policy *core.RetentionPeriod) attr.Value {
-	if policy == nil {
-		return types.ListValueMust(types.ObjectType{AttrTypes: retentionPolicyObjectType()}, []attr.Value{})
-	}
-	return types.ListValueMust(types.ObjectType{AttrTypes: retentionPolicyObjectType()}, []attr.Value{
-		types.ObjectValueMust(retentionPolicyObjectType(), map[string]attr.Value{
-			"quantity_to_keep":    types.Int64Value(int64(policy.QuantityToKeep)),
-			"should_keep_forever": types.BoolValue(policy.ShouldKeepForever),
-			"unit":                types.StringValue(policy.Unit),
-		}),
-	})
-}
-
-func getStringSlice(list types.List) []string {
-	if list.IsNull() || list.IsUnknown() {
-		return nil
-	}
-
-	result := make([]string, 0, len(list.Elements()))
-	for _, element := range list.Elements() {
-		if str, ok := element.(types.String); ok {
-			result = append(result, str.ValueString())
-		}
-	}
-	return result
 }
