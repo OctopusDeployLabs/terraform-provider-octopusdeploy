@@ -33,7 +33,7 @@ func ProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, err
 				func() tfprotov6.ProviderServer {
 					return upgradedSdkServer
 				},
-				providerserver.NewProtocol6(NewOctopusDeployProviderV6()),
+				providerserver.NewProtocol6(NewOctopusDeployFrameworkProvider()),
 			}
 
 			return tf6muxserver.NewMuxServer(context.Background(), providers...)
