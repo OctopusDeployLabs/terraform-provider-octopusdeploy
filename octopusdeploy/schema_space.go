@@ -53,52 +53,6 @@ func addSpaceManagers(spaceID string, teamIDs []string) []string {
 	return newSlice
 }
 
-func flattenSpace(space *spaces.Space) map[string]interface{} {
-	if space == nil {
-		return nil
-	}
-
-	return map[string]interface{}{
-		"description":                 space.Description,
-		"id":                          space.GetID(),
-		"is_default":                  space.IsDefault,
-		"is_task_queue_stopped":       space.TaskQueueStopped,
-		"name":                        space.Name,
-		"slug":                        space.Slug,
-		"space_managers_team_members": space.SpaceManagersTeamMembers,
-		"space_managers_teams":        space.SpaceManagersTeams,
-	}
-}
-
-func getSpaceDataSourceSchema() map[string]*schema.Schema {
-	dataSchema := getSpaceSchema()
-	setDataSchema(&dataSchema)
-
-	dataSchema["name"] = getNameSchemaWithMaxLength(true, 20)
-
-	return dataSchema
-}
-
-func getSpacesDataSourceSchema() map[string]*schema.Schema {
-	dataSchema := getSpaceSchema()
-	setDataSchema(&dataSchema)
-
-	return map[string]*schema.Schema{
-		"id":           getDataSchemaID(),
-		"ids":          getQueryIDs(),
-		"partial_name": getQueryPartialName(),
-		"skip":         getQuerySkip(),
-		"take":         getQueryTake(),
-		"spaces": {
-			Computed:    true,
-			Description: "A list of spaces that match the filter(s).",
-			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-	}
-}
-
 func getSpaceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"description": getDescriptionSchema("space"),
