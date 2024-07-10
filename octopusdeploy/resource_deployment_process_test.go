@@ -6,7 +6,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"os"
 	"strings"
 	"testing"
 
@@ -94,8 +93,7 @@ func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
 
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
+	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -134,8 +132,7 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
 
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
+	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -234,6 +231,7 @@ func testAccDeploymentProcessBasic(localName string) string {
 
 			  run_script_action {
 				  name = "Step2"
+ 				  sort_order = 1
 				  run_on_server = true
 				  script_body = "Write-Host 'hi'"
 			  }

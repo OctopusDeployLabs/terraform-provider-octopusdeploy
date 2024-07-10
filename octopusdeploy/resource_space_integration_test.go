@@ -32,8 +32,8 @@ func TestSpaceResource(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	if space.Description != "My test space" {
-		t.Fatalf("New space must have the name \"My test space\"")
+	if space.Description != "TestSpaceResource" {
+		t.Fatalf("New space must have the description \"TestSpaceResource\"")
 	}
 
 	if space.IsDefault {
