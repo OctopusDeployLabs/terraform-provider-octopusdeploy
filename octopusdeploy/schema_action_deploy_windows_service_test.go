@@ -75,6 +75,7 @@ func testAccWindowsServiceFeature() string {
 	return testAccBuildTestAction(`
 		deploy_package_action {
 			name = "Test"
+			sort_order = 1
 
 			primary_package {
 				package_id = "MyPackage"

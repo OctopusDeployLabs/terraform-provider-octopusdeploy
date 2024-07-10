@@ -67,6 +67,7 @@ func testAccRunScriptAction(feedLocalName string, feedName string, feedURI strin
 		testAccBuildTestAction(`
 		run_script_action {
 			name                           = "Run Script"
+			sort_order = 1
 			run_on_server                  = true
 			script_file_name               = "Test.ps1"
 			script_parameters              = "-Test 1"
