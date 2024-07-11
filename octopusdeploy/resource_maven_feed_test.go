@@ -18,7 +18,7 @@ func TestAccOctopusDeployMavenFeed(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_maven_feed." + localName
 
-	downloadAttempts := acctest.RandIntRange(0, 10)
+	downloadAttempts := acctest.RandIntRange(1, 10)
 	downloadRetryBackoffSeconds := acctest.RandIntRange(0, 60)
 	feedURI := "https://repo.maven.apache.org/maven2/"
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
