@@ -18,13 +18,14 @@ type octopusDeployFrameworkProvider struct {
 
 var _ provider.Provider = (*octopusDeployFrameworkProvider)(nil)
 var _ provider.ProviderWithMetaSchema = (*octopusDeployFrameworkProvider)(nil)
+var ProviderTypeName = "octopusdeploy"
 
 func NewOctopusDeployFrameworkProvider() *octopusDeployFrameworkProvider {
 	return &octopusDeployFrameworkProvider{}
 }
 
 func (p *octopusDeployFrameworkProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "octopusdeploy"
+	resp.TypeName = ProviderTypeName
 }
 
 func (p *octopusDeployFrameworkProvider) MetaSchema(ctx context.Context, request provider.MetaSchemaRequest, response *provider.MetaSchemaResponse) {
@@ -62,6 +63,8 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewProjectGroupsDataSource,
+		NewSpaceDataSource,
+		NewSpacesDataSource,
 	}
 }
 
