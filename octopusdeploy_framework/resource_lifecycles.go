@@ -8,9 +8,11 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"strings"
 )
 
 type lifecycleTypeResource struct {
@@ -27,8 +29,15 @@ type lifecycleTypeResourceModel struct {
 	TentacleRetentionPolicy types.List   `tfsdk:"tentacle_retention_policy"`
 }
 
-func NewLifecycleResource() resource.Resource {
+func NewLifecycleResource() resource.ResourceWithImportState {
 	return &lifecycleTypeResource{}
+}
+
+func (r *lifecycleTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	idParts := strings.Split(req.ID, "/")
+	lifecycleID := idParts[len(idParts)-1]
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), lifecycleID)...)
+	// Note: This implementation assumes that space_id is set at the provider level
 }
 
 func (r *lifecycleTypeResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
