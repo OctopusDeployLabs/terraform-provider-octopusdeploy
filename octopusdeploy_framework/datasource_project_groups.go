@@ -2,8 +2,8 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -25,7 +25,6 @@ type projectGroupsDataSourceModel struct {
 	Skip          types.Int64  `tfsdk:"skip"`
 	Take          types.Int64  `tfsdk:"take"`
 	ProjectGroups types.List   `tfsdk:"project_groups"`
-	//ProjectGroups []projectGroupTypeResourceModel `tfsdk:"project_groups"`
 }
 
 func NewProjectGroupsDataSource() datasource.DataSource {
@@ -42,13 +41,11 @@ func getNestedGroupAttributes() map[string]attr.Type {
 	}
 }
 
-func (p *projectGroupsDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	tflog.Debug(ctx, "groups datasource Metadata")
-	resp.TypeName = "octopusdeploy_project_groups"
+func (p *projectGroupsDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = ProviderTypeName + "_project_groups"
 }
 
-func (p *projectGroupsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	tflog.Debug(ctx, "groups datasource Schema")
+func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	description := "project group"
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -66,17 +63,7 @@ func (p *projectGroupsDataSource) Schema(ctx context.Context, req datasource.Sch
 			"project_groups": schema.ListNestedBlock{
 				Description: "A list of project groups that match the filter(s).",
 				NestedObject: schema.NestedBlockObject{
-					Attributes: map[string]schema.Attribute{
-						"id":       util.GetIdResourceSchema(),
-						"space_id": util.GetSpaceIdResourceSchema(description),
-						"name":     util.GetNameResourceSchema(true),
-						"retention_policy_id": schema.StringAttribute{
-							Computed:    true,
-							Optional:    true,
-							Description: "The ID of the retention policy associated with this project group.",
-						},
-						"description": util.GetDescriptionResourceSchema(description),
-					},
+					Attributes: schemas.GetProjectGroupDatasourceSchema(),
 				},
 			},
 		},
@@ -84,12 +71,10 @@ func (p *projectGroupsDataSource) Schema(ctx context.Context, req datasource.Sch
 }
 
 func (p *projectGroupsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	tflog.Debug(ctx, "groups datasource Configure")
-	p.Config = dataSourceConfiguration(req, resp)
+	p.Config = DataSourceConfiguration(req, resp)
 }
 
 func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	tflog.Debug(ctx, "groups datasource Read")
 	var err error
 	var data projectGroupsDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -126,10 +111,10 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	var newGroups []projectGroupTypeResourceModel
+	var newGroups []schemas.ProjectGroupTypeResourceModel
 	for _, projectGroup := range existingProjectGroups.Items {
 		tflog.Debug(ctx, "loaded group "+projectGroup.Name)
-		var g projectGroupTypeResourceModel
+		var g schemas.ProjectGroupTypeResourceModel
 		g.ID = types.StringValue(projectGroup.ID)
 		g.SpaceID = types.StringValue(projectGroup.SpaceID)
 		g.Name = types.StringValue(projectGroup.Name)
@@ -147,21 +132,4 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 	data.ProjectGroups = g
 	data.ID = types.StringValue("ProjectGroups " + time.Now().UTC().String())
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func dataSourceConfiguration(req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) *Config {
-	if req.ProviderData == nil {
-		return nil
-	}
-
-	config, ok := req.ProviderData.(*Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return nil
-	}
-
-	return config
 }
