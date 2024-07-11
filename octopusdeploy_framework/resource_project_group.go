@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,14 +13,6 @@ import (
 
 type projectGroupTypeResource struct {
 	*Config
-}
-
-type projectGroupTypeResourceModel struct {
-	ID                types.String `tfsdk:"id"`
-	Name              types.String `tfsdk:"name"`
-	SpaceID           types.String `tfsdk:"space_id"`
-	Description       types.String `tfsdk:"description"`
-	RetentionPolicyID types.String `tfsdk:"retention_policy_id"`
 }
 
 func NewProjectGroupResource() resource.Resource {
@@ -32,19 +24,8 @@ func (r *projectGroupTypeResource) Metadata(ctx context.Context, req resource.Me
 }
 
 func (r *projectGroupTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	description := "project group"
 	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			"id":       util.GetIdResourceSchema(),
-			"space_id": util.GetSpaceIdResourceSchema(description),
-			"name":     util.GetNameResourceSchema(true),
-			"retention_policy_id": schema.StringAttribute{
-				Computed:    true,
-				Optional:    true,
-				Description: "The ID of the retention policy associated with this project group.",
-			},
-			"description": util.GetDescriptionResourceSchema(description),
-		},
+		Attributes: schemas.GetProjectGroupResourceSchema(),
 	}
 }
 
@@ -53,7 +34,7 @@ func (r *projectGroupTypeResource) Configure(_ context.Context, req resource.Con
 }
 
 func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *projectGroupTypeResourceModel
+	var data *schemas.ProjectGroupTypeResourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -82,7 +63,7 @@ func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.Crea
 }
 
 func (r *projectGroupTypeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *projectGroupTypeResourceModel
+	var data schemas.ProjectGroupTypeResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -103,7 +84,7 @@ func (r *projectGroupTypeResource) Read(ctx context.Context, req resource.ReadRe
 }
 
 func (r *projectGroupTypeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data, state *projectGroupTypeResourceModel
+	var data, state schemas.ProjectGroupTypeResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -139,7 +120,7 @@ func (r *projectGroupTypeResource) Update(ctx context.Context, req resource.Upda
 }
 
 func (r *projectGroupTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *projectGroupTypeResourceModel
+	var data schemas.ProjectGroupTypeResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {

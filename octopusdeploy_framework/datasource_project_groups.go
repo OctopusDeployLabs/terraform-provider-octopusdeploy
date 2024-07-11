@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -62,17 +63,7 @@ func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 			"project_groups": schema.ListNestedBlock{
 				Description: "A list of project groups that match the filter(s).",
 				NestedObject: schema.NestedBlockObject{
-					Attributes: map[string]schema.Attribute{
-						"id":       util.GetIdResourceSchema(),
-						"space_id": util.GetSpaceIdResourceSchema(description),
-						"name":     util.GetNameResourceSchema(true),
-						"retention_policy_id": schema.StringAttribute{
-							Computed:    true,
-							Optional:    true,
-							Description: "The ID of the retention policy associated with this project group.",
-						},
-						"description": util.GetDescriptionResourceSchema(description),
-					},
+					Attributes: schemas.GetProjectGroupDatasourceSchema(),
 				},
 			},
 		},
@@ -120,10 +111,10 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	var newGroups []projectGroupTypeResourceModel
+	var newGroups []schemas.ProjectGroupTypeResourceModel
 	for _, projectGroup := range existingProjectGroups.Items {
 		tflog.Debug(ctx, "loaded group "+projectGroup.Name)
-		var g projectGroupTypeResourceModel
+		var g schemas.ProjectGroupTypeResourceModel
 		g.ID = types.StringValue(projectGroup.ID)
 		g.SpaceID = types.StringValue(projectGroup.SpaceID)
 		g.Name = types.StringValue(projectGroup.Name)
