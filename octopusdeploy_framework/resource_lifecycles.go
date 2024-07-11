@@ -57,67 +57,29 @@ func (r *lifecycleTypeResource) Schema(_ context.Context, _ resource.SchemaReque
 					},
 					Blocks: map[string]schema.Block{
 
-						"release_retention_policy": schema.ListNestedBlock{
-							NestedObject: schema.NestedBlockObject{
-								Attributes: map[string]schema.Attribute{
-									"quantity_to_keep": schema.Int64Attribute{
-										Optional: true,
-									},
-									"should_keep_forever": schema.BoolAttribute{
-										Optional: true,
-									},
-									"unit": schema.StringAttribute{
-										Optional: true,
-									},
-								},
-							},
-						},
-						"tentacle_retention_policy": schema.ListNestedBlock{
-							NestedObject: schema.NestedBlockObject{
-								Attributes: map[string]schema.Attribute{
-									"quantity_to_keep": schema.Int64Attribute{
-										Optional: true,
-									},
-									"should_keep_forever": schema.BoolAttribute{
-										Optional: true,
-									},
-									"unit": schema.StringAttribute{
-										Optional: true,
-									},
-								},
-							},
-						},
+						"release_retention_policy":  getResourceRetentionPolicySchema(),
+						"tentacle_retention_policy": getResourceRetentionPolicySchema(),
 					},
 				},
 			},
-			"release_retention_policy": schema.ListNestedBlock{
-				NestedObject: schema.NestedBlockObject{
-					Attributes: map[string]schema.Attribute{
-						"quantity_to_keep": schema.Int64Attribute{
-							Optional: true,
-						},
-						"should_keep_forever": schema.BoolAttribute{
-							Optional: true,
-						},
-						"unit": schema.StringAttribute{
-							Optional: true,
-						},
-					},
+			"release_retention_policy":  getResourceRetentionPolicySchema(),
+			"tentacle_retention_policy": getResourceRetentionPolicySchema(),
+		},
+	}
+}
+
+func getResourceRetentionPolicySchema() schema.ListNestedBlock {
+	return schema.ListNestedBlock{
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				"quantity_to_keep": schema.Int64Attribute{
+					Optional: true,
 				},
-			},
-			"tentacle_retention_policy": schema.ListNestedBlock{
-				NestedObject: schema.NestedBlockObject{
-					Attributes: map[string]schema.Attribute{
-						"quantity_to_keep": schema.Int64Attribute{
-							Optional: true,
-						},
-						"should_keep_forever": schema.BoolAttribute{
-							Optional: true,
-						},
-						"unit": schema.StringAttribute{
-							Optional: true,
-						},
-					},
+				"should_keep_forever": schema.BoolAttribute{
+					Optional: true,
+				},
+				"unit": schema.StringAttribute{
+					Optional: true,
 				},
 			},
 		},
@@ -399,7 +361,7 @@ func getPhaseAttrTypes() map[string]attr.Type {
 		"optional_deployment_targets":           types.ListType{ElemType: types.StringType},
 		"minimum_environments_before_promotion": types.Int64Type,
 		"is_optional_phase":                     types.BoolType,
-		"release_retention_policy":              types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()},
-		"tentacle_retention_policy":             types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()},
+		"release_retention_policy":              types.ListType{ElemType: types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()}},
+		"tentacle_retention_policy":             types.ListType{ElemType: types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()}},
 	}
 }
