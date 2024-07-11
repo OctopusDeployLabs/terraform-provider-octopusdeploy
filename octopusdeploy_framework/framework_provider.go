@@ -59,7 +59,9 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 }
 
 func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewLifecycleResource,
+	}
 }
 
 func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {

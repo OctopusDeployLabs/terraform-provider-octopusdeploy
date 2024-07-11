@@ -34,6 +34,7 @@ func NewLifecycleResource() resource.Resource {
 func (r *lifecycleTypeResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = "octopusdeploy_lifecycle"
 }
+
 func (r *lifecycleTypeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	description := "lifecycle"
 	resp.Schema = schema.Schema{
@@ -42,9 +43,10 @@ func (r *lifecycleTypeResource) Schema(_ context.Context, _ resource.SchemaReque
 			"space_id":    util.GetSpaceIdResourceSchema(description),
 			"name":        util.GetNameResourceSchema(true),
 			"description": util.GetDescriptionResourceSchema(description),
-			"phase": schema.ListNestedAttribute{
-				Optional: true,
-				NestedObject: schema.NestedAttributeObject{
+		},
+		Blocks: map[string]schema.Block{
+			"phase": schema.ListNestedBlock{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
 						"id":                                    schema.StringAttribute{Computed: true},
 						"name":                                  schema.StringAttribute{Required: true},
@@ -52,46 +54,69 @@ func (r *lifecycleTypeResource) Schema(_ context.Context, _ resource.SchemaReque
 						"optional_deployment_targets":           schema.ListAttribute{ElementType: types.StringType, Optional: true},
 						"minimum_environments_before_promotion": schema.Int64Attribute{Optional: true},
 						"is_optional_phase":                     schema.BoolAttribute{Optional: true},
-						"release_retention_policy": schema.ListNestedAttribute{
-							Optional: true,
-							NestedObject: schema.NestedAttributeObject{
+					},
+					Blocks: map[string]schema.Block{
+
+						"release_retention_policy": schema.ListNestedBlock{
+							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
-									"quantity_to_keep":    schema.Int64Attribute{Optional: true},
-									"should_keep_forever": schema.BoolAttribute{Optional: true},
-									"unit":                schema.StringAttribute{Optional: true},
+									"quantity_to_keep": schema.Int64Attribute{
+										Optional: true,
+									},
+									"should_keep_forever": schema.BoolAttribute{
+										Optional: true,
+									},
+									"unit": schema.StringAttribute{
+										Optional: true,
+									},
 								},
 							},
 						},
-						"tentacle_retention_policy": schema.ListNestedAttribute{
-							Optional: true,
-							NestedObject: schema.NestedAttributeObject{
+						"tentacle_retention_policy": schema.ListNestedBlock{
+							NestedObject: schema.NestedBlockObject{
 								Attributes: map[string]schema.Attribute{
-									"quantity_to_keep":    schema.Int64Attribute{Optional: true},
-									"should_keep_forever": schema.BoolAttribute{Optional: true},
-									"unit":                schema.StringAttribute{Optional: true},
+									"quantity_to_keep": schema.Int64Attribute{
+										Optional: true,
+									},
+									"should_keep_forever": schema.BoolAttribute{
+										Optional: true,
+									},
+									"unit": schema.StringAttribute{
+										Optional: true,
+									},
 								},
 							},
 						},
 					},
 				},
 			},
-			"release_retention_policy": schema.ListNestedAttribute{
-				Optional: true,
-				NestedObject: schema.NestedAttributeObject{
+			"release_retention_policy": schema.ListNestedBlock{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"quantity_to_keep":    schema.Int64Attribute{Optional: true},
-						"should_keep_forever": schema.BoolAttribute{Optional: true},
-						"unit":                schema.StringAttribute{Optional: true},
+						"quantity_to_keep": schema.Int64Attribute{
+							Optional: true,
+						},
+						"should_keep_forever": schema.BoolAttribute{
+							Optional: true,
+						},
+						"unit": schema.StringAttribute{
+							Optional: true,
+						},
 					},
 				},
 			},
-			"tentacle_retention_policy": schema.ListNestedAttribute{
-				Optional: true,
-				NestedObject: schema.NestedAttributeObject{
+			"tentacle_retention_policy": schema.ListNestedBlock{
+				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"quantity_to_keep":    schema.Int64Attribute{Optional: true},
-						"should_keep_forever": schema.BoolAttribute{Optional: true},
-						"unit":                schema.StringAttribute{Optional: true},
+						"quantity_to_keep": schema.Int64Attribute{
+							Optional: true,
+						},
+						"should_keep_forever": schema.BoolAttribute{
+							Optional: true,
+						},
+						"unit": schema.StringAttribute{
+							Optional: true,
+						},
 					},
 				},
 			},
