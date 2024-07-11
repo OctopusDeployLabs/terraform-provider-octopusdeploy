@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -38,54 +36,7 @@ func (r *lifecycleTypeResource) Metadata(_ context.Context, req resource.Metadat
 }
 
 func (r *lifecycleTypeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	description := "lifecycle"
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			"id":          util.GetIdResourceSchema(),
-			"space_id":    util.GetSpaceIdResourceSchema(description),
-			"name":        util.GetNameResourceSchema(true),
-			"description": util.GetDescriptionResourceSchema(description),
-		},
-		Blocks: map[string]schema.Block{
-			"phase": schema.ListNestedBlock{
-				NestedObject: schema.NestedBlockObject{
-					Attributes: map[string]schema.Attribute{
-						"id":                                    schema.StringAttribute{Computed: true},
-						"name":                                  schema.StringAttribute{Required: true},
-						"automatic_deployment_targets":          schema.ListAttribute{ElementType: types.StringType, Optional: true},
-						"optional_deployment_targets":           schema.ListAttribute{ElementType: types.StringType, Optional: true},
-						"minimum_environments_before_promotion": schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(0)},
-						"is_optional_phase":                     schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
-					},
-					Blocks: map[string]schema.Block{
-
-						"release_retention_policy":  getResourceRetentionPolicySchema(),
-						"tentacle_retention_policy": getResourceRetentionPolicySchema(),
-					},
-				},
-			},
-			"release_retention_policy":  getResourceRetentionPolicySchema(),
-			"tentacle_retention_policy": getResourceRetentionPolicySchema(),
-		},
-	}
-}
-
-func getResourceRetentionPolicySchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
-		NestedObject: schema.NestedBlockObject{
-			Attributes: map[string]schema.Attribute{
-				"quantity_to_keep": schema.Int64Attribute{
-					Optional: true,
-				},
-				"should_keep_forever": schema.BoolAttribute{
-					Optional: true,
-				},
-				"unit": schema.StringAttribute{
-					Optional: true,
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.GetLifecycleSchema()
 }
 
 func (r *lifecycleTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -194,6 +145,47 @@ func flattenLifecycleResource(lifecycle *lifecycles.Lifecycle) *lifecycleTypeRes
 	}
 }
 
+func flattenPhases(phases []*lifecycles.Phase) types.List {
+	if phases == nil {
+		return types.ListNull(types.ObjectType{AttrTypes: getPhaseAttrTypes()})
+	}
+	phasesList := make([]attr.Value, 0, len(phases))
+
+	for _, phase := range phases {
+		attrs := map[string]attr.Value{
+			"id":                                    types.StringValue(phase.ID),
+			"name":                                  types.StringValue(phase.Name),
+			"automatic_deployment_targets":          util.Ternary(len(phase.AutomaticDeploymentTargets) > 0, util.FlattenStringList(phase.AutomaticDeploymentTargets), types.ListNull(types.StringType)),
+			"optional_deployment_targets":           util.Ternary(len(phase.OptionalDeploymentTargets) > 0, util.FlattenStringList(phase.OptionalDeploymentTargets), types.ListNull(types.StringType)),
+			"minimum_environments_before_promotion": types.Int64Value(int64(phase.MinimumEnvironmentsBeforePromotion)),
+			"is_optional_phase":                     types.BoolValue(phase.IsOptionalPhase),
+			"release_retention_policy":              util.Ternary(phase.ReleaseRetentionPolicy != nil, flattenRetentionPeriod(phase.ReleaseRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),
+			"tentacle_retention_policy":             util.Ternary(phase.TentacleRetentionPolicy != nil, flattenRetentionPeriod(phase.TentacleRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),
+		}
+		phasesList = append(phasesList, types.ObjectValueMust(getPhaseAttrTypes(), attrs))
+	}
+	return types.ListValueMust(types.ObjectType{AttrTypes: getPhaseAttrTypes()}, phasesList)
+}
+
+func flattenRetentionPeriod(retentionPeriod *core.RetentionPeriod) types.List {
+	if retentionPeriod == nil {
+		return types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})
+	}
+	return types.ListValueMust(
+		types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()},
+		[]attr.Value{
+			types.ObjectValueMust(
+				getRetentionPeriodAttrTypes(),
+				map[string]attr.Value{
+					"quantity_to_keep":    types.Int64Value(int64(retentionPeriod.QuantityToKeep)),
+					"should_keep_forever": types.BoolValue(retentionPeriod.ShouldKeepForever),
+					"unit":                types.StringValue(retentionPeriod.Unit),
+				},
+			),
+		},
+	)
+}
+
 func expandLifecycle(data *lifecycleTypeResourceModel) *lifecycles.Lifecycle {
 	lifecycle := lifecycles.NewLifecycle(data.Name.ValueString())
 	lifecycle.Description = data.Description.ValueString()
@@ -283,53 +275,12 @@ func expandRetentionPeriod(v types.List) *core.RetentionPeriod {
 	return core.NewRetentionPeriod(quantityToKeep, unit, shouldKeepForever)
 }
 
-func flattenRetentionPeriod(retentionPeriod *core.RetentionPeriod) types.List {
-	if retentionPeriod == nil {
-		return types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})
-	}
-	return types.ListValueMust(
-		types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()},
-		[]attr.Value{
-			types.ObjectValueMust(
-				getRetentionPeriodAttrTypes(),
-				map[string]attr.Value{
-					"quantity_to_keep":    types.Int64Value(int64(retentionPeriod.QuantityToKeep)),
-					"should_keep_forever": types.BoolValue(retentionPeriod.ShouldKeepForever),
-					"unit":                types.StringValue(retentionPeriod.Unit),
-				},
-			),
-		},
-	)
-}
-
 func getRetentionPeriodAttrTypes() map[string]attr.Type {
 	return map[string]attr.Type{
 		"quantity_to_keep":    types.Int64Type,
 		"should_keep_forever": types.BoolType,
 		"unit":                types.StringType,
 	}
-}
-
-func flattenPhases(phases []*lifecycles.Phase) types.List {
-	if phases == nil {
-		return types.ListNull(types.ObjectType{AttrTypes: getPhaseAttrTypes()})
-	}
-	phasesList := make([]attr.Value, 0, len(phases))
-
-	for _, phase := range phases {
-		attrs := map[string]attr.Value{
-			"id":                                    types.StringValue(phase.ID),
-			"name":                                  types.StringValue(phase.Name),
-			"automatic_deployment_targets":          util.Ternary(len(phase.AutomaticDeploymentTargets) > 0, util.FlattenStringList(phase.AutomaticDeploymentTargets), types.ListNull(types.StringType)),
-			"optional_deployment_targets":           util.Ternary(len(phase.OptionalDeploymentTargets) > 0, util.FlattenStringList(phase.OptionalDeploymentTargets), types.ListNull(types.StringType)),
-			"minimum_environments_before_promotion": types.Int64Value(int64(phase.MinimumEnvironmentsBeforePromotion)),
-			"is_optional_phase":                     types.BoolValue(phase.IsOptionalPhase),
-			"release_retention_policy":              util.Ternary(phase.ReleaseRetentionPolicy != nil, flattenRetentionPeriod(phase.ReleaseRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),
-			"tentacle_retention_policy":             util.Ternary(phase.TentacleRetentionPolicy != nil, flattenRetentionPeriod(phase.TentacleRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),
-		}
-		phasesList = append(phasesList, types.ObjectValueMust(getPhaseAttrTypes(), attrs))
-	}
-	return types.ListValueMust(types.ObjectType{AttrTypes: getPhaseAttrTypes()}, phasesList)
 }
 
 func getPhaseAttrTypes() map[string]attr.Type {

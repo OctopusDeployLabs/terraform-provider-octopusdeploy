@@ -68,6 +68,7 @@ func (l *lifecyclesDataSource) Configure(ctx context.Context, req datasource.Con
 	tflog.Debug(ctx, "lifecycles datasource Configure")
 	l.Config = DataSourceConfiguration(req, resp)
 }
+
 func (l *lifecyclesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	tflog.Debug(ctx, "lifecycles datasource Read")
 	var data lifecyclesDataSourceModel
