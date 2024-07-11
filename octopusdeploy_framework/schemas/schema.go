@@ -1,8 +1,8 @@
-package util
+package schemas
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
+	//"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -94,7 +94,6 @@ func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema
 	return datasourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
 		Optional:    true,
-		Computed:    true,
 	}
 }
 
@@ -135,7 +134,6 @@ func GetDescriptionResourceSchema(resourceDescription string) resourceSchema.Att
 	return resourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
 		Optional:    true,
-		Computed:    true,
 	}
 }
 
@@ -170,8 +168,4 @@ func GetNumber(val types.Int64) int {
 	}
 
 	return v
-}
-
-func GetTypeName(name string) string {
-	return fmt.Sprintf("%s_%s", octopusdeploy_framework.ProviderTypeName, name)
 }

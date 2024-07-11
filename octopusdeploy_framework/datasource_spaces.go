@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -28,27 +29,27 @@ func NewSpacesDataSource() datasource.DataSource {
 	return &spacesDataSource{}
 }
 
-func (*spacesDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*spacesDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("spaces")
 }
 
-func (*spacesDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			// request
-			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
+			"ids":          schemas.GetQueryIDsDatasourceSchema(),
+			"partial_name": schemas.GetQueryPartialNameDatasourceSchema(),
+			"skip":         schemas.GetQuerySkipDatasourceSchema(),
+			"take":         schemas.GetQueryTakeDatasourceSchema(),
 
 			// response
-			"id": util.GetIdDatasourceSchema(),
+			"id": schemas.GetIdDatasourceSchema(),
 		},
 		Blocks: map[string]schema.Block{
 			"spaces": schema.ListNestedBlock{
 				Description: "Provides information about existing spaces.",
 				NestedObject: schema.NestedBlockObject{
-					Attributes: getSpaceSchema(),
+					Attributes: schemas.GetSpaceDatasourceSchema(),
 				},
 			},
 		},
@@ -68,10 +69,10 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	query := spaces.SpacesQuery{
-		IDs:         util.GetIds(data.IDs),
+		IDs:         schemas.GetIds(data.IDs),
 		PartialName: data.PartialName.ValueString(),
-		Skip:        util.GetNumber(data.Skip),
-		Take:        util.GetNumber(data.Take),
+		Skip:        schemas.GetNumber(data.Skip),
+		Take:        schemas.GetNumber(data.Take),
 	}
 
 	existingSpaces, err := spaces.Get(b.Client, query)
@@ -80,10 +81,10 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	var mappedSpaces []spaceModel
+	var mappedSpaces []schemas.SpaceModel
 	for _, space := range existingSpaces.Items {
-		var s spaceModel
-		mapSpace(ctx, &s, space)
+		var s schemas.SpaceModel
+		mapSpaceToState(ctx, &s, space)
 		mappedSpaces = append(mappedSpaces, s)
 	}
 

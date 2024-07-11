@@ -19,18 +19,18 @@ func NewSpaceDataSource() datasource.DataSource {
 	return &spaceDataSource{}
 }
 
-func (*spaceDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (*spaceDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("space")
 }
 
-func (*spaceDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*spaceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Provides information about an existing space.",
 		Attributes:  schemas.GetSpaceDatasourceSchema(),
 	}
 }
 
-func (b *spaceDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (b *spaceDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	b.Config = DataSourceConfiguration(req, resp)
 }
 
@@ -58,17 +58,34 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		}
 	}
 
-	mapSpace(ctx, &data, matchedSpace)
+	mapSpaceToState(ctx, &data, matchedSpace)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func mapSpace(ctx context.Context, data *schemas.SpaceModel, matchedSpace *spaces.Space) {
-	data.ID = types.StringValue(matchedSpace.ID)
-	data.Description = types.StringValue(matchedSpace.Description)
-	data.Slug = types.StringValue(matchedSpace.Slug)
-	data.IsTaskQueueStopped = types.BoolValue(matchedSpace.TaskQueueStopped)
-	data.IsDefault = types.BoolValue(matchedSpace.IsDefault)
-	data.SpaceManagersTeamMembers, _ = types.ListValueFrom(ctx, types.StringType, matchedSpace.SpaceManagersTeamMembers)
-	data.SpaceManagersTeams, _ = types.ListValueFrom(ctx, types.StringType, matchedSpace.SpaceManagersTeams)
+func mapSpaceToState(ctx context.Context, data *schemas.SpaceModel, space *spaces.Space) {
+	data.ID = types.StringValue(space.ID)
+	data.Description = types.StringValue(space.Description)
+	data.Slug = types.StringValue(space.Slug)
+	data.IsTaskQueueStopped = types.BoolValue(space.TaskQueueStopped)
+	data.IsDefault = types.BoolValue(space.IsDefault)
+	data.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, space.SpaceManagersTeamMembers)
+	data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, space.SpaceManagersTeams)
+}
+
+func mapSpaceFromState(ctx context.Context, data *schemas.SpaceModel, space *spaces.Space) {
+	space.ID = data.ID.ValueString()
+	space.Name = data.Name.ValueString()
+	space.Description = data.Description.ValueString()
+	space.Slug = data.Slug.ValueString()
+	space.IsDefault = data.IsDefault.ValueBool()
+	space.TaskQueueStopped = data.IsTaskQueueStopped.ValueBool()
+
+	for _, t := range data.SpaceManagersTeams.Elements() {
+		space.SpaceManagersTeams = append(space.SpaceManagersTeams, t.String())
+	}
+
+	for _, t := range data.SpaceManagersTeamMembers.Elements() {
+		space.SpaceManagersTeamMembers = append(space.SpaceManagersTeamMembers, t.String())
+	}
 }
