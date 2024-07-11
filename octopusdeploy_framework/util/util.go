@@ -5,14 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func ToValueSlice(slice []string) []attr.Value {
-	values := make([]attr.Value, len(slice))
-	for i, s := range slice {
-		values[i] = types.StringValue(s)
-	}
-	return values
-}
-
 func GetStringSlice(list types.List) []string {
 	if list.IsNull() || list.IsUnknown() {
 		return nil
@@ -47,4 +39,11 @@ func FlattenStringList(list []string) types.List {
 		elements = append(elements, types.StringValue(s))
 	}
 	return types.ListValueMust(types.StringType, elements)
+}
+
+func Ternary(condition bool, whenTrue, whenFalse attr.Value) attr.Value {
+	if condition {
+		return whenTrue
+	}
+	return whenFalse
 }

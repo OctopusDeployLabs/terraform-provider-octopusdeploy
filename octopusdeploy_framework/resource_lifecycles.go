@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -52,8 +54,8 @@ func (r *lifecycleTypeResource) Schema(_ context.Context, _ resource.SchemaReque
 						"name":                                  schema.StringAttribute{Required: true},
 						"automatic_deployment_targets":          schema.ListAttribute{ElementType: types.StringType, Optional: true},
 						"optional_deployment_targets":           schema.ListAttribute{ElementType: types.StringType, Optional: true},
-						"minimum_environments_before_promotion": schema.Int64Attribute{Optional: true},
-						"is_optional_phase":                     schema.BoolAttribute{Optional: true},
+						"minimum_environments_before_promotion": schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(0)},
+						"is_optional_phase":                     schema.BoolAttribute{Optional: true, Computed: true, Default: booldefault.StaticBool(false)},
 					},
 					Blocks: map[string]schema.Block{
 
@@ -226,11 +228,11 @@ func expandPhases(phases types.List) []*lifecycles.Phase {
 		}
 
 		if v, ok := phaseAttrs["automatic_deployment_targets"].(types.List); ok && !v.IsNull() {
-			phase.AutomaticDeploymentTargets = expandStringList(v)
+			phase.AutomaticDeploymentTargets = util.ExpandStringList(v)
 		}
 
 		if v, ok := phaseAttrs["optional_deployment_targets"].(types.List); ok && !v.IsNull() {
-			phase.OptionalDeploymentTargets = expandStringList(v)
+			phase.OptionalDeploymentTargets = util.ExpandStringList(v)
 		}
 
 		if v, ok := phaseAttrs["minimum_environments_before_promotion"].(types.Int64); ok && !v.IsNull() {
@@ -253,28 +255,6 @@ func expandPhases(phases types.List) []*lifecycles.Phase {
 	}
 
 	return result
-}
-
-func expandStringList(list types.List) []string {
-	if list.IsNull() || list.IsUnknown() {
-		return nil
-	}
-
-	result := make([]string, 0, len(list.Elements()))
-	for _, elem := range list.Elements() {
-		if str, ok := elem.(types.String); ok {
-			result = append(result, str.ValueString())
-		}
-	}
-	return result
-}
-
-func flattenStringList(list []string) types.List {
-	elements := make([]attr.Value, 0, len(list))
-	for _, s := range list {
-		elements = append(elements, types.StringValue(s))
-	}
-	return types.ListValueMust(types.StringType, elements)
 }
 
 func expandRetentionPeriod(v types.List) *core.RetentionPeriod {
@@ -335,20 +315,19 @@ func flattenPhases(phases []*lifecycles.Phase) types.List {
 		return types.ListNull(types.ObjectType{AttrTypes: getPhaseAttrTypes()})
 	}
 	phasesList := make([]attr.Value, 0, len(phases))
+
 	for _, phase := range phases {
-		phasesList = append(phasesList, types.ObjectValueMust(
-			getPhaseAttrTypes(),
-			map[string]attr.Value{
-				"id":                                    types.StringValue(phase.ID),
-				"name":                                  types.StringValue(phase.Name),
-				"automatic_deployment_targets":          flattenStringList(phase.AutomaticDeploymentTargets),
-				"optional_deployment_targets":           flattenStringList(phase.OptionalDeploymentTargets),
-				"minimum_environments_before_promotion": types.Int64Value(int64(phase.MinimumEnvironmentsBeforePromotion)),
-				"is_optional_phase":                     types.BoolValue(phase.IsOptionalPhase),
-				"release_retention_policy":              flattenRetentionPeriod(phase.ReleaseRetentionPolicy),
-				"tentacle_retention_policy":             flattenRetentionPeriod(phase.TentacleRetentionPolicy),
-			},
-		))
+		attrs := map[string]attr.Value{
+			"id":                                    types.StringValue(phase.ID),
+			"name":                                  types.StringValue(phase.Name),
+			"automatic_deployment_targets":          util.Ternary(len(phase.AutomaticDeploymentTargets) > 0, util.FlattenStringList(phase.AutomaticDeploymentTargets), types.ListNull(types.StringType)),
+			"optional_deployment_targets":           util.Ternary(len(phase.OptionalDeploymentTargets) > 0, util.FlattenStringList(phase.OptionalDeploymentTargets), types.ListNull(types.StringType)),
+			"minimum_environments_before_promotion": types.Int64Value(int64(phase.MinimumEnvironmentsBeforePromotion)),
+			"is_optional_phase":                     types.BoolValue(phase.IsOptionalPhase),
+			"release_retention_policy":              util.Ternary(phase.ReleaseRetentionPolicy != nil, flattenRetentionPeriod(phase.ReleaseRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),
+			"tentacle_retention_policy":             util.Ternary(phase.TentacleRetentionPolicy != nil, flattenRetentionPeriod(phase.TentacleRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),
+		}
+		phasesList = append(phasesList, types.ObjectValueMust(getPhaseAttrTypes(), attrs))
 	}
 	return types.ListValueMust(types.ObjectType{AttrTypes: getPhaseAttrTypes()}, phasesList)
 }
