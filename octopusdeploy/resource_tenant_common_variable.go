@@ -91,8 +91,24 @@ func resourceTenantCommonVariableCreate(ctx context.Context, d *schema.ResourceD
 		return nil
 	}
 
+	// A common problem here is that the tenant is not linked to a project that then links to
+	// the library variable set that defined the common variable. This relationship is not
+	// defined in the HCL and is not immediately obvious.
+	// To help debug this issue, we print additional details about the tenant.
+	debugMessage := "The tenant " + tenant.Name + " (" + tenant.ID + ")"
+	if tenant.ProjectEnvironments == nil || len(tenant.ProjectEnvironments) == 0 {
+		debugMessage += " is not linked to any projects.\n"
+	} else {
+		debugMessage += " is linked to the following projects and environments:\n"
+		for projectId, environments := range tenant.ProjectEnvironments {
+			debugMessage += projectId + ": " + strings.Join(environments, ", ") + "\n"
+		}
+	}
+	debugMessage += "The tenant must be linked to a project that references the library variable set that defines the common variable.\n" +
+		"The tenant common variable was not found in any projects linked to the tenant."
+
 	d.SetId("")
-	return diag.Errorf("unable to locate tenant common variable for tenant ID, %s", tenantID)
+	return diag.Errorf(debugMessage)
 }
 
 func resourceTenantCommonVariableDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
