@@ -1,11 +1,10 @@
-package project_group
+package octopusdeploy_framework
 
 import (
 	"context"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeployv6/config"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeployv6/util"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +12,7 @@ import (
 )
 
 type projectGroupTypeResource struct {
-	*config.Config
+	*Config
 }
 
 type projectGroupTypeResourceModel struct {
@@ -50,7 +49,7 @@ func (r *projectGroupTypeResource) Schema(ctx context.Context, req resource.Sche
 }
 
 func (r *projectGroupTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	r.Config = resourceConfiguration(req, resp)
+	r.Config = ResourceConfiguration(req, resp)
 }
 
 func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -151,21 +150,4 @@ func (r *projectGroupTypeResource) Delete(ctx context.Context, req resource.Dele
 		resp.Diagnostics.AddError("unable to delete project group", err.Error())
 		return
 	}
-}
-
-func resourceConfiguration(req resource.ConfigureRequest, resp *resource.ConfigureResponse) *config.Config {
-	if req.ProviderData == nil {
-		return nil
-	}
-
-	p, ok := req.ProviderData.(*config.Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return nil
-	}
-
-	return p
 }

@@ -1,11 +1,9 @@
-package project_group
+package octopusdeploy_framework
 
 import (
 	"context"
-	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeployv6/config"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeployv6/util"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -15,7 +13,7 @@ import (
 )
 
 type projectGroupsDataSource struct {
-	*config.Config
+	*Config
 }
 
 type projectGroupsDataSourceModel struct {
@@ -26,7 +24,6 @@ type projectGroupsDataSourceModel struct {
 	Skip          types.Int64  `tfsdk:"skip"`
 	Take          types.Int64  `tfsdk:"take"`
 	ProjectGroups types.List   `tfsdk:"project_groups"`
-	//ProjectGroups []projectGroupTypeResourceModel `tfsdk:"project_groups"`
 }
 
 func NewProjectGroupsDataSource() datasource.DataSource {
@@ -43,13 +40,11 @@ func getNestedGroupAttributes() map[string]attr.Type {
 	}
 }
 
-func (p *projectGroupsDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	tflog.Debug(ctx, "groups datasource Metadata")
-	resp.TypeName = "octopusdeploy_project_groups"
+func (p *projectGroupsDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = ProviderTypeName + "_project_groups"
 }
 
-func (p *projectGroupsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	tflog.Debug(ctx, "groups datasource Schema")
+func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	description := "project group"
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -85,12 +80,10 @@ func (p *projectGroupsDataSource) Schema(ctx context.Context, req datasource.Sch
 }
 
 func (p *projectGroupsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	tflog.Debug(ctx, "groups datasource Configure")
-	p.Config = dataSourceConfiguration(req, resp)
+	p.Config = DataSourceConfiguration(req, resp)
 }
 
 func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	tflog.Debug(ctx, "groups datasource Read")
 	var err error
 	var data projectGroupsDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -148,21 +141,4 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 	data.ProjectGroups = g
 	data.ID = types.StringValue("ProjectGroups " + time.Now().UTC().String())
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func dataSourceConfiguration(req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) *config.Config {
-	if req.ProviderData == nil {
-		return nil
-	}
-
-	config, ok := req.ProviderData.(*config.Config)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return nil
-	}
-
-	return config
 }
