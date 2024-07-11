@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
@@ -38,30 +38,7 @@ func (l *lifecyclesDataSource) Metadata(ctx context.Context, req datasource.Meta
 
 func (l *lifecyclesDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	tflog.Debug(ctx, "lifecycles datasource Schema")
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			"id":           schema.StringAttribute{Computed: true},
-			"space_id":     schema.StringAttribute{Optional: true},
-			"ids":          schema.ListAttribute{ElementType: types.StringType, Optional: true},
-			"partial_name": schema.StringAttribute{Optional: true},
-			"skip":         schema.Int64Attribute{Optional: true},
-			"take":         schema.Int64Attribute{Optional: true},
-			"lifecycles": schema.ListNestedAttribute{
-				Computed: true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"id":                        schema.StringAttribute{Computed: true},
-						"space_id":                  schema.StringAttribute{Computed: true},
-						"name":                      schema.StringAttribute{Computed: true},
-						"description":               schema.StringAttribute{Computed: true},
-						"phase":                     getPhasesSchema(),
-						"release_retention_policy":  getRetentionPolicySchema(),
-						"tentacle_retention_policy": getRetentionPolicySchema(),
-					},
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.GetDatasourceLifecycleSchema()
 }
 
 func (l *lifecyclesDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -111,37 +88,6 @@ func flattenLifecycles(items []*lifecycles.Lifecycle) types.List {
 		lifecyclesList = append(lifecyclesList, types.ObjectValueMust(lifecycleObjectType(), lifecycleMap))
 	}
 	return types.ListValueMust(types.ObjectType{AttrTypes: lifecycleObjectType()}, lifecyclesList)
-}
-
-func getPhasesSchema() schema.ListNestedAttribute {
-	return schema.ListNestedAttribute{
-		Computed: true,
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: map[string]schema.Attribute{
-				"id":                                    schema.StringAttribute{Computed: true},
-				"name":                                  schema.StringAttribute{Computed: true},
-				"automatic_deployment_targets":          schema.ListAttribute{ElementType: types.StringType, Computed: true},
-				"optional_deployment_targets":           schema.ListAttribute{ElementType: types.StringType, Computed: true},
-				"minimum_environments_before_promotion": schema.Int64Attribute{Computed: true},
-				"is_optional_phase":                     schema.BoolAttribute{Computed: true},
-				"release_retention_policy":              getRetentionPolicySchema(),
-				"tentacle_retention_policy":             getRetentionPolicySchema(),
-			},
-		},
-	}
-}
-
-func getRetentionPolicySchema() schema.ListNestedAttribute {
-	return schema.ListNestedAttribute{
-		Computed: true,
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: map[string]schema.Attribute{
-				"quantity_to_keep":    schema.Int64Attribute{Computed: true},
-				"should_keep_forever": schema.BoolAttribute{Computed: true},
-				"unit":                schema.StringAttribute{Computed: true},
-			},
-		},
-	}
 }
 
 func lifecycleObjectType() map[string]attr.Type {
