@@ -20,7 +20,7 @@ func NewProjectGroupResource() resource.Resource {
 }
 
 func (r *projectGroupTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "octopusdeploy_project_group"
+	resp.TypeName = ProviderTypeName + "_project_group"
 }
 
 func (r *projectGroupTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -59,7 +59,6 @@ func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.Crea
 	data.RetentionPolicyID = types.StringValue(group.RetentionPolicyID)
 	data.Description = types.StringValue(group.Description)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 }
 
 func (r *projectGroupTypeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
