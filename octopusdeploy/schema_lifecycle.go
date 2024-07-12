@@ -42,42 +42,6 @@ func expandLifecycle(d *schema.ResourceData) *lifecycles.Lifecycle {
 	return lifecycle
 }
 
-func flattenLifecycle(lifecycle *lifecycles.Lifecycle) map[string]interface{} {
-	if lifecycle == nil {
-		return nil
-	}
-
-	return map[string]interface{}{
-		"description":               lifecycle.Description,
-		"id":                        lifecycle.GetID(),
-		"name":                      lifecycle.Name,
-		"phase":                     flattenPhases(lifecycle.Phases),
-		"space_id":                  lifecycle.SpaceID,
-		"release_retention_policy":  flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy),
-		"tentacle_retention_policy": flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy),
-	}
-}
-
-func getLifecycleDataSchema() map[string]*schema.Schema {
-	dataSchema := getLifecycleSchema()
-	setDataSchema(&dataSchema)
-
-	return map[string]*schema.Schema{
-		"ids": getQueryIDs(),
-		"lifecycles": {
-			Computed:    true,
-			Description: "A list of lifecycles that match the filter(s).",
-			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
-			Type:        schema.TypeList,
-		},
-		"partial_name": getQueryPartialName(),
-		"skip":         getQuerySkip(),
-		"take":         getQueryTake(),
-		"space_id":     getSpaceIDSchema(),
-	}
-}
-
 func getLifecycleSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"description": {

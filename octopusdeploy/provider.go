@@ -24,7 +24,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_kubernetes_agent_deployment_targets":             dataSourceKubernetesAgentDeploymentTargets(),
 			"octopusdeploy_kubernetes_cluster_deployment_targets":           dataSourceKubernetesClusterDeploymentTargets(),
 			"octopusdeploy_library_variable_sets":                           dataSourceLibraryVariableSet(),
-			"octopusdeploy_lifecycles":                                      dataSourceLifecycles(),
 			"octopusdeploy_listening_tentacle_deployment_targets":           dataSourceListeningTentacleDeploymentTargets(),
 			"octopusdeploy_machine":                                         dataSourceMachine(),
 			"octopusdeploy_machine_policies":                                dataSourceMachinePolicies(),
