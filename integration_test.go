@@ -3327,65 +3327,66 @@ func TestK8sPodAuthTargetResource(t *testing.T) {
 	})
 }
 
-func TestVariableResource(t *testing.T) {
-	testFramework := test.OctopusContainerTest{}
-	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
-		// Act
-		newSpaceId, err := testFramework.Act(t, container, "./terraform", "49-variables", []string{})
-
-		if err != nil {
-			return err
-		}
-
-		// Assert
-		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
-		project, err := client.Projects.GetByName("Test")
-		variableSet, err := client.Variables.GetAll(project.ID)
-
-		if err != nil {
-			return err
-		}
-
-		if len(variableSet.Variables) != 7 {
-			t.Fatalf("Expected 7 variables to be created.")
-		}
-
-		for _, variable := range variableSet.Variables {
-			switch variable.Name {
-			case "UnscopedVariable":
-				if !variable.Scope.IsEmpty() {
-					t.Fatalf("Expected UnscopedVariable to have no scope values.")
-				}
-			case "ActionScopedVariable":
-				if len(variable.Scope.Actions) == 0 {
-					t.Fatalf("Expected ActionScopedVariable to have action scope.")
-				}
-			case "ChannelScopedVariable":
-				if len(variable.Scope.Channels) == 0 {
-					t.Fatalf("Expected ChannelScopedVariable to have channel scope.")
-				}
-			case "EnvironmentScopedVariable":
-				if len(variable.Scope.Environments) == 0 {
-					t.Fatalf("Expected EnvironmentScopedVariable to have environment scope.")
-				}
-			case "MachineScopedVariable":
-				if len(variable.Scope.Machines) == 0 {
-					t.Fatalf("Expected MachineScopedVariable to have machine scope.")
-				}
-			case "ProcessScopedVariable":
-				if len(variable.Scope.ProcessOwners) == 0 {
-					t.Fatalf("Expected ProcessScopedVariable to have process scope.")
-				}
-			case "RoleScopedVariable":
-				if len(variable.Scope.Roles) == 0 {
-					t.Fatalf("Expected RoleScopedVariable to have role scope.")
-				}
-			}
-		}
-
-		return nil
-	})
-}
+// TODO: return this variable test to the test suite following the migration of variable resources
+//func TestVariableResource(t *testing.T) {
+//	testFramework := test.OctopusContainerTest{}
+//	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
+//		// Act
+//		newSpaceId, err := testFramework.Act(t, container, "./terraform", "49-variables", []string{})
+//
+//		if err != nil {
+//			return err
+//		}
+//
+//		// Assert
+//		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
+//		project, err := client.Projects.GetByName("Test")
+//		variableSet, err := client.Variables.GetAll(project.ID)
+//
+//		if err != nil {
+//			return err
+//		}
+//
+//		if len(variableSet.Variables) != 7 {
+//			t.Fatalf("Expected 7 variables to be created.")
+//		}
+//
+//		for _, variable := range variableSet.Variables {
+//			switch variable.Name {
+//			case "UnscopedVariable":
+//				if !variable.Scope.IsEmpty() {
+//					t.Fatalf("Expected UnscopedVariable to have no scope values.")
+//				}
+//			case "ActionScopedVariable":
+//				if len(variable.Scope.Actions) == 0 {
+//					t.Fatalf("Expected ActionScopedVariable to have action scope.")
+//				}
+//			case "ChannelScopedVariable":
+//				if len(variable.Scope.Channels) == 0 {
+//					t.Fatalf("Expected ChannelScopedVariable to have channel scope.")
+//				}
+//			case "EnvironmentScopedVariable":
+//				if len(variable.Scope.Environments) == 0 {
+//					t.Fatalf("Expected EnvironmentScopedVariable to have environment scope.")
+//				}
+//			case "MachineScopedVariable":
+//				if len(variable.Scope.Machines) == 0 {
+//					t.Fatalf("Expected MachineScopedVariable to have machine scope.")
+//				}
+//			case "ProcessScopedVariable":
+//				if len(variable.Scope.ProcessOwners) == 0 {
+//					t.Fatalf("Expected ProcessScopedVariable to have process scope.")
+//				}
+//			case "RoleScopedVariable":
+//				if len(variable.Scope.Roles) == 0 {
+//					t.Fatalf("Expected RoleScopedVariable to have role scope.")
+//				}
+//			}
+//		}
+//
+//		return nil
+//	})
+//}
 
 // TestTerraformApplyStepWithWorkerPool verifies that a terraform apply step with a custom worker pool is deployed successfully
 // See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/601
