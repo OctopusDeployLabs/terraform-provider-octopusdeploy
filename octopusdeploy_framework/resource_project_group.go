@@ -53,7 +53,7 @@ func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	updateProjectGroup(data, group)
+	updateProjectGroup(&data, group)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -70,7 +70,7 @@ func (r *projectGroupTypeResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	updateProjectGroup(data, group)
+	updateProjectGroup(&data, group)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -102,7 +102,7 @@ func (r *projectGroupTypeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	updateProjectGroup(data, updatedProjectGroup)
+	updateProjectGroup(&data, updatedProjectGroup)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -120,7 +120,7 @@ func (r *projectGroupTypeResource) Delete(ctx context.Context, req resource.Dele
 	}
 }
 
-func updateProjectGroup(data schemas.ProjectGroupTypeResourceModel, group *projectgroups.ProjectGroup) {
+func updateProjectGroup(data *schemas.ProjectGroupTypeResourceModel, group *projectgroups.ProjectGroup) {
 	data.ID = types.StringValue(group.ID)
 	data.Name = types.StringValue(group.Name)
 	data.SpaceID = types.StringValue(group.SpaceID)
