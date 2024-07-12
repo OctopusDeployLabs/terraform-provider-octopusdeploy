@@ -2,9 +2,12 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -22,9 +25,9 @@ func TestAccOctopusDeployDockerContainerRegistry(t *testing.T) {
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testDockerContainerRegistryCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testDockerContainerRegistryCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -55,9 +58,8 @@ func testDockerContainerRegistryBasic(localName string, apiVersion string, feedU
 
 func testDockerContainerRegistryExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		feedID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Feeds.GetByID(feedID); err != nil {
+		if _, err := octoClient.Feeds.GetByID(feedID); err != nil {
 			return err
 		}
 
@@ -71,12 +73,89 @@ func testDockerContainerRegistryCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		feed, err := client.Feeds.GetByID(rs.Primary.ID)
+		feed, err := octoClient.Feeds.GetByID(rs.Primary.ID)
 		if err == nil && feed != nil {
 			return fmt.Errorf("Docker Container Registry (%s) still exists", rs.Primary.ID)
 		}
 	}
 
 	return nil
+}
+
+// TestDockerFeedResource verifies that a docker feed can be reimported with the correct settings
+func TestDockerFeedResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "11-dockerfeed", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "11a-dockerfeedds"), newSpaceId, []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := feeds.FeedsQuery{
+		PartialName: "Docker",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Feeds.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an feed called \"Docker\"")
+	}
+	resource := resources.Items[0].(*feeds.DockerContainerRegistry)
+
+	if resource.FeedType != "Docker" {
+		t.Fatal("The feed must have a type of \"Docker\"")
+	}
+
+	if resource.Username != "username" {
+		t.Fatal("The feed must have a username of \"username\"")
+	}
+
+	if resource.APIVersion != "v1" {
+		t.Fatal("The feed must be have a API version of \"v1\"")
+	}
+
+	if resource.FeedURI != "https://index.docker.io" {
+		t.Fatal("The feed must be have a feed uri of \"https://index.docker.io\"")
+	}
+
+	foundExecutionTarget := false
+	foundNotAcquired := false
+	for _, o := range resource.PackageAcquisitionLocationOptions {
+		if o == "ExecutionTarget" {
+			foundExecutionTarget = true
+		}
+
+		if o == "NotAcquired" {
+			foundNotAcquired = true
+		}
+	}
+
+	if !(foundExecutionTarget && foundNotAcquired) {
+		t.Fatal("The feed must be have a PackageAcquisitionLocationOptions including \"ExecutionTarget\" and \"NotAcquired\"")
+	}
+
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "11a-dockerfeedds"), "data_lookup")
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }

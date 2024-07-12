@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -16,8 +15,8 @@ func TestAccOctopusDeployDeployWindowsServiceAction(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDeployWindowsServiceAction(),
@@ -36,8 +35,8 @@ func TestAccOctopusDeployWindowsServiceFeature(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWindowsServiceFeature(),
@@ -63,6 +62,7 @@ func testAccDeployWindowsServiceAction() string {
 			service_account = "_CUSTOM"
 			service_name = "MyService"
 			start_mode = "manual"
+			sort_order = 1
 
 			primary_package {
 				package_id = "MyPackage"
@@ -75,6 +75,7 @@ func testAccWindowsServiceFeature() string {
 	return testAccBuildTestAction(`
 		deploy_package_action {
 			name = "Test"
+			sort_order = 1
 
 			primary_package {
 				package_id = "MyPackage"
@@ -98,9 +99,7 @@ func testAccWindowsServiceFeature() string {
 
 func testAccCheckDeployWindowsServiceActionOrFeature(expectedActionType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-
-		process, err := getDeploymentProcess(s, client)
+		process, err := getDeploymentProcess(s, octoClient)
 		if err != nil {
 			return err
 		}

@@ -2,10 +2,13 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -15,7 +18,7 @@ func TestAccOctopusDeployMavenFeed(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_maven_feed." + localName
 
-	downloadAttempts := acctest.RandIntRange(0, 10)
+	downloadAttempts := acctest.RandIntRange(1, 10)
 	downloadRetryBackoffSeconds := acctest.RandIntRange(0, 60)
 	feedURI := "https://repo.maven.apache.org/maven2/"
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -23,9 +26,9 @@ func TestAccOctopusDeployMavenFeed(t *testing.T) {
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testMavenFeedCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testMavenFeedCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -56,9 +59,8 @@ func testMavenFeedBasic(localName string, downloadAttempts int, downloadRetryBac
 
 func testMavenFeedExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		feedID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.Feeds.GetByID(feedID); err != nil {
+		if _, err := octoClient.Feeds.GetByID(feedID); err != nil {
 			return err
 		}
 
@@ -72,12 +74,92 @@ func testMavenFeedCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		feed, err := client.Feeds.GetByID(rs.Primary.ID)
+		feed, err := octoClient.Feeds.GetByID(rs.Primary.ID)
 		if err == nil && feed != nil {
 			return fmt.Errorf("Maven feed (%s) still exists", rs.Primary.ID)
 		}
 	}
 
 	return nil
+}
+
+// TestMavenFeedResource verifies that a maven feed can be reimported with the correct settings
+func TestMavenFeedResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "13-mavenfeed", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "13a-mavenfeedds"), newSpaceId, []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := feeds.FeedsQuery{
+		PartialName: "Maven",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Feeds.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an feed called \"Maven\"")
+	}
+	resource := resources.Items[0].(*feeds.MavenFeed)
+
+	if resource.FeedType != "Maven" {
+		t.Fatal("The feed must have a type of \"Maven\"")
+	}
+
+	if resource.Username != "username" {
+		t.Fatal("The feed must have a username of \"username\"")
+	}
+
+	if resource.DownloadAttempts != 5 {
+		t.Fatal("The feed must be have a downloads attempts set to \"5\"")
+	}
+
+	if resource.DownloadRetryBackoffSeconds != 10 {
+		t.Fatal("The feed must be have a downloads retry backoff set to \"10\"")
+	}
+
+	if resource.FeedURI != "https://repo.maven.apache.org/maven2/" {
+		t.Fatal("The feed must be have a feed uri of \"https://repo.maven.apache.org/maven2/\"")
+	}
+
+	foundExecutionTarget := false
+	foundServer := false
+	for _, o := range resource.PackageAcquisitionLocationOptions {
+		if o == "ExecutionTarget" {
+			foundExecutionTarget = true
+		}
+
+		if o == "Server" {
+			foundServer = true
+		}
+	}
+
+	if !(foundExecutionTarget && foundServer) {
+		t.Fatal("The feed must be have a PackageAcquisitionLocationOptions including \"ExecutionTarget\" and \"Server\"")
+	}
+
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "13a-mavenfeedds"), "data_lookup")
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }
