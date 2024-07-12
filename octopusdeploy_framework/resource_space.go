@@ -40,12 +40,11 @@ func (s *spaceResource) Configure(_ context.Context, req resource.ConfigureReque
 
 func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data schemas.SpaceModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	//tflog.Info(ctx, fmt.Sprintf("creating space: %#v", data))
 	util.Create(ctx, "space", data)
 
 	newSpace := spaces.NewSpace(data.Name.ValueString())
@@ -54,30 +53,19 @@ func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, 
 	newSpace.IsDefault = data.IsDefault.ValueBool()
 	newSpace.TaskQueueStopped = data.IsTaskQueueStopped.ValueBool()
 
-	teams := make([]types.String, 0, len(data.SpaceManagersTeams.Elements()))
-	diags := data.SpaceManagersTeams.ElementsAs(ctx, &teams, false)
+	convertedTeams, diags := util.ToStringArray(ctx, data.SpaceManagersTeams)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-	convertTeams := make([]string, 0)
-	for _, t := range teams {
-		convertTeams = append(convertTeams, t.ValueString())
-	}
-	newSpace.SpaceManagersTeams = convertTeams
+	newSpace.SpaceManagersTeams = convertedTeams
 
-	teamMembers := make([]types.String, 0, len(data.SpaceManagersTeamMembers.Elements()))
-	diags = data.SpaceManagersTeamMembers.ElementsAs(ctx, &teamMembers, false)
+	convertedTeamMembers, diags := util.ToStringArray(ctx, data.SpaceManagersTeamMembers)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
-
-	convertTeamMembers := make([]string, 0)
-	for _, t := range teamMembers {
-		convertTeamMembers = append(convertTeamMembers, t.ValueString())
-	}
-	newSpace.SpaceManagersTeamMembers = convertTeamMembers
+	newSpace.SpaceManagersTeamMembers = convertedTeamMembers
 
 	tflog.Debug(ctx, fmt.Sprintf("creating space %#v", newSpace))
 
@@ -89,15 +77,40 @@ func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	tflog.Debug(ctx, fmt.Sprintf("resulting space %#v", createdSpace))
 
+	// the result of a space add operation seems to not return the correct values for teams, but the get does
+	createdSpace, _ = spaces.GetByID(s.Client, createdSpace.ID)
+
+	if data.IsTaskQueueStopped.ValueBool() == true {
+		// a space can't have a stopped task queue via the create, need to do a subsequent update
+		createdSpace.TaskQueueStopped = true
+		_, err = spaces.Update(s.Client, createdSpace)
+		if err != nil {
+			resp.Diagnostics.AddError("Error updating space task queue", err.Error())
+		}
+		createdSpace, _ = spaces.GetByID(s.Client, createdSpace.ID)
+		tflog.Debug(ctx, fmt.Sprintf("resulting space after setting task queue stopped %#v", createdSpace))
+	}
+
 	data.ID = types.StringValue(createdSpace.ID)
 	data.Description = types.StringValue(createdSpace.Description)
 	data.Slug = types.StringValue(createdSpace.Slug)
 	data.IsTaskQueueStopped = types.BoolValue(createdSpace.TaskQueueStopped)
 	data.IsDefault = types.BoolValue(createdSpace.IsDefault)
-	data.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, createdSpace.SpaceManagersTeamMembers)
-	data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, createdSpace.SpaceManagersTeams))
+
+	data.SpaceManagersTeamMembers, diags = types.SetValueFrom(ctx, types.StringType, createdSpace.SpaceManagersTeamMembers)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+
+	data.SpaceManagersTeams, diags = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, createdSpace.SpaceManagersTeams))
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	tflog.Debug(ctx, fmt.Sprintf("state space %#v", data))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-	//tflog.Info(ctx, fmt.Sprintf("space created (%s)", data.ID.ValueString()))
+	util.Created(ctx, "space")
 }
 
 func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -116,7 +129,7 @@ func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	data.ID = types.StringValue(spaceResult.ID)
+	data.Name = types.StringValue(spaceResult.Name)
 	data.Description = types.StringValue(spaceResult.Description)
 	data.Slug = types.StringValue(spaceResult.Slug)
 	data.IsTaskQueueStopped = types.BoolValue(spaceResult.TaskQueueStopped)
@@ -129,38 +142,69 @@ func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp
 }
 
 func (s *spaceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data schemas.SpaceModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	// read plan and state
+	var plan, state schemas.SpaceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	spaceResult, err := spaces.GetByID(s.Client, data.ID.ValueString())
-
+	// get existing resource from api
+	spaceResult, err := spaces.GetByID(s.Client, state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("unable to query spaces", err.Error())
 		return
 	}
 
+	// update the api resource
+	spaceResult.Name = plan.Name.ValueString()
+	spaceResult.Slug = plan.Slug.ValueString()
+	spaceResult.Description = plan.Description.ValueString()
+	spaceResult.IsDefault = plan.IsDefault.ValueBool()
+	spaceResult.TaskQueueStopped = plan.IsTaskQueueStopped.ValueBool()
+
+	convertedTeams, diags := util.ToStringArray(ctx, plan.SpaceManagersTeams)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	spaceResult.SpaceManagersTeams = addSpaceManagers(spaceResult.ID, convertedTeams)
+
+	convertedTeamMembers, diags := util.ToStringArray(ctx, plan.SpaceManagersTeamMembers)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	spaceResult.SpaceManagersTeamMembers = convertedTeamMembers
+
+	// push to api
 	tflog.Debug(ctx, fmt.Sprintf("update: spaceResult before update: %#v", spaceResult))
-	updatedSpace, err := spaces.Update(s.Client, spaceResult)
+	_, err = spaces.Update(s.Client, spaceResult)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to update space", err.Error())
 		return
 	}
 
-	updatedSpace, err = spaces.GetByID(s.Client, data.ID.ValueString())
-
+	// refresh from the api
+	updatedSpace, _ := spaces.GetByID(s.Client, state.ID.ValueString())
 	tflog.Debug(ctx, fmt.Sprintf("Update: updatedSpace: %+v", updatedSpace))
 
-	data.ID = types.StringValue(updatedSpace.ID)
-	data.Description = types.StringValue(updatedSpace.Description)
-	data.Slug = types.StringValue(updatedSpace.Slug)
-	data.IsTaskQueueStopped = types.BoolValue(updatedSpace.TaskQueueStopped)
-	data.IsDefault = types.BoolValue(updatedSpace.IsDefault)
-	data.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, updatedSpace.SpaceManagersTeamMembers)
-	data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, updatedSpace.SpaceManagersTeams))
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	// update the plan for the managers teams
+	plan.ID = types.StringValue(spaceResult.ID)
+	plan.Name = types.StringValue(spaceResult.Name)
+	plan.Description = types.StringValue(spaceResult.Description)
+	plan.Slug = types.StringValue(spaceResult.Slug)
+	plan.IsTaskQueueStopped = types.BoolValue(spaceResult.TaskQueueStopped)
+	plan.IsDefault = types.BoolValue(spaceResult.IsDefault)
+	plan.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
+	plan.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, updatedSpace.SpaceManagersTeams))
+
+	// save plan to state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (s *spaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -199,12 +243,19 @@ func removeSpaceManagers(ctx context.Context, teamIDs []string) []string {
 	}
 	var newSlice []string
 
-	tflog.Debug(ctx, fmt.Sprintf("before removeSpaceManagers: %#v", teamIDs))
 	for _, v := range teamIDs {
 		if !strings.Contains(v, spaceManagersTeamIDPrefix) {
 			newSlice = append(newSlice, v)
 		}
 	}
-	tflog.Debug(ctx, fmt.Sprintf("after removeSpaceManagers: %#v", newSlice))
+	return newSlice
+}
+
+func addSpaceManagers(spaceID string, teamIDs []string) []string {
+	var newSlice []string
+	if util.GetStringOrEmpty(spaceID) != "" {
+		newSlice = append(newSlice, spaceManagersTeamIDPrefix+spaceID)
+	}
+	newSlice = append(newSlice, teamIDs...)
 	return newSlice
 }

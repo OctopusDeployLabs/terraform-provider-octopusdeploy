@@ -8,5 +8,8 @@ import (
 
 func Create(ctx context.Context, resource string, v ...any) {
 	tflog.Info(ctx, fmt.Sprintf("creating %s: %#v", resource, v))
-	defer tflog.Info(ctx, fmt.Sprintf("%s created"))
+}
+
+func Created(ctx context.Context, resource string, v ...any) {
+	tflog.Info(ctx, fmt.Sprintf("created %s: %#v", resource, v))
 }
