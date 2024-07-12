@@ -20,7 +20,7 @@ func NewProjectGroupResource() resource.Resource {
 }
 
 func (r *projectGroupTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "octopusdeploy_project_group"
+	resp.TypeName = ProviderTypeName + "_project_group"
 }
 
 func (r *projectGroupTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -34,8 +34,8 @@ func (r *projectGroupTypeResource) Configure(_ context.Context, req resource.Con
 }
 
 func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *schemas.ProjectGroupTypeResourceModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	var data schemas.ProjectGroupTypeResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -53,13 +53,8 @@ func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	data.ID = types.StringValue(group.ID)
-	data.Name = types.StringValue(group.Name)
-	data.SpaceID = types.StringValue(group.SpaceID)
-	data.RetentionPolicyID = types.StringValue(group.RetentionPolicyID)
-	data.Description = types.StringValue(group.Description)
+	updateProjectGroup(&data, group)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 }
 
 func (r *projectGroupTypeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -75,11 +70,7 @@ func (r *projectGroupTypeResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	data.ID = types.StringValue(group.ID)
-	data.Name = types.StringValue(group.Name)
-	data.SpaceID = types.StringValue(group.SpaceID)
-	data.RetentionPolicyID = types.StringValue(group.RetentionPolicyID)
-	data.Description = types.StringValue(group.Description)
+	updateProjectGroup(&data, group)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -111,11 +102,7 @@ func (r *projectGroupTypeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	data.ID = types.StringValue(updatedProjectGroup.ID)
-	data.Name = types.StringValue(updatedProjectGroup.Name)
-	data.SpaceID = types.StringValue(updatedProjectGroup.SpaceID)
-	data.RetentionPolicyID = types.StringValue(updatedProjectGroup.RetentionPolicyID)
-	data.Description = types.StringValue(updatedProjectGroup.Description)
+	updateProjectGroup(&data, updatedProjectGroup)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -131,4 +118,12 @@ func (r *projectGroupTypeResource) Delete(ctx context.Context, req resource.Dele
 		resp.Diagnostics.AddError("unable to delete project group", err.Error())
 		return
 	}
+}
+
+func updateProjectGroup(data *schemas.ProjectGroupTypeResourceModel, group *projectgroups.ProjectGroup) {
+	data.ID = types.StringValue(group.ID)
+	data.Name = types.StringValue(group.Name)
+	data.SpaceID = types.StringValue(group.SpaceID)
+	data.RetentionPolicyID = types.StringValue(group.RetentionPolicyID)
+	data.Description = types.StringValue(group.Description)
 }
