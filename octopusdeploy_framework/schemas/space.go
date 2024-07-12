@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const description = "space"
+const spaceDescription = "space"
 
 type SpaceModel struct {
 	ID                       types.String `tfsdk:"id"`
@@ -23,9 +23,9 @@ type SpaceModel struct {
 func GetSpaceResourceSchema() map[string]resourceSchema.Attribute {
 	return map[string]resourceSchema.Attribute{
 		"id":          GetIdResourceSchema(),
-		"description": GetDescriptionResourceSchema(description),
+		"description": GetDescriptionResourceSchema(spaceDescription),
 		"name":        GetNameResourceSchema(true),
-		"slug":        GetSlugResourceSchema(description),
+		"slug":        GetSlugResourceSchema(spaceDescription),
 		"space_managers_teams": resourceSchema.SetAttribute{
 			ElementType: types.StringType,
 			Description: "A list of team IDs designated to be managers of this space.",
@@ -54,9 +54,9 @@ func GetSpaceResourceSchema() map[string]resourceSchema.Attribute {
 func GetSpaceDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":          GetIdDatasourceSchema(),
-		"description": GetDescriptionDatasourceSchema(description),
+		"description": GetDescriptionDatasourceSchema(spaceDescription),
 		"name":        GetNameDatasourceWithMaxLengthSchema(true, 20),
-		"slug":        GetSlugDatasourceSchema(description),
+		"slug":        GetSlugDatasourceSchema(spaceDescription),
 		"space_managers_teams": datasourceSchema.SetAttribute{
 			ElementType: types.StringType,
 			Description: "A list of team IDs designated to be managers of this space.",
