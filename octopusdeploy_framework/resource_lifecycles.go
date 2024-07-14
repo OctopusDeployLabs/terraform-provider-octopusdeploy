@@ -196,9 +196,16 @@ func flattenRetentionPeriod(retentionPeriod *core.RetentionPeriod) types.List {
 }
 
 func expandLifecycle(data *lifecycleTypeResourceModel) *lifecycles.Lifecycle {
+	if data == nil {
+		return nil
+	}
+
 	lifecycle := lifecycles.NewLifecycle(data.Name.ValueString())
 	lifecycle.Description = data.Description.ValueString()
 	lifecycle.SpaceID = data.SpaceID.ValueString()
+	if !data.ID.IsNull() && data.ID.ValueString() != "" {
+		lifecycle.ID = data.ID.ValueString()
+	}
 
 	lifecycle.Phases = expandPhases(data.Phase)
 	lifecycle.ReleaseRetentionPolicy = expandRetentionPeriod(data.ReleaseRetentionPolicy)
@@ -208,7 +215,7 @@ func expandLifecycle(data *lifecycleTypeResourceModel) *lifecycles.Lifecycle {
 }
 
 func expandPhases(phases types.List) []*lifecycles.Phase {
-	if phases.IsNull() || phases.IsUnknown() {
+	if phases.IsNull() || phases.IsUnknown() || len(phases.Elements()) == 0 {
 		return nil
 	}
 
