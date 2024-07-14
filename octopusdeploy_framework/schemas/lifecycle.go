@@ -29,12 +29,8 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 	return resourceSchema.ListNestedBlock{
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
-				"id": resourceSchema.StringAttribute{
-					Computed: true,
-				},
-				"name": resourceSchema.StringAttribute{
-					Required: true,
-				},
+				"id":   util.GetIdResourceSchema(),
+				"name": util.GetNameResourceSchema(true),
 				"automatic_deployment_targets": resourceSchema.ListAttribute{
 					ElementType: types.StringType,
 					Optional:    true,
@@ -81,22 +77,23 @@ func getResourceRetentionPolicyBlockSchema() resourceSchema.ListNestedBlock {
 }
 
 func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
+	description := "lifecycle"
 	return datasourceSchema.Schema{
 		Attributes: map[string]datasourceSchema.Attribute{
-			"id":           datasourceSchema.StringAttribute{Computed: true},
-			"space_id":     datasourceSchema.StringAttribute{Optional: true},
-			"ids":          datasourceSchema.ListAttribute{ElementType: types.StringType, Optional: true},
-			"partial_name": datasourceSchema.StringAttribute{Optional: true},
-			"skip":         datasourceSchema.Int64Attribute{Optional: true},
-			"take":         datasourceSchema.Int64Attribute{Optional: true},
+			"id":           util.GetIdDatasourceSchema(),
+			"space_id":     util.GetSpaceIdDatasourceSchema(description),
+			"ids":          util.GetSpaceIdDatasourceSchema(description),
+			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
+			"skip":         util.GetQuerySkipDatasourceSchema(),
+			"take":         util.GetQueryTakeDatasourceSchema(),
 			"lifecycles": datasourceSchema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: map[string]datasourceSchema.Attribute{
-						"id":                        datasourceSchema.StringAttribute{Computed: true},
-						"space_id":                  datasourceSchema.StringAttribute{Computed: true},
-						"name":                      datasourceSchema.StringAttribute{Computed: true},
-						"description":               datasourceSchema.StringAttribute{Computed: true},
+						"id":                        util.GetIdDatasourceSchema(),
+						"space_id":                  util.GetSpaceIdDatasourceSchema(description),
+						"name":                      util.GetNameDatasourceSchema(true),
+						"description":               util.GetDescriptionDatasourceSchema(description),
 						"phase":                     getDatasourcePhasesSchema(),
 						"release_retention_policy":  getDatasourceRetentionPolicySchema(),
 						"tentacle_retention_policy": getDatasourceRetentionPolicySchema(),
@@ -112,8 +109,8 @@ func getDatasourcePhasesSchema() datasourceSchema.ListNestedAttribute {
 		Computed: true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				"id":                                    datasourceSchema.StringAttribute{Computed: true},
-				"name":                                  datasourceSchema.StringAttribute{Computed: true},
+				"id":                                    util.GetIdDatasourceSchema(),
+				"name":                                  util.GetNameDatasourceSchema(true),
 				"automatic_deployment_targets":          datasourceSchema.ListAttribute{ElementType: types.StringType, Computed: true},
 				"optional_deployment_targets":           datasourceSchema.ListAttribute{ElementType: types.StringType, Computed: true},
 				"minimum_environments_before_promotion": datasourceSchema.Int64Attribute{Computed: true},
