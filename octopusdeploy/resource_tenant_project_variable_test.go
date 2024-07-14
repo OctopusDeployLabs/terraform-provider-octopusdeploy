@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -39,7 +38,7 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAccTenantProjectVariableCheckDestroy,
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -116,13 +115,12 @@ func testTenantProjectVariableExists(prefix string) resource.TestCheckFunc {
 			}
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		tenant, err := client.Tenants.GetByID(tenantID)
+		tenant, err := octoClient.Tenants.GetByID(tenantID)
 		if err != nil {
 			return err
 		}
 
-		tenantVariables, err := client.Tenants.GetVariables(tenant)
+		tenantVariables, err := octoClient.Tenants.GetVariables(tenant)
 		if err != nil {
 			return err
 		}
@@ -140,7 +138,6 @@ func testTenantProjectVariableExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccTenantProjectVariableCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_tenant_project_variable" {
 			continue
@@ -156,12 +153,12 @@ func testAccTenantProjectVariableCheckDestroy(s *terraform.State) error {
 		environmentID := importStrings[2]
 		templateID := importStrings[3]
 
-		tenant, err := client.Tenants.GetByID(tenantID)
+		tenant, err := octoClient.Tenants.GetByID(tenantID)
 		if err != nil {
 			return nil
 		}
 
-		tenantVariables, err := client.Tenants.GetVariables(tenant)
+		tenantVariables, err := octoClient.Tenants.GetVariables(tenant)
 		if err != nil {
 			return nil
 		}

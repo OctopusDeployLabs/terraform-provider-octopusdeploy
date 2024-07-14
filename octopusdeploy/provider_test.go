@@ -1,6 +1,13 @@
 package octopusdeploy
 
 import (
+	"context"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
+	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
+	"log"
 	"os"
 	"testing"
 
@@ -33,5 +40,38 @@ func testAccPreCheck(t *testing.T) {
 	}
 	if v := os.Getenv("OCTOPUS_APIKEY"); isEmpty(v) {
 		t.Fatal("OCTOPUS_APIKEY must be set for acceptance tests")
+	}
+}
+
+func ProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, error) {
+	return map[string]func() (tfprotov6.ProviderServer, error){
+		"octopusdeploy": func() (tfprotov6.ProviderServer, error) {
+			ctx := context.Background()
+
+			upgradedSdkServer, err := tf5to6server.UpgradeServer(
+				ctx,
+				Provider().GRPCProvider)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if err != nil {
+				log.Fatal(err)
+			}
+			providers := []func() tfprotov6.ProviderServer{
+				func() tfprotov6.ProviderServer {
+					return upgradedSdkServer
+				},
+				providerserver.NewProtocol6(octopusdeploy_framework.NewOctopusDeployFrameworkProvider()),
+			}
+
+			return tf6muxserver.NewMuxServer(context.Background(), providers...)
+		},
+	}
+}
+
+func SkipCI(t *testing.T, reason string) {
+	if os.Getenv("Skip_Legacy_Tests") == "" {
+		t.Skip(reason)
 	}
 }

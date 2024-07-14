@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
 	"log"
 
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
