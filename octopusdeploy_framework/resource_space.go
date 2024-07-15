@@ -57,14 +57,14 @@ func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, 
 	newSpace.IsDefault = data.IsDefault.ValueBool()
 	newSpace.TaskQueueStopped = data.IsTaskQueueStopped.ValueBool()
 
-	convertedTeams, diags := util.ListToStringArray(ctx, data.SpaceManagersTeams)
+	convertedTeams, diags := util.SetToStringArray(ctx, data.SpaceManagersTeams)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 	newSpace.SpaceManagersTeams = convertedTeams
 
-	convertedTeamMembers, diags := util.ListToStringArray(ctx, data.SpaceManagersTeamMembers)
+	convertedTeamMembers, diags := util.SetToStringArray(ctx, data.SpaceManagersTeamMembers)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -101,13 +101,13 @@ func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, 
 	data.IsTaskQueueStopped = types.BoolValue(createdSpace.TaskQueueStopped)
 	data.IsDefault = types.BoolValue(createdSpace.IsDefault)
 
-	data.SpaceManagersTeamMembers, diags = types.ListValueFrom(ctx, types.StringType, createdSpace.SpaceManagersTeamMembers)
+	data.SpaceManagersTeamMembers, diags = types.SetValueFrom(ctx, types.StringType, createdSpace.SpaceManagersTeamMembers)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	data.SpaceManagersTeams, diags = types.ListValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, createdSpace.SpaceManagersTeams))
+	data.SpaceManagersTeams, diags = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, createdSpace.SpaceManagersTeams))
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -138,8 +138,8 @@ func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	data.Slug = types.StringValue(spaceResult.Slug)
 	data.IsTaskQueueStopped = types.BoolValue(spaceResult.TaskQueueStopped)
 	data.IsDefault = types.BoolValue(spaceResult.IsDefault)
-	data.SpaceManagersTeamMembers, _ = types.ListValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
-	data.SpaceManagersTeams, _ = types.ListValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, spaceResult.SpaceManagersTeams))
+	data.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
+	data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, spaceResult.SpaceManagersTeams))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	tflog.Info(ctx, fmt.Sprintf("space read (%s)", data.ID))
@@ -171,14 +171,14 @@ func (s *spaceResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	spaceResult.IsDefault = plan.IsDefault.ValueBool()
 	spaceResult.TaskQueueStopped = plan.IsTaskQueueStopped.ValueBool()
 
-	convertedTeams, diags := util.ListToStringArray(ctx, plan.SpaceManagersTeams)
+	convertedTeams, diags := util.SetToStringArray(ctx, plan.SpaceManagersTeams)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 	spaceResult.SpaceManagersTeams = addSpaceManagers(spaceResult.ID, convertedTeams)
 
-	convertedTeamMembers, diags := util.ListToStringArray(ctx, plan.SpaceManagersTeamMembers)
+	convertedTeamMembers, diags := util.SetToStringArray(ctx, plan.SpaceManagersTeamMembers)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -204,8 +204,8 @@ func (s *spaceResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	plan.Slug = types.StringValue(spaceResult.Slug)
 	plan.IsTaskQueueStopped = types.BoolValue(spaceResult.TaskQueueStopped)
 	plan.IsDefault = types.BoolValue(spaceResult.IsDefault)
-	plan.SpaceManagersTeamMembers, _ = types.ListValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
-	plan.SpaceManagersTeams, _ = types.ListValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, updatedSpace.SpaceManagersTeams))
+	plan.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
+	plan.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, updatedSpace.SpaceManagersTeams))
 
 	// save plan to state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
