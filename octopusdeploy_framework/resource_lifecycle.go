@@ -61,6 +61,14 @@ func (r *lifecycleTypeResource) Create(ctx context.Context, req resource.CreateR
 
 	newLifecycle := expandLifecycle(data)
 
+	if newLifecycle.ReleaseRetentionPolicy == nil {
+		newLifecycle.ReleaseRetentionPolicy = core.NewRetentionPeriod(30, "Days", false)
+	}
+
+	if newLifecycle.TentacleRetentionPolicy == nil {
+		newLifecycle.TentacleRetentionPolicy = core.NewRetentionPeriod(30, "Days", false)
+	}
+
 	lifecycle, err := lifecycles.Add(r.Config.Client, newLifecycle)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to create lifecycle", err.Error())

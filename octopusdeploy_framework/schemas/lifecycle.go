@@ -2,25 +2,28 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func GetResourceLifecycleSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":          util.GetIdResourceSchema(),
-			"space_id":    util.GetSpaceIdResourceSchema("lifecycle"),
-			"name":        util.GetNameResourceSchema(true),
-			"description": util.GetDescriptionResourceSchema("lifecycle"),
+			"id":                        util.GetIdResourceSchema(),
+			"space_id":                  util.GetSpaceIdResourceSchema("lifecycle"),
+			"name":                      util.GetNameResourceSchema(true),
+			"description":               util.GetDescriptionResourceSchema("lifecycle"),
+			"release_retention_policy":  getResourceRetentionPolicySchema(),
+			"tentacle_retention_policy": getResourceRetentionPolicySchema(),
 		},
 		Blocks: map[string]resourceSchema.Block{
-			"phase":                     getResourcePhaseBlockSchema(),
-			"release_retention_policy":  getResourceRetentionPolicyBlockSchema(),
-			"tentacle_retention_policy": getResourceRetentionPolicyBlockSchema(),
+			"phase": getResourcePhaseBlockSchema(),
 		},
 	}
 }
@@ -49,10 +52,8 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 					Computed: true,
 					Default:  booldefault.StaticBool(false),
 				},
-			},
-			Blocks: map[string]resourceSchema.Block{
-				"release_retention_policy":  getResourceRetentionPolicyBlockSchema(),
-				"tentacle_retention_policy": getResourceRetentionPolicyBlockSchema(),
+				"release_retention_policy":  getResourceRetentionPolicySchema(),
+				"tentacle_retention_policy": getResourceRetentionPolicySchema(),
 			},
 		},
 	}
@@ -119,6 +120,54 @@ func getDatasourcePhasesSchema() datasourceSchema.ListNestedAttribute {
 				"tentacle_retention_policy":             getDatasourceRetentionPolicySchema(),
 			},
 		},
+	}
+}
+
+func getResourceRetentionPolicySchema() resourceSchema.ListNestedAttribute {
+	return resourceSchema.ListNestedAttribute{
+		NestedObject: resourceSchema.NestedAttributeObject{
+			Attributes: map[string]resourceSchema.Attribute{
+				"quantity_to_keep": resourceSchema.Int64Attribute{
+					Optional: true,
+					Computed: true,
+					Default:  int64default.StaticInt64(30),
+				},
+				"should_keep_forever": resourceSchema.BoolAttribute{
+					Optional: true,
+					Computed: true,
+					Default:  booldefault.StaticBool(false),
+				},
+				"unit": resourceSchema.StringAttribute{
+					Optional: true,
+					Computed: true,
+					Default:  stringdefault.StaticString("Days"),
+				},
+			},
+		},
+		Optional: true,
+		Computed: true,
+		Default: listdefault.StaticValue(
+			types.ListValueMust(
+				types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()},
+				[]attr.Value{
+					types.ObjectValueMust(
+						getRetentionPeriodAttrTypes(),
+						map[string]attr.Value{
+							"quantity_to_keep":    types.Int64Value(30),
+							"should_keep_forever": types.BoolValue(false),
+							"unit":                types.StringValue("Days"),
+						},
+					),
+				},
+			),
+		),
+	}
+}
+func getRetentionPeriodAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"quantity_to_keep":    types.Int64Type,
+		"should_keep_forever": types.BoolType,
+		"unit":                types.StringType,
 	}
 }
 
