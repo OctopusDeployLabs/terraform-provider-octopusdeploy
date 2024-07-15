@@ -19,6 +19,7 @@ type octopusDeployFrameworkProvider struct {
 
 var _ provider.Provider = (*octopusDeployFrameworkProvider)(nil)
 var _ provider.ProviderWithMetaSchema = (*octopusDeployFrameworkProvider)(nil)
+var _ provider.ProviderWithFunctions
 var ProviderTypeName = "octopusdeploy"
 
 func NewOctopusDeployFrameworkProvider() *octopusDeployFrameworkProvider {
@@ -81,12 +82,10 @@ func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provide
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				Optional:    false,
 				Required:    true,
 				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": schema.StringAttribute{
-				Optional:    false,
 				Required:    true,
 				Description: "The API key to use with the Octopus REST API",
 			},
