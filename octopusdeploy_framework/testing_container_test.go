@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/testcontainers/testcontainers-go"
 	"log"
@@ -47,7 +46,6 @@ func TestMain(m *testing.M) {
 		log.Printf("Exit code: (%d)", code)
 		os.Exit(code)
 	} else {
-		octoClient, err = octoclient.CreateClient(os.Getenv("OCTOPUS_URL"), "", os.Getenv("OCTOPUS_APIKEY"))
 		code := m.Run()
 		os.Exit(code)
 	}
