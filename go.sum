@@ -70,6 +70,8 @@ github.com/Microsoft/hcsshim v0.11.4 h1:68vKo2VN8DE9AdN4tnkWnmdhqdbpUFM8OF3Airm7
 github.com/Microsoft/hcsshim v0.11.4/go.mod h1:smjE4dvqPX9Zldna+t5FG3rnoHhaB7QYxPRqGcpAD9w=
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.43.0 h1:fYwGBqG88xy3qHp5j1ySCztdqfw2NLfg2yp0N3XcBYg=
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.43.0/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
+github.com/OctopusDeploy/go-octopusdeploy/v2 v2.44.1 h1:e8aGPNAXEBr/PRSTghyE1FgKERJXYvCPh/12C11kmbE=
+github.com/OctopusDeploy/go-octopusdeploy/v2 v2.44.1/go.mod h1:GZmFu6LmN8Yg0tEoZx3ytk9FnaH+84cWm7u5TdWZC6E=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240502041300-f71244db277d h1:E0Rm52/XBlVzdkHET/+Js1FVVgf5/0oRk1tNkI4jcyk=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240502041300-f71244db277d/go.mod h1:Nyg+7cyTrSQ/lMIy5YY1UdJekRuoMWf4uHIPfaGmgTM=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
