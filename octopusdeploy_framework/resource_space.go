@@ -20,6 +20,9 @@ type spaceResource struct {
 	*Config
 }
 
+var _ resource.Resource = &spaceResource{}
+var _ resource.ResourceWithImportState = &spaceResource{}
+
 func NewSpaceResource() resource.Resource {
 	return &spaceResource{}
 }
