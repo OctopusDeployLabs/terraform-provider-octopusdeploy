@@ -26,6 +26,9 @@ func resourceTenantProjectEnvironment() *schema.Resource {
 }
 
 func resourceTenantProjectEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	client := m.(*client.Client)
 	k := extractRelationship(d, client)
 
@@ -53,28 +56,10 @@ func resourceTenantProjectEnvironmentCreate(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func extractRelationship(d *schema.ResourceData, client *client.Client) person {
-	tenantID := d.Get("tenant_id").(string)
-	projectID := d.Get("project_id").(string)
-	environmentID := d.Get("environment_id").(string)
-
-	spaceID := client.GetSpaceID()
-	if v, ok := d.GetOk("space_id"); ok {
-		spaceID = v.(string)
-	}
-
-	n := person{tenantID: tenantID, projectID: projectID, environmentID: environmentID, spaceID: spaceID}
-	return n
-}
-
-type person struct {
-	tenantID      string
-	projectID     string
-	environmentID string
-	spaceID       string
-}
-
 func resourceTenantProjectEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	client := m.(*client.Client)
 	k := extractRelationship(d, client)
 
@@ -122,4 +107,25 @@ func resourceTenantProjectEnvironmentRead(ctx context.Context, d *schema.Resourc
 		}
 	}
 	return nil
+}
+
+func extractRelationship(d *schema.ResourceData, client *client.Client) person {
+	tenantID := d.Get("tenant_id").(string)
+	projectID := d.Get("project_id").(string)
+	environmentID := d.Get("environment_id").(string)
+
+	spaceID := client.GetSpaceID()
+	if v, ok := d.GetOk("space_id"); ok {
+		spaceID = v.(string)
+	}
+
+	n := person{tenantID: tenantID, projectID: projectID, environmentID: environmentID, spaceID: spaceID}
+	return n
+}
+
+type person struct {
+	tenantID      string
+	projectID     string
+	environmentID string
+	spaceID       string
 }
