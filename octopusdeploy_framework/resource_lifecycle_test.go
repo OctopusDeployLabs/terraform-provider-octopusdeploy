@@ -192,8 +192,7 @@ func TestAccLifecycleBasic(t *testing.T) {
 func TestAccLifecycleWithUpdate(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_lifecycle." + localName
-
-	description := "octopusdeploy_lifecycle dest"
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
@@ -297,6 +296,7 @@ func TestAccLifecycleComplex(t *testing.T) {
 func testAccLifecycle(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
 		name = "%s"
+        description = ""
 		release_retention_policy {
 			unit             = "Days"
 			quantity_to_keep = 30
@@ -311,18 +311,18 @@ func testAccLifecycle(localName string, name string) string {
 
 func testAccLifecycleWithDescription(localName string, name string, description string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
-		description = "%s"
-		name        = "%s"
-		release_retention_policy {
-			unit             = "Days"
-			quantity_to_keep = 30
-		}
+       name        = "%s"
+       description = "%s"
+       release_retention_policy {
+          unit             = "Days"
+          quantity_to_keep = 30
+       }
 
-		tentacle_retention_policy {
-			unit             = "Days"
-			quantity_to_keep = 30
-		}
-	}`, localName, description, name)
+       tentacle_retention_policy {
+          unit             = "Days"
+          quantity_to_keep = 30
+       }
+    }`, localName, name, description)
 }
 
 func testAccLifecycleComplex(localName string, name string) string {
