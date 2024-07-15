@@ -2,6 +2,8 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+
 	//"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -134,6 +136,8 @@ func GetDescriptionResourceSchema(resourceDescription string) resourceSchema.Att
 	return resourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
 		Optional:    true,
+		Computed:    true,
+		Default:     stringdefault.StaticString(""),
 	}
 }
 

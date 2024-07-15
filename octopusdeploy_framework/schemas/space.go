@@ -41,6 +41,8 @@ func GetSpaceResourceSchema() map[string]resourceSchema.Attribute {
 		"is_task_queue_stopped": resourceSchema.BoolAttribute{
 			Description: "Specifies the status of the task queue for this space.",
 			Optional:    true,
+			Computed:    true,
+			Default:     booldefault.StaticBool(false),
 		},
 		"is_default": resourceSchema.BoolAttribute{
 			Description: "Specifies if this space is the default space in Octopus.",
