@@ -193,7 +193,7 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_lifecycle." + localName
 
-	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := "octopusdeploy_lifecycle dest"
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{

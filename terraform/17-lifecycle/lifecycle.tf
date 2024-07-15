@@ -4,7 +4,7 @@ resource "octopusdeploy_lifecycle" "simple_lifecycle" {
 
   release_retention_policy {
     quantity_to_keep    = 1
-    should_keep_forever = true
+    should_keep_forever = false // true only if quantity_to_keep = 0
     unit                = "Days"
   }
 
