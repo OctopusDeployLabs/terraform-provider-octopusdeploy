@@ -82,7 +82,7 @@ func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
 		Attributes: map[string]datasourceSchema.Attribute{
 			"id":           util.GetIdDatasourceSchema(),
 			"space_id":     util.GetSpaceIdDatasourceSchema(description),
-			"ids":          util.GetSpaceIdDatasourceSchema(description),
+			"ids":          util.GetQueryIDsDatasourceSchema(),
 			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 			"skip":         util.GetQuerySkipDatasourceSchema(),
 			"take":         util.GetQueryTakeDatasourceSchema(),
