@@ -23,7 +23,6 @@ func NewLifecycleTestOptions() *LifecycleTestOptions {
 
 	return options
 }
-
 func LifecycleConfiguration(options *LifecycleTestOptions) string {
 	configuration := fmt.Sprintf(`resource "%s" "%s" {`, options.ResourceName, options.LocalName)
 	configuration += "\n"
@@ -34,6 +33,22 @@ func LifecycleConfiguration(options *LifecycleTestOptions) string {
 		configuration += fmt.Sprintf(`description = "%s"`, options.Resource.Description)
 		configuration += "\n"
 	}
+
+	// Add release retention policy
+	configuration += `
+    release_retention_policy {
+        unit             = "Days"
+        quantity_to_keep = 30
+    }
+    `
+
+	// Add tentacle retention policy
+	configuration += `
+    tentacle_retention_policy {
+        unit             = "Days"
+        quantity_to_keep = 30
+    }
+    `
 
 	configuration += "}"
 	return configuration
