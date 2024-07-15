@@ -54,9 +54,6 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 	if err := config.GetClient(ctx); err != nil {
 		resp.Diagnostics.AddError("failed to load client", err.Error())
 	}
-	if err := config.GetClient(ctx); err != nil {
-		resp.Diagnostics.AddError("failed to load client", err.Error())
-	}
 
 	resp.DataSourceData = &config
 	resp.ResourceData = &config
@@ -82,11 +79,13 @@ func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provide
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				Required:    true,
+				//Required:    true,
+				Optional:    true,
 				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": schema.StringAttribute{
-				Required:    true,
+				//Required:    true,
+				Optional:    true,
 				Description: "The API key to use with the Octopus REST API",
 			},
 			"space_id": schema.StringAttribute{

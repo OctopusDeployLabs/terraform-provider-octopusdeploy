@@ -23,14 +23,13 @@ var err error
 
 func TestMain(m *testing.M) {
 	flag.Parse() // Parse the flags
-
+	os.Setenv("TF_ACC", "1")
 	if *createSharedContainer {
 
 		testFramework := test.OctopusContainerTest{}
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
-		os.Setenv("TF_ACC", "1")
 
 		code := m.Run()
 		ctx := context.Background()
