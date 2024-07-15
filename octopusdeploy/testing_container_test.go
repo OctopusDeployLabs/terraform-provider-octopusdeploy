@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var createSharedContainer = flag.Bool("createSharedContainer", true, "Set to true to run integration tests in containers")
+var createSharedContainer = flag.Bool("createSharedContainer", false, "Set to true to run integration tests in containers")
 
 var octoContainer *test.OctopusContainer
 var octoClient *client.Client

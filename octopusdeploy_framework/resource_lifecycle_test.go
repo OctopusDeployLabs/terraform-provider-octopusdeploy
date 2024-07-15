@@ -297,6 +297,15 @@ func TestAccLifecycleComplex(t *testing.T) {
 func testAccLifecycle(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
 		name = "%s"
+		release_retention_policy {
+			unit             = "Days"
+			quantity_to_keep = 30
+		}
+
+		tentacle_retention_policy {
+			unit             = "Days"
+			quantity_to_keep = 30
+		}
 	}`, localName, name)
 }
 
@@ -304,6 +313,15 @@ func testAccLifecycleWithDescription(localName string, name string, description 
 	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
 		description = "%s"
 		name        = "%s"
+		release_retention_policy {
+			unit             = "Days"
+			quantity_to_keep = 30
+		}
+
+		tentacle_retention_policy {
+			unit             = "Days"
+			quantity_to_keep = 30
+		}
 	}`, localName, description, name)
 }
 

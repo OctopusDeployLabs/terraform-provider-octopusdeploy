@@ -6,6 +6,7 @@ import (
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -64,12 +65,18 @@ func getResourceRetentionPolicyBlockSchema() resourceSchema.ListNestedBlock {
 			Attributes: map[string]resourceSchema.Attribute{
 				"quantity_to_keep": resourceSchema.Int64Attribute{
 					Optional: true,
+					Computed: true,
+					Default:  int64default.StaticInt64(30),
 				},
 				"should_keep_forever": resourceSchema.BoolAttribute{
 					Optional: true,
+					Computed: true,
+					Default:  booldefault.StaticBool(false),
 				},
 				"unit": resourceSchema.StringAttribute{
 					Optional: true,
+					Computed: true,
+					Default:  stringdefault.StaticString("Days"),
 				},
 			},
 		},
