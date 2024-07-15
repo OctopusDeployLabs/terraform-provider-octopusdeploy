@@ -15,8 +15,8 @@ type SpaceModel struct {
 	Slug                     types.String `tfsdk:"slug"`
 	Description              types.String `tfsdk:"description"`
 	IsDefault                types.Bool   `tfsdk:"is_default"`
-	SpaceManagersTeams       types.Set    `tfsdk:"space_managers_teams"`
-	SpaceManagersTeamMembers types.Set    `tfsdk:"space_managers_team_members"`
+	SpaceManagersTeams       types.List   `tfsdk:"space_managers_teams"`
+	SpaceManagersTeamMembers types.List   `tfsdk:"space_managers_team_members"`
 	IsTaskQueueStopped       types.Bool   `tfsdk:"is_task_queue_stopped"`
 }
 
@@ -26,13 +26,13 @@ func GetSpaceResourceSchema() map[string]resourceSchema.Attribute {
 		"description": GetDescriptionResourceSchema(spaceDescription),
 		"name":        GetNameResourceSchema(true),
 		"slug":        GetSlugResourceSchema(spaceDescription),
-		"space_managers_teams": resourceSchema.SetAttribute{
+		"space_managers_teams": resourceSchema.ListAttribute{
 			ElementType: types.StringType,
 			Description: "A list of team IDs designated to be managers of this space.",
 			Optional:    true,
 			Computed:    true,
 		},
-		"space_managers_team_members": resourceSchema.SetAttribute{
+		"space_managers_team_members": resourceSchema.ListAttribute{
 			ElementType: types.StringType,
 			Description: "A list of user IDs designated to be managers of this space.",
 			Optional:    true,
@@ -59,13 +59,13 @@ func GetSpaceDatasourceSchema() map[string]datasourceSchema.Attribute {
 		"description": GetDescriptionDatasourceSchema(spaceDescription),
 		"name":        GetNameDatasourceWithMaxLengthSchema(true, 20),
 		"slug":        GetSlugDatasourceSchema(spaceDescription),
-		"space_managers_teams": datasourceSchema.SetAttribute{
+		"space_managers_teams": datasourceSchema.ListAttribute{
 			ElementType: types.StringType,
 			Description: "A list of team IDs designated to be managers of this space.",
 			Optional:    true,
 			Computed:    true,
 		},
-		"space_managers_team_members": datasourceSchema.SetAttribute{
+		"space_managers_team_members": datasourceSchema.ListAttribute{
 			ElementType: types.StringType,
 			Description: "A list of user IDs designated to be managers of this space.",
 			Optional:    true,

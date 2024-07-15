@@ -69,8 +69,8 @@ func mapSpaceToState(ctx context.Context, data *schemas.SpaceModel, space *space
 	data.Slug = types.StringValue(space.Slug)
 	data.IsTaskQueueStopped = types.BoolValue(space.TaskQueueStopped)
 	data.IsDefault = types.BoolValue(space.IsDefault)
-	data.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, space.SpaceManagersTeamMembers)
-	data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, space.SpaceManagersTeams)
+	data.SpaceManagersTeamMembers, _ = types.ListValueFrom(ctx, types.StringType, space.SpaceManagersTeamMembers)
+	data.SpaceManagersTeams, _ = types.ListValueFrom(ctx, types.StringType, space.SpaceManagersTeams)
 }
 
 func mapSpaceFromState(ctx context.Context, data *schemas.SpaceModel, space *spaces.Space) {
