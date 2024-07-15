@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"os"
 )
 
 type octopusDeployFrameworkProvider struct {
@@ -41,8 +42,17 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 
 	config := Config{}
 	config.ApiKey = providerData.ApiKey.ValueString()
+	if config.ApiKey == "" {
+		config.ApiKey = os.Getenv("OCTOPUS_APIKEY")
+	}
 	config.Address = providerData.Address.ValueString()
+	if config.Address == "" {
+		config.Address = os.Getenv("OCTOPUS_URL")
+	}
 	config.SpaceID = providerData.SpaceID.ValueString()
+	if err := config.GetClient(ctx); err != nil {
+		resp.Diagnostics.AddError("failed to load client", err.Error())
+	}
 	if err := config.GetClient(ctx); err != nil {
 		resp.Diagnostics.AddError("failed to load client", err.Error())
 	}
@@ -53,9 +63,9 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 
 func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		NewProjectGroupsDataSource,
 		NewSpaceDataSource,
 		NewSpacesDataSource,
-		NewProjectGroupsDataSource,
 		NewLifecyclesDataSource,
 	}
 }
@@ -71,13 +81,11 @@ func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provide
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				Optional:    false,
-				Required:    true,
+				Optional:    true,
 				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": schema.StringAttribute{
-				Optional:    false,
-				Required:    true,
+				Optional:    true,
 				Description: "The API key to use with the Octopus REST API",
 			},
 			"space_id": schema.StringAttribute{

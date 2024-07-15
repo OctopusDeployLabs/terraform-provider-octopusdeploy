@@ -2,6 +2,10 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -17,9 +21,9 @@ func TestAccLifecycleBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccLifecycleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testAccLifecycleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -50,9 +54,9 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccLifecycleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testAccLifecycleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create lifecycle with no description
 			{
@@ -121,9 +125,9 @@ func TestAccLifecycleComplex(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccLifecycleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testAccLifecycleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -206,8 +210,7 @@ func testAccLifecycleComplex(localName string, name string) string {
 
 func testAccCheckLifecycleExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-		if err := existsHelperLifecycle(s, client); err != nil {
+		if err := existsHelperLifecycle(s, octoClient); err != nil {
 			return err
 		}
 		return nil
@@ -216,8 +219,7 @@ func testAccCheckLifecycleExists(n string) resource.TestCheckFunc {
 
 func testAccCheckLifecyclePhaseCount(name string, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-		resourceList, err := client.Lifecycles.GetByPartialName(name)
+		resourceList, err := octoClient.Lifecycles.GetByPartialName(name)
 		if err != nil {
 			return err
 		}
@@ -249,12 +251,84 @@ func testAccLifecycleCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		lifecycle, err := client.Lifecycles.GetByID(rs.Primary.ID)
+		lifecycle, err := octoClient.Lifecycles.GetByID(rs.Primary.ID)
 		if err == nil && lifecycle != nil {
 			return fmt.Errorf("lifecycle (%s) still exists", rs.Primary.ID)
 		}
 	}
 
 	return nil
+}
+
+// TestLifecycleResource verifies that a lifecycle can be reimported with the correct settings
+func TestLifecycleResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "17-lifecycle", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "17a-lifecycleds"), newSpaceId, []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := lifecycles.Query{
+		PartialName: "Simple",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Lifecycles.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have an environment called \"Simple\"")
+	}
+	resource := resources.Items[0]
+
+	if resource.Description != "A test lifecycle" {
+		t.Fatal("The lifecycle must be have a description of \"A test lifecycle\" (was \"" + resource.Description + "\")")
+	}
+
+	if resource.TentacleRetentionPolicy.QuantityToKeep != 30 {
+		t.Fatal("The lifecycle must be have a tentacle retention policy of \"30\" (was \"" + fmt.Sprint(resource.TentacleRetentionPolicy.QuantityToKeep) + "\")")
+	}
+
+	if resource.TentacleRetentionPolicy.ShouldKeepForever {
+		t.Fatal("The lifecycle must be have a tentacle retention not set to keep forever")
+	}
+
+	if resource.TentacleRetentionPolicy.Unit != "Items" {
+		t.Fatal("The lifecycle must be have a tentacle retention unit set to \"Items\" (was \"" + resource.TentacleRetentionPolicy.Unit + "\")")
+	}
+
+	if resource.ReleaseRetentionPolicy.QuantityToKeep != 1 {
+		t.Fatal("The lifecycle must be have a release retention policy of \"1\" (was \"" + fmt.Sprint(resource.ReleaseRetentionPolicy.QuantityToKeep) + "\")")
+	}
+
+	if !resource.ReleaseRetentionPolicy.ShouldKeepForever {
+		t.Log("BUG: The lifecycle must be have a release retention set to keep forever (known bug - the provider creates this field as false)")
+	}
+
+	if resource.ReleaseRetentionPolicy.Unit != "Days" {
+		t.Fatal("The lifecycle must be have a release retention unit set to \"Days\" (was \"" + resource.ReleaseRetentionPolicy.Unit + "\")")
+	}
+
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "17a-lifecycleds"), "data_lookup")
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
 }

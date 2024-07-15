@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -16,8 +15,8 @@ func TestAccOctopusDeployRunKubectlScriptAction(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRunKubectlScriptAction(),
@@ -33,6 +32,7 @@ func testAccRunKubectlScriptAction() string {
 	return testAccBuildTestAction(`
 		run_kubectl_script_action {
       name = "Run Script"
+      sort_order = 1                         
       run_on_server = true
 
 			primary_package {
@@ -50,9 +50,8 @@ func testAccRunKubectlScriptAction() string {
 
 func testAccCheckRunKubectlScriptAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 
-		process, err := getDeploymentProcess(s, client)
+		process, err := getDeploymentProcess(s, octoClient)
 		if err != nil {
 			return err
 		}
