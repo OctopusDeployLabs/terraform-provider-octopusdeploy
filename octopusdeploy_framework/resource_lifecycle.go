@@ -164,8 +164,8 @@ func flattenPhases(phases []*lifecycles.Phase) types.List {
 		attrs := map[string]attr.Value{
 			"id":                                    types.StringValue(phase.ID),
 			"name":                                  types.StringValue(phase.Name),
-			"automatic_deployment_targets":          util.Ternary(len(phase.AutomaticDeploymentTargets) > 0, util.FlattenStringList(phase.AutomaticDeploymentTargets), types.ListNull(types.StringType)),
-			"optional_deployment_targets":           util.Ternary(len(phase.OptionalDeploymentTargets) > 0, util.FlattenStringList(phase.OptionalDeploymentTargets), types.ListNull(types.StringType)),
+			"automatic_deployment_targets":          util.FlattenStringList(phase.AutomaticDeploymentTargets),
+			"optional_deployment_targets":           util.FlattenStringList(phase.OptionalDeploymentTargets),
 			"minimum_environments_before_promotion": types.Int64Value(int64(phase.MinimumEnvironmentsBeforePromotion)),
 			"is_optional_phase":                     types.BoolValue(phase.IsOptionalPhase),
 			"release_retention_policy":              util.Ternary(phase.ReleaseRetentionPolicy != nil, flattenRetentionPeriod(phase.ReleaseRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),

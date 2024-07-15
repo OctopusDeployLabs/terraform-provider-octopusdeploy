@@ -35,10 +35,12 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 				"automatic_deployment_targets": resourceSchema.ListAttribute{
 					ElementType: types.StringType,
 					Optional:    true,
+					Computed:    true,
 				},
 				"optional_deployment_targets": resourceSchema.ListAttribute{
 					ElementType: types.StringType,
 					Optional:    true,
+					Computed:    true,
 				},
 				"minimum_environments_before_promotion": resourceSchema.Int64Attribute{
 					Optional: true,
