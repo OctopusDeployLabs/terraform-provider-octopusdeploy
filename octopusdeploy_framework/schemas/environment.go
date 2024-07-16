@@ -2,7 +2,9 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -35,7 +37,18 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 			Computed:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
-					"environment_type": datasourceSchema.StringAttribute{Computed: true},
+					"environment_type": datasourceSchema.StringAttribute{
+						Computed: true,
+						Validators: []validator.String{
+							stringvalidator.OneOfCaseInsensitive(
+								"development",
+								"production",
+								"testing",
+								"staging",
+								"unmapped",
+							),
+						},
+					},
 				},
 			},
 		},
