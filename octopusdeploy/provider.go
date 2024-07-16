@@ -67,7 +67,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_lifecycle":                                      resourceLifecycle(),
 			"octopusdeploy_listening_tentacle_deployment_target":           resourceListeningTentacleDeploymentTarget(),
 			"octopusdeploy_machine_policy":                                 resourceMachinePolicy(),
-			"octopusdeploy_maven_feed":                                     resourceMavenFeed(),
 			"octopusdeploy_artifactory_generic_feed":                       resourceArtifactoryGenericFeed(),
 			"octopusdeploy_nuget_feed":                                     resourceNuGetFeed(),
 			"octopusdeploy_offline_package_drop_deployment_target":         resourceOfflinePackageDropDeploymentTarget(),

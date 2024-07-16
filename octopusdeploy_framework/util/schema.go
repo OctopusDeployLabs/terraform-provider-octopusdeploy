@@ -160,6 +160,42 @@ func GetSortOrderDataSourceSchema(resourceDescription string) schema.Attribute {
 	}
 }
 
+func GetPasswordSchema(isRequired bool) schema.Attribute {
+	s := schema.StringAttribute{
+		Description: "The password associated with this resource.",
+		Sensitive:   true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
+func GetUsernameSchema(isRequired bool) schema.Attribute {
+	s := &schema.StringAttribute{
+		Description: "The username associated with this resource.",
+		Sensitive:   true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
 func GetIds(ids types.List) []string {
 	var result = make([]string, 0, len(ids.Elements()))
 	for _, id := range ids.Elements() {

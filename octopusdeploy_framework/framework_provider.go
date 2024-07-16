@@ -74,6 +74,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewProjectGroupResource,
+		NewMavenFeedResource,
 	}
 }
 
