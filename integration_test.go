@@ -1,39 +1,5 @@
 package main
 
-/*
-	To test the Octopus Terraform provider locally, save the following into a failed called ~/.terraformrc, replacing
-	/var/home/yourname/Code/terraform-provider-octopusdeploy with the directory containing your clone
-	of the git repo:
-
-		provider_installation {
-		  dev_overrides {
-			"octopusdeploylabs/octopusdeploy" = "/var/home/yourname/Code/terraform-provider-octopusdeploy"
-		  }
-
-		  direct {}
-		}
-
-	Checkout the provider with
-
-		git clone https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy.git
-
-	Then build the provider executable with the command:
-
-		go build -o terraform-provider-octopusdeploy main.go
-
-	Terraform will then use the local executable rather than download the provider from the registry.
-
-	To build the and run the tests, run:
-
-		export LICENSE=base 64 octopus license
-		export ECR_ACCESS_KEY=aws access key
-		export ECR_SECRET_KEY=aws secret key
-		export GIT_CREDENTIAL=github token
-		export GIT_USERNAME=github username
-		go test -c -o integration_test
-		./integration_test
-*/
-
 import (
 	"fmt"
 	"net/url"
@@ -96,8 +62,8 @@ func TestSpaceResource(t *testing.T) {
 			return err
 		}
 
-		if space.Description != "My test space" {
-			t.Fatalf("New space must have the name \"My test space\"")
+		if space.Description != "TestSpaceResource" {
+			t.Fatalf("New space must have the name \"TestSpaceResource\"")
 		}
 
 		if space.IsDefault {
@@ -435,9 +401,6 @@ func TestSshAccountResource(t *testing.T) {
 
 // TestAzureSubscriptionAccountResource verifies that an azure account can be reimported with the correct settings
 func TestAzureSubscriptionAccountResource(t *testing.T) {
-	// I could not figure out a combination of properties that made this resource work
-	return
-
 	testFramework := test.OctopusContainerTest{}
 	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
 		// Act
@@ -465,12 +428,12 @@ func TestAzureSubscriptionAccountResource(t *testing.T) {
 		}
 		resource := resources.Items[0].(*accounts.AzureSubscriptionAccount)
 
-		if resource.AccountType != "AzureServicePrincipal" {
-			t.Fatal("The account must be have a type of \"AzureServicePrincipal\"")
+		if resource.AccountType != "AzureSubscription" {
+			t.Fatal("The account must be have a type of \"AzureSubscription\"")
 		}
 
 		if resource.Description != "A test account" {
-			t.Fatal("BUG: The account must be have a description of \"A test account\"")
+			t.Fatal("The account must be have a description of \"A test account\"")
 		}
 
 		if resource.TenantedDeploymentMode != "Untenanted" {

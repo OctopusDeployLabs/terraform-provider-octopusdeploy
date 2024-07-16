@@ -485,6 +485,7 @@ Optional:
 - `id` (String) The unique ID for this resource.
 - `is_disabled` (Boolean) Indicates the disabled status of this deployment action.
 - `is_required` (Boolean) Indicates the required status of this deployment action.
+- `kubernetes_object_status_check_enabled` (Boolean) Indicates the status of the Kubernetes Object Status feature
 - `notes` (String) The notes associated with this deployment action.
 - `package` (Block List) The package assocated with this action. (see [below for nested schema](#nestedblock--step--deploy_kubernetes_secret_action--package))
 - `properties` (Map of String) The properties associated with this deployment action.

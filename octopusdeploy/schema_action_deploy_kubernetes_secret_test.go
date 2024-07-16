@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccOctopusDeployDeployKuberentesSecretAction(t *testing.T) {
+func TestAccOctopusDeployDeployKubernetesSecretAction(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccProjectCheckDestroy,
@@ -20,21 +20,22 @@ func TestAccOctopusDeployDeployKuberentesSecretAction(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDeployKuberentesSecretAction(),
+				Config: testAccDeployKubernetesSecretAction(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDeployKuberentesSecretAction(),
+					testAccCheckDeployKubernetesSecretAction(),
 				),
 			},
 		},
 	})
 }
 
-func testAccDeployKuberentesSecretAction() string {
+func testAccDeployKubernetesSecretAction() string {
 	return testAccBuildTestAction(`
 		deploy_kubernetes_secret_action {
 			name          = "Run Script"
 			run_on_server = true
 			secret_name   = "secret name"
+			kubernetes_object_status_check_enabled = false
 
 			secret_values = {
 				"key-123" = "value-123",
@@ -44,7 +45,7 @@ func testAccDeployKuberentesSecretAction() string {
 	`)
 }
 
-func testAccCheckDeployKuberentesSecretAction() resource.TestCheckFunc {
+func testAccCheckDeployKubernetesSecretAction() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*client.Client)
 
@@ -65,6 +66,10 @@ func testAccCheckDeployKuberentesSecretAction() resource.TestCheckFunc {
 
 		if action.Properties["Octopus.Action.KubernetesContainers.SecretValues"].Value != `{"key-123":"value-123","key-321":"value-321"}` {
 			return fmt.Errorf("SecretValue is incorrect: %s", action.Properties["Octopus.Action.KubernetesContainers.SecretValues"].Value)
+		}
+
+		if action.Properties["Octopus.Action.Kubernetes.ResourceStatusCheck"].Value != "False" {
+			return fmt.Errorf("Kubernetes Object Status Check is incorrect: %s", action.Properties["Octopus.Action.Kubernetes.ResourceStatusCheck"].Value)
 		}
 
 		return nil

@@ -2,7 +2,7 @@ package test
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
 type SpaceTestOptions struct {
