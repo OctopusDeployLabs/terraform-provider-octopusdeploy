@@ -59,6 +59,25 @@ func (r *lifecycleTypeResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	// Check if retention policies are set in the plan
+	var planData lifecycleTypeResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &planData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	releaseRetentionPolicySet := !planData.ReleaseRetentionPolicy.IsNull() && len(planData.ReleaseRetentionPolicy.Elements()) > 0
+	tentacleRetentionPolicySet := !planData.TentacleRetentionPolicy.IsNull() && len(planData.TentacleRetentionPolicy.Elements()) > 0
+
+	// Set default policies only if they're not in the plan
+	defaultPolicy := flattenRetentionPeriod(core.NewRetentionPeriod(30, "Days", false))
+	if !releaseRetentionPolicySet {
+		data.ReleaseRetentionPolicy = defaultPolicy
+	}
+	if !tentacleRetentionPolicySet {
+		data.TentacleRetentionPolicy = defaultPolicy
+	}
+
 	newLifecycle := expandLifecycle(data)
 
 	lifecycle, err := lifecycles.Add(r.Config.Client, newLifecycle)
@@ -66,7 +85,17 @@ func (r *lifecycleTypeResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("unable to create lifecycle", err.Error())
 		return
 	}
+
 	data = flattenLifecycleResource(lifecycle)
+
+	// Remove default policies from data before setting state, but only if we added them
+	if !releaseRetentionPolicySet && data.ReleaseRetentionPolicy.Equal(defaultPolicy) {
+		data.ReleaseRetentionPolicy = types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})
+	}
+	if !tentacleRetentionPolicySet && data.TentacleRetentionPolicy.Equal(defaultPolicy) {
+		data.TentacleRetentionPolicy = types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -76,14 +105,26 @@ func (r *lifecycleTypeResource) Read(ctx context.Context, req resource.ReadReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	// Check if retention policies are set in the current state
+	releaseRetentionPolicySet := !data.ReleaseRetentionPolicy.IsNull() && len(data.ReleaseRetentionPolicy.Elements()) > 0
+	tentacleRetentionPolicySet := !data.TentacleRetentionPolicy.IsNull() && len(data.TentacleRetentionPolicy.Elements()) > 0
 
 	lifecycle, err := lifecycles.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load lifecycle", err.Error())
 		return
 	}
-
 	data = flattenLifecycleResource(lifecycle)
+
+	// Remove default policies from data if they weren't explicitly set in the original state
+	defaultPolicy := flattenRetentionPeriod(core.NewRetentionPeriod(30, "Days", false))
+	if !releaseRetentionPolicySet && data.ReleaseRetentionPolicy.Equal(defaultPolicy) {
+		data.ReleaseRetentionPolicy = types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})
+	}
+	if !tentacleRetentionPolicySet && data.TentacleRetentionPolicy.Equal(defaultPolicy) {
+		data.TentacleRetentionPolicy = types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -94,6 +135,18 @@ func (r *lifecycleTypeResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	releaseRetentionPolicySet := !data.ReleaseRetentionPolicy.IsNull() && len(data.ReleaseRetentionPolicy.Elements()) > 0
+	tentacleRetentionPolicySet := !data.TentacleRetentionPolicy.IsNull() && len(data.TentacleRetentionPolicy.Elements()) > 0
+
+	// Set default policies only if they're not in the plan
+	defaultPolicy := flattenRetentionPeriod(core.NewRetentionPeriod(30, "Days", false))
+	if !releaseRetentionPolicySet {
+		data.ReleaseRetentionPolicy = defaultPolicy
+	}
+	if !tentacleRetentionPolicySet {
+		data.TentacleRetentionPolicy = defaultPolicy
 	}
 
 	tflog.Debug(ctx, fmt.Sprintf("updating lifecycle '%s'", data.ID.ValueString()))
@@ -108,6 +161,15 @@ func (r *lifecycleTypeResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	data = flattenLifecycleResource(updatedLifecycle)
+
+	// Remove default policies from data before setting state, but only if we added them
+	if !releaseRetentionPolicySet && data.ReleaseRetentionPolicy.Equal(defaultPolicy) {
+		data.ReleaseRetentionPolicy = types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})
+	}
+	if !tentacleRetentionPolicySet && data.TentacleRetentionPolicy.Equal(defaultPolicy) {
+		data.TentacleRetentionPolicy = types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -140,6 +202,17 @@ func resourceConfiguration(req resource.ConfigureRequest, resp *resource.Configu
 	}
 
 	return p
+}
+func setDefaultRetentionPolicies(data *lifecycleTypeResourceModel) {
+	defaultPolicy := flattenRetentionPeriod(core.NewRetentionPeriod(30, "Days", false))
+
+	if data.ReleaseRetentionPolicy.IsNull() || len(data.ReleaseRetentionPolicy.Elements()) == 0 {
+		data.ReleaseRetentionPolicy = defaultPolicy
+	}
+
+	if data.TentacleRetentionPolicy.IsNull() || len(data.TentacleRetentionPolicy.Elements()) == 0 {
+		data.TentacleRetentionPolicy = defaultPolicy
+	}
 }
 
 func flattenLifecycleResource(lifecycle *lifecycles.Lifecycle) *lifecycleTypeResourceModel {

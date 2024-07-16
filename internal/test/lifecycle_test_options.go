@@ -34,22 +34,6 @@ func LifecycleConfiguration(options *LifecycleTestOptions) string {
 		configuration += "\n"
 	}
 
-	// Add release retention policy
-	configuration += `
-    release_retention_policy {
-        unit             = "Days"
-        quantity_to_keep = 30
-    }
-    `
-
-	// Add tentacle retention policy
-	configuration += `
-    tentacle_retention_policy {
-        unit             = "Days"
-        quantity_to_keep = 30
-    }
-    `
-
 	configuration += "}"
 	return configuration
 }

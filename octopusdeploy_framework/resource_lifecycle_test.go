@@ -173,15 +173,15 @@ func TestAccLifecycleBasic(t *testing.T) {
 					testAccCheckLifecycleExists(resourceName),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "30"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.should_keep_forever", "false"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.unit", "Days"),
+					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.#", "0"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.should_keep_forever", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.unit", "Days"),
 					resource.TestCheckResourceAttrSet(resourceName, "space_id"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "30"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
+					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.#", "0"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
 				),
 				Config: testAccLifecycle(localName, name),
 			},
@@ -206,15 +206,15 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 					testAccCheckLifecycleExists(resourceName),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "30"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.should_keep_forever", "false"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.unit", "Days"),
+					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.#", "0"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.should_keep_forever", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.unit", "Days"),
 					resource.TestCheckResourceAttrSet(resourceName, "space_id"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "30"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
+					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.#", "0"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
 				),
 				Config: testAccLifecycle(localName, name),
 			},
@@ -225,15 +225,15 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "30"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.should_keep_forever", "false"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.unit", "Days"),
+					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.#", "0"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.should_keep_forever", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.unit", "Days"),
 					resource.TestCheckResourceAttrSet(resourceName, "space_id"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "30"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
+					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.#", "0"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
 				),
 				Config: testAccLifecycleWithDescription(localName, name, description),
 			},
@@ -244,17 +244,36 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", ""),
+					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.#", "0"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.should_keep_forever", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.unit", "Days"),
+					resource.TestCheckResourceAttrSet(resourceName, "space_id"),
+					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.#", "0"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "30"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
+					//resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
+				),
+				Config: testAccLifecycle(localName, name),
+			},
+			// update lifecycle add retention policy
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLifecycleExists(resourceName),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "description", description),
 					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "30"),
+					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.quantity_to_keep", "60"),
 					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.should_keep_forever", "false"),
 					resource.TestCheckResourceAttr(resourceName, "release_retention_policy.0.unit", "Days"),
 					resource.TestCheckResourceAttrSet(resourceName, "space_id"),
 					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "30"),
-					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "false"),
+					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.quantity_to_keep", "0"),
+					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.should_keep_forever", "true"),
 					resource.TestCheckResourceAttr(resourceName, "tentacle_retention_policy.0.unit", "Days"),
 				),
-				Config: testAccLifecycle(localName, name),
+				Config: testAccLifecycleWithRetentionPolicy(localName, name, description),
 			},
 		},
 	})
@@ -297,15 +316,6 @@ func testAccLifecycle(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
 		name = "%s"
         description = ""
-		release_retention_policy {
-			unit             = "Days"
-			quantity_to_keep = 30
-		}
-
-		tentacle_retention_policy {
-			unit             = "Days"
-			quantity_to_keep = 30
-		}
 	}`, localName, name)
 }
 
@@ -313,15 +323,24 @@ func testAccLifecycleWithDescription(localName string, name string, description 
 	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
        name        = "%s"
        description = "%s"
-       release_retention_policy {
-          unit             = "Days"
-          quantity_to_keep = 30
-       }
+    }`, localName, name, description)
+}
 
-       tentacle_retention_policy {
-          unit             = "Days"
-          quantity_to_keep = 30
-       }
+func testAccLifecycleWithRetentionPolicy(localName string, name string, description string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
+       name        = "%s"
+       description = "%s"
+		release_retention_policy {
+			unit             = "Days"
+			quantity_to_keep = 60
+			should_keep_forever = false
+		}
+
+		tentacle_retention_policy {
+			unit             = "Days"
+			quantity_to_keep = 0
+			should_keep_forever = true
+		}
     }`, localName, name, description)
 }
 
