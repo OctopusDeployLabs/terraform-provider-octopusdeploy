@@ -147,7 +147,9 @@ func GetSlugDatasourceSchema(resourceDescription string) schema.Attribute {
 func GetIds(ids types.List) []string {
 	var result = make([]string, 0, len(ids.Elements()))
 	for _, id := range ids.Elements() {
-		result = append(result, id.String())
+		if str, ok := id.(types.String); ok {
+			result = append(result, str.ValueString())
+}
 	}
 	return result
 }
