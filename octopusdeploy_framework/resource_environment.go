@@ -160,8 +160,12 @@ func updateEnvironment(ctx context.Context, data *schemas.EnvironmentTypeResourc
 	data.Slug = types.StringValue(environment.Slug)
 	data.Name = types.StringValue(environment.Name)
 	data.Description = types.StringValue(environment.Description)
-	data.AllowDynamicInfrastructure = types.BoolValue(environment.AllowDynamicInfrastructure)
-	data.UseGuidedFailure = types.BoolValue(environment.UseGuidedFailure)
+	if !data.AllowDynamicInfrastructure.IsNull() {
+		data.AllowDynamicInfrastructure = types.BoolValue(environment.AllowDynamicInfrastructure)
+	}
+	if !data.UseGuidedFailure.IsNull() {
+		data.UseGuidedFailure = types.BoolValue(environment.UseGuidedFailure)
+	}
 	data.SortOrder = types.Int64Value(int64(environment.SortOrder))
 	if len(environment.ExtensionSettings) != 0 {
 		for _, extensionSettings := range environment.ExtensionSettings {
