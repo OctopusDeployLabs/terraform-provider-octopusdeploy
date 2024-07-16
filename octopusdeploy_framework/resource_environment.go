@@ -8,7 +8,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type environmentTypeResource struct {
@@ -98,16 +97,16 @@ func (r *environmentTypeResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	_, err := environments.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	env, err := environments.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load environment", err.Error())
 		return
 	}
 
 	updatedEnv := environments.NewEnvironment(data.Name.ValueString())
-	updatedEnv.ID = data.ID.ValueString()
-	updatedEnv.SpaceID = data.SpaceID.ValueString()
-	updatedEnv.Slug = data.Slug.ValueString()
+	updatedEnv.ID = env.ID
+	updatedEnv.SpaceID = env.SpaceID
+	updatedEnv.Slug = env.Slug
 	updatedEnv.Description = data.Description.ValueString()
 	updatedEnv.AllowDynamicInfrastructure = data.AllowDynamicInfrastructure.ValueBool()
 	updatedEnv.UseGuidedFailure = data.UseGuidedFailure.ValueBool()
@@ -138,11 +137,7 @@ func (r *environmentTypeResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	updateEnvironment(ctx, &data, updatedEnvironment)
-	tflog.Debug(ctx, "updated environment in update")
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		tflog.Debug(ctx, "failed to append state...")
-	}
 }
 
 func (r *environmentTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
