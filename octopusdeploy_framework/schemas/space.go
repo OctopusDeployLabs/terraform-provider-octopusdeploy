@@ -1,6 +1,7 @@
 package schemas
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -59,13 +60,13 @@ func GetSpaceDatasourceSchema() map[string]datasourceSchema.Attribute {
 		"description": GetDescriptionDatasourceSchema(spaceDescription),
 		"name":        GetNameDatasourceWithMaxLengthSchema(true, 20),
 		"slug":        GetSlugDatasourceSchema(spaceDescription),
-		"space_managers_teams": datasourceSchema.ListAttribute{
+		"space_managers_teams": datasourceSchema.SetAttribute{
 			ElementType: types.StringType,
 			Description: "A list of team IDs designated to be managers of this space.",
 			Optional:    true,
 			Computed:    true,
 		},
-		"space_managers_team_members": datasourceSchema.ListAttribute{
+		"space_managers_team_members": datasourceSchema.SetAttribute{
 			ElementType: types.StringType,
 			Description: "A list of user IDs designated to be managers of this space.",
 			Optional:    true,
@@ -80,4 +81,16 @@ func GetSpaceDatasourceSchema() map[string]datasourceSchema.Attribute {
 			Optional:    true,
 		},
 	}
+}
+
+func GetSpaceTypeAttributes() attr.Type {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{
+		"id":                          types.StringType,
+		"name":                        types.StringType,
+		"slug":                        types.StringType,
+		"description":                 types.StringType,
+		"is_default":                  types.BoolType,
+		"space_managers_teams":        types.SetType{ElemType: types.StringType},
+		"space_managers_team_members": types.SetType{ElemType: types.StringType},
+		"is_task_queue_stopped":       types.BoolType}}
 }

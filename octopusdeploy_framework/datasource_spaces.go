@@ -5,7 +5,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -88,16 +87,7 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		mappedSpaces = append(mappedSpaces, s)
 	}
 
-	data.Spaces, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: map[string]attr.Type{
-		"id":                          types.StringType,
-		"name":                        types.StringType,
-		"slug":                        types.StringType,
-		"description":                 types.StringType,
-		"is_default":                  types.BoolType,
-		"space_managers_teams":        types.ListType{ElemType: types.StringType},
-		"space_managers_team_members": types.ListType{ElemType: types.StringType},
-		"is_task_queue_stopped":       types.BoolType}},
-		mappedSpaces)
+	data.Spaces, _ = types.ListValueFrom(ctx, schemas.GetSpaceTypeAttributes(), mappedSpaces)
 	data.ID = types.StringValue("Spaces " + time.Now().UTC().String())
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

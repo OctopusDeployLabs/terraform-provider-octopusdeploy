@@ -72,20 +72,3 @@ func mapSpaceToState(ctx context.Context, data *schemas.SpaceModel, space *space
 	data.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, space.SpaceManagersTeamMembers)
 	data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, space.SpaceManagersTeams)
 }
-
-func mapSpaceFromState(ctx context.Context, data *schemas.SpaceModel, space *spaces.Space) {
-	space.ID = data.ID.ValueString()
-	space.Name = data.Name.ValueString()
-	space.Description = data.Description.ValueString()
-	space.Slug = data.Slug.ValueString()
-	space.IsDefault = data.IsDefault.ValueBool()
-	space.TaskQueueStopped = data.IsTaskQueueStopped.ValueBool()
-
-	for _, t := range data.SpaceManagersTeams.Elements() {
-		space.SpaceManagersTeams = append(space.SpaceManagersTeams, t.String())
-	}
-
-	for _, t := range data.SpaceManagersTeamMembers.Elements() {
-		space.SpaceManagersTeamMembers = append(space.SpaceManagersTeamMembers, t.String())
-	}
-}
