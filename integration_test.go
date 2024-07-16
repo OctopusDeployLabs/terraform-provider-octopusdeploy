@@ -71,8 +71,6 @@ import (
 	"k8s.io/utils/strings/slices"
 )
 
-replace github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240502041300-f71244db277d => /Users/kevintchang/Code/OctopusTerraformTestFramework
-
 // TestSpaceResource verifies that a space can be reimported with the correct settings
 func TestSpaceResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
@@ -3889,6 +3887,8 @@ func TestTentacleCertificateResource(t *testing.T) {
 }
 
 func TestKubernetesAgentWorkerResource(t *testing.T) {
+	customEnv := make(map[string]string)
+	customEnv["Octopus"]
 	testFramework := test.OctopusContainerTest{}
 	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
 		// Act
