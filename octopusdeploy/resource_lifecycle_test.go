@@ -10,15 +10,6 @@ import (
 func testAccLifecycle(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_lifecycle" "%s" {
 		name = "%s"
-		release_retention_policy {
-			unit             = "Days"
-			quantity_to_keep = 30
-		}
-
-		tentacle_retention_policy {
-			unit             = "Days"
-			quantity_to_keep = 30
-		}
 	}`, localName, name)
 }
 
