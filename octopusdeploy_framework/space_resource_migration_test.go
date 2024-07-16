@@ -85,7 +85,7 @@ func testSpaceUpdated(t *testing.T) resource.TestCheckFunc {
 		assert.Equal(t, "Updated Test Space", space.Name, "Space name did not match expected value")
 		assert.Equal(t, true, space.TaskQueueStopped, "Task Queue did not match expected value")
 		assert.Equal(t, false, space.IsDefault, "IsDefault did not match expected value")
-		assert.Contains(t, "teams-managers", space.SpaceManagersTeams, "Teams manager ID did not match expected value")
+		assert.Contains(t, space.SpaceManagersTeams, "teams-managers", "Teams manager ID did not match expected value")
 
 		return nil
 	}
