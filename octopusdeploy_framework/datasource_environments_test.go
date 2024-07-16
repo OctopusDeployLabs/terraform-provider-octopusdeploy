@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccDataSourceEnvironments(t *testing.T) {
@@ -45,7 +46,6 @@ func testAccCheckEnvironmentsDataSourceID(n string) resource.TestCheckFunc {
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("snapshot Environments source ID not set")
 		}
-
 		return nil
 	}
 }
@@ -57,5 +57,5 @@ func testAccDataSourceEnvironmentsConfig(localName string, take int) string {
 }
 
 func testAccDataSourceEnvironmentsEmpty(localName string) string {
-	return fmt.Sprintf(`data "octopusdeploy_environments %s" {}`, localName)
+	return fmt.Sprintf(`data "octopusdeploy_environments" "%s" {}`, localName)
 }
