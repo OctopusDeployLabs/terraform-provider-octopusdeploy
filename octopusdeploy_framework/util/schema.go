@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -12,6 +13,13 @@ func GetQueryIDsDatasourceSchema() schema.Attribute {
 	return schema.ListAttribute{
 		Description: "A filter to search by a list of IDs.",
 		ElementType: types.StringType,
+		Optional:    true,
+	}
+}
+
+func GetQueryNameDatasourceSchema() schema.Attribute {
+	return schema.StringAttribute{
+		Description: "A filter search by exact name",
 		Optional:    true,
 	}
 }
@@ -144,10 +152,20 @@ func GetSlugDatasourceSchema(resourceDescription string) schema.Attribute {
 	}
 }
 
+func GetSortOrderDataSourceSchema(resourceDescription string) schema.Attribute {
+	return schema.Int64Attribute{
+		Description: fmt.Sprintf("The order number to sort an %s", resourceDescription),
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
 func GetIds(ids types.List) []string {
 	var result = make([]string, 0, len(ids.Elements()))
 	for _, id := range ids.Elements() {
-		result = append(result, id.String())
+		if str, ok := id.(types.String); ok {
+			result = append(result, str.ValueString())
+		}
 	}
 	return result
 }

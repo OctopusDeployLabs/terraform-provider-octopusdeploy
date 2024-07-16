@@ -91,7 +91,7 @@ func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
 		"description":  getDescriptionSchema("Azure subscription account"),
 		"environments": getEnvironmentsSchema(),
 		"management_endpoint": {
-			Required:     true,
+			Optional:     true,
 			Type:         schema.TypeString,
 			RequiredWith: []string{"azure_environment"},
 		},
@@ -99,7 +99,7 @@ func getAzureSubscriptionAccountSchema() map[string]*schema.Schema {
 		"space_id": getSpaceIDSchema(),
 		"storage_endpoint_suffix": {
 			Description:  "The storage endpoint suffix associated with this Azure subscription account.",
-			Required:     true,
+			Optional:     true,
 			Type:         schema.TypeString,
 			RequiredWith: []string{"azure_environment"},
 		},

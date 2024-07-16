@@ -76,9 +76,6 @@ func testAzureSubscriptionAccountBasic(localName string, azureEnvironment string
 
 // TestAzureSubscriptionAccountResource verifies that an azure account can be reimported with the correct settings
 func TestAzureSubscriptionAccountResource(t *testing.T) {
-	// I could not figure out a combination of properties that made this resource work
-	return
-
 	testFramework := test.OctopusContainerTest{}
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "8-azuresubscriptionaccount", []string{})
@@ -105,12 +102,12 @@ func TestAzureSubscriptionAccountResource(t *testing.T) {
 	}
 	resource := resources.Items[0].(*accounts.AzureSubscriptionAccount)
 
-	if resource.AccountType != "AzureServicePrincipal" {
-		t.Fatal("The account must be have a type of \"AzureServicePrincipal\"")
+	if resource.AccountType != "AzureSubscription" {
+		t.Fatal("The account must be have a type of \"AzureSubscription\"")
 	}
 
 	if resource.Description != "A test account" {
-		t.Fatal("BUG: The account must be have a description of \"A test account\"")
+		t.Fatal("The account must be have a description of \"A test account\"")
 	}
 
 	if resource.TenantedDeploymentMode != "Untenanted" {
