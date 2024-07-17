@@ -71,7 +71,7 @@ func ResourceConfiguration(req resource.ConfigureRequest, resp *resource.Configu
 		return nil
 	}
 
-	p, ok := req.ProviderData.(*Config)
+	config, ok := req.ProviderData.(*Config)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -80,5 +80,5 @@ func ResourceConfiguration(req resource.ConfigureRequest, resp *resource.Configu
 		return nil
 	}
 
-	return p
+	return config
 }

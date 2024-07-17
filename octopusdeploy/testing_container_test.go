@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/testcontainers/testcontainers-go"
 	"log"
@@ -46,6 +47,15 @@ func TestMain(m *testing.M) {
 		log.Printf("Exit code: (%d)", code)
 		os.Exit(code)
 	} else {
+		if os.Getenv("TF_ACC_LOCAL") != "" {
+			var url = os.Getenv("OCTOPUS_URL")
+			var apikey = os.Getenv("OCTOPUS_APIKEY")
+			octoClient, err = octoclient.CreateClient(url, "", apikey)
+			if err != nil {
+				log.Printf("Failed to create client: (%s)", err.Error())
+				panic(m)
+			}
+		}
 		code := m.Run()
 		os.Exit(code)
 	}

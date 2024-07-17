@@ -2,6 +2,9 @@ package util
 
 import (
 	"fmt"
+	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -103,19 +106,25 @@ func GetDescriptionDatasourceSchema(resourceDescription string) schema.Attribute
 	}
 }
 
-func GetIdResourceSchema() schema.Attribute {
-	return schema.StringAttribute{
+func GetIdResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",
 		Computed:    true,
 		Optional:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	}
 }
 
-func GetSpaceIdResourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetSpaceIdResourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
 		Description: "The space ID associated with this " + resourceDescription + ".",
 		Computed:    true,
 		Optional:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	}
 }
 
@@ -158,6 +167,42 @@ func GetSortOrderDataSourceSchema(resourceDescription string) schema.Attribute {
 		Optional:    true,
 		Computed:    true,
 	}
+}
+
+func GetPasswordResourceSchema(isRequired bool) resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The password associated with this resource.",
+		Sensitive:   true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
+func GetUsernameResourceSchema(isRequired bool) resourceSchema.Attribute {
+	s := &resourceSchema.StringAttribute{
+		Description: "The username associated with this resource.",
+		Sensitive:   true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
 }
 
 func GetIds(ids types.List) []string {

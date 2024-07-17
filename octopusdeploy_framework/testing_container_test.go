@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/testcontainers/testcontainers-go"
 	"log"
@@ -22,14 +23,13 @@ var err error
 
 func TestMain(m *testing.M) {
 	flag.Parse() // Parse the flags
-
+	os.Setenv("TF_ACC", "1")
 	if *createSharedContainer {
 
 		testFramework := test.OctopusContainerTest{}
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
-		os.Setenv("TF_ACC", "1")
 
 		code := m.Run()
 		ctx := context.Background()
@@ -46,6 +46,15 @@ func TestMain(m *testing.M) {
 		log.Printf("Exit code: (%d)", code)
 		os.Exit(code)
 	} else {
+		if os.Getenv("TF_ACC_LOCAL") != "" {
+			var url = os.Getenv("OCTOPUS_URL")
+			var apikey = os.Getenv("OCTOPUS_APIKEY")
+			octoClient, err = octoclient.CreateClient(url, "", apikey)
+			if err != nil {
+				log.Printf("Failed to create client: (%s)", err.Error())
+				panic(m)
+			}
+		}
 		code := m.Run()
 		os.Exit(code)
 	}

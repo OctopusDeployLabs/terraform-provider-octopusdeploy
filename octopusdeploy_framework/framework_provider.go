@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -26,7 +27,7 @@ func NewOctopusDeployFrameworkProvider() *octopusDeployFrameworkProvider {
 }
 
 func (p *octopusDeployFrameworkProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = ProviderTypeName
+	resp.TypeName = util.GetProviderName()
 }
 
 func (p *octopusDeployFrameworkProvider) MetaSchema(ctx context.Context, request provider.MetaSchemaRequest, response *provider.MetaSchemaResponse) {
@@ -53,9 +54,6 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 	if err := config.GetClient(ctx); err != nil {
 		resp.Diagnostics.AddError("failed to load client", err.Error())
 	}
-	if err := config.GetClient(ctx); err != nil {
-		resp.Diagnostics.AddError("failed to load client", err.Error())
-	}
 
 	resp.DataSourceData = &config
 	resp.ResourceData = &config
@@ -73,8 +71,9 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 
 func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewSpaceResource,
 		NewProjectGroupResource,
-		NewLifecycleResource,
+		NewMavenFeedResource,
 	}
 }
 
@@ -82,10 +81,12 @@ func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provide
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
+				//Required:    true,
 				Optional:    true,
 				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": schema.StringAttribute{
+				//Required:    true,
 				Optional:    true,
 				Description: "The API key to use with the Octopus REST API",
 			},

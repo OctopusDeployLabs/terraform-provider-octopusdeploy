@@ -23,6 +23,7 @@ func NewLifecycleTestOptions() *LifecycleTestOptions {
 
 	return options
 }
+
 func LifecycleConfiguration(options *LifecycleTestOptions) string {
 	configuration := fmt.Sprintf(`resource "%s" "%s" {`, options.ResourceName, options.LocalName)
 	configuration += "\n"
