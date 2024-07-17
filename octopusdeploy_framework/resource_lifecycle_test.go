@@ -512,13 +512,3 @@ func TestLifecycleResource(t *testing.T) {
 		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
 	}
 }
-
-func testAccEnvironment(localName string, name string, description string, allowDynamicInfrastructure bool, sortOrder int, useGuidedFailure bool) string {
-	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
-		allow_dynamic_infrastructure = "%v"
-		description                  = "%s"
-		name                         = "%s"
-		sort_order                   = %v
-		use_guided_failure           = "%v"
-	}`, localName, allowDynamicInfrastructure, description, name, sortOrder, useGuidedFailure)
-}
