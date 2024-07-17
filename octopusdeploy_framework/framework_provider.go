@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -19,6 +20,7 @@ type octopusDeployFrameworkProvider struct {
 
 var _ provider.Provider = (*octopusDeployFrameworkProvider)(nil)
 var _ provider.ProviderWithMetaSchema = (*octopusDeployFrameworkProvider)(nil)
+var _ provider.ProviderWithFunctions
 var ProviderTypeName = "octopusdeploy"
 
 func NewOctopusDeployFrameworkProvider() *octopusDeployFrameworkProvider {
@@ -26,7 +28,7 @@ func NewOctopusDeployFrameworkProvider() *octopusDeployFrameworkProvider {
 }
 
 func (p *octopusDeployFrameworkProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = ProviderTypeName
+	resp.TypeName = util.GetProviderName()
 }
 
 func (p *octopusDeployFrameworkProvider) MetaSchema(ctx context.Context, request provider.MetaSchemaRequest, response *provider.MetaSchemaResponse) {
@@ -53,9 +55,6 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 	if err := config.GetClient(ctx); err != nil {
 		resp.Diagnostics.AddError("failed to load client", err.Error())
 	}
-	if err := config.GetClient(ctx); err != nil {
-		resp.Diagnostics.AddError("failed to load client", err.Error())
-	}
 
 	resp.DataSourceData = &config
 	resp.ResourceData = &config
@@ -73,6 +72,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 
 func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewSpaceResource,
 		NewProjectGroupResource,
 		NewMavenFeedResource,
 	}
@@ -82,10 +82,12 @@ func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provide
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
+				//Required:    true,
 				Optional:    true,
 				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": schema.StringAttribute{
+				//Required:    true,
 				Optional:    true,
 				Description: "The API key to use with the Octopus REST API",
 			},
