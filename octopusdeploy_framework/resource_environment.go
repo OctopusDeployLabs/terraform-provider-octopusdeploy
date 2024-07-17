@@ -6,6 +6,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/extensions"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -42,7 +43,7 @@ func (r *environmentTypeResource) Create(ctx context.Context, req resource.Creat
 	newEnvironment.Description = data.Description.ValueString()
 	newEnvironment.AllowDynamicInfrastructure = data.AllowDynamicInfrastructure.ValueBool()
 	newEnvironment.UseGuidedFailure = data.UseGuidedFailure.ValueBool()
-	newEnvironment.SortOrder = int(data.SortOrder.ValueInt64())
+	newEnvironment.SortOrder = util.GetNumber(data.SortOrder)
 	if len(data.JiraExtensionSettings.Elements()) > 0 {
 		jiraExtensionSettings := mapJiraExtensionSettings(data.JiraExtensionSettings)
 		if jiraExtensionSettings != nil {
@@ -110,7 +111,7 @@ func (r *environmentTypeResource) Update(ctx context.Context, req resource.Updat
 	updatedEnv.Description = data.Description.ValueString()
 	updatedEnv.AllowDynamicInfrastructure = data.AllowDynamicInfrastructure.ValueBool()
 	updatedEnv.UseGuidedFailure = data.UseGuidedFailure.ValueBool()
-	updatedEnv.SortOrder = int(data.SortOrder.ValueInt64())
+	updatedEnv.SortOrder = util.GetNumber(data.SortOrder)
 	if len(data.JiraExtensionSettings.Elements()) > 0 {
 		jiraExtensionSettings := mapJiraExtensionSettings(data.JiraExtensionSettings)
 		if jiraExtensionSettings != nil {
