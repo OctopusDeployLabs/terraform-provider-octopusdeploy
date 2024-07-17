@@ -25,11 +25,11 @@ func TestResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 						Source:            "OctopusDeployLabs/octopusdeploy",
 					},
 				},
-				Config: config,
+				Config: mavenConfig,
 			},
 			{
 				ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-				Config:                   config,
+				Config:                   mavenConfig,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
@@ -38,7 +38,7 @@ func TestResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 			},
 			{
 				ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-				Config:                   updatedConfig,
+				Config:                   updatedMavenConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testFeedUpdated(t),
 				),
@@ -47,7 +47,7 @@ func TestResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 	})
 }
 
-const config = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
+const mavenConfig = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
 						  name                                 = "Maven"
 						  feed_uri                             = "https://repo.maven.apache.org/maven2/"
 						  username                             = "username"
@@ -56,7 +56,7 @@ const config = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
 						  download_retry_backoff_seconds       = 11
 					   }`
 
-const updatedConfig = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
+const updatedMavenConfig = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
 						  name                                 = "Updated_Maven"
 						  feed_uri                             = "https://Updated.maven.apache.org/maven2/z"
 						  username                             = "username_Updated"
