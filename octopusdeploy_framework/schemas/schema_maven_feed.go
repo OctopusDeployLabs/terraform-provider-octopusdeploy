@@ -4,6 +4,8 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -33,6 +35,9 @@ func GetMavenFeedResourceSchema() map[string]resourceSchema.Attribute {
 			Computed:    true,
 			ElementType: types.StringType,
 			Optional:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"password": util.GetPasswordResourceSchema(false),
 		"space_id": util.GetSpaceIdResourceSchema(mavenFeedDescription),

@@ -58,8 +58,6 @@ func (r *mavenFeedTypeResource) Create(ctx context.Context, req resource.CreateR
 
 	updateDataFromFeed(data, data.SpaceID.ValueString(), createdFeed.(*feeds.MavenFeed))
 
-	data.ID = types.StringValue(createdFeed.GetID())
-
 	tflog.Info(ctx, fmt.Sprintf("Maven feed created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -175,5 +173,5 @@ func updateDataFromFeed(data *schemas.MavenFeedTypeResourceModel, spaceId string
 
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
-	data.ID = types.StringValue(feed.GetID())
+	data.ID = types.StringValue(feed.ID)
 }

@@ -4,6 +4,8 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -32,6 +34,9 @@ func GetProjectGroupResourceSchema() map[string]resourceSchema.Attribute {
 			Computed:    true,
 			Optional:    true,
 			Description: "The ID of the retention policy associated with this project group.",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"description": util.GetDescriptionResourceSchema(projectGroupDescription),
 	}
