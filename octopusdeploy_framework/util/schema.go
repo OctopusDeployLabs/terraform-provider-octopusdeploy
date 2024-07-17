@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -160,8 +161,8 @@ func GetSortOrderDataSourceSchema(resourceDescription string) schema.Attribute {
 	}
 }
 
-func GetPasswordSchema(isRequired bool) schema.Attribute {
-	s := schema.StringAttribute{
+func GetPasswordResourceSchema(isRequired bool) schema.Attribute {
+	s := resourceSchema.StringAttribute{
 		Description: "The password associated with this resource.",
 		Sensitive:   true,
 		Validators: []validator.String{
@@ -178,8 +179,8 @@ func GetPasswordSchema(isRequired bool) schema.Attribute {
 	return s
 }
 
-func GetUsernameSchema(isRequired bool) schema.Attribute {
-	s := &schema.StringAttribute{
+func GetUsernameResourceSchema(isRequired bool) schema.Attribute {
+	s := &resourceSchema.StringAttribute{
 		Description: "The username associated with this resource.",
 		Sensitive:   true,
 		Validators: []validator.String{

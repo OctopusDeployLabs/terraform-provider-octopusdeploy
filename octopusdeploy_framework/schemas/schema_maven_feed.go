@@ -34,9 +34,9 @@ func GetMavenFeedResourceSchema() map[string]resourceSchema.Attribute {
 			ElementType: types.StringType,
 			Optional:    true,
 		},
-		"password": util.GetPasswordSchema(false),
+		"password": util.GetPasswordResourceSchema(false),
 		"space_id": util.GetSpaceIdResourceSchema(mavenFeedDescription),
-		"username": util.GetUsernameSchema(false),
+		"username": util.GetUsernameResourceSchema(false),
 	}
 }
 
