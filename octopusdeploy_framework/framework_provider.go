@@ -2,9 +2,9 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"os"
 
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -32,7 +32,6 @@ func (p *octopusDeployFrameworkProvider) Metadata(ctx context.Context, req provi
 }
 
 func (p *octopusDeployFrameworkProvider) MetaSchema(ctx context.Context, request provider.MetaSchemaRequest, response *provider.MetaSchemaResponse) {
-
 }
 
 func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -75,6 +74,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewSpaceResource,
 		NewProjectGroupResource,
 		NewMavenFeedResource,
+		NewLifecycleResource,
 		NewEnvironmentResource,
 	}
 }

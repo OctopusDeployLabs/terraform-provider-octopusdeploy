@@ -63,7 +63,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_kubernetes_agent_deployment_target":             resourceKubernetesAgentDeploymentTarget(),
 			"octopusdeploy_kubernetes_cluster_deployment_target":           resourceKubernetesClusterDeploymentTarget(),
 			"octopusdeploy_library_variable_set":                           resourceLibraryVariableSet(),
-			"octopusdeploy_lifecycle":                                      resourceLifecycle(),
 			"octopusdeploy_listening_tentacle_deployment_target":           resourceListeningTentacleDeploymentTarget(),
 			"octopusdeploy_machine_policy":                                 resourceMachinePolicy(),
 			"octopusdeploy_artifactory_generic_feed":                       resourceArtifactoryGenericFeed(),
