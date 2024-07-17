@@ -18,8 +18,8 @@ func TestAccSpaceImportBasic(t *testing.T) {
 	slug := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccSpaceCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccSpaceCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -42,8 +42,8 @@ func TestAccSpaceBasic(t *testing.T) {
 	prefix := "octopusdeploy_space." + localName
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccSpaceCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccSpaceCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -90,7 +90,6 @@ func testSpaceBasic(localName string, name string, slug string) string {
 			name = "%s"
 			slug = "%s"
 			space_managers_teams  = ["teams-managers"]
-
 			lifecycle {
 			  ignore_changes = [space_managers_teams]
 			}

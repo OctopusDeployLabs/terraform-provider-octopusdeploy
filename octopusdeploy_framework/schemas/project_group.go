@@ -7,33 +7,33 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const description = "project group"
+const projectGroupDescription = "project group"
 
 func GetProjectGroupDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":       util.GetIdResourceSchema(),
-		"space_id": util.GetSpaceIdResourceSchema(description),
+		"space_id": util.GetSpaceIdResourceSchema(projectGroupDescription),
 		"name":     util.GetNameResourceSchema(true),
 		"retention_policy_id": datasourceSchema.StringAttribute{
 			Computed:    true,
 			Optional:    true,
 			Description: "The ID of the retention policy associated with this project group.",
 		},
-		"description": util.GetDescriptionResourceSchema(description),
+		"description": util.GetDescriptionResourceSchema(projectGroupDescription),
 	}
 }
 
 func GetProjectGroupResourceSchema() map[string]resourceSchema.Attribute {
 	return map[string]resourceSchema.Attribute{
 		"id":       util.GetIdResourceSchema(),
-		"space_id": util.GetSpaceIdResourceSchema(description),
+		"space_id": util.GetSpaceIdResourceSchema(projectGroupDescription),
 		"name":     util.GetNameResourceSchema(true),
 		"retention_policy_id": resourceSchema.StringAttribute{
 			Computed:    true,
 			Optional:    true,
 			Description: "The ID of the retention policy associated with this project group.",
 		},
-		"description": util.GetDescriptionResourceSchema(description),
+		"description": util.GetDescriptionResourceSchema(projectGroupDescription),
 	}
 }
 
