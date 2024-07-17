@@ -72,29 +72,10 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 }
 
 func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func() resource.Resource {
-	resources := []func() resource.Resource{
+	return []func() resource.Resource{
 		NewProjectGroupResource,
-	}
-
-	resources = append(resources, getImportableResources()...)
-
-	return resources
-}
-
-func getImportableResources() []func() resource.Resource {
-	importableResources := []func() resource.ResourceWithImportState{
 		NewLifecycleResource,
 	}
-
-	resources := make([]func() resource.Resource, 0, len(importableResources))
-
-	for _, r := range importableResources {
-		resourceFunc := r
-		resources = append(resources, func() resource.Resource {
-			return resourceFunc()
-		})
-	}
-	return resources
 }
 
 func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {

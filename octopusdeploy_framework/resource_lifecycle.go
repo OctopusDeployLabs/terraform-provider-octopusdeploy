@@ -19,6 +19,9 @@ type lifecycleTypeResource struct {
 	*Config
 }
 
+var _ resource.Resource = &lifecycleTypeResource{}
+var _ resource.ResourceWithImportState = &lifecycleTypeResource{}
+
 type lifecycleTypeResourceModel struct {
 	ID                      types.String `tfsdk:"id"`
 	SpaceID                 types.String `tfsdk:"space_id"`
@@ -29,7 +32,7 @@ type lifecycleTypeResourceModel struct {
 	TentacleRetentionPolicy types.List   `tfsdk:"tentacle_retention_policy"`
 }
 
-func NewLifecycleResource() resource.ResourceWithImportState {
+func NewLifecycleResource() resource.Resource {
 	return &lifecycleTypeResource{}
 }
 
