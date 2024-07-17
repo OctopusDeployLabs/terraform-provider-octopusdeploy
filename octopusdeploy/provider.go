@@ -60,7 +60,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_git_credential":                                 resourceGitCredential(),
 			"octopusdeploy_github_repository_feed":                         resourceGitHubRepositoryFeed(),
 			"octopusdeploy_gcp_account":                                    resourceGoogleCloudPlatformAccount(),
-			"octopusdeploy_helm_feed":                                      resourceHelmFeed(),
 			"octopusdeploy_kubernetes_agent_deployment_target":             resourceKubernetesAgentDeploymentTarget(),
 			"octopusdeploy_kubernetes_cluster_deployment_target":           resourceKubernetesClusterDeploymentTarget(),
 			"octopusdeploy_library_variable_set":                           resourceLibraryVariableSet(),
