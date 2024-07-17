@@ -102,9 +102,9 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		env.AllowDynamicInfrastructure = types.BoolValue(environment.AllowDynamicInfrastructure)
 		env.SortOrder = types.Int64Value(int64(environment.SortOrder))
 		env.UseGuidedFailure = types.BoolValue(environment.UseGuidedFailure)
-		env.JiraExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: jiraExtensionSettingsObjectType()}, []any{})
-		env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: jiraServiceManagementExtensionSettingsObjectType()}, []any{})
-		env.ServiceNowExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: serviceNowExtensionSettingsObjectType()}, []any{})
+		env.JiraExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.JiraExtensionSettingsObjectType()}, []any{})
+		env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.JiraServiceManagementExtensionSettingsObjectType()}, []any{})
+		env.ServiceNowExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.ServiceNowExtensionSettingsObjectType()}, []any{})
 
 		for _, extensionSetting := range environment.ExtensionSettings {
 			switch extensionSetting.ExtensionID() {
@@ -112,24 +112,24 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 				if jiraExtension, ok := extensionSetting.(*environments.JiraExtensionSettings); ok {
 					env.JiraExtensionSettings, _ = types.ListValueFrom(
 						ctx,
-						types.ObjectType{AttrTypes: jiraExtensionSettingsObjectType()},
-						[]any{mapJiraExtensionSettings(jiraExtension)},
+						types.ObjectType{AttrTypes: schemas.JiraExtensionSettingsObjectType()},
+						[]any{schemas.MapJiraExtensionSettings(jiraExtension)},
 					)
 				}
 			case extensions.JiraServiceManagementExtensionID:
 				if jiraServiceManagementExtensionSettings, ok := extensionSetting.(*environments.JiraServiceManagementExtensionSettings); ok {
 					env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(
 						ctx,
-						types.ObjectType{AttrTypes: jiraServiceManagementExtensionSettingsObjectType()},
-						[]any{mapJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings)},
+						types.ObjectType{AttrTypes: schemas.JiraServiceManagementExtensionSettingsObjectType()},
+						[]any{schemas.MapJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings)},
 					)
 				}
 			case extensions.ServiceNowExtensionID:
 				if serviceNowExtensionSettings, ok := extensionSetting.(*environments.ServiceNowExtensionSettings); ok {
 					env.ServiceNowExtensionSettings, _ = types.ListValueFrom(
 						ctx,
-						types.ObjectType{AttrTypes: serviceNowExtensionSettingsObjectType()},
-						[]any{mapServiceNowExtensionSettings(serviceNowExtensionSettings)},
+						types.ObjectType{AttrTypes: schemas.ServiceNowExtensionSettingsObjectType()},
+						[]any{schemas.MapServiceNowExtensionSettings(serviceNowExtensionSettings)},
 					)
 				}
 			}
@@ -144,41 +144,6 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func jiraExtensionSettingsObjectType() map[string]attr.Type {
-	return map[string]attr.Type{
-		"environment_type": types.StringType,
-	}
-}
-func mapJiraExtensionSettings(jiraExtensionSettings *environments.JiraExtensionSettings) attr.Value {
-	return types.ObjectValueMust(jiraExtensionSettingsObjectType(), map[string]attr.Value{
-		"environment_type": types.StringValue(jiraExtensionSettings.JiraEnvironmentType),
-	})
-}
-
-func jiraServiceManagementExtensionSettingsObjectType() map[string]attr.Type {
-	return map[string]attr.Type{
-		"is_enabled": types.BoolType,
-	}
-}
-
-func mapJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings *environments.JiraServiceManagementExtensionSettings) attr.Value {
-	return types.ObjectValueMust(jiraServiceManagementExtensionSettingsObjectType(), map[string]attr.Value{
-		"is_enabled": types.BoolValue(jiraServiceManagementExtensionSettings.IsChangeControlled()),
-	})
-}
-
-func serviceNowExtensionSettingsObjectType() map[string]attr.Type {
-	return map[string]attr.Type{
-		"is_enabled": types.BoolType,
-	}
-}
-
-func mapServiceNowExtensionSettings(serviceNowExtensionSettings *environments.ServiceNowExtensionSettings) attr.Value {
-	return types.ObjectValueMust(serviceNowExtensionSettingsObjectType(), map[string]attr.Value{
-		"is_enabled": types.BoolValue(serviceNowExtensionSettings.IsChangeControlled()),
-	})
-}
-
 func environmentObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"id":          types.StringType,
@@ -190,13 +155,13 @@ func environmentObjectType() map[string]attr.Type {
 		schemas.EnvironmentUseGuidedFailure:           types.BoolType,
 		"space_id":                                    types.StringType,
 		schemas.EnvironmentJiraExtensionSettings: types.ListType{
-			ElemType: types.ObjectType{AttrTypes: jiraExtensionSettingsObjectType()},
+			ElemType: types.ObjectType{AttrTypes: schemas.JiraExtensionSettingsObjectType()},
 		},
 		schemas.EnvironmentJiraServiceManagementExtensionSettings: types.ListType{
-			ElemType: types.ObjectType{AttrTypes: jiraServiceManagementExtensionSettingsObjectType()},
+			ElemType: types.ObjectType{AttrTypes: schemas.JiraServiceManagementExtensionSettingsObjectType()},
 		},
 		schemas.EnvironmentServiceNowExtensionSettings: types.ListType{
-			ElemType: types.ObjectType{AttrTypes: serviceNowExtensionSettingsObjectType()},
+			ElemType: types.ObjectType{AttrTypes: schemas.ServiceNowExtensionSettingsObjectType()},
 		},
 	}
 }

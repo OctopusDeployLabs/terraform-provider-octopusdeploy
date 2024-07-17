@@ -56,7 +56,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_deployment_process":                             resourceDeploymentProcess(),
 			"octopusdeploy_docker_container_registry":                      resourceDockerContainerRegistry(),
 			"octopusdeploy_dynamic_worker_pool":                            resourceDynamicWorkerPool(),
-			"octopusdeploy_environment":                                    resourceEnvironment(),
 			"octopusdeploy_git_credential":                                 resourceGitCredential(),
 			"octopusdeploy_github_repository_feed":                         resourceGitHubRepositoryFeed(),
 			"octopusdeploy_gcp_account":                                    resourceGoogleCloudPlatformAccount(),
