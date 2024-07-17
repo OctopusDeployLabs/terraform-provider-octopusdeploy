@@ -42,7 +42,7 @@ func (r *mavenFeedTypeResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	mavenFeed, err := createResourceFromData(data)
+	mavenFeed, err := createMavenResourceFromData(data)
 	if err != nil {
 		return
 	}
@@ -56,7 +56,7 @@ func (r *mavenFeedTypeResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	updateDataFromFeed(data, data.SpaceID.ValueString(), createdFeed.(*feeds.MavenFeed))
+	updateDataFromMavenFeed(data, data.SpaceID.ValueString(), createdFeed.(*feeds.MavenFeed))
 
 	tflog.Info(ctx, fmt.Sprintf("Maven feed created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -79,7 +79,7 @@ func (r *mavenFeedTypeResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	mavenFeed := feed.(*feeds.MavenFeed)
-	updateDataFromFeed(data, data.SpaceID.ValueString(), mavenFeed)
+	updateDataFromMavenFeed(data, data.SpaceID.ValueString(), mavenFeed)
 
 	tflog.Info(ctx, fmt.Sprintf("Maven feed read (%s)", mavenFeed.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -95,7 +95,7 @@ func (r *mavenFeedTypeResource) Update(ctx context.Context, req resource.UpdateR
 
 	tflog.Debug(ctx, fmt.Sprintf("updating maven feed '%s'", data.ID.ValueString()))
 
-	feed, err := createResourceFromData(data)
+	feed, err := createMavenResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load maven feed", err.Error())
@@ -111,7 +111,7 @@ func (r *mavenFeedTypeResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	updateDataFromFeed(data, state.SpaceID.ValueString(), updatedFeed.(*feeds.MavenFeed))
+	updateDataFromMavenFeed(data, state.SpaceID.ValueString(), updatedFeed.(*feeds.MavenFeed))
 
 	tflog.Info(ctx, fmt.Sprintf("Maven feed updated (%s)", data.ID))
 
@@ -132,7 +132,7 @@ func (r *mavenFeedTypeResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-func createResourceFromData(data *schemas.MavenFeedTypeResourceModel) (*feeds.MavenFeed, error) {
+func createMavenResourceFromData(data *schemas.MavenFeedTypeResourceModel) (*feeds.MavenFeed, error) {
 	feed, err := feeds.NewMavenFeed(data.Name.ValueString())
 	if err != nil {
 		return nil, err
@@ -156,7 +156,7 @@ func createResourceFromData(data *schemas.MavenFeedTypeResourceModel) (*feeds.Ma
 	return feed, nil
 }
 
-func updateDataFromFeed(data *schemas.MavenFeedTypeResourceModel, spaceId string, feed *feeds.MavenFeed) {
+func updateDataFromMavenFeed(data *schemas.MavenFeedTypeResourceModel, spaceId string, feed *feeds.MavenFeed) {
 	data.DownloadAttempts = types.Int64Value(int64(feed.DownloadAttempts))
 	data.DownloadRetryBackoffSeconds = types.Int64Value(int64(feed.DownloadRetryBackoffSeconds))
 	data.FeedUri = types.StringValue(feed.FeedURI)

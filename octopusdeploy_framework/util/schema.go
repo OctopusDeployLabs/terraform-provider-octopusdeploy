@@ -3,6 +3,8 @@ package util
 import (
 	"fmt"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
@@ -238,4 +240,38 @@ func GetNumber(val types.Int64) int {
 	}
 
 	return v
+}
+
+func GetDownloadAttemptsResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.Int64Attribute{
+		Default:     int64default.StaticInt64(5),
+		Description: "The number of times a deployment should attempt to download a package from this feed before failing.",
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func GetDownloadRetryBackoffSecondsResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.Int64Attribute{
+		Default:     int64default.StaticInt64(10),
+		Description: "The number of seconds to apply as a linear back off between download attempts.",
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func GetPackageAcquisitionLocationOptionsResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.ListAttribute{
+		Computed:    true,
+		ElementType: types.StringType,
+		Optional:    true,
+		PlanModifiers: []planmodifier.List{
+			listplanmodifier.UseStateForUnknown(),
+		},
+	}
+}
+func GetFeedUriResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
+		Required: true,
+	}
 }
