@@ -139,7 +139,7 @@ resource "octopusdeploy_tenant" "tenant_team_b" {
 resource "octopusdeploy_tenant_project" "team_b_tenanted" {
   tenant_id = octopusdeploy_tenant.tenant_team_b.id
   project_id = octopusdeploy_project.tenanted.id
-  environment_id = [octopusdeploy_environment.env_1.id, octopusdeploy_environment.env_2.id]
+  environment_ids = [octopusdeploy_environment.env_1.id, octopusdeploy_environment.env_2.id]
   space_id = var.octopus_space_id
 }
 
