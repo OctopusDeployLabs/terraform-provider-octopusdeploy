@@ -20,9 +20,9 @@ func GetArtifactoryGenericFeedResourceSchema() map[string]resourceSchema.Attribu
 			ElementType: types.StringType,
 			Optional:    true,
 		},
-		"password": util.GetPasswordSchema(false, 1000),
+		"password": util.GetPasswordResourceSchema(false),
 		"space_id": util.GetSpaceIdResourceSchema(helmFeedDescription),
-		"username": util.GetUsernameSchema(false, 1000),
+		"username": util.GetUsernameResourceSchema(false),
 		"repository": resourceSchema.StringAttribute{
 			Computed: false,
 			Required: true,
