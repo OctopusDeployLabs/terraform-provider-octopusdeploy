@@ -2,7 +2,7 @@ package octopusdeploy
 
 import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-func getTenantProjectEnvironmentSchema() map[string]*schema.Schema {
+func getTenantProjectSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"tenant_id": {
 			Description: "The tenant ID associated with this tenant.",
@@ -16,11 +16,12 @@ func getTenantProjectEnvironmentSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			ForceNew:    true,
 		},
-		"environment_id": {
+		"environment_ids": {
 			Description: "The environment ID associated with this tenant.",
-			Required:    true,
-			Type:        schema.TypeString,
-			ForceNew:    true,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			Optional:    true,
+			Type:        schema.TypeList,
+			Required:    false,
 		},
 		"space_id": getSpaceIDSchema(),
 	}

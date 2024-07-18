@@ -3,9 +3,8 @@ package octopusdeploy
 import (
 	"context"
 	"log"
-	"slices"
-
 	"net/http"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -14,56 +13,79 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceTenantProjectEnvironment() *schema.Resource {
+func resourceTenantProject() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceTenantProjectEnvironmentCreate,
-		DeleteContext: resourceTenantProjectEnvironmentDelete,
+		CreateContext: resourceTenantProjectCreate,
+		DeleteContext: resourceTenantProjectDelete,
 		Description:   "This resource manages tenants in Octopus Deploy.",
 		Importer:      getImporter(),
-		ReadContext:   resourceTenantProjectEnvironmentRead,
-		Schema:        getTenantProjectEnvironmentSchema(),
+		ReadContext:   resourceTenantProjectRead,
+		UpdateContext: resourceTenantProjectUpdate,
+		Schema:        getTenantProjectSchema(),
 	}
 }
 
-func resourceTenantProjectEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceTenantProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	client := m.(*client.Client)
 	k := extractRelationship(d, client)
 
-	log.Printf("[INFO] connecting tenant (%#v) to project (%#v) for environment (%#v)", k.tenantID, k.projectID, k.environmentID)
+	log.Printf("[INFO] updating tenant (%#v) connection to project (%#v)", k.tenantID, k.projectID)
 
 	tenant, err := tenants.GetByID(client, k.spaceID, k.tenantID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Append relationship if not present
-	if !slices.Contains(tenant.ProjectEnvironments[k.projectID], k.environmentID) {
-		tenant.ProjectEnvironments[k.projectID] = append(tenant.ProjectEnvironments[k.projectID], k.environmentID)
-	}
+	tenant.ProjectEnvironments[k.projectID] = k.environmentIDs
 
 	_, err = tenants.Update(client, tenant)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	id := k.spaceID + ":" + k.tenantID + ":" + k.projectID + ":" + k.environmentID
-	d.SetId(id)
-
-	log.Printf("[INFO] tenant (%s) connected to project (%#v) for environment (%#v)", k.tenantID, k.projectID, k.environmentID)
+	log.Printf("[INFO] updated tenant (%s) connection to project (%#v)", k.tenantID, k.projectID)
 	return nil
 }
 
-func resourceTenantProjectEnvironmentDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceTenantProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	client := m.(*client.Client)
 	k := extractRelationship(d, client)
 
-	log.Printf("[INFO] removing tenant (%#v) from project (%#v) for environment (%#v)", k.tenantID, k.projectID, k.environmentID)
+	log.Printf("[INFO] connecting tenant (%#v) to project (%#v)", k.tenantID, k.projectID)
+
+	tenant, err := tenants.GetByID(client, k.spaceID, k.tenantID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	tenant.ProjectEnvironments[k.projectID] = k.environmentIDs
+
+	_, err = tenants.Update(client, tenant)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	id := k.spaceID + ":" + k.tenantID + ":" + k.projectID
+	d.SetId(id)
+
+	log.Printf("[INFO] tenant (%s) connected to project (%#v)", k.tenantID, k.projectID)
+	return nil
+}
+
+func resourceTenantProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	client := m.(*client.Client)
+	k := extractRelationship(d, client)
+
+	log.Printf("[INFO] removing tenant (%#v) from project (%#v)", k.tenantID, k.projectID)
 
 	tenant, err := tenants.GetByID(client, k.spaceID, k.tenantID)
 	if err != nil {
@@ -77,55 +99,60 @@ func resourceTenantProjectEnvironmentDelete(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 
-	p := tenant.ProjectEnvironments[k.projectID]
-	if slices.Contains(p, k.environmentID) {
-		for i := 0; i < len(p); i++ {
-			if p[i] == k.environmentID {
-				tenant.ProjectEnvironments[k.projectID] = slices.Delete(p, i, i+1)
-			}
-		}
-	}
+	delete(tenant.ProjectEnvironments, k.projectID)
 
 	_, err = tenants.Update(client, tenant)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] tenant (%#v) disconnected from project (%#v) for environment (%#v)", k.tenantID, k.projectID, k.environmentID)
+	log.Printf("[INFO] tenant (%#v) disconnected from project (%#v)", k.tenantID, k.projectID)
 	d.SetId("")
 	return nil
 }
 
-func resourceTenantProjectEnvironmentRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceTenantProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	k := extractRelationship(d, client)
-	_, err := tenants.GetByID(client, k.spaceID, k.tenantID)
+
+	bits := strings.Split(d.Id(), ":")
+	spaceID := bits[0]
+	tenantID := bits[1]
+	projectID := bits[2]
+
+	tenant, err := tenants.GetByID(client, spaceID, tenantID)
 	if err != nil {
 		apiError := err.(*core.APIError)
 		if apiError.StatusCode != http.StatusNotFound {
 			return diag.FromErr(err)
 		}
 	}
+
+	d.Set("environment_ids", tenant.ProjectEnvironments[projectID])
+
 	return nil
 }
 
 func extractRelationship(d *schema.ResourceData, client *client.Client) person {
 	tenantID := d.Get("tenant_id").(string)
 	projectID := d.Get("project_id").(string)
-	environmentID := d.Get("environment_id").(string)
+
+	environmentIDs := []string{}
+	if attr, ok := d.GetOk("environment_ids"); ok {
+		environmentIDs = getSliceFromTerraformTypeList(attr)
+	}
 
 	spaceID := client.GetSpaceID()
 	if v, ok := d.GetOk("space_id"); ok {
 		spaceID = v.(string)
 	}
 
-	n := person{tenantID: tenantID, projectID: projectID, environmentID: environmentID, spaceID: spaceID}
+	n := person{tenantID: tenantID, projectID: projectID, environmentIDs: environmentIDs, spaceID: spaceID}
 	return n
 }
 
 type person struct {
-	tenantID      string
-	projectID     string
-	environmentID string
-	spaceID       string
+	tenantID       string
+	projectID      string
+	environmentIDs []string
+	spaceID        string
 }
