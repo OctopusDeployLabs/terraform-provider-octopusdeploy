@@ -42,7 +42,6 @@ func (g *gitCredentialResource) Schema(_ context.Context, _ resource.SchemaReque
 func (g *gitCredentialResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	g.Config = ResourceConfiguration(req, resp)
 }
-
 func (g *gitCredentialResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan gitCredentialResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -50,15 +49,38 @@ func (g *gitCredentialResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	tflog.Debug(ctx, "Creating Git credential", map[string]interface{}{
+		"name":        plan.Name.ValueString(),
+		"description": plan.Description.ValueString(),
+	})
+
 	gitCredential := expandGitCredential(&plan)
-	createdCredential, err := credentials.Add(g.Client, gitCredential)
+	createdResponse, err := credentials.Add(g.Client, gitCredential)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating Git credential", err.Error())
 		return
 	}
 
-	setGitCredential(ctx, &plan, createdCredential)
-	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	createdGitCredential, err := credentials.GetByID(g.Client, gitCredential.SpaceID, createdResponse.ID)
+	if err != nil {
+		resp.Diagnostics.AddError("Error retrieving created Git credential", err.Error())
+		return
+	}
+
+	if createdGitCredential == nil {
+		resp.Diagnostics.AddError("Error creating Git credential", "Created resource is nil")
+		return
+	}
+
+	setGitCredential(ctx, &plan, createdGitCredential)
+
+	tflog.Debug(ctx, "Git credential created", map[string]interface{}{
+		"id":          plan.ID.ValueString(),
+		"name":        plan.Name.ValueString(),
+		"description": plan.Description.ValueString(),
+	})
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (g *gitCredentialResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -68,13 +90,13 @@ func (g *gitCredentialResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	resource, err := credentials.GetByID(g.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	gitCredential, err := credentials.GetByID(g.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading Git credential", err.Error())
 		return
 	}
 
-	setGitCredential(ctx, &state, resource)
+	setGitCredential(ctx, &state, gitCredential)
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
@@ -85,8 +107,8 @@ func (g *gitCredentialResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	resource := expandGitCredential(&plan)
-	updatedResource, err := credentials.Update(g.Client, resource)
+	gitCredential := expandGitCredential(&plan)
+	updatedResource, err := credentials.Update(g.Client, gitCredential)
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating Git credential", err.Error())
 		return
@@ -111,19 +133,42 @@ func (g *gitCredentialResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func expandGitCredential(model *gitCredentialResourceModel) *credentials.Resource {
+	if model == nil {
+		tflog.Error(context.Background(), "Model is nil in expandGitCredential")
+		return nil
+	}
+
 	password := core.NewSensitiveValue(model.Password.ValueString())
 	name := model.Name.ValueString()
 	username := model.Username.ValueString()
 
 	usernamePassword := credentials.NewUsernamePassword(username, password)
 
-	resource := credentials.NewResource(name, usernamePassword)
-	resource.ID = model.ID.ValueString()
-	resource.Description = model.Description.ValueString()
-	resource.SpaceID = model.SpaceID.ValueString()
+	gitCredential := credentials.NewResource(name, usernamePassword)
 
-	return resource
+	// Only set these if they're not empty
+	if !model.ID.IsNull() {
+		gitCredential.ID = model.ID.ValueString()
+	}
+	if !model.Description.IsNull() {
+		gitCredential.Description = model.Description.ValueString()
+	}
+	if !model.SpaceID.IsNull() {
+		gitCredential.SpaceID = model.SpaceID.ValueString()
+	}
+
+	tflog.Debug(context.Background(), "Expanded Git credential", map[string]interface{}{
+		"id":          gitCredential.ID,
+		"name":        gitCredential.Name,
+		"description": gitCredential.Description,
+		"space_id":    gitCredential.SpaceID,
+		"username":    username,
+		// Don't log the password
+	})
+
+	return gitCredential
 }
+
 func setGitCredential(ctx context.Context, model *gitCredentialResourceModel, resource *credentials.Resource) {
 	if resource == nil {
 		tflog.Warn(ctx, "Resource is nil in setGitCredential")
@@ -135,18 +180,20 @@ func setGitCredential(ctx context.Context, model *gitCredentialResourceModel, re
 	model.Name = types.StringValue(resource.GetName())
 	model.Description = types.StringValue(resource.Description)
 
-	if resource.Details != nil {
-		model.Type = types.StringValue(string(resource.Details.Type()))
+	tflog.Debug(ctx, "Setting Git credential state", map[string]interface{}{
+		"id":          resource.GetID(),
+		"space_id":    resource.SpaceID,
+		"name":        resource.GetName(),
+		"description": resource.Description,
+	})
 
-		if usernamePassword, ok := resource.Details.(*credentials.UsernamePassword); ok && usernamePassword != nil {
-			model.Username = types.StringValue(usernamePassword.Username)
-		} else {
-			tflog.Debug(ctx, "Git credential is not of type UsernamePassword", map[string]interface{}{
-				"type": resource.Details.Type(),
-			})
-		}
+	if usernamePassword, ok := resource.Details.(*credentials.UsernamePassword); ok && usernamePassword != nil {
+		model.Username = types.StringValue(usernamePassword.Username)
+		// Note: We don't set the password here as it's sensitive and not returned by the API
 	} else {
-		tflog.Warn(ctx, "Git credential details are nil")
+		tflog.Debug(ctx, "Git credential is not of type UsernamePassword", map[string]interface{}{
+			"type": resource.Details.Type(),
+		})
 	}
 
 	tflog.Debug(ctx, "Git credential state set", map[string]interface{}{
