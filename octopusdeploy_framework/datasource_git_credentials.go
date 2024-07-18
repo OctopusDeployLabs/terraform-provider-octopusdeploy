@@ -47,7 +47,7 @@ func (g *gitCredentialsDataSource) Metadata(_ context.Context, req datasource.Me
 
 func (g *gitCredentialsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Provides information about existing Git credentials.",
+		Description: "A list of Git Credentials that match the filter(s).",
 		Attributes:  schemas.GetGitCredentialDataSourceSchema(),
 	}
 }
@@ -89,7 +89,7 @@ func (g *gitCredentialsDataSource) Read(ctx context.Context, req datasource.Read
 	}
 	data.GitCredentials = gitCredentialsList
 
-	data.ID = types.StringValue(fmt.Sprintf("GitCredentials-%s", time.Now().UTC().String()))
+	data.ID = types.StringValue(fmt.Sprintf("GitCredentials-%s - new sdk", time.Now().UTC().String()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
