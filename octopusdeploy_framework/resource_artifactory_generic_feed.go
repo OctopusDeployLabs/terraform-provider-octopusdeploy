@@ -166,7 +166,9 @@ func updateDataFromArtifactoryGenericFeed(data *schemas.ArtifactoryGenericFeedTy
 		data.Username = types.StringValue(feed.Username)
 	}
 	data.Repository = types.StringValue(feed.Repository)
-	data.LayoutRegex = types.StringValue(feed.LayoutRegex)
+	if feed.LayoutRegex != "" {
+		data.LayoutRegex = types.StringValue(feed.LayoutRegex)
+	}
 
 	packageAcquisitionLocationOptionsList := make([]attr.Value, len(feed.PackageAcquisitionLocationOptions))
 	for i, option := range feed.PackageAcquisitionLocationOptions {
