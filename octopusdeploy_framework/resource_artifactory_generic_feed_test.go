@@ -1,12 +1,11 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployArtifactoryGenericFeed(t *testing.T) {
@@ -21,8 +20,8 @@ func TestAccOctopusDeployArtifactoryGenericFeed(t *testing.T) {
 	layoutRegex := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testArtifactoryGenericFeedCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testArtifactoryGenericFeedCheckDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
