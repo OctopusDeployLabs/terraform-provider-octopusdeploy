@@ -42,7 +42,7 @@ func NewGitCredentialsDataSource() datasource.DataSource {
 }
 
 func (g *gitCredentialsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = util.GetTypeName("git_credentials")
+	resp.TypeName = util.GetTypeName(schemas.GitCredentialDatasourceName)
 }
 
 func (g *gitCredentialsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {

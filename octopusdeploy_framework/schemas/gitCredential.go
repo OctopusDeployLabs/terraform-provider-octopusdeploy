@@ -8,31 +8,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
+const (
+	GitCredentialResourceDescription = "Git Credential"
+	GitCredentialResourceName        = "git_credential"
+	GitCredentialDatasourceName      = "git_credentials"
+)
+
 func GetGitCredentialResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "Manages a Git credential in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id": resourceSchema.StringAttribute{
-				Computed:    true,
-				Description: "The ID of the Git credential.",
-			},
-			"space_id": resourceSchema.StringAttribute{
-				Optional:    true,
-				Description: "The ID of the space this Git credential belongs to.",
-			},
-			"name": resourceSchema.StringAttribute{
-				Required:    true,
-				Description: "The name of the Git credential. This name must be unique.",
-				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
-				},
-			},
-			"description": resourceSchema.StringAttribute{
-				Optional:    true,
-				Description: "The description of this Git credential.",
-			},
+			"id":          util.GetIdResourceSchema(),
+			"space_id":    util.GetSpaceIdResourceSchema(GitCredentialResourceDescription),
+			"name":        util.GetNameResourceSchema(true),
+			"description": util.GetDescriptionResourceSchema(GitCredentialResourceDescription),
 			"type": resourceSchema.StringAttribute{
-				Computed:    true,
+				Optional:    true,
 				Description: "The Git credential authentication type.",
 			},
 			"username": resourceSchema.StringAttribute{
@@ -57,7 +48,7 @@ func GetGitCredentialResourceSchema() resourceSchema.Schema {
 func GetGitCredentialDataSourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":       util.GetIdDatasourceSchema(),
-		"space_id": util.GetSpaceIdDatasourceSchema("Git credentials"),
+		"space_id": util.GetSpaceIdDatasourceSchema(GitCredentialResourceDescription),
 		"name":     util.GetQueryNameDatasourceSchema(),
 		"skip":     util.GetQuerySkipDatasourceSchema(),
 		"take":     util.GetQueryTakeDatasourceSchema(),
@@ -74,9 +65,9 @@ func GetGitCredentialDataSourceSchema() map[string]datasourceSchema.Attribute {
 func GetGitCredentialAttributes() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":          util.GetIdDatasourceSchema(),
-		"space_id":    util.GetSpaceIdDatasourceSchema("Git credentials"),
+		"space_id":    util.GetSpaceIdDatasourceSchema(GitCredentialResourceDescription),
 		"name":        util.GetQueryNameDatasourceSchema(),
-		"description": util.GetDescriptionDatasourceSchema("Git credentials"),
+		"description": util.GetDescriptionDatasourceSchema(GitCredentialResourceDescription),
 		"type": datasourceSchema.StringAttribute{
 			Computed:    true,
 			Description: "The Git credential authentication type.",

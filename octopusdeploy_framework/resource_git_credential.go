@@ -8,6 +8,7 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ resource.Resource = &gitCredentialResource{}
@@ -31,7 +32,7 @@ func NewGitCredentialResource() resource.Resource {
 }
 
 func (g *gitCredentialResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = util.GetTypeName("git_credential")
+	resp.TypeName = util.GetTypeName(schemas.GitCredentialResourceName)
 }
 
 func (g *gitCredentialResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -49,14 +50,14 @@ func (g *gitCredentialResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	resource := expandGitCredential(&plan)
-	createdResource, err := credentials.Add(g.Client, resource)
+	gitCredential := expandGitCredential(&plan)
+	createdCredential, err := credentials.Add(g.Client, gitCredential)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating Git credential", err.Error())
 		return
 	}
 
-	setGitCredential(ctx, &plan, createdResource)
+	setGitCredential(ctx, &plan, createdCredential)
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
@@ -123,15 +124,37 @@ func expandGitCredential(model *gitCredentialResourceModel) *credentials.Resourc
 
 	return resource
 }
-
 func setGitCredential(ctx context.Context, model *gitCredentialResourceModel, resource *credentials.Resource) {
+	if resource == nil {
+		tflog.Warn(ctx, "Resource is nil in setGitCredential")
+		return
+	}
+
 	model.ID = types.StringValue(resource.GetID())
 	model.SpaceID = types.StringValue(resource.SpaceID)
 	model.Name = types.StringValue(resource.GetName())
 	model.Description = types.StringValue(resource.Description)
-	model.Type = types.StringValue(string(resource.Details.Type()))
 
-	if usernamePassword, ok := resource.Details.(*credentials.UsernamePassword); ok {
-		model.Username = types.StringValue(usernamePassword.Username)
+	if resource.Details != nil {
+		model.Type = types.StringValue(string(resource.Details.Type()))
+
+		if usernamePassword, ok := resource.Details.(*credentials.UsernamePassword); ok && usernamePassword != nil {
+			model.Username = types.StringValue(usernamePassword.Username)
+		} else {
+			tflog.Debug(ctx, "Git credential is not of type UsernamePassword", map[string]interface{}{
+				"type": resource.Details.Type(),
+			})
+		}
+	} else {
+		tflog.Warn(ctx, "Git credential details are nil")
 	}
+
+	tflog.Debug(ctx, "Git credential state set", map[string]interface{}{
+		"id":          model.ID.ValueString(),
+		"name":        model.Name.ValueString(),
+		"space_id":    model.SpaceID.ValueString(),
+		"type":        model.Type.ValueString(),
+		"description": model.Description.ValueString(),
+		"username":    model.Username.ValueString(),
+	})
 }
