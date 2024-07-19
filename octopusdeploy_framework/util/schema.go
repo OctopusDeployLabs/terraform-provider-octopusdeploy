@@ -205,6 +205,24 @@ func GetPasswordResourceSchema(isRequired bool) resourceSchema.Attribute {
 	return s
 }
 
+func GetPasswordDataSourceSchema(isRequired bool) schema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The password associated with this resource.",
+		Sensitive:   true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
 func GetUsernameResourceSchema(isRequired bool) resourceSchema.Attribute {
 	s := &resourceSchema.StringAttribute{
 		Description: "The username associated with this resource.",

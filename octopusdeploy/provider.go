@@ -19,7 +19,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_cloud_region_deployment_targets":                 dataSourceCloudRegionDeploymentTargets(),
 			"octopusdeploy_channels":                                        dataSourceChannels(),
 			"octopusdeploy_deployment_targets":                              dataSourceDeploymentTargets(),
-			"octopusdeploy_feeds":                                           dataSourceFeeds(),
 			"octopusdeploy_kubernetes_agent_deployment_targets":             dataSourceKubernetesAgentDeploymentTargets(),
 			"octopusdeploy_kubernetes_cluster_deployment_targets":           dataSourceKubernetesClusterDeploymentTargets(),
 			"octopusdeploy_library_variable_sets":                           dataSourceLibraryVariableSet(),
