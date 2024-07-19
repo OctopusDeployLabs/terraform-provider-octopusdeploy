@@ -3877,7 +3877,7 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 		}
 
 		if len(resources.Items) != 2 {
-			t.Fatalf("Space must have two workers (both KubernetesTentacles)")
+			t.Fatalf("Space must have two workers (both KubernetesTentacles), instead found %v", resources.Items)
 		}
 
 		optionalAgentName := "optional-agent"
