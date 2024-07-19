@@ -3850,9 +3850,12 @@ func TestTentacleCertificateResource(t *testing.T) {
 }
 
 func TestKubernetesAgentWorkerResource(t *testing.T) {
-	customEnv := make(map[string]string)
-	customEnv["Octopus"]
-	testFramework := test.OctopusContainerTest{}
+	testFramework := test.OctopusContainerTest{
+		CustomEnvironment: 		Env: map[string]string{
+		"OCTOPUS__FeatureToggles__KubernetesAgentAsWorkerFeatureToggle": "true",
+	},
+}
+	testFramework.CustomEnvironment = customEnv
 	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
 		// Act
 		newSpaceId, err := testFramework.Act(t, container, "./terraform", "58-kubernetesagentworker", []string{})

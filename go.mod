@@ -2,11 +2,9 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 
 go 1.21
 
-replace github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240502041300-f71244db277d => /Users/trent/projects/OctopusTerraformTestFramework
-
 require (
 	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.43.0
-	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240622231527-24df7b6eaa48
+	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240718055636-f42871b46363
 	github.com/google/uuid v1.6.0
 	github.com/gruntwork-io/terratest v0.41.11
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -31,8 +29,8 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
-	github.com/Microsoft/go-winio v0.6.1 // indirect
-	github.com/Microsoft/hcsshim v0.11.4 // indirect
+	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/Microsoft/hcsshim v0.11.5 // indirect
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
@@ -45,13 +43,14 @@ require (
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
-	github.com/containerd/containerd v1.7.15 // indirect
+	github.com/containerd/containerd v1.7.18 // indirect
+	github.com/containerd/errdefs v0.1.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dghubble/sling v1.4.1 // indirect
-	github.com/distribution/reference v0.5.0 // indirect
-	github.com/docker/docker v25.0.5+incompatible // indirect
+	github.com/distribution/reference v0.6.0 // indirect
+	github.com/docker/docker v27.0.3+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fatih/color v1.16.0 // indirect
@@ -93,7 +92,7 @@ require (
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/klauspost/compress v1.16.0 // indirect
+	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -108,6 +107,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
 	github.com/moby/sys/sequential v0.5.0 // indirect
 	github.com/moby/sys/user v0.1.0 // indirect
@@ -127,7 +127,7 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/testcontainers/testcontainers-go v0.31.0 // indirect
+	github.com/testcontainers/testcontainers-go v0.32.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/tmccombs/hcl2json v0.3.6 // indirect
