@@ -119,11 +119,13 @@ resource "octopusdeploy_tenant" "tenant_team_a" {
   space_id    = var.octopus_space_id
 
   depends_on = [octopusdeploy_tag.tag_a, octopusdeploy_tag.tag_b]
+}
 
-  project_environment {
-    environments = [octopusdeploy_environment.env_1.id, octopusdeploy_environment.env_2.id]
-    project_id   = octopusdeploy_project.tenanted.id
-  }
+resource "octopusdeploy_tenant_project" "team_a_tenanted" {
+  tenant_id = octopusdeploy_tenant.tenant_team_a.id
+  project_id = octopusdeploy_project.tenanted.id
+  environment_ids = [octopusdeploy_environment.env_1.id, octopusdeploy_environment.env_2.id]
+  space_id = var.octopus_space_id
 }
 
 resource "octopusdeploy_tenant" "tenant_team_b" {
@@ -132,11 +134,13 @@ resource "octopusdeploy_tenant" "tenant_team_b" {
   tenant_tags = ["tag1/a", "tag1/b"]
   space_id    = var.octopus_space_id
   depends_on  = [octopusdeploy_tag.tag_a, octopusdeploy_tag.tag_b]
+}
 
-  project_environment {
-    environments = [octopusdeploy_environment.env_1.id, octopusdeploy_environment.env_2.id]
-    project_id   = octopusdeploy_project.tenanted.id
-  }
+resource "octopusdeploy_tenant_project" "team_b_tenanted" {
+  tenant_id = octopusdeploy_tenant.tenant_team_b.id
+  project_id = octopusdeploy_project.tenanted.id
+  environment_ids = [octopusdeploy_environment.env_1.id, octopusdeploy_environment.env_2.id]
+  space_id = var.octopus_space_id
 }
 
 resource "octopusdeploy_project_scheduled_trigger" "tenanted_trigger" {

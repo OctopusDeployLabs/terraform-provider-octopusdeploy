@@ -24,6 +24,9 @@ func resourceTenant() *schema.Resource {
 }
 
 func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	tenant := expandTenant(d)
 
 	log.Printf("[INFO] creating tenant: %#v", tenant)
@@ -45,6 +48,9 @@ func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceTenantDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	log.Printf("[INFO] deleting tenant (%s)", d.Id())
 
 	client := m.(*client.Client)
@@ -75,6 +81,9 @@ func resourceTenantRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceTenantUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	log.Printf("[INFO] updating tenant (%s)", d.Id())
 
 	tenant := expandTenant(d)
