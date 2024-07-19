@@ -33,7 +33,7 @@ func NewLifecyclesDataSource() datasource.DataSource {
 
 func (l *lifecyclesDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	tflog.Debug(ctx, "lifecycles datasource Metadata")
-	resp.TypeName = "octopusdeploy_lifecycles"
+	resp.TypeName = util.GetTypeName("lifecycles")
 }
 
 func (l *lifecyclesDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
