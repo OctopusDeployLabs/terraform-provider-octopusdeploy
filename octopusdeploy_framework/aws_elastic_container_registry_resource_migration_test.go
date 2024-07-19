@@ -14,6 +14,8 @@ import (
 func TestAwsElasticContainerRegistryResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
+	os.Setenv("ECR_ACCESS_KEY", "")
+	os.Setenv("ECR_SECRET_KEY", "")
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testAwsElasticContainerRegistryFeedDestroy,
