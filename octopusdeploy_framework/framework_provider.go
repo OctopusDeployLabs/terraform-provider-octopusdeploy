@@ -78,6 +78,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewEnvironmentResource,
 		NewHelmFeedResource,
 		NewArtifactoryGenericFeedResource,
+		NewGitHubRepositoryFeedResource,
 	}
 }
 
