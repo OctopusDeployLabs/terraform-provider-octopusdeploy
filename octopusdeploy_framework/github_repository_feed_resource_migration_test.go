@@ -11,12 +11,12 @@ import (
 	"testing"
 )
 
-func TestMavenResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func TestGitHubFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testFeedDestroy,
+		CheckDestroy: testGitHubFeedDestroy,
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
@@ -25,11 +25,11 @@ func TestMavenResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 						Source:            "OctopusDeployLabs/octopusdeploy",
 					},
 				},
-				Config: mavenConfig,
+				Config: gitHubconfig,
 			},
 			{
 				ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-				Config:                   mavenConfig,
+				Config:                   gitHubconfig,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
@@ -38,36 +38,36 @@ func TestMavenResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 			},
 			{
 				ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-				Config:                   updatedMavenConfig,
+				Config:                   updatedGitHubConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testFeedUpdated(t),
+					testGitHubFeedUpdated(t),
 				),
 			},
 		},
 	})
 }
 
-const mavenConfig = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
-						  name                                 = "Maven"
-						  feed_uri                             = "https://repo.maven.apache.org/maven2/"
+const gitHubconfig = `resource "octopusdeploy_github_repository_feed" "feed_github_repository_migration" {
+						  name                                 = "Test GitHub Feed"
+						  feed_uri                             = "https://api.github.com"
 						  username                             = "username"
 						  password                             = "password"
 						  download_attempts                    = 6
 						  download_retry_backoff_seconds       = 11
 					   }`
 
-const updatedMavenConfig = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
-						  name                                 = "Updated_Maven"
-						  feed_uri                             = "https://Updated.maven.apache.org/maven2/z"
+const updatedGitHubConfig = `resource "octopusdeploy_github_repository_feed" "feed_github_repository_migration" {
+						  name                                 = "Updated Test GitHub Feed"
+						  feed_uri                             = "https://api.github.com/updated"
 						  username                             = "username_Updated"
 						  password                             = "password_Updated"
 						  download_attempts                    = 7
 						  download_retry_backoff_seconds       = 12
 					   }`
 
-func testFeedDestroy(s *terraform.State) error {
+func testGitHubFeedDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "octopusdeploy_maven_feed" {
+		if rs.Type != "octopusdeploy_github_repository_feed" {
 			continue
 		}
 
@@ -80,23 +80,23 @@ func testFeedDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testFeedUpdated(t *testing.T) resource.TestCheckFunc {
+func testGitHubFeedUpdated(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		feedId := s.RootModule().Resources["octopusdeploy_maven_feed"+".feed_maven_migration"].Primary.ID
+		feedId := s.RootModule().Resources["octopusdeploy_github_repository_feed"+".feed_github_repository_migration"].Primary.ID
 		feed, err := octoClient.Feeds.GetByID(feedId)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve feed by ID: %s", err)
 		}
 
-		mavenFeed := feed.(*feeds.MavenFeed)
+		githubRepositoryFeed := feed.(*feeds.GitHubRepositoryFeed)
 
-		assert.Equal(t, "Feeds-1001", mavenFeed.ID, "Feed ID did not match expected value")
-		assert.Equal(t, "Updated_Maven", mavenFeed.Name, "Feed name did not match expected value")
-		assert.Equal(t, "username_Updated", mavenFeed.Username, "Feed username did not match expected value")
-		assert.Equal(t, true, mavenFeed.Password.HasValue, "Feed password should be set")
-		assert.Equal(t, "https://Updated.maven.apache.org/maven2/z", mavenFeed.FeedURI, "Feed URI did not match expected value")
-		assert.Equal(t, 7, mavenFeed.DownloadAttempts, "Feed download attempts did not match expected value")
-		assert.Equal(t, 12, mavenFeed.DownloadRetryBackoffSeconds, "Feed download retry_backoff_seconds did not match expected value")
+		assert.Equal(t, "Feeds-1001", githubRepositoryFeed.ID, "Feed ID did not match expected value")
+		assert.Equal(t, "Updated Test GitHub Feed", githubRepositoryFeed.Name, "Feed name did not match expected value")
+		assert.Equal(t, "username_Updated", githubRepositoryFeed.Username, "Feed username did not match expected value")
+		assert.Equal(t, true, githubRepositoryFeed.Password.HasValue, "Feed password should be set")
+		assert.Equal(t, "https://api.github.com/updated", githubRepositoryFeed.FeedURI, "Feed URI did not match expected value")
+		assert.Equal(t, 7, githubRepositoryFeed.DownloadAttempts, "Feed download attempts did not match expected value")
+		assert.Equal(t, 12, githubRepositoryFeed.DownloadRetryBackoffSeconds, "Feed download retry_backoff_seconds did not match expected value")
 
 		return nil
 	}
