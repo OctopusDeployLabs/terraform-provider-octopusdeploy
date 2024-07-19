@@ -17,7 +17,7 @@ func resourceTenantProject() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceTenantProjectCreate,
 		DeleteContext: resourceTenantProjectDelete,
-		Description:   "This resource manages tenants in Octopus Deploy.",
+		Description:   "This resource represents the connection between tenants and projects.",
 		Importer:      getImporter(),
 		ReadContext:   resourceTenantProjectRead,
 		UpdateContext: resourceTenantProjectUpdate,
