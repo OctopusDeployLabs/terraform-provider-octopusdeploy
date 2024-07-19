@@ -25,7 +25,7 @@ func TestAccDataSourceFeeds(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFeedsDataSourceID(prefix),
-					resource.TestCheckResourceAttr(prefix, "feeds.#", "8"),
+					resource.TestCheckResourceAttr(prefix, "feeds.#", "7"),
 				),
 				Config: testAccDataSourceFeedsConfig(localName, take),
 			},
@@ -80,13 +80,6 @@ func createTestAccDataSourceFeedsConfig() string {
     password                       = "test-password"
     name                           = "Test Maven Feed"
     username                       = "test-username"
-  }
-
-  resource "octopusdeploy_aws_elastic_container_registry" "aws_ecr_feed" {
-    access_key = "access-key"
-    name       = "Test AWS ECR"
-    region     = "us-east-1"
-    secret_key = "secret-key"
   }
 
   resource "octopusdeploy_github_repository_feed" "ghr_feed" {
