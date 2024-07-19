@@ -13,16 +13,12 @@ func GetArtifactoryGenericFeedResourceSchema() map[string]resourceSchema.Attribu
 		"feed_uri": resourceSchema.StringAttribute{
 			Required: true,
 		},
-		"id":   util.GetIdResourceSchema(),
-		"name": util.GetNameResourceSchema(true),
-		"package_acquisition_location_options": resourceSchema.ListAttribute{
-			Computed:    true,
-			ElementType: types.StringType,
-			Optional:    true,
-		},
-		"password": util.GetPasswordResourceSchema(false),
-		"space_id": util.GetSpaceIdResourceSchema(helmFeedDescription),
-		"username": util.GetUsernameResourceSchema(false),
+		"id":                                   util.GetIdResourceSchema(),
+		"name":                                 util.GetNameResourceSchema(true),
+		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
+		"password":                             util.GetPasswordResourceSchema(false),
+		"space_id":                             util.GetSpaceIdResourceSchema(helmFeedDescription),
+		"username":                             util.GetUsernameResourceSchema(false),
 		"repository": resourceSchema.StringAttribute{
 			Computed: false,
 			Required: true,

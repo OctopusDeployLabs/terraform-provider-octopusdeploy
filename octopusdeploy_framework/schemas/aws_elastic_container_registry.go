@@ -14,13 +14,9 @@ func GetAwsElasticContainerRegistryFeedResourceSchema() map[string]resourceSchem
 			Required:    true,
 			Description: "The AWS access key to use when authenticating against Amazon Web Services.",
 		},
-		"id":   util.GetIdResourceSchema(),
-		"name": util.GetNameResourceSchema(true),
-		"package_acquisition_location_options": resourceSchema.ListAttribute{
-			Computed:    true,
-			ElementType: types.StringType,
-			Optional:    true,
-		},
+		"id":                                   util.GetIdResourceSchema(),
+		"name":                                 util.GetNameResourceSchema(true),
+		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
 		"region": resourceSchema.StringAttribute{
 			Required:    true,
 			Description: "The AWS region where the registry resides.",

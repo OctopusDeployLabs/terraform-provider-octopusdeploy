@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestMavenFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func TestMavenResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
 

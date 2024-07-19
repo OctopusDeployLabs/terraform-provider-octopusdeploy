@@ -59,8 +59,6 @@ func (r *artifactoryGenericFeedTypeResource) Create(ctx context.Context, req res
 
 	updateDataFromArtifactoryGenericFeed(data, data.SpaceID.ValueString(), createdFeed.(*feeds.ArtifactoryGenericFeed))
 
-	data.ID = types.StringValue(createdFeed.GetID())
-
 	tflog.Info(ctx, fmt.Sprintf("ArtifactoryGeneric feed created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -168,7 +166,9 @@ func updateDataFromArtifactoryGenericFeed(data *schemas.ArtifactoryGenericFeedTy
 		data.Username = types.StringValue(feed.Username)
 	}
 	data.Repository = types.StringValue(feed.Repository)
-	data.LayoutRegex = types.StringValue(feed.LayoutRegex)
+	if feed.LayoutRegex != "" {
+		data.LayoutRegex = types.StringValue(feed.LayoutRegex)
+	}
 
 	packageAcquisitionLocationOptionsList := make([]attr.Value, len(feed.PackageAcquisitionLocationOptions))
 	for i, option := range feed.PackageAcquisitionLocationOptions {

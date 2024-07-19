@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -18,7 +19,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_cloud_region_deployment_targets":                 dataSourceCloudRegionDeploymentTargets(),
 			"octopusdeploy_channels":                                        dataSourceChannels(),
 			"octopusdeploy_deployment_targets":                              dataSourceDeploymentTargets(),
-			"octopusdeploy_git_credentials":                                 dataSourceGitCredentials(),
 			"octopusdeploy_kubernetes_agent_deployment_targets":             dataSourceKubernetesAgentDeploymentTargets(),
 			"octopusdeploy_kubernetes_cluster_deployment_targets":           dataSourceKubernetesClusterDeploymentTargets(),
 			"octopusdeploy_library_variable_sets":                           dataSourceLibraryVariableSet(),
@@ -53,7 +53,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_deployment_process":                             resourceDeploymentProcess(),
 			"octopusdeploy_docker_container_registry":                      resourceDockerContainerRegistry(),
 			"octopusdeploy_dynamic_worker_pool":                            resourceDynamicWorkerPool(),
-			"octopusdeploy_git_credential":                                 resourceGitCredential(),
 			"octopusdeploy_gcp_account":                                    resourceGoogleCloudPlatformAccount(),
 			"octopusdeploy_kubernetes_agent_deployment_target":             resourceKubernetesAgentDeploymentTarget(),
 			"octopusdeploy_kubernetes_cluster_deployment_target":           resourceKubernetesClusterDeploymentTarget(),
