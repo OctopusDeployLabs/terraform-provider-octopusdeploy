@@ -33,9 +33,9 @@ func GetGitHubRepositoryFeedResourceSchema() map[string]resourceSchema.Attribute
 			ElementType: types.StringType,
 			Optional:    true,
 		},
-		"password": util.GetPasswordSchema(false, 1000),
+		"password": util.GetPasswordResourceSchema(false),
 		"space_id": util.GetSpaceIdResourceSchema(gitHubRepositoryFeedDescription),
-		"username": util.GetUsernameSchema(false, 1000),
+		"username": util.GetUsernameResourceSchema(false),
 	}
 }
 
