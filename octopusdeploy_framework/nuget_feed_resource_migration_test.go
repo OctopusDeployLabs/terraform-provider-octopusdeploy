@@ -11,12 +11,12 @@ import (
 	"testing"
 )
 
-func TestMavenFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func TestNugetFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testFeedDestroy,
+		CheckDestroy: testNugetFeedDestroy,
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{
@@ -25,11 +25,11 @@ func TestMavenFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 						Source:            "OctopusDeployLabs/octopusdeploy",
 					},
 				},
-				Config: mavenConfig,
+				Config: nugetConfig,
 			},
 			{
 				ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-				Config:                   mavenConfig,
+				Config:                   nugetConfig,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
@@ -38,36 +38,38 @@ func TestMavenFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 			},
 			{
 				ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-				Config:                   updatedMavenConfig,
+				Config:                   updatedNugetConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testFeedUpdated(t),
+					testNugetFeedUpdated(t),
 				),
 			},
 		},
 	})
 }
 
-const mavenConfig = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
-						  name                                 = "Maven"
-						  feed_uri                             = "https://repo.maven.apache.org/maven2/"
+const nugetConfig = `resource "octopusdeploy_nuget_feed" "feed_nuget_migration" {
+						  name                                 = "Nuget"
+						  feed_uri                             = "https://api.nuget.org/v3/index.json"
 						  username                             = "username"
 						  password                             = "password"
+						  is_enhanced_mode					   = false
 						  download_attempts                    = 6
 						  download_retry_backoff_seconds       = 11
 					   }`
 
-const updatedMavenConfig = `resource "octopusdeploy_maven_feed" "feed_maven_migration" {
-						  name                                 = "Updated_Maven"
-						  feed_uri                             = "https://Updated.maven.apache.org/maven2/z"
+const updatedNugetConfig = `resource "octopusdeploy_nuget_feed" "feed_nuget_migration" {
+						  name                                 = "Updated Nuget"
+						  feed_uri                             = "https://api.nuget.org/v4/index.json"
 						  username                             = "username_Updated"
 						  password                             = "password_Updated"
+ 	 					  is_enhanced_mode					   = true
 						  download_attempts                    = 7
 						  download_retry_backoff_seconds       = 12
 					   }`
 
-func testFeedDestroy(s *terraform.State) error {
+func testNugetFeedDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "octopusdeploy_maven_feed" {
+		if rs.Type != "octopusdeploy_nuget_feed" {
 			continue
 		}
 
@@ -80,23 +82,24 @@ func testFeedDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testFeedUpdated(t *testing.T) resource.TestCheckFunc {
+func testNugetFeedUpdated(t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		feedId := s.RootModule().Resources["octopusdeploy_maven_feed"+".feed_maven_migration"].Primary.ID
+		feedId := s.RootModule().Resources["octopusdeploy_nuget_feed"+".feed_nuget_migration"].Primary.ID
 		feed, err := octoClient.Feeds.GetByID(feedId)
 		if err != nil {
 			return fmt.Errorf("Failed to retrieve feed by ID: %s", err)
 		}
 
-		mavenFeed := feed.(*feeds.MavenFeed)
+		nugetFeed := feed.(*feeds.NuGetFeed)
 
-		assert.Equal(t, "Feeds-1001", mavenFeed.ID, "Feed ID did not match expected value")
-		assert.Equal(t, "Updated_Maven", mavenFeed.Name, "Feed name did not match expected value")
-		assert.Equal(t, "username_Updated", mavenFeed.Username, "Feed username did not match expected value")
-		assert.Equal(t, true, mavenFeed.Password.HasValue, "Feed password should be set")
-		assert.Equal(t, "https://Updated.maven.apache.org/maven2/z", mavenFeed.FeedURI, "Feed URI did not match expected value")
-		assert.Equal(t, 7, mavenFeed.DownloadAttempts, "Feed download attempts did not match expected value")
-		assert.Equal(t, 12, mavenFeed.DownloadRetryBackoffSeconds, "Feed download retry_backoff_seconds did not match expected value")
+		assert.Equal(t, "Feeds-1001", nugetFeed.ID, "Feed ID did not match expected value")
+		assert.Equal(t, "Updated Nuget", nugetFeed.Name, "Feed name did not match expected value")
+		assert.Equal(t, "username_Updated", nugetFeed.Username, "Feed username did not match expected value")
+		assert.Equal(t, true, nugetFeed.Password.HasValue, "Feed password should be set")
+		assert.Equal(t, true, nugetFeed.EnhancedMode, "Feed enhanced mode should be set")
+		assert.Equal(t, "https://api.nuget.org/v4/index.json", nugetFeed.FeedURI, "Feed URI did not match expected value")
+		assert.Equal(t, 7, nugetFeed.DownloadAttempts, "Feed download attempts did not match expected value")
+		assert.Equal(t, 12, nugetFeed.DownloadRetryBackoffSeconds, "Feed download retry_backoff_seconds did not match expected value")
 
 		return nil
 	}

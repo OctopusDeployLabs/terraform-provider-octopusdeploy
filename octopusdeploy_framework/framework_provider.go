@@ -66,6 +66,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewSpacesDataSource,
 		NewLifecyclesDataSource,
 		NewEnvironmentsDataSource,
+		NewFeedsDataSource,
 	}
 }
 
@@ -74,9 +75,11 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewSpaceResource,
 		NewProjectGroupResource,
 		NewMavenFeedResource,
-		NewLifecycleResource,
-		NewEnvironmentResource,
 		NewHelmFeedResource,
+		NewArtifactoryGenericFeedResource,
+		NewGitHubRepositoryFeedResource,
+		NewAwsElasticContainerRegistryFeedResource,
+		NewNugetFeedResource,
 	}
 }
 

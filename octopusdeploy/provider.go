@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -19,7 +18,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_cloud_region_deployment_targets":                 dataSourceCloudRegionDeploymentTargets(),
 			"octopusdeploy_channels":                                        dataSourceChannels(),
 			"octopusdeploy_deployment_targets":                              dataSourceDeploymentTargets(),
-			"octopusdeploy_feeds":                                           dataSourceFeeds(),
 			"octopusdeploy_git_credentials":                                 dataSourceGitCredentials(),
 			"octopusdeploy_kubernetes_agent_deployment_targets":             dataSourceKubernetesAgentDeploymentTargets(),
 			"octopusdeploy_kubernetes_cluster_deployment_targets":           dataSourceKubernetesClusterDeploymentTargets(),
@@ -43,7 +41,6 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_aws_account":                                    resourceAmazonWebServicesAccount(),
 			"octopusdeploy_aws_openid_connect_account":                     resourceAmazonWebServicesOpenIDConnectAccount(),
-			"octopusdeploy_aws_elastic_container_registry":                 resourceAwsElasticContainerRegistry(),
 			"octopusdeploy_azure_cloud_service_deployment_target":          resourceAzureCloudServiceDeploymentTarget(),
 			"octopusdeploy_azure_service_fabric_cluster_deployment_target": resourceAzureServiceFabricClusterDeploymentTarget(),
 			"octopusdeploy_azure_service_principal":                        resourceAzureServicePrincipalAccount(),
@@ -57,15 +54,12 @@ func Provider() *schema.Provider {
 			"octopusdeploy_docker_container_registry":                      resourceDockerContainerRegistry(),
 			"octopusdeploy_dynamic_worker_pool":                            resourceDynamicWorkerPool(),
 			"octopusdeploy_git_credential":                                 resourceGitCredential(),
-			"octopusdeploy_github_repository_feed":                         resourceGitHubRepositoryFeed(),
 			"octopusdeploy_gcp_account":                                    resourceGoogleCloudPlatformAccount(),
 			"octopusdeploy_kubernetes_agent_deployment_target":             resourceKubernetesAgentDeploymentTarget(),
 			"octopusdeploy_kubernetes_cluster_deployment_target":           resourceKubernetesClusterDeploymentTarget(),
 			"octopusdeploy_library_variable_set":                           resourceLibraryVariableSet(),
 			"octopusdeploy_listening_tentacle_deployment_target":           resourceListeningTentacleDeploymentTarget(),
 			"octopusdeploy_machine_policy":                                 resourceMachinePolicy(),
-			"octopusdeploy_artifactory_generic_feed":                       resourceArtifactoryGenericFeed(),
-			"octopusdeploy_nuget_feed":                                     resourceNuGetFeed(),
 			"octopusdeploy_offline_package_drop_deployment_target":         resourceOfflinePackageDropDeploymentTarget(),
 			"octopusdeploy_polling_tentacle_deployment_target":             resourcePollingTentacleDeploymentTarget(),
 			"octopusdeploy_polling_subscription_id":                        resourcePollingSubscriptionId(),
