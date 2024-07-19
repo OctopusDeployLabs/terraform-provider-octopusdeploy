@@ -3866,7 +3866,7 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 		// Assert
 		client, err := octoclient.CreateClient(container.URI, newSpaceId, test.ApiKey)
 		query := machines.WorkersQuery{
-			CommunicationStyles: []string{"Polling"},
+			CommunicationStyles: []string{"KubernetesTentacle"},
 			Skip:                0,
 			Take:                3,
 		}
