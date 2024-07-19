@@ -82,6 +82,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewArtifactoryGenericFeedResource,
 		NewGitHubRepositoryFeedResource,
 		NewAwsElasticContainerRegistryFeedResource,
+		NewNugetFeedResource,
 	}
 }
 
