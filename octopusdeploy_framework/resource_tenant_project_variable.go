@@ -89,6 +89,7 @@ func (t *tenantProjectVariableResource) Create(ctx context.Context, req resource
 	}
 
 	plan.ID = types.StringValue(id)
+	plan.SpaceID = types.StringValue(tenant.SpaceID)
 
 	tflog.Debug(ctx, "Tenant project variable created", map[string]interface{}{
 		"id": plan.ID.ValueString(),
