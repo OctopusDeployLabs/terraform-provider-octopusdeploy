@@ -1,13 +1,12 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"strings"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccTenantProjectVariableBasic(t *testing.T) {
@@ -36,8 +35,8 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 	newValue := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccTenantProjectVariableCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccTenantProjectVariableCheckDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -68,7 +67,7 @@ func testAccTenantProjectVariable(lifecycleLocalName string, lifecycleName strin
 	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
 
-	return testAccLifecycle(lifecycleLocalName, lifecycleName) + "\n" +
+	var tfconfig = testAccLifecycle(lifecycleLocalName, lifecycleName) + "\n" +
 		testAccProjectGroup(projectGroupLocalName, projectGroupName) + "\n" +
 		testAccProjectWithTemplate(projectLocalName, projectName, lifecycleLocalName, projectGroupLocalName) + "\n" +
 		testAccEnvironment(primaryEnvironmentLocalName, primaryEnvironmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure) + "\n" +
@@ -76,6 +75,30 @@ func testAccTenantProjectVariable(lifecycleLocalName string, lifecycleName strin
 		testAccTenantWithProjectEnvironment(tenantLocalName, tenantName, projectLocalName, primaryEnvironmentLocalName, secondaryEnvironmentLocalName) + "\n" +
 		testTenantProjectVariable(primaryLocalName, primaryEnvironmentLocalName, projectLocalName, tenantLocalName, projectLocalName, primaryValue) + "\n" +
 		testTenantProjectVariable(secondaryLocalName, secondaryEnvironmentLocalName, projectLocalName, tenantLocalName, projectLocalName, secondaryValue)
+	return tfconfig
+}
+
+func testAccProjectWithTemplate(localName string, name string, lifecycleLocalName string, projectGroupLocalName string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
+		lifecycle_id     = octopusdeploy_lifecycle.%s.id
+		name             = "%s"
+		project_group_id = octopusdeploy_project_group.%s.id
+
+		template {
+			name  = "project variable template name"
+			label = "project variable template label"
+
+			display_settings = {
+				"Octopus.ControlType" = "Sensitive"
+			}
+		}
+	}`, localName, lifecycleLocalName, name, projectGroupLocalName)
+}
+
+func testAccProjectGroup(localName string, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project_group" "%s" {
+		name = "%s"
+	}`, localName, name)
 }
 
 func testAccTenantWithProjectEnvironment(localName string, name string, projectLocalName string, primaryEnvironmentLocalName string, secondaryEnvironmentLocalName string) string {

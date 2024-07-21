@@ -54,6 +54,10 @@ func TestMain(m *testing.M) {
 				log.Printf("Failed to create client: (%s)", err.Error())
 				panic(m)
 			}
+			octoContainer = &test.OctopusContainer{
+				Container: nil,
+				URI:       url,
+			}
 		}
 		code := m.Run()
 		os.Exit(code)
