@@ -3855,6 +3855,7 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 			"OCTOPUS__FeatureToggles__KubernetesAgentAsWorkerFeatureToggle": "true",
 		},
 	}
+
 	testFramework.ArrangeTest(t, func(t *testing.T, container *test.OctopusContainer, spaceClient *client.Client) error {
 		// Act
 		newSpaceId, err := testFramework.Act(t, container, "./terraform", "58-kubernetesagentworker", []string{})
@@ -3884,8 +3885,8 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 		optionalAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.Worker) bool { return t.Name == optionalAgentName })
 		optionalAgentWorker := resources.Items[optionalAgentIndex]
 		optionalAgentEndpoint := optionalAgentWorker.Endpoint.(*machines.KubernetesTentacleEndpoint)
-		if optionalAgentWorker.IsDisabled {
-			t.Fatalf("Expected  \"%s\" to not be disabled", optionalAgentName)
+		if !optionalAgentWorker.IsDisabled {
+			t.Fatalf("Expected  \"%s\" to be disabled", optionalAgentName)
 		}
 
 		if !optionalAgentEndpoint.UpgradeLocked {
@@ -3896,8 +3897,8 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 		fullAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.Worker) bool { return t.Name == fullAgentName })
 		fullAgentWorker := resources.Items[fullAgentIndex]
 
-		if !fullAgentWorker.IsDisabled {
-			t.Fatalf("Expected  \"%s\" to be disabled", fullAgentName)
+		if fullAgentWorker.IsDisabled {
+			t.Fatalf("Expected  \"%s\" to be enabled", fullAgentName)
 		}
 
 		fullAgentEndpoint := fullAgentWorker.Endpoint.(*machines.KubernetesTentacleEndpoint)
