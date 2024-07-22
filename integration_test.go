@@ -3881,7 +3881,7 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 			t.Fatalf("Space must have two workers (both KubernetesTentacles), instead found %v", resources.Items)
 		}
 
-		optionalAgentName := "optional-agent"
+		optionalAgentName := "minimum-agent"
 		optionalAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.Worker) bool { return t.Name == optionalAgentName })
 		optionalAgentWorker := resources.Items[optionalAgentIndex]
 		optionalAgentEndpoint := optionalAgentWorker.Endpoint.(*machines.KubernetesTentacleEndpoint)
@@ -3893,7 +3893,7 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 			t.Fatalf("Expected  \"%s\" to have upgrade locked", optionalAgentName)
 		}
 
-		fullAgentName := "agent_with_optional"
+		fullAgentName := "agent-with-optionals"
 		fullAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.Worker) bool { return t.Name == fullAgentName })
 		fullAgentWorker := resources.Items[fullAgentIndex]
 

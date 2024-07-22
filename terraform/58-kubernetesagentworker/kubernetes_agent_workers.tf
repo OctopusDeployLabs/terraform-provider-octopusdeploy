@@ -6,7 +6,7 @@ resource "octopusdeploy_kubernetes_agent_worker" "agent_with_minimum" {
 }
 
 resource "octopusdeploy_kubernetes_agent_worker" "agent_with_optional" {
-  name               = "optional-agent"
+  name               = "agent-with-optionals"
   machine_policy_id  = octopusdeploy_machine_policy.machinepolicy_testing.id
   worker_pool_ids    = [octopusdeploy_static_worker_pool.workerpool_docker.id]
   communication_mode = "Polling"
