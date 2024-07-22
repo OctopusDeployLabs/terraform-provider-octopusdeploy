@@ -12,14 +12,14 @@ import (
 )
 
 type LibraryVariableSetResourceModel struct {
-	Description        types.String `tfsdk:"description"`
-	ID                 types.String `tfsdk:"id"`
-	Name               types.String `tfsdk:"name"`
-	SpaceID            types.String `tfsdk:"space_id"`
-	LibraryVariableSet types.String `tfsdk:"variable_set_id"`
-	Template           types.List   `tfsdk:"templates"`
-	TemplateIds        types.List   `tfsdk:"template_ids"`
-	VariableSetId      types.String `tfsdk:"variable_set_id"`
+	Description types.String `tfsdk:"description"`
+	ID          types.String `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	SpaceID     types.String `tfsdk:"space_id"`
+	//LibraryVariableSets types.List   `tfsdk:"library_variable_sets"`
+	Template      types.List   `tfsdk:"templates"`
+	TemplateIds   types.Map    `tfsdk:"template_ids"`
+	VariableSetId types.String `tfsdk:"variable_set_id"`
 }
 
 func CreateLibraryVariableSet(data *LibraryVariableSetResourceModel) *variables.LibraryVariableSet {
@@ -128,6 +128,10 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 			"space_id":    GetSpaceIdResourceSchema("library variable set"),
 			// This field is based on the suggestion at
 			// https://discuss.hashicorp.com/t/custom-provider-how-to-reference-computed-attribute-of-typemap-list-set-defined-as-nested-block/22898/2
+			"templates": resourceSchema.ListAttribute{
+				Optional:    true,
+				ElementType: types.ObjectType{AttrTypes: templateObjectType()},
+			},
 			"template_ids": resourceSchema.MapAttribute{
 				ElementType: types.StringType,
 				Computed:    true,
@@ -137,14 +141,14 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 				Computed: true,
 			},
 		},
-		Blocks: map[string]resourceSchema.Block{
-			"project_groups": resourceSchema.ListNestedBlock{
-				Description: "A list of project groups that match the filter(s).",
-				NestedObject: resourceSchema.NestedBlockObject{
-					Attributes: getActionTemplateParameterSchema(),
-				},
-			},
-		},
+		//Blocks: map[string]resourceSchema.Block{
+		//	"project_groups": resourceSchema.ListNestedBlock{
+		//		Description: "A list of project groups that match the filter(s).",
+		//		NestedObject: resourceSchema.NestedBlockObject{
+		//			Attributes: getActionTemplateParameterSchema(),
+		//		},
+		//	},
+		//},
 	}
 }
 
@@ -155,11 +159,13 @@ func UpdateDataFromLibraryVariableSet(data *LibraryVariableSetResourceModel, spa
 	data.Description = types.StringValue(libraryVariableSet.Description)
 	data.SpaceID = types.StringValue(spaceId)
 
-	data.Template, _ = types.ListValueFrom(
-		context.Background(),
-		types.ObjectType{AttrTypes: templateObjectType()},
-		[]any{flattenActionTemplateParameters(libraryVariableSet.Templates)},
-	)
+	if len(libraryVariableSet.Templates) > 0 {
+		data.Template, _ = types.ListValueFrom(
+			context.Background(),
+			types.ObjectType{AttrTypes: templateObjectType()},
+			[]any{flattenActionTemplateParameters(libraryVariableSet.Templates)},
+		)
+	}
 
 	data.ID = types.StringValue(libraryVariableSet.GetID())
 }

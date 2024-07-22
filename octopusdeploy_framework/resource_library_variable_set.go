@@ -67,7 +67,7 @@ func (r *libraryVariableSetFeedTypeResource) Create(ctx context.Context, req res
 		return
 	}
 
-	schemas.UpdateDataFromLibraryVariableSet(data, data.SpaceID.ValueString(), libraryVariableSet)
+	schemas.UpdateDataFromLibraryVariableSet(data, libraryVariableSet.SpaceID, libraryVariableSet)
 	tflog.Info(ctx, fmt.Sprintf("Library Variable Set created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -110,7 +110,7 @@ func (r *libraryVariableSetFeedTypeResource) Update(ctx context.Context, req res
 		resp.Diagnostics.AddError("unable to update library variable set", err.Error())
 		return
 	}
-	schemas.UpdateDataFromLibraryVariableSet(data, data.SpaceID.ValueString(), updatedLibraryVariableSet)
+	schemas.UpdateDataFromLibraryVariableSet(data, state.SpaceID.ValueString(), updatedLibraryVariableSet)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

@@ -62,7 +62,7 @@ func mapTemplateNamesToIds(actionTemplateParameters []actiontemplates.ActionTemp
 func templateObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"default_value":    types.StringType,
-		"display_settings": types.MapType{},
+		"display_settings": types.MapType{ElemType: types.StringType},
 		"help_text":        types.StringType,
 		"id":               types.StringType,
 		"label":            types.MapType{ElemType: types.StringType},
@@ -79,6 +79,7 @@ func getActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
 		"display_settings": resourceSchema.MapAttribute{
 			Description: "The display settings for the parameter.",
 			Optional:    true,
+			ElementType: types.StringType,
 		},
 		"help_text": resourceSchema.StringAttribute{
 			Description: "The help presented alongside the parameter input.",
