@@ -24,6 +24,18 @@ func NewProjectGroupTestOptions() *ProjectGroupTestOptions {
 	return options
 }
 
+func NewProjectGroupTestOptionsWithName(name string) *ProjectGroupTestOptions {
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	options := &ProjectGroupTestOptions{
+		TestOptions: *NewTestOptions[projectgroups.ProjectGroup]("project_group"),
+	}
+	options.Resource = projectgroups.NewProjectGroup(name)
+	options.Resource.Description = description
+
+	return options
+}
+
 func ProjectGroupConfiguration(options *ProjectGroupTestOptions) string {
 	configuration := fmt.Sprintf(`resource "%s" "%s" {`, options.ResourceName, options.LocalName)
 	configuration += "\n"

@@ -85,6 +85,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewAwsElasticContainerRegistryFeedResource,
 		NewNugetFeedResource,
 		NewTenantProjectVariableResource,
+		NewTenantCommonVariableResource,
 	}
 }
 

@@ -23,6 +23,7 @@ func GetTenantProjectVariableResourceSchema() schema.Schema {
 			"value": schema.StringAttribute{
 				Required:    true,
 				Description: "The value of the variable.",
+				Sensitive:   true,
 			},
 		},
 	}
