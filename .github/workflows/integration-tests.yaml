@@ -97,7 +97,6 @@ jobs:
           GOMAXPROCS: 1
           OCTOTESTVERSION: latest
           OCTOTESTIMAGEURL: docker.packages.octopushq.com/octopusdeploy/octopusdeploy
-          OCTOPUS__FeatureToggles__KubernetesAgentAsWorkerFeatureToggle: true
       - name: Upload test artifacts
         uses: actions/upload-artifact@v3
         with:
