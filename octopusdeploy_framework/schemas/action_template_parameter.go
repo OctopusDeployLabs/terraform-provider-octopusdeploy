@@ -1,22 +1,25 @@
-package octopusdeploy
+package schemas
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func expandActionTemplateParameter(tfTemplate map[string]interface{}) actiontemplates.ActionTemplateParameter {
+func expandActionTemplateParameter(tfTemplate map[string]attr.Value) actiontemplates.ActionTemplateParameter {
 	actionTemplateParameter := actiontemplates.NewActionTemplateParameter()
 
-	propertyValue := core.NewPropertyValue(tfTemplate["default_value"].(string), false)
+	propertyValue := core.NewPropertyValue(tfTemplate["default_value"].(types.String).ValueString(), false)
 	actionTemplateParameter.DefaultValue = &propertyValue
-	actionTemplateParameter.DisplaySettings = flattenDisplaySettings(tfTemplate["display_settings"].(map[string]interface{}))
-	actionTemplateParameter.HelpText = tfTemplate["help_text"].(string)
-	actionTemplateParameter.ID = tfTemplate["id"].(string)
-	actionTemplateParameter.Label = tfTemplate["label"].(string)
-	actionTemplateParameter.Name = tfTemplate["name"].(string)
+
+	actionTemplateParameter.DisplaySettings = flattenDisplaySettings(tfTemplate["display_settings"].(types.Map).Elements())
+	actionTemplateParameter.HelpText = tfTemplate["help_text"].(types.String).ValueString()
+	actionTemplateParameter.ID = tfTemplate["id"].(types.String).ValueString()
+	actionTemplateParameter.Label = tfTemplate["label"].(types.String).ValueString()
+	actionTemplateParameter.Name = tfTemplate["name"].(types.String).ValueString()
 
 	return *actionTemplateParameter
 }
@@ -28,8 +31,7 @@ func expandActionTemplateParameters(actionTemplateParameters []interface{}) []ac
 
 	expandedActionTemplateParameters := []actiontemplates.ActionTemplateParameter{}
 	for _, actionTemplateParameter := range actionTemplateParameters {
-		actionTemplateParameterMap := actionTemplateParameter.(map[string]interface{})
-		expandedActionTemplateParameters = append(expandedActionTemplateParameters, expandActionTemplateParameter(actionTemplateParameterMap))
+		expandedActionTemplateParameters = append(expandedActionTemplateParameters, expandActionTemplateParameter(actionTemplateParameter.(types.Map).Elements()))
 	}
 	return expandedActionTemplateParameters
 }
@@ -57,34 +59,44 @@ func mapTemplateNamesToIds(actionTemplateParameters []actiontemplates.ActionTemp
 	return templateNameIds
 }
 
-func getActionTemplateParameterSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"default_value": {
+func templateObjectType() map[string]attr.Type {
+	return map[string]attr.Type{
+		"default_value":    types.StringType,
+		"display_settings": types.MapType{},
+		"help_text":        types.StringType,
+		"id":               types.StringType,
+		"label":            types.MapType{ElemType: types.StringType},
+		"name":             types.StringType,
+	}
+}
+
+func getActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
+	return map[string]resourceSchema.Attribute{
+		"default_value": resourceSchema.StringAttribute{
 			Description: "A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.",
 			Optional:    true,
-			Type:        schema.TypeString,
 		},
-		"display_settings": {
+		"display_settings": resourceSchema.MapAttribute{
 			Description: "The display settings for the parameter.",
 			Optional:    true,
-			Type:        schema.TypeMap,
 		},
-		"help_text": {
+		"help_text": resourceSchema.StringAttribute{
 			Description: "The help presented alongside the parameter input.",
 			Optional:    true,
-			Type:        schema.TypeString,
 		},
-		"id": getIDSchema(),
-		"label": {
+		"id": util.GetIdResourceSchema(),
+		"label": resourceSchema.StringAttribute{
 			Description: "The label shown beside the parameter when presented in the deployment process. Example: `Server name`.",
 			Optional:    true,
-			Type:        schema.TypeString,
 		},
-		"name": {
-			Description:      "The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`.",
-			Required:         true,
-			Type:             schema.TypeString,
-			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
-		},
+		"name": util.GetNameResourceSchema(true),
 	}
+}
+
+func flattenDisplaySettings(displaySettings map[string]attr.Value) map[string]string {
+	flattenedDisplaySettings := make(map[string]string, len(displaySettings))
+	for key, displaySetting := range displaySettings {
+		flattenedDisplaySettings[key] = displaySetting.(types.String).ValueString()
+	}
+	return flattenedDisplaySettings
 }

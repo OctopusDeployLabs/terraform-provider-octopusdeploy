@@ -66,6 +66,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewSpacesDataSource,
 		NewLifecyclesDataSource,
 		NewEnvironmentsDataSource,
+		NewLibraryVariableSetDataSource,
 	}
 }
 
@@ -77,6 +78,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewLifecycleResource,
 		NewEnvironmentResource,
 		NewHelmFeedResource,
+		NewLibraryVariableSetFeedResource,
 	}
 }
 

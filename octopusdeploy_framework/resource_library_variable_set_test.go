@@ -1,4 +1,4 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
@@ -17,8 +17,8 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testLibraryVariableSetDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testLibraryVariableSetDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -40,8 +40,8 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testLibraryVariableSetDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testLibraryVariableSetDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -84,8 +84,8 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testLibraryVariableSetDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testLibraryVariableSetDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create variable set with no description
