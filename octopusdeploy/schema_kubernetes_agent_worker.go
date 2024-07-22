@@ -10,7 +10,7 @@ import (
 func expandKubernetesAgentWorker(kubernetesAgent *schema.ResourceData) *machines.Worker {
 	uri, _ := url.Parse(kubernetesAgent.Get("uri").(string))
 	thumbprint := kubernetesAgent.Get("thumbprint").(string)
-	
+
 	communicationsMode := kubernetesAgent.Get("communication_mode").(string)
 	upgradeLocked := kubernetesAgent.Get("upgrade_locked").(bool)
 	var endpoint machines.IEndpoint = machines.NewKubernetesTentacleEndpoint(uri, thumbprint, upgradeLocked, communicationsMode, "")

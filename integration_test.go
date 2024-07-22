@@ -3885,8 +3885,8 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 		optionalAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.Worker) bool { return t.Name == optionalAgentName })
 		optionalAgentWorker := resources.Items[optionalAgentIndex]
 		optionalAgentEndpoint := optionalAgentWorker.Endpoint.(*machines.KubernetesTentacleEndpoint)
-		if !optionalAgentWorker.IsDisabled {
-			t.Fatalf("Expected  \"%s\" to be disabled", optionalAgentName)
+		if optionalAgentWorker.IsDisabled {
+			t.Fatalf("Expected  \"%s\" to be enabled", optionalAgentName)
 		}
 
 		if !optionalAgentEndpoint.UpgradeLocked {
@@ -3897,8 +3897,8 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 		fullAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.Worker) bool { return t.Name == fullAgentName })
 		fullAgentWorker := resources.Items[fullAgentIndex]
 
-		if fullAgentWorker.IsDisabled {
-			t.Fatalf("Expected  \"%s\" to be enabled", fullAgentName)
+		if !fullAgentWorker.IsDisabled {
+			t.Fatalf("Expected  \"%s\" to be disabled", fullAgentName)
 		}
 
 		fullAgentEndpoint := fullAgentWorker.Endpoint.(*machines.KubernetesTentacleEndpoint)
