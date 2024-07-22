@@ -3889,8 +3889,8 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 			t.Fatalf("Expected  \"%s\" to be enabled", optionalAgentName)
 		}
 
-		if !optionalAgentEndpoint.UpgradeLocked {
-			t.Fatalf("Expected  \"%s\" to have upgrade locked", optionalAgentName)
+		if optionalAgentEndpoint.UpgradeLocked {
+			t.Fatalf("Expected  \"%s\" to not be upgrade locked", optionalAgentName)
 		}
 
 		fullAgentName := "agent-with-optionals"
@@ -3902,8 +3902,8 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 		}
 
 		fullAgentEndpoint := fullAgentWorker.Endpoint.(*machines.KubernetesTentacleEndpoint)
-		if fullAgentEndpoint.UpgradeLocked {
-			t.Fatalf("Expected  \"%s\" to not have upgrade locked", fullAgentName)
+		if !fullAgentEndpoint.UpgradeLocked {
+			t.Fatalf("Expected  \"%s\" to be upgrade locked", fullAgentName)
 		}
 
 		return nil
