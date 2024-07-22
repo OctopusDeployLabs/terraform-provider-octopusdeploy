@@ -2,12 +2,12 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
