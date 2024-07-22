@@ -17,7 +17,7 @@ type LibraryVariableSetResourceModel struct {
 	Name        types.String `tfsdk:"name"`
 	SpaceID     types.String `tfsdk:"space_id"`
 	//LibraryVariableSets types.List   `tfsdk:"library_variable_sets"`
-	Template      types.List   `tfsdk:"templates"`
+	Template      types.List   `tfsdk:"template"`
 	TemplateIds   types.Map    `tfsdk:"template_ids"`
 	VariableSetId types.String `tfsdk:"variable_set_id"`
 }
@@ -128,7 +128,7 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 			"space_id":    GetSpaceIdResourceSchema("library variable set"),
 			// This field is based on the suggestion at
 			// https://discuss.hashicorp.com/t/custom-provider-how-to-reference-computed-attribute-of-typemap-list-set-defined-as-nested-block/22898/2
-			"templates": resourceSchema.ListAttribute{
+			"template": resourceSchema.ListAttribute{
 				Optional:    true,
 				ElementType: types.ObjectType{AttrTypes: templateObjectType()},
 			},
