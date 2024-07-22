@@ -35,7 +35,7 @@ func NewLibraryVariableSetDataSource() datasource.DataSource {
 
 func (l *libraryVariableSetDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	tflog.Debug(ctx, "library variable set Metadata")
-	resp.TypeName = util.GetTypeName("library_variable_set")
+	resp.TypeName = util.GetTypeName("library_variable_sets")
 }
 
 func (l *libraryVariableSetDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -78,7 +78,7 @@ func (l *libraryVariableSetDataSource) Read(ctx context.Context, req datasource.
 	flattenedLibraryVariableSetsValues, _ := types.ListValueFrom(context.Background(),
 		types.ObjectType{AttrTypes: schemas.GetLibraryVariableSetObjectType()},
 		[]any{flattenedLibraryVariableSets})
-	
+
 	data.LibraryVariableSets = flattenedLibraryVariableSetsValues
 
 	data.ID = types.StringValue("Library Variables Sets " + time.Now().UTC().String())
