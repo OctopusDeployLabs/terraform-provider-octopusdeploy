@@ -30,20 +30,6 @@ type libraryVariableSetModel struct {
 	LibraryVariableSets types.List   `tfsdk:"library_variable_sets"`
 }
 
-//
-//func libraryVariableSetObjectType() map[string]attr.Type {
-//	return map[string]attr.Type{
-//		"content_type":          types.StringType,
-//		"id":                    types.StringType,
-//		"space_id":              types.StringType,
-//		"ids":                   types.ListType{ElemType: types.StringType},
-//		"partial_name":          types.StringType,
-//		"skip":                  types.Int64Type,
-//		"take":                  types.Int64Type,
-//		"library_variable_sets": types.ListType{ElemType: types.ObjectType{AttrTypes: schemas.GetLibraryVariableSetObjectType()}},
-//	}
-//}
-
 func NewLibraryVariableSetDataSource() datasource.DataSource {
 	return &libraryVariableSetDataSource{}
 }

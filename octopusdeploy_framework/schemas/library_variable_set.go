@@ -16,11 +16,10 @@ import (
 )
 
 type LibraryVariableSetResourceModel struct {
-	Description types.String `tfsdk:"description"`
-	ID          types.String `tfsdk:"id"`
-	Name        types.String `tfsdk:"name"`
-	SpaceID     types.String `tfsdk:"space_id"`
-	//LibraryVariableSets types.List   `tfsdk:"library_variable_sets"`
+	Description   types.String `tfsdk:"description"`
+	ID            types.String `tfsdk:"id"`
+	Name          types.String `tfsdk:"name"`
+	SpaceID       types.String `tfsdk:"space_id"`
 	Template      types.List   `tfsdk:"template"`
 	TemplateIds   types.Map    `tfsdk:"template_ids"`
 	VariableSetId types.String `tfsdk:"variable_set_id"`
@@ -118,22 +117,6 @@ func UpdateDataFromLibraryVariableSet(data *LibraryVariableSetResourceModel, spa
 
 	data.Template = FlattenTemplates(libraryVariableSet.Templates)
 	data.TemplateIds = FlattenTemplateIds(libraryVariableSet.Templates)
-
-	//
-	//types.ListValueFrom(
-	//	context.Background(),
-	//	types.ObjectType{AttrTypes: TemplateObjectType()},
-	//	[]any{flattenActionTemplateParameters(libraryVariableSet.Templates)},
-	//)
-	//
-	//templateIds := map[string]attr.Value{}
-	//if libraryVariableSet.Templates != nil {
-	//	//for _, template := range libraryVariableSet.Templates {
-	//	//	//templateIds[template.Name] = types.StringValue(template.GetID())
-	//	//}
-	//}
-	//templateIdsValues, _ := types.MapValue(types.StringType, templateIds)
-	//data.TemplateIds = templateIdsValues
 
 	data.ID = types.StringValue(libraryVariableSet.GetID())
 }
