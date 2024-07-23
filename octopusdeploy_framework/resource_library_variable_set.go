@@ -7,9 +7,11 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
+	"reflect"
 )
 
 //TODO: Plan Modifiers for
@@ -17,6 +19,68 @@ import (
 
 type libraryVariableSetFeedTypeResource struct {
 	*Config
+}
+
+type libraryVariableSetFeedModifier struct{}
+
+func (m libraryVariableSetFeedModifier) Description(_ context.Context) string {
+	return "Template_Ids will be populated once created"
+}
+
+func (m libraryVariableSetFeedModifier) MarkdownDescription(_ context.Context) string {
+	return "Template_Ids will be populated once created"
+}
+
+func (m libraryVariableSetFeedModifier) PlanModifyMap(_ context.Context, req planmodifier.MapRequest, resp *planmodifier.MapResponse) {
+	if req.ConfigValue.IsNull() {
+		return
+	}
+
+	if req.StateValue.IsUnknown() || req.StateValue.IsNull() {
+		return
+	}
+
+	oldValues := req.StateValue.Elements()
+	for k, v := range req.PlanValue.Elements() {
+		o, ok := oldValues[k]
+		log.Println(o)
+		if !ok {
+			// something new, go ahead with the plan
+			return
+		}
+
+		s, ok := v.(types.String)
+		log.Println(s)
+		if !ok {
+			// this is very bad and shouldn't haven't gotten past validation
+			resp.Diagnostics.AddError(fmt.Sprintf("Invalid value type for json string in plan for %s", req.Path), "invalid value")
+			return
+		}
+
+		var newValue map[string]interface{}
+
+		s, ok = o.(types.String)
+
+		var oldValue map[string]interface{}
+		//err = json.Unmarshal([]byte(s.ValueString()), &oldValue)
+		//if err != nil {
+		//	resp.Diagnostics.AddError(fmt.Sprintf("Invalid json in plan for %s", req.Path), err.Error())
+		//	return
+		//}
+
+		if !reflect.DeepEqual(oldValue, newValue) {
+			return
+		}
+
+		delete(oldValues, k)
+	}
+
+	if len(oldValues) > 0 {
+		// something was removed in the plan
+		return
+	}
+
+	resp.PlanValue = req.StateValue
 }
 
 func NewLibraryVariableSetFeedResource() resource.Resource {
@@ -35,27 +99,9 @@ func (r *libraryVariableSetFeedTypeResource) Configure(_ context.Context, req re
 	r.Config = ResourceConfiguration(req, resp)
 }
 
-// fixTemplateIds uses the suggestion from https://github.com/hashicorp/terraform/issues/18863
-// to ensure that the template_ids field has keys to match the list of template names.
-func fixTemplateIds(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	templates := d.Get("template")
-	templateIds := map[string]string{}
-	if templates != nil {
-		for _, t := range templates.([]interface{}) {
-			template := t.(map[string]interface{})
-			templateIds[template["name"].(string)] = template["id"].(string)
-		}
-	}
-	if err := d.SetNew("template_ids", templateIds); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (r *libraryVariableSetFeedTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *schemas.LibraryVariableSetResourceModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
