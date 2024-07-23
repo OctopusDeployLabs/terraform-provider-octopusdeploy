@@ -481,13 +481,13 @@ func flattenVariableScopes(variableScopes variables.VariableScope) attr.Value {
 	}
 
 	flattenedScopes := map[string]attr.Value{}
-	flattenedScopes[schemas.VariableScopeFieldNames.Actions] = util.StringArrayToListOrNullIfEmpty(types.StringType, variableScopes.Actions)
-	flattenedScopes[schemas.VariableScopeFieldNames.Channels] = util.StringArrayToListOrNullIfEmpty(types.StringType, variableScopes.Channels)
-	flattenedScopes[schemas.VariableScopeFieldNames.Environments] = util.StringArrayToListOrNullIfEmpty(types.StringType, variableScopes.Environments)
-	flattenedScopes[schemas.VariableScopeFieldNames.Machines] = util.StringArrayToListOrNullIfEmpty(types.StringType, variableScopes.Machines)
-	flattenedScopes[schemas.VariableScopeFieldNames.Processes] = util.StringArrayToListOrNullIfEmpty(types.StringType, variableScopes.ProcessOwners)
-	flattenedScopes[schemas.VariableScopeFieldNames.Roles] = util.StringArrayToListOrNullIfEmpty(types.StringType, variableScopes.Roles)
-	flattenedScopes[schemas.VariableScopeFieldNames.TenantTags] = util.StringArrayToListOrNullIfEmpty(types.StringType, variableScopes.TenantTags)
+	flattenedScopes[schemas.VariableScopeFieldNames.Actions] = util.Ternary(variableScopes.Actions != nil, util.FlattenStringList(variableScopes.Actions), types.ListNull(types.StringType))
+	flattenedScopes[schemas.VariableScopeFieldNames.Channels] = util.Ternary(variableScopes.Channels != nil, util.FlattenStringList(variableScopes.Channels), types.ListNull(types.StringType))
+	flattenedScopes[schemas.VariableScopeFieldNames.Environments] = util.Ternary(variableScopes.Environments != nil, util.FlattenStringList(variableScopes.Environments), types.ListNull(types.StringType))
+	flattenedScopes[schemas.VariableScopeFieldNames.Machines] = util.Ternary(variableScopes.Machines != nil, util.FlattenStringList(variableScopes.Machines), types.ListNull(types.StringType))
+	flattenedScopes[schemas.VariableScopeFieldNames.Processes] = util.Ternary(variableScopes.ProcessOwners != nil, util.FlattenStringList(variableScopes.ProcessOwners), types.ListNull(types.StringType))
+	flattenedScopes[schemas.VariableScopeFieldNames.Roles] = util.Ternary(variableScopes.Roles != nil, util.FlattenStringList(variableScopes.Roles), types.ListNull(types.StringType))
+	flattenedScopes[schemas.VariableScopeFieldNames.TenantTags] = util.Ternary(variableScopes.TenantTags != nil, util.FlattenStringList(variableScopes.TenantTags), types.ListNull(types.StringType))
 
 	return types.ObjectValueMust(
 		variableScopeObjectType(),
@@ -504,13 +504,13 @@ func expandVariableScopes(flattenedVariableScopes types.List) variables.Variable
 	attrs := obj.Attributes()
 	scopes := variables.VariableScope{}
 
-	scopes.Actions = util.GetStringSlice(attrs[schemas.VariableScopeFieldNames.Actions].(types.List))
-	scopes.Channels = util.GetStringSlice(attrs[schemas.VariableScopeFieldNames.Channels].(types.List))
-	scopes.Environments = util.GetStringSlice(attrs[schemas.VariableScopeFieldNames.Environments].(types.List))
-	scopes.Machines = util.GetStringSlice(attrs[schemas.VariableScopeFieldNames.Machines].(types.List))
-	scopes.ProcessOwners = util.GetStringSlice(attrs[schemas.VariableScopeFieldNames.Processes].(types.List))
-	scopes.Roles = util.GetStringSlice(attrs[schemas.VariableScopeFieldNames.Roles].(types.List))
-	scopes.TenantTags = util.GetStringSlice(attrs[schemas.VariableScopeFieldNames.TenantTags].(types.List))
+	scopes.Actions = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Actions].(types.List))
+	scopes.Channels = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Channels].(types.List))
+	scopes.Environments = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Environments].(types.List))
+	scopes.Machines = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Machines].(types.List))
+	scopes.ProcessOwners = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Processes].(types.List))
+	scopes.Roles = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Roles].(types.List))
+	scopes.TenantTags = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.TenantTags].(types.List))
 
 	return scopes
 }

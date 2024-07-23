@@ -65,28 +65,6 @@ func Ternary(condition bool, whenTrue, whenFalse attr.Value) attr.Value {
 	return whenFalse
 }
 
-func GetStringSlice(list types.List) []string {
-	if list.IsNull() || list.IsUnknown() {
-		return nil
-	}
-
-	result := make([]string, 0, len(list.Elements()))
-	for _, element := range list.Elements() {
-		if str, ok := element.(types.String); ok {
-			result = append(result, str.ValueString())
-		}
-	}
-	return result
-}
-
-func StringArrayToListOrNullIfEmpty(itemType attr.Type, items []string) types.List {
-	if len(items) > 0 {
-		return types.ListValueMust(itemType, ToValueSlice(items))
-	}
-
-	return types.ListNull(itemType)
-}
-
 func ToValueSlice(slice []string) []attr.Value {
 	values := make([]attr.Value, len(slice))
 	for i, s := range slice {
