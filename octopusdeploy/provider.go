@@ -2,10 +2,13 @@ package octopusdeploy
 
 import (
 	"context"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+var mutex = &sync.Mutex{}
 
 // Provider is the plugin entry point for the Terraform provider for Octopus Deploy.
 func Provider() *schema.Provider {
@@ -80,7 +83,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_user":                                           resourceUser(),
 			"octopusdeploy_user_role":                                      resourceUserRole(),
 			"octopusdeploy_username_password_account":                      resourceUsernamePasswordAccount(),
-			"octopusdeploy_variable":                                       resourceVariable(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
