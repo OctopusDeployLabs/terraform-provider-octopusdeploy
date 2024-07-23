@@ -2,15 +2,18 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"os"
+	"sync"
 
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+var mutex = &sync.Mutex{}
 
 type octopusDeployFrameworkProvider struct {
 	Address types.String `tfsdk:"address"`
@@ -88,6 +91,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewTenantProjectVariableResource,
 		NewTenantCommonVariableResource,
 		NewLibraryVariableSetFeedResource,
+		NewVariableResource,
 	}
 }
 
