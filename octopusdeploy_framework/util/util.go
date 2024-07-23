@@ -94,17 +94,3 @@ func ToValueSlice(slice []string) []attr.Value {
 	}
 	return values
 }
-
-func GetStringSlice(list types.List) []string {
-	if list.IsNull() || list.IsUnknown() {
-		return nil
-	}
-
-	result := make([]string, 0, len(list.Elements()))
-	for _, element := range list.Elements() {
-		if str, ok := element.(types.String); ok {
-			result = append(result, str.ValueString())
-		}
-	}
-	return result
-}
