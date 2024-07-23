@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -14,7 +15,7 @@ import (
 )
 
 func TestAccOctopusDeployVariableBasic(t *testing.T) {
-	//SkipCI(t, "Octopus API error: The resource you requested was not found. []")
+	internalTest.SkipCI(t, "Octopus API error: The resource you requested was not found. []")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_variable." + localName
 
