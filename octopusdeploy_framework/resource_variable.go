@@ -447,7 +447,7 @@ func expandDisplaySettings(flattenedDisplaySettings types.List) *resources.Displ
 }
 
 func expandSelectOptions(flattenedSelectOptions types.List) []*resources.SelectOption {
-	if flattenedSelectOptions.IsNull() {
+	if flattenedSelectOptions.IsNull() || flattenedSelectOptions.IsUnknown() {
 		return nil
 	}
 
