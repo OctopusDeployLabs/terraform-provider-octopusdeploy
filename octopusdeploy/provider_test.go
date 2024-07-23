@@ -2,14 +2,15 @@ package octopusdeploy
 
 import (
 	"context"
+	"log"
+	"os"
+	"testing"
+
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
-	"log"
-	"os"
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -67,11 +68,5 @@ func ProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, err
 
 			return tf6muxserver.NewMuxServer(context.Background(), providers...)
 		},
-	}
-}
-
-func SkipCI(t *testing.T, reason string) {
-	if os.Getenv("Skip_Legacy_Tests") == "" {
-		t.Skip(reason)
 	}
 }
