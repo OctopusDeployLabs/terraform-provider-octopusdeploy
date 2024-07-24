@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
@@ -88,8 +89,19 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 
 	if !model.Template.IsNull() {
 		var templates []templateModel
-		model.Template.ElementsAs(ctx, &templates, false)
-		project.Templates = expandTemplates(templates)
+		diags := model.Template.ElementsAs(ctx, &templates, false)
+		if diags.HasError() {
+			// Handle or log the error
+			fmt.Printf("Error converting templates: %v\n", diags)
+		} else {
+			fmt.Printf("Number of templates: %d\n", len(templates))
+
+			// Now we can use the templates slice
+			project.Templates = expandTemplates(templates)
+		}
+	} else {
+		fmt.Println("Template is null")
+		project.Templates = []actiontemplates.ActionTemplateParameter{}
 	}
 
 	if !model.AutoDeployReleaseOverrides.IsNull() {
@@ -223,7 +235,6 @@ func expandDeploymentActionPackage(model deploymentActionPackageModel) *packages
 		PackageReference: model.PackageReference.ValueString(),
 	}
 }
-
 func expandTemplates(models []templateModel) []actiontemplates.ActionTemplateParameter {
 	templates := make([]actiontemplates.ActionTemplateParameter, len(models))
 	for i, model := range models {
@@ -231,20 +242,23 @@ func expandTemplates(models []templateModel) []actiontemplates.ActionTemplatePar
 
 		displaySettings := make(map[string]string)
 		if !model.DisplaySettings.IsNull() && !model.DisplaySettings.IsUnknown() {
-			for k, v := range model.DisplaySettings.Elements() {
-				if strVal, ok := v.(types.String); ok {
-					displaySettings[k] = strVal.ValueString()
-				}
-			}
+			model.DisplaySettings.ElementsAs(context.Background(), &displaySettings, false)
 		}
 
-		templates[i] = actiontemplates.ActionTemplateParameter{
-			Name:            model.Name.ValueString(),
-			Label:           model.Label.ValueString(),
-			HelpText:        model.HelpText.ValueString(),
+		template := actiontemplates.ActionTemplateParameter{
 			DefaultValue:    &defaultValue,
 			DisplaySettings: displaySettings,
+			HelpText:        model.HelpText.ValueString(),
+			Label:           model.Label.ValueString(),
+			Name:            model.Name.ValueString(),
 		}
+
+		// Set the ID in the embedded Resource
+		if !model.ID.IsNull() {
+			template.Resource.ID = model.ID.ValueString()
+		}
+
+		templates[i] = template
 	}
 	return templates
 }

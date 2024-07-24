@@ -71,11 +71,34 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 		model.VersioningStrategy = flattenVersioningStrategy(project.VersioningStrategy)
 	}
 
-	// Template
-	templateList, d := flattenTemplates(ctx, project.Templates)
-	diags.Append(d...)
-	model.Template = templateList
+	model.Template = flattenTemplates(project.Templates)
 
+	diags, resourceModel, diagnostics, done := processPersistenceSettings(ctx, project, model, diags)
+	if done {
+		return resourceModel, diagnostics
+	}
+
+	// Extension Settings
+	model.JiraServiceManagementExtensionSettings = flattenJiraServiceManagementExtensionSettings(nil)
+	model.ServiceNowExtensionSettings = flattenServiceNowExtensionSettings(nil)
+
+	for _, extensionSetting := range project.ExtensionSettings {
+		switch extensionSetting.ExtensionID() {
+		case extensions.JiraServiceManagementExtensionID:
+			if jsmSettings, ok := extensionSetting.(*projects.JiraServiceManagementExtensionSettings); ok {
+				model.JiraServiceManagementExtensionSettings = flattenJiraServiceManagementExtensionSettings(jsmSettings)
+			}
+		case extensions.ServiceNowExtensionID:
+			if snowSettings, ok := extensionSetting.(*projects.ServiceNowExtensionSettings); ok {
+				model.ServiceNowExtensionSettings = flattenServiceNowExtensionSettings(snowSettings)
+			}
+		}
+	}
+
+	return model, diags
+}
+
+func processPersistenceSettings(ctx context.Context, project *projects.Project, model *projectResourceModel, diags diag.Diagnostics) (diag.Diagnostics, *projectResourceModel, diag.Diagnostics, bool) {
 	if project.PersistenceSettings != nil {
 		if project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 			gitSettings := project.PersistenceSettings.(projects.GitPersistenceSettings)
@@ -97,7 +120,7 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 			}
 
 			if diags.HasError() {
-				return nil, diags
+				return nil, nil, diags, true
 			}
 		} else {
 			model.GitLibraryPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitLibraryPersistenceSettingsAttrTypes()})
@@ -109,25 +132,7 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 		model.GitUsernamePasswordPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()})
 		model.GitAnonymousPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()})
 	}
-
-	// Extension Settings
-	model.JiraServiceManagementExtensionSettings = flattenJiraServiceManagementExtensionSettings(nil)
-	model.ServiceNowExtensionSettings = flattenServiceNowExtensionSettings(nil)
-
-	for _, extensionSetting := range project.ExtensionSettings {
-		switch extensionSetting.ExtensionID() {
-		case extensions.JiraServiceManagementExtensionID:
-			if jsmSettings, ok := extensionSetting.(*projects.JiraServiceManagementExtensionSettings); ok {
-				model.JiraServiceManagementExtensionSettings = flattenJiraServiceManagementExtensionSettings(jsmSettings)
-			}
-		case extensions.ServiceNowExtensionID:
-			if snowSettings, ok := extensionSetting.(*projects.ServiceNowExtensionSettings); ok {
-				model.ServiceNowExtensionSettings = flattenServiceNowExtensionSettings(snowSettings)
-			}
-		}
-	}
-
-	return model, diags
+	return diags, nil, nil, false
 }
 
 func flattenConnectivityPolicy(policy *core.ConnectivityPolicy) types.List {
@@ -241,15 +246,15 @@ func flattenServiceNowExtensionSettings(settings *projects.ServiceNowExtensionSe
 	return types.ListValueMust(types.ObjectType{AttrTypes: getServiceNowExtensionSettingsAttrTypes()}, []attr.Value{obj})
 }
 
-func flattenTemplates(ctx context.Context, templates []actiontemplates.ActionTemplateParameter) (types.List, diag.Diagnostics) {
+func flattenTemplates(templates []actiontemplates.ActionTemplateParameter) types.List {
 	if len(templates) == 0 {
-		return types.ListNull(types.ObjectType{AttrTypes: getTemplateAttrTypes()}), nil
+		return types.ListNull(types.ObjectType{AttrTypes: getTemplateAttrTypes()})
 	}
 
 	templateList := make([]attr.Value, 0, len(templates))
 	for _, template := range templates {
-		obj, diags := types.ObjectValueFrom(ctx, getTemplateAttrTypes(), map[string]attr.Value{
-			"id":            types.StringValue(template.ID),
+		obj := types.ObjectValueMust(getTemplateAttrTypes(), map[string]attr.Value{
+			"id":            types.StringValue(template.Resource.ID),
 			"name":          types.StringValue(template.Name),
 			"label":         types.StringValue(template.Label),
 			"help_text":     types.StringValue(template.HelpText),
@@ -259,13 +264,11 @@ func flattenTemplates(ctx context.Context, templates []actiontemplates.ActionTem
 				convertMapStringToMapAttrValue(template.DisplaySettings),
 			),
 		})
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{AttrTypes: getTemplateAttrTypes()}), diags
-		}
+
 		templateList = append(templateList, obj)
 	}
 
-	return types.ListValueMust(types.ObjectType{AttrTypes: getTemplateAttrTypes()}, templateList), nil
+	return types.ListValueMust(types.ObjectType{AttrTypes: getTemplateAttrTypes()}, templateList)
 }
 
 func flattenAutoDeployReleaseOverrides(overrides []projects.AutoDeployReleaseOverride) types.List {

@@ -90,6 +90,7 @@ type deploymentActionPackageModel struct {
 }
 
 type templateModel struct {
+	ID              types.String `tfsdk:"id"`
 	Name            types.String `tfsdk:"name"`
 	Label           types.String `tfsdk:"label"`
 	HelpText        types.String `tfsdk:"help_text"`
