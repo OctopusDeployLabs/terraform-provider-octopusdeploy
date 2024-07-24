@@ -105,6 +105,17 @@ func TestAccProjectWithUpdate(t *testing.T) {
 				),
 				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
 			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccProjectCheckExists(),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.0.step_name"),
+					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.1.step_name"),
+					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.iis_website.0.step_name"),
+				),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
+			},
 		},
 	})
 }
@@ -114,7 +125,7 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 	projectGroup.LocalName = projectGroupLocalName
 	projectGroup.Resource.Name = projectGroupName
 
-	var cf = fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
+	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
 		internaltest.ProjectGroupConfiguration(projectGroup)+"\n"+
 		`resource "octopusdeploy_project" "%s" {
 			description      = "%s"
@@ -159,7 +170,6 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 		//     template = "alskdjaslkdj"
 		//   }
 		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
-	return cf
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
