@@ -43,6 +43,8 @@ data "octopusdeploy_channels" "example" {
 Read-Only:
 
 - `description` (String) The description of this channel.
+- `git_reference_rules` (List of String) List of rules to restrict which Git references can be used with this channel when creating releases for version controlled projects. References must be fully qualified e.g. `refs/heads/main`. Supports glob patten syntax.
+- `git_resource_rules` (List of Object) List of rules to restrict which Git resources can be used with this channel when creating releases with external Git resources. Resources must be fully qualified e.g. `refs/heads/main`. Supports glob patten syntax. (see [below for nested schema](#nestedatt--channels--git_resource_rules))
 - `id` (String) The unique ID for this resource.
 - `is_default` (Boolean) Indicates if this is the default channel for the associated project.
 - `lifecycle_id` (String) The lifecycle ID associated with this channel.
@@ -51,6 +53,25 @@ Read-Only:
 - `rule` (List of Object) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channels--rule))
 - `space_id` (String) The space ID associated with this resource.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+
+<a id="nestedatt--channels--git_resource_rules"></a>
+### Nested Schema for `channels.git_resource_rules`
+
+Read-Only:
+
+- `git_dependency_actions` (List of Object) (see [below for nested schema](#nestedobjatt--channels--git_resource_rules--git_dependency_actions))
+- `id` (String)
+- `rules` (List of String)
+
+<a id="nestedobjatt--channels--git_resource_rules--git_dependency_actions"></a>
+### Nested Schema for `channels.git_resource_rules.git_dependency_actions`
+
+Read-Only:
+
+- `deployment_action_slug` (String)
+- `git_dependency_name` (String)
+
+
 
 <a id="nestedatt--channels--rule"></a>
 ### Nested Schema for `channels.rule`
