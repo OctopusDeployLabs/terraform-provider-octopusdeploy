@@ -1,20 +1,19 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
+	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"os"
 	"path/filepath"
 	"sort"
 	"testing"
-
-	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccProjectBasic(t *testing.T) {
@@ -29,7 +28,7 @@ func TestAccProjectBasic(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -50,56 +49,33 @@ func TestAccProjectBasic(t *testing.T) {
 	})
 }
 
-func testAccProject(localName string, name string, lifecycleLocalName string, projectGroupLocalName string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
-		lifecycle_id     = octopusdeploy_lifecycle.%s.id
-		name             = "%s"
-		project_group_id = octopusdeploy_project_group.%s.id
-	}`, localName, lifecycleLocalName, name, projectGroupLocalName)
-}
-
-type ProjectTestOptions struct {
-	AllowDeploymentsToNoTargets bool
-	LifecycleLocalName          string
-	LocalName                   string
-	Name                        string
-	ProjectGroupLocalName       string
-}
-
-func NewProjectTestOptions(projectGroupLocalName string, lifecycleLocalName string) *ProjectTestOptions {
-	return &ProjectTestOptions{
-		LifecycleLocalName:    lifecycleLocalName,
-		LocalName:             acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
-		Name:                  acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
-		ProjectGroupLocalName: projectGroupLocalName,
-	}
-}
-
-func testAccProjectWithOptions(opt *ProjectTestOptions) string {
-
-	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
-		allow_deployments_to_no_targets = %v
-		lifecycle_id                    = octopusdeploy_lifecycle.%s.id
-		name                            = "%s"
-		project_group_id                = octopusdeploy_project_group.%s.id
-	}`, opt.LocalName, opt.AllowDeploymentsToNoTargets, opt.LifecycleLocalName, opt.Name, opt.ProjectGroupLocalName)
-}
-
-func testAccProjectWithTemplate(localName string, name string, lifecycleLocalName string, projectGroupLocalName string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
-		lifecycle_id     = octopusdeploy_lifecycle.%s.id
-		name             = "%s"
-		project_group_id = octopusdeploy_project_group.%s.id
-
-		template {
-			name  = "project variable template name"
-			label = "project variable template label"
-
-			display_settings = {
-				"Octopus.ControlType" = "Sensitive"
-			}
+func testAccProjectGroupCheckDestroy(s *terraform.State) error {
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_project_group" {
+			continue
 		}
-	}`, localName, lifecycleLocalName, name, projectGroupLocalName)
+
+		if projectGroup, err := octoClient.ProjectGroups.GetByID(rs.Primary.ID); err == nil {
+			return fmt.Errorf("project group (%s) still exists", projectGroup.GetID())
+		}
+	}
+
+	return nil
+}
+
+func testProjectGroupExists(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Not found: %s", resourceName)
+		}
+
+		if _, err := octoClient.ProjectGroups.GetByID(rs.Primary.ID); err != nil {
+			return err
+		}
+
+		return nil
+	}
 }
 
 func TestAccProjectWithUpdate(t *testing.T) {
@@ -118,7 +94,7 @@ func TestAccProjectWithUpdate(t *testing.T) {
 			testAccProjectCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -194,30 +170,6 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 		//     template = "alskdjaslkdj"
 		//   }
 		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
-}
-
-func testAccProjectCaC(spaceID string, lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string, basePath string, url string, password string, username string) string {
-	projectGroup := internaltest.NewProjectGroupTestOptions()
-
-	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
-		internaltest.ProjectGroupConfiguration(projectGroup)+"\n"+
-		`resource "octopusdeploy_project" "%s" {
-	       description      = "%s"
-		   lifecycle_id     = octopusdeploy_lifecycle.%s.id
-		   name             = "%s"
-		   project_group_id = octopusdeploy_project_group.%s.id
-		   space_id         = "%s"
-
-			git_persistence_settings {
-				base_path = "%s"
-				url       = "%s"
-
-				credentials {
-					password = "%s"
-					username = "%s"
-				}
-			}
-		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName, spaceID, basePath, url, password, username)
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {

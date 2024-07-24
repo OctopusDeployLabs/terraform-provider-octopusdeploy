@@ -85,3 +85,31 @@ func ToValueSlice(slice []string) []attr.Value {
 	}
 	return values
 }
+
+func TerraformSetFromStringArray(ctx context.Context, arr []string) (types.Set, diag.Diagnostics) {
+	if arr == nil {
+		return types.SetNull(types.StringType), nil
+	}
+
+	elements := make([]attr.Value, len(arr))
+	for i, v := range arr {
+		elements[i] = types.StringValue(v)
+	}
+
+	return types.SetValueFrom(ctx, types.StringType, elements)
+}
+
+func ExpandStringArray(set types.Set) []string {
+	if set.IsNull() || set.IsUnknown() {
+		return nil
+	}
+
+	var result []string
+	for _, v := range set.Elements() {
+		if strVal, ok := v.(types.String); ok {
+			result = append(result, strVal.ValueString())
+		}
+	}
+
+	return result
+}
