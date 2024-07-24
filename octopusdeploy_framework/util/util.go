@@ -17,6 +17,10 @@ func GetTypeName(name string) string {
 	return fmt.Sprintf("%s_%s", GetProviderName(), name)
 }
 
+func GetDataSourceDescription(resourceName string) string {
+	return fmt.Sprintf("Provides information about existing %s", resourceName)
+}
+
 func GetStringOrEmpty(tfAttr interface{}) string {
 	if tfAttr == nil {
 		return ""

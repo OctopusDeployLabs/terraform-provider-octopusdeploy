@@ -24,6 +24,13 @@ func GetQueryIDsDatasourceSchema() datasourceSchema.Attribute {
 	}
 }
 
+func GetQuerySpaceIDDatasourceSchema() datasourceSchema.Attribute {
+	return schema.StringAttribute{
+		Description: "A Space ID to filter by. Will revert what is specified on the provider if not set.",
+		Optional:    true,
+	}
+}
+
 func GetQueryNameDatasourceSchema() datasourceSchema.Attribute {
 	return datasourceSchema.StringAttribute{
 		Description: "A filter search by exact name",
