@@ -77,7 +77,7 @@ var VariableTypeNames = struct {
 	UsernamePasswordAccount:  "UsernamePasswordAccount",
 }
 
-var variableTypes = []string{
+var VariableTypes = []string{
 	VariableTypeNames.AmazonWebServicesAccount,
 	VariableTypeNames.AzureAccount,
 	VariableTypeNames.GoogleCloudAccount,
@@ -140,10 +140,10 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 			},
 			VariableSchemaAttributeNames.Type: resourceSchema.StringAttribute{
 				Required:    true,
-				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s", strings.Join(variableTypes, ", ")),
+				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s", strings.Join(VariableTypes, ", ")),
 				Validators: []validator.String{
 					stringvalidator.OneOf(
-						variableTypes...,
+						VariableTypes...,
 					),
 				},
 			},
