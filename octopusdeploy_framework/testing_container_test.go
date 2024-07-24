@@ -30,7 +30,6 @@ func TestMain(m *testing.M) {
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
 		if err != nil {
 			log.Printf("Failed to arrange containers: (%s)", err.Error())
-			panic(m)
 		}
 
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
@@ -45,7 +44,6 @@ func TestMain(m *testing.M) {
 
 		if err != nil {
 			log.Printf("Failed to clean up containers: (%s)", err.Error())
-			panic(m)
 		}
 
 		log.Printf("Exit code: (%d)", code)
