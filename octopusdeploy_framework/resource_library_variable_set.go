@@ -7,11 +7,8 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"log"
-	"reflect"
 )
 
 //TODO: Plan Modifiers for
@@ -21,66 +18,36 @@ type libraryVariableSetFeedTypeResource struct {
 	*Config
 }
 
-type libraryVariableSetFeedModifier struct{}
-
-func (m libraryVariableSetFeedModifier) Description(_ context.Context) string {
-	return "Template_Ids will be populated once created"
-}
-
-func (m libraryVariableSetFeedModifier) MarkdownDescription(_ context.Context) string {
-	return "Template_Ids will be populated once created"
-}
-
-func (m libraryVariableSetFeedModifier) PlanModifyMap(_ context.Context, req planmodifier.MapRequest, resp *planmodifier.MapResponse) {
-	if req.ConfigValue.IsNull() {
-		return
-	}
-
-	if req.StateValue.IsUnknown() || req.StateValue.IsNull() {
-		return
-	}
-
-	oldValues := req.StateValue.Elements()
-	for k, v := range req.PlanValue.Elements() {
-		o, ok := oldValues[k]
-		log.Println(o)
-		if !ok {
-			// something new, go ahead with the plan
-			return
-		}
-
-		s, ok := v.(types.String)
-		log.Println(s)
-		if !ok {
-			// this is very bad and shouldn't haven't gotten past validation
-			resp.Diagnostics.AddError(fmt.Sprintf("Invalid value type for json string in plan for %s", req.Path), "invalid value")
-			return
-		}
-
-		var newValue map[string]interface{}
-
-		s, ok = o.(types.String)
-
-		var oldValue map[string]interface{}
-		//err = json.Unmarshal([]byte(s.ValueString()), &oldValue)
-		//if err != nil {
-		//	resp.Diagnostics.AddError(fmt.Sprintf("Invalid json in plan for %s", req.Path), err.Error())
-		//	return
-		//}
-
-		if !reflect.DeepEqual(oldValue, newValue) {
-			return
-		}
-
-		delete(oldValues, k)
-	}
-
-	if len(oldValues) > 0 {
-		// something was removed in the plan
-		return
-	}
-
-	resp.PlanValue = req.StateValue
+func (r *libraryVariableSetFeedTypeResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	//var plan *schemas.LibraryVariableSetResourceModel
+	//
+	//if req.Plan.Raw.IsNull() {
+	//	return
+	//}
+	//
+	//if req.State.Raw.IsNull() {
+	//	isCreation = true
+	//} else {
+	//	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	//}
+	//
+	//resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	//if resp.Diagnostics.HasError() {
+	//	return
+	//}
+	////
+	////if !isCreation {
+	//templates := plan.Template
+	//
+	////templates := plan.Template
+	//log.Println(templates)
+	////templateIds := make(map[string]string)
+	//
+	//expandedActionTemplates := schemas.ExpandActionTemplateParameters(templates)
+	//templateIdsValues := schemas.FlattenTemplateIds(expandedActionTemplates)
+	//
+	//resp.Plan.SetAttribute(ctx, path.Root("template_ids"), templateIdsValues)
+	//}
 }
 
 func NewLibraryVariableSetFeedResource() resource.Resource {

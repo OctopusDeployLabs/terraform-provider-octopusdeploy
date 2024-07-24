@@ -24,14 +24,14 @@ func expandActionTemplateParameter(tfTemplate map[string]attr.Value) actiontempl
 	return *actionTemplateParameter
 }
 
-func expandActionTemplateParameters(actionTemplateParameters []interface{}) []actiontemplates.ActionTemplateParameter {
-	if len(actionTemplateParameters) == 0 {
-		return nil
+func ExpandActionTemplateParameters(actionTemplateParameters types.List) []actiontemplates.ActionTemplateParameter {
+	if len(actionTemplateParameters.Elements()) == 0 {
+		return []actiontemplates.ActionTemplateParameter{}
 	}
 
 	expandedActionTemplateParameters := []actiontemplates.ActionTemplateParameter{}
-	for _, actionTemplateParameter := range actionTemplateParameters {
-		expandedActionTemplateParameters = append(expandedActionTemplateParameters, expandActionTemplateParameter(actionTemplateParameter.(types.Map).Elements()))
+	for _, actionTemplateParameter := range actionTemplateParameters.Elements() {
+		expandedActionTemplateParameters = append(expandedActionTemplateParameters, expandActionTemplateParameter(actionTemplateParameter.(types.Object).Attributes()))
 	}
 	return expandedActionTemplateParameters
 }
@@ -70,7 +70,7 @@ func TemplateObjectType() map[string]attr.Type {
 	}
 }
 
-func getActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
+func GetActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
 	return map[string]resourceSchema.Attribute{
 		"default_value": resourceSchema.StringAttribute{
 			Description: "A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.",

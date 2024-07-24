@@ -71,21 +71,28 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 			"id":          GetIdResourceSchema(),
 			"name":        GetNameResourceSchema(true),
 			"space_id":    GetSpaceIdResourceSchema("library variable set"),
-			"template": resourceSchema.ListAttribute{
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.ObjectType{AttrTypes: TemplateObjectType()},
-			},
 			"template_ids": resourceSchema.MapAttribute{
 				ElementType: types.StringType,
 				Computed:    true,
-				Optional:    false,
+				Optional:    true,
 				PlanModifiers: []planmodifier.Map{
 					mapplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"variable_set_id": resourceSchema.StringAttribute{
 				Computed: true,
+			},
+		},
+		Blocks: map[string]resourceSchema.Block{
+			"template": resourceSchema.ListNestedBlock{
+				NestedObject: resourceSchema.NestedBlockObject{
+					Attributes: GetActionTemplateParameterSchema(),
+					//Optional:    true,
+					//ElementType: types. {AttrTypes: TemplateObjectType()},
+					//PlanModifiers: []planmodifier.List{
+					//	listplanmodifier.UseStateForUnknown(),
+					//},
+				},
 			},
 		},
 	}
@@ -127,18 +134,13 @@ func CreateLibraryVariableSet(data *LibraryVariableSetResourceModel) *variables.
 	libraryVariableSet.Description = data.Description.ValueString()
 	libraryVariableSet.SpaceID = data.SpaceID.ValueString()
 
-	if len(data.Template.Elements()) > 0 {
-		for _, tfTemplate := range data.Template.Elements() {
-			template := expandActionTemplateParameter(tfTemplate.(types.Object).Attributes())
-			libraryVariableSet.Templates = append(libraryVariableSet.Templates, template)
-		}
-	}
+	libraryVariableSet.Templates = ExpandActionTemplateParameters(data.Template)
 
 	return libraryVariableSet
 }
 
 func FlattenTemplates(actionTemplateParameters []actiontemplates.ActionTemplateParameter) types.List {
-	if actionTemplateParameters == nil {
+	if len(actionTemplateParameters) == 0 {
 		return types.ListNull(types.ObjectType{AttrTypes: TemplateObjectType()})
 	}
 	actionTemplateList := make([]attr.Value, 0, len(actionTemplateParameters))
@@ -148,7 +150,7 @@ func FlattenTemplates(actionTemplateParameters []actiontemplates.ActionTemplateP
 			"default_value":    types.StringValue(actionTemplateParams.DefaultValue.Value),
 			"display_settings": flattenDisplaySettingsMap(actionTemplateParams.DisplaySettings),
 			"help_text":        types.StringValue(actionTemplateParams.HelpText),
-			"id":               types.StringValue(actionTemplateParams.ID),
+			"id":               types.StringValue(actionTemplateParams.GetID()),
 			"label":            types.StringValue(actionTemplateParams.Label),
 			"name":             types.StringValue(actionTemplateParams.Name),
 		}
@@ -173,12 +175,12 @@ func flattenDisplaySettingsMap(displaySettings map[string]string) types.Map {
 
 func FlattenTemplateIds(actionTemplateParameters []actiontemplates.ActionTemplateParameter) types.Map {
 	if actionTemplateParameters == nil {
-		return types.MapNull(types.ObjectType{AttrTypes: TemplateObjectType()})
+		return types.MapNull(types.StringType)
 	}
 
 	templateIds := map[string]attr.Value{}
 	for _, template := range actionTemplateParameters {
-		templateIds[template.Name] = types.StringValue(template.GetID())
+		templateIds[template.Name] = types.StringValue(template.ID)
 	}
 
 	templateIdsValues, _ := types.MapValue(types.StringType, templateIds)

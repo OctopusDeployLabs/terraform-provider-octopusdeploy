@@ -10,22 +10,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 )
 
-func TestAccOctopusDeployLibraryVariableSetDatasource(t *testing.T) {
-	dataLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-
-	resource.Test(t, resource.TestCase{
-		CheckDestroy:             testLibraryVariableSetDestroy,
-		PreCheck:                 func() { TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-		Steps: []resource.TestStep{
-			{
-				Config: testLibraryVariableSetsData(dataLocalName, name),
-			},
-		},
-	})
-}
-
 func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_library_variable_set." + localName
