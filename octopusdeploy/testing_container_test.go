@@ -28,6 +28,10 @@ func TestMain(m *testing.M) {
 
 		testFramework := test.OctopusContainerTest{}
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
+		if err != nil {
+			log.Printf("Failed to arrange containers: (%s)", err.Error())
+			panic(m)
+		}
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
 		os.Setenv("TF_ACC", "1")
@@ -36,7 +40,7 @@ func TestMain(m *testing.M) {
 		ctx := context.Background()
 
 		// Waiting for the container logs to clear.
-		time.Sleep(10000 * time.Millisecond)
+		time.Sleep(5000 * time.Millisecond)
 		err := testFramework.CleanUp(ctx, octoContainer, sqlServerContainer, network)
 
 		if err != nil {
