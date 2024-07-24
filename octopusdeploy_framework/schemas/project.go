@@ -18,22 +18,30 @@ func GetProjectResourceSchema() schema.Schema {
 			"description":      util.GetDescriptionResourceSchema("project"),
 			"lifecycle_id":     schema.StringAttribute{Description: "The lifecycle ID associated with this project.", Required: true},
 			"project_group_id": schema.StringAttribute{Description: "The project group ID associated with this project.", Required: true},
-			"is_disabled":      schema.BoolAttribute{Description: "Indicates whether the project is disabled.", Optional: true},
+			"is_disabled": schema.BoolAttribute{
+				Description: "Indicates whether the project is disabled.",
+				Optional:    true,
+				Computed:    true,
+			},
 			"auto_create_release": schema.BoolAttribute{
 				Description: "Indicates whether to automatically create a release when a package is pushed to a trigger.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"default_guided_failure_mode": schema.StringAttribute{
 				Description: "The default guided failure mode setting for the project.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"default_to_skip_if_already_installed": schema.BoolAttribute{
 				Description: "Indicates whether deployment steps should be skipped if the relevant package is already installed.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"deployment_changes_template": schema.StringAttribute{
 				Description: "The template to use for deployment change details.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"deployment_process_id": schema.StringAttribute{
 				Description: "The ID of the deployment process associated with this project.",
@@ -42,23 +50,28 @@ func GetProjectResourceSchema() schema.Schema {
 			"discrete_channel_release": schema.BoolAttribute{
 				Description: "Treats releases of different channels to the same environment as a separate deployment dimension.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"is_discrete_channel_release": schema.BoolAttribute{
 				Description: "Treats releases of different channels to the same environment as a separate deployment dimension.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"is_version_controlled": schema.BoolAttribute{
 				Description: "Indicates whether the project is version controlled.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"included_library_variable_sets": schema.ListAttribute{
 				Description: "The list of included library variable set IDs.",
 				ElementType: types.StringType,
 				Optional:    true,
+				Computed:    true,
 			},
 			"tenanted_deployment_participation": schema.StringAttribute{
 				Description: "The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"variable_set_id": schema.StringAttribute{
 				Description: "The ID of the variable set associated with this project.",
@@ -67,6 +80,7 @@ func GetProjectResourceSchema() schema.Schema {
 			"release_notes_template": schema.StringAttribute{
 				Description: "The template to use for release notes.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"slug": util.GetSlugResourceSchema("project"),
 		},
@@ -96,7 +110,7 @@ func GetProjectResourceSchema() schema.Schema {
 			"git_anonymous_persistence_settings": schema.SingleNestedBlock{
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
 				Attributes: map[string]schema.Attribute{
-					"url":                util.GetFeedUriResourceSchema(),
+					"url":                schema.StringAttribute{Optional: true},
 					"base_path":          schema.StringAttribute{Description: "The base path associated with these version control settings.", Optional: true},
 					"default_branch":     schema.StringAttribute{Description: "The default branch associated with these version control settings.", Optional: true},
 					"protected_branches": schema.SetAttribute{Description: "A list of protected branch patterns.", ElementType: types.StringType, Optional: true},
@@ -105,8 +119,8 @@ func GetProjectResourceSchema() schema.Schema {
 			"git_library_persistence_settings": schema.SingleNestedBlock{
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
 				Attributes: map[string]schema.Attribute{
-					"git_credential_id":  schema.StringAttribute{Description: "The ID of the Git credential to use.", Required: true},
-					"url":                util.GetFeedUriResourceSchema(),
+					"git_credential_id":  schema.StringAttribute{Description: "The ID of the Git credential to use.", Optional: true},
+					"url":                schema.StringAttribute{Optional: true},
 					"base_path":          schema.StringAttribute{Description: "The base path associated with these version control settings.", Optional: true},
 					"default_branch":     schema.StringAttribute{Description: "The default branch associated with these version control settings.", Optional: true},
 					"protected_branches": schema.SetAttribute{Description: "A list of protected branch patterns.", ElementType: types.StringType, Optional: true},
@@ -115,9 +129,9 @@ func GetProjectResourceSchema() schema.Schema {
 			"git_username_password_persistence_settings": schema.SingleNestedBlock{
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
 				Attributes: map[string]schema.Attribute{
-					"url":                util.GetFeedUriResourceSchema(),
-					"username":           util.GetUsernameResourceSchema(true),
-					"password":           util.GetPasswordResourceSchema(true),
+					"url":                schema.StringAttribute{Optional: true},
+					"username":           util.GetUsernameResourceSchema(false),
+					"password":           util.GetPasswordResourceSchema(false),
 					"base_path":          schema.StringAttribute{Description: "The base path associated with these version control settings.", Optional: true},
 					"default_branch":     schema.StringAttribute{Description: "The default branch associated with these version control settings.", Optional: true},
 					"protected_branches": schema.SetAttribute{Description: "A list of protected branch patterns.", ElementType: types.StringType, Optional: true},
@@ -126,17 +140,17 @@ func GetProjectResourceSchema() schema.Schema {
 			"jira_service_management_extension_settings": schema.SingleNestedBlock{
 				Description: "Provides extension settings for the Jira Service Management (JSM) integration for this project.",
 				Attributes: map[string]schema.Attribute{
-					"connection_id":             schema.StringAttribute{Description: "The connection identifier associated with the extension settings.", Required: true},
-					"is_enabled":                schema.BoolAttribute{Description: "Specifies whether or not this extension is enabled for this project.", Required: true},
-					"service_desk_project_name": schema.StringAttribute{Description: "The project name associated with this extension.", Required: true},
+					"connection_id":             schema.StringAttribute{Description: "The connection identifier associated with the extension settings.", Optional: true},
+					"is_enabled":                schema.BoolAttribute{Description: "Specifies whether or not this extension is enabled for this project.", Optional: true},
+					"service_desk_project_name": schema.StringAttribute{Description: "The project name associated with this extension.", Optional: true},
 				},
 			},
 			"servicenow_extension_settings": schema.SingleNestedBlock{
 				Description: "Provides extension settings for the ServiceNow integration for this project.",
 				Attributes: map[string]schema.Attribute{
-					"connection_id":                       schema.StringAttribute{Description: "The connection identifier associated with the extension settings.", Required: true},
-					"is_enabled":                          schema.BoolAttribute{Description: "Specifies whether or not this extension is enabled for this project.", Required: true},
-					"is_state_automatically_transitioned": schema.BoolAttribute{Description: "Specifies whether or not this extension will automatically transition the state of a deployment for this project.", Required: true},
+					"connection_id":                       schema.StringAttribute{Description: "The connection identifier associated with the extension settings.", Optional: true},
+					"is_enabled":                          schema.BoolAttribute{Description: "Specifies whether or not this extension is enabled for this project.", Optional: true},
+					"is_state_automatically_transitioned": schema.BoolAttribute{Description: "Specifies whether or not this extension will automatically transition the state of a deployment for this project.", Optional: true},
 					"standard_change_template_name":       schema.StringAttribute{Description: "The name of the standard change template associated with this extension.", Optional: true},
 				},
 			},
@@ -174,7 +188,7 @@ func GetProjectResourceSchema() schema.Schema {
 				Description: "Defines template parameters for the project.",
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
-						"name":             util.GetNameResourceSchema(true),
+						"name":             util.GetNameResourceSchema(false),
 						"label":            schema.StringAttribute{Description: "The label shown beside the parameter when presented in the deployment process.", Optional: true},
 						"help_text":        schema.StringAttribute{Description: "The help presented alongside the parameter input.", Optional: true},
 						"default_value":    schema.StringAttribute{Description: "A default value for the parameter, if applicable.", Optional: true},
