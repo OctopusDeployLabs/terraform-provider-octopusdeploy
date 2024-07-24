@@ -64,7 +64,7 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	// Set state to fully populated data
-	flattenedProject, diags := flattenProject(ctx, createdProject)
+	flattenedProject, diags := flattenProject(ctx, createdProject, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -88,7 +88,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	flattenedProject, diags := flattenProject(ctx, project)
+	flattenedProject, diags := flattenProject(ctx, project, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -133,7 +133,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	flattenedProject, diags := flattenProject(ctx, updatedProject)
+	flattenedProject, diags := flattenProject(ctx, updatedProject, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

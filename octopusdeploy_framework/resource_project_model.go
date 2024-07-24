@@ -20,20 +20,22 @@ type projectResourceModel struct {
 	DiscreteChannelRelease                 types.Bool   `tfsdk:"discrete_channel_release"`
 	IsDiscreteChannelRelease               types.Bool   `tfsdk:"is_discrete_channel_release"`
 	IsVersionControlled                    types.Bool   `tfsdk:"is_version_controlled"`
-	IncludedLibraryVariableSets            types.List   `tfsdk:"included_library_variable_sets"`
 	TenantedDeploymentParticipation        types.String `tfsdk:"tenanted_deployment_participation"`
 	VariableSetID                          types.String `tfsdk:"variable_set_id"`
 	ReleaseNotesTemplate                   types.String `tfsdk:"release_notes_template"`
 	Slug                                   types.String `tfsdk:"slug"`
-	ConnectivityPolicy                     types.Object `tfsdk:"connectivity_policy"`
-	GitAnonymousPersistenceSettings        types.Object `tfsdk:"git_anonymous_persistence_settings"`
-	GitLibraryPersistenceSettings          types.Object `tfsdk:"git_library_persistence_settings"`
-	GitUsernamePasswordPersistenceSettings types.Object `tfsdk:"git_username_password_persistence_settings"`
-	JiraServiceManagementExtensionSettings types.Object `tfsdk:"jira_service_management_extension_settings"`
-	ServicenowExtensionSettings            types.Object `tfsdk:"servicenow_extension_settings"`
-	VersioningStrategy                     types.Object `tfsdk:"versioning_strategy"`
-	ReleaseCreationStrategy                types.Object `tfsdk:"release_creation_strategy"`
+	ClonedFromProjectID                    types.String `tfsdk:"cloned_from_project_id"`
+	VersioningStrategy                     types.List   `tfsdk:"versioning_strategy"`
+	ConnectivityPolicy                     types.List   `tfsdk:"connectivity_policy"`
+	ReleaseCreationStrategy                types.List   `tfsdk:"release_creation_strategy"`
 	Template                               types.List   `tfsdk:"template"`
+	GitAnonymousPersistenceSettings        types.List   `tfsdk:"git_anonymous_persistence_settings"`
+	GitLibraryPersistenceSettings          types.List   `tfsdk:"git_library_persistence_settings"`
+	GitUsernamePasswordPersistenceSettings types.List   `tfsdk:"git_username_password_persistence_settings"`
+	JiraServiceManagementExtensionSettings types.List   `tfsdk:"jira_service_management_extension_settings"`
+	ServiceNowExtensionSettings            types.List   `tfsdk:"servicenow_extension_settings"`
+	IncludedLibraryVariableSets            types.List   `tfsdk:"included_library_variable_sets"`
+	AutoDeployReleaseOverrides             types.List   `tfsdk:"auto_deploy_release_overrides"`
 }
 
 type connectivityPolicyModel struct {
@@ -42,27 +44,19 @@ type connectivityPolicyModel struct {
 	SkipMachineBehavior         types.String `tfsdk:"skip_machine_behavior"`
 	TargetRoles                 types.List   `tfsdk:"target_roles"`
 }
+type autoDeployReleaseOverrideModel struct {
+	EnvironmentID types.String `tfsdk:"environment_id"`
+	TenantID      types.String `tfsdk:"tenant_id"`
+}
 
 type gitPersistenceSettingsModel struct {
 	URL               types.String `tfsdk:"url"`
 	BasePath          types.String `tfsdk:"base_path"`
 	DefaultBranch     types.String `tfsdk:"default_branch"`
 	ProtectedBranches types.Set    `tfsdk:"protected_branches"`
-}
-
-type gitAnonymousPersistenceSettingsModel struct {
-	gitPersistenceSettingsModel
-}
-
-type gitLibraryPersistenceSettingsModel struct {
-	gitPersistenceSettingsModel
-	GitCredentialID types.String `tfsdk:"git_credential_id"`
-}
-
-type gitUsernamePasswordPersistenceSettingsModel struct {
-	gitPersistenceSettingsModel
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
+	Username          types.String `tfsdk:"username"`
+	Password          types.String `tfsdk:"password"`
+	GitCredentialID   types.String `tfsdk:"git_credential_id"`
 }
 
 type jiraServiceManagementExtensionSettingsModel struct {

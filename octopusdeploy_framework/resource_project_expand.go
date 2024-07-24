@@ -7,7 +7,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"net/url"
@@ -34,6 +33,7 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 	project.TenantedDeploymentMode = core.TenantedDeploymentMode(model.TenantedDeploymentParticipation.ValueString())
 	project.ReleaseNotesTemplate = model.ReleaseNotesTemplate.ValueString()
 	project.Slug = model.Slug.ValueString()
+	project.ClonedFromProjectID = model.ClonedFromProjectID.ValueString()
 
 	if !model.IncludedLibraryVariableSets.IsNull() {
 		var includedSets []string
@@ -43,44 +43,46 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 
 	if !model.ConnectivityPolicy.IsNull() {
 		var connectivityPolicy connectivityPolicyModel
-		model.ConnectivityPolicy.As(ctx, &connectivityPolicy, basetypes.ObjectAsOptions{})
+		model.ConnectivityPolicy.ElementsAs(ctx, &connectivityPolicy, false)
 		project.ConnectivityPolicy = expandConnectivityPolicy(connectivityPolicy)
 	}
 
-	if !model.GitAnonymousPersistenceSettings.IsNull() {
-		var settings gitAnonymousPersistenceSettingsModel
-		model.GitAnonymousPersistenceSettings.As(ctx, &settings, basetypes.ObjectAsOptions{})
-		project.PersistenceSettings = expandGitAnonymousPersistenceSettings(settings)
-	} else if !model.GitLibraryPersistenceSettings.IsNull() {
-		var settings gitLibraryPersistenceSettingsModel
-		model.GitLibraryPersistenceSettings.As(ctx, &settings, basetypes.ObjectAsOptions{})
-		project.PersistenceSettings = expandGitLibraryPersistenceSettings(settings)
-	} else if !model.GitUsernamePasswordPersistenceSettings.IsNull() {
-		var settings gitUsernamePasswordPersistenceSettingsModel
-		model.GitUsernamePasswordPersistenceSettings.As(ctx, &settings, basetypes.ObjectAsOptions{})
-		project.PersistenceSettings = expandGitUsernamePasswordPersistenceSettings(settings)
-	}
+	// TODO: git_library_persistence_settings
+	//if v, ok := d.GetOk("git_library_persistence_settings"); ok {
+	//	project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandLibraryGitCredential)
+	//}
+	//if v, ok := d.GetOk("git_username_password_persistence_settings"); ok {
+	//	project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandUsernamePasswordGitCredential)
+	//}
+	//if v, ok := d.GetOk("git_anonymous_persistence_settings"); ok {
+	//	project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandAnonymousGitCredential)
+	//}
+	//
+	//if project.PersistenceSettings != nil {
+	//	tflog.Info(ctx, fmt.Sprintf("expanded persistence settings {%v}", project.PersistenceSettings))
+	//}
 
 	if !model.JiraServiceManagementExtensionSettings.IsNull() {
 		var settings jiraServiceManagementExtensionSettingsModel
-		model.JiraServiceManagementExtensionSettings.As(ctx, &settings, basetypes.ObjectAsOptions{})
+		model.JiraServiceManagementExtensionSettings.ElementsAs(ctx, &settings, false)
 		project.ExtensionSettings = append(project.ExtensionSettings, expandJiraServiceManagementExtensionSettings(settings))
 	}
-	if !model.ServicenowExtensionSettings.IsNull() {
+
+	if !model.ServiceNowExtensionSettings.IsNull() {
 		var settings servicenowExtensionSettingsModel
-		model.ServicenowExtensionSettings.As(ctx, &settings, basetypes.ObjectAsOptions{})
+		model.ServiceNowExtensionSettings.ElementsAs(ctx, &settings, false)
 		project.ExtensionSettings = append(project.ExtensionSettings, expandServiceNowExtensionSettings(settings))
 	}
 
 	if !model.VersioningStrategy.IsNull() {
 		var strategy versioningStrategyModel
-		model.VersioningStrategy.As(ctx, &strategy, basetypes.ObjectAsOptions{})
+		model.VersioningStrategy.ElementsAs(ctx, &strategy, false)
 		project.VersioningStrategy = expandVersioningStrategy(strategy)
 	}
 
 	if !model.ReleaseCreationStrategy.IsNull() {
 		var strategy releaseCreationStrategyModel
-		model.ReleaseCreationStrategy.As(ctx, &strategy, basetypes.ObjectAsOptions{})
+		model.ReleaseCreationStrategy.ElementsAs(ctx, &strategy, false)
 		project.ReleaseCreationStrategy = expandReleaseCreationStrategy(strategy)
 	}
 
@@ -90,7 +92,65 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		project.Templates = expandTemplates(templates)
 	}
 
+	if !model.AutoDeployReleaseOverrides.IsNull() {
+		var overrideModels []autoDeployReleaseOverrideModel
+		diags := model.AutoDeployReleaseOverrides.ElementsAs(ctx, &overrideModels, false)
+		if !diags.HasError() {
+			project.AutoDeployReleaseOverrides = expandAutoDeployReleaseOverrides(ctx, overrideModels)
+		}
+	}
+
 	return project
+}
+
+func expandAutoDeployReleaseOverrides(ctx context.Context, models []autoDeployReleaseOverrideModel) []projects.AutoDeployReleaseOverride {
+	result := make([]projects.AutoDeployReleaseOverride, 0, len(models))
+
+	for _, model := range models {
+		override := projects.AutoDeployReleaseOverride{
+			EnvironmentID: model.EnvironmentID.ValueString(),
+		}
+
+		// TenantID is optional, so we only set it if it's not null
+		if !model.TenantID.IsNull() {
+			override.TenantID = model.TenantID.ValueString()
+		}
+
+		result = append(result, override)
+	}
+
+	return result
+}
+
+func expandGitPersistenceSettings(model gitPersistenceSettingsModel) projects.PersistenceSettings {
+	gitUrl, _ := url.Parse(model.URL.ValueString())
+
+	basePath := model.BasePath.ValueString()
+	defaultBranch := model.DefaultBranch.ValueString()
+
+	var protectedBranches []string
+	model.ProtectedBranches.ElementsAs(context.Background(), &protectedBranches, false)
+
+	var gitCredential credentials.GitCredential
+
+	if !model.GitCredentialID.IsNull() {
+		// Library Git Credential
+		gitCredential = credentials.NewReference(model.GitCredentialID.ValueString())
+	} else if !model.Username.IsNull() && !model.Password.IsNull() {
+		// Username and Password Git Credential
+		gitCredential = credentials.NewUsernamePassword(model.Username.ValueString(), core.NewSensitiveValue(model.Password.ValueString()))
+	} else {
+		// Anonymous Git Credential
+		gitCredential = credentials.NewAnonymous()
+	}
+
+	return projects.NewGitPersistenceSettings(
+		basePath,
+		gitCredential,
+		defaultBranch,
+		protectedBranches,
+		gitUrl,
+	)
 }
 
 func expandConnectivityPolicy(model connectivityPolicyModel) *core.ConnectivityPolicy {
@@ -109,40 +169,6 @@ func expandConnectivityPolicy(model connectivityPolicyModel) *core.ConnectivityP
 		SkipMachineBehavior:         core.SkipMachineBehavior(model.SkipMachineBehavior.ValueString()),
 		TargetRoles:                 targetRoles,
 	}
-}
-
-func expandGitAnonymousPersistenceSettings(model gitAnonymousPersistenceSettingsModel) projects.GitPersistenceSettings {
-	url, _ := url.Parse(model.URL.ValueString())
-	return projects.NewGitPersistenceSettings(
-		model.BasePath.ValueString(),
-		credentials.NewAnonymous(),
-		model.DefaultBranch.ValueString(),
-		util.ExpandStringArray(model.ProtectedBranches),
-		url,
-	)
-}
-
-func expandGitLibraryPersistenceSettings(model gitLibraryPersistenceSettingsModel) projects.GitPersistenceSettings {
-	url, _ := url.Parse(model.URL.ValueString())
-	return projects.NewGitPersistenceSettings(
-		model.BasePath.ValueString(),
-		credentials.NewReference(model.GitCredentialID.ValueString()),
-		model.DefaultBranch.ValueString(),
-		util.ExpandStringArray(model.ProtectedBranches),
-		url,
-	)
-}
-
-func expandGitUsernamePasswordPersistenceSettings(model gitUsernamePasswordPersistenceSettingsModel) projects.GitPersistenceSettings {
-	url, _ := url.Parse(model.URL.ValueString())
-	passwordSensitiveValue := core.NewSensitiveValue(model.Password.ValueString())
-	return projects.NewGitPersistenceSettings(
-		model.BasePath.ValueString(),
-		credentials.NewUsernamePassword(model.Username.ValueString(), passwordSensitiveValue),
-		model.DefaultBranch.ValueString(),
-		util.ExpandStringArray(model.ProtectedBranches),
-		url,
-	)
 }
 
 func expandJiraServiceManagementExtensionSettings(model jiraServiceManagementExtensionSettingsModel) *projects.JiraServiceManagementExtensionSettings {
