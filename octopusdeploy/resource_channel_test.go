@@ -433,3 +433,48 @@ func TestProjectChannelResource(t *testing.T) {
 		t.Fatal("The environment lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
 	}
 }
+
+type ProjectTestOptions struct {
+	AllowDeploymentsToNoTargets bool
+	LifecycleLocalName          string
+	LocalName                   string
+	Name                        string
+	ProjectGroupLocalName       string
+}
+
+func NewProjectTestOptions(projectGroupLocalName string, lifecycleLocalName string) *ProjectTestOptions {
+	return &ProjectTestOptions{
+		LifecycleLocalName:    lifecycleLocalName,
+		LocalName:             acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
+		Name:                  acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
+		ProjectGroupLocalName: projectGroupLocalName,
+	}
+}
+
+func testAccProjectWithOptions(opt *ProjectTestOptions) string {
+
+	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
+		allow_deployments_to_no_targets = %v
+		lifecycle_id                    = octopusdeploy_lifecycle.%s.id
+		name                            = "%s"
+		project_group_id                = octopusdeploy_project_group.%s.id
+	}`, opt.LocalName, opt.AllowDeploymentsToNoTargets, opt.LifecycleLocalName, opt.Name, opt.ProjectGroupLocalName)
+}
+
+func testAccProjectWithTemplate(localName string, name string, lifecycleLocalName string, projectGroupLocalName string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
+		lifecycle_id     = octopusdeploy_lifecycle.%s.id
+		name             = "%s"
+		project_group_id = octopusdeploy_project_group.%s.id
+
+		template {
+			name  = "project variable template name"
+			label = "project variable template label"
+
+			display_settings = {
+				"Octopus.ControlType" = "Sensitive"
+			}
+		}
+	}`, localName, lifecycleLocalName, name, projectGroupLocalName)
+
+}
