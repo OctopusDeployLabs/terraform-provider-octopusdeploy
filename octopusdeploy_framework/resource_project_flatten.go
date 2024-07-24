@@ -2,8 +2,10 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/extensions"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
@@ -49,18 +51,18 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 	var diags diag.Diagnostics
 
 	model.IncludedLibraryVariableSets = util.FlattenStringList(project.IncludedLibraryVariableSets)
-	model.AutoDeployReleaseOverrides = flattenAutoDeployReleaseOverrides(ctx, project.AutoDeployReleaseOverrides)
+	model.AutoDeployReleaseOverrides = flattenAutoDeployReleaseOverrides(project.AutoDeployReleaseOverrides)
 
 	if state.ConnectivityPolicy.IsNull() {
 		model.ConnectivityPolicy = types.ListNull(types.ObjectType{AttrTypes: getConnectivityPolicyAttrTypes()})
 	} else {
-		model.ConnectivityPolicy = flattenConnectivityPolicy(ctx, project.ConnectivityPolicy)
+		model.ConnectivityPolicy = flattenConnectivityPolicy(project.ConnectivityPolicy)
 	}
 
 	if state.ReleaseCreationStrategy.IsNull() {
 		model.ReleaseCreationStrategy = types.ListNull(types.ObjectType{AttrTypes: getReleaseCreationStrategyAttrTypes()})
 	} else {
-		model.ReleaseCreationStrategy = flattenReleaseCreationStrategy(ctx, project.ReleaseCreationStrategy)
+		model.ReleaseCreationStrategy = flattenReleaseCreationStrategy(project.ReleaseCreationStrategy)
 	}
 
 	if state.VersioningStrategy.IsNull() {
@@ -74,24 +76,53 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 	diags.Append(d...)
 	model.Template = templateList
 
-	// TODO GitPersistenceSetting
-	model.GitLibraryPersistenceSettings, d = flattenGitLibraryPersistenceSettings(ctx, project.PersistenceSettings)
-	model.GitAnonymousPersistenceSettings, d = flattenGitAnonymousPersistenceSettings(ctx, project.PersistenceSettings)
-	model.GitUsernamePasswordPersistenceSettings, d = flattenGitUsernamePasswordPersistenceSettings(ctx, project.PersistenceSettings)
+	if project.PersistenceSettings != nil {
+		if project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
+			gitSettings := project.PersistenceSettings.(projects.GitPersistenceSettings)
+			gitCredentialType := gitSettings.Credential().Type()
+
+			switch gitCredentialType {
+			case credentials.GitCredentialTypeReference:
+				model.GitLibraryPersistenceSettings, diags = flattenGitPersistenceSettings(ctx, gitSettings)
+				model.GitUsernamePasswordPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()})
+				model.GitAnonymousPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()})
+			case credentials.GitCredentialTypeUsernamePassword:
+				model.GitLibraryPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitLibraryPersistenceSettingsAttrTypes()})
+				model.GitUsernamePasswordPersistenceSettings, diags = flattenGitPersistenceSettings(ctx, gitSettings)
+				model.GitAnonymousPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()})
+			case credentials.GitCredentialTypeAnonymous:
+				model.GitLibraryPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitLibraryPersistenceSettingsAttrTypes()})
+				model.GitUsernamePasswordPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()})
+				model.GitAnonymousPersistenceSettings, diags = flattenGitPersistenceSettings(ctx, gitSettings)
+			}
+
+			if diags.HasError() {
+				return nil, diags
+			}
+		} else {
+			model.GitLibraryPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitLibraryPersistenceSettingsAttrTypes()})
+			model.GitUsernamePasswordPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()})
+			model.GitAnonymousPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()})
+		}
+	} else {
+		model.GitLibraryPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitLibraryPersistenceSettingsAttrTypes()})
+		model.GitUsernamePasswordPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()})
+		model.GitAnonymousPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()})
+	}
 
 	// Extension Settings
-	model.JiraServiceManagementExtensionSettings = flattenJiraServiceManagementExtensionSettings(ctx, nil)
-	model.ServiceNowExtensionSettings = flattenServiceNowExtensionSettings(ctx, nil)
+	model.JiraServiceManagementExtensionSettings = flattenJiraServiceManagementExtensionSettings(nil)
+	model.ServiceNowExtensionSettings = flattenServiceNowExtensionSettings(nil)
 
 	for _, extensionSetting := range project.ExtensionSettings {
 		switch extensionSetting.ExtensionID() {
 		case extensions.JiraServiceManagementExtensionID:
 			if jsmSettings, ok := extensionSetting.(*projects.JiraServiceManagementExtensionSettings); ok {
-				model.JiraServiceManagementExtensionSettings = flattenJiraServiceManagementExtensionSettings(ctx, jsmSettings)
+				model.JiraServiceManagementExtensionSettings = flattenJiraServiceManagementExtensionSettings(jsmSettings)
 			}
 		case extensions.ServiceNowExtensionID:
 			if snowSettings, ok := extensionSetting.(*projects.ServiceNowExtensionSettings); ok {
-				model.ServiceNowExtensionSettings = flattenServiceNowExtensionSettings(ctx, snowSettings)
+				model.ServiceNowExtensionSettings = flattenServiceNowExtensionSettings(snowSettings)
 			}
 		}
 	}
@@ -99,7 +130,7 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 	return model, diags
 }
 
-func flattenConnectivityPolicy(ctx context.Context, policy *core.ConnectivityPolicy) types.List {
+func flattenConnectivityPolicy(policy *core.ConnectivityPolicy) types.List {
 	if policy == nil {
 		return types.ListValueMust(types.ObjectType{AttrTypes: getConnectivityPolicyAttrTypes()}, []attr.Value{})
 	}
@@ -128,19 +159,60 @@ func flattenVersioningStrategy(strategy *projects.VersioningStrategy) types.List
 	return types.ListValueMust(types.ObjectType{AttrTypes: getVersioningStrategyAttrTypes()}, []attr.Value{obj})
 }
 
-func flattenGitLibraryPersistenceSettings(ctx context.Context, settings projects.PersistenceSettings) (types.List, diag.Diagnostics) {
-	return types.ListNull(types.ObjectType{AttrTypes: getGitLibraryPersistenceSettingsAttrTypes()}), nil
+func flattenGitPersistenceSettings(ctx context.Context, persistenceSettings projects.PersistenceSettings) (types.List, diag.Diagnostics) {
+	if persistenceSettings == nil || persistenceSettings.Type() == projects.PersistenceSettingsTypeDatabase {
+		return types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()}), nil
+	}
+
+	gitPersistenceSettings := persistenceSettings.(projects.GitPersistenceSettings)
+
+	baseAttrValues := map[string]attr.Value{
+		"base_path":      types.StringValue(gitPersistenceSettings.BasePath()),
+		"default_branch": types.StringValue(gitPersistenceSettings.DefaultBranch()),
+		"url":            types.StringValue(gitPersistenceSettings.URL().String()),
+	}
+
+	protectedBranches, diags := types.SetValueFrom(ctx, types.StringType, gitPersistenceSettings.ProtectedBranchNamePatterns())
+	if diags.HasError() {
+		return types.ListNull(types.ObjectType{}), diags
+	}
+	baseAttrValues["protected_branches"] = protectedBranches
+
+	var attrTypes map[string]attr.Type
+	var attrValues map[string]attr.Value
+
+	credential := gitPersistenceSettings.Credential()
+	switch credential.Type() {
+	case credentials.GitCredentialTypeReference:
+		attrTypes = getGitLibraryPersistenceSettingsAttrTypes()
+		attrValues = baseAttrValues
+		attrValues["git_credential_id"] = types.StringValue(credential.(*credentials.Reference).ID)
+	case credentials.GitCredentialTypeUsernamePassword:
+		attrTypes = getGitUsernamePasswordPersistenceSettingsAttrTypes()
+		attrValues = baseAttrValues
+		attrValues["username"] = types.StringValue(credential.(*credentials.UsernamePassword).Username)
+		attrValues["password"] = types.StringValue(*credential.(*credentials.UsernamePassword).Password.NewValue)
+	case credentials.GitCredentialTypeAnonymous:
+		attrTypes = getGitAnonymousPersistenceSettingsAttrTypes()
+		attrValues = baseAttrValues
+	default:
+		return types.ListNull(types.ObjectType{}), diag.Diagnostics{
+			diag.NewErrorDiagnostic(
+				"Unsupported Git Credential Type",
+				fmt.Sprintf("Git credential type %v is not supported", credential.Type()),
+			),
+		}
+	}
+
+	objValue, diags := types.ObjectValue(attrTypes, attrValues)
+	if diags.HasError() {
+		return types.ListNull(types.ObjectType{AttrTypes: attrTypes}), diags
+	}
+
+	return types.ListValueMust(types.ObjectType{AttrTypes: attrTypes}, []attr.Value{objValue}), nil
 }
 
-func flattenGitAnonymousPersistenceSettings(ctx context.Context, settings projects.PersistenceSettings) (types.List, diag.Diagnostics) {
-	return types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()}), nil
-}
-
-func flattenGitUsernamePasswordPersistenceSettings(ctx context.Context, settings projects.PersistenceSettings) (types.List, diag.Diagnostics) {
-	return types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()}), nil
-}
-
-func flattenJiraServiceManagementExtensionSettings(ctx context.Context, settings *projects.JiraServiceManagementExtensionSettings) types.List {
+func flattenJiraServiceManagementExtensionSettings(settings *projects.JiraServiceManagementExtensionSettings) types.List {
 	if settings == nil {
 		return types.ListValueMust(types.ObjectType{AttrTypes: getJSMExtensionSettingsAttrTypes()}, []attr.Value{})
 	}
@@ -154,7 +226,7 @@ func flattenJiraServiceManagementExtensionSettings(ctx context.Context, settings
 	return types.ListValueMust(types.ObjectType{AttrTypes: getJSMExtensionSettingsAttrTypes()}, []attr.Value{obj})
 }
 
-func flattenServiceNowExtensionSettings(ctx context.Context, settings *projects.ServiceNowExtensionSettings) types.List {
+func flattenServiceNowExtensionSettings(settings *projects.ServiceNowExtensionSettings) types.List {
 	if settings == nil {
 		return types.ListValueMust(types.ObjectType{AttrTypes: getServiceNowExtensionSettingsAttrTypes()}, []attr.Value{})
 	}
@@ -196,7 +268,7 @@ func flattenTemplates(ctx context.Context, templates []actiontemplates.ActionTem
 	return types.ListValueMust(types.ObjectType{AttrTypes: getTemplateAttrTypes()}, templateList), nil
 }
 
-func flattenAutoDeployReleaseOverrides(ctx context.Context, overrides []projects.AutoDeployReleaseOverride) types.List {
+func flattenAutoDeployReleaseOverrides(overrides []projects.AutoDeployReleaseOverride) types.List {
 	if len(overrides) == 0 {
 		return types.ListValueMust(types.ObjectType{AttrTypes: getAutoDeployReleaseOverrideAttrTypes()}, []attr.Value{})
 	}
@@ -222,7 +294,7 @@ func getAutoDeployReleaseOverrideAttrTypes() map[string]attr.Type {
 	}
 }
 
-func flattenReleaseCreationStrategy(ctx context.Context, strategy *projects.ReleaseCreationStrategy) types.List {
+func flattenReleaseCreationStrategy(strategy *projects.ReleaseCreationStrategy) types.List {
 	if strategy == nil {
 		return types.ListValueMust(types.ObjectType{AttrTypes: getReleaseCreationStrategyAttrTypes()}, []attr.Value{})
 	}
