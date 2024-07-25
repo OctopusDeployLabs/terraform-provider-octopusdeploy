@@ -39,11 +39,12 @@ func TestMain(m *testing.M) {
 		ctx := context.Background()
 
 		// Waiting for the container logs to clear.
-		time.Sleep(5000 * time.Millisecond)
+		time.Sleep(10000 * time.Millisecond)
 		err := testFramework.CleanUp(ctx, octoContainer, sqlServerContainer, network)
 
 		if err != nil {
 			log.Printf("Failed to clean up containers: (%s)", err.Error())
+			panic(m)
 		}
 
 		log.Printf("Exit code: (%d)", code)

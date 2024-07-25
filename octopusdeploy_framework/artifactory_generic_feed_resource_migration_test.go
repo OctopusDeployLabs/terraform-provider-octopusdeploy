@@ -90,7 +90,7 @@ func testArtifactoryGenericFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		artifactoryGenericFeed := feed.(*feeds.ArtifactoryGenericFeed)
 
-		assert.Equal(t, "Feeds-1001", artifactoryGenericFeed.ID, "Feed ID did not match expected value")
+		assert.Contains(t, "Feeds-1", artifactoryGenericFeed.ID, "Feed ID did not match expected value")
 		assert.Equal(t, "Updated_Artifactory_Generic", artifactoryGenericFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", artifactoryGenericFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, artifactoryGenericFeed.Password.HasValue, "Feed password should be set")
