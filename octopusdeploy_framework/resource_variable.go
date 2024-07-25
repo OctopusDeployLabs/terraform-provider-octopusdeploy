@@ -101,7 +101,7 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	updateVariable(&data, newVariable)
+	mapVariableToState(&data, newVariable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -127,7 +127,7 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("variable read (%s)", data.ID))
-	updateVariable(&data, variable)
+	mapVariableToState(&data, variable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -183,7 +183,7 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 
 	tflog.Info(ctx, fmt.Sprintf("variable updated (%s)", data.ID))
 
-	updateVariable(&data, updatedVariable)
+	mapVariableToState(&data, updatedVariable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -263,7 +263,7 @@ func validateVariable(variableSet *variables.VariableSet, newVariable *variables
 	return fmt.Errorf("unable to locate variable for owner ID %s", variableOwnerId)
 }
 
-func updateVariable(data *schemas.VariableTypeResourceModel, variable *variables.Variable) {
+func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *variables.Variable) {
 	data.SpaceID = types.StringValue(variable.SpaceID)
 	data.Name = types.StringValue(variable.Name)
 	data.Description = types.StringValue(variable.Description)
