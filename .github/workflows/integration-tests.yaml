@@ -91,7 +91,7 @@ jobs:
           ECR_ACCESS_KEY: ${{ secrets.ECR_ACCESS_KEY }}
           ECR_SECRET_KEY: ${{ secrets.ECR_SECRET_KEY }}
           GIT_USERNAME: x-access-token
-          OCTODISABLEOCTOCONTAINERLOGGING: false
+          OCTODISABLEOCTOCONTAINERLOGGING: true
           OCTOTESTSKIPINIT: true
           GOMAXPROCS: 1
           OCTOTESTVERSION: latest
