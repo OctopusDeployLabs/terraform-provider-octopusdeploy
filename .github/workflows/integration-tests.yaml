@@ -97,6 +97,7 @@ jobs:
           OCTOTESTVERSION: latest
           OCTOTESTIMAGEURL: docker.packages.octopushq.com/octopusdeploy/octopusdeploy
           OCTO_MSSQLTAG: 2022-CU13-ubuntu-22.04
+          OCTOTESTRETRYCOUNT: 1
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v3
