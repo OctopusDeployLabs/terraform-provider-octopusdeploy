@@ -90,7 +90,7 @@ func testFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		mavenFeed := feed.(*feeds.MavenFeed)
 
-		assert.Contains(t, "Feeds-1", mavenFeed.ID, "Feed ID did not match expected value")
+		assert.Regexp(t, "^Feeds\\-\\d+$", mavenFeed.GetID(), "Feed ID did not match expected value")
 		assert.Equal(t, "Updated_Maven", mavenFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", mavenFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, mavenFeed.Password.HasValue, "Feed password should be set")
