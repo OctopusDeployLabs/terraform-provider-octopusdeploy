@@ -65,7 +65,7 @@ func FlattenVariableScopes(variableScopes variables.VariableScope) attr.Value {
 }
 
 func ExpandVariableScopes(flattenedVariableScopes types.List) variables.VariableScope {
-	if flattenedVariableScopes.IsNull() {
+	if flattenedVariableScopes.IsNull() || len(flattenedVariableScopes.Elements()) == 0 {
 		return variables.VariableScope{}
 	}
 
