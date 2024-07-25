@@ -75,8 +75,8 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 	newVariable.IsEditable = data.IsEditable.ValueBool()
 	newVariable.IsSensitive = data.IsSensitive.ValueBool()
 	newVariable.Type = data.Type.ValueString()
-	newVariable.Scope = schemas.ExpandVariableScopes(data.Scope)
-	newVariable.Prompt = schemas.ExpandPromptedVariableSettings(data.Prompt)
+	newVariable.Scope = schemas.MapToVariableScope(data.Scope)
+	newVariable.Prompt = schemas.MapToVariablePrompOptions(data.Prompt)
 	newVariable.SpaceID = data.SpaceID.ValueString()
 
 	if newVariable.IsSensitive {
@@ -158,8 +158,8 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 	updatedVariable.IsEditable = data.IsEditable.ValueBool()
 	updatedVariable.IsSensitive = data.IsSensitive.ValueBool()
 	updatedVariable.Type = data.Type.ValueString()
-	updatedVariable.Scope = schemas.ExpandVariableScopes(data.Scope)
-	updatedVariable.Prompt = schemas.ExpandPromptedVariableSettings(data.Prompt)
+	updatedVariable.Scope = schemas.MapToVariableScope(data.Scope)
+	updatedVariable.Prompt = schemas.MapToVariablePrompOptions(data.Prompt)
 	updatedVariable.SpaceID = state.SpaceID.ValueString()
 
 	if updatedVariable.IsSensitive {
@@ -288,14 +288,14 @@ func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *varia
 	if !data.Prompt.IsNull() {
 		data.Prompt = types.ListValueMust(
 			types.ObjectType{AttrTypes: schemas.VariablePromptOptionsObjectType()},
-			[]attr.Value{schemas.FlattenPromptedVariableSettings(variable.Prompt)},
+			[]attr.Value{schemas.MapFromVariablePromptOptions(variable.Prompt)},
 		)
 	}
 
 	if !data.Scope.IsNull() {
 		data.Scope = types.ListValueMust(
 			types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()},
-			[]attr.Value{schemas.FlattenVariableScopes(variable.Scope)},
+			[]attr.Value{schemas.MapFromVariableScope(variable.Scope)},
 		)
 	}
 

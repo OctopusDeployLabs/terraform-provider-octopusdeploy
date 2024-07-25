@@ -40,7 +40,7 @@ func VariablePromptOptionsObjectType() map[string]attr.Type {
 		SchemaAttributeNames.Description: types.StringType,
 		VariableSchemaAttributeNames.DisplaySettings: types.ListType{
 			ElemType: types.ObjectType{
-				AttrTypes: VariablePromptOptionsDisplaySettingsObjectType(),
+				AttrTypes: VariableDisplaySettingsObjectType(),
 			},
 		},
 		VariableSchemaAttributeNames.IsRequired: types.BoolType,
@@ -48,16 +48,16 @@ func VariablePromptOptionsObjectType() map[string]attr.Type {
 	}
 }
 
-func VariablePromptOptionsDisplaySettingsObjectType() map[string]attr.Type {
+func VariableDisplaySettingsObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		VariableSchemaAttributeNames.ControlType: types.StringType,
 		VariableSchemaAttributeNames.SelectOption: types.ListType{
-			ElemType: VariablePromptoOptionsDisplaySettingsSelectOptionObjectType(),
+			ElemType: VariableSelectOptionsObjectType(),
 		},
 	}
 }
 
-func VariablePromptoOptionsDisplaySettingsSelectOptionObjectType() attr.Type {
+func VariableSelectOptionsObjectType() attr.Type {
 	return types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			VariableSchemaAttributeNames.Value:       types.StringType,
@@ -66,7 +66,7 @@ func VariablePromptoOptionsDisplaySettingsSelectOptionObjectType() attr.Type {
 	}
 }
 
-func FlattenPromptedVariableSettings(variablePromptOptions *variables.VariablePromptOptions) attr.Value {
+func MapFromVariablePromptOptions(variablePromptOptions *variables.VariablePromptOptions) attr.Value {
 	if variablePromptOptions == nil {
 		return types.ObjectNull(VariablePromptOptionsObjectType())
 	}
@@ -75,15 +75,15 @@ func FlattenPromptedVariableSettings(variablePromptOptions *variables.VariablePr
 		SchemaAttributeNames.Description:             types.StringValue(variablePromptOptions.Description),
 		VariableSchemaAttributeNames.IsRequired:      types.BoolValue(variablePromptOptions.IsRequired),
 		VariableSchemaAttributeNames.Label:           types.StringValue(variablePromptOptions.Label),
-		VariableSchemaAttributeNames.DisplaySettings: types.ListNull(types.ObjectType{AttrTypes: VariablePromptOptionsDisplaySettingsObjectType()}),
+		VariableSchemaAttributeNames.DisplaySettings: types.ListNull(types.ObjectType{AttrTypes: VariableDisplaySettingsObjectType()}),
 	}
 	if variablePromptOptions.DisplaySettings != nil {
 		attrs[VariableSchemaAttributeNames.DisplaySettings] = types.ListValueMust(
 			types.ObjectType{
-				AttrTypes: VariablePromptOptionsDisplaySettingsObjectType(),
+				AttrTypes: VariableDisplaySettingsObjectType(),
 			},
 			[]attr.Value{
-				FlattenDisplaySettings(variablePromptOptions.DisplaySettings),
+				MapFromDisplaySettings(variablePromptOptions.DisplaySettings),
 			},
 		)
 	}
@@ -91,7 +91,7 @@ func FlattenPromptedVariableSettings(variablePromptOptions *variables.VariablePr
 	return types.ObjectValueMust(VariablePromptOptionsObjectType(), attrs)
 }
 
-func FlattenDisplaySettings(displaySettings *resources.DisplaySettings) attr.Value {
+func MapFromDisplaySettings(displaySettings *resources.DisplaySettings) attr.Value {
 	if displaySettings == nil {
 		return nil
 	}
@@ -102,25 +102,25 @@ func FlattenDisplaySettings(displaySettings *resources.DisplaySettings) attr.Val
 	if displaySettings.ControlType == resources.ControlTypeSelect {
 		if len(displaySettings.SelectOptions) > 0 {
 			attrs[VariableSchemaAttributeNames.SelectOption] = types.ListValueMust(
-				VariablePromptoOptionsDisplaySettingsSelectOptionObjectType(),
-				FlattenSelectOptions(displaySettings.SelectOptions),
+				VariableSelectOptionsObjectType(),
+				MapFromSelectOptions(displaySettings.SelectOptions),
 			)
 		}
 	} else {
-		attrs[VariableSchemaAttributeNames.SelectOption] = types.ListNull(VariablePromptoOptionsDisplaySettingsSelectOptionObjectType())
+		attrs[VariableSchemaAttributeNames.SelectOption] = types.ListNull(VariableSelectOptionsObjectType())
 	}
 
 	return types.ObjectValueMust(
-		VariablePromptOptionsDisplaySettingsObjectType(),
+		VariableDisplaySettingsObjectType(),
 		attrs,
 	)
 }
 
-func FlattenSelectOptions(selectOptions []*resources.SelectOption) []attr.Value {
+func MapFromSelectOptions(selectOptions []*resources.SelectOption) []attr.Value {
 	options := make([]attr.Value, len(selectOptions))
 	for _, option := range selectOptions {
 		options = append(options, types.ObjectValueMust(
-			VariablePromptOptionsDisplaySettingsObjectType(),
+			VariableDisplaySettingsObjectType(),
 			map[string]attr.Value{
 				VariableSchemaAttributeNames.Value:       types.StringValue(option.Value),
 				VariableSchemaAttributeNames.DisplayName: types.StringValue(option.DisplayName),
@@ -130,7 +130,7 @@ func FlattenSelectOptions(selectOptions []*resources.SelectOption) []attr.Value 
 	return options
 }
 
-func ExpandPromptedVariableSettings(flattenedVariablePromptOptions types.List) *variables.VariablePromptOptions {
+func MapToVariablePrompOptions(flattenedVariablePromptOptions types.List) *variables.VariablePromptOptions {
 	if flattenedVariablePromptOptions.IsNull() {
 		return nil
 	}
@@ -152,18 +152,18 @@ func ExpandPromptedVariableSettings(flattenedVariablePromptOptions types.List) *
 	}
 
 	if displaySettings, ok := attrs[VariableSchemaAttributeNames.DisplaySettings].(types.List); ok && !displaySettings.IsNull() {
-		promptOptions.DisplaySettings = ExpandDisplaySettings(displaySettings)
+		promptOptions.DisplaySettings = MapToDisplaySettings(displaySettings)
 	}
 
 	return &promptOptions
 }
 
-func ExpandDisplaySettings(flattenedDisplaySettings types.List) *resources.DisplaySettings {
-	if flattenedDisplaySettings.IsNull() {
+func MapToDisplaySettings(displaySettings types.List) *resources.DisplaySettings {
+	if displaySettings.IsNull() {
 		return nil
 	}
 
-	obj := flattenedDisplaySettings.Elements()[0].(types.Object)
+	obj := displaySettings.Elements()[0].(types.Object)
 	attrs := obj.Attributes()
 
 	ct, _ := attrs[VariableSchemaAttributeNames.ControlType].(types.String)
@@ -171,19 +171,19 @@ func ExpandDisplaySettings(flattenedDisplaySettings types.List) *resources.Displ
 
 	var selectOptions []*resources.SelectOption
 	if controlType == resources.ControlTypeSelect {
-		selectOptions = ExpandSelectOptions(attrs[VariableSchemaAttributeNames.SelectOption].(types.List))
+		selectOptions = MapToSelectOptions(attrs[VariableSchemaAttributeNames.SelectOption].(types.List))
 	}
 
 	return resources.NewDisplaySettings(controlType, selectOptions)
 }
 
-func ExpandSelectOptions(flattenedSelectOptions types.List) []*resources.SelectOption {
-	if flattenedSelectOptions.IsNull() || flattenedSelectOptions.IsUnknown() {
+func MapToSelectOptions(selectOptions types.List) []*resources.SelectOption {
+	if selectOptions.IsNull() || selectOptions.IsUnknown() {
 		return nil
 	}
 
-	options := make([]*resources.SelectOption, len(flattenedSelectOptions.Elements()))
-	for _, option := range flattenedSelectOptions.Elements() {
+	options := make([]*resources.SelectOption, len(selectOptions.Elements()))
+	for _, option := range selectOptions.Elements() {
 		attrs := option.(types.Object).Attributes()
 		options = append(options, &resources.SelectOption{
 			DisplayName: attrs[VariableSchemaAttributeNames.DisplayName].(types.String).ValueString(),

@@ -66,7 +66,7 @@ func FlattenStringList(list []string) types.List {
 	return types.ListValueMust(types.StringType, elements)
 }
 
-func Ternary(condition bool, whenTrue, whenFalse attr.Value) attr.Value {
+func Ternary[T interface{}](condition bool, whenTrue T, whenFalse T) T {
 	if condition {
 		return whenTrue
 	}

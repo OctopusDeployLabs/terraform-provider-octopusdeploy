@@ -40,7 +40,7 @@ func (v *variablesDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	scope := schemas.ExpandVariableScopes(data.Scope)
+	scope := schemas.MapToVariableScope(data.Scope)
 	variables, err := variables.GetByName(v.Client, data.SpaceID.ValueString(), data.OwnerID.ValueString(), data.Name.ValueString(), &scope)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("error reading variable with owner ID %s with name %s", data.OwnerID, data.Name), err.Error())
@@ -72,13 +72,13 @@ func (v *variablesDataSource) Read(ctx context.Context, req datasource.ReadReque
 	if variable.Prompt != nil {
 		data.Prompt = types.ListValueMust(
 			types.ObjectType{AttrTypes: schemas.VariablePromptOptionsObjectType()},
-			[]attr.Value{schemas.FlattenPromptedVariableSettings(variable.Prompt)},
+			[]attr.Value{schemas.MapFromVariablePromptOptions(variable.Prompt)},
 		)
 	}
 	if !variable.Scope.IsEmpty() {
 		data.Scope = types.ListValueMust(
 			types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()},
-			[]attr.Value{schemas.FlattenVariableScopes(variable.Scope)},
+			[]attr.Value{schemas.MapFromVariableScope(variable.Scope)},
 		)
 	}
 
