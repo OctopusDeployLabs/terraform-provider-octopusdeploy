@@ -1,4 +1,4 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"

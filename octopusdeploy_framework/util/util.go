@@ -77,3 +77,11 @@ func GetStringSlice(list types.List) []string {
 	}
 	return result
 }
+
+func ToValueSlice(slice []string) []attr.Value {
+	values := make([]attr.Value, len(slice))
+	for i, s := range slice {
+		values[i] = types.StringValue(s)
+	}
+	return values
+}

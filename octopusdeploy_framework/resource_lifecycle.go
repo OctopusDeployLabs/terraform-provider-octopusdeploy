@@ -44,7 +44,7 @@ func (r *lifecycleTypeResource) ImportState(ctx context.Context, req resource.Im
 }
 
 func (r *lifecycleTypeResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = "octopusdeploy_lifecycle"
+	resp.TypeName = util.GetTypeName("lifecycle")
 }
 
 func (r *lifecycleTypeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
