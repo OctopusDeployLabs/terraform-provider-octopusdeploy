@@ -12,4 +12,4 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v3
       - name: Run Revive Action by pulling pre-built image
-        uses: docker://morphy/revive-action:v2
+        uses: docker://morphy/revive-action:v2.5.7
