@@ -1,6 +1,7 @@
 package schemas
 
 import (
+	"flag"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
@@ -9,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/stretchr/testify/assert"
 )
+
+var createSharedContainer = flag.Bool("createSharedContainer", false, "Set to true to run integration tests in containers")
 
 func TestExpandVariableScope(t *testing.T) {
 	// scope := ExpandVariableScopes(nil)
