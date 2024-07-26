@@ -2,7 +2,9 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	//"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
 
@@ -170,6 +172,9 @@ func GetBranchResourceSchema(resourceDescription string) resourceSchema.Attribut
 		Computed:    true,
 		Description: fmt.Sprintf("The branch name associated with this %s (i.e. `main`). This value is optional and only applies to associated projects that are stored in version control.", resourceDescription),
 		Optional:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	}
 }
 
@@ -193,6 +198,7 @@ func getPackageRequirementResourceSchema() resourceSchema.Attribute {
 		Default:     stringdefault.StaticString("LetOctopusDecide"),
 		Description: "Whether to run this step before or after package acquisition (if possible)",
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.String{
 			stringvalidator.OneOf(
 				"AfterPackageAcquisition",
@@ -215,6 +221,7 @@ func getStartTriggerResourceSchema() resourceSchema.Attribute {
 		Default:     stringdefault.StaticString("StartAfterPrevious"),
 		Description: "Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious')",
 		Optional:    true,
+		Computed:    true,
 		Validators: []validator.String{
 			stringvalidator.OneOf("StartAfterPrevious", "StartWithPrevious"),
 		},

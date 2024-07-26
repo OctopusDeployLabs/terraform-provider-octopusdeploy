@@ -77,3 +77,15 @@ func GetStringSlice(list types.List) []string {
 	}
 	return result
 }
+
+func SetString(attrs map[string]attr.Value, attr string, s *string) {
+	if v, ok := attrs[attr]; ok {
+		*s = v.(types.String).ValueString()
+	}
+}
+
+func SetBool(attrs map[string]attr.Value, attr string, b *bool) {
+	if v, ok := attrs[attr]; ok {
+		*b = v.(types.Bool).ValueBool()
+	}
+}

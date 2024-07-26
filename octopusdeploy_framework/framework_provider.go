@@ -77,6 +77,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewLifecycleResource,
 		NewEnvironmentResource,
 		NewHelmFeedResource,
+		NewDeploymentProcessResource,
 	}
 }
 
@@ -84,12 +85,12 @@ func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provide
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				//Required:    true,
+				//Required: true,
 				Optional:    true,
 				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": schema.StringAttribute{
-				//Required:    true,
+				//Required: true,
 				Optional:    true,
 				Description: "The API key to use with the Octopus REST API",
 			},

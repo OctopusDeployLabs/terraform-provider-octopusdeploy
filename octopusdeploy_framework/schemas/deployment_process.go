@@ -1,11 +1,11 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const (
@@ -33,6 +33,13 @@ const (
 )
 
 type DeploymentProcessResourceModel struct {
+	ID             types.String `tfsdk:"id"`
+	SpaceID        types.String `tfsdk:"space_id"`
+	ProjectID      types.String `tfsdk:"project_id"`
+	Version        types.String `tfsdk:"version"`
+	LastSnapshotID types.String `tfsdk:"last_snapshot_id"`
+	Branch         types.String `tfsdk:"branch"`
+	Steps          types.List   `tfsdk:"step"`
 }
 
 func GetDeploymentProcessResourceSchema() resourceSchema.Schema {
@@ -56,18 +63,16 @@ func GetDeploymentProcessResourceSchema() resourceSchema.Schema {
 }
 
 func getStepResourceBlockSchema(resourceDescription string) resourceSchema.ListNestedBlock {
-	actionBuilder := util.NewActionResourceSchemaBuilder()
 	return resourceSchema.ListNestedBlock{
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
 				"id":   GetIdResourceSchema(),
 				"name": GetNameResourceSchema(true),
-
-				//DeploymentProcessApplyTerraformTemplateAction: getApplyTerraformTemplateActionSchema(),
 				DeploymentProcessCondition: resourceSchema.StringAttribute{
 					Default:     stringdefault.StaticString("Success"),
 					Description: "When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'",
 					Optional:    true,
+					Computed:    true,
 					Validators: []validator.String{
 						stringvalidator.OneOf("Always",
 							"Failure",
@@ -76,19 +81,22 @@ func getStepResourceBlockSchema(resourceDescription string) resourceSchema.ListN
 					},
 				},
 				DeploymentProcessConditionExpression: getConditionExpressionResourceSchema(),
+				DeploymentProcessPackageRequirement:  getPackageRequirementResourceSchema(),
+				DeploymentProcessProperties:          getPropertiesResourceSchema(),
+				DeploymentProcessStartTrigger:        getStartTriggerResourceSchema(),
+				DeploymentProcessTargetRoles:         getTargetRolesResourceSchema(),
+				DeploymentProcessWindowSize:          getWindowSizeResourceSchema(),
+			},
+			Blocks: map[string]resourceSchema.Block{
+				DeploymentProcessAction:          NewActionResourceSchemaBuilder().WithActionType().WithExecutionLocation().WithPackages().WithWorkerPool().WithWorkerPoolVariable().WithGitDependency().Build(),
+				DeploymentProcessRunScriptAction: NewActionResourceSchemaBuilder().WithExecutionLocation().WithScriptFromPackage().WithPackages().WithWorkerPool().WithWorkerPoolVariable().WithScript().WithVariableSubstitutionInFiles().Build(),
+				//DeploymentProcessRunKubectlScriptAction: getKubectlActionResourceSchema(),
+				//DeploymentProcessApplyTerraformTemplateAction: getApplyTerraformTemplateActionSchema(),
 				//DeploymentProcessApplyKubernetesSecretAction: getDeployKubernetesSecretActionResourceSchema(),
 				//DeploymentProcessPackageAction: getPackageActionResourceSchema(),
 				//DeploymentProcessWindowsServiceAction: getWindowsServiceActionResourceSchema(),
 				//DeploymentProcessManualInterventionAction: getManualInterventionActionResourceSchema(),
-				DeploymentProcessPackageRequirement: getPackageRequirementResourceSchema(),
-				DeploymentProcessProperties:         getPropertiesResourceSchema(),
-				//DeploymentProcessRunKubectlScriptAction: getKubectlActionResourceSchema(),
-				DeploymentProcessStartTrigger: getStartTriggerResourceSchema(),
-				DeploymentProcessTargetRoles:  getTargetRolesResourceSchema(),
-				DeploymentProcessWindowSize:   getWindowSizeResourceSchema(),
-			},
-			Blocks: map[string]resourceSchema.Block{
-				DeploymentProcessAction: actionBuilder.WithActionType().Build(),
+
 			},
 		},
 	}

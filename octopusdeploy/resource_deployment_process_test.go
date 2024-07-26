@@ -190,9 +190,9 @@ func testAccDeploymentProcessBasic(localName string) string {
 				window_size = "5"
 
 				run_script_action {
-					// channels = ["Channels-1"]
-					// environments = ["Environments-1"]
-					// excluded_environments = ["Environments-2"]
+					channels = ["Channels-1"]
+					environments = ["Environments-1"]
+					excluded_environments = ["Environments-2"]
 					is_disabled = false
 					is_required = true
 					name = "Test"
@@ -201,6 +201,10 @@ func testAccDeploymentProcessBasic(localName string) string {
 					script_source = "Package"
 					tenant_tags = ["tag/tag"]
 					sort_order  = 1
+					container {
+						feed_id = "Feeds-123"
+						image = "blah"
+					}
 
 					primary_package {
 						acquisition_location = "Server"
@@ -222,6 +226,11 @@ func testAccDeploymentProcessBasic(localName string) string {
 						feed_id = "feeds-builtin"
 						name = "ThePackage2"
 						package_id = "MyPackage2"
+					}
+					
+					action_template {
+						id = "actiontemplates-1"
+						version = "1.2.3"
 					}
 				}
 			}

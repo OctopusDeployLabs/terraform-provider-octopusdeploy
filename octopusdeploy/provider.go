@@ -53,7 +53,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_certificate":                                    resourceCertificate(),
 			"octopusdeploy_channel":                                        resourceChannel(),
 			"octopusdeploy_cloud_region_deployment_target":                 resourceCloudRegionDeploymentTarget(),
-			"octopusdeploy_deployment_process":                             resourceDeploymentProcess(),
 			"octopusdeploy_docker_container_registry":                      resourceDockerContainerRegistry(),
 			"octopusdeploy_dynamic_worker_pool":                            resourceDynamicWorkerPool(),
 			"octopusdeploy_git_credential":                                 resourceGitCredential(),
