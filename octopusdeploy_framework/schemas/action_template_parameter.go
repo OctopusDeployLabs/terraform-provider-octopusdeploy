@@ -6,6 +6,8 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -75,6 +77,9 @@ func GetActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
 		"default_value": resourceSchema.StringAttribute{
 			Description: "A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.",
 			Optional:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"display_settings": resourceSchema.MapAttribute{
 			Description: "The display settings for the parameter.",
@@ -84,11 +89,17 @@ func GetActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
 		"help_text": resourceSchema.StringAttribute{
 			Description: "The help presented alongside the parameter input.",
 			Optional:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"id": util.GetIdResourceSchema(),
 		"label": resourceSchema.StringAttribute{
 			Description: "The label shown beside the parameter when presented in the deployment process. Example: `Server name`.",
 			Optional:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"name": util.GetNameResourceSchema(true),
 	}
