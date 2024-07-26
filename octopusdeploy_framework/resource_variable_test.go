@@ -310,6 +310,7 @@ func TestVariableSetResource(t *testing.T) {
 }
 
 func TestVariableResource(t *testing.T) {
+	internalTest.SkipCI(t, "Changes to these variables could not be saved, because another user has made changes to the variables between when you started editing and when you saved your changes. Please reload or open a new tab to make your changes.")
 	testFramework := test.OctopusContainerTest{}
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "49-variables", []string{})
 
