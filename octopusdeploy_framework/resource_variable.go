@@ -76,7 +76,7 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 	newVariable.IsSensitive = data.IsSensitive.ValueBool()
 	newVariable.Type = data.Type.ValueString()
 	newVariable.Scope = schemas.MapToVariableScope(data.Scope)
-	newVariable.Prompt = schemas.MapToVariablePrompOptions(data.Prompt)
+	newVariable.Prompt = schemas.MapToVariablePromptOptions(data.Prompt)
 	newVariable.SpaceID = data.SpaceID.ValueString()
 
 	if newVariable.IsSensitive {
@@ -159,7 +159,7 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 	updatedVariable.IsSensitive = data.IsSensitive.ValueBool()
 	updatedVariable.Type = data.Type.ValueString()
 	updatedVariable.Scope = schemas.MapToVariableScope(data.Scope)
-	updatedVariable.Prompt = schemas.MapToVariablePrompOptions(data.Prompt)
+	updatedVariable.Prompt = schemas.MapToVariablePromptOptions(data.Prompt)
 	updatedVariable.SpaceID = state.SpaceID.ValueString()
 
 	if updatedVariable.IsSensitive {
