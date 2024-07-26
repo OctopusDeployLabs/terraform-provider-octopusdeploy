@@ -1,5 +1,5 @@
 # Set variables
-$VERSION = "0.7.566"
+$VERSION = "0.7.104"
 $BINARY = "terraform-provider-octopusdeploy.exe"
 $HOSTNAME = "octopus.com"
 $NAMESPACE = "com"

@@ -38,6 +38,7 @@ func ExpandActionTemplateParameters(actionTemplateParameters types.List) []actio
 	return expandedActionTemplateParameters
 }
 
+// Note these are used in projects and were copied there during the Library Variable Set migration. This is currently unused.
 func flattenActionTemplateParameters(actionTemplateParameters []actiontemplates.ActionTemplateParameter) []interface{} {
 	flattenedActionTemplateParameters := make([]interface{}, 0)
 	for _, actionTemplateParameter := range actionTemplateParameters {
@@ -51,14 +52,6 @@ func flattenActionTemplateParameters(actionTemplateParameters []actiontemplates.
 		flattenedActionTemplateParameters = append(flattenedActionTemplateParameters, a)
 	}
 	return flattenedActionTemplateParameters
-}
-
-func mapTemplateNamesToIds(actionTemplateParameters []actiontemplates.ActionTemplateParameter) map[string]string {
-	templateNameIds := map[string]string{}
-	for _, actionTemplateParameter := range actionTemplateParameters {
-		templateNameIds[actionTemplateParameter.Name] = actionTemplateParameter.ID
-	}
-	return templateNameIds
 }
 
 func TemplateObjectType() map[string]attr.Type {
