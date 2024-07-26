@@ -32,7 +32,6 @@ func TestExpandVariableScope(t *testing.T) {
 	assert.Empty(t, scope.Channels)
 
 	//flattenedVariableScope = []interface{}{"foo"}
-	// flattenedVariableScope = types.ListValueMust(types.StringType, []attr.Value{types.StringValue("foo")})
 	// scope = MapToVariableScope(flattenedVariableScope)
 	// assert.True(t, scope.IsEmpty())
 	// assert.Equal(t, variables.VariableScope{}, scope)
