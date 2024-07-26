@@ -3,9 +3,12 @@ package octopusdeploy
 import (
 	"context"
 
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+var mutex = internal.Mutex
 
 // Provider is the plugin entry point for the Terraform provider for Octopus Deploy.
 func Provider() *schema.Provider {
