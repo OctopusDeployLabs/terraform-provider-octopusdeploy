@@ -15,24 +15,6 @@ type libraryVariableSetFeedTypeResource struct {
 	*Config
 }
 
-func (r *libraryVariableSetFeedTypeResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	var plan *schemas.LibraryVariableSetResourceModel
-
-	if req.Plan.Raw.IsNull() {
-		return
-	}
-
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	//templates := plan.Template
-	//expandedActionTemplates := schemas.ExpandActionTemplateParameters(templates)
-	//templateIdsValues := schemas.FlattenTemplateIds(expandedActionTemplates)
-	//resp.Plan.SetAttribute(ctx, path.Root("template_ids"), templateIdsValues)
-}
-
 func NewLibraryVariableSetFeedResource() resource.Resource {
 	return &libraryVariableSetFeedTypeResource{}
 }
