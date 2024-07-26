@@ -1,16 +1,13 @@
 package schemas
 
 import (
-	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	types "github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 )
 
 type LibraryVariableSetResourceModel struct {
@@ -86,24 +83,6 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 			},
 		},
 	}
-}
-
-// fixTemplateIds uses the suggestion from https://github.com/hashicorp/terraform/issues/18863
-// to ensure that the template_ids field has keys to match the list of template names.
-func fixTemplateIds(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	templates := d.Get("template")
-	templateIds := map[string]string{}
-	if templates != nil {
-		for _, t := range templates.([]interface{}) {
-			template := t.(map[string]interface{})
-			templateIds[template["name"].(string)] = template["id"].(string)
-		}
-	}
-	if err := d.SetNew("template_ids", templateIds); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func MapFromLibraryVariableSet(data *LibraryVariableSetResourceModel, spaceId string, libraryVariableSet *variables.LibraryVariableSet) {
