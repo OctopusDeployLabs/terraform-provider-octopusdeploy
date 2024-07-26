@@ -137,11 +137,11 @@ func FlattenTemplates(actionTemplateParameters []actiontemplates.ActionTemplateP
 
 	for _, actionTemplateParams := range actionTemplateParameters {
 		attrs := map[string]attr.Value{
-			"default_value":    types.StringValue(actionTemplateParams.DefaultValue.Value),
+			"default_value":    util.Ternary(actionTemplateParams.DefaultValue.Value != "", types.StringValue(actionTemplateParams.DefaultValue.Value), types.StringNull()),
 			"display_settings": flattenDisplaySettingsMap(actionTemplateParams.DisplaySettings),
-			"help_text":        types.StringValue(actionTemplateParams.HelpText),
+			"help_text":        util.Ternary(actionTemplateParams.HelpText != "", types.StringValue(actionTemplateParams.HelpText), types.StringNull()),
 			"id":               types.StringValue(actionTemplateParams.GetID()),
-			"label":            types.StringValue(actionTemplateParams.Label),
+			"label":            util.Ternary(actionTemplateParams.Label != "", types.StringValue(actionTemplateParams.Label), types.StringNull()),
 			"name":             types.StringValue(actionTemplateParams.Name),
 		}
 		actionTemplateList = append(actionTemplateList, types.ObjectValueMust(TemplateObjectType(), attrs))
@@ -151,7 +151,7 @@ func FlattenTemplates(actionTemplateParameters []actiontemplates.ActionTemplateP
 
 func flattenDisplaySettingsMap(displaySettings map[string]string) types.Map {
 	if len(displaySettings) == 0 {
-		return types.MapNull(types.ObjectType{AttrTypes: TemplateObjectType()})
+		return types.MapNull(types.StringType)
 	}
 
 	flattenedDisplaySettings := make(map[string]attr.Value, len(displaySettings))

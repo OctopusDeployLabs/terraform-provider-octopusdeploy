@@ -6,6 +6,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/libraryvariablesets"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"log"
@@ -22,21 +23,15 @@ func (r *libraryVariableSetFeedTypeResource) ModifyPlan(ctx context.Context, req
 		return
 	}
 
-	//if req.State.Raw.IsNull() {
-	//	isCreation = true
-	//} else {
-	//	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	//}
-
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	//templates := plan.Template
-	//expandedActionTemplates := schemas.ExpandActionTemplateParameters(templates)
-	//templateIdsValues := schemas.FlattenTemplateIds(expandedActionTemplates)
-	//resp.Plan.SetAttribute(ctx, path.Root("template_ids"), templateIdsValues)
+	templates := plan.Template
+	expandedActionTemplates := schemas.ExpandActionTemplateParameters(templates)
+	templateIdsValues := schemas.FlattenTemplateIds(expandedActionTemplates)
+	resp.Plan.SetAttribute(ctx, path.Root("template_ids"), templateIdsValues)
 }
 
 func NewLibraryVariableSetFeedResource() resource.Resource {

@@ -189,23 +189,23 @@ func testLibraryVariableSetDestroy(s *terraform.State) error {
 
 func testAccCheckOctopusDeployLibraryVariableSetExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		//if err := existsHelperLibraryVariableSet(s, octoClient); err != nil {
-		//	return err
-		//}
+		if err := existsHelperLibraryVariableSet(s, octoClient); err != nil {
+			return err
+		}
 		return nil
 	}
 }
 
 func destroyHelperLibraryVariableSet(s *terraform.State) error {
-	//for _, rs := range s.RootModule().Resources {
-	//	libraryVariableSetID := rs.Primary.ID
-	//	libraryVariableSet, err := octoClient.LibraryVariableSets.GetByID(libraryVariableSetID)
-	//	if err == nil {
-	//		if libraryVariableSet != nil {
-	//			return fmt.Errorf("library variable set (%s) still exists", rs.Primary.ID)
-	//		}
-	//	}
-	//}
+	for _, rs := range s.RootModule().Resources {
+		libraryVariableSetID := rs.Primary.ID
+		libraryVariableSet, err := octoClient.LibraryVariableSets.GetByID(libraryVariableSetID)
+		if err == nil {
+			if libraryVariableSet != nil {
+				return fmt.Errorf("library variable set (%s) still exists", rs.Primary.ID)
+			}
+		}
+	}
 
 	return nil
 }
