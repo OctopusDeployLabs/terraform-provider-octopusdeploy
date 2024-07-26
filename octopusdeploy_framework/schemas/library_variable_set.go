@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -75,9 +73,6 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 				ElementType: types.StringType,
 				Computed:    true,
 				Optional:    true,
-				PlanModifiers: []planmodifier.Map{
-					mapplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"variable_set_id": resourceSchema.StringAttribute{
 				Computed: true,
@@ -87,11 +82,6 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 			"template": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: GetActionTemplateParameterSchema(),
-					//Optional:    true,
-					//ElementType: types. {AttrTypes: TemplateObjectType()},
-					//PlanModifiers: []planmodifier.List{
-					//	listplanmodifier.UseStateForUnknown(),
-					//},
 				},
 			},
 		},
@@ -116,7 +106,7 @@ func fixTemplateIds(ctx context.Context, d *schema.ResourceDiff, meta interface{
 	return nil
 }
 
-func UpdateDataFromLibraryVariableSet(data *LibraryVariableSetResourceModel, spaceId string, libraryVariableSet *variables.LibraryVariableSet) {
+func MapFromLibraryVariableSet(data *LibraryVariableSetResourceModel, spaceId string, libraryVariableSet *variables.LibraryVariableSet) {
 	data.Description = types.StringValue(libraryVariableSet.Description)
 	data.Name = types.StringValue(libraryVariableSet.Name)
 	data.VariableSetId = types.StringValue(libraryVariableSet.VariableSetID)
@@ -128,7 +118,7 @@ func UpdateDataFromLibraryVariableSet(data *LibraryVariableSetResourceModel, spa
 	data.ID = types.StringValue(libraryVariableSet.GetID())
 }
 
-func CreateLibraryVariableSet(data *LibraryVariableSetResourceModel) *variables.LibraryVariableSet {
+func MapToLibraryVariableSet(data *LibraryVariableSetResourceModel) *variables.LibraryVariableSet {
 	libraryVariableSet := variables.NewLibraryVariableSet(data.Name.ValueString())
 	libraryVariableSet.ID = data.ID.ValueString()
 	libraryVariableSet.Description = data.Description.ValueString()

@@ -11,43 +11,32 @@ import (
 	"log"
 )
 
-//TODO: Plan Modifiers for
-//		CustomizeDiff: fixTemplateIds,
-
 type libraryVariableSetFeedTypeResource struct {
 	*Config
 }
 
 func (r *libraryVariableSetFeedTypeResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	//var plan *schemas.LibraryVariableSetResourceModel
-	//
-	//if req.Plan.Raw.IsNull() {
-	//	return
-	//}
-	//
+	var plan *schemas.LibraryVariableSetResourceModel
+
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
 	//if req.State.Raw.IsNull() {
 	//	isCreation = true
 	//} else {
 	//	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	//}
-	//
-	//resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
-	////
-	////if !isCreation {
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	//templates := plan.Template
-	//
-	////templates := plan.Template
-	//log.Println(templates)
-	////templateIds := make(map[string]string)
-	//
 	//expandedActionTemplates := schemas.ExpandActionTemplateParameters(templates)
 	//templateIdsValues := schemas.FlattenTemplateIds(expandedActionTemplates)
-	//
 	//resp.Plan.SetAttribute(ctx, path.Root("template_ids"), templateIdsValues)
-	//}
 }
 
 func NewLibraryVariableSetFeedResource() resource.Resource {
@@ -73,14 +62,14 @@ func (r *libraryVariableSetFeedTypeResource) Create(ctx context.Context, req res
 		return
 	}
 
-	newLibraryVariableSet := schemas.CreateLibraryVariableSet(data)
+	newLibraryVariableSet := schemas.MapToLibraryVariableSet(data)
 	libraryVariableSet, err := libraryvariablesets.Add(r.Config.Client, newLibraryVariableSet)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to create library variable set", err.Error())
 		return
 	}
 
-	schemas.UpdateDataFromLibraryVariableSet(data, libraryVariableSet.SpaceID, libraryVariableSet)
+	schemas.MapFromLibraryVariableSet(data, libraryVariableSet.SpaceID, libraryVariableSet)
 	tflog.Info(ctx, fmt.Sprintf("Library Variable Set created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -100,7 +89,7 @@ func (r *libraryVariableSetFeedTypeResource) Read(ctx context.Context, req resou
 		return
 	}
 
-	schemas.UpdateDataFromLibraryVariableSet(data, data.SpaceID.ValueString(), libraryVariableSet)
+	schemas.MapFromLibraryVariableSet(data, data.SpaceID.ValueString(), libraryVariableSet)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -115,7 +104,7 @@ func (r *libraryVariableSetFeedTypeResource) Update(ctx context.Context, req res
 
 	tflog.Debug(ctx, fmt.Sprintf("updating library variable set '%s'", data.ID.ValueString()))
 
-	libraryVariableSet := schemas.CreateLibraryVariableSet(data)
+	libraryVariableSet := schemas.MapToLibraryVariableSet(data)
 	libraryVariableSet.ID = state.ID.ValueString()
 
 	updatedLibraryVariableSet, err := libraryvariablesets.Update(r.Config.Client, libraryVariableSet)
@@ -123,7 +112,7 @@ func (r *libraryVariableSetFeedTypeResource) Update(ctx context.Context, req res
 		resp.Diagnostics.AddError("unable to update library variable set", err.Error())
 		return
 	}
-	schemas.UpdateDataFromLibraryVariableSet(data, state.SpaceID.ValueString(), updatedLibraryVariableSet)
+	schemas.MapFromLibraryVariableSet(data, state.SpaceID.ValueString(), updatedLibraryVariableSet)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
