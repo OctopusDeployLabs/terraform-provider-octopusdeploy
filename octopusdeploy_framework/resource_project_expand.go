@@ -48,20 +48,40 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		project.ConnectivityPolicy = expandConnectivityPolicy(connectivityPolicy)
 	}
 
-	// TODO: git_library_persistence_settings
-	//if v, ok := d.GetOk("git_library_persistence_settings"); ok {
-	//	project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandLibraryGitCredential)
-	//}
-	//if v, ok := d.GetOk("git_username_password_persistence_settings"); ok {
-	//	project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandUsernamePasswordGitCredential)
-	//}
-	//if v, ok := d.GetOk("git_anonymous_persistence_settings"); ok {
-	//	project.PersistenceSettings = expandGitPersistenceSettings(ctx, v, expandAnonymousGitCredential)
-	//}
-	//
-	//if project.PersistenceSettings != nil {
-	//	tflog.Info(ctx, fmt.Sprintf("expanded persistence settings {%v}", project.PersistenceSettings))
-	//}
+	if !model.GitLibraryPersistenceSettings.IsNull() {
+		var gitLibrarySettingsList []gitLibraryPersistenceSettingsModel
+		diags := model.GitLibraryPersistenceSettings.ElementsAs(ctx, &gitLibrarySettingsList, false)
+		if diags.HasError() {
+			fmt.Printf("Error converting Git library persistence settings: %v\n", diags)
+		} else {
+			fmt.Printf("Number of Git library persistence settings: %d\n", len(gitLibrarySettingsList))
+			if len(gitLibrarySettingsList) > 0 {
+				project.PersistenceSettings = expandGitLibraryPersistenceSettings(ctx, gitLibrarySettingsList[0])
+			}
+		}
+	} else if !model.GitUsernamePasswordPersistenceSettings.IsNull() {
+		var gitUsernamePasswordSettingsList []gitUsernamePasswordPersistenceSettingsModel
+		diags := model.GitUsernamePasswordPersistenceSettings.ElementsAs(ctx, &gitUsernamePasswordSettingsList, false)
+		if diags.HasError() {
+			fmt.Printf("Error converting Git username/password persistence settings: %v\n", diags)
+		} else {
+			fmt.Printf("Number of Git username/password persistence settings: %d\n", len(gitUsernamePasswordSettingsList))
+			if len(gitUsernamePasswordSettingsList) > 0 {
+				project.PersistenceSettings = expandGitUsernamePasswordPersistenceSettings(ctx, gitUsernamePasswordSettingsList[0])
+			}
+		}
+	} else if !model.GitAnonymousPersistenceSettings.IsNull() {
+		var gitAnonymousSettingsList []gitAnonymousPersistenceSettingsModel
+		diags := model.GitAnonymousPersistenceSettings.ElementsAs(ctx, &gitAnonymousSettingsList, false)
+		if diags.HasError() {
+			fmt.Printf("Error converting Git anonymous persistence settings: %v\n", diags)
+		} else {
+			fmt.Printf("Number of Git anonymous persistence settings: %d\n", len(gitAnonymousSettingsList))
+			if len(gitAnonymousSettingsList) > 0 {
+				project.PersistenceSettings = expandGitAnonymousPersistenceSettings(ctx, gitAnonymousSettingsList[0])
+			}
+		}
+	}
 
 	if !model.JiraServiceManagementExtensionSettings.IsNull() {
 		var settings jiraServiceManagementExtensionSettingsModel
@@ -91,12 +111,9 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		var templates []templateModel
 		diags := model.Template.ElementsAs(ctx, &templates, false)
 		if diags.HasError() {
-			// Handle or log the error
 			fmt.Printf("Error converting templates: %v\n", diags)
 		} else {
 			fmt.Printf("Number of templates: %d\n", len(templates))
-
-			// Now we can use the templates slice
 			project.Templates = expandTemplates(templates)
 		}
 	} else {
@@ -108,14 +125,60 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		var overrideModels []autoDeployReleaseOverrideModel
 		diags := model.AutoDeployReleaseOverrides.ElementsAs(ctx, &overrideModels, false)
 		if !diags.HasError() {
-			project.AutoDeployReleaseOverrides = expandAutoDeployReleaseOverrides(ctx, overrideModels)
+			project.AutoDeployReleaseOverrides = expandAutoDeployReleaseOverrides(overrideModels)
 		}
 	}
 
 	return project
 }
+func expandGitLibraryPersistenceSettings(ctx context.Context, model gitLibraryPersistenceSettingsModel) projects.GitPersistenceSettings {
+	url, _ := url.Parse(model.URL.ValueString())
+	var protectedBranches []string
+	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
 
-func expandAutoDeployReleaseOverrides(ctx context.Context, models []autoDeployReleaseOverrideModel) []projects.AutoDeployReleaseOverride {
+	return projects.NewGitPersistenceSettings(
+		model.BasePath.ValueString(),
+		&credentials.Reference{
+			ID: model.GitCredentialID.ValueString(),
+		},
+		model.DefaultBranch.ValueString(),
+		protectedBranches,
+		url,
+	)
+}
+
+func expandGitUsernamePasswordPersistenceSettings(ctx context.Context, model gitUsernamePasswordPersistenceSettingsModel) projects.GitPersistenceSettings {
+	url, _ := url.Parse(model.URL.ValueString())
+	var protectedBranches []string
+	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
+
+	return projects.NewGitPersistenceSettings(
+		model.BasePath.ValueString(),
+		&credentials.UsernamePassword{
+			Username: model.Username.ValueString(),
+			Password: core.NewSensitiveValue(model.Password.ValueString()),
+		},
+		model.DefaultBranch.ValueString(),
+		protectedBranches,
+		url,
+	)
+}
+
+func expandGitAnonymousPersistenceSettings(ctx context.Context, model gitAnonymousPersistenceSettingsModel) projects.GitPersistenceSettings {
+	url, _ := url.Parse(model.URL.ValueString())
+	var protectedBranches []string
+	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
+
+	return projects.NewGitPersistenceSettings(
+		model.BasePath.ValueString(),
+		&credentials.Anonymous{},
+		model.DefaultBranch.ValueString(),
+		protectedBranches,
+		url,
+	)
+}
+
+func expandAutoDeployReleaseOverrides(models []autoDeployReleaseOverrideModel) []projects.AutoDeployReleaseOverride {
 	result := make([]projects.AutoDeployReleaseOverride, 0, len(models))
 
 	for _, model := range models {
@@ -123,7 +186,6 @@ func expandAutoDeployReleaseOverrides(ctx context.Context, models []autoDeployRe
 			EnvironmentID: model.EnvironmentID.ValueString(),
 		}
 
-		// TenantID is optional, so we only set it if it's not null
 		if !model.TenantID.IsNull() {
 			override.TenantID = model.TenantID.ValueString()
 		}
@@ -132,37 +194,6 @@ func expandAutoDeployReleaseOverrides(ctx context.Context, models []autoDeployRe
 	}
 
 	return result
-}
-
-func expandGitPersistenceSettings(model gitPersistenceSettingsModel) projects.PersistenceSettings {
-	gitUrl, _ := url.Parse(model.URL.ValueString())
-
-	basePath := model.BasePath.ValueString()
-	defaultBranch := model.DefaultBranch.ValueString()
-
-	var protectedBranches []string
-	model.ProtectedBranches.ElementsAs(context.Background(), &protectedBranches, false)
-
-	var gitCredential credentials.GitCredential
-
-	if !model.GitCredentialID.IsNull() {
-		// Library Git Credential
-		gitCredential = credentials.NewReference(model.GitCredentialID.ValueString())
-	} else if !model.Username.IsNull() && !model.Password.IsNull() {
-		// Username and Password Git Credential
-		gitCredential = credentials.NewUsernamePassword(model.Username.ValueString(), core.NewSensitiveValue(model.Password.ValueString()))
-	} else {
-		// Anonymous Git Credential
-		gitCredential = credentials.NewAnonymous()
-	}
-
-	return projects.NewGitPersistenceSettings(
-		basePath,
-		gitCredential,
-		defaultBranch,
-		protectedBranches,
-		gitUrl,
-	)
 }
 
 func expandConnectivityPolicy(model connectivityPolicyModel) *core.ConnectivityPolicy {
@@ -253,7 +284,6 @@ func expandTemplates(models []templateModel) []actiontemplates.ActionTemplatePar
 			Name:            model.Name.ValueString(),
 		}
 
-		// Set the ID in the embedded Resource
 		if !model.ID.IsNull() {
 			template.Resource.ID = model.ID.ValueString()
 		}

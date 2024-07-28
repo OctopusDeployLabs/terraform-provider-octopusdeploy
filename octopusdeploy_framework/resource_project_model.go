@@ -49,16 +49,6 @@ type autoDeployReleaseOverrideModel struct {
 	TenantID      types.String `tfsdk:"tenant_id"`
 }
 
-type gitPersistenceSettingsModel struct {
-	URL               types.String `tfsdk:"url"`
-	BasePath          types.String `tfsdk:"base_path"`
-	DefaultBranch     types.String `tfsdk:"default_branch"`
-	ProtectedBranches types.Set    `tfsdk:"protected_branches"`
-	Username          types.String `tfsdk:"username"`
-	Password          types.String `tfsdk:"password"`
-	GitCredentialID   types.String `tfsdk:"git_credential_id"`
-}
-
 type jiraServiceManagementExtensionSettingsModel struct {
 	ConnectionID           types.String `tfsdk:"connection_id"`
 	IsEnabled              types.Bool   `tfsdk:"is_enabled"`
@@ -96,4 +86,28 @@ type templateModel struct {
 	HelpText        types.String `tfsdk:"help_text"`
 	DefaultValue    types.String `tfsdk:"default_value"`
 	DisplaySettings types.Map    `tfsdk:"display_settings"`
+}
+
+type gitLibraryPersistenceSettingsModel struct {
+	GitCredentialID   types.String `tfsdk:"git_credential_id"`
+	URL               types.String `tfsdk:"url"`
+	BasePath          types.String `tfsdk:"base_path"`
+	DefaultBranch     types.String `tfsdk:"default_branch"`
+	ProtectedBranches types.Set    `tfsdk:"protected_branches"`
+}
+
+type gitUsernamePasswordPersistenceSettingsModel struct {
+	URL               types.String `tfsdk:"url"`
+	Username          types.String `tfsdk:"username"`
+	Password          types.String `tfsdk:"password"`
+	BasePath          types.String `tfsdk:"base_path"`
+	DefaultBranch     types.String `tfsdk:"default_branch"`
+	ProtectedBranches types.Set    `tfsdk:"protected_branches"`
+}
+
+type gitAnonymousPersistenceSettingsModel struct {
+	URL               types.String `tfsdk:"url"`
+	BasePath          types.String `tfsdk:"base_path"`
+	DefaultBranch     types.String `tfsdk:"default_branch"`
+	ProtectedBranches types.Set    `tfsdk:"protected_branches"`
 }
