@@ -96,6 +96,7 @@ jobs:
           GOMAXPROCS: 1
           OCTOTESTVERSION: latest
           OCTOTESTIMAGEURL: docker.packages.octopushq.com/octopusdeploy/octopusdeploy
+          OCTOTESTRETRYCOUNT: 1
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v3
