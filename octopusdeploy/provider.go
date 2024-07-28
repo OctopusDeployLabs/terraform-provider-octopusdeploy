@@ -62,6 +62,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_offline_package_drop_deployment_target":         resourceOfflinePackageDropDeploymentTarget(),
 			"octopusdeploy_polling_tentacle_deployment_target":             resourcePollingTentacleDeploymentTarget(),
 			"octopusdeploy_polling_subscription_id":                        resourcePollingSubscriptionId(),
+			"octopusdeploy_project":                                        resourceProject(),
 			"octopusdeploy_project_deployment_target_trigger":              resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_external_feed_create_release_trigger":           resourceExternalFeedCreateReleaseTrigger(),
 			"octopusdeploy_project_scheduled_trigger":                      resourceProjectScheduledTrigger(),
