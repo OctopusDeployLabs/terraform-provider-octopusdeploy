@@ -20,7 +20,7 @@ func GetTenantCommonVariableResourceSchema() schema.Schema {
 			"library_variable_set_id": util.GetRequiredStringResourceSchema("The ID of the library variable set."),
 			"template_id":             util.GetRequiredStringResourceSchema("The ID of the variable template."),
 			"value": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: "The value of the variable.",
 				Sensitive:   true,
 			},
