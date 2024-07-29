@@ -31,8 +31,8 @@ func (suite *IntegrationTestSuite) TestSpaceResource() {
 		t.Fatal(err.Error())
 	}
 
-	if space.Description != "The description of the new space" {
-		t.Fatalf("New space must have the description \"The description of the new space\"")
+	if space.Description != "TestSdkIntegrationTestSuite/TestSpaceResource" {
+		t.Fatalf("New space must have the description \"TestSdkIntegrationTestSuite/TestSpaceResource")
 	}
 
 	if space.IsDefault {
