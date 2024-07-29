@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.43.0
-	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240718055636-f42871b46363
+	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240725054341-2848f54d101e
 	github.com/google/uuid v1.6.0
 	github.com/gruntwork-io/terratest v0.41.11
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637

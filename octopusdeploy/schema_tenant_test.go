@@ -31,7 +31,6 @@ func TestFlattenTenant(t *testing.T) {
 		"description":           description,
 		"id":                    id,
 		"name":                  name,
-		"project_environment":   flattenProjectEnvironments(projectEnvironments),
 		"space_id":              spaceID,
 		"tenant_tags":           tenantTags,
 	}
