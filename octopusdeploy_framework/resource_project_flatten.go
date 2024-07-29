@@ -253,12 +253,22 @@ func flattenTemplates(templates []actiontemplates.ActionTemplateParameter) types
 
 	templateList := make([]attr.Value, 0, len(templates))
 	for _, template := range templates {
+		helpText := types.StringNull()
+		if template.HelpText != "" {
+			helpText = types.StringValue(template.HelpText)
+		}
+
+		defaultValue := types.StringNull()
+		if template.DefaultValue != nil && template.DefaultValue.Value != "" {
+			defaultValue = types.StringValue(template.DefaultValue.Value)
+		}
+
 		obj := types.ObjectValueMust(getTemplateAttrTypes(), map[string]attr.Value{
 			"id":            types.StringValue(template.Resource.ID),
 			"name":          types.StringValue(template.Name),
 			"label":         types.StringValue(template.Label),
-			"help_text":     types.StringValue(template.HelpText),
-			"default_value": types.StringValue(template.DefaultValue.Value),
+			"help_text":     helpText,
+			"default_value": defaultValue,
 			"display_settings": types.MapValueMust(
 				types.StringType,
 				convertMapStringToMapAttrValue(template.DisplaySettings),

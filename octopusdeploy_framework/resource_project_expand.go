@@ -266,29 +266,30 @@ func expandDeploymentActionPackage(model deploymentActionPackageModel) *packages
 		PackageReference: model.PackageReference.ValueString(),
 	}
 }
-func expandTemplates(models []templateModel) []actiontemplates.ActionTemplateParameter {
-	templates := make([]actiontemplates.ActionTemplateParameter, len(models))
-	for i, model := range models {
-		defaultValue := core.NewPropertyValue(model.DefaultValue.ValueString(), false)
+func expandTemplates(templates []templateModel) []actiontemplates.ActionTemplateParameter {
+	result := make([]actiontemplates.ActionTemplateParameter, len(templates))
+	for i, template := range templates {
+		defaultValue := core.NewPropertyValue("", false)
+		if !template.DefaultValue.IsNull() {
+			defaultValue = core.NewPropertyValue(template.DefaultValue.ValueString(), false)
+		}
 
 		displaySettings := make(map[string]string)
-		if !model.DisplaySettings.IsNull() && !model.DisplaySettings.IsUnknown() {
-			model.DisplaySettings.ElementsAs(context.Background(), &displaySettings, false)
+		if !template.DisplaySettings.IsNull() && !template.DisplaySettings.IsUnknown() {
+			template.DisplaySettings.ElementsAs(context.Background(), &displaySettings, false)
 		}
 
-		template := actiontemplates.ActionTemplateParameter{
+		result[i] = actiontemplates.ActionTemplateParameter{
 			DefaultValue:    &defaultValue,
 			DisplaySettings: displaySettings,
-			HelpText:        model.HelpText.ValueString(),
-			Label:           model.Label.ValueString(),
-			Name:            model.Name.ValueString(),
+			HelpText:        template.HelpText.ValueString(),
+			Label:           template.Label.ValueString(),
+			Name:            template.Name.ValueString(),
 		}
 
-		if !model.ID.IsNull() {
-			template.Resource.ID = model.ID.ValueString()
+		if !template.ID.IsNull() {
+			result[i].Resource.ID = template.ID.ValueString()
 		}
-
-		templates[i] = template
 	}
-	return templates
+	return result
 }
