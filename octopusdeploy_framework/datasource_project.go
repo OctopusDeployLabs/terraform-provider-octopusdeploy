@@ -35,7 +35,7 @@ func NewProjectsDataSource() datasource.DataSource {
 }
 
 func (p *projectsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = util.GetTypeName(schemas.ProjectResourceName)
+	resp.TypeName = util.GetTypeName(schemas.ProjectDataSourceName)
 }
 
 func (p *projectsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {

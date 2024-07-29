@@ -11,6 +11,7 @@ import (
 )
 
 const ProjectResourceName = "project"
+const ProjectDataSourceName = "projects"
 
 func getOptionalComputedStringAttribute() resourceSchema.StringAttribute {
 	return resourceSchema.StringAttribute{
