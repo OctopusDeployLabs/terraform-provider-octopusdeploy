@@ -206,10 +206,15 @@ func expandConnectivityPolicy(model connectivityPolicyModel) *core.ConnectivityP
 		}
 	}
 
+	skipMachineBehavior := core.SkipMachineBehavior(model.SkipMachineBehavior.ValueString())
+	if skipMachineBehavior == "" {
+		skipMachineBehavior = core.SkipMachineBehaviorNone
+	}
+
 	return &core.ConnectivityPolicy{
 		AllowDeploymentsToNoTargets: model.AllowDeploymentsToNoTargets.ValueBool(),
 		ExcludeUnhealthyTargets:     model.ExcludeUnhealthyTargets.ValueBool(),
-		SkipMachineBehavior:         core.SkipMachineBehavior(model.SkipMachineBehavior.ValueString()),
+		SkipMachineBehavior:         skipMachineBehavior,
 		TargetRoles:                 targetRoles,
 	}
 }
