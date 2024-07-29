@@ -90,13 +90,13 @@ func Provider() *schema.Provider {
 			"address": {
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_URL", nil),
 				Description: "The endpoint of the Octopus REST API",
-				Required:    true,
+				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"api_key": {
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),
 				Description: "The API key to use with the Octopus REST API",
-				Required:    true,
+				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"space_id": {
