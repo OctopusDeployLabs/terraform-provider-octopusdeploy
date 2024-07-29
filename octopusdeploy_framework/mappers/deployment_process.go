@@ -61,29 +61,117 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 			}
 		}
 
-		for a := range deploymentStep.Actions {
-			switch deploymentStep.Actions[a].ActionType {
-			case "Octopus.KubernetesDeploySecret":
-				flatten_action_func("deploy_kubernetes_secret_action", i, flattenDeployKubernetesSecretAction)
-			case "Octopus.KubernetesRunScript":
-				flatten_action_func("run_kubectl_script_action", i, flattenKubernetesRunScriptAction)
-			case "Octopus.Manual":
-				flatten_action_func("manual_intervention_action", i, flattenManualInterventionAction)
+		newActions := []map[string]attr.Value
+		for i,a := range deploymentStep.Actions {
+			newAction := map[string]attr.Value{
+				"sort_order": types.StringValue(strconv.Itoa(i)),
+			}
+			srcAction := deploymentStep.Actions[i]
+			switch srcAction.ActionType {
+			//case "Octopus.KubernetesDeploySecret":
+			//	flatten_action_func("deploy_kubernetes_secret_action", i, flattenDeployKubernetesSecretAction)
+			//case "Octopus.KubernetesRunScript":
+			//	flatten_action_func("run_kubectl_script_action", i, flattenKubernetesRunScriptAction)
+			//case "Octopus.Manual":
+			//	flatten_action_func("manual_intervention_action", i, flattenManualInterventionAction)
 			case "Octopus.Script":
 				flatten_action_func("run_script_action", i, flattenRunScriptAction)
-			case "Octopus.TentaclePackage":
-				flatten_action_func("deploy_package_action", i, flattenDeployPackageAction)
-			case "Octopus.TerraformApply":
-				flatten_action_func("apply_terraform_template_action", i, flattenApplyTerraformTemplateAction)
-			case "Octopus.WindowsService":
-				flatten_action_func("deploy_windows_service_action", i, flattenDeployWindowsServiceAction)
+			//case "Octopus.TentaclePackage":
+			//	flatten_action_func("deploy_package_action", i, flattenDeployPackageAction)
+			//case "Octopus.TerraformApply":
+			//	flatten_action_func("apply_terraform_template_action", i, flattenApplyTerraformTemplateAction)
+			//case "Octopus.WindowsService":
+			//	flatten_action_func("deploy_windows_service_action", i, flattenDeployWindowsServiceAction)
 			default:
-				flatten_action_func("action", i, flattenDeploymentAction)
+				mapDeploymentActionToState(a, newAction)
+				break
 			}
+
+
+			newActions = append(newActions, newAction)
 			}
 		}
 	}
 }
+
+func mapDeploymentActionToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	newAction["can_be_used_for_project_versioning"] = types.BoolValue( action.CanBeUsedForProjectVersioning)
+		newAction["is_disabled"] = types.BoolValue(                        action.IsDisabled)
+		newAction["is_required"] = types.BoolValue(                        action.IsRequired)
+
+		if len(action.Channels) > 0 {
+			newAction["channels"] = util.FlattenStringList(action.Channels)
+		}
+
+	if len(action.Condition) > 0 {
+		newAction["condition"] = types.StringValue(action.Condition)
+	}
+
+	if action.Container != nil {
+		newAction["container"] = mapContainerToState(action.Container)
+	}
+
+	if len(action.Environments) > 0 {
+		newAction["environments"] = util.FlattenStringList(action.Environments)
+	}
+
+	if len(action.ExcludedEnvironments) > 0 {
+		newAction["excluded_environments"] = util.FlattenStringList(action.ExcludedEnvironments)
+	}
+
+	if len(action.ID) > 0 {
+		newAction["id"] = types.StringValue(action.ID)
+	}
+
+	if len(action.Name) > 0 {
+		newAction["name"] = types.StringValue(action.Name)
+	}
+
+	if len(action.Slug) > 0 {
+		newAction["slug"] = types.StringValue(action.Slug)
+	}
+
+	if len(action.Notes) > 0 {
+		newAction["notes"] = types.StringValue(action.Notes)
+	}
+
+	if len(action.Properties) > 0 {
+		updatedProperties, diags := mapPropertiesToState(ctx, action.Properties)
+		if diags.HasError() {
+			return diags
+		}
+		newAction["properties"] = updatedProperties
+	}
+
+	if len(action.TenantTags) > 0 {
+		newAction["tenant_tags"] = util.FlattenStringList(action.TenantTags)
+	}
+
+	if v, ok := action.Properties["Octopus.Action.EnabledFeatures"]; ok {
+		newAction["features"] = util.FlattenStringList(strings.Split(v.Value, ","))
+	}
+
+	if v, ok := action.Properties["Octopus.Action.Template.Id"]; ok {
+		actionTemplate := map[string]interface{}{
+			"id": v.Value,
+		}
+
+		if v, ok := action.Properties["Octopus.Action.Template.Version"]; ok {
+			version, _ := strconv.Atoi(v.Value)
+			actionTemplate["version"] = version
+		}
+
+		flattenedAction["action_template"] = []interface{}{actionTemplate}
+	}
+}
+
+func mapContainerToState(container *deployments.DeploymentActionContainer) attr.Value{
+	return types.ObjectValueMust(map[string]attr.Type { "feed_id": types.StringType, "image": types.StringType}, map[string]attr.Value {
+		"feed_id": types.StringValue(container.FeedID),
+		"image": types.StringValue(container.Image),
+	})
+}
+
 
 func mapPropertiesToState(ctx context.Context, properties map[string]core.PropertyValue) (types.Map, diag.Diagnostics) {
 
@@ -157,13 +245,6 @@ func mapStepsToDeploymentProcess(steps types.List, current *deployments.Deployme
 				break
 			}
 		}
-		//if actionsAttribute, ok := attrs["actions"]; ok {
-		//	actions := actionsAttribute.(types.List)
-		//	for _, action := range actions.Elements() {
-		//		actionAttribute := action.(types.Object).Attributes()
-		//
-		//	}
-		//}
 
 		current.Steps = append(current.Steps, step)
 	}
