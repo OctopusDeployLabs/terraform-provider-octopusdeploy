@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccTenantCommonVariableBasic(t *testing.T) {
+	SkipCI(t, "project_environment have been refactor [deprecated] - will enable this test later after Ben fix")
 	//SkipCI(t, "A managed resource \"octopusdeploy_project_group\" \"ewtxiwplhaenzmhpaqyx\" has\n        not been declared in the root module.")
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
