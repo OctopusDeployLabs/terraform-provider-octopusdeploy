@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_maven_feed Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  This resource manages a Maven feed in Octopus Deploy.
+  
 ---
 
 # octopusdeploy_maven_feed (Resource)
 
-This resource manages a Maven feed in Octopus Deploy.
+
 
 ## Example Usage
 
@@ -27,7 +27,7 @@ resource "octopusdeploy_maven_feed" "example" {
 ### Required
 
 - `feed_uri` (String)
-- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `name` (String) The name of this resource.
 
 ### Optional
 
@@ -36,7 +36,7 @@ resource "octopusdeploy_maven_feed" "example" {
 - `id` (String) The unique ID for this resource.
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this maven feed.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ## Import

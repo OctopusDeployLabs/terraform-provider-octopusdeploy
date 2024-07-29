@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_project_groups Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  Provides information about existing project groups.
+  
 ---
 
 # octopusdeploy_project_groups (Data Source)
 
-Provides information about existing project groups.
+
 
 ## Example Usage
 
@@ -26,25 +26,25 @@ data "octopusdeploy_project_groups" "example" {
 
 ### Optional
 
+- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
-- `partial_name` (String) A filter to search by the partial match of a name.
-- `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
-- `take` (Number) A filter to specify the number of items to take (or return) in the response.
-
-### Read-Only
-
-- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `partial_name` (String) A filter to search by a partial name.
 - `project_groups` (Block List) A list of project groups that match the filter(s). (see [below for nested schema](#nestedblock--project_groups))
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) The space ID associated with this project group.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 <a id="nestedblock--project_groups"></a>
 ### Nested Schema for `project_groups`
 
-Read-Only:
+Required:
+
+- `name` (String) The name of this resource.
+
+Optional:
 
 - `description` (String) The description of this project group.
 - `id` (String) The unique ID for this resource.
-- `name` (String) The name of this resource.
 - `retention_policy_id` (String) The ID of the retention policy associated with this project group.
 - `space_id` (String) The space ID associated with this project group.
 
