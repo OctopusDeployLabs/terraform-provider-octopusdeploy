@@ -42,16 +42,7 @@ Read-Only:
 - `description` (String) The description of this tenant.
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
-- `project_environment` (Set of Object) (see [below for nested schema](#nestedatt--tenants--project_environment))
 - `space_id` (String) The space ID associated with this resource.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-
-<a id="nestedatt--tenants--project_environment"></a>
-### Nested Schema for `tenants.project_environment`
-
-Read-Only:
-
-- `environments` (List of String)
-- `project_id` (String)
 
 
