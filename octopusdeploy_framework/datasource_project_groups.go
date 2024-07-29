@@ -42,7 +42,7 @@ func getNestedGroupAttributes() map[string]attr.Type {
 }
 
 func (p *projectGroupsDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_project_groups"
+	resp.TypeName = util.GetTypeName("project_groups")
 }
 
 func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
