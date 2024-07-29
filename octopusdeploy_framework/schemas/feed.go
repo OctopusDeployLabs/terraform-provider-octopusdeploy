@@ -146,7 +146,7 @@ func GetFeedDataSourceSchema() map[string]datasourceSchema.Attribute {
 			Optional: true,
 		},
 		"access_key": datasourceSchema.StringAttribute{
-			Required:    true,
+			Optional:    true,
 			Description: "The AWS access key to use when authenticating against Amazon Web Services.",
 		},
 		"api_version": datasourceSchema.StringAttribute{

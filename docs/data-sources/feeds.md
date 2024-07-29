@@ -41,12 +41,12 @@ data "octopusdeploy_feeds" "example" {
 
 Required:
 
-- `access_key` (String) The AWS access key to use when authenticating against Amazon Web Services.
 - `feed_uri` (String)
 - `name` (String) The name of this resource.
 
 Optional:
 
+- `access_key` (String) The AWS access key to use when authenticating against Amazon Web Services.
 - `api_version` (String)
 - `delete_unreleased_packages_after_days` (Number)
 - `download_attempts` (Number) The number of times a deployment should attempt to download a package from this feed before failing.
