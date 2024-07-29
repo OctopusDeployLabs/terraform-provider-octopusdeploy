@@ -2,28 +2,26 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"path/filepath"
 )
 
-func TestAccOctopusDeployAzureWebAppDeploymentTargetBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployAzureWebAppDeploymentTargetBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_azure_web_app_deployment_target." + localName
 	tenantedDeploymentMode := core.TenantedDeploymentModeTenantedOrUntenanted
 	webAppName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccountCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -70,8 +68,9 @@ func testAzureWebAppDeploymentTargetBasic(localName string, name string, tenante
 }
 
 // TestAzureWebAppTargetResource verifies that a web app target can be reimported with the correct settings
-func TestAzureWebAppTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAzureWebAppTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "37-webapptarget", []string{
 		"-var=account_sales_account=whatever",

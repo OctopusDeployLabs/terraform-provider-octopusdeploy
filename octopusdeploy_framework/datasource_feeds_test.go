@@ -2,18 +2,17 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccDataSourceFeeds(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccDataSourceFeeds() {
 	localName := acctest.RandStringFromCharSet(50, acctest.CharSetAlpha)
 	prefix := fmt.Sprintf("data.octopusdeploy_feeds.%s", localName)
 	take := 10
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),

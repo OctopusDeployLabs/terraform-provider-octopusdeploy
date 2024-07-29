@@ -3,20 +3,18 @@ package octopusdeploy
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"net/http"
-	"path/filepath"
-	"testing"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"net/http"
+	"path/filepath"
 )
 
-func TestAccOctopusDeployChannelBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployChannelBasic() {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -29,6 +27,7 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 	resourceName := "octopusdeploy_channel." + localName
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccChannelCheckDestroy,
@@ -48,7 +47,7 @@ func TestAccOctopusDeployChannelBasic(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployChannelBasicWithUpdate() {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -60,6 +59,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 
 	resourceName := "octopusdeploy_channel." + localName
 	const channelName = "Funky Channel"
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccChannelCheckDestroy,
@@ -88,7 +88,8 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployChannelWithOneRule() {
+	t := suite.T()
 	SkipCI(t, "action_package blocks required on rule, this test is out of date.")
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	const channelName = "Funky Channel"
@@ -115,7 +116,8 @@ func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployChannelWithOneRuleWithUpdate() {
+	t := suite.T()
 	SkipCI(t, "action_package blocks required on rule, this test is out of date.")
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	const channelName = "Funky Channel"
@@ -156,7 +158,8 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployChannelWithTwoRules() {
+	t := suite.T()
 	SkipCI(t, "action_package blocks required on rule, this test is out of date.")
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	const channelName = "Funky Channel"
@@ -365,7 +368,8 @@ func destroyHelperChannel(s *terraform.State, client *client.Client) error {
 }
 
 // TestProjectChannelResource verifies that a project channel can be reimported with the correct settings
-func TestProjectChannelResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectChannelResource() {
+	t := suite.T()
 	testFramework := test.OctopusContainerTest{}
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "20-channel", []string{})

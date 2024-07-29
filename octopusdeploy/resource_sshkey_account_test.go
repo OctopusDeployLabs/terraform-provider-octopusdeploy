@@ -3,16 +3,14 @@ package octopusdeploy
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestSSHKeyBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestSSHKeyBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_ssh_key_account." + localName
 
@@ -22,9 +20,9 @@ func TestSSHKeyBasic(t *testing.T) {
 	tenantedDeploymentParticipation := core.TenantedDeploymentModeTenantedOrUntenanted
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccountCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -52,8 +50,9 @@ func testSSHKeyBasic(localName string, name string, privateKeyFile string, usern
 }
 
 // TestSshAccountResource verifies that an SSH account can be reimported with the correct settings
-func TestSshAccountResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestSshAccountResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "7-sshaccount", []string{})
 
 	if err != nil {

@@ -10,10 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"path/filepath"
 	"strconv"
-	"testing"
 )
 
-func TestGitHubRepositoryFeed(t *testing.T) {
+func (suite *IntegrationTestSuite) TestGitHubRepositoryFeed() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_github_repository_feed." + localName
 
@@ -23,6 +22,7 @@ func TestGitHubRepositoryFeed(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testGitHubRepositoryFeedCheckDestroy,
@@ -83,8 +83,9 @@ func testGitHubRepositoryFeedCheckDestroy(s *terraform.State) error {
 }
 
 // TestGithubFeedResource verifies that a nuget feed can be reimported with the correct settings
-func TestGithubFeedResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestGithubFeedResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "44-githubfeed", []string{})
 

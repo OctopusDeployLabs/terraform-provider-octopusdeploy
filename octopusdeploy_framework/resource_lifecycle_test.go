@@ -22,13 +22,14 @@ func TestExpandLifecycleWithNil(t *testing.T) {
 	require.Nil(t, lifecycle)
 }
 
-func TestExpandLifecycle(t *testing.T) {
+func (suite *IntegrationTestSuite) TestExpandLifecycle() {
 	description := "test-description"
 	name := "test-name"
 	spaceID := "test-space-id"
 	Id := "test-id"
 	releaseRetention := core.NewRetentionPeriod(0, "Days", true)
 	tentacleRetention := core.NewRetentionPeriod(2, "Items", false)
+	t := suite.T()
 
 	data := &lifecycleTypeResourceModel{
 		ID:          types.StringValue(Id),
@@ -94,8 +95,9 @@ func TestExpandPhasesWithUnknownInput(t *testing.T) {
 	require.Nil(t, phases)
 }
 
-func TestExpandAndFlattenPhasesWithSensibleDefaults(t *testing.T) {
+func (suite *IntegrationTestSuite) TestExpandAndFlattenPhasesWithSensibleDefaults() {
 	phase := createTestPhase("TestPhase", []string{"AutoTarget1", "AutoTarget2"}, true, 5)
+	t := suite.T()
 
 	flattenedPhases := flattenPhases([]*lifecycles.Phase{phase})
 	require.NotNil(t, flattenedPhases)
@@ -115,9 +117,10 @@ func TestExpandAndFlattenPhasesWithSensibleDefaults(t *testing.T) {
 	require.Equal(t, phase.TentacleRetentionPolicy, expandedPhase.TentacleRetentionPolicy)
 }
 
-func TestExpandAndFlattenMultiplePhasesWithSensibleDefaults(t *testing.T) {
+func (suite *IntegrationTestSuite) TestExpandAndFlattenMultiplePhasesWithSensibleDefaults() {
 	phase1 := createTestPhase("Phase1", []string{"AutoTarget1", "AutoTarget2"}, true, 5)
 	phase2 := createTestPhase("Phase2", []string{"AutoTarget3", "AutoTarget4"}, false, 3)
+	t := suite.T()
 
 	flattenedPhases := flattenPhases([]*lifecycles.Phase{phase1, phase2})
 	require.NotNil(t, flattenedPhases)
@@ -157,11 +160,12 @@ func createTestPhase(name string, autoTargets []string, isOptional bool, minEnvs
 
 //Integration test under here
 
-func TestAccLifecycleBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccLifecycleBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_lifecycle." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccLifecycleCheckDestroy,
@@ -189,11 +193,12 @@ func TestAccLifecycleBasic(t *testing.T) {
 	})
 }
 
-func TestAccLifecycleWithUpdate(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccLifecycleWithUpdate() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_lifecycle." + localName
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccLifecycleCheckDestroy,
@@ -279,11 +284,12 @@ func TestAccLifecycleWithUpdate(t *testing.T) {
 	})
 }
 
-func TestAccLifecycleComplex(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccLifecycleComplex() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_lifecycle." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccLifecycleCheckDestroy,
@@ -441,8 +447,9 @@ func testAccLifecycleCheckDestroy(s *terraform.State) error {
 }
 
 // TestLifecycleResource verifies that a lifecycle can be reimported with the correct settings
-func TestLifecycleResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestLifecycleResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "17-lifecycle", []string{})
 
 	if err != nil {

@@ -5,12 +5,12 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"path/filepath"
-	"testing"
 )
 
 // TestPollingTargetResource verifies that a polling machine can be reimported with the correct settings
-func TestPollingTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestPollingTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "32-pollingtarget", []string{})
 
 	if err != nil {

@@ -2,15 +2,13 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccScopedUserRole(t *testing.T) {
-	SkipCI(t, "Error: octopus deploy api returned an error on endpoint /api/scopeduserroles - [You cannot use a role with Space level permissions at the System level. Space level permissions: AccountCreate]")
+func (suite *IntegrationTestSuite) TestAccScopedUserRole() {
+	SkipCI(suite.T(), "Error: octopus deploy api returned an error on endpoint /api/scopeduserroles - [You cannot use a role with Space level permissions at the System level. Space level permissions: AccountCreate]")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	teamResource := "octopusdeploy_team." + localName
 	environmentResource := "octopusdeploy_environment." + localName
@@ -22,9 +20,9 @@ func TestAccScopedUserRole(t *testing.T) {
 
 	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccScopedUserRoleCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

@@ -2,19 +2,18 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccProjectGroup(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccProjectGroup() {
 	options := test.NewProjectGroupTestOptions()
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testProjectGroupDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testProjectGroupDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

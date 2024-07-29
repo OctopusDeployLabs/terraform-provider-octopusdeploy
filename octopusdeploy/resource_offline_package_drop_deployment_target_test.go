@@ -5,12 +5,12 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"path/filepath"
-	"testing"
 )
 
 // TestOfflineDropTargetResource verifies that an offline drop can be reimported with the correct settings
-func TestOfflineDropTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestOfflineDropTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "34-offlinedroptarget", []string{})
 
 	if err != nil {

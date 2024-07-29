@@ -3,18 +3,17 @@ package octopusdeploy
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestTokenAccountBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestTokenAccountBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_token_account." + localName
+	t := suite.T()
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -53,8 +52,9 @@ func testTokenAccountBasic(localName string, description string, name string, te
 }
 
 // TestTokenAccountResource verifies that a token account can be reimported with the correct settings
-func TestTokenAccountResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestTokenAccountResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "9-tokenaccount", []string{})
 
 	if err != nil {

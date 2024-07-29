@@ -10,10 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"path/filepath"
 	"strconv"
-	"testing"
 )
 
-func TestAccOctopusDeployMavenFeed(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployMavenFeed() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_maven_feed." + localName
 
@@ -23,6 +22,7 @@ func TestAccOctopusDeployMavenFeed(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testMavenFeedCheckDestroy,
@@ -83,8 +83,9 @@ func testMavenFeedCheckDestroy(s *terraform.State) error {
 }
 
 // TestMavenFeedResource verifies that a maven feed can be reimported with the correct settings
-func TestMavenFeedResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestMavenFeedResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "13-mavenfeed", []string{})
 
 	if err != nil {

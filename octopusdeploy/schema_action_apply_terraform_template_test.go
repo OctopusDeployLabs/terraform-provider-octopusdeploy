@@ -2,15 +2,14 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"strconv"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"strconv"
 )
 
-func TestAccOctopusDeployApplyTerraformAction(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployApplyTerraformAction() {
+	t := suite.T()
 	allowPluginDownloads := acctest.RandIntRange(0, 2) == 0
 	applyParameters := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	initParameters := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)

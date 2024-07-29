@@ -5,12 +5,12 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
 )
 
 // TestAzureAccountResource verifies that an Azure account can be reimported with the correct settings
-func TestAzureAccountResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAzureAccountResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "4-azureaccount", []string{})
 

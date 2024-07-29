@@ -2,22 +2,20 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"strconv"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"strconv"
 )
 
-func TestAccDataSourceTenants(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccDataSourceTenants() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := fmt.Sprintf("data.octopusdeploy_tenants.%s", localName)
 	skip := acctest.RandIntRange(0, 100)
 	take := acctest.RandIntRange(0, 100)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+	resource.Test(suite.T(), resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

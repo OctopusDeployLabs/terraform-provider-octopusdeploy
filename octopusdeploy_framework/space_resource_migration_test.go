@@ -11,9 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSpaceResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func (suite *IntegrationTestSuite) TestSpaceResource_UpgradeFromSDK_ToPluginFramework() {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testSpaceDestroy,

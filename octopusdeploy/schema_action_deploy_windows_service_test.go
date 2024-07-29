@@ -2,46 +2,44 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccOctopusDeployDeployWindowsServiceAction(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+func (suite *IntegrationTestSuite) TestAccOctopusDeployDeployWindowsServiceAction() {
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccProjectCheckDestroy,
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDeployWindowsServiceAction(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDeployWindowsServiceActionOrFeature("Octopus.WindowsService"),
+					testAccCheckDeployWindowsServiceActionOrFeature(suite, "Octopus.WindowsService"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccOctopusDeployWindowsServiceFeature(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+func (suite *IntegrationTestSuite) TestAccOctopusDeployWindowsServiceFeature() {
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccProjectCheckDestroy,
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWindowsServiceFeature(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDeployWindowsServiceActionOrFeature("Octopus.TentaclePackage"),
+					testAccCheckDeployWindowsServiceActionOrFeature(suite, "Octopus.TentaclePackage"),
 				),
 			},
 		},
@@ -97,9 +95,9 @@ func testAccWindowsServiceFeature() string {
 	`)
 }
 
-func testAccCheckDeployWindowsServiceActionOrFeature(expectedActionType string) resource.TestCheckFunc {
+func testAccCheckDeployWindowsServiceActionOrFeature(suite *IntegrationTestSuite, expectedActionType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		process, err := getDeploymentProcess(s, octoClient)
+		process, err := getDeploymentProcess(s, suite.octoClient)
 		if err != nil {
 			return err
 		}

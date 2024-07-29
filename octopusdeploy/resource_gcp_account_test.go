@@ -2,16 +2,15 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccGcpAccountBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccGcpAccountBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_gcp_account." + localName
+	t := suite.T()
 
 	jsonKey := acctest.RandString(acctest.RandIntRange(20, 255))
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -19,8 +18,8 @@ func TestAccGcpAccountBasic(t *testing.T) {
 	tenantedDeploymentParticipation := core.TenantedDeploymentModeTenantedOrUntenanted
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccountCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

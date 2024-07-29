@@ -5,13 +5,13 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"path/filepath"
-	"testing"
 )
 
 // TestAwsAccountExport verifies that an AWS account can be reimported with the correct settings
-func TestAwsAccountExport(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAwsAccountExport() {
 	testFramework := test.OctopusContainerTest{}
 
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "3-awsaccount", []string{})
 
 	if err != nil {

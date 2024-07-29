@@ -2,20 +2,18 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDataSourceWorkerPools(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccDataSourceWorkerPools() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := fmt.Sprintf("data.octopusdeploy_worker_pools.%s", localName)
 	partialName := "W"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+	resource.Test(suite.T(), resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

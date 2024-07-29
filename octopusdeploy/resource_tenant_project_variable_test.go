@@ -2,15 +2,13 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"strings"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"strings"
 )
 
-func TestAccTenantProjectVariableBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccTenantProjectVariableBasic() {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -35,9 +33,9 @@ func TestAccTenantProjectVariableBasic(t *testing.T) {
 
 	newValue := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccTenantProjectVariableCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+	resource.Test(suite.T(), resource.TestCase{
+		CheckDestroy:             testAccTenantProjectVariableCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

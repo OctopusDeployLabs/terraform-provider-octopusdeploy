@@ -2,14 +2,12 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAWSAccountBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccAWSAccountBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_aws_account." + localName
 
@@ -21,9 +19,9 @@ func TestAccAWSAccountBasic(t *testing.T) {
 
 	newAccessKey := acctest.RandString(acctest.RandIntRange(20, 3000))
 
-	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+	resource.Test(suite.T(), resource.TestCase{
+		CheckDestroy:             testAccountCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

@@ -6,11 +6,11 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	stdslices "slices"
-	"testing"
 )
 
-func TestProjectScheduledTriggerResources(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectScheduledTriggerResources() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "53-scheduledprojecttrigger", []string{})
 
 	// Assert

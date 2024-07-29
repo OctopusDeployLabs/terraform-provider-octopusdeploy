@@ -5,15 +5,13 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
 )
 
-func TestAccOctopusDeployCertificateBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployCertificateBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_certificate." + localName
 
@@ -21,9 +19,9 @@ func TestAccOctopusDeployCertificateBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccCertificateCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -74,8 +72,9 @@ func testAccCertificateCheckDestroy(s *terraform.State) error {
 }
 
 // TestCertificateResource verifies that a certificate can be reimported with the correct settings
-func TestCertificateResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestCertificateResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "25-certificates", []string{})
 

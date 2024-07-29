@@ -5,15 +5,13 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
 )
 
-func TestAccTenantBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccTenantBasic() {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -30,6 +28,7 @@ func TestAccTenantBasic(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccTenantCheckDestroy,
@@ -106,8 +105,9 @@ func testAccTenantCheckDestroy(s *terraform.State) error {
 }
 
 // TestTenantsResource verifies that a git credential can be reimported with the correct settings
-func TestTenantsResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestTenantsResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "24-tenants", []string{})
 
 	if err != nil {

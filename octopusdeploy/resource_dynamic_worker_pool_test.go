@@ -2,15 +2,14 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"strconv"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"strconv"
 )
 
-func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployDynamicWorkerPoolBasic() {
+	t := suite.T()
 	SkipCI(t, "[The worker image specified does not exist.] ")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_dynamic_worker_pool." + localName

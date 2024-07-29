@@ -2,18 +2,17 @@ package octopusdeploy
 
 import (
 	"fmt"
+	localtest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"strings"
-	"testing"
-
-	localtest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"strings"
 )
 
-func TestAccTenantCommonVariableBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccTenantCommonVariableBasic() {
+	t := suite.T()
 	SkipCI(t, "A managed resource \"octopusdeploy_project_group\" \"ewtxiwplhaenzmhpaqyx\" has\n        not been declared in the root module.")
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -182,8 +181,9 @@ func testAccTenantCommonVariableCheckDestroy(s *terraform.State) error {
 }
 
 // TestTenantVariablesResource verifies that a tenant variables can be reimported with the correct settings
-func TestTenantVariablesResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestTenantVariablesResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "26-tenant_variables", []string{})
 
 	if err != nil {

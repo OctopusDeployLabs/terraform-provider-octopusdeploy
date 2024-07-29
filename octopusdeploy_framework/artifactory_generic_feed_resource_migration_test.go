@@ -11,11 +11,11 @@ import (
 	"testing"
 )
 
-func TestArtifactoryGenericFeedResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func (suite *IntegrationTestSuite) TestArtifactoryGenericFeedResource_UpgradeFromSDK_ToPluginFramework() {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy: testArtifactoryGenericFeedDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -40,7 +40,7 @@ func TestArtifactoryGenericFeedResource_UpgradeFromSDK_ToPluginFramework(t *test
 				ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 				Config:                   artifactoryGenericUpdatedConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testArtifactoryGenericFeedUpdated(t),
+					testArtifactoryGenericFeedUpdated(suite.T()),
 				),
 			},
 		},

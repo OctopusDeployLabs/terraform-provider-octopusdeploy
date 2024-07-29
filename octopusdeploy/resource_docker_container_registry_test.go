@@ -5,17 +5,16 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
 )
 
-func TestAccOctopusDeployDockerContainerRegistry(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployDockerContainerRegistry() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_docker_container_registry." + localName
+	t := suite.T()
 
 	apiVersion := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	feedURI := "https://index.docker.io"
@@ -83,8 +82,9 @@ func testDockerContainerRegistryCheckDestroy(s *terraform.State) error {
 }
 
 // TestDockerFeedResource verifies that a docker feed can be reimported with the correct settings
-func TestDockerFeedResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestDockerFeedResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "11-dockerfeed", []string{})
 

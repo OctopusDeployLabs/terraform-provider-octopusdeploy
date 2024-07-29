@@ -6,16 +6,14 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"strconv"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
+	"strconv"
 )
 
-func TestAccUserImportBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccUserImportBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_user." + localName
 
@@ -23,6 +21,7 @@ func TestAccUserImportBasic(t *testing.T) {
 	emailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccUserCheckDestroy,
@@ -42,7 +41,7 @@ func TestAccUserImportBasic(t *testing.T) {
 	})
 }
 
-func TestAccUserBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccUserBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_user." + localName
 
@@ -52,6 +51,7 @@ func TestAccUserBasic(t *testing.T) {
 	emailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
 	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccUserCheckDestroy,
@@ -136,8 +136,9 @@ func testAccUserCheckDestroy(s *terraform.State) error {
 }
 
 // TestProjectTerraformPackageScriptExport verifies that users and teams can be reimported
-func TestUsersAndTeams(t *testing.T) {
+func (suite *IntegrationTestSuite) TestUsersAndTeams() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "43-users", []string{})
 
 	if err != nil {

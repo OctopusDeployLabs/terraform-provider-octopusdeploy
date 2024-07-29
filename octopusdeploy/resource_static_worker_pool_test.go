@@ -5,16 +5,14 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"strconv"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
+	"strconv"
 )
 
-func TestAccOctopusDeployStaticWorkerPoolBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployStaticWorkerPoolBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_static_worker_pool." + localName
 
@@ -22,6 +20,7 @@ func TestAccOctopusDeployStaticWorkerPoolBasic(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	isDefault := false
 	sortOrder := acctest.RandIntRange(50, 100)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -83,8 +82,9 @@ func testStaticWorkerPoolDestroy(s *terraform.State) error {
 }
 
 // TestWorkerPoolResource verifies that a static worker pool can be reimported with the correct settings
-func TestWorkerPoolResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestWorkerPoolResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "15-workerpool", []string{})
 
 	if err != nil {
