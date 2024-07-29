@@ -32,7 +32,7 @@ type (
 	}
 )
 
-func IntegrationTests_SdkProvider(t *testing.T) {
+func TestMySuite(t *testing.T) {
 	suite.Run(t, &IntegrationTestSuite{})
 }
 
