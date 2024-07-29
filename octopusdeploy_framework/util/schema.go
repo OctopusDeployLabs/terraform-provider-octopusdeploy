@@ -288,6 +288,7 @@ func GetPackageAcquisitionLocationOptionsResourceSchema() resourceSchema.Attribu
 		},
 	}
 }
+
 func GetFeedUriResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Required: true,
