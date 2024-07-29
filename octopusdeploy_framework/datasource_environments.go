@@ -36,7 +36,7 @@ func NewEnvironmentsDataSource() datasource.DataSource {
 }
 
 func (*environmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_environments"
+	resp.TypeName = util.GetTypeName("environments")
 }
 
 func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {

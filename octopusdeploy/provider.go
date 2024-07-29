@@ -77,6 +77,9 @@ func Provider() *schema.Provider {
 			"octopusdeploy_tag_set":                                        resourceTagSet(),
 			"octopusdeploy_team":                                           resourceTeam(),
 			"octopusdeploy_tenant":                                         resourceTenant(),
+			"octopusdeploy_tenant_project":                                 resourceTenantProject(),
+			"octopusdeploy_tenant_common_variable":                         resourceTenantCommonVariable(),
+			"octopusdeploy_tenant_project_variable":                        resourceTenantProjectVariable(),
 			"octopusdeploy_tentacle_certificate":                           resourceTentacleCertificate(),
 			"octopusdeploy_token_account":                                  resourceTokenAccount(),
 			"octopusdeploy_user":                                           resourceUser(),
@@ -88,13 +91,13 @@ func Provider() *schema.Provider {
 			"address": {
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_URL", nil),
 				Description: "The endpoint of the Octopus REST API",
-				Required:    true,
+				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"api_key": {
 				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),
 				Description: "The API key to use with the Octopus REST API",
-				Required:    true,
+				Optional:    true,
 				Type:        schema.TypeString,
 			},
 			"space_id": {

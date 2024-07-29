@@ -23,7 +23,7 @@ func NewFeedsDataSource() datasource.DataSource {
 }
 
 func (*feedsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_feeds"
+	resp.TypeName = util.GetTypeName("feeds")
 }
 
 func (e *feedsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

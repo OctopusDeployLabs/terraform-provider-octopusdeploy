@@ -22,10 +22,6 @@ func expandTenant(d *schema.ResourceData) *tenants.Tenant {
 		tenant.Description = v.(string)
 	}
 
-	if v, ok := d.GetOk("project_environment"); ok {
-		tenant.ProjectEnvironments = expandProjectEnvironments(v)
-	}
-
 	if v, ok := d.GetOk("space_id"); ok {
 		tenant.SpaceID = v.(string)
 	}
@@ -47,7 +43,6 @@ func flattenTenant(tenant *tenants.Tenant) map[string]interface{} {
 		"description":           tenant.Description,
 		"id":                    tenant.GetID(),
 		"name":                  tenant.Name,
-		"project_environment":   flattenProjectEnvironments(tenant.ProjectEnvironments),
 		"space_id":              tenant.SpaceID,
 		"tenant_tags":           tenant.TenantTags,
 	}
@@ -89,25 +84,6 @@ func getTenantSchema() map[string]*schema.Schema {
 		"description": getDescriptionSchema("tenant"),
 		"id":          getIDSchema(),
 		"name":        getNameSchema(true),
-		"project_environment": {
-			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"environments": {
-						Description: "A list of environment IDs associated with this tenant through a project.",
-						Elem:        &schema.Schema{Type: schema.TypeString},
-						Required:    true,
-						Type:        schema.TypeList,
-					},
-					"project_id": {
-						Description: "The project ID associated with this tenant.",
-						Required:    true,
-						Type:        schema.TypeString,
-					},
-				},
-			},
-			Type: schema.TypeSet,
-		},
 		"space_id":    getSpaceIDSchema(),
 		"tenant_tags": getTenantTagsSchema(),
 	}
@@ -118,11 +94,6 @@ func setTenant(ctx context.Context, d *schema.ResourceData, tenant *tenants.Tena
 	d.Set("description", tenant.Description)
 	d.Set("id", tenant.GetID())
 	d.Set("name", tenant.Name)
-
-	if err := d.Set("project_environment", flattenProjectEnvironments(tenant.ProjectEnvironments)); err != nil {
-		return fmt.Errorf("error setting project_environment: %s", err)
-	}
-
 	d.Set("space_id", tenant.SpaceID)
 
 	if err := d.Set("tenant_tags", tenant.TenantTags); err != nil {
