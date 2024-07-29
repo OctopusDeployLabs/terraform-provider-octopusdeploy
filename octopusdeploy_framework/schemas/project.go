@@ -20,14 +20,14 @@ func getOptionalComputedStringAttribute() resourceSchema.StringAttribute {
 }
 
 func getOptionalComputedBoolAttribute(description string) resourceSchema.BoolAttribute {
-	attr := resourceSchema.BoolAttribute{
+	attribute := resourceSchema.BoolAttribute{
 		Optional: true,
 		Computed: true,
 	}
 	if description != "" {
-		attr.Description = description
+		attribute.Description = description
 	}
-	return attr
+	return attribute
 }
 
 func getOptionalStringAttribute(description string) resourceSchema.StringAttribute {
@@ -55,6 +55,14 @@ func getResourceOptionalStringListAttribute(description string) resourceSchema.L
 	}
 
 	return attr
+}
+
+func getResourceOptionalStringSetAttribute(description string) resourceSchema.SetAttribute {
+	return resourceSchema.SetAttribute{
+		Description: description,
+		ElementType: types.StringType,
+		Optional:    true,
+	}
 }
 
 func GetProjectResourceSchema() resourceSchema.Schema {
@@ -109,7 +117,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 						"url":                getOptionalStringAttribute("The URL associated with these version control settings."),
 						"base_path":          getOptionalStringAttribute("The base path associated with these version control settings."),
 						"default_branch":     getOptionalStringAttribute("The default branch associated with these version control settings."),
-						"protected_branches": getResourceOptionalStringListAttribute("A list of protected branch patterns."),
+						"protected_branches": getResourceOptionalStringSetAttribute("A list of protected branch patterns."),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
@@ -121,7 +129,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 						"url":                getOptionalStringAttribute("The URL associated with these version control settings."),
 						"base_path":          getOptionalStringAttribute("The base path associated with these version control settings."),
 						"default_branch":     getOptionalStringAttribute("The default branch associated with these version control settings."),
-						"protected_branches": getResourceOptionalStringListAttribute("A list of protected branch patterns."),
+						"protected_branches": getResourceOptionalStringSetAttribute("A list of protected branch patterns."),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
@@ -134,7 +142,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 						"password":           util.GetPasswordResourceSchema(false),
 						"base_path":          getOptionalStringAttribute("The base path associated with these version control settings."),
 						"default_branch":     getOptionalStringAttribute("The default branch associated with these version control settings."),
-						"protected_branches": getResourceOptionalStringListAttribute("A list of protected branch patterns."),
+						"protected_branches": getResourceOptionalStringSetAttribute("A list of protected branch patterns."),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
