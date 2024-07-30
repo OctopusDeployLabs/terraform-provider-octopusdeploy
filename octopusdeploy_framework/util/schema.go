@@ -241,6 +241,15 @@ func GetUsernameResourceSchema(isRequired bool) resourceSchema.Attribute {
 	return s
 }
 
+func GetRequiredStringResourceSchema(description string) schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: description,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+}
 func GetIds(ids types.List) []string {
 	var result = make([]string, 0, len(ids.Elements()))
 	for _, id := range ids.Elements() {

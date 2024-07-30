@@ -21,7 +21,6 @@ type octopusDeployFrameworkProvider struct {
 var _ provider.Provider = (*octopusDeployFrameworkProvider)(nil)
 var _ provider.ProviderWithMetaSchema = (*octopusDeployFrameworkProvider)(nil)
 var _ provider.ProviderWithFunctions
-var ProviderTypeName = "octopusdeploy"
 
 func NewOctopusDeployFrameworkProvider() *octopusDeployFrameworkProvider {
 	return &octopusDeployFrameworkProvider{}
@@ -85,20 +84,20 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewGitHubRepositoryFeedResource,
 		NewAwsElasticContainerRegistryFeedResource,
 		NewNugetFeedResource,
+		NewTenantProjectVariableResource,
+		NewTenantCommonVariableResource,
 		NewLibraryVariableSetFeedResource,
 	}
 }
 
-func (p *octopusDeployFrameworkProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *octopusDeployFrameworkProvider) Schema(_ context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				//Required:    true,
 				Optional:    true,
 				Description: "The endpoint of the Octopus REST API",
 			},
 			"api_key": schema.StringAttribute{
-				//Required:    true,
 				Optional:    true,
 				Description: "The API key to use with the Octopus REST API",
 			},
