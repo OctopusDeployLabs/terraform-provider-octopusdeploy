@@ -140,15 +140,10 @@ func flattenConnectivityPolicy(policy *core.ConnectivityPolicy) types.List {
 		return types.ListNull(types.ObjectType{AttrTypes: getConnectivityPolicyAttrTypes()})
 	}
 
-	skipMachineBehavior := string(policy.SkipMachineBehavior)
-	if skipMachineBehavior == "" || skipMachineBehavior == string(core.SkipMachineBehaviorNone) {
-		skipMachineBehavior = "SkipUnavailableMachines"
-	}
-
 	obj := types.ObjectValueMust(getConnectivityPolicyAttrTypes(), map[string]attr.Value{
 		"allow_deployments_to_no_targets": types.BoolValue(policy.AllowDeploymentsToNoTargets),
 		"exclude_unhealthy_targets":       types.BoolValue(policy.ExcludeUnhealthyTargets),
-		"skip_machine_behavior":           types.StringValue(skipMachineBehavior),
+		"skip_machine_behavior":           types.StringValue(string(policy.SkipMachineBehavior)),
 		"target_roles":                    util.FlattenStringList(policy.TargetRoles),
 	})
 

@@ -43,9 +43,7 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 	}
 
 	if !model.ConnectivityPolicy.IsNull() {
-		var connectivityPolicy connectivityPolicyModel
-		model.ConnectivityPolicy.ElementsAs(ctx, &connectivityPolicy, false)
-		project.ConnectivityPolicy = expandConnectivityPolicy(connectivityPolicy)
+		project.ConnectivityPolicy = expandConnectivityPolicy(ctx, model.ConnectivityPolicy)
 	}
 
 	if !model.GitLibraryPersistenceSettings.IsNull() {
@@ -195,24 +193,32 @@ func expandAutoDeployReleaseOverrides(models []autoDeployReleaseOverrideModel) [
 	return result
 }
 
-func expandConnectivityPolicy(model connectivityPolicyModel) *core.ConnectivityPolicy {
-	var targetRoles []string
-	if !model.TargetRoles.IsNull() && !model.TargetRoles.IsUnknown() {
-		for _, v := range model.TargetRoles.Elements() {
-			if strVal, ok := v.(types.String); ok {
-				targetRoles = append(targetRoles, strVal.ValueString())
-			}
-		}
+func expandConnectivityPolicy(ctx context.Context, connectivityPolicyList types.List) *core.ConnectivityPolicy {
+	if connectivityPolicyList.IsNull() || connectivityPolicyList.IsUnknown() {
+		return nil
 	}
 
-	skipMachineBehavior := core.SkipMachineBehavior(model.SkipMachineBehavior.ValueString())
-	if skipMachineBehavior == "" || skipMachineBehavior == core.SkipMachineBehaviorNone {
-		skipMachineBehavior = core.SkipMachineBehavior("SkipUnavailableMachines")
+	var policyList []connectivityPolicyModel
+	diags := connectivityPolicyList.ElementsAs(ctx, &policyList, false)
+	if diags.HasError() {
+		return nil
 	}
+
+	if len(policyList) == 0 {
+		return nil
+	}
+	policy := policyList[0]
+
+	var targetRoles []string
+	if !policy.TargetRoles.IsNull() && !policy.TargetRoles.IsUnknown() {
+		policy.TargetRoles.ElementsAs(ctx, &targetRoles, false)
+	}
+
+	skipMachineBehavior := core.SkipMachineBehavior(policy.SkipMachineBehavior.ValueString())
 
 	return &core.ConnectivityPolicy{
-		AllowDeploymentsToNoTargets: model.AllowDeploymentsToNoTargets.ValueBool(),
-		ExcludeUnhealthyTargets:     model.ExcludeUnhealthyTargets.ValueBool(),
+		AllowDeploymentsToNoTargets: policy.AllowDeploymentsToNoTargets.ValueBool(),
+		ExcludeUnhealthyTargets:     policy.ExcludeUnhealthyTargets.ValueBool(),
 		SkipMachineBehavior:         skipMachineBehavior,
 		TargetRoles:                 targetRoles,
 	}
