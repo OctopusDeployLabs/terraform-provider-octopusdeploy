@@ -4,10 +4,12 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -94,7 +96,13 @@ func GetActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
 				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
-		"name": util.GetNameResourceSchema(true),
+		"name": resourceSchema.StringAttribute{
+			Description: "The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`",
+			Required:    true,
+			Validators: []validator.String{
+				stringvalidator.LengthAtLeast(1),
+			},
+		},
 	}
 }
 

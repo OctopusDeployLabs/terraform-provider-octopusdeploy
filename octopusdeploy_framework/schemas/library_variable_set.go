@@ -23,6 +23,14 @@ type LibraryVariableSetResourceModel struct {
 func GetLibraryVariableSetDataSourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Attributes: getLibraryVariableSetDataSchema(),
+		Blocks: map[string]datasourceSchema.Block{
+			"library_variable_sets": datasourceSchema.ListNestedBlock{
+				Description: "A list of library variable sets that match the filter(s).",
+				NestedObject: datasourceSchema.NestedBlockObject{
+					Attributes: GetLibraryVariableSetObjectDatasourceSchema(),
+				},
+			},
+		},
 	}
 }
 
@@ -32,18 +40,32 @@ func getLibraryVariableSetDataSchema() map[string]datasourceSchema.Attribute {
 			Description: "A filter to search by content type.",
 			Optional:    true,
 		},
-		"id":       util.GetIdDatasourceSchema(),
-		"space_id": util.GetSpaceIdDatasourceSchema("library variable set"),
-		"ids":      util.GetQueryIDsDatasourceSchema(),
-		"library_variable_sets": datasourceSchema.ListAttribute{
-			Computed:    true,
-			Description: "A list of library variable sets that match the filter(s).",
-			ElementType: types.ObjectType{AttrTypes: GetLibraryVariableSetObjectType()},
-			Optional:    true,
-		},
+		"id":           util.GetIdDatasourceSchema(),
+		"space_id":     util.GetSpaceIdDatasourceSchema("library variable set"),
+		"ids":          util.GetQueryIDsDatasourceSchema(),
 		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 		"skip":         util.GetQuerySkipDatasourceSchema(),
 		"take":         util.GetQueryTakeDatasourceSchema(),
+	}
+}
+
+func GetLibraryVariableSetObjectDatasourceSchema() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{
+		"description": GetDescriptionDatasourceSchema("library variable set"),
+		"id":          GetIdDatasourceSchema(),
+		"name":        GetNameDatasourceSchema(false),
+		"space_id":    GetSpaceIdDatasourceSchema("library variable set"),
+		"template_ids": datasourceSchema.MapAttribute{
+			ElementType: types.StringType,
+			Computed:    true,
+		},
+		"template": datasourceSchema.ListAttribute{
+			Optional:    true,
+			ElementType: types.ObjectType{AttrTypes: TemplateObjectType()},
+		},
+		"variable_set_id": datasourceSchema.StringAttribute{
+			Computed: true,
+		},
 	}
 }
 
