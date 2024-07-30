@@ -106,6 +106,9 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 }
 
 func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	var data schemas.VariableTypeResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
