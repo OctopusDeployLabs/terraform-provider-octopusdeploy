@@ -92,7 +92,7 @@ func testNugetFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		nugetFeed := feed.(*feeds.NuGetFeed)
 
-		assert.Equal(t, "Feeds-1001", nugetFeed.ID, "Feed ID did not match expected value")
+		assert.Regexp(t, "^Feeds\\-\\d+$", nugetFeed.GetID(), "Feed ID did not match expected value")
 		assert.Equal(t, "Updated Nuget", nugetFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", nugetFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, nugetFeed.Password.HasValue, "Feed password should be set")

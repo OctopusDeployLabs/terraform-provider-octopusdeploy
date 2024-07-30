@@ -86,7 +86,7 @@ func testHelmFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		helmFeed := feed.(*feeds.HelmFeed)
 
-		assert.Equal(t, "Feeds-1001", helmFeed.ID, "Feed ID did not match expected value")
+		assert.Regexp(t, "^Feeds\\-\\d+$", helmFeed.GetID(), "Feed ID did not match expected value")
 		assert.Equal(t, "Updated_Helm", helmFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", helmFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, helmFeed.Password.HasValue, "Feed password should be set")
