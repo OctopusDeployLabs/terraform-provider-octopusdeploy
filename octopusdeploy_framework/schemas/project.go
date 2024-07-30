@@ -1,6 +1,7 @@
 package schemas
 
 import (
+	"fmt"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -240,7 +241,7 @@ func GetProjectDataSourceSchema() datasourceSchema.Schema {
 			"cloned_from_project_id": getDataSourceStringAttribute("The ID of the project this project was cloned from.", true),
 			"ids":                    util.GetQueryIDsDatasourceSchema(),
 			"is_clone":               getDataSourceBoolAttribute("If set, only return projects that are clones.", true),
-			"name":                   util.GetNameDatasourceSchema(true),
+			"name":                   util.GetNameDatasourceSchema(false),
 			"partial_name":           util.GetQueryPartialNameDatasourceSchema(),
 			"skip":                   util.GetQuerySkipDatasourceSchema(),
 			"space_id":               util.GetSpaceIdDatasourceSchema(ProjectResourceName),
@@ -256,9 +257,8 @@ func getProjectsDataSourceAttribute() datasourceSchema.ListNestedAttribute {
 		Computed:    true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				"allow_deployments_to_no_targets":            getDataSourceBoolAttribute("Deprecated: Whether deployments can be created to no targets.", false),
 				"auto_create_release":                        getDataSourceBoolAttribute("Whether to automatically create a release when a package is pushed to a trigger.", false),
-				"auto_deploy_release_overrides":              getDataSourceListAttribute("A list of release overrides for auto deployments.", types.StringType),
+				"auto_deploy_release_overrides":              getAutoDeployReleaseOverrides(),
 				"cloned_from_project_id":                     getDataSourceStringAttribute("The ID of the project this project was cloned from.", false),
 				"default_guided_failure_mode":                getDataSourceStringAttribute("The default guided failure mode setting for the project.", false),
 				"default_to_skip_if_already_installed":       getDataSourceBoolAttribute("Whether deployment steps should be skipped if the relevant package is already installed.", false),
@@ -280,14 +280,28 @@ func getProjectsDataSourceAttribute() datasourceSchema.ListNestedAttribute {
 				"tenanted_deployment_participation":          getDataSourceStringAttribute("The tenanted deployment mode of the project.", false),
 				"variable_set_id":                            getDataSourceStringAttribute("The ID of the variable set associated with this project.", false),
 				"connectivity_policy":                        getDataSourceConnectivityPolicyAttribute(),
-				"git_library_persistence_settings":           getDataSourceGitPersistenceSettingsAttribute("Git-related persistence settings for a version-controlled project.", true),
-				"git_username_password_persistence_settings": getDataSourceGitPersistenceSettingsAttribute("Git-related persistence settings for a version-controlled project using username/password authentication.", false),
-				"git_anonymous_persistence_settings":         getDataSourceGitPersistenceSettingsAttribute("Git-related persistence settings for a version-controlled project using anonymous authentication.", false),
+				"git_library_persistence_settings":           getDataSourceGitPersistenceSettingsAttribute("library"),
+				"git_username_password_persistence_settings": getDataSourceGitPersistenceSettingsAttribute("username_password"),
+				"git_anonymous_persistence_settings":         getDataSourceGitPersistenceSettingsAttribute("anonymous"),
 				"jira_service_management_extension_settings": getDataSourceJSMExtensionSettingsAttribute(),
 				"servicenow_extension_settings":              getDataSourceServiceNowExtensionSettingsAttribute(),
 				"versioning_strategy":                        getDataSourceVersioningStrategyAttribute(),
 				"release_creation_strategy":                  getDataSourceReleaseCreationStrategyAttribute(),
 				"template":                                   getDataSourceTemplateAttribute(),
+			},
+		},
+	}
+}
+
+func getAutoDeployReleaseOverrides() datasourceSchema.ListNestedAttribute {
+	return datasourceSchema.ListNestedAttribute{
+		Description: "A list of release overrides for auto deployments.",
+		Computed:    true,
+		NestedObject: datasourceSchema.NestedAttributeObject{
+			Attributes: map[string]datasourceSchema.Attribute{
+				"environment_id": getDataSourceStringAttribute("The environment ID for the auto deploy release override.", false),
+				"release_id":     getDataSourceStringAttribute("The release ID for the auto deploy release override.", false),
+				"tenant_id":      getDataSourceStringAttribute("The tenant ID for the auto deploy release override.", false),
 			},
 		},
 	}
@@ -323,20 +337,22 @@ func getDataSourceListAttribute(description string, elementType attr.Type) datas
 	}
 }
 
-func getDataSourceConnectivityPolicyAttribute() datasourceSchema.SingleNestedAttribute {
-	return datasourceSchema.SingleNestedAttribute{
+func getDataSourceConnectivityPolicyAttribute() datasourceSchema.ListNestedAttribute {
+	return datasourceSchema.ListNestedAttribute{
 		Description: "Defines the connectivity policy for deployments.",
 		Computed:    true,
-		Attributes: map[string]datasourceSchema.Attribute{
-			"allow_deployments_to_no_targets": getDataSourceBoolAttribute("Allow deployments to be created when there are no targets.", false),
-			"exclude_unhealthy_targets":       getDataSourceBoolAttribute("Exclude unhealthy targets from deployments.", false),
-			"skip_machine_behavior":           getDataSourceStringAttribute("The behavior when a machine is skipped.", false),
-			"target_roles":                    getDataSourceListAttribute("The target roles for the connectivity policy.", types.StringType),
+		NestedObject: datasourceSchema.NestedAttributeObject{
+			Attributes: map[string]datasourceSchema.Attribute{
+				"allow_deployments_to_no_targets": getDataSourceBoolAttribute("Allow deployments to be created when there are no targets.", false),
+				"exclude_unhealthy_targets":       getDataSourceBoolAttribute("Exclude unhealthy targets from deployments.", false),
+				"skip_machine_behavior":           getDataSourceStringAttribute("The behavior when a machine is skipped.", false),
+				"target_roles":                    getDataSourceListAttribute("The target roles for the connectivity policy.", types.StringType),
+			},
 		},
 	}
 }
 
-func getDataSourceGitPersistenceSettingsAttribute(description string, includeCredential bool) datasourceSchema.SingleNestedAttribute {
+func getDataSourceGitPersistenceSettingsAttribute(settingType string) datasourceSchema.ListNestedAttribute {
 	attributes := map[string]datasourceSchema.Attribute{
 		"base_path":      getDataSourceStringAttribute("The base path associated with these version control settings.", false),
 		"default_branch": getDataSourceStringAttribute("The default branch associated with these version control settings.", false),
@@ -348,83 +364,100 @@ func getDataSourceGitPersistenceSettingsAttribute(description string, includeCre
 		"url": getDataSourceStringAttribute("The URL associated with these version control settings.", false),
 	}
 
-	if includeCredential {
+	switch settingType {
+	case "library":
 		attributes["git_credential_id"] = getDataSourceStringAttribute("The ID of the Git credential.", false)
-	} else {
+	case "username_password":
 		attributes["username"] = getDataSourceStringAttribute("The username for the Git credential.", false)
 		attributes["password"] = datasourceSchema.StringAttribute{
 			Description: "The password for the Git credential.",
 			Computed:    true,
 			Sensitive:   true,
 		}
+	case "anonymous":
+		// No additional attributes for anonymous
 	}
 
-	return datasourceSchema.SingleNestedAttribute{
-		Description: description,
+	return datasourceSchema.ListNestedAttribute{
+		Description: fmt.Sprintf("Git-related persistence settings for a version-controlled project using %s authentication.", settingType),
 		Computed:    true,
-		Attributes:  attributes,
+		NestedObject: datasourceSchema.NestedAttributeObject{
+			Attributes: attributes,
+		},
 	}
 }
 
-func getDataSourceJSMExtensionSettingsAttribute() datasourceSchema.SingleNestedAttribute {
-	return datasourceSchema.SingleNestedAttribute{
+func getDataSourceJSMExtensionSettingsAttribute() datasourceSchema.ListNestedAttribute {
+	return datasourceSchema.ListNestedAttribute{
 		Description: "Extension settings for the Jira Service Management (JSM) integration.",
 		Computed:    true,
-		Attributes: map[string]datasourceSchema.Attribute{
-			"connection_id":             getDataSourceStringAttribute("The connection identifier for JSM.", false),
-			"is_enabled":                getDataSourceBoolAttribute("Whether the JSM extension is enabled.", false),
-			"service_desk_project_name": getDataSourceStringAttribute("The JSM service desk project name.", false),
+		NestedObject: datasourceSchema.NestedAttributeObject{
+			Attributes: map[string]datasourceSchema.Attribute{
+				"connection_id":             getDataSourceStringAttribute("The connection identifier for JSM.", false),
+				"is_enabled":                getDataSourceBoolAttribute("Whether the JSM extension is enabled.", false),
+				"service_desk_project_name": getDataSourceStringAttribute("The JSM service desk project name.", false),
+			},
 		},
 	}
 }
 
-func getDataSourceServiceNowExtensionSettingsAttribute() datasourceSchema.SingleNestedAttribute {
-	return datasourceSchema.SingleNestedAttribute{
+func getDataSourceServiceNowExtensionSettingsAttribute() datasourceSchema.ListNestedAttribute {
+	return datasourceSchema.ListNestedAttribute{
 		Description: "Extension settings for the ServiceNow integration.",
 		Computed:    true,
-		Attributes: map[string]datasourceSchema.Attribute{
-			"connection_id":                       getDataSourceStringAttribute("The connection identifier for ServiceNow.", false),
-			"is_enabled":                          getDataSourceBoolAttribute("Whether the ServiceNow extension is enabled.", false),
-			"is_state_automatically_transitioned": getDataSourceBoolAttribute("Whether state is automatically transitioned in ServiceNow.", false),
-			"standard_change_template_name":       getDataSourceStringAttribute("The name of the standard change template in ServiceNow.", false),
+		NestedObject: datasourceSchema.NestedAttributeObject{
+			Attributes: map[string]datasourceSchema.Attribute{
+				"connection_id":                       getDataSourceStringAttribute("The connection identifier for ServiceNow.", false),
+				"is_enabled":                          getDataSourceBoolAttribute("Whether the ServiceNow extension is enabled.", false),
+				"is_state_automatically_transitioned": getDataSourceBoolAttribute("Whether state is automatically transitioned in ServiceNow.", false),
+				"standard_change_template_name":       getDataSourceStringAttribute("The name of the standard change template in ServiceNow.", false),
+			},
 		},
 	}
 }
 
-func getDataSourceVersioningStrategyAttribute() datasourceSchema.SingleNestedAttribute {
-	return datasourceSchema.SingleNestedAttribute{
+func getDataSourceVersioningStrategyAttribute() datasourceSchema.ListNestedAttribute {
+	return datasourceSchema.ListNestedAttribute{
 		Description: "The versioning strategy for the project.",
 		Computed:    true,
-		Attributes: map[string]datasourceSchema.Attribute{
-			"donor_package_step_id": getDataSourceStringAttribute("The ID of the step containing the donor package.", false),
-			"donor_package": datasourceSchema.SingleNestedAttribute{
-				Description: "Details of the donor package.",
-				Computed:    true,
-				Attributes: map[string]datasourceSchema.Attribute{
-					"deployment_action": getDataSourceStringAttribute("The deployment action for the donor package.", false),
-					"package_reference": getDataSourceStringAttribute("The package reference for the donor package.", false),
+		NestedObject: datasourceSchema.NestedAttributeObject{
+			Attributes: map[string]datasourceSchema.Attribute{
+				"donor_package_step_id": getDataSourceStringAttribute("The ID of the step containing the donor package.", false),
+				"donor_package": datasourceSchema.ListNestedAttribute{
+					Computed: true,
+					NestedObject: datasourceSchema.NestedAttributeObject{
+						Attributes: map[string]datasourceSchema.Attribute{
+							"deployment_action": getDataSourceStringAttribute("The deployment action for the donor package.", false),
+							"package_reference": getDataSourceStringAttribute("The package reference for the donor package.", false),
+						},
+					},
 				},
+				"template": getDataSourceStringAttribute("The template to use for version numbers.", false),
 			},
-			"template": getDataSourceStringAttribute("The template to use for version numbers.", false),
 		},
 	}
 }
 
-func getDataSourceReleaseCreationStrategyAttribute() datasourceSchema.SingleNestedAttribute {
-	return datasourceSchema.SingleNestedAttribute{
+func getDataSourceReleaseCreationStrategyAttribute() datasourceSchema.ListNestedAttribute {
+	return datasourceSchema.ListNestedAttribute{
 		Description: "The release creation strategy for the project.",
 		Computed:    true,
-		Attributes: map[string]datasourceSchema.Attribute{
-			"channel_id": getDataSourceStringAttribute("The ID of the channel to use for release creation.", false),
-			"release_creation_package": datasourceSchema.SingleNestedAttribute{
-				Description: "Details of the package used for release creation.",
-				Computed:    true,
-				Attributes: map[string]datasourceSchema.Attribute{
-					"deployment_action": getDataSourceStringAttribute("The deployment action for the release creation package.", false),
-					"package_reference": getDataSourceStringAttribute("The package reference for the release creation package.", false),
+		NestedObject: datasourceSchema.NestedAttributeObject{
+
+			Attributes: map[string]datasourceSchema.Attribute{
+				"channel_id": getDataSourceStringAttribute("The ID of the channel to use for release creation.", false),
+				"release_creation_package": datasourceSchema.ListNestedAttribute{
+					Description: "Details of the package used for release creation.",
+					Computed:    true,
+					NestedObject: datasourceSchema.NestedAttributeObject{
+						Attributes: map[string]datasourceSchema.Attribute{
+							"deployment_action": getDataSourceStringAttribute("The deployment action for the release creation package.", false),
+							"package_reference": getDataSourceStringAttribute("The package reference for the release creation package.", false),
+						},
+					},
 				},
+				"release_creation_package_step_id": getDataSourceStringAttribute("The ID of the step containing the package for release creation.", false),
 			},
-			"release_creation_package_step_id": getDataSourceStringAttribute("The ID of the step containing the package for release creation.", false),
 		},
 	}
 }
@@ -435,6 +468,7 @@ func getDataSourceTemplateAttribute() datasourceSchema.ListNestedAttribute {
 		Computed:    true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
+				"id":            getDataSourceStringAttribute("The ID of the template parameter.", false),
 				"name":          getDataSourceStringAttribute("The name of the variable set by the parameter.", false),
 				"label":         getDataSourceStringAttribute("The label shown beside the parameter.", false),
 				"help_text":     getDataSourceStringAttribute("The help text for the parameter.", false),
