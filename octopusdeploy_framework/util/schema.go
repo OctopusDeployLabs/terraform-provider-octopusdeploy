@@ -108,6 +108,23 @@ func GetDescriptionDatasourceSchema(resourceDescription string) schema.Attribute
 	}
 }
 
+func GetTenantTagsDatasourceSchema() schema.Attribute {
+	return schema.ListAttribute{
+		Computed:    true,
+		Description: "A list of tenant tags associated with this resource.",
+		ElementType: types.StringType,
+		Optional:    true,
+	}
+}
+
+func GetQueryDatasourceTags() schema.Attribute {
+	return schema.ListAttribute{
+		Description: "A filter to search by a list of tags.",
+		ElementType: types.StringType,
+		Optional:    true,
+	}
+}
+
 func GetIdResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",

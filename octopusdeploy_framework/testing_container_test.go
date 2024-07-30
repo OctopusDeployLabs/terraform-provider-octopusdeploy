@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 	if *createSharedContainer {
 
 		testFramework := test.OctopusContainerTest{}
-		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
+		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer()
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
 

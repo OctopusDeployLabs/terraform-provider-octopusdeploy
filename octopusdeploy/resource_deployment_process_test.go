@@ -420,7 +420,6 @@ func testAccDeploymentProcessCheckDestroy(s *terraform.State) error {
 
 func TestDeploymentProcessWithGitDependency(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "51-deploymentprocesswithgitdependency", []string{})
 
 	if err != nil {
