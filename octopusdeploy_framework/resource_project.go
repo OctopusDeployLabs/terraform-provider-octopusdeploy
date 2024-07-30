@@ -39,9 +39,12 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	project := expandProject(ctx, plan)
+	// Following value not return after create project or getById so need to save here and add back to stage later
 	persistenceSettings := project.PersistenceSettings
 	versioningStrategy := project.VersioningStrategy
+	connectivityPolicy := project.ConnectivityPolicy
 	createdProject, err := projects.Add(r.Client, project)
+
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating project", err.Error())
 		return
@@ -70,6 +73,10 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 		createdProject.VersioningStrategy = versioningStrategy
 	}
 
+	if connectivityPolicy != nil {
+		createdProject.ConnectivityPolicy = connectivityPolicy
+	}
+
 	flattenedProject, diags := flattenProject(ctx, createdProject, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -88,10 +95,25 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
+	stateProject := expandProject(ctx, state)
+	// Following value not return after create project or getById so need to save here and add back to stage later
+	persistenceSettings := stateProject.PersistenceSettings
+	versioningStrategy := stateProject.VersioningStrategy
+	connectivityPolicy := stateProject.ConnectivityPolicy
+
 	project, err := projects.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error reading project", err.Error())
 		return
+	}
+	if persistenceSettings != nil {
+		project.PersistenceSettings = persistenceSettings
+	}
+	if versioningStrategy != nil {
+		project.VersioningStrategy = versioningStrategy
+	}
+	if connectivityPolicy != nil {
+		project.ConnectivityPolicy = connectivityPolicy
 	}
 
 	flattenedProject, diags := flattenProject(ctx, project, &state)
@@ -120,6 +142,10 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	updatedProject := expandProject(ctx, plan)
 	updatedProject.ID = existingProject.ID
 	updatedProject.Links = existingProject.Links
+	// Following value not return after create project or getById so need to save here and add back to stage later
+	persistenceSettings := updatedProject.PersistenceSettings
+	versioningStrategy := updatedProject.VersioningStrategy
+	connectivityPolicy := updatedProject.ConnectivityPolicy
 
 	if updatedProject.PersistenceSettings != nil && updatedProject.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 		if existingProject.PersistenceSettings == nil || existingProject.PersistenceSettings.Type() != projects.PersistenceSettingsTypeVersionControlled {
@@ -136,6 +162,15 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating project", err.Error())
 		return
+	}
+	if persistenceSettings != nil {
+		updatedProject.PersistenceSettings = persistenceSettings
+	}
+	if versioningStrategy != nil {
+		updatedProject.VersioningStrategy = versioningStrategy
+	}
+	if connectivityPolicy != nil {
+		updatedProject.ConnectivityPolicy = connectivityPolicy
 	}
 
 	flattenedProject, diags := flattenProject(ctx, updatedProject, &plan)
