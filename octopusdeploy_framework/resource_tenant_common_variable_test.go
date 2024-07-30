@@ -11,11 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	localtest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 )
 
 func TestAccTenantCommonVariableBasic(t *testing.T) {
-	SkipCI(t, "project_environment have been refactor [deprecated] - will enable this test later after Ben fix")
+	internalTest.SkipCI(t, "project_environment have been refactor [deprecated] - will enable this test later after Ben fix")
 	//SkipCI(t, "A managed resource \"octopusdeploy_project_group\" \"ewtxiwplhaenzmhpaqyx\" has\n        not been declared in the root module.")
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -60,14 +60,14 @@ func TestAccTenantCommonVariableBasic(t *testing.T) {
 }
 
 func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, tenantLocalName string, tenantName string, tenantDescription string, localName string, value string) string {
-	projectGroup := localtest.NewProjectGroupTestOptions()
+	projectGroup := internalTest.NewProjectGroupTestOptions()
 	allowDynamicInfrastructure := false
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
 	projectGroup.LocalName = projectGroupLocalName
 	var tfConfig = fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
-		localtest.ProjectGroupConfiguration(projectGroup)+"\n"+
+		internalTest.ProjectGroupConfiguration(projectGroup)+"\n"+
 		testAccEnvironment(environmentLocalName, environmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
 		resource "octopusdeploy_library_variable_set" "test-library-variable-set" {
 			name = "test"
