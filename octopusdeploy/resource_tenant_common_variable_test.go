@@ -91,11 +91,12 @@ func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName s
 
 		resource "octopusdeploy_tenant" "%s" {
 			name = "%s"
+		}
 
-			project_environment {
-				project_id   = octopusdeploy_project.%s.id
-				environments = [octopusdeploy_environment.%s.id]
-			}
+		resource "octopusdeploy_tenant_project" "project_environment" {
+			tenant_id = octopusdeploy_tenant.%s.id
+			project_id   = octopusdeploy_project.%s.id
+			environment_ids = [octopusdeploy_environment.%s.id]
 		}
 
 		resource "octopusdeploy_tenant_common_variable" "%s" {
