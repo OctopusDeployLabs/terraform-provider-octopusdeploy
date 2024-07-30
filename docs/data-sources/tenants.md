@@ -28,7 +28,7 @@ Provides information about existing tenants.
 - `space_id` (String) The space ID associated with this tenants.
 - `tags` (List of String) A filter to search by a list of tags.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
-- `tenants` (Block List) (see [below for nested schema](#nestedblock--tenants))
+- `tenants` (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
 
 <a id="nestedblock--tenants"></a>
 ### Nested Schema for `tenants`

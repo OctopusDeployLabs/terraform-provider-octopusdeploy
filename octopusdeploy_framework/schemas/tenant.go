@@ -50,7 +50,7 @@ func FlattenTenant(tenant *tenants.Tenant) attr.Value {
 	}
 	var tenantTagsList, _ = types.ListValue(types.StringType, tenantTags)
 
-	return types.ObjectValueMust(datasourceSchema.TenantObjectType(), map[string]attr.Value{
+	return types.ObjectValueMust(TenantObjectType(), map[string]attr.Value{
 		"cloned_from_tenant_id": types.StringValue(tenant.ClonedFromTenantID),
 		"description":           types.StringValue(tenant.Description),
 		"id":                    types.StringValue(tenant.GetID()),
