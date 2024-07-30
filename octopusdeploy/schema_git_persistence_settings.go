@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"net/url"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -84,14 +83,12 @@ func flattenGitPersistenceSettings(ctx context.Context, persistenceSettings proj
 	credential := gitPersistenceSettings.Credential()
 	switch credential.Type() {
 	case credentials.GitCredentialTypeReference:
+		tflog.Info(ctx, "flatten reference credential")
 		flattenedGitPersistenceSettings["git_credential_id"] = credential.(*credentials.Reference).ID
 	case credentials.GitCredentialTypeUsernamePassword:
+		tflog.Info(ctx, "flatten U/P credential")
 		flattenedGitPersistenceSettings["username"] = credential.(*credentials.UsernamePassword).Username
-		if credential, ok := credential.(*credentials.UsernamePassword); ok {
-			flattenedGitPersistenceSettings["password"] = types.StringValue(*credential.Password.NewValue)
-		} else {
-			flattenedGitPersistenceSettings["password"] = types.StringNull()
-		}
+		flattenedGitPersistenceSettings["password"] = credential.(*credentials.UsernamePassword).Password.NewValue
 	}
 
 	if gitPersistenceSettings.URL() != nil {

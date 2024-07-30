@@ -47,16 +47,19 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	if persistenceSettings != nil && persistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
-		vcsProject, err := projects.ConvertToVCS(r.Client, createdProject, "Converting project to use VCS", "", persistenceSettings.(projects.GitPersistenceSettings))
+		_, err := projects.ConvertToVCS(r.Client, createdProject, "Converting project to use VCS", "", persistenceSettings.(projects.GitPersistenceSettings))
 		if err != nil {
 			resp.Diagnostics.AddError("Error converting project to VCS", err.Error())
 			_ = projects.DeleteByID(r.Client, plan.SpaceID.ValueString(), createdProject.GetID())
 			return
 		}
-		createdProject.PersistenceSettings = vcsProject.PersistenceSettings
 	}
 
 	createdProject, err = projects.GetByID(r.Client, plan.SpaceID.ValueString(), createdProject.GetID())
+	if persistenceSettings != nil {
+		createdProject.PersistenceSettings = persistenceSettings
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("Error retrieving created project", err.Error())
 		return
