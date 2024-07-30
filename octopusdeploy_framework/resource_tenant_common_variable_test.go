@@ -2,13 +2,14 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"strings"
-	"testing"
 
 	localtest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 )

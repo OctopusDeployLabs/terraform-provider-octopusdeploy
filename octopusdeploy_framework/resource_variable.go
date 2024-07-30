@@ -34,7 +34,7 @@ func (r *variableTypeResource) ImportState(ctx context.Context, req resource.Imp
 	if len(idParts) != 2 {
 		resp.Diagnostics.AddError(
 			"unexpected import identifier",
-			fmt.Sprintf("%s_variable import must be in the form of OwnerID:VariableID (e.g. Projects-62:0906031f-68ba-4a15-afaa-657c1564e07b)", ProviderTypeName))
+			fmt.Sprintf("%s_variable import must be in the form of OwnerID:VariableID (e.g. Projects-62:0906031f-68ba-4a15-afaa-657c1564e07b)", util.GetProviderName()))
 		return
 	}
 
@@ -43,7 +43,7 @@ func (r *variableTypeResource) ImportState(ctx context.Context, req resource.Imp
 }
 
 func (r *variableTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_variable"
+	resp.TypeName = util.GetProviderName() + "_variable"
 }
 
 func (r *variableTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
