@@ -149,12 +149,14 @@ func expandGitUsernamePasswordPersistenceSettings(ctx context.Context, model git
 	var protectedBranches []string
 	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
 
+	usernamePasswordCredential := credentials.NewUsernamePassword(
+		model.Username.ValueString(),
+		core.NewSensitiveValue(model.Password.ValueString()),
+	)
+
 	return projects.NewGitPersistenceSettings(
 		model.BasePath.ValueString(),
-		&credentials.UsernamePassword{
-			Username: model.Username.ValueString(),
-			Password: core.NewSensitiveValue(model.Password.ValueString()),
-		},
+		usernamePasswordCredential,
 		model.DefaultBranch.ValueString(),
 		protectedBranches,
 		url,
