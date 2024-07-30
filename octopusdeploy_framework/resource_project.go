@@ -45,7 +45,6 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	// Handle Git persistence settings if specified
 	if project.PersistenceSettings != nil && project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 		vcsProject, err := projects.ConvertToVCS(r.Client, createdProject, "Converting project to use VCS", "", project.PersistenceSettings.(projects.GitPersistenceSettings))
 		if err != nil {
@@ -56,14 +55,12 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 		createdProject.PersistenceSettings = vcsProject.PersistenceSettings
 	}
 
-	// Fetch the created project to ensure we have the latest state
 	createdProject, err = projects.GetByID(r.Client, plan.SpaceID.ValueString(), createdProject.GetID())
 	if err != nil {
 		resp.Diagnostics.AddError("Error retrieving created project", err.Error())
 		return
 	}
 
-	// Set state to fully populated data
 	flattenedProject, diags := flattenProject(ctx, createdProject, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -115,7 +112,6 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	updatedProject.ID = existingProject.ID
 	updatedProject.Links = existingProject.Links
 
-	// Handle Git persistence settings if specified
 	if updatedProject.PersistenceSettings != nil && updatedProject.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 		if existingProject.PersistenceSettings == nil || existingProject.PersistenceSettings.Type() != projects.PersistenceSettingsTypeVersionControlled {
 			vcsProject, err := projects.ConvertToVCS(r.Client, existingProject, "Converting project to use VCS", "", updatedProject.PersistenceSettings.(projects.GitPersistenceSettings))

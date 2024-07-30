@@ -96,9 +96,7 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 	}
 
 	if !model.VersioningStrategy.IsNull() {
-		var strategy versioningStrategyModel
-		model.VersioningStrategy.ElementsAs(ctx, &strategy, false)
-		project.VersioningStrategy = expandVersioningStrategy(strategy)
+		project.VersioningStrategy = expandVersioningStrategy(ctx, model.VersioningStrategy)
 	}
 
 	if !model.ReleaseCreationStrategy.IsNull() {
@@ -131,6 +129,7 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 
 	return project
 }
+
 func expandGitLibraryPersistenceSettings(ctx context.Context, model gitLibraryPersistenceSettingsModel) projects.GitPersistenceSettings {
 	url, _ := url.Parse(model.URL.ValueString())
 	var protectedBranches []string
@@ -207,8 +206,8 @@ func expandConnectivityPolicy(model connectivityPolicyModel) *core.ConnectivityP
 	}
 
 	skipMachineBehavior := core.SkipMachineBehavior(model.SkipMachineBehavior.ValueString())
-	if skipMachineBehavior == "" {
-		skipMachineBehavior = core.SkipMachineBehaviorNone
+	if skipMachineBehavior == "" || skipMachineBehavior == core.SkipMachineBehaviorNone {
+		skipMachineBehavior = core.SkipMachineBehavior("SkipUnavailableMachines")
 	}
 
 	return &core.ConnectivityPolicy{
@@ -236,20 +235,43 @@ func expandServiceNowExtensionSettings(model servicenowExtensionSettingsModel) *
 	)
 }
 
-func expandVersioningStrategy(model versioningStrategyModel) *projects.VersioningStrategy {
-	strategy := &projects.VersioningStrategy{
-		Template: model.Template.ValueString(),
+func expandVersioningStrategy(ctx context.Context, versioningStrategyList types.List) *projects.VersioningStrategy {
+	if versioningStrategyList.IsNull() || versioningStrategyList.IsUnknown() {
+		return nil
 	}
-	if !model.DonorPackageStepID.IsNull() {
-		donorPackageStepID := model.DonorPackageStepID.ValueString()
-		strategy.DonorPackageStepID = &donorPackageStepID
+
+	var strategyList []versioningStrategyModel
+	diags := versioningStrategyList.ElementsAs(ctx, &strategyList, false)
+	if diags.HasError() {
+		return nil
 	}
-	if !model.DonorPackage.IsNull() {
-		var donorPackage deploymentActionPackageModel
-		model.DonorPackage.As(context.Background(), &donorPackage, basetypes.ObjectAsOptions{})
-		strategy.DonorPackage = expandDeploymentActionPackage(donorPackage)
+
+	if len(strategyList) == 0 {
+		return nil
 	}
-	return strategy
+	strategy := strategyList[0]
+
+	versioningStrategy := &projects.VersioningStrategy{
+		Template: strategy.Template.ValueString(),
+	}
+
+	if !strategy.DonorPackageStepID.IsNull() {
+		donorPackageStepID := strategy.DonorPackageStepID.ValueString()
+		versioningStrategy.DonorPackageStepID = &donorPackageStepID
+	}
+
+	if !strategy.DonorPackage.IsNull() {
+		var donorPackageList []deploymentActionPackageModel
+		diags := strategy.DonorPackage.ElementsAs(ctx, &donorPackageList, false)
+		if !diags.HasError() && len(donorPackageList) > 0 {
+			donorPackage := donorPackageList[0]
+			versioningStrategy.DonorPackage = &packages.DeploymentActionPackage{
+				DeploymentAction: donorPackage.DeploymentAction.ValueString(),
+				PackageReference: donorPackage.PackageReference.ValueString(),
+			}
+		}
+	}
+	return versioningStrategy
 }
 
 func expandReleaseCreationStrategy(model releaseCreationStrategyModel) *projects.ReleaseCreationStrategy {

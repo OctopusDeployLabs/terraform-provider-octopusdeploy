@@ -155,6 +155,9 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 				}
 			}
 
+		  	versioning_strategy {
+				template = "#{Octopus.Version.LastMajor}.#{Octopus.Version.LastMinor}.#{Octopus.Version.LastPatch}.#{Octopus.Version.NextRevision}"
+		  	}
 		  //   connectivity_policy {
 		//     allow_deployments_to_no_targets = true
 		// 	skip_machine_behavior           = "None"

@@ -137,18 +137,18 @@ func processPersistenceSettings(ctx context.Context, project *projects.Project, 
 
 func flattenConnectivityPolicy(policy *core.ConnectivityPolicy) types.List {
 	if policy == nil {
-		return types.ListValueMust(types.ObjectType{AttrTypes: getConnectivityPolicyAttrTypes()}, []attr.Value{})
+		return types.ListNull(types.ObjectType{AttrTypes: getConnectivityPolicyAttrTypes()})
 	}
 
-	skipMachineBehavior := policy.SkipMachineBehavior
-	if skipMachineBehavior == "" {
-		skipMachineBehavior = core.SkipMachineBehaviorNone
+	skipMachineBehavior := string(policy.SkipMachineBehavior)
+	if skipMachineBehavior == "" || skipMachineBehavior == string(core.SkipMachineBehaviorNone) {
+		skipMachineBehavior = "SkipUnavailableMachines"
 	}
 
 	obj := types.ObjectValueMust(getConnectivityPolicyAttrTypes(), map[string]attr.Value{
 		"allow_deployments_to_no_targets": types.BoolValue(policy.AllowDeploymentsToNoTargets),
 		"exclude_unhealthy_targets":       types.BoolValue(policy.ExcludeUnhealthyTargets),
-		"skip_machine_behavior":           types.StringValue(string(skipMachineBehavior)),
+		"skip_machine_behavior":           types.StringValue(skipMachineBehavior),
 		"target_roles":                    util.FlattenStringList(policy.TargetRoles),
 	})
 
@@ -157,9 +157,8 @@ func flattenConnectivityPolicy(policy *core.ConnectivityPolicy) types.List {
 
 func flattenVersioningStrategy(strategy *projects.VersioningStrategy) types.List {
 	if strategy == nil {
-		return types.ListValueMust(types.ObjectType{AttrTypes: getVersioningStrategyAttrTypes()}, []attr.Value{})
+		return types.ListNull(types.ObjectType{AttrTypes: getVersioningStrategyAttrTypes()})
 	}
-
 	obj := types.ObjectValueMust(getVersioningStrategyAttrTypes(), map[string]attr.Value{
 		"donor_package":         flattenDeploymentActionPackage(strategy.DonorPackage),
 		"donor_package_step_id": types.StringPointerValue(strategy.DonorPackageStepID),

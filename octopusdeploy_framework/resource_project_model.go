@@ -65,7 +65,7 @@ type servicenowExtensionSettingsModel struct {
 type versioningStrategyModel struct {
 	DonorPackageStepID types.String `tfsdk:"donor_package_step_id"`
 	Template           types.String `tfsdk:"template"`
-	DonorPackage       types.Object `tfsdk:"donor_package"`
+	DonorPackage       types.List   `tfsdk:"donor_package"`
 }
 
 type releaseCreationStrategyModel struct {
