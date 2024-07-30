@@ -40,6 +40,7 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 
 	project := expandProject(ctx, plan)
 	persistenceSettings := project.PersistenceSettings
+	versioningStrategy := project.VersioningStrategy
 	createdProject, err := projects.Add(r.Client, project)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating project", err.Error())
@@ -56,13 +57,17 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	createdProject, err = projects.GetByID(r.Client, plan.SpaceID.ValueString(), createdProject.GetID())
+	if err != nil {
+		resp.Diagnostics.AddError("Error retrieving created project", err.Error())
+		return
+	}
+
 	if persistenceSettings != nil {
 		createdProject.PersistenceSettings = persistenceSettings
 	}
 
-	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving created project", err.Error())
-		return
+	if versioningStrategy != nil {
+		createdProject.VersioningStrategy = versioningStrategy
 	}
 
 	flattenedProject, diags := flattenProject(ctx, createdProject, &plan)
