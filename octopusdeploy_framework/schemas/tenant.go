@@ -96,7 +96,7 @@ func GetTenantDataSourceSchema() map[string]datasourceSchema.Attribute {
 		},
 		"description": util.GetDescriptionDatasourceSchema("tenants"),
 		"id":          util.GetIdDatasourceSchema(),
-		"name":        util.GetNameDatasourceSchema(true),
+		"name":        util.GetNameDatasourceSchema(false),
 		"space_id":    util.GetSpaceIdDatasourceSchema("tenant"),
 		"tenant_tags": datasourceSchema.ListAttribute{
 			Computed:    true,

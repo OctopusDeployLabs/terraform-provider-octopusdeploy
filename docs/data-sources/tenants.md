@@ -33,15 +33,12 @@ Provides information about existing tenants.
 <a id="nestedblock--tenants"></a>
 ### Nested Schema for `tenants`
 
-Required:
-
-- `name` (String) The name of this resource.
-
 Optional:
 
 - `cloned_from_tenant_id` (String) The ID of the tenant from which this tenant was cloned.
 - `description` (String) The description of this tenants.
 - `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
 - `space_id` (String) The space ID associated with this tenant.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
