@@ -1,13 +1,13 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
@@ -17,8 +17,8 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testLibraryVariableSetDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testLibraryVariableSetDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -40,8 +40,8 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testLibraryVariableSetDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testLibraryVariableSetDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -84,8 +84,8 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testLibraryVariableSetDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testLibraryVariableSetDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create variable set with no description

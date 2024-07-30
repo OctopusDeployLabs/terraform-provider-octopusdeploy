@@ -28,6 +28,10 @@ func TestMain(m *testing.M) {
 
 		testFramework := test.OctopusContainerTest{}
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
+		if err != nil {
+			log.Printf("Failed to arrange containers: (%s)", err.Error())
+		}
+
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
 
