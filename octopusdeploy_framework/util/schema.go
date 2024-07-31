@@ -2,6 +2,9 @@ package util
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
@@ -9,65 +12,64 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func GetQueryIDsDatasourceSchema() schema.Attribute {
-	return schema.ListAttribute{
+func GetQueryIDsDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.ListAttribute{
 		Description: "A filter to search by a list of IDs.",
 		ElementType: types.StringType,
 		Optional:    true,
 	}
 }
 
-func GetQueryNameDatasourceSchema() schema.Attribute {
-	return schema.StringAttribute{
+func GetQueryNameDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "A filter search by exact name",
 		Optional:    true,
 	}
 }
 
-func GetQueryPartialNameDatasourceSchema() schema.Attribute {
-	return schema.StringAttribute{
+func GetQueryPartialNameDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "A filter to search by a partial name.",
 		Optional:    true,
 	}
 }
 
-func GetQuerySkipDatasourceSchema() schema.Attribute {
-	return schema.Int64Attribute{
+func GetQuerySkipDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.Int64Attribute{
 		Description: "A filter to specify the number of items to skip in the response.",
 		Optional:    true,
 	}
 }
 
-func GetQueryTakeDatasourceSchema() schema.Attribute {
-	return schema.Int64Attribute{
+func GetQueryTakeDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.Int64Attribute{
 		Description: "A filter to specify the number of items to take (or return) in the response.",
 		Optional:    true,
 	}
 }
 
-func GetIdDatasourceSchema() schema.Attribute {
-	return schema.StringAttribute{
+func GetIdDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",
 		Computed:    true,
 		Optional:    true,
 	}
 }
 
-func GetSpaceIdDatasourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetSpaceIdDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "The space ID associated with this " + resourceDescription + ".",
 		Computed:    true,
 		Optional:    true,
 	}
 }
 
-func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) schema.Attribute {
-	s := schema.StringAttribute{
+func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The name of this resource, no more than %d characters long", maxLength),
 		Validators: []validator.String{
 			stringvalidator.LengthBetween(1, maxLength),
@@ -83,8 +85,8 @@ func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) schema
 	return s
 }
 
-func GetNameDatasourceSchema(isRequired bool) schema.Attribute {
-	s := schema.StringAttribute{
+func GetNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
 		Description: "The name of this resource.",
 		Validators: []validator.String{
 			stringvalidator.LengthAtLeast(1),
@@ -100,8 +102,8 @@ func GetNameDatasourceSchema(isRequired bool) schema.Attribute {
 	return s
 }
 
-func GetDescriptionDatasourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
 		Optional:    true,
 		Computed:    true,
@@ -130,8 +132,8 @@ func GetSpaceIdResourceSchema(resourceDescription string) resourceSchema.Attribu
 	}
 }
 
-func GetNameResourceSchema(isRequired bool) schema.Attribute {
-	s := schema.StringAttribute{
+func GetNameResourceSchema(isRequired bool) resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
 		Description: "The name of this resource.",
 		Validators: []validator.String{
 			stringvalidator.LengthAtLeast(1),
@@ -147,40 +149,41 @@ func GetNameResourceSchema(isRequired bool) schema.Attribute {
 	return s
 }
 
-func GetDescriptionResourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetDescriptionResourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
 		Optional:    true,
 		Computed:    true,
+		Default:     stringdefault.StaticString(""),
 	}
 }
 
-func GetSlugDatasourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetSlugDatasourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
 		Optional:    true,
 		Computed:    true,
 	}
 }
 
-func GetSlugResourceSchema(resourceDescription string) schema.Attribute {
-	return schema.StringAttribute{
+func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
 		Optional:    true,
 		Computed:    true,
 	}
 }
 
-func GetSortOrderDataSourceSchema(resourceDescription string) schema.Attribute {
-	return schema.Int64Attribute{
+func GetSortOrderDataSourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.Int64Attribute{
 		Description: fmt.Sprintf("The order number to sort an %s", resourceDescription),
 		Optional:    true,
 		Computed:    true,
 	}
 }
 
-func GetSortOrderResourceSchema(resourceDescription string) schema.Attribute {
-	return schema.Int64Attribute{
+func GetSortOrderResourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.Int64Attribute{
 		Description: fmt.Sprintf("The order number to sort an %s", resourceDescription),
 		Optional:    true,
 		Computed:    true,
@@ -205,8 +208,8 @@ func GetPasswordResourceSchema(isRequired bool) resourceSchema.Attribute {
 	return s
 }
 
-func GetPasswordDataSourceSchema(isRequired bool) schema.Attribute {
-	s := resourceSchema.StringAttribute{
+func GetPasswordDataSourceSchema(isRequired bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
 		Description: "The password associated with this resource.",
 		Sensitive:   true,
 		Validators: []validator.String{
@@ -241,8 +244,8 @@ func GetUsernameResourceSchema(isRequired bool) resourceSchema.Attribute {
 	return s
 }
 
-func GetRequiredStringResourceSchema(description string) schema.StringAttribute {
-	return schema.StringAttribute{
+func GetRequiredStringResourceSchema(description string) resourceSchema.StringAttribute {
+	return resourceSchema.StringAttribute{
 		Required:    true,
 		Description: description,
 		Validators: []validator.String{
