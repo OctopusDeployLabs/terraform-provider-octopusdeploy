@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -121,7 +122,7 @@ func getVariableScopeResourceSchema() resourceSchema.ListNestedBlock {
 
 func getVariableScopeFieldResourceSchema(scopeDescription string) resourceSchema.ListAttribute {
 	return resourceSchema.ListAttribute{
-		Description: fmt.Sprintf("A list of %s that are scoped to this variable value.", scopeDescription),
+		Description: fmt.Sprintf("A list of %s that are scoped to this variable value.", strings.ReplaceAll(scopeDescription, "_", " ")),
 		Optional:    true,
 		ElementType: basetypes.StringType{},
 	}

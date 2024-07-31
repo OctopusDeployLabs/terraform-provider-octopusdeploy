@@ -22,17 +22,17 @@ var displaySettingsControlTypeNames = struct {
 	Select         string
 	SingleLineText string
 }{
-	"CheckBox",
+	"Checkbox",
 	"MultiLineText",
 	"Select",
-	"SingeLineText",
+	"SingleLineText",
 }
 
 var displaySettingsControlTypes = []string{
-	displaySettingsControlTypeNames.CheckBox,
-	displaySettingsControlTypeNames.MultiLineText,
-	displaySettingsControlTypeNames.Select,
 	displaySettingsControlTypeNames.SingleLineText,
+	displaySettingsControlTypeNames.MultiLineText,
+	displaySettingsControlTypeNames.CheckBox,
+	displaySettingsControlTypeNames.Select,
 }
 
 func VariablePromptOptionsObjectType() map[string]attr.Type {
@@ -218,7 +218,7 @@ func getDisplaySettingsDatasourceSchema() datasourceSchema.ListNestedAttribute {
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
 				VariableSchemaAttributeNames.ControlType: datasourceSchema.StringAttribute{
-					Description: fmt.Sprintf("The type of control for rendering this prompted variable. Valid types are %s", strings.Join(displaySettingsControlTypes, ", ")),
+					Description: fmt.Sprintf("The type of control for rendering this prompted variable. Valid types are %s", strings.Join(util.Map(displaySettingsControlTypes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 					Required:    true,
 					Validators: []validator.String{
 						stringvalidator.OneOf(
@@ -254,14 +254,16 @@ func getVariablePromptResourceSchema() resourceSchema.ListNestedBlock {
 	return resourceSchema.ListNestedBlock{
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
-				SchemaAttributeNames.Description:             util.GetDescriptionResourceSchema("variable prompt option"),
-				VariableSchemaAttributeNames.DisplaySettings: getDisplaySettingsResourceSchema(),
+				SchemaAttributeNames.Description: util.GetDescriptionResourceSchema("variable prompt option"),
 				VariableSchemaAttributeNames.IsRequired: resourceSchema.BoolAttribute{
 					Optional: true,
 				},
 				VariableSchemaAttributeNames.Label: resourceSchema.StringAttribute{
 					Optional: true,
 				},
+			},
+			Blocks: map[string]resourceSchema.Block{
+				VariableSchemaAttributeNames.DisplaySettings: getDisplaySettingsResourceSchema(),
 			},
 		},
 		Validators: []validator.List{
@@ -270,13 +272,12 @@ func getVariablePromptResourceSchema() resourceSchema.ListNestedBlock {
 	}
 }
 
-func getDisplaySettingsResourceSchema() resourceSchema.ListNestedAttribute {
-	return resourceSchema.ListNestedAttribute{
-		Optional: true,
-		NestedObject: resourceSchema.NestedAttributeObject{
+func getDisplaySettingsResourceSchema() resourceSchema.ListNestedBlock {
+	return resourceSchema.ListNestedBlock{
+		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
 				VariableSchemaAttributeNames.ControlType: resourceSchema.StringAttribute{
-					Description: fmt.Sprintf("The type of control for rendering this prompted variable. Valid types are %s", strings.Join(displaySettingsControlTypes, ", ")),
+					Description: fmt.Sprintf("The type of control for rendering this prompted variable. Valid types are %s.", strings.Join(util.Map(displaySettingsControlTypes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 					Required:    true,
 					Validators: []validator.String{
 						stringvalidator.OneOf(
@@ -284,10 +285,11 @@ func getDisplaySettingsResourceSchema() resourceSchema.ListNestedAttribute {
 						),
 					},
 				},
-				VariableSchemaAttributeNames.SelectOption: resourceSchema.ListNestedAttribute{
+			},
+			Blocks: map[string]resourceSchema.Block{
+				VariableSchemaAttributeNames.SelectOption: resourceSchema.ListNestedBlock{
 					Description: fmt.Sprintf("If the `%s` is `%s`, then this value defines an option.", VariableSchemaAttributeNames.ControlType, displaySettingsControlTypeNames.Select),
-					Optional:    true,
-					NestedObject: resourceSchema.NestedAttributeObject{
+					NestedObject: resourceSchema.NestedBlockObject{
 						Attributes: map[string]resourceSchema.Attribute{
 							VariableSchemaAttributeNames.Value: resourceSchema.StringAttribute{
 								Description: "The select value",
