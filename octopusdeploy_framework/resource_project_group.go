@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projectgroups"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,7 +21,7 @@ func NewProjectGroupResource() resource.Resource {
 }
 
 func (r *projectGroupTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_project_group"
+	resp.TypeName = util.GetTypeName("project_group")
 }
 
 func (r *projectGroupTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

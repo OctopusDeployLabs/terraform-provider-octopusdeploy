@@ -88,4 +88,10 @@ func SetBool(attrs map[string]attr.Value, attr string, b *bool) {
 	if v, ok := attrs[attr]; ok {
 		*b = v.(types.Bool).ValueBool()
 	}
+func ToValueSlice(slice []string) []attr.Value {
+	values := make([]attr.Value, len(slice))
+	for i, s := range slice {
+		values[i] = types.StringValue(s)
+	}
+	return values
 }

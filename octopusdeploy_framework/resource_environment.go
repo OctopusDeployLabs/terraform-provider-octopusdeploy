@@ -20,7 +20,7 @@ func NewEnvironmentResource() resource.Resource {
 }
 
 func (r *environmentTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_environment"
+	resp.TypeName = util.GetTypeName("environment")
 }
 
 func (r *environmentTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

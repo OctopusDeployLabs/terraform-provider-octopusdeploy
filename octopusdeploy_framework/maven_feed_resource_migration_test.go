@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func TestMavenResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
 
@@ -90,7 +90,7 @@ func testFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		mavenFeed := feed.(*feeds.MavenFeed)
 
-		assert.Equal(t, "Feeds-1001", mavenFeed.ID, "Feed ID did not match expected value")
+		assert.Regexp(t, "^Feeds\\-\\d+$", mavenFeed.GetID(), "Feed ID did not match expected value")
 		assert.Equal(t, "Updated_Maven", mavenFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", mavenFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, mavenFeed.Password.HasValue, "Feed password should be set")

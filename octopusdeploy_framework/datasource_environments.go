@@ -20,7 +20,7 @@ type environmentDataSource struct {
 	*Config
 }
 
-type environmentsDataSoruceModel struct {
+type environmentsDataSourceModel struct {
 	ID           types.String `tfsdk:"id"`
 	SpaceID      types.String `tfsdk:"space_id"`
 	IDs          types.List   `tfsdk:"ids"`
@@ -36,7 +36,7 @@ func NewEnvironmentsDataSource() datasource.DataSource {
 }
 
 func (*environmentDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_environments"
+	resp.TypeName = util.GetTypeName("environments")
 }
 
 func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -71,7 +71,7 @@ func (e *environmentDataSource) Configure(_ context.Context, req datasource.Conf
 
 func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var err error
-	var data environmentsDataSoruceModel
+	var data environmentsDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

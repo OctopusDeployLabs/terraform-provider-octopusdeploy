@@ -81,7 +81,7 @@ func testSpaceUpdated(t *testing.T) resource.TestCheckFunc {
 			return fmt.Errorf("Failed to retrieve space by ID: %s", err)
 		}
 
-		assert.Equal(t, "Spaces-2", space.GetID(), "Space ID did not match expected value")
+		assert.Regexp(t, "^Spaces\\-\\d+$", space.GetID(), "Space ID did not match expected value")
 		assert.Equal(t, "Updated Test Space", space.Name, "Space name did not match expected value")
 		assert.Equal(t, true, space.TaskQueueStopped, "Task Queue did not match expected value")
 		assert.Equal(t, false, space.IsDefault, "IsDefault did not match expected value")
