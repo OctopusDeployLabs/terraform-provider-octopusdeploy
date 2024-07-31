@@ -66,6 +66,7 @@ func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, project
 	resource "octopusdeploy_tenant" "%s" {
 		description = "%s"
 		name        = "%s"
+	}
 
 	resource "octopusdeploy_tenant_project" "project_environment" {
 		tenant_id = octopusdeploy_tenant.%s.id
