@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_docker_container_registry Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  This resource manages a Docker Container Registry in Octopus Deploy.
+  
 ---
 
 # octopusdeploy_docker_container_registry (Resource)
 
-This resource manages a Docker Container Registry in Octopus Deploy.
+
 
 ## Example Usage
 
@@ -25,8 +25,8 @@ resource "octopusdeploy_docker_container_registry" "example" {
 
 ### Required
 
-- `feed_uri` (String) The URL to a Docker repository.
-- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `feed_uri` (String)
+- `name` (String) The name of this resource.
 
 ### Optional
 
@@ -35,7 +35,7 @@ resource "octopusdeploy_docker_container_registry" "example" {
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
 - `registry_path` (String)
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this docker container registry feed.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ## Import

@@ -152,6 +152,7 @@ func createDockerContainerRegistryFeedResourceFromData(data *schemas.DockerConta
 	feed.SpaceID = data.SpaceID.ValueString()
 	feed.Username = data.Username.ValueString()
 	feed.APIVersion = data.ApiVersion.ValueString()
+	feed.RegistryPath = data.RegistryPath.ValueString()
 
 	return feed, nil
 }
@@ -161,6 +162,7 @@ func updateDataFromDockerContainerRegistryFeed(data *schemas.DockerContainerRegi
 	data.Name = types.StringValue(feed.Name)
 	data.SpaceID = types.StringValue(spaceId)
 	data.ApiVersion = types.StringValue(feed.APIVersion)
+	data.RegistryPath = types.StringValue(feed.RegistryPath)
 	if feed.Username != "" {
 		data.Username = types.StringValue(feed.Username)
 	}

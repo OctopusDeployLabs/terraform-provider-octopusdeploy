@@ -18,8 +18,11 @@ func GetDockerContainerRegistryFeedResourceSchema() map[string]resourceSchema.At
 		"name":                                 util.GetNameResourceSchema(true),
 		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
 		"password":                             util.GetPasswordResourceSchema(false),
-		"space_id":                             util.GetSpaceIdResourceSchema(mavenFeedDescription),
+		"space_id":                             util.GetSpaceIdResourceSchema(dockerContainerRegistryFeedDescription),
 		"username":                             util.GetUsernameResourceSchema(false),
+		"registry_path": resourceSchema.StringAttribute{
+			Optional: true,
+		},
 	}
 }
 
@@ -32,4 +35,5 @@ type DockerContainerRegistryFeedTypeResourceModel struct {
 	Password                          types.String `tfsdk:"password"`
 	SpaceID                           types.String `tfsdk:"space_id"`
 	Username                          types.String `tfsdk:"username"`
+	RegistryPath                      types.String `tfsdk:"registry_path"`
 }
