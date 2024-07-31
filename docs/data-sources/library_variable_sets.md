@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_library_variable_sets Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  Provides information about existing library variable sets.
+  
 ---
 
 # octopusdeploy_library_variable_sets (Data Source)
 
-Provides information about existing library variable sets.
+
 
 
 
@@ -18,34 +18,34 @@ Provides information about existing library variable sets.
 ### Optional
 
 - `content_type` (String) A filter to search by content type.
+- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
-- `partial_name` (String) A filter to search by the partial match of a name.
-- `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
-- `take` (Number) A filter to specify the number of items to take (or return) in the response.
-
-### Read-Only
-
-- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 - `library_variable_sets` (Block List) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedblock--library_variable_sets))
+- `partial_name` (String) A filter to search by a partial name.
+- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `space_id` (String) The space ID associated with this library variable set.
+- `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 <a id="nestedblock--library_variable_sets"></a>
 ### Nested Schema for `library_variable_sets`
 
-Read-Only:
+Optional:
 
 - `description` (String) The description of this library variable set.
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this library variable set.
 - `template` (List of Object) (see [below for nested schema](#nestedatt--library_variable_sets--template))
+
+Read-Only:
+
 - `template_ids` (Map of String)
 - `variable_set_id` (String)
 
 <a id="nestedatt--library_variable_sets--template"></a>
 ### Nested Schema for `library_variable_sets.template`
 
-Read-Only:
+Optional:
 
 - `default_value` (String)
 - `display_settings` (Map of String)
