@@ -70,7 +70,7 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	deploymentDiags := r.updateStateWithDeploymentSettings(createdProject, flattenedProject)
+	deploymentDiags := r.updateStateWithDeploymentSettings(createdProject, flattenedProject, &plan)
 	if deploymentDiags.HasError() {
 		return
 	}
@@ -104,7 +104,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	diagFromUpdate := r.updateStateWithDeploymentSettings(project, flattenedProject)
+	diagFromUpdate := r.updateStateWithDeploymentSettings(project, flattenedProject, &state)
 	if diagFromUpdate.HasError() {
 		return
 	}
@@ -158,7 +158,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	diagFromUpdate := r.updateStateWithDeploymentSettings(updatedProject, flattenedProject)
+	diagFromUpdate := r.updateStateWithDeploymentSettings(updatedProject, flattenedProject, &plan)
 	if diagFromUpdate.HasError() {
 		return
 	}
@@ -184,7 +184,7 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *projectResource) updateStateWithDeploymentSettings(project *projects.Project, state *projectResourceModel) diag.Diagnostics {
+func (r *projectResource) updateStateWithDeploymentSettings(project *projects.Project, newState *projectResourceModel, originalState *projectResourceModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	var gitRef string
@@ -203,15 +203,15 @@ func (r *projectResource) updateStateWithDeploymentSettings(project *projects.Pr
 	}
 
 	// Update the state with the deployment settings
-	if deploymentSettings.ConnectivityPolicy != nil {
-		state.ConnectivityPolicy = flattenConnectivityPolicy(deploymentSettings.ConnectivityPolicy)
+	if deploymentSettings.ConnectivityPolicy != nil && !originalState.ConnectivityPolicy.IsNull() {
+		newState.ConnectivityPolicy = flattenConnectivityPolicy(deploymentSettings.ConnectivityPolicy)
 	}
-	state.DefaultGuidedFailureMode = types.StringValue(string(deploymentSettings.DefaultGuidedFailureMode))
-	state.DefaultToSkipIfAlreadyInstalled = types.BoolValue(deploymentSettings.DefaultToSkipIfAlreadyInstalled)
-	state.DeploymentChangesTemplate = types.StringValue(deploymentSettings.DeploymentChangesTemplate)
-	state.ReleaseNotesTemplate = types.StringValue(deploymentSettings.ReleaseNotesTemplate)
-	if deploymentSettings.VersioningStrategy != nil {
-		state.VersioningStrategy = flattenVersioningStrategy(deploymentSettings.VersioningStrategy)
+	newState.DefaultGuidedFailureMode = types.StringValue(string(deploymentSettings.DefaultGuidedFailureMode))
+	newState.DefaultToSkipIfAlreadyInstalled = types.BoolValue(deploymentSettings.DefaultToSkipIfAlreadyInstalled)
+	newState.DeploymentChangesTemplate = types.StringValue(deploymentSettings.DeploymentChangesTemplate)
+	newState.ReleaseNotesTemplate = types.StringValue(deploymentSettings.ReleaseNotesTemplate)
+	if deploymentSettings.VersioningStrategy != nil && !originalState.VersioningStrategy.IsNull() {
+		newState.VersioningStrategy = flattenVersioningStrategy(deploymentSettings.VersioningStrategy)
 	}
 
 	return diags
