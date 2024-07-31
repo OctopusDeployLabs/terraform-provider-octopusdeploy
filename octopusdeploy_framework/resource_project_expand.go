@@ -55,6 +55,7 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 			fmt.Printf("Number of Git library persistence settings: %d\n", len(gitLibrarySettingsList))
 			if len(gitLibrarySettingsList) > 0 {
 				project.PersistenceSettings = expandGitLibraryPersistenceSettings(ctx, gitLibrarySettingsList[0])
+				project.IsVersionControlled = true
 			}
 		}
 	} else if !model.GitUsernamePasswordPersistenceSettings.IsNull() {
@@ -66,6 +67,7 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 			fmt.Printf("Number of Git username/password persistence settings: %d\n", len(gitUsernamePasswordSettingsList))
 			if len(gitUsernamePasswordSettingsList) > 0 {
 				project.PersistenceSettings = expandGitUsernamePasswordPersistenceSettings(ctx, gitUsernamePasswordSettingsList[0])
+				project.IsVersionControlled = true
 			}
 		}
 	} else if !model.GitAnonymousPersistenceSettings.IsNull() {
@@ -77,20 +79,27 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 			fmt.Printf("Number of Git anonymous persistence settings: %d\n", len(gitAnonymousSettingsList))
 			if len(gitAnonymousSettingsList) > 0 {
 				project.PersistenceSettings = expandGitAnonymousPersistenceSettings(ctx, gitAnonymousSettingsList[0])
+				project.IsVersionControlled = true
 			}
 		}
 	}
 
 	if !model.JiraServiceManagementExtensionSettings.IsNull() {
-		var settings jiraServiceManagementExtensionSettingsModel
-		model.JiraServiceManagementExtensionSettings.ElementsAs(ctx, &settings, false)
-		project.ExtensionSettings = append(project.ExtensionSettings, expandJiraServiceManagementExtensionSettings(settings))
+		var settingsList []jiraServiceManagementExtensionSettingsModel
+		diags := model.JiraServiceManagementExtensionSettings.ElementsAs(ctx, &settingsList, false)
+		if !diags.HasError() && len(settingsList) > 0 {
+			settings := settingsList[0]
+			project.ExtensionSettings = append(project.ExtensionSettings, expandJiraServiceManagementExtensionSettings(settings))
+		}
 	}
 
 	if !model.ServiceNowExtensionSettings.IsNull() {
-		var settings servicenowExtensionSettingsModel
-		model.ServiceNowExtensionSettings.ElementsAs(ctx, &settings, false)
-		project.ExtensionSettings = append(project.ExtensionSettings, expandServiceNowExtensionSettings(settings))
+		var settingsList []servicenowExtensionSettingsModel
+		diags := model.ServiceNowExtensionSettings.ElementsAs(ctx, &settingsList, false)
+		if !diags.HasError() && len(settingsList) > 0 {
+			settings := settingsList[0]
+			project.ExtensionSettings = append(project.ExtensionSettings, expandServiceNowExtensionSettings(settings))
+		}
 	}
 
 	if !model.VersioningStrategy.IsNull() {

@@ -103,7 +103,7 @@ func processPersistenceSettings(ctx context.Context, project *projects.Project, 
 		if project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 			gitSettings := project.PersistenceSettings.(projects.GitPersistenceSettings)
 			gitCredentialType := gitSettings.Credential().Type()
-
+			model.IsVersionControlled = types.BoolValue(true)
 			switch gitCredentialType {
 			case credentials.GitCredentialTypeReference:
 				model.GitLibraryPersistenceSettings, diags = flattenGitPersistenceSettings(ctx, gitSettings)
@@ -131,6 +131,7 @@ func processPersistenceSettings(ctx context.Context, project *projects.Project, 
 		model.GitLibraryPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitLibraryPersistenceSettingsAttrTypes()})
 		model.GitUsernamePasswordPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()})
 		model.GitAnonymousPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()})
+		model.IsVersionControlled = types.BoolValue(false)
 	}
 	return diags, nil, nil, false
 }

@@ -2,10 +2,13 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 )
 
 var _ resource.Resource = &projectResource{}
@@ -39,12 +42,9 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	project := expandProject(ctx, plan)
-	// Following value not return after create project or getById so need to save here and add back to stage later
+	// Password doesn't return from API so this is work around
 	persistenceSettings := project.PersistenceSettings
-	versioningStrategy := project.VersioningStrategy
-	connectivityPolicy := project.ConnectivityPolicy
 	createdProject, err := projects.Add(r.Client, project)
-
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating project", err.Error())
 		return
@@ -60,26 +60,18 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	createdProject, err = projects.GetByID(r.Client, plan.SpaceID.ValueString(), createdProject.GetID())
-	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving created project", err.Error())
-		return
-	}
-
 	if persistenceSettings != nil {
 		createdProject.PersistenceSettings = persistenceSettings
-	}
-
-	if versioningStrategy != nil {
-		createdProject.VersioningStrategy = versioningStrategy
-	}
-
-	if connectivityPolicy != nil {
-		createdProject.ConnectivityPolicy = connectivityPolicy
 	}
 
 	flattenedProject, diags := flattenProject(ctx, createdProject, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	deploymentDiags := r.updateStateWithDeploymentSettings(createdProject, flattenedProject)
+	if deploymentDiags.HasError() {
 		return
 	}
 
@@ -94,12 +86,8 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 	stateProject := expandProject(ctx, state)
-	// Following value not return after create project or getById so need to save here and add back to stage later
 	persistenceSettings := stateProject.PersistenceSettings
-	versioningStrategy := stateProject.VersioningStrategy
-	connectivityPolicy := stateProject.ConnectivityPolicy
 
 	project, err := projects.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
@@ -109,16 +97,15 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	if persistenceSettings != nil {
 		project.PersistenceSettings = persistenceSettings
 	}
-	if versioningStrategy != nil {
-		project.VersioningStrategy = versioningStrategy
-	}
-	if connectivityPolicy != nil {
-		project.ConnectivityPolicy = connectivityPolicy
-	}
 
 	flattenedProject, diags := flattenProject(ctx, project, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diagFromUpdate := r.updateStateWithDeploymentSettings(project, flattenedProject)
+	if diagFromUpdate.HasError() {
 		return
 	}
 
@@ -142,10 +129,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	updatedProject := expandProject(ctx, plan)
 	updatedProject.ID = existingProject.ID
 	updatedProject.Links = existingProject.Links
-	// Following value not return after create project or getById so need to save here and add back to stage later
 	persistenceSettings := updatedProject.PersistenceSettings
-	versioningStrategy := updatedProject.VersioningStrategy
-	connectivityPolicy := updatedProject.ConnectivityPolicy
 
 	if updatedProject.PersistenceSettings != nil && updatedProject.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 		if existingProject.PersistenceSettings == nil || existingProject.PersistenceSettings.Type() != projects.PersistenceSettingsTypeVersionControlled {
@@ -163,19 +147,19 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		resp.Diagnostics.AddError("Error updating project", err.Error())
 		return
 	}
+
 	if persistenceSettings != nil {
 		updatedProject.PersistenceSettings = persistenceSettings
-	}
-	if versioningStrategy != nil {
-		updatedProject.VersioningStrategy = versioningStrategy
-	}
-	if connectivityPolicy != nil {
-		updatedProject.ConnectivityPolicy = connectivityPolicy
 	}
 
 	flattenedProject, diags := flattenProject(ctx, updatedProject, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diagFromUpdate := r.updateStateWithDeploymentSettings(updatedProject, flattenedProject)
+	if diagFromUpdate.HasError() {
 		return
 	}
 
@@ -198,4 +182,37 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 
 	resp.State.RemoveResource(ctx)
+}
+
+func (r *projectResource) updateStateWithDeploymentSettings(project *projects.Project, state *projectResourceModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	var gitRef string
+	if project.IsVersionControlled {
+		if gitSettings, ok := project.PersistenceSettings.(projects.GitPersistenceSettings); ok {
+			gitRef = gitSettings.DefaultBranch()
+		}
+		if gitRef == "" {
+			gitRef = "main"
+		}
+	}
+
+	deploymentSettings, err := r.Client.Deployments.GetDeploymentSettings(project, gitRef)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error reading deployment settings: %w", err))
+	}
+
+	// Update the state with the deployment settings
+	if deploymentSettings.ConnectivityPolicy != nil {
+		state.ConnectivityPolicy = flattenConnectivityPolicy(deploymentSettings.ConnectivityPolicy)
+	}
+	state.DefaultGuidedFailureMode = types.StringValue(string(deploymentSettings.DefaultGuidedFailureMode))
+	state.DefaultToSkipIfAlreadyInstalled = types.BoolValue(deploymentSettings.DefaultToSkipIfAlreadyInstalled)
+	state.DeploymentChangesTemplate = types.StringValue(deploymentSettings.DeploymentChangesTemplate)
+	state.ReleaseNotesTemplate = types.StringValue(deploymentSettings.ReleaseNotesTemplate)
+	if deploymentSettings.VersioningStrategy != nil {
+		state.VersioningStrategy = flattenVersioningStrategy(deploymentSettings.VersioningStrategy)
+	}
+
+	return diags
 }
