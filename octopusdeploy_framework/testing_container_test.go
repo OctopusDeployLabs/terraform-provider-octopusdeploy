@@ -56,6 +56,10 @@ func (suite *IntegrationTestSuite) SetupSuite() {
 			if suite.err != nil {
 				log.Printf("Failed to create client: (%s)", suite.err.Error())
 			}
+			octoContainer = &test.OctopusContainer{
+				Container: nil,
+				URI:       url,
+			}
 		}
 	}
 }

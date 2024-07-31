@@ -1,10 +1,10 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"strings"
 )
 
@@ -35,7 +35,7 @@ func (suite *IntegrationTestSuite) TestAccTenantProjectVariableBasic() {
 
 	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccTenantProjectVariableCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(suite.T()) },
+		PreCheck:                 func() { TestAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -171,4 +171,27 @@ func testAccTenantProjectVariableCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func testAccProjectWithTemplate(localName string, name string, lifecycleLocalName string, projectGroupLocalName string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project" "%s" {
+		lifecycle_id     = octopusdeploy_lifecycle.%s.id
+		name             = "%s"
+		project_group_id = octopusdeploy_project_group.%s.id
+
+		template {
+			name  = "project variable template name"
+			label = "project variable template label"
+
+			display_settings = {
+				"Octopus.ControlType" = "Sensitive"
+			}
+		}
+	}`, localName, lifecycleLocalName, name, projectGroupLocalName)
+}
+
+func testAccProjectGroup(localName string, name string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_project_group" "%s" {
+		name = "%s"
+	}`, localName, name)
 }
