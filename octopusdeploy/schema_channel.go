@@ -43,6 +43,18 @@ func expandChannel(d *schema.ResourceData) *channels.Channel {
 		}
 	}
 
+	if v, ok := d.GetOk("git_reference_rules"); ok {
+		channel.GitReferenceRules = expandArray(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("git_resource_rules"); ok {
+		channelGitResourceRules := v.([]interface{})
+		for _, channelGitResourceRule := range channelGitResourceRules {
+			rule := expandChannelGitResourceRules(channelGitResourceRule.(map[string]interface{}))
+			channel.GitResourceRules = append(channel.GitResourceRules, rule)
+		}
+	}
+
 	return channel
 }
 
@@ -52,15 +64,17 @@ func flattenChannel(channel *channels.Channel) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"description":  channel.Description,
-		"id":           channel.GetID(),
-		"is_default":   channel.IsDefault,
-		"lifecycle_id": channel.LifecycleID,
-		"name":         channel.Name,
-		"project_id":   channel.ProjectID,
-		"rule":         flattenChannelRules(channel.Rules),
-		"space_id":     channel.SpaceID,
-		"tenant_tags":  channel.TenantTags,
+		"description":         channel.Description,
+		"id":                  channel.GetID(),
+		"is_default":          channel.IsDefault,
+		"lifecycle_id":        channel.LifecycleID,
+		"name":                channel.Name,
+		"project_id":          channel.ProjectID,
+		"rule":                flattenChannelRules(channel.Rules),
+		"space_id":            channel.SpaceID,
+		"tenant_tags":         channel.TenantTags,
+		"git_reference_rules": flattenArray(channel.GitReferenceRules),
+		"git_resource_rules":  flattenChannelGitResourceRules(channel.GitResourceRules),
 	}
 }
 
@@ -112,6 +126,18 @@ func getChannelSchema() map[string]*schema.Schema {
 		},
 		"space_id":    getSpaceIDSchema(),
 		"tenant_tags": getTenantTagsSchema(),
+		"git_reference_rules": {
+			Description: "List of rules to restrict which Git references can be used with this channel when creating releases for version controlled projects. References must be fully qualified e.g. `refs/heads/main`. Supports glob patten syntax.",
+			Optional:    true,
+			Type:        schema.TypeList,
+			Elem:        &schema.Schema{Type: schema.TypeString},
+		},
+		"git_resource_rules": {
+			Description: "List of rules to restrict which Git resources can be used with this channel when creating releases with external Git resources. Resources must be fully qualified e.g. `refs/heads/main`. Supports glob patten syntax.",
+			Optional:    true,
+			Type:        schema.TypeList,
+			Elem:        &schema.Resource{Schema: getChannelGitResourceRuleSchema()},
+		},
 	}
 }
 
@@ -129,6 +155,14 @@ func setChannel(ctx context.Context, d *schema.ResourceData, channel *channels.C
 
 	if err := d.Set("tenant_tags", channel.TenantTags); err != nil {
 		return fmt.Errorf("error setting tenant_tags: %s", err)
+	}
+
+	if err := d.Set("git_reference_rules", channel.GitReferenceRules); err != nil {
+		return fmt.Errorf("error setting git_reference_rules: %s", err)
+	}
+
+	if err := d.Set("git_resource_rules", flattenChannelGitResourceRules(channel.GitResourceRules)); err != nil {
+		return fmt.Errorf("error setting git_resource_rules: %s", err)
 	}
 
 	return nil

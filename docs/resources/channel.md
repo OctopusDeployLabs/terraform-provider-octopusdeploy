@@ -30,12 +30,36 @@ resource "octopusdeploy_channel" "example" {
 ### Optional
 
 - `description` (String) The description of this channel.
+- `git_reference_rules` (List of String) List of rules to restrict which Git references can be used with this channel when creating releases for version controlled projects. References must be fully qualified e.g. `refs/heads/main`. Supports glob patten syntax.
+- `git_resource_rules` (Block List) List of rules to restrict which Git resources can be used with this channel when creating releases with external Git resources. Resources must be fully qualified e.g. `refs/heads/main`. Supports glob patten syntax. (see [below for nested schema](#nestedblock--git_resource_rules))
 - `id` (String) The unique ID for this resource.
 - `is_default` (Boolean) Indicates if this is the default channel for the associated project.
 - `lifecycle_id` (String) The lifecycle ID associated with this channel.
 - `rule` (Block List) A list of rules associated with this channel. (see [below for nested schema](#nestedblock--rule))
 - `space_id` (String) The space ID associated with this resource.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+
+<a id="nestedblock--git_resource_rules"></a>
+### Nested Schema for `git_resource_rules`
+
+Required:
+
+- `git_dependency_actions` (Block List, Min: 1) (see [below for nested schema](#nestedblock--git_resource_rules--git_dependency_actions))
+
+Optional:
+
+- `id` (String) The unique ID for this resource.
+- `rules` (List of String)
+
+<a id="nestedblock--git_resource_rules--git_dependency_actions"></a>
+### Nested Schema for `git_resource_rules.git_dependency_actions`
+
+Optional:
+
+- `deployment_action_slug` (String)
+- `git_dependency_name` (String)
+
+
 
 <a id="nestedblock--rule"></a>
 ### Nested Schema for `rule`
