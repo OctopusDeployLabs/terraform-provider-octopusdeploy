@@ -11,12 +11,6 @@ jobs:
   tests:
     name: Test
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        parallel: [ 15 ]
-        index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ]
-
     steps:
       - uses: actions/checkout@v3
       - name: Install Terraform
@@ -51,14 +45,6 @@ jobs:
           --header "X-GitHub-Api-Version: 2022-11-28" | jq -r '"GIT_CREDENTIAL=" + .token' > "$GITHUB_ENV"
         env:
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
-      - name: Download JUnit Summary from Previous Workflow
-        id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          workflow_conclusion: success
-          name: junit-test-summary
-          if_no_artifact_found: warn
-          branch: main
       - name: Install Dependencies
         run: go get ./...
         shell: bash
