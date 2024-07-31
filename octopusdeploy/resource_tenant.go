@@ -6,7 +6,6 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -25,8 +24,8 @@ func resourceTenant() *schema.Resource {
 }
 
 func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.GlobalMutex.Lock()
-	defer internal.GlobalMutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	tenant := expandTenant(d)
 
@@ -49,8 +48,8 @@ func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceTenantDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.GlobalMutex.Lock()
-	defer internal.GlobalMutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	log.Printf("[INFO] deleting tenant (%s)", d.Id())
 
@@ -82,8 +81,8 @@ func resourceTenantRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceTenantUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.GlobalMutex.Lock()
-	defer internal.GlobalMutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	log.Printf("[INFO] updating tenant (%s)", d.Id())
 

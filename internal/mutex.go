@@ -2,4 +2,4 @@ package internal
 
 import "sync"
 
-var GlobalMutex sync.Mutex
+var _GlobalMutex sync.Mutex

@@ -9,7 +9,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tagsets"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -29,8 +28,8 @@ func resourceTag() *schema.Resource {
 }
 
 func resourceTagCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.GlobalMutex.Lock()
-	defer internal.GlobalMutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	log.Printf("[INFO] creating tag")
 
@@ -73,8 +72,8 @@ func tagCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.
 }
 
 func resourceTagDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.GlobalMutex.Lock()
-	defer internal.GlobalMutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	tagSetID := d.Get("tag_set_id").(string)
 	tagSetSpaceID := d.Get("tag_set_space_id").(string)
@@ -121,8 +120,8 @@ func resourceTagDelete(ctx context.Context, d *schema.ResourceData, m interface{
 }
 
 func resourceTagRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.GlobalMutex.Lock()
-	defer internal.GlobalMutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	// validate the tag ID
 	if d.Id() == "" || !strings.Contains(d.Id(), "/") {
@@ -152,8 +151,8 @@ func resourceTagRead(ctx context.Context, d *schema.ResourceData, m interface{})
 }
 
 func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.GlobalMutex.Lock()
-	defer internal.GlobalMutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	name := d.Get("name").(string)
 	tagSetID := d.Get("tag_set_id").(string)
