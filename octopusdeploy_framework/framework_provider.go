@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -12,8 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
-
-var mutex = &internal.GlobalMutex
 
 type octopusDeployFrameworkProvider struct {
 	Address types.String `tfsdk:"address"`
