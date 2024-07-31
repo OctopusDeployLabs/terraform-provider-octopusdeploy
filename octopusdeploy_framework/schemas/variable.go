@@ -108,24 +108,24 @@ func GetVariableDatasourceSchema() datasourceSchema.Schema {
 
 			//response
 			SchemaAttributeNames.ID: datasourceSchema.StringAttribute{
-				Optional:    true,
+				Computed:    true,
 				Description: "The identifier of the variable to find.",
 			},
 			SchemaAttributeNames.Description: datasourceSchema.StringAttribute{
 				Computed:    true,
-				Description: "The description of this variable",
+				Description: "The description of this variable.",
 			},
-			VariableSchemaAttributeNames.IsEditable: GetBooleanDatasourceAttribute(
-				"Indicates whether or not this variable is considered editable.",
-				true,
-			),
-			VariableSchemaAttributeNames.IsSensitive: GetBooleanDatasourceAttribute(
-				"Indicates whether or not this resource is considered sensitive and should be kept secret.",
-				true,
-			),
+			VariableSchemaAttributeNames.IsEditable: datasourceSchema.BoolAttribute{
+				Description: "Indicates whether or not this variable is considered editable.",
+				Computed:    true,
+			},
+			VariableSchemaAttributeNames.IsSensitive: datasourceSchema.BoolAttribute{
+				Description: "Indicates whether or not this resource is considered sensitive and should be kept secret.",
+				Computed:    true,
+			},
 			VariableSchemaAttributeNames.Type: datasourceSchema.StringAttribute{
 				Computed:    true,
-				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s", strings.Join(VariableTypes, ", ")),
+				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s.", strings.Join(util.Map(VariableTypes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 			},
 			VariableSchemaAttributeNames.SensitiveValue: datasourceSchema.StringAttribute{
 				Computed:  true,
@@ -134,10 +134,10 @@ func GetVariableDatasourceSchema() datasourceSchema.Schema {
 			VariableSchemaAttributeNames.Value: datasourceSchema.StringAttribute{
 				Computed: true,
 			},
+			VariableSchemaAttributeNames.Prompt: getVariablePromptDatasourceSchema(),
 		},
 		Blocks: map[string]datasourceSchema.Block{
-			VariableSchemaAttributeNames.Scope:  getVariableScopeDatasourceSchema(),
-			VariableSchemaAttributeNames.Prompt: getVariablePromptDatasourceSchema(),
+			VariableSchemaAttributeNames.Scope: getVariableScopeDatasourceSchema(),
 		},
 	}
 }

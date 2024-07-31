@@ -22,7 +22,7 @@ func GetResourceSchemaDescription(resourceName string) string {
 }
 
 func GetDataSourceDescription(resourceName string) string {
-	return fmt.Sprintf("Provides information about existing %s", resourceName)
+	return fmt.Sprintf("Provides information about existing %s.", resourceName)
 }
 
 func GetStringOrEmpty(tfAttr interface{}) string {
