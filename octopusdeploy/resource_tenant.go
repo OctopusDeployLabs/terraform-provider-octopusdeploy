@@ -86,8 +86,13 @@ func resourceTenantUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	log.Printf("[INFO] updating tenant (%s)", d.Id())
 
-	tenant := expandTenant(d)
 	client := m.(*client.Client)
+	tenantFromApi, err := tenants.GetByID(client, d.Get("space_id").(string), d.Id())
+
+	tenant := expandTenant(d)
+
+	// the project environments are not managed here, so we need to maintain the collection when updating
+	tenant.ProjectEnvironments = tenantFromApi.ProjectEnvironments
 	updatedTenant, err := tenants.Update(client, tenant)
 	if err != nil {
 		return diag.FromErr(err)

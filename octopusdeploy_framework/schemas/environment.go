@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -86,15 +87,19 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":                 util.GetIdResourceSchema(),
-			"slug":               util.GetSlugDatasourceSchema(EnvironmentResourceDescription),
+			"slug":               util.GetSlugResourceSchema(EnvironmentResourceDescription),
 			"name":               util.GetNameResourceSchema(true),
 			"description":        util.GetDescriptionResourceSchema(EnvironmentResourceDescription),
 			EnvironmentSortOrder: util.GetSortOrderResourceSchema(EnvironmentResourceDescription),
 			EnvironmentAllowDynamicInfrastructure: resourceSchema.BoolAttribute{
 				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
 			},
 			EnvironmentUseGuidedFailure: resourceSchema.BoolAttribute{
 				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
 			},
 			"space_id": util.GetSpaceIdResourceSchema(EnvironmentResourceDescription),
 		},

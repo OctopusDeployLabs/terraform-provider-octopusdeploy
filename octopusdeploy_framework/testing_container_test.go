@@ -27,7 +27,11 @@ func TestMain(m *testing.M) {
 	if *createSharedContainer {
 
 		testFramework := test.OctopusContainerTest{}
-		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer()
+		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
+		if err != nil {
+			log.Printf("Failed to arrange containers: (%s)", err.Error())
+		}
+
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
 
@@ -54,8 +58,18 @@ func TestMain(m *testing.M) {
 				log.Printf("Failed to create client: (%s)", err.Error())
 				panic(m)
 			}
+			octoContainer = &test.OctopusContainer{
+				Container: nil,
+				URI:       url,
+			}
 		}
 		code := m.Run()
 		os.Exit(code)
+	}
+}
+
+func SkipCI(t *testing.T, reason string) {
+	if os.Getenv("Skip_Legacy_Tests") == "" {
+		t.Skip(reason)
 	}
 }
