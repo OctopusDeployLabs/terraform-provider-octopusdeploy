@@ -1,4 +1,4 @@
-name: build
+name: Validate Docs
 on:
   push:
     branches:
