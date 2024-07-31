@@ -8,6 +8,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -79,8 +80,8 @@ func (t *tenantProjectResource) Configure(_ context.Context, req resource.Config
 }
 
 func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 
 	var plan TenantProjectModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -140,8 +141,8 @@ func (t *tenantProjectResource) Read(ctx context.Context, req resource.ReadReque
 }
 
 func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 
 	// read plan and state
 	var plan, state TenantProjectModel
@@ -185,8 +186,8 @@ func (t *tenantProjectResource) getSpaceId(plan TenantProjectModel) string {
 }
 
 func (t *tenantProjectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 	var data TenantProjectModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
