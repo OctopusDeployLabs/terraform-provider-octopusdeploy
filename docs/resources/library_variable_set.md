@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_library_variable_set Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages library variable sets in Octopus Deploy.
+  
 ---
 
 # octopusdeploy_library_variable_set (Resource)
 
-This resource manages library variable sets in Octopus Deploy.
+
 
 
 
@@ -23,12 +23,12 @@ This resource manages library variable sets in Octopus Deploy.
 
 - `description` (String) The description of this library variable set.
 - `id` (String) The unique ID for this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this library variable set.
 - `template` (Block List) (see [below for nested schema](#nestedblock--template))
+- `template_ids` (Map of String)
 
 ### Read-Only
 
-- `template_ids` (Map of String)
 - `variable_set_id` (String)
 
 <a id="nestedblock--template"></a>
@@ -36,7 +36,7 @@ This resource manages library variable sets in Octopus Deploy.
 
 Required:
 
-- `name` (String) The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`.
+- `name` (String) The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`
 
 Optional:
 

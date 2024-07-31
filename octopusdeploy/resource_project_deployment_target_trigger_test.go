@@ -1,5 +1,14 @@
 package octopusdeploy
 
+import (
+	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/filters"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"testing"
+)
+
 // import (
 // 	"fmt"
 // 	"testing"
@@ -162,3 +171,45 @@ package octopusdeploy
 
 // 	return nil
 // }
+
+// TestProjectTriggerResource verifies that a project trigger can be reimported with the correct settings
+func TestProjectTriggerResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "28-projecttrigger", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := projects.ProjectsQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Projects.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a project called \"Test\"")
+	}
+	resource := resources.Items[0]
+
+	trigger, err := client.ProjectTriggers.GetByProjectID(resource.ID)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if trigger[0].Name != "test" {
+		t.Fatal("The project must have a trigger called \"test\" (was \"" + trigger[0].Name + "\")")
+	}
+
+	if trigger[0].Filter.GetFilterType() != filters.MachineFilter {
+		t.Fatal("The project trigger must have Filter.FilterType set to \"MachineFilter\" (was \"" + fmt.Sprint(trigger[0].Filter.GetFilterType()) + "\")")
+	}
+}

@@ -15,8 +15,8 @@ func TestAccDataSourceChannels(t *testing.T) {
 	take := 10
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceChannelsConfig(localName, take),

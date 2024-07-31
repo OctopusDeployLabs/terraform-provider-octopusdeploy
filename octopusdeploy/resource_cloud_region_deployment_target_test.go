@@ -2,9 +2,12 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -17,9 +20,9 @@ func TestAccCloudRegionDeploymentTargetImportBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccCloudRegionDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testAccCloudRegionDeploymentTargetCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRegionDeploymentTargetBasic(localName, name),
@@ -40,9 +43,9 @@ func TestAccCloudRegionDeploymentTargetBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccCloudRegionDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testAccCloudRegionDeploymentTargetCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRegionDeploymentTargetBasic(localName, name),
@@ -74,9 +77,8 @@ func testAccCloudRegionDeploymentTargetBasic(localName string, name string) stri
 
 func testAccCloudRegionDeploymentTargetExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		deploymentTargetID := s.RootModule().Resources[resourceName].Primary.ID
-		if _, err := client.Machines.GetByID(deploymentTargetID); err != nil {
+		if _, err := octoClient.Machines.GetByID(deploymentTargetID); err != nil {
 			return fmt.Errorf("error retrieving deployment target: %s", err)
 		}
 
@@ -85,17 +87,63 @@ func testAccCloudRegionDeploymentTargetExists(resourceName string) resource.Test
 }
 
 func testAccCloudRegionDeploymentTargetCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_cloud_region_deployment_target" {
 			continue
 		}
 
-		_, err := client.Machines.GetByID(rs.Primary.ID)
+		_, err := octoClient.Machines.GetByID(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("deployment target (%s) still exists", rs.Primary.ID)
 		}
 	}
 
 	return nil
+}
+
+// TestCloudRegionTargetResource verifies that a cloud region can be reimported with the correct settings
+func TestCloudRegionTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "33-cloudregiontarget", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "33a-cloudregiontargetds"), newSpaceId, []string{})
+
+	if err != nil {
+		t.Fatal("cloud region data source does not appear to work")
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := machines.MachinesQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Machines.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a machine called \"Test\"")
+	}
+	resource := resources.Items[0]
+
+	if len(resource.Roles) != 1 {
+		t.Fatal("The machine must have 1 role")
+	}
+
+	if resource.Roles[0] != "cloud" {
+		t.Fatal("The machine must have a role of \"cloud\" (was \"" + resource.Roles[0] + "\")")
+	}
+
+	if resource.TenantedDeploymentMode != "Untenanted" {
+		t.Fatal("The machine must have a TenantedDeploymentParticipation of \"Untenanted\" (was \"" + resource.TenantedDeploymentMode + "\")")
+	}
 }
