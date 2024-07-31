@@ -16,7 +16,7 @@ func (suite *IntegrationTestSuite) TestEnvironmentResource_UpgradeFromSDK_ToPlug
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy: testEnvironmentDestroy,
 		Steps: []resource.TestStep{
 			{
