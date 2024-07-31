@@ -1,19 +1,17 @@
-name: Generate terraform docs
+name: build
 on:
-  - pull_request
-
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
 jobs:
-  docs:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Render terraform docs and push changes back to PR
-        uses: terraform-docs/gh-actions@main
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
         with:
-          working-dir: .
-          output-file: README.md
-          output-method: inject
-          git-push: "true"
+          go-version: '1.22'
+      - run: go validate main.go
