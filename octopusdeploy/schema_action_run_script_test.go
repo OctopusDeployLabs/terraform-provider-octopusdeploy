@@ -33,7 +33,7 @@ func TestExpandRunScriptAction(t *testing.T) {
 	require.NotNil(t, runScriptAction)
 }
 
-func TestAccRunScriptAction(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccRunScriptAction() {
 	feedLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	feedName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	feedURI := "http://test.com"
@@ -41,7 +41,7 @@ func TestAccRunScriptAction(t *testing.T) {
 	feedUsername := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	feedPassword := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccDeploymentProcessCheckDestroy,
 			testAccProjectCheckDestroy,
