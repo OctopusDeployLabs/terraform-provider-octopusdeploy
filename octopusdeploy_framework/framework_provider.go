@@ -87,6 +87,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewTenantProjectVariableResource,
 		NewTenantCommonVariableResource,
 		NewLibraryVariableSetFeedResource,
+		NewDockerContainerRegistryFeedResource,
 	}
 }
 
