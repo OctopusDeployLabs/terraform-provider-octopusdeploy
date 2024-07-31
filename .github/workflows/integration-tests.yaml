@@ -11,6 +11,12 @@ jobs:
   tests:
     name: Test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        parallel: [ 3 ]
+        index: [ 0, 1, 2 ]
+
     steps:
       - uses: actions/checkout@v3
       - name: Install Terraform
@@ -45,6 +51,21 @@ jobs:
           --header "X-GitHub-Api-Version: 2022-11-28" | jq -r '"GIT_CREDENTIAL=" + .token' > "$GITHUB_ENV"
         env:
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
+      - name: Download JUnit Summary from Previous Workflow
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow_conclusion: success
+          name: junit-test-summary
+          if_no_artifact_found: warn
+          branch: main
+      - name: Split tests
+        id: test_split
+        uses: hashicorp-forge/go-test-split-action@v1
+        with:
+          index: ${{ matrix.index }}
+          total: ${{ matrix.parallel }}
+          junit-summary: ./junit-test-summary.xml
       - name: Install Dependencies
         run: go get ./...
         shell: bash
@@ -61,7 +82,9 @@ jobs:
           }
           EOT
       - name: Test
-        run: go test ./...
+        run: |
+          GOBIN=$PWD/bin go install gotest.tools/gotestsum@latest
+          ./bin/gotestsum --junitfile node-summary.xml --format short-verbose -- -run "${{ steps.test_split.outputs.run }}" -timeout 0 ./...
         shell: bash
         env:
           LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
@@ -74,7 +97,51 @@ jobs:
           OCTOTESTVERSION: latest
           OCTOTESTIMAGEURL: docker.packages.octopushq.com/octopusdeploy/octopusdeploy
           OCTOTESTRETRYCOUNT: 1
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-test-summary-${{ matrix.index }}
+          path: node-summary.xml
+          retention-days: 1
 
+  tests-combine-summaries:
+    if: always()
+    name: Combine Test Reports
+    needs: [ tests ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Install junit-report-merger
+        run: npm install -g junit-report-merger
+
+      - name: Merge reports
+        run: >
+          jrm ./junit-test-summary.xml 
+          "junit-test-summary-0/*.xml" 
+          "junit-test-summary-1/*.xml" 
+          "junit-test-summary-2/*.xml" 
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-test-summary
+          path: ./junit-test-summary.xml
+
+      - name: Report
+        uses: dorny/test-reporter@v1
+        with:
+          name: Go Tests
+          path: junit-test-summary.xml
+          reporter: java-junit
+          fail-on-error: 'true'
 permissions:
   id-token: write
   checks: write
