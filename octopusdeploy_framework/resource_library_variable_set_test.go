@@ -1,11 +1,11 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func (suite *IntegrationTestSuite) TestAccOctopusDeployLibraryVariableSetBasic() {
@@ -17,7 +17,7 @@ func (suite *IntegrationTestSuite) TestAccOctopusDeployLibraryVariableSetBasic()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testLibraryVariableSetDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -40,7 +40,7 @@ func (suite *IntegrationTestSuite) TestAccOctopusDeployLibraryVariableSetComplex
 
 	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testLibraryVariableSetDestroy,
-		PreCheck:                 func() { testAccPreCheck(suite.T()) },
+		PreCheck:                 func() { TestAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -84,7 +84,7 @@ func (suite *IntegrationTestSuite) TestAccOctopusDeployLibraryVariableSetWithUpd
 
 	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testLibraryVariableSetDestroy,
-		PreCheck:                 func() { testAccPreCheck(suite.T()) },
+		PreCheck:                 func() { TestAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create variable set with no description
