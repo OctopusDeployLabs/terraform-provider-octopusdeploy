@@ -171,6 +171,7 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	plan.ID = types.StringValue(plan.GetId(spaceId))
+	plan.SpaceID = types.StringValue(spaceId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	tflog.Info(ctx, fmt.Sprintf("updated tenant (%s) connection to project (%#v)", plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
