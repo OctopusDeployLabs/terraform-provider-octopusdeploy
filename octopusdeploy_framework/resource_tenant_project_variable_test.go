@@ -79,12 +79,13 @@ func testAccTenantProjectVariable(lifecycleLocalName string, lifecycleName strin
 func testAccTenantWithProjectEnvironment(localName string, name string, projectLocalName string, primaryEnvironmentLocalName string, secondaryEnvironmentLocalName string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_tenant" "%s" {
 		name = "%s"
+	}
 
-		project_environment {
-			project_id   = octopusdeploy_project.%s.id
-			environments = [octopusdeploy_environment.%s.id, octopusdeploy_environment.%s.id]
-		}
-	}`, localName, name, projectLocalName, primaryEnvironmentLocalName, secondaryEnvironmentLocalName)
+	resource "octopusdeploy_tenant_project" "project_environment" {
+		tenant_id = octopusdeploy_tenant.%s.id
+		project_id   = "${octopusdeploy_project.%s.id}"
+		environment_ids = [octopusdeploy_environment.%s.id, octopusdeploy_environment.%s.id]
+	}`, localName, name, localName, projectLocalName, primaryEnvironmentLocalName, secondaryEnvironmentLocalName)
 }
 
 func testTenantProjectVariable(localName string, environmentLocalName string, projectLocalName string, tenantLocalName string, templateLocalName string, value string) string {
