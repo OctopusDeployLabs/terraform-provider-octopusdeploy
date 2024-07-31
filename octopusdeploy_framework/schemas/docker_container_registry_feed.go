@@ -27,7 +27,7 @@ func GetDockerContainerRegistryFeedResourceSchema() map[string]resourceSchema.At
 }
 
 type DockerContainerRegistryFeedTypeResourceModel struct {
-	ApiVersion                        types.String `tfsdk:"api_version"`
+	APIVersion                        types.String `tfsdk:"api_version"`
 	FeedUri                           types.String `tfsdk:"feed_uri"`
 	ID                                types.String `tfsdk:"id"`
 	Name                              types.String `tfsdk:"name"`

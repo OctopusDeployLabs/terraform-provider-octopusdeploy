@@ -151,7 +151,7 @@ func createDockerContainerRegistryFeedResourceFromData(data *schemas.DockerConta
 	feed.Password = core.NewSensitiveValue(data.Password.ValueString())
 	feed.SpaceID = data.SpaceID.ValueString()
 	feed.Username = data.Username.ValueString()
-	feed.APIVersion = data.ApiVersion.ValueString()
+	feed.APIVersion = data.APIVersion.ValueString()
 	feed.RegistryPath = data.RegistryPath.ValueString()
 
 	return feed, nil
@@ -161,8 +161,12 @@ func updateDataFromDockerContainerRegistryFeed(data *schemas.DockerContainerRegi
 	data.FeedUri = types.StringValue(feed.FeedURI)
 	data.Name = types.StringValue(feed.Name)
 	data.SpaceID = types.StringValue(spaceId)
-	data.ApiVersion = types.StringValue(feed.APIVersion)
-	data.RegistryPath = types.StringValue(feed.RegistryPath)
+	if feed.APIVersion != "" {
+		data.APIVersion = types.StringValue(feed.APIVersion)
+	}
+	if feed.RegistryPath != "" {
+		data.RegistryPath = types.StringValue(feed.RegistryPath)
+	}
 	if feed.Username != "" {
 		data.Username = types.StringValue(feed.Username)
 	}
