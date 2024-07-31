@@ -26,7 +26,7 @@ resource "octopusdeploy_aws_elastic_container_registry" "example" {
 
 - `access_key` (String) The AWS access key to use when authenticating against Amazon Web Services.
 - `name` (String) The name of this resource.
-- This should be fixed
+- `region` (String) The AWS region where the registry resides.
 - `secret_key` (String, Sensitive) The AWS secret key to use when authenticating against Amazon Web Services.
 
 ### Optional
