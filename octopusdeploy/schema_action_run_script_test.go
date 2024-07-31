@@ -49,7 +49,7 @@ func (suite *IntegrationTestSuite) TestAccRunScriptAction() {
 			testAccEnvironmentCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
