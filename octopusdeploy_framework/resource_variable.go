@@ -56,6 +56,7 @@ func (r *variableTypeResource) Configure(ctx context.Context, req resource.Confi
 
 func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	mutex.Lock()
+	defer mutex.Unlock()
 
 	var data schemas.VariableTypeResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -102,12 +103,11 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 
 	mapVariableToState(&data, newVariable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
-	mutex.Unlock()
 }
 
 func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	mutex.Lock()
+	defer mutex.Unlock()
 
 	var data schemas.VariableTypeResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -132,12 +132,11 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 	tflog.Info(ctx, fmt.Sprintf("variable read (%s)", data.ID))
 	mapVariableToState(&data, variable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
-	mutex.Unlock()
 }
 
 func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	mutex.Lock()
+	defer mutex.Unlock()
 
 	var data, state schemas.VariableTypeResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -189,12 +188,11 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 
 	mapVariableToState(&data, updatedVariable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
-	mutex.Unlock()
 }
 
 func (r *variableTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	mutex.Lock()
+	defer mutex.Unlock()
 
 	var data schemas.VariableTypeResourceModel
 
@@ -216,8 +214,6 @@ func (r *variableTypeResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("variable deleted (%s)", data.ID))
-
-	mutex.Unlock()
 }
 
 func (r *variableTypeResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
