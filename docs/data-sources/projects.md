@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_projects Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  Provides information about existing projects.
+  Provides information about existing Octopus Deploy projects.
 ---
 
 # octopusdeploy_projects (Data Source)
 
-Provides information about existing projects.
+Provides information about existing Octopus Deploy projects.
 
 ## Example Usage
 
@@ -32,64 +32,74 @@ data "octopusdeploy_projects" "example" {
 - `cloned_from_project_id` (String) A filter to search for cloned resources by a project ID.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `is_clone` (Boolean) A filter to search for cloned resources.
-- `name` (String) A filter to search by name.
-- `partial_name` (String) A filter to search by the partial match of a name.
+- `name` (String) A filter to search by name
+- `partial_name` (String) A filter to search by a partial name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
+- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `projects` (Block List) A list of projects that match the filter(s). (see [below for nested schema](#nestedblock--projects))
+- `projects` (Attributes List) A list of projects that match the filter(s). (see [below for nested schema](#nestedatt--projects))
 
-<a id="nestedblock--projects"></a>
+<a id="nestedatt--projects"></a>
 ### Nested Schema for `projects`
 
 Read-Only:
 
 - `allow_deployments_to_no_targets` (Boolean, Deprecated)
 - `auto_create_release` (Boolean)
-- `auto_deploy_release_overrides` (List of String)
+- `auto_deploy_release_overrides` (Attributes List) (see [below for nested schema](#nestedatt--projects--auto_deploy_release_overrides))
 - `cloned_from_project_id` (String)
-- `connectivity_policy` (List of Object) (see [below for nested schema](#nestedatt--projects--connectivity_policy))
+- `connectivity_policy` (Attributes List) (see [below for nested schema](#nestedatt--projects--connectivity_policy))
 - `default_guided_failure_mode` (String)
 - `default_to_skip_if_already_installed` (Boolean)
 - `deployment_changes_template` (String)
 - `deployment_process_id` (String)
-- `description` (String) The description of this project.
-- `discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
-- `git_anonymous_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_anonymous_persistence_settings))
-- `git_library_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_library_persistence_settings))
-- `git_username_password_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_username_password_persistence_settings))
-- `id` (String) The unique ID for this resource.
+- `description` (String)
+- `discrete_channel_release` (Boolean)
+- `git_anonymous_persistence_settings` (Attributes List) Git-related persistence settings for a version-controlled project using anonymous authentication. (see [below for nested schema](#nestedatt--projects--git_anonymous_persistence_settings))
+- `git_library_persistence_settings` (Attributes List) Git-related persistence settings for a version-controlled project using library authentication. (see [below for nested schema](#nestedatt--projects--git_library_persistence_settings))
+- `git_username_password_persistence_settings` (Attributes List) Git-related persistence settings for a version-controlled project using username_password authentication. (see [below for nested schema](#nestedatt--projects--git_username_password_persistence_settings))
+- `id` (String)
 - `included_library_variable_sets` (List of String)
 - `is_disabled` (Boolean)
-- `is_discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
+- `is_discrete_channel_release` (Boolean)
 - `is_version_controlled` (Boolean)
-- `jira_service_management_extension_settings` (List of Object) Provides extension settings for the Jira Service Management (JSM) integration for this project. (see [below for nested schema](#nestedatt--projects--jira_service_management_extension_settings))
-- `lifecycle_id` (String) The lifecycle ID associated with this project.
-- `name` (String) The name of the project in Octopus Deploy. This name must be unique.
+- `jira_service_management_extension_settings` (Attributes List) Extension settings for the Jira Service Management (JSM) integration. (see [below for nested schema](#nestedatt--projects--jira_service_management_extension_settings))
+- `lifecycle_id` (String)
+- `name` (String) The name of the project.
 - `project_group_id` (String) The project group ID associated with this project.
-- `release_creation_strategy` (List of Object) (see [below for nested schema](#nestedatt--projects--release_creation_strategy))
-- `release_notes_template` (String)
-- `servicenow_extension_settings` (List of Object) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedatt--projects--servicenow_extension_settings))
+- `release_creation_strategy` (Attributes List) The release creation strategy for the project. (see [below for nested schema](#nestedatt--projects--release_creation_strategy))
+- `release_notes_template` (String) The template to use for release notes.
+- `servicenow_extension_settings` (Attributes List) Extension settings for the ServiceNow integration. (see [below for nested schema](#nestedatt--projects--servicenow_extension_settings))
 - `slug` (String) A human-readable, unique identifier, used to identify a project.
 - `space_id` (String) The space ID associated with this project.
-- `template` (List of Object) (see [below for nested schema](#nestedatt--projects--template))
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `variable_set_id` (String)
-- `versioning_strategy` (Set of Object) (see [below for nested schema](#nestedatt--projects--versioning_strategy))
+- `template` (Attributes List) Template parameters for the project. (see [below for nested schema](#nestedatt--projects--template))
+- `tenanted_deployment_participation` (String) The tenanted deployment mode of the project.
+- `variable_set_id` (String) The ID of the variable set associated with this project.
+- `versioning_strategy` (Attributes List) The versioning strategy for the project. (see [below for nested schema](#nestedatt--projects--versioning_strategy))
+
+<a id="nestedatt--projects--auto_deploy_release_overrides"></a>
+### Nested Schema for `projects.auto_deploy_release_overrides`
+
+Read-Only:
+
+- `environment_id` (String) The environment ID for the auto deploy release override.
+- `release_id` (String) The release ID for the auto deploy release override.
+- `tenant_id` (String) The tenant ID for the auto deploy release override.
+
 
 <a id="nestedatt--projects--connectivity_policy"></a>
 ### Nested Schema for `projects.connectivity_policy`
 
 Read-Only:
 
-- `allow_deployments_to_no_targets` (Boolean)
-- `exclude_unhealthy_targets` (Boolean)
-- `skip_machine_behavior` (String)
-- `target_roles` (List of String)
+- `allow_deployments_to_no_targets` (Boolean) Allow deployments to be created when there are no targets.
+- `exclude_unhealthy_targets` (Boolean) Exclude unhealthy targets from deployments.
+- `skip_machine_behavior` (String) The behavior when a machine is skipped.
+- `target_roles` (List of String) The target roles for the connectivity policy.
 
 
 <a id="nestedatt--projects--git_anonymous_persistence_settings"></a>
@@ -97,10 +107,10 @@ Read-Only:
 
 Read-Only:
 
-- `base_path` (String)
-- `default_branch` (String)
-- `protected_branches` (Set of String)
-- `url` (String)
+- `base_path` (String) The base path associated with these version control settings.
+- `default_branch` (String) The default branch associated with these version control settings.
+- `protected_branches` (Set of String) A list of protected branch patterns.
+- `url` (String) The URL associated with these version control settings.
 
 
 <a id="nestedatt--projects--git_library_persistence_settings"></a>
@@ -108,11 +118,11 @@ Read-Only:
 
 Read-Only:
 
-- `base_path` (String)
-- `default_branch` (String)
-- `git_credential_id` (String)
-- `protected_branches` (Set of String)
-- `url` (String)
+- `base_path` (String) The base path associated with these version control settings.
+- `default_branch` (String) The default branch associated with these version control settings.
+- `git_credential_id` (String) The ID of the Git credential.
+- `protected_branches` (Set of String) A list of protected branch patterns.
+- `url` (String) The URL associated with these version control settings.
 
 
 <a id="nestedatt--projects--git_username_password_persistence_settings"></a>
@@ -120,12 +130,12 @@ Read-Only:
 
 Read-Only:
 
-- `base_path` (String)
-- `default_branch` (String)
-- `password` (String)
-- `protected_branches` (Set of String)
-- `url` (String)
-- `username` (String)
+- `base_path` (String) The base path associated with these version control settings.
+- `default_branch` (String) The default branch associated with these version control settings.
+- `password` (String, Sensitive) The password for the Git credential.
+- `protected_branches` (Set of String) A list of protected branch patterns.
+- `url` (String) The URL associated with these version control settings.
+- `username` (String) The username for the Git credential.
 
 
 <a id="nestedatt--projects--jira_service_management_extension_settings"></a>
@@ -133,9 +143,9 @@ Read-Only:
 
 Read-Only:
 
-- `connection_id` (String)
-- `is_enabled` (Boolean)
-- `service_desk_project_name` (String)
+- `connection_id` (String) The connection identifier for JSM.
+- `is_enabled` (Boolean) Whether the JSM extension is enabled.
+- `service_desk_project_name` (String) The JSM service desk project name.
 
 
 <a id="nestedatt--projects--release_creation_strategy"></a>
@@ -143,17 +153,17 @@ Read-Only:
 
 Read-Only:
 
-- `channel_id` (String)
-- `release_creation_package` (List of Object) (see [below for nested schema](#nestedobjatt--projects--release_creation_strategy--release_creation_package))
-- `release_creation_package_step_id` (String)
+- `channel_id` (String) The ID of the channel to use for release creation.
+- `release_creation_package` (Attributes List) Details of the package used for release creation. (see [below for nested schema](#nestedatt--projects--release_creation_strategy--release_creation_package))
+- `release_creation_package_step_id` (String) The ID of the step containing the package for release creation.
 
-<a id="nestedobjatt--projects--release_creation_strategy--release_creation_package"></a>
+<a id="nestedatt--projects--release_creation_strategy--release_creation_package"></a>
 ### Nested Schema for `projects.release_creation_strategy.release_creation_package`
 
 Read-Only:
 
-- `deployment_action` (String)
-- `package_reference` (String)
+- `deployment_action` (String) The deployment action for the release creation package.
+- `package_reference` (String) The package reference for the release creation package.
 
 
 
@@ -162,10 +172,10 @@ Read-Only:
 
 Read-Only:
 
-- `connection_id` (String)
-- `is_enabled` (Boolean)
-- `is_state_automatically_transitioned` (Boolean)
-- `standard_change_template_name` (String)
+- `connection_id` (String) The connection identifier for ServiceNow.
+- `is_enabled` (Boolean) Whether the ServiceNow extension is enabled.
+- `is_state_automatically_transitioned` (Boolean) Whether state is automatically transitioned in ServiceNow.
+- `standard_change_template_name` (String) The name of the standard change template in ServiceNow.
 
 
 <a id="nestedatt--projects--template"></a>
@@ -173,12 +183,12 @@ Read-Only:
 
 Read-Only:
 
-- `default_value` (String)
-- `display_settings` (Map of String)
-- `help_text` (String)
-- `id` (String)
-- `label` (String)
-- `name` (String)
+- `default_value` (String) The default value for the parameter.
+- `display_settings` (Map of String) The display settings for the parameter.
+- `help_text` (String) The help text for the parameter.
+- `id` (String) The ID of the template parameter.
+- `label` (String) The label shown beside the parameter.
+- `name` (String) The name of the variable set by the parameter.
 
 
 <a id="nestedatt--projects--versioning_strategy"></a>
@@ -186,16 +196,16 @@ Read-Only:
 
 Read-Only:
 
-- `donor_package` (List of Object) (see [below for nested schema](#nestedobjatt--projects--versioning_strategy--donor_package))
-- `donor_package_step_id` (String)
-- `template` (String)
+- `donor_package` (Attributes List) (see [below for nested schema](#nestedatt--projects--versioning_strategy--donor_package))
+- `donor_package_step_id` (String) The ID of the step containing the donor package.
+- `template` (String) The template to use for version numbers.
 
-<a id="nestedobjatt--projects--versioning_strategy--donor_package"></a>
+<a id="nestedatt--projects--versioning_strategy--donor_package"></a>
 ### Nested Schema for `projects.versioning_strategy.donor_package`
 
 Read-Only:
 
-- `deployment_action` (String)
-- `package_reference` (String)
+- `deployment_action` (String) The deployment action for the donor package.
+- `package_reference` (String) The package reference for the donor package.
 
 

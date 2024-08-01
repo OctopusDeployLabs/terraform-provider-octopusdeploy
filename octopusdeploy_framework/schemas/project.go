@@ -38,7 +38,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"variable_set_id":                      util.String().Computed().Build(),
 		},
 		Blocks: map[string]resourceSchema.Block{
-			//This is correct with what return from project object.
+			// This is correct object that return from api for project object not a list string.
 			"auto_deploy_release_overrides": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
@@ -175,14 +175,14 @@ func GetProjectDataSourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing Octopus Deploy projects.",
 		Attributes: map[string]datasourceSchema.Attribute{
-			"id":                     util.GetIdDatasourceSchema(),
-			"cloned_from_project_id": util.DataSourceString().Optional().Description("The ID of the project this project was cloned from.").Build(),
+			"id":                     util.String().Computed().Description("An auto-generated identifier that includes the timestamp when this data source was last modified.").Build(),
+			"cloned_from_project_id": util.DataSourceString().Optional().Description("A filter to search for cloned resources by a project ID.").Build(),
 			"ids":                    util.GetQueryIDsDatasourceSchema(),
-			"is_clone":               util.DataSourceBool().Optional().Description("If set, only return projects that are clones.").Build(),
-			"name":                   util.GetNameDatasourceSchema(false),
+			"is_clone":               util.DataSourceBool().Optional().Description("A filter to search for cloned resources.").Build(),
+			"name":                   util.DataSourceString().Optional().Description("A filter to search by name").Build(),
 			"partial_name":           util.GetQueryPartialNameDatasourceSchema(),
 			"skip":                   util.GetQuerySkipDatasourceSchema(),
-			"space_id":               util.GetSpaceIdDatasourceSchema(ProjectResourceName),
+			"space_id":               util.String().Optional().Description("A Space ID to filter by. Will revert what is specified on the provider if not set").Build(),
 			"take":                   util.GetQueryTakeDatasourceSchema(),
 			"projects":               getProjectsDataSourceAttribute(),
 		},
@@ -195,22 +195,23 @@ func getProjectsDataSourceAttribute() datasourceSchema.ListNestedAttribute {
 		Computed:    true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				"auto_create_release":                        util.DataSourceBool().Computed().Description("Whether to automatically create a release when a package is pushed to a trigger.").Build(),
+				"allow_deployments_to_no_targets":            util.DataSourceBool().Computed().Deprecated("Allow deployments to be created when there are no targets.").Build(),
+				"auto_create_release":                        util.DataSourceBool().Computed().Build(),
 				"auto_deploy_release_overrides":              getAutoDeployReleaseOverrides(),
-				"cloned_from_project_id":                     util.DataSourceString().Computed().Description("The ID of the project this project was cloned from.").Build(),
-				"default_guided_failure_mode":                util.DataSourceString().Computed().Description("The default guided failure mode setting for the project.").Build(),
-				"default_to_skip_if_already_installed":       util.DataSourceBool().Computed().Description("Whether deployment steps should be skipped if the relevant package is already installed.").Build(),
-				"deployment_changes_template":                util.DataSourceString().Computed().Description("The template to use for deployment change details.").Build(),
-				"deployment_process_id":                      util.DataSourceString().Computed().Description("The ID of the deployment process associated with this project.").Build(),
-				"description":                                util.DataSourceString().Computed().Description("The description of this project.").Build(),
-				"discrete_channel_release":                   util.DataSourceBool().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension.").Build(),
-				"id":                                         util.DataSourceString().Computed().Description("The unique ID of the project.").Build(),
-				"included_library_variable_sets":             util.DataSourceList(types.StringType).Computed().Description("The list of included library variable set IDs.").Build(),
-				"is_disabled":                                util.DataSourceBool().Computed().Description("Whether the project is disabled.").Build(),
-				"is_discrete_channel_release":                util.DataSourceBool().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension.").Build(),
-				"is_version_controlled":                      util.DataSourceBool().Computed().Description("Whether the project is version controlled.").Build(),
-				"lifecycle_id":                               util.DataSourceString().Computed().Description("The lifecycle ID associated with this project.").Build(),
-				"name":                                       util.DataSourceString().Computed().Description("The name of the project.").Build(),
+				"cloned_from_project_id":                     util.DataSourceString().Computed().Build(),
+				"default_guided_failure_mode":                util.DataSourceString().Computed().Build(),
+				"default_to_skip_if_already_installed":       util.DataSourceBool().Computed().Build(),
+				"deployment_changes_template":                util.DataSourceString().Computed().Build(),
+				"deployment_process_id":                      util.DataSourceString().Computed().Build(),
+				"description":                                util.DataSourceString().Computed().Description("The description of this project").Build(),
+				"discrete_channel_release":                   util.DataSourceBool().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
+				"id":                                         util.DataSourceString().Computed().Build(),
+				"included_library_variable_sets":             util.DataSourceList(types.StringType).Computed().Build(),
+				"is_disabled":                                util.DataSourceBool().Computed().Build(),
+				"is_discrete_channel_release":                util.DataSourceBool().Computed().Build(),
+				"is_version_controlled":                      util.DataSourceBool().Computed().Build(),
+				"lifecycle_id":                               util.DataSourceString().Computed().Description("The lifecycle ID associated with this project").Build(),
+				"name":                                       util.DataSourceString().Computed().Description("The name of the project in Octopus Deploy. This name must be unique.").Build(),
 				"project_group_id":                           util.DataSourceString().Computed().Description("The project group ID associated with this project.").Build(),
 				"release_notes_template":                     util.DataSourceString().Computed().Description("The template to use for release notes.").Build(),
 				"slug":                                       util.DataSourceString().Computed().Description("A human-readable, unique identifier, used to identify a project.").Build(),
@@ -231,10 +232,10 @@ func getProjectsDataSourceAttribute() datasourceSchema.ListNestedAttribute {
 	}
 }
 
+// This is correct object that return from api for project object not a list string.
 func getAutoDeployReleaseOverrides() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
-		Description: "A list of release overrides for auto deployments.",
-		Computed:    true,
+		Computed: true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
 				"environment_id": util.DataSourceString().Computed().Description("The environment ID for the auto deploy release override.").Build(),
@@ -247,8 +248,7 @@ func getAutoDeployReleaseOverrides() datasourceSchema.ListNestedAttribute {
 
 func getDataSourceConnectivityPolicyAttribute() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
-		Description: "Defines the connectivity policy for deployments.",
-		Computed:    true,
+		Computed: true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
 				"allow_deployments_to_no_targets": util.DataSourceBool().Computed().Description("Allow deployments to be created when there are no targets.").Build(),
