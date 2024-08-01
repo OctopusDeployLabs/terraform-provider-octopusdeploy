@@ -68,6 +68,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewGitCredentialsDataSource,
 		NewFeedsDataSource,
 		NewLibraryVariableSetDataSource,
+		NewVariablesDataSource,
 		NewTenantsDataSource,
 	}
 }
