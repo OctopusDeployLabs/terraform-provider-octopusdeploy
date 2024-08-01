@@ -1,15 +1,14 @@
 package schemas
 
 import (
-	"context"
-	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type TenantModel struct {
@@ -116,6 +115,9 @@ func GetTenantResourceSchema() map[string]resourceSchema.Attribute {
 		"cloned_from_tenant_id": resourceSchema.StringAttribute{
 			Description: "The ID of the tenant from which this tenant was cloned.",
 			Optional:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"description": util.GetDescriptionResourceSchema("tenant"),
 		"id":          util.GetIdResourceSchema(),
@@ -128,18 +130,4 @@ func GetTenantResourceSchema() map[string]resourceSchema.Attribute {
 			Optional:    true,
 		},
 	}
-}
-
-func setTenant(ctx context.Context, d *schema.ResourceData, tenant *tenants.Tenant) error {
-	d.Set("cloned_from_tenant_id", tenant.ClonedFromTenantID)
-	d.Set("description", tenant.Description)
-	d.Set("id", tenant.GetID())
-	d.Set("name", tenant.Name)
-	d.Set("space_id", tenant.SpaceID)
-
-	if err := d.Set("tenant_tags", tenant.TenantTags); err != nil {
-		return fmt.Errorf("error setting tenant_tags: %s", err)
-	}
-
-	return nil
 }

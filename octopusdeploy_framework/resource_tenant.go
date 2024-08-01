@@ -157,7 +157,9 @@ func mapStateToTenant(data *schemas.TenantModel) (*tenants.Tenant, error) {
 
 func mapTenantToState(data *schemas.TenantModel, tenant *tenants.Tenant) {
 	data.ID = types.StringValue(tenant.ID)
-	data.ClonedFromTenantId = types.StringValue(tenant.ClonedFromTenantID)
+	if tenant.ClonedFromTenantID != "" {
+		data.ClonedFromTenantId = types.StringValue(tenant.ClonedFromTenantID)
+	}
 	data.Description = types.StringValue(tenant.Description)
 	data.SpaceID = types.StringValue(tenant.SpaceID)
 	data.Name = types.StringValue(tenant.Name)
