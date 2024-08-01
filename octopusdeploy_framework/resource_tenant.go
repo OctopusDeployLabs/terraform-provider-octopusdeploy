@@ -145,12 +145,11 @@ func mapStateToTenant(data *schemas.TenantModel) (*tenants.Tenant, error) {
 	tenant.ClonedFromTenantID = data.ClonedFromTenantId.ValueString()
 	tenant.Description = data.Description.ValueString()
 	tenant.SpaceID = data.SpaceID.ValueString()
-
-	tenantTags := make([]string, len(data.TenantTags.Elements()))
-	for i, value := range data.TenantTags.Elements() {
-		tenantTags[i] = value.String()
+	if len(data.TenantTags.Elements()) > 0 {
+		tenant.TenantTags = util.ExpandStringList(data.TenantTags)
+	} else {
+		tenant.TenantTags = []string{}
 	}
-	tenant.TenantTags = tenantTags
 
 	return tenant, nil
 }
@@ -163,11 +162,5 @@ func mapTenantToState(data *schemas.TenantModel, tenant *tenants.Tenant) {
 	data.Description = types.StringValue(tenant.Description)
 	data.SpaceID = types.StringValue(tenant.SpaceID)
 	data.Name = types.StringValue(tenant.Name)
-
-	tenantTagsList := make([]attr.Value, len(tenant.TenantTags))
-	for i, option := range tenant.TenantTags {
-		tenantTagsList[i] = types.StringValue(option)
-	}
-	var tenantTags, _ = types.ListValue(types.StringType, tenantTagsList)
-	data.TenantTags = tenantTags
+	data.TenantTags = util.Ternary(tenant.TenantTags != nil && len(tenant.TenantTags) > 0, util.FlattenStringList(tenant.TenantTags), types.ListValueMust(types.StringType, make([]attr.Value, 0)))
 }

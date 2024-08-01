@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -105,7 +106,7 @@ func GetTenantDataSourceSchema() map[string]datasourceSchema.Attribute {
 			Computed:    true,
 			Description: "A list of tenant tags associated with this resource.",
 			ElementType: types.StringType,
-			Optional:    true,
+			Optional:    false,
 		},
 	}
 }
@@ -124,10 +125,13 @@ func GetTenantResourceSchema() map[string]resourceSchema.Attribute {
 		"name":        util.GetNameResourceSchema(true),
 		"space_id":    util.GetSpaceIdResourceSchema("tenant"),
 		"tenant_tags": resourceSchema.ListAttribute{
-			Computed:    true,
 			Description: "A list of tenant tags associated with this resource.",
 			ElementType: types.StringType,
 			Optional:    true,
+			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 		},
 	}
 }
