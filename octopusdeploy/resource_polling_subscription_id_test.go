@@ -4,11 +4,11 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"net/url"
 	"path/filepath"
-	"testing"
 )
 
-func TestPollingSubscriptionIdResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestPollingSubscriptionIdResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	_, err := testFramework.Act(t, octoContainer, "../terraform", "56-pollingsubscriptionid", []string{})
 
 	if err != nil {

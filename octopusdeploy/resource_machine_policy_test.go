@@ -6,7 +6,6 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"strings"
-	"testing"
 )
 
 // import (
@@ -156,8 +155,9 @@ import (
 // }
 
 // TestMachinePolicyResource verifies that a machine policies can be reimported with the correct settings
-func TestMachinePolicyResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestMachinePolicyResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "27-machinepolicy", []string{})
 
 	if err != nil {

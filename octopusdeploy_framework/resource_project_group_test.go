@@ -5,12 +5,12 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"path/filepath"
-	"testing"
 )
 
 // TestProjectGroupResource verifies that a project group can be reimported with the correct settings
-func TestProjectGroupResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectGroupResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "2-projectgroup", []string{})
 
 	if err != nil {

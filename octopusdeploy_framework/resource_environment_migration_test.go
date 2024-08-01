@@ -11,12 +11,12 @@ import (
 	"testing"
 )
 
-func TestEnvironmentResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func (suite *IntegrationTestSuite) TestEnvironmentResource_UpgradeFromSDK_ToPluginFramework() {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy: testEnvironmentDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -41,7 +41,7 @@ func TestEnvironmentResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
 				ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 				Config:                   updateEnvironmentConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					testEnvironment(t, name),
+					testEnvironment(suite.T(), name),
 				),
 			},
 		},

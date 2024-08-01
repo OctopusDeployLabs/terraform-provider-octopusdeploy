@@ -5,15 +5,14 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
 )
 
-func TestAccOctopusDeployVariableBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployVariableBasic() {
+	t := suite.T()
 	SkipCI(t, "Octopus API error: The resource you requested was not found. []")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_variable." + localName
@@ -223,8 +222,9 @@ func testVariableDestroy(s *terraform.State) error {
 }
 
 // TestVariableSetResource verifies that a variable set can be reimported with the correct settings
-func TestVariableSetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestVariableSetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "18-variableset", []string{})
 
 	if err != nil {
@@ -301,8 +301,9 @@ func TestVariableSetResource(t *testing.T) {
 	}
 }
 
-func TestVariableResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestVariableResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "49-variables", []string{})
 
 	if err != nil {

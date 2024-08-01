@@ -9,10 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"path/filepath"
-	"testing"
 )
 
-func TestAccOctopusDeployHelmFeed(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployHelmFeed() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_helm_feed." + localName
 
@@ -22,6 +21,7 @@ func TestAccOctopusDeployHelmFeed(t *testing.T) {
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	updatedName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testHelmFeedCheckDestroy,
@@ -88,8 +88,9 @@ func testHelmFeedCheckDestroy(s *terraform.State) error {
 }
 
 // TestHelmFeedResource verifies that a helm feed can be reimported with the correct settings
-func TestHelmFeedResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestHelmFeedResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "10-helmfeed", []string{})
 

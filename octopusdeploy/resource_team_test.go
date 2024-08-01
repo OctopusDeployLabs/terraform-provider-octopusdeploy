@@ -2,14 +2,12 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccTeamBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccTeamBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_team." + localName
 
@@ -17,9 +15,9 @@ func TestAccTeamBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	updatedDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccTeamCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -42,8 +40,8 @@ func TestAccTeamBasic(t *testing.T) {
 	})
 }
 
-func TestAccTeamUserRole(t *testing.T) {
-	SkipCI(t, "error creating user role for team Teams-3: octopus deploy api returned an error on endpoint /api/scopeduserroles - [You cannot use a role with Space level permissions at the System level. Space level permissions: AccountCreate]")
+func (suite *IntegrationTestSuite) TestAccTeamUserRole() {
+	SkipCI(suite.T(), "error creating user role for team Teams-3: octopus deploy api returned an error on endpoint /api/scopeduserroles - [You cannot use a role with Space level permissions at the System level. Space level permissions: AccountCreate]")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_team." + localName
 	userRoleResource := "octopusdeploy_user_role." + localName
@@ -53,9 +51,9 @@ func TestAccTeamUserRole(t *testing.T) {
 
 	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccTeamCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

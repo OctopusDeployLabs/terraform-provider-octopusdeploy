@@ -7,11 +7,11 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	stdslices "slices"
-	"testing"
 )
 
-func TestPackageFeedCreateReleaseTriggerResources(t *testing.T) {
+func (suite *IntegrationTestSuite) TestPackageFeedCreateReleaseTriggerResources() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "52-packagefeedcreatereleasetrigger", []string{})
 

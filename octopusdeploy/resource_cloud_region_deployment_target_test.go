@@ -5,17 +5,16 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
 )
 
-func TestAccCloudRegionDeploymentTargetImportBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccCloudRegionDeploymentTargetImportBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_cloud_region_deployment_target." + localName
+	t := suite.T()
 
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
@@ -36,15 +35,15 @@ func TestAccCloudRegionDeploymentTargetImportBasic(t *testing.T) {
 	})
 }
 
-func TestAccCloudRegionDeploymentTargetBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccCloudRegionDeploymentTargetBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_cloud_region_deployment_target." + localName
 
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccCloudRegionDeploymentTargetCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -102,8 +101,9 @@ func testAccCloudRegionDeploymentTargetCheckDestroy(s *terraform.State) error {
 }
 
 // TestCloudRegionTargetResource verifies that a cloud region can be reimported with the correct settings
-func TestCloudRegionTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestCloudRegionTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "33-cloudregiontarget", []string{})
 

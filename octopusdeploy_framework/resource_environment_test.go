@@ -2,20 +2,18 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
-	"path/filepath"
-	"strconv"
-	"testing"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployEnvironmentBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_environment." + localName
 
@@ -24,6 +22,7 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccEnvironmentCheckDestroy,
@@ -45,7 +44,7 @@ func TestAccOctopusDeployEnvironmentBasic(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployEnvironmentMinimum() {
 	allowDynamicInfrastructure := false
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -53,6 +52,7 @@ func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccEnvironmentCheckDestroy,
@@ -106,8 +106,9 @@ func testAccEnvironmentCheckDestroy(s *terraform.State) error {
 }
 
 // TestEnvironmentResource verifies that an environment can be reimported with the correct settings
-func TestEnvironmentResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestEnvironmentResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "16-environment", []string{})
 

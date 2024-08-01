@@ -42,6 +42,9 @@ func ProtoV6ProviderFactories() map[string]func() (tfprotov6.ProviderServer, err
 }
 
 func TestAccPreCheck(t *testing.T) {
+	if t.Name() == "TestAccPreCheck" {
+		t.Skip("Go registers this function as a test, it's intended as validation")
+	}
 	if v := os.Getenv("OCTOPUS_URL"); isEmpty(v) {
 		t.Fatal("OCTOPUS_URL must be set for acceptance tests")
 	}

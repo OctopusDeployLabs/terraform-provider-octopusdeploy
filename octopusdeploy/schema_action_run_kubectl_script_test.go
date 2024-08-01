@@ -2,13 +2,12 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccOctopusDeployRunKubectlScriptAction(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployRunKubectlScriptAction() {
+	t := suite.T()
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccProjectCheckDestroy,

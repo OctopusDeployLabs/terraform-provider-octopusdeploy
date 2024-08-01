@@ -4,12 +4,12 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
 )
 
 // TestGcpAccountResource verifies that a GCP account can be reimported with the correct settings
-func TestGcpAccountResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestGcpAccountResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "6-gcpaccount", []string{})
 

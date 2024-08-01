@@ -4,14 +4,13 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
-
 	"k8s.io/utils/strings/slices"
 )
 
 // TestSpaceResource verifies that a space can be reimported with the correct settings
-func TestSpaceResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestSpaceResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "1-singlespace", []string{})
 
 	if err != nil {
@@ -32,8 +31,8 @@ func TestSpaceResource(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	if space.Description != "TestSpaceResource" {
-		t.Fatalf("New space must have the description \"TestSpaceResource\"")
+	if space.Description != "TestSdkIntegrationTestSuite/TestSpaceResource" {
+		t.Fatalf("New space must have the description \"TestSdkIntegrationTestSuite/TestSpaceResource")
 	}
 
 	if space.IsDefault {

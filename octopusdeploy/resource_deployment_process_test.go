@@ -2,18 +2,16 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"strings"
-	"testing"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"strings"
 )
 
 // func TestAccDeploymentProcess(t *testing.T) {
@@ -63,9 +61,10 @@ import (
 // 		}`, options.LocalName, options.Project.LocalName, options.StepName, options.ActionType, options.ActionName, options.PackageName, options.PackageID)
 // }
 
-func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployDeploymentProcessBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -89,7 +88,8 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployDeploymentProcessWithActionTemplate() {
+	t := suite.T()
 	SkipCI(t, "Unsupported block type on `template` block")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
@@ -129,9 +129,10 @@ func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
+	t := suite.T()
 
 	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
@@ -418,8 +419,9 @@ func testAccDeploymentProcessCheckDestroy(s *terraform.State) error {
 	return nil
 }
 
-func TestDeploymentProcessWithGitDependency(t *testing.T) {
+func (suite *IntegrationTestSuite) TestDeploymentProcessWithGitDependency() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "51-deploymentprocesswithgitdependency", []string{})
 
@@ -469,8 +471,9 @@ func TestDeploymentProcessWithGitDependency(t *testing.T) {
 
 // TestTerraformApplyStepWithWorkerPool verifies that a terraform apply step with a custom worker pool is deployed successfully
 // See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/601
-func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
+func (suite *IntegrationTestSuite) TestTerraformApplyStepWithWorkerPool() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "50-applyterraformtemplateaction", []string{})
 

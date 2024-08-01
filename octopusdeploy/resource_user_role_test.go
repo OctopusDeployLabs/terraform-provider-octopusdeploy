@@ -2,20 +2,18 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccUserRoleBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccUserRoleBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccUserRoleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+	resource.Test(suite.T(), resource.TestCase{
+		CheckDestroy:             testAccUserRoleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -25,13 +23,14 @@ func TestAccUserRoleBasic(t *testing.T) {
 	})
 }
 
-func TestAccUserRolePermissions(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccUserRolePermissions() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccUserRoleCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy:             testAccUserRoleCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

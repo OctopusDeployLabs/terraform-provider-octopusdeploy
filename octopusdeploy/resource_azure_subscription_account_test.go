@@ -3,17 +3,15 @@ package octopusdeploy
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccOctopusDeployAzureSubscriptionAccountBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployAzureSubscriptionAccountBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_azure_subscription_account." + localName
 
@@ -27,9 +25,9 @@ func TestAccOctopusDeployAzureSubscriptionAccountBasic(t *testing.T) {
 
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testAccountCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -75,8 +73,9 @@ func testAzureSubscriptionAccountBasic(localName string, azureEnvironment string
 }
 
 // TestAzureSubscriptionAccountResource verifies that an azure account can be reimported with the correct settings
-func TestAzureSubscriptionAccountResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAzureSubscriptionAccountResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "8-azuresubscriptionaccount", []string{})
 

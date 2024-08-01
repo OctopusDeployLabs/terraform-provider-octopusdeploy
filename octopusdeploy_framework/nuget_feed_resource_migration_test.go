@@ -11,9 +11,10 @@ import (
 	"testing"
 )
 
-func TestNugetFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func (suite *IntegrationTestSuite) TestNugetFeed_UpgradeFromSDK_ToPluginFramework() {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testNugetFeedDestroy,
@@ -92,7 +93,7 @@ func testNugetFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		nugetFeed := feed.(*feeds.NuGetFeed)
 
-		assert.Regexp(t, "^Feeds\\-\\d+$", nugetFeed.GetID(), "Feed ID did not match expected value")
+		assert.Regexp(t, "^Feeds\\-\\d+$", nugetFeed.ID, "Feed ID did not match expected value")
 		assert.Equal(t, "Updated Nuget", nugetFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", nugetFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, nugetFeed.Password.HasValue, "Feed password should be set")

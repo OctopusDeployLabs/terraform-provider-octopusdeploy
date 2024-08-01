@@ -2,17 +2,16 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccSpaceImportBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccSpaceImportBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_space." + localName
+	t := suite.T()
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	slug := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -34,12 +33,13 @@ func TestAccSpaceImportBasic(t *testing.T) {
 	})
 }
 
-func TestAccSpaceBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccSpaceBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	newName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	slug := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_space." + localName
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccSpaceCheckDestroy,

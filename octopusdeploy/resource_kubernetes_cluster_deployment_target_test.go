@@ -5,15 +5,13 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	stdslices "slices"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"path/filepath"
+	stdslices "slices"
 )
 
-func TestAccKubernetesClusterDeploymentTargetBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccKubernetesClusterDeploymentTargetBasic() {
 	accountLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountUsername := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -28,9 +26,9 @@ func TestAccKubernetesClusterDeploymentTargetBasic(t *testing.T) {
 
 	newClusterURL := "http://www.example.com"
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testDeploymentTargetCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -43,7 +41,7 @@ func TestAccKubernetesClusterDeploymentTargetBasic(t *testing.T) {
 	})
 }
 
-func TestAccKubernetesClusterDeploymentTargetAws(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccKubernetesClusterDeploymentTargetAws() {
 	accountLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountAccessKey := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -58,9 +56,9 @@ func TestAccKubernetesClusterDeploymentTargetAws(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testDeploymentTargetCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -82,7 +80,7 @@ func TestAccKubernetesClusterDeploymentTargetAws(t *testing.T) {
 	})
 }
 
-func TestAccKubernetesClusterDeploymentTargetGcp(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccKubernetesClusterDeploymentTargetGcp() {
 	accountLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	accountUsername := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -98,9 +96,9 @@ func TestAccKubernetesClusterDeploymentTargetGcp(t *testing.T) {
 	project := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 	region := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testDeploymentTargetCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -231,8 +229,9 @@ func testAccKubernetesClusterDeploymentTargetAws(
 }
 
 // TestK8sTargetResource verifies that a k8s machine can be reimported with the correct settings
-func TestK8sTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestK8sTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "29-k8starget", []string{})
 
 	if err != nil {
@@ -280,8 +279,9 @@ func TestK8sTargetResource(t *testing.T) {
 }
 
 // TestK8sTargetResource verifies that a k8s machine can be reimported with the correct settings
-func TestK8sTargetWithCertResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestK8sTargetWithCertResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "47-k8stargetwithcert", []string{})
 
 	if err != nil {
@@ -316,8 +316,9 @@ func TestK8sTargetWithCertResource(t *testing.T) {
 }
 
 // TestK8sPodAuthTargetResource verifies that a k8s machine with pod auth can be reimported with the correct settings
-func TestK8sPodAuthTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestK8sPodAuthTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "48-k8stargetpodauth", []string{})
 
 	if err != nil {
@@ -359,8 +360,9 @@ func TestK8sPodAuthTargetResource(t *testing.T) {
 	}
 }
 
-func TestKubernetesDeploymentTargetData(t *testing.T) {
+func (suite *IntegrationTestSuite) TestKubernetesDeploymentTargetData() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "55-kubernetesagentdeploymenttarget", []string{})
 
 	if err != nil {
@@ -395,8 +397,9 @@ func TestKubernetesDeploymentTargetData(t *testing.T) {
 	}
 }
 
-func TestKubernetesDeploymentTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestKubernetesDeploymentTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "55-kubernetesagentdeploymenttarget", []string{})
 
 	if err != nil {

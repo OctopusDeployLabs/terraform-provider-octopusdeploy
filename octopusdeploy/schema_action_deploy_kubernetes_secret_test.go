@@ -2,20 +2,18 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccOctopusDeployDeployKubernetesSecretAction(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+func (suite *IntegrationTestSuite) TestAccOctopusDeployDeployKubernetesSecretAction() {
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccProjectCheckDestroy,
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

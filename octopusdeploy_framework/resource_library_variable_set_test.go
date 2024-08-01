@@ -2,17 +2,16 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"testing"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 )
 
-func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployLibraryVariableSetBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_library_variable_set." + localName
+	t := suite.T()
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
@@ -32,16 +31,16 @@ func TestAccOctopusDeployLibraryVariableSetBasic(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployLibraryVariableSetComplex() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_library_variable_set." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testLibraryVariableSetDestroy,
-		PreCheck:                 func() { TestAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -73,7 +72,7 @@ func TestAccOctopusDeployLibraryVariableSetComplex(t *testing.T) {
 	})
 }
 
-func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployLibraryVariableSetWithUpdate() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_library_variable_set." + localName
 
@@ -83,9 +82,9 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testLibraryVariableSetDestroy,
-		PreCheck:                 func() { TestAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			// create variable set with no description

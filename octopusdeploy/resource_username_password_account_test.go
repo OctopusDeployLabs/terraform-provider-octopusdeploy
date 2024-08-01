@@ -2,20 +2,19 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccUsernamePasswordBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccUsernamePasswordBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_username_password_account." + localName
+	t := suite.T()
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -67,8 +66,9 @@ func testUsernamePasswordMinimum(localName string, name string, username string)
 
 // TestUsernamePasswordVariableResource verifies that a project variable referencing a username/password account
 // can be created
-func TestUsernamePasswordVariableResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestUsernamePasswordVariableResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "54-usernamepasswordvariable", []string{})
 
 	if err != nil {

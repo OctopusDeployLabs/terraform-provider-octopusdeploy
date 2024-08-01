@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parallel: [ 15 ]
-        index: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ]
+        parallel: [ 3 ]
+        index: [ 0, 1, 2 ]
 
     steps:
       - uses: actions/checkout@v3
@@ -84,7 +84,7 @@ jobs:
       - name: Test
         run: |
           GOBIN=$PWD/bin go install gotest.tools/gotestsum@latest
-          ./bin/gotestsum --junitfile node-summary.xml --format standard-verbose -- -run "${{ steps.test_split.outputs.run }}" -timeout 0 ./... -createSharedContainer=true
+          ./bin/gotestsum --junitfile node-summary.xml --format short-verbose -- -run "${{ steps.test_split.outputs.run }}" -timeout 0 ./...
         shell: bash
         env:
           LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
@@ -97,6 +97,7 @@ jobs:
           OCTOTESTVERSION: latest
           OCTOTESTIMAGEURL: docker.packages.octopushq.com/octopusdeploy/octopusdeploy
           OCTOTESTRETRYCOUNT: 1
+          TF_ACC: 1
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v3
@@ -128,18 +129,6 @@ jobs:
           "junit-test-summary-0/*.xml" 
           "junit-test-summary-1/*.xml" 
           "junit-test-summary-2/*.xml" 
-          "junit-test-summary-3/*.xml" 
-          "junit-test-summary-4/*.xml" 
-          "junit-test-summary-5/*.xml" 
-          "junit-test-summary-6/*.xml" 
-          "junit-test-summary-7/*.xml" 
-          "junit-test-summary-8/*.xml" 
-          "junit-test-summary-9/*.xml"
-          "junit-test-summary-10/*.xml"
-          "junit-test-summary-11/*.xml"
-          "junit-test-summary-12/*.xml"
-          "junit-test-summary-13/*.xml"
-          "junit-test-summary-14/*.xml"
 
       - name: Upload test artifacts
         uses: actions/upload-artifact@v3

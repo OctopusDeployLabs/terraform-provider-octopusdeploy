@@ -5,12 +5,12 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"path/filepath"
-	"testing"
 )
 
 // TestAzureServiceFabricTargetResource verifies that a service fabric target can be reimported with the correct settings
-func TestAzureServiceFabricTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAzureServiceFabricTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "36-servicefabrictarget", []string{
 		"-var=target_service_fabric=whatever",

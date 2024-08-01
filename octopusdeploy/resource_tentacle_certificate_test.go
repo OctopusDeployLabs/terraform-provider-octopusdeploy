@@ -3,11 +3,11 @@ package octopusdeploy
 import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"path/filepath"
-	"testing"
 )
 
-func TestTentacleCertificateResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestTentacleCertificateResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	_, err := testFramework.Act(t, octoContainer, "../terraform", "57-tentaclecertificate", []string{})
 
 	if err != nil {

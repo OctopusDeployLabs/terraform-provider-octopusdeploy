@@ -5,10 +5,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"testing"
 )
 
-func TestAccOctopusDeployArtifactoryGenericFeed(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployArtifactoryGenericFeed() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_artifactory_generic_feed." + localName
 
@@ -18,6 +17,7 @@ func TestAccOctopusDeployArtifactoryGenericFeed(t *testing.T) {
 	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	repository := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	layoutRegex := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testArtifactoryGenericFeedCheckDestroy,

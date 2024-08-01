@@ -6,7 +6,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
 )
 
 // import (
@@ -173,8 +172,9 @@ import (
 // }
 
 // TestProjectTriggerResource verifies that a project trigger can be reimported with the correct settings
-func TestProjectTriggerResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectTriggerResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "28-projecttrigger", []string{})
 
 	if err != nil {

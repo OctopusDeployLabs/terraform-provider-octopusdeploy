@@ -5,12 +5,12 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"strings"
-	"testing"
 )
 
 // TestRunbookResource verifies that a runbook can be reimported with the correct settings
-func TestRunbookResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestRunbookResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "46-runbooks", []string{})
 
 	if err != nil {

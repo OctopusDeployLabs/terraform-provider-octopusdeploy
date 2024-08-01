@@ -5,15 +5,13 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
 )
 
-func TestAccOctopusDeployScriptModuleBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployScriptModuleBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_script_module." + localName
 
@@ -22,9 +20,9 @@ func TestAccOctopusDeployScriptModuleBasic(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	syntax := "Bash"
 
-	resource.Test(t, resource.TestCase{
+	resource.Test(suite.T(), resource.TestCase{
 		CheckDestroy:             testScriptModuleCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -81,8 +79,9 @@ func testScriptModuleExists(n string) resource.TestCheckFunc {
 }
 
 // TestScriptModuleResource verifies that a script module set can be reimported with the correct settings
-func TestScriptModuleResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestScriptModuleResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "23-scriptmodule", []string{})
 
 	if err != nil {

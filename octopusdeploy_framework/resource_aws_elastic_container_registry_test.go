@@ -6,11 +6,11 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"os"
 	"path/filepath"
-	"testing"
 )
 
 // TestEcrFeedResource verifies that a ecr feed can be reimported with the correct settings
-func TestEcrFeedResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestEcrFeedResource() {
+	t := suite.T()
 	if os.Getenv("ECR_ACCESS_KEY") == "" {
 		t.Fatal("The ECR_ACCESS_KEY environment variable must be set a valid AWS access key")
 	}

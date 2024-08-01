@@ -11,9 +11,10 @@ import (
 	"testing"
 )
 
-func TestHelmFeedResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func (suite *IntegrationTestSuite) TestHelmFeedResource_UpgradeFromSDK_ToPluginFramework() {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testHelmFeedDestroy,
@@ -86,7 +87,7 @@ func testHelmFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		helmFeed := feed.(*feeds.HelmFeed)
 
-		assert.Regexp(t, "^Feeds\\-\\d+$", helmFeed.GetID(), "Feed ID did not match expected value")
+		assert.Regexp(t, "^Feeds\\-\\d+$", helmFeed.ID, "Feed ID did not match expected value")
 		assert.Equal(t, "Updated_Helm", helmFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", helmFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, helmFeed.Password.HasValue, "Feed password should be set")

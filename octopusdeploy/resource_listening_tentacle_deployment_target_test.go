@@ -6,14 +6,13 @@ import (
 	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"path/filepath"
 )
 
-func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccListeningTentacleDeploymentTarget() {
+	t := suite.T()
 	SkipCI(t, "Error: Missing required argument")
 	options := internaltest.NewListeningTentacleDeploymentTargetTestOptions()
 
@@ -126,8 +125,9 @@ func testAccListeningTentacleDeploymentTargetCheckDestroy(s *terraform.State) er
 }
 
 // TestListeningTargetResource verifies that a listening machine can be reimported with the correct settings
-func TestListeningTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestListeningTargetResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "31-listeningtarget", []string{})
 
 	if err != nil {

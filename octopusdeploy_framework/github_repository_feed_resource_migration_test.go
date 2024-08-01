@@ -11,9 +11,10 @@ import (
 	"testing"
 )
 
-func TestGitHubFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
+func (suite *IntegrationTestSuite) TestGitHubFeed_UpgradeFromSDK_ToPluginFramework() {
 	// override the path to check for terraformrc file and test against the real 0.21.1 version
 	os.Setenv("TF_CLI_CONFIG_FILE=", "")
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: testGitHubFeedDestroy,
@@ -90,7 +91,7 @@ func testGitHubFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		githubRepositoryFeed := feed.(*feeds.GitHubRepositoryFeed)
 
-		assert.Regexp(t, "^Feeds\\-\\d+$", githubRepositoryFeed.GetID(), "Feed ID did not match expected value")
+		assert.Regexp(t, "^Feeds\\-\\d+$", githubRepositoryFeed.ID, "Feed ID did not match expected value")
 		assert.Equal(t, "Updated Test GitHub Feed", githubRepositoryFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", githubRepositoryFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, githubRepositoryFeed.Password.HasValue, "Feed password should be set")

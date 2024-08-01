@@ -6,15 +6,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"path/filepath"
-	"testing"
 )
 
-func TestGitCredentialBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestGitCredentialBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_git_credential." + localName
 
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	t := suite.T()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
@@ -43,8 +43,9 @@ func testGitCredential(localName string, name string, description string) string
 }
 
 // TestGitCredentialsResource verifies that a git credential can be reimported with the correct settings
-func TestGitCredentialsResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestGitCredentialsResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "22-gitcredentialtest", []string{})
 

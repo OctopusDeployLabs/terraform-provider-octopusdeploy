@@ -4,20 +4,20 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"testing"
 )
 
 // TestAzureCloudServiceTargetResource verifies that a azure cloud service target can be reimported with the correct settings
-func TestAzureCloudServiceTargetResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAzureCloudServiceTargetResource() {
 	// I could not figure out a combination of properties that made the octopusdeploy_azure_subscription_account resource work
 	return
 
+	t := suite.T()
 	testFramework := test.OctopusContainerTest{}
 
-	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "35-azurecloudservicetarget", []string{})
+	newSpaceId, err := testFramework.Act(suite.T(), octoContainer, "../terraform", "35-azurecloudservicetarget", []string{})
 
 	if err != nil {
-		t.Fatal(err.Error())
+		suite.T().Fatal(err.Error())
 	}
 
 	// Assert

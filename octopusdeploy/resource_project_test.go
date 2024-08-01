@@ -4,24 +4,23 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
+	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"os"
-	"path/filepath"
-	"sort"
-	"testing"
-
-	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"os"
+	"path/filepath"
+	"sort"
 )
 
-func TestAccProjectBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccProjectBasic() {
 	lifecycleTestOptions := internaltest.NewLifecycleTestOptions()
 	projectGroupTestOptions := internaltest.NewProjectGroupTestOptions()
 	projectTestOptions := internaltest.NewProjectTestOptions(lifecycleTestOptions, projectGroupTestOptions)
 	projectTestOptions.Resource.IsDisabled = true
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -102,13 +101,14 @@ func testAccProjectWithTemplate(localName string, name string, lifecycleLocalNam
 	}`, localName, lifecycleLocalName, name, projectGroupLocalName)
 }
 
-func TestAccProjectWithUpdate(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccProjectWithUpdate() {
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_project." + localName
+	t := suite.T()
 
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -249,8 +249,9 @@ func testAccProjectCheckExists() resource.TestCheckFunc {
 }
 
 // TestProjectResource verifies that a project can be reimported with the correct settings
-func TestProjectResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "19-project", []string{})
 
 	if err != nil {
@@ -337,8 +338,9 @@ func TestProjectResource(t *testing.T) {
 	}
 }
 
-func TestProjectInSpaceResource(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectInSpaceResource() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "19b-projectspace", []string{})
 
 	if err != nil {
@@ -418,7 +420,8 @@ func TestProjectInSpaceResource(t *testing.T) {
 }
 
 // TestProjectWithGitUsernameExport verifies that a project can be reimported with the correct git settings
-func TestProjectWithGitUsernameExport(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectWithGitUsernameExport() {
+	t := suite.T()
 	if os.Getenv("GIT_CREDENTIAL") == "" {
 		t.Fatal("The GIT_CREDENTIAL environment variable must be set")
 	}
@@ -441,8 +444,9 @@ func TestProjectWithGitUsernameExport(t *testing.T) {
 }
 
 // TestProjectWithDollarSignsExport verifies that a project can be reimported with terraform string interpolation
-func TestProjectWithDollarSignsExport(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectWithDollarSignsExport() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "40-escapedollar", []string{})
 
@@ -471,8 +475,9 @@ func TestProjectWithDollarSignsExport(t *testing.T) {
 
 // TestProjectTerraformInlineScriptExport verifies that a project can be reimported with a terraform inline template step.
 // See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/478
-func TestProjectTerraformInlineScriptExport(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectTerraformInlineScriptExport() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "41-terraforminlinescript", []string{})
 
@@ -507,8 +512,9 @@ func TestProjectTerraformInlineScriptExport(t *testing.T) {
 
 // TestProjectTerraformPackageScriptExport verifies that a project can be reimported with a terraform package template step.
 // See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/478
-func TestProjectTerraformPackageScriptExport(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectTerraformPackageScriptExport() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "42-terraformpackagescript", []string{})
 
 	if err != nil {
@@ -545,8 +551,9 @@ func TestProjectTerraformPackageScriptExport(t *testing.T) {
 }
 
 // TestProjectWithScriptActions verifies that a project with a plain script step can be applied and reapplied
-func TestProjectWithScriptActions(t *testing.T) {
+func (suite *IntegrationTestSuite) TestProjectWithScriptActions() {
 	testFramework := test.OctopusContainerTest{}
+	t := suite.T()
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "45-projectwithscriptactions", []string{})
 
 	if err != nil {

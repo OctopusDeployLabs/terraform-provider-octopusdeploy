@@ -2,15 +2,13 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccOctopusDeployAzureServicePrincipalAccountBasic(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccOctopusDeployAzureServicePrincipalAccountBasic() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_azure_service_principal." + localName
 
@@ -24,9 +22,9 @@ func TestAccOctopusDeployAzureServicePrincipalAccountBasic(t *testing.T) {
 
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccountCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
+	resource.Test(suite.T(), resource.TestCase{
+		CheckDestroy:             testAccountCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(suite.T()) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

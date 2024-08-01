@@ -3,16 +3,15 @@ package octopusdeploy_framework
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccDataSourceProjectGroups(t *testing.T) {
+func (suite *IntegrationTestSuite) TestAccDataSourceProjectGroups() {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := fmt.Sprintf("data.octopusdeploy_project_groups.%s", localName)
 	take := 10
+	t := suite.T()
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
