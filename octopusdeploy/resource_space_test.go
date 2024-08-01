@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -19,9 +18,9 @@ func TestAccSpaceImportBasic(t *testing.T) {
 	slug := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccSpaceCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testAccSpaceCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testSpaceBasic(localName, name, slug),
@@ -43,9 +42,9 @@ func TestAccSpaceBasic(t *testing.T) {
 	prefix := "octopusdeploy_space." + localName
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testAccSpaceCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testAccSpaceCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -91,7 +90,6 @@ func testSpaceBasic(localName string, name string, slug string) string {
 			name = "%s"
 			slug = "%s"
 			space_managers_teams  = ["teams-managers"]
-
 			lifecycle {
 			  ignore_changes = [space_managers_teams]
 			}
@@ -100,9 +98,8 @@ func testSpaceBasic(localName string, name string, slug string) string {
 
 func testSpaceExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		spaceID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := spaces.GetByID(client, spaceID); err != nil {
+		if _, err := spaces.GetByID(octoClient, spaceID); err != nil {
 			return err
 		}
 
@@ -111,10 +108,9 @@ func testSpaceExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccSpaceCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		spaceID := rs.Primary.ID
-		space, err := spaces.GetByID(client, spaceID)
+		space, err := spaces.GetByID(octoClient, spaceID)
 		if err == nil {
 			if space != nil {
 				return fmt.Errorf("space (%s) still exists", rs.Primary.ID)

@@ -3,7 +3,7 @@ package octopusdeploy
 import (
 	"context"
 	"fmt"
-
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -619,4 +619,87 @@ func setProject(ctx context.Context, d *schema.ResourceData, project *projects.P
 	d.Set("id", project.GetID())
 
 	return nil
+}
+
+// The Library Variable set migration has moved these methods to the action_template_parameter.go file in the framework. These are to be removed when migrating projects and the action_template_parameter.go versions used instead.
+func expandActionTemplateParameters(actionTemplateParameters []interface{}) []actiontemplates.ActionTemplateParameter {
+	if len(actionTemplateParameters) == 0 {
+		return nil
+	}
+
+	expandedActionTemplateParameters := []actiontemplates.ActionTemplateParameter{}
+	for _, actionTemplateParameter := range actionTemplateParameters {
+		actionTemplateParameterMap := actionTemplateParameter.(map[string]interface{})
+		expandedActionTemplateParameters = append(expandedActionTemplateParameters, expandActionTemplateParameter(actionTemplateParameterMap))
+	}
+	return expandedActionTemplateParameters
+}
+
+func expandActionTemplateParameter(tfTemplate map[string]interface{}) actiontemplates.ActionTemplateParameter {
+	actionTemplateParameter := actiontemplates.NewActionTemplateParameter()
+
+	propertyValue := core.NewPropertyValue(tfTemplate["default_value"].(string), false)
+	actionTemplateParameter.DefaultValue = &propertyValue
+	actionTemplateParameter.DisplaySettings = flattenDisplaySettings(tfTemplate["display_settings"].(map[string]interface{}))
+	actionTemplateParameter.HelpText = tfTemplate["help_text"].(string)
+	actionTemplateParameter.ID = tfTemplate["id"].(string)
+	actionTemplateParameter.Label = tfTemplate["label"].(string)
+	actionTemplateParameter.Name = tfTemplate["name"].(string)
+
+	return *actionTemplateParameter
+}
+
+func flattenDisplaySettings(displaySettings map[string]interface{}) map[string]string {
+	flattenedDisplaySettings := make(map[string]string, len(displaySettings))
+	for key, displaySetting := range displaySettings {
+		flattenedDisplaySettings[key] = displaySetting.(string)
+	}
+	return flattenedDisplaySettings
+}
+
+func flattenActionTemplateParameters(actionTemplateParameters []actiontemplates.ActionTemplateParameter) []interface{} {
+	flattenedActionTemplateParameters := make([]interface{}, 0)
+	for _, actionTemplateParameter := range actionTemplateParameters {
+		a := make(map[string]interface{})
+		a["default_value"] = actionTemplateParameter.DefaultValue.Value
+		a["display_settings"] = actionTemplateParameter.DisplaySettings
+		a["help_text"] = actionTemplateParameter.HelpText
+		a["id"] = actionTemplateParameter.ID
+		a["label"] = actionTemplateParameter.Label
+		a["name"] = actionTemplateParameter.Name
+		flattenedActionTemplateParameters = append(flattenedActionTemplateParameters, a)
+	}
+	return flattenedActionTemplateParameters
+}
+
+func getActionTemplateParameterSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"default_value": {
+			Description: "A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"display_settings": {
+			Description: "The display settings for the parameter.",
+			Optional:    true,
+			Type:        schema.TypeMap,
+		},
+		"help_text": {
+			Description: "The help presented alongside the parameter input.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"id": getIDSchema(),
+		"label": {
+			Description: "The label shown beside the parameter when presented in the deployment process. Example: `Server name`.",
+			Optional:    true,
+			Type:        schema.TypeString,
+		},
+		"name": {
+			Description:      "The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`.",
+			Required:         true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotEmpty),
+		},
+	}
 }
