@@ -3,6 +3,8 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -10,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"time"
 )
 
 type lifecyclesDataSource struct {
@@ -55,7 +56,7 @@ func (l *lifecyclesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	query := lifecycles.Query{
-		IDs:         util.GetStringSlice(data.IDs),
+		IDs:         util.ExpandStringList(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        int(data.Skip.ValueInt64()),
 		Take:        int(data.Take.ValueInt64()),

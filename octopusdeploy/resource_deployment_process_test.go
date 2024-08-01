@@ -2,13 +2,14 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
-	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"strings"
 	"testing"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
@@ -91,7 +92,7 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
-	SkipCI(t, "Unsupported block type on `template` block")
+	internalTest.SkipCI(t, "Unsupported block type on `template` block")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
 
@@ -523,84 +524,4 @@ func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
 	if process.Steps[0].Actions[0].WorkerPool != workerpools.Items[0].GetID() {
 		t.Fatalf("Action must use the worker pool \"Docker\"")
 	}
-}
-
-func testAccProjectCheckDestroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "octopusdeploy_project" {
-			continue
-		}
-
-		if project, err := octoClient.Projects.GetByID(rs.Primary.ID); err == nil {
-			return fmt.Errorf("project (%s) still exists", project.GetID())
-		}
-	}
-
-	return nil
-}
-
-func testAccProjectCheckExists() resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-
-		for _, r := range s.RootModule().Resources {
-			if r.Type == "octopusdeploy_project" {
-				if _, err := octoClient.Projects.GetByID(r.Primary.ID); err != nil {
-					return fmt.Errorf("error retrieving project with ID %s: %s", r.Primary.ID, err)
-				}
-			}
-		}
-		return nil
-	}
-}
-
-func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string) string {
-	projectGroup := internaltest.NewProjectGroupTestOptions()
-	projectGroup.LocalName = projectGroupLocalName
-	projectGroup.Resource.Name = projectGroupName
-
-	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
-		internaltest.ProjectGroupConfiguration(projectGroup)+"\n"+
-		`resource "octopusdeploy_project" "%s" {
-			description      = "%s"
-			lifecycle_id     = octopusdeploy_lifecycle.%s.id
-			name             = "%s"
-			project_group_id = octopusdeploy_project_group.%s.id
-
-			template {
-				default_value = "default-value"
-				help_text     = "help-test"
-				label         = "label"
-				name          = "2"
-
-				display_settings = {
-					"Octopus.ControlType": "SingleLineText"
-				}
-			}
-
-			template {
-				default_value = "default-value"
-				help_text     = "help-test"
-				label         = "label"
-				name          = "1"
-
-				display_settings = {
-					"Octopus.ControlType": "SingleLineText"
-				}
-			}
-
-		  //   connectivity_policy {
-		//     allow_deployments_to_no_targets = true
-		// 	skip_machine_behavior           = "None"
-		//   }
-
-		//   version_control_settings {
-		// 	default_branch = "foo"
-		// 	url            = "https://example.com/"
-		// 	username       = "bar"
-		//   }
-
-		//   versioning_strategy {
-		//     template = "alskdjaslkdj"
-		//   }
-		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
 }

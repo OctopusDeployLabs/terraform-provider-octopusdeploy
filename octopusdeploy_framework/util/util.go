@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -14,6 +15,10 @@ func GetProviderName() string {
 
 func GetTypeName(name string) string {
 	return fmt.Sprintf("%s_%s", GetProviderName(), name)
+}
+
+func GetDataSourceDescription(resourceName string) string {
+	return fmt.Sprintf("Provides information about existing %s", resourceName)
 }
 
 func GetStringOrEmpty(tfAttr interface{}) string {
@@ -50,6 +55,10 @@ func SetToStringArray(ctx context.Context, set types.Set) ([]string, diag.Diagno
 }
 
 func FlattenStringList(list []string) types.List {
+	if list == nil {
+		return types.ListValueMust(types.StringType, make([]attr.Value, 0))
+	}
+
 	elements := make([]attr.Value, 0, len(list))
 	for _, s := range list {
 		elements = append(elements, types.StringValue(s))
@@ -57,25 +66,11 @@ func FlattenStringList(list []string) types.List {
 	return types.ListValueMust(types.StringType, elements)
 }
 
-func Ternary(condition bool, whenTrue, whenFalse attr.Value) attr.Value {
+func Ternary[T interface{}](condition bool, whenTrue T, whenFalse T) T {
 	if condition {
 		return whenTrue
 	}
 	return whenFalse
-}
-
-func GetStringSlice(list types.List) []string {
-	if list.IsNull() || list.IsUnknown() {
-		return nil
-	}
-
-	result := make([]string, 0, len(list.Elements()))
-	for _, element := range list.Elements() {
-		if str, ok := element.(types.String); ok {
-			result = append(result, str.ValueString())
-		}
-	}
-	return result
 }
 
 func ToValueSlice(slice []string) []attr.Value {

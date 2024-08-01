@@ -3,13 +3,14 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/libraryvariablesets"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
@@ -59,7 +60,7 @@ func (l *libraryVariableSetDataSource) Read(ctx context.Context, req datasource.
 
 	query := variables.LibraryVariablesQuery{
 		ContentType: data.ContentType.ValueString(),
-		IDs:         util.GetStringSlice(data.IDs),
+		IDs:         util.GetIds(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        int(data.Skip.ValueInt64()),
 		Take:        int(data.Take.ValueInt64()),

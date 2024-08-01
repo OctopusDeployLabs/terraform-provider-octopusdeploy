@@ -33,7 +33,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_tenants":                                         dataSourceTenants(),
 			"octopusdeploy_users":                                           dataSourceUsers(),
 			"octopusdeploy_user_roles":                                      dataSourceUserRoles(),
-			"octopusdeploy_variables":                                       dataSourceVariable(),
 			"octopusdeploy_worker_pools":                                    dataSourceWorkerPools(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -78,7 +77,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_user":                                           resourceUser(),
 			"octopusdeploy_user_role":                                      resourceUserRole(),
 			"octopusdeploy_username_password_account":                      resourceUsernamePasswordAccount(),
-			"octopusdeploy_variable":                                       resourceVariable(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {

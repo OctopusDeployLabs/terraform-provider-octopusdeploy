@@ -2,20 +2,21 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
-	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"path/filepath"
 	"testing"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
-	SkipCI(t, "Error: Missing required argument")
-	options := internaltest.NewListeningTentacleDeploymentTargetTestOptions()
+	internalTest.SkipCI(t, "Error: Missing required argument")
+	options := internalTest.NewListeningTentacleDeploymentTargetTestOptions()
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccListeningTentacleDeploymentTargetCheckDestroy,
@@ -23,7 +24,7 @@ func TestAccListeningTentacleDeploymentTarget(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: internaltest.ListeningTentacleDeploymentTargetConfiguration(options),
+				Config: internalTest.ListeningTentacleDeploymentTargetConfiguration(options),
 				Check: resource.ComposeTestCheckFunc(
 					testAccListeningTentacleDeploymentTargetExists(options.ResourceName),
 				),
