@@ -13,6 +13,7 @@ type projectResourceModel struct {
 	ProjectGroupID                         types.String `tfsdk:"project_group_id"`
 	IsDisabled                             types.Bool   `tfsdk:"is_disabled"`
 	AutoCreateRelease                      types.Bool   `tfsdk:"auto_create_release"`
+	AllowDeploymentsToNoTargets            types.Bool   `tfsdk:"allow_deployments_to_no_targets"`
 	DefaultGuidedFailureMode               types.String `tfsdk:"default_guided_failure_mode"`
 	DefaultToSkipIfAlreadyInstalled        types.Bool   `tfsdk:"default_to_skip_if_already_installed"`
 	DeploymentChangesTemplate              types.String `tfsdk:"deployment_changes_template"`

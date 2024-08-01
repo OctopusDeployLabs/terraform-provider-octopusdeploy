@@ -33,6 +33,30 @@ func (b *DataSourceAttributeBuilder[T]) Optional() *DataSourceAttributeBuilder[T
 	return b
 }
 
+func (b *DataSourceAttributeBuilder[T]) Deprecated(deprecationMessage string) *DataSourceAttributeBuilder[T] {
+	switch a := any(&b.attr).(type) {
+	case *schema.StringAttribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.BoolAttribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.Int64Attribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.Float64Attribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.NumberAttribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.ListAttribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.SetAttribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.MapAttribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.ObjectAttribute:
+		a.DeprecationMessage = deprecationMessage
+	}
+	return b
+}
+
 func (b *DataSourceAttributeBuilder[T]) Required() *DataSourceAttributeBuilder[T] {
 	switch a := any(&b.attr).(type) {
 	case *schema.StringAttribute:
