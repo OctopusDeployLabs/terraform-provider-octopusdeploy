@@ -2,13 +2,14 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func TestGitHubFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {

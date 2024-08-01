@@ -80,7 +80,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_user":                                           resourceUser(),
 			"octopusdeploy_user_role":                                      resourceUserRole(),
 			"octopusdeploy_username_password_account":                      resourceUsernamePasswordAccount(),
-			"octopusdeploy_variable":                                       resourceVariable(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
