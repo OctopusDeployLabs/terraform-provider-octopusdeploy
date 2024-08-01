@@ -193,11 +193,7 @@ func GetIds(ids types.List) []string {
 	for _, id := range ids.Elements() {
 		strVal, ok := id.(types.String)
 
-		if !ok {
-			return nil
-		}
-
-		if strVal.IsNull() || strVal.IsUnknown() {
+		if !ok || strVal.IsNull() || strVal.IsUnknown() {
 			continue
 		}
 		result = append(result, strVal.ValueString())
