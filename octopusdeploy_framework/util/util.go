@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -62,20 +63,6 @@ func Ternary(condition bool, whenTrue, whenFalse attr.Value) attr.Value {
 		return whenTrue
 	}
 	return whenFalse
-}
-
-func GetStringSlice(list types.List) []string {
-	if list.IsNull() || list.IsUnknown() {
-		return nil
-	}
-
-	result := make([]string, 0, len(list.Elements()))
-	for _, element := range list.Elements() {
-		if str, ok := element.(types.String); ok {
-			result = append(result, str.ValueString())
-		}
-	}
-	return result
 }
 
 func ToValueSlice(slice []string) []attr.Value {

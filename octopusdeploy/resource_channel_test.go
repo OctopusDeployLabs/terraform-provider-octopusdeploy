@@ -2,12 +2,14 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"net/http"
 	"path/filepath"
 	"testing"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -89,7 +91,7 @@ func TestAccOctopusDeployChannelBasicWithUpdate(t *testing.T) {
 }
 
 func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
-	SkipCI(t, "action_package blocks required on rule, this test is out of date.")
+	internalTest.SkipCI(t, "action_package blocks required on rule, this test is out of date.")
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	const channelName = "Funky Channel"
 	const channelDescription = "this is Funky"
@@ -116,7 +118,7 @@ func TestAccOctopusDeployChannelWithOneRule(t *testing.T) {
 }
 
 func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
-	SkipCI(t, "action_package blocks required on rule, this test is out of date.")
+	internalTest.SkipCI(t, "action_package blocks required on rule, this test is out of date.")
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	const channelName = "Funky Channel"
 	const updatedChannelName = "Updated Channel"
@@ -157,7 +159,7 @@ func TestAccOctopusDeployChannelWithOneRuleWithUpdate(t *testing.T) {
 }
 
 func TestAccOctopusDeployChannelWithTwoRules(t *testing.T) {
-	SkipCI(t, "action_package blocks required on rule, this test is out of date.")
+	internalTest.SkipCI(t, "action_package blocks required on rule, this test is out of date.")
 	const terraformNamePrefix = "octopusdeploy_channel.ch"
 	const channelName = "Funky Channel"
 	const channelDescription = "this is Funky"

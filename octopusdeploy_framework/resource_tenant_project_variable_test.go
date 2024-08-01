@@ -2,15 +2,18 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"strings"
-	"testing"
+
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 )
 
 func TestAccTenantProjectVariableBasic(t *testing.T) {
-	SkipCI(t, "project_environment have been refactor [deprecated] - will enable this test later after Ben fix")
+	internalTest.SkipCI(t, "project_environment have been refactor [deprecated] - will enable this test later after Ben fix")
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
