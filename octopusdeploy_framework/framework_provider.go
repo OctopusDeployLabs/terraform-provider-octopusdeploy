@@ -90,6 +90,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewTenantCommonVariableResource,
 		NewLibraryVariableSetFeedResource,
 		NewVariableResource,
+		NewTenantResource,
 	}
 }
 

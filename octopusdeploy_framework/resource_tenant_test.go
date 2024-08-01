@@ -1,7 +1,10 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"path/filepath"
 	"testing"
 
@@ -9,10 +12,6 @@ import (
 	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccTenantBasic(t *testing.T) {
@@ -36,7 +35,7 @@ func TestAccTenantBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccTenantCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -180,4 +179,57 @@ func TestTenantsResource(t *testing.T) {
 	if tenants != resource.ID {
 		t.Fatal("The target lookup did not succeed. Lookup value was \"" + tenants + "\" while the resource value was \"" + resource.ID + "\".")
 	}
+}
+
+// Copied from resource_project_test this can be removed once projects are migrated
+func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string) string {
+	projectGroup := internalTest.NewProjectGroupTestOptions()
+	projectGroup.LocalName = projectGroupLocalName
+	projectGroup.Resource.Name = projectGroupName
+
+	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
+		internalTest.ProjectGroupConfiguration(projectGroup)+"\n"+
+		`resource "octopusdeploy_project" "%s" {
+			description      = "%s"
+			lifecycle_id     = octopusdeploy_lifecycle.%s.id
+			name             = "%s"
+			project_group_id = octopusdeploy_project_group.%s.id
+
+			template {
+				default_value = "default-value"
+				help_text     = "help-test"
+				label         = "label"
+				name          = "2"
+
+				display_settings = {
+					"Octopus.ControlType": "SingleLineText"
+				}
+			}
+
+			template {
+				default_value = "default-value"
+				help_text     = "help-test"
+				label         = "label"
+				name          = "1"
+
+				display_settings = {
+					"Octopus.ControlType": "SingleLineText"
+				}
+			}
+
+		  //   connectivity_policy {
+		//     allow_deployments_to_no_targets = true
+		// 	skip_machine_behavior           = "None"
+		//   }
+
+		//   version_control_settings {
+		// 	default_branch = "foo"
+		// 	url            = "https://example.com/"
+		// 	username       = "bar"
+		//   }
+
+		//   versioning_strategy {
+		//     template = "alskdjaslkdj"
+		//   }
+		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
 }
