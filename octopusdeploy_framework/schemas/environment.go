@@ -1,6 +1,7 @@
 package schemas
 
 import (
+	"strings"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -25,6 +26,28 @@ const (
 	EnvironmentServiceNowExtensionSettingsIsEnabled            = "is_enabled"
 )
 
+var jiraEnvironmentTypeNames = struct {
+	Development string
+	Production  string
+	Testing     string
+	Staging     string
+	Unmapped    string
+}{
+	Development: "development",
+	Production:  "production",
+	Testing:     "testing",
+	Staging:     "staging",
+	Unmapped:    "unmapped",
+}
+
+var jiraEnvironmentTypes = []string{
+	jiraEnvironmentTypeNames.Development,
+	jiraEnvironmentTypeNames.Production,
+	jiraEnvironmentTypeNames.Staging,
+	jiraEnvironmentTypeNames.Testing,
+	jiraEnvironmentTypeNames.Unmapped,
+}
+
 func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":                 GetIdDatasourceSchema(true),
@@ -48,11 +71,7 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 						Computed: true,
 						Validators: []validator.String{
 							stringvalidator.OneOfCaseInsensitive(
-								"development",
-								"production",
-								"testing",
-								"staging",
-								"unmapped",
+								jiraEnvironmentTypes...,
 							),
 						},
 					},
@@ -82,6 +101,7 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 
 func GetEnvironmentResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
+		Description: util.GetResourceSchemaDescription(EnvironmentResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":                 util.GetIdResourceSchema(),
 			"slug":               util.GetSlugResourceSchema(EnvironmentResourceDescription),
@@ -106,14 +126,11 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
 						"environment_type": resourceSchema.StringAttribute{
-							Optional: true,
+							Description: fmt.Sprintf("The Jira environment type of this Octopus deployment environment. Valid values are %s.", strings.Join(util.Map(jiraEnvironmentTypes, func(item string) string { return fmt.Sprintf("`\"%s\"`", item) }), ", ")),
+							Required:    true,
 							Validators: []validator.String{
 								stringvalidator.OneOfCaseInsensitive(
-									"development",
-									"production",
-									"staging",
-									"testing",
-									"unmapped",
+									jiraEnvironmentTypes...,
 								),
 							},
 						},
@@ -124,7 +141,10 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 				Description: "Provides extension settings for the Jira Service Management (JSM) integration for this environment.",
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"is_enabled": resourceSchema.BoolAttribute{Optional: true},
+						"is_enabled": resourceSchema.BoolAttribute{
+							Description: "Specifies whether or not this extension is enabled for this project.",
+							Required:    true,
+						},
 					},
 				},
 			},
@@ -132,7 +152,10 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 				Description: "Provides extension settings for the ServiceNow integration for this environment.",
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"is_enabled": resourceSchema.BoolAttribute{Optional: true},
+						"is_enabled": resourceSchema.BoolAttribute{
+							Description: "Specifies whether or not this extension is enabled for this project.",
+							Required:    true,
+						},
 					},
 				},
 			},
