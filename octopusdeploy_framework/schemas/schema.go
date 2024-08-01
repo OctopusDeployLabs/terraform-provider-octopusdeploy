@@ -171,6 +171,14 @@ func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute 
 	}
 }
 
+func GetBooleanDatasourceAttribute(description string, isOptional bool) datasourceSchema.Attribute {
+	return datasourceSchema.BoolAttribute{
+		Description: description,
+		Optional:    isOptional,
+		Computed:    true,
+	}
+}
+
 func GetBooleanResourceAttribute(description string, defaultValue bool, isOptional bool) resourceSchema.Attribute {
 	return resourceSchema.BoolAttribute{
 		Default:     booldefault.StaticBool(defaultValue),
