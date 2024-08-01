@@ -85,7 +85,7 @@ func getTeamDataSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Description: "A list of teams that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
+			Optional:    false,
 			Type:        schema.TypeList,
 		},
 	}
