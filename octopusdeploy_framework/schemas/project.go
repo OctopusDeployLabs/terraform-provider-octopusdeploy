@@ -18,6 +18,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"space_id":                             util.GetSpaceIdResourceSchema(ProjectResourceName),
 			"name":                                 util.GetNameResourceSchema(true),
 			"description":                          util.GetDescriptionResourceSchema(ProjectResourceName),
+			"allow_deployments_to_no_targets":      util.Bool().Optional().Deprecated("This value is only valid for an associated connectivity policy and should not be specified here.").Build(),
 			"auto_create_release":                  util.Bool().Optional().Computed().Build(),
 			"cloned_from_project_id":               util.String().Optional().Description("The ID of the project this project was cloned from.").Build(),
 			"default_guided_failure_mode":          util.String().Optional().Computed().Build(),
@@ -29,14 +30,15 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"is_version_controlled":                util.Bool().Optional().Computed().Build(),
 			"lifecycle_id":                         util.String().Required().Description("The lifecycle ID associated with this project.").Build(),
 			"project_group_id":                     util.String().Required().Description("The project group ID associated with this project.").Build(),
-			"tenanted_deployment_participation":    util.String().Optional().Computed().Build(),
+			"tenanted_deployment_participation":    util.String().Optional().Computed().Description("The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.").Build(),
 			"included_library_variable_sets":       util.List(types.StringType).Optional().Computed().Description("The list of included library variable set IDs.").Build(),
 			"release_notes_template":               util.String().Optional().Computed().Build(),
-			"slug":                                 util.String().Optional().Computed().Build(),
-			"deployment_process_id":                util.String().Optional().Computed().Build(),
-			"variable_set_id":                      util.String().Optional().Computed().Build(),
+			"slug":                                 util.String().Optional().Computed().Description("A human-readable, unique identifier, used to identify a project.").Build(),
+			"deployment_process_id":                util.String().Computed().Build(),
+			"variable_set_id":                      util.String().Computed().Build(),
 		},
 		Blocks: map[string]resourceSchema.Block{
+			//This is correct with what return from project object.
 			"auto_deploy_release_overrides": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
@@ -59,7 +61,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"git_anonymous_persistence_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"url":                util.String().Optional().Description("The URL associated with these version control settings.").Build(),
+						"url":                util.String().Required().Description("The URL associated with these version control settings.").Build(),
 						"base_path":          util.String().Optional().Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.String().Optional().Description("The default branch associated with these version control settings.").Build(),
 						"protected_branches": util.Set(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
@@ -70,8 +72,8 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"git_library_persistence_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"git_credential_id":  util.String().Optional().Build(),
-						"url":                util.String().Optional().Description("The URL associated with these version control settings.").Build(),
+						"git_credential_id":  util.String().Required().Build(),
+						"url":                util.String().Required().Description("The URL associated with these version control settings.").Build(),
 						"base_path":          util.String().Optional().Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.String().Optional().Description("The default branch associated with these version control settings.").Build(),
 						"protected_branches": util.Set(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
@@ -82,9 +84,9 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"git_username_password_persistence_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"url":                util.String().Optional().Description("The URL associated with these version control settings.").Build(),
-						"username":           util.String().Optional().Description("The username for the Git credential.").Build(),
-						"password":           util.GetPasswordResourceSchema(false),
+						"url":                util.String().Required().Description("The URL associated with these version control settings.").Build(),
+						"username":           util.String().Required().Description("The username for the Git credential.").Build(),
+						"password":           util.String().Sensitive().Required().Description("The password for the Git credential").Build(), //util.GetPasswordResourceSchema(false),
 						"base_path":          util.String().Optional().Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.String().Optional().Description("The default branch associated with these version control settings.").Build(),
 						"protected_branches": util.Set(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
@@ -95,9 +97,9 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"jira_service_management_extension_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"connection_id":             util.String().Optional().Description("The connection identifier associated with the extension settings.").Build(),
-						"is_enabled":                util.Bool().Optional().Computed().Description("Specifies whether or not this extension is enabled for this project.").Build(),
-						"service_desk_project_name": util.String().Optional().Description("The project name associated with this extension.").Build(),
+						"connection_id":             util.String().Required().Description("The connection identifier associated with the extension settings.").Build(),
+						"is_enabled":                util.Bool().Required().Description("Specifies whether or not this extension is enabled for this project.").Build(),
+						"service_desk_project_name": util.String().Required().Description("The project name associated with this extension.").Build(),
 					},
 				},
 				Description: "Provides extension settings for the Jira Service Management (JSM) integration for this project.",
@@ -105,10 +107,10 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"servicenow_extension_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"connection_id":                       util.String().Optional().Description("The connection identifier associated with the extension settings.").Build(),
-						"is_enabled":                          util.Bool().Optional().Computed().Description("Specifies whether or not this extension is enabled for this project.").Build(),
-						"is_state_automatically_transitioned": util.Bool().Optional().Computed().Description("Specifies whether or not this extension will automatically transition the state of a deployment for this project.").Build(),
-						"standard_change_template_name":       util.String().Optional().Description("The name of the standard change template associated with this extension.").Build(),
+						"connection_id":                       util.String().Required().Description("The connection identifier associated with the extension settings.").Build(),
+						"is_enabled":                          util.Bool().Required().Description("Specifies whether or not this extension is enabled for this project.").Build(),
+						"is_state_automatically_transitioned": util.Bool().Required().Description("Specifies whether or not this extension will automatically transition the state of a deployment for this project.").Build(),
+						"standard_change_template_name":       util.String().Optional().Description("The name of the standard change template associated with this extension. If provided, deployments will create a standard change based on the provided template, otherwise a normal change will be created.").Build(),
 					},
 				},
 				Description: "Provides extension settings for the ServiceNow integration for this project.",
@@ -120,7 +122,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 						"name":          util.String().Required().Description("The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods.").Build(),
 						"label":         util.String().Optional().Description("The label shown beside the parameter when presented in the deployment process.").Build(),
 						"help_text":     util.String().Optional().Description("The help presented alongside the parameter input.").Build(),
-						"default_value": util.String().Optional().Description("A default value for the parameter, if applicable.").Build(),
+						"default_value": util.String().Optional().Description("A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.").Build(),
 						"display_settings": resourceSchema.MapAttribute{
 							Description: "The display settings for the parameter.",
 							ElementType: types.StringType,
