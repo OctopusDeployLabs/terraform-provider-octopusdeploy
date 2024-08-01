@@ -180,30 +180,37 @@ func (b *AttributeBuilder[T]) Build() T {
 	return b.attr
 }
 
-func String() *AttributeBuilder[schema.StringAttribute] {
+func ResourceString() *AttributeBuilder[schema.StringAttribute] {
 	return NewAttributeBuilder[schema.StringAttribute]()
 }
 
-func Bool() *AttributeBuilder[schema.BoolAttribute] {
+func ResourceBool() *AttributeBuilder[schema.BoolAttribute] {
 	return NewAttributeBuilder[schema.BoolAttribute]()
 }
 
-func Int64() *AttributeBuilder[schema.Int64Attribute] {
+func ResourceInt64() *AttributeBuilder[schema.Int64Attribute] {
 	return NewAttributeBuilder[schema.Int64Attribute]()
 }
 
-func Float64() *AttributeBuilder[schema.Float64Attribute] {
+func ResourceFloat64() *AttributeBuilder[schema.Float64Attribute] {
 	return NewAttributeBuilder[schema.Float64Attribute]()
 }
 
-func Number() *AttributeBuilder[schema.NumberAttribute] {
+func ResourceNumber() *AttributeBuilder[schema.NumberAttribute] {
 	return NewAttributeBuilder[schema.NumberAttribute]()
 }
 
-func List(elementType attr.Type) *AttributeBuilder[schema.ListAttribute] {
+func ResourceList(elementType attr.Type) *AttributeBuilder[schema.ListAttribute] {
 	return NewAttributeBuilder[schema.ListAttribute]().ElementType(elementType)
 }
 
-func Set(elementType attr.Type) *AttributeBuilder[schema.SetAttribute] {
+func ResourceSet(elementType attr.Type) *AttributeBuilder[schema.SetAttribute] {
 	return NewAttributeBuilder[schema.SetAttribute]().ElementType(elementType)
+}
+func ResourceMap(elementType attr.Type) *AttributeBuilder[schema.MapAttribute] {
+	return NewAttributeBuilder[schema.MapAttribute]().ElementType(elementType)
+}
+
+func ResourceObject(attributeTypes map[string]attr.Type) *AttributeBuilder[schema.ObjectAttribute] {
+	return NewAttributeBuilder[schema.ObjectAttribute]().AttributeTypes(attributeTypes)
 }

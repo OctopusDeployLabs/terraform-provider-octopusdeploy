@@ -18,53 +18,53 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"space_id":                             util.GetSpaceIdResourceSchema(ProjectResourceName),
 			"name":                                 util.GetNameResourceSchema(true),
 			"description":                          util.GetDescriptionResourceSchema(ProjectResourceName),
-			"allow_deployments_to_no_targets":      util.Bool().Optional().Deprecated("This value is only valid for an associated connectivity policy and should not be specified here.").Build(),
-			"auto_create_release":                  util.Bool().Optional().Computed().Build(),
-			"cloned_from_project_id":               util.String().Optional().Description("The ID of the project this project was cloned from.").Build(),
-			"default_guided_failure_mode":          util.String().Optional().Computed().Build(),
-			"default_to_skip_if_already_installed": util.Bool().Optional().Computed().Build(),
-			"deployment_changes_template":          util.String().Optional().Computed().Build(),
-			"discrete_channel_release":             util.Bool().Optional().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
-			"is_disabled":                          util.Bool().Optional().Computed().Build(),
-			"is_discrete_channel_release":          util.Bool().Optional().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
-			"is_version_controlled":                util.Bool().Optional().Computed().Build(),
-			"lifecycle_id":                         util.String().Required().Description("The lifecycle ID associated with this project.").Build(),
-			"project_group_id":                     util.String().Required().Description("The project group ID associated with this project.").Build(),
-			"tenanted_deployment_participation":    util.String().Optional().Computed().Description("The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.").Build(),
-			"included_library_variable_sets":       util.List(types.StringType).Optional().Computed().Description("The list of included library variable set IDs.").Build(),
-			"release_notes_template":               util.String().Optional().Computed().Build(),
-			"slug":                                 util.String().Optional().Computed().Description("A human-readable, unique identifier, used to identify a project.").Build(),
-			"deployment_process_id":                util.String().Computed().Build(),
-			"variable_set_id":                      util.String().Computed().Build(),
+			"allow_deployments_to_no_targets":      util.ResourceBool().Optional().Deprecated("This value is only valid for an associated connectivity policy and should not be specified here.").Build(),
+			"auto_create_release":                  util.ResourceBool().Optional().Computed().Build(),
+			"cloned_from_project_id":               util.ResourceString().Optional().Description("The ID of the project this project was cloned from.").Build(),
+			"default_guided_failure_mode":          util.ResourceString().Optional().Computed().Build(),
+			"default_to_skip_if_already_installed": util.ResourceBool().Optional().Computed().Build(),
+			"deployment_changes_template":          util.ResourceString().Optional().Computed().Build(),
+			"discrete_channel_release":             util.ResourceBool().Optional().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
+			"is_disabled":                          util.ResourceBool().Optional().Computed().Build(),
+			"is_discrete_channel_release":          util.ResourceBool().Optional().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
+			"is_version_controlled":                util.ResourceBool().Optional().Computed().Build(),
+			"lifecycle_id":                         util.ResourceString().Required().Description("The lifecycle ID associated with this project.").Build(),
+			"project_group_id":                     util.ResourceString().Required().Description("The project group ID associated with this project.").Build(),
+			"tenanted_deployment_participation":    util.ResourceString().Optional().Computed().Description("The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.").Build(),
+			"included_library_variable_sets":       util.ResourceList(types.StringType).Optional().Computed().Description("The list of included library variable set IDs.").Build(),
+			"release_notes_template":               util.ResourceString().Optional().Computed().Build(),
+			"slug":                                 util.ResourceString().Optional().Computed().Description("A human-readable, unique identifier, used to identify a project.").Build(),
+			"deployment_process_id":                util.ResourceString().Computed().Build(),
+			"variable_set_id":                      util.ResourceString().Computed().Build(),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			// This is correct object that return from api for project object not a list string.
 			"auto_deploy_release_overrides": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"environment_id": util.String().Optional().Build(),
-						"release_id":     util.String().Optional().Build(),
-						"tenant_id":      util.String().Optional().Build(),
+						"environment_id": util.ResourceString().Optional().Build(),
+						"release_id":     util.ResourceString().Optional().Build(),
+						"tenant_id":      util.ResourceString().Optional().Build(),
 					},
 				},
 			},
 			"connectivity_policy": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"allow_deployments_to_no_targets": util.Bool().Optional().Computed().Build(),
-						"exclude_unhealthy_targets":       util.Bool().Optional().Computed().Build(),
-						"skip_machine_behavior":           util.String().Optional().Build(),
-						"target_roles":                    util.List(types.StringType).Optional().Computed().Build(),
+						"allow_deployments_to_no_targets": util.ResourceBool().Optional().Computed().Build(),
+						"exclude_unhealthy_targets":       util.ResourceBool().Optional().Computed().Build(),
+						"skip_machine_behavior":           util.ResourceString().Optional().Build(),
+						"target_roles":                    util.ResourceList(types.StringType).Optional().Computed().Build(),
 					},
 				},
 			},
 			"git_anonymous_persistence_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"url":                util.String().Required().Description("The URL associated with these version control settings.").Build(),
-						"base_path":          util.String().Optional().Description("The base path associated with these version control settings.").Build(),
-						"default_branch":     util.String().Optional().Description("The default branch associated with these version control settings.").Build(),
-						"protected_branches": util.Set(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
+						"url":                util.ResourceString().Required().Description("The URL associated with these version control settings.").Build(),
+						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
+						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
+						"protected_branches": util.ResourceSet(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
@@ -72,11 +72,11 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"git_library_persistence_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"git_credential_id":  util.String().Required().Build(),
-						"url":                util.String().Required().Description("The URL associated with these version control settings.").Build(),
-						"base_path":          util.String().Optional().Description("The base path associated with these version control settings.").Build(),
-						"default_branch":     util.String().Optional().Description("The default branch associated with these version control settings.").Build(),
-						"protected_branches": util.Set(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
+						"git_credential_id":  util.ResourceString().Required().Build(),
+						"url":                util.ResourceString().Required().Description("The URL associated with these version control settings.").Build(),
+						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
+						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
+						"protected_branches": util.ResourceSet(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
@@ -84,12 +84,12 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"git_username_password_persistence_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"url":                util.String().Required().Description("The URL associated with these version control settings.").Build(),
-						"username":           util.String().Required().Description("The username for the Git credential.").Build(),
-						"password":           util.String().Sensitive().Required().Description("The password for the Git credential").Build(), //util.GetPasswordResourceSchema(false),
-						"base_path":          util.String().Optional().Description("The base path associated with these version control settings.").Build(),
-						"default_branch":     util.String().Optional().Description("The default branch associated with these version control settings.").Build(),
-						"protected_branches": util.Set(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
+						"url":                util.ResourceString().Required().Description("The URL associated with these version control settings.").Build(),
+						"username":           util.ResourceString().Required().Description("The username for the Git credential.").Build(),
+						"password":           util.ResourceString().Sensitive().Required().Description("The password for the Git credential").Build(), //util.GetPasswordResourceSchema(false),
+						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
+						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
+						"protected_branches": util.ResourceSet(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
@@ -97,9 +97,9 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"jira_service_management_extension_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"connection_id":             util.String().Required().Description("The connection identifier associated with the extension settings.").Build(),
-						"is_enabled":                util.Bool().Required().Description("Specifies whether or not this extension is enabled for this project.").Build(),
-						"service_desk_project_name": util.String().Required().Description("The project name associated with this extension.").Build(),
+						"connection_id":             util.ResourceString().Required().Description("The connection identifier associated with the extension settings.").Build(),
+						"is_enabled":                util.ResourceBool().Required().Description("Specifies whether or not this extension is enabled for this project.").Build(),
+						"service_desk_project_name": util.ResourceString().Required().Description("The project name associated with this extension.").Build(),
 					},
 				},
 				Description: "Provides extension settings for the Jira Service Management (JSM) integration for this project.",
@@ -107,10 +107,10 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"servicenow_extension_settings": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"connection_id":                       util.String().Required().Description("The connection identifier associated with the extension settings.").Build(),
-						"is_enabled":                          util.Bool().Required().Description("Specifies whether or not this extension is enabled for this project.").Build(),
-						"is_state_automatically_transitioned": util.Bool().Required().Description("Specifies whether or not this extension will automatically transition the state of a deployment for this project.").Build(),
-						"standard_change_template_name":       util.String().Optional().Description("The name of the standard change template associated with this extension. If provided, deployments will create a standard change based on the provided template, otherwise a normal change will be created.").Build(),
+						"connection_id":                       util.ResourceString().Required().Description("The connection identifier associated with the extension settings.").Build(),
+						"is_enabled":                          util.ResourceBool().Required().Description("Specifies whether or not this extension is enabled for this project.").Build(),
+						"is_state_automatically_transitioned": util.ResourceBool().Required().Description("Specifies whether or not this extension will automatically transition the state of a deployment for this project.").Build(),
+						"standard_change_template_name":       util.ResourceString().Optional().Description("The name of the standard change template associated with this extension. If provided, deployments will create a standard change based on the provided template, otherwise a normal change will be created.").Build(),
 					},
 				},
 				Description: "Provides extension settings for the ServiceNow integration for this project.",
@@ -118,11 +118,11 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"template": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"id":            util.String().Optional().Computed().Description("The ID of the template parameter.").Build(),
-						"name":          util.String().Required().Description("The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods.").Build(),
-						"label":         util.String().Optional().Description("The label shown beside the parameter when presented in the deployment process.").Build(),
-						"help_text":     util.String().Optional().Description("The help presented alongside the parameter input.").Build(),
-						"default_value": util.String().Optional().Description("A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.").Build(),
+						"id":            util.ResourceString().Optional().Computed().Description("The ID of the template parameter.").Build(),
+						"name":          util.ResourceString().Required().Description("The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods.").Build(),
+						"label":         util.ResourceString().Optional().Description("The label shown beside the parameter when presented in the deployment process.").Build(),
+						"help_text":     util.ResourceString().Optional().Description("The help presented alongside the parameter input.").Build(),
+						"default_value": util.ResourceString().Optional().Description("A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.").Build(),
 						"display_settings": resourceSchema.MapAttribute{
 							Description: "The display settings for the parameter.",
 							ElementType: types.StringType,
@@ -134,15 +134,15 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"versioning_strategy": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"donor_package_step_id": util.String().Optional().Build(),
-						"template":              util.String().Optional().Build(),
+						"donor_package_step_id": util.ResourceString().Optional().Build(),
+						"template":              util.ResourceString().Optional().Build(),
 					},
 					Blocks: map[string]resourceSchema.Block{
 						"donor_package": resourceSchema.ListNestedBlock{
 							NestedObject: resourceSchema.NestedBlockObject{
 								Attributes: map[string]resourceSchema.Attribute{
-									"deployment_action": util.String().Optional().Build(),
-									"package_reference": util.String().Optional().Build(),
+									"deployment_action": util.ResourceString().Optional().Build(),
+									"package_reference": util.ResourceString().Optional().Build(),
 								},
 							},
 						},
@@ -152,15 +152,15 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"release_creation_strategy": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"channel_id":                       util.String().Optional().Build(),
-						"release_creation_package_step_id": util.String().Optional().Build(),
+						"channel_id":                       util.ResourceString().Optional().Build(),
+						"release_creation_package_step_id": util.ResourceString().Optional().Build(),
 					},
 					Blocks: map[string]resourceSchema.Block{
 						"release_creation_package": resourceSchema.ListNestedBlock{
 							NestedObject: resourceSchema.NestedBlockObject{
 								Attributes: map[string]resourceSchema.Attribute{
-									"deployment_action": util.String().Optional().Build(),
-									"package_reference": util.String().Optional().Build(),
+									"deployment_action": util.ResourceString().Optional().Build(),
+									"package_reference": util.ResourceString().Optional().Build(),
 								},
 							},
 						},
@@ -175,14 +175,14 @@ func GetProjectDataSourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing Octopus Deploy projects.",
 		Attributes: map[string]datasourceSchema.Attribute{
-			"id":                     util.String().Computed().Description("An auto-generated identifier that includes the timestamp when this data source was last modified.").Build(),
+			"id":                     util.ResourceString().Computed().Description("An auto-generated identifier that includes the timestamp when this data source was last modified.").Build(),
 			"cloned_from_project_id": util.DataSourceString().Optional().Description("A filter to search for cloned resources by a project ID.").Build(),
 			"ids":                    util.GetQueryIDsDatasourceSchema(),
 			"is_clone":               util.DataSourceBool().Optional().Description("A filter to search for cloned resources.").Build(),
 			"name":                   util.DataSourceString().Optional().Description("A filter to search by name").Build(),
 			"partial_name":           util.GetQueryPartialNameDatasourceSchema(),
 			"skip":                   util.GetQuerySkipDatasourceSchema(),
-			"space_id":               util.String().Optional().Description("A Space ID to filter by. Will revert what is specified on the provider if not set").Build(),
+			"space_id":               util.ResourceString().Optional().Description("A Space ID to filter by. Will revert what is specified on the provider if not set").Build(),
 			"take":                   util.GetQueryTakeDatasourceSchema(),
 			"projects":               getProjectsDataSourceAttribute(),
 		},
