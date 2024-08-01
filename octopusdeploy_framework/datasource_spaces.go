@@ -68,10 +68,18 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	query := spaces.SpacesQuery{
-		IDs:         schemas.GetIds(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        schemas.GetNumber(data.Skip),
 		Take:        schemas.GetNumber(data.Take),
+	}
+
+	if !data.IDs.IsNull() {
+		var ids []string
+		resp.Diagnostics.Append(data.IDs.ElementsAs(ctx, &ids, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		query.IDs = ids
 	}
 
 	existingSpaces, err := spaces.Get(b.Client, query)
