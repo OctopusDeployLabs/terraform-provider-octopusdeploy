@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -121,7 +122,7 @@ func getVariableScopeResourceSchema() resourceSchema.ListNestedBlock {
 
 func getVariableScopeFieldResourceSchema(scopeDescription string) resourceSchema.ListAttribute {
 	return resourceSchema.ListAttribute{
-		Description: fmt.Sprintf("A list of %s that are scoped to this variable value.", scopeDescription),
+		Description: fmt.Sprintf("A list of %s that are scoped to this variable value.", strings.ReplaceAll(scopeDescription, "_", " ")),
 		Optional:    true,
 		ElementType: basetypes.StringType{},
 	}
@@ -129,6 +130,7 @@ func getVariableScopeFieldResourceSchema(scopeDescription string) resourceSchema
 
 func getVariableScopeDatasourceSchema() datasourceSchema.ListNestedBlock {
 	return datasourceSchema.ListNestedBlock{
+		Description: "As variable names can appear more than once under different scopes, a VariableScope must also be provided",
 		NestedObject: datasourceSchema.NestedBlockObject{
 			Attributes: map[string]datasourceSchema.Attribute{
 				variableScopeFieldNames.Actions:      getVariableScopeFieldDatasourceSchema(variableScopeFieldNames.Actions),
@@ -141,6 +143,7 @@ func getVariableScopeDatasourceSchema() datasourceSchema.ListNestedBlock {
 			},
 		},
 		Validators: []validator.List{
+			listvalidator.IsRequired(),
 			listvalidator.SizeAtMost(1),
 		},
 	}
@@ -148,7 +151,7 @@ func getVariableScopeDatasourceSchema() datasourceSchema.ListNestedBlock {
 
 func getVariableScopeFieldDatasourceSchema(scopeDescription string) datasourceSchema.ListAttribute {
 	return datasourceSchema.ListAttribute{
-		Description: fmt.Sprintf("A list of %s that are scoped to this variable value.", scopeDescription),
+		Description: fmt.Sprintf("A list of %s that are scoped to this variable value.", strings.ReplaceAll(scopeDescription, "_", " ")),
 		Optional:    true,
 		ElementType: basetypes.StringType{},
 	}
