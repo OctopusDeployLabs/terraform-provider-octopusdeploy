@@ -52,13 +52,13 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	query := tenants.TenantsQuery{
 		ClonedFromTenantID: data.ClonedFromTenantId.ValueString(),
-		IDs:                util.GetStringSlice(data.IDs),
+		IDs:                util.ExpandStringList(data.IDs),
 		IsClone:            data.IsClone.ValueBool(),
 		Name:               data.Name.ValueString(),
 		PartialName:        data.PartialName.ValueString(),
 		ProjectID:          data.ProjectId.ValueString(),
 		Skip:               int(data.Skip.ValueInt64()),
-		Tags:               util.GetStringSlice(data.Tags),
+		Tags:               util.ExpandStringList(data.Tags),
 		Take:               int(data.Take.ValueInt64()),
 	}
 
