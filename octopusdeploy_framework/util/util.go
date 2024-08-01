@@ -17,8 +17,12 @@ func GetTypeName(name string) string {
 	return fmt.Sprintf("%s_%s", GetProviderName(), name)
 }
 
+func GetResourceSchemaDescription(resourceName string) string {
+	return fmt.Sprintf("This resource manages %ss in Octopus Deploy.", resourceName)
+}
+
 func GetDataSourceDescription(resourceName string) string {
-	return fmt.Sprintf("Provides information about existing %s", resourceName)
+	return fmt.Sprintf("Provides information about existing %s.", resourceName)
 }
 
 func GetStringOrEmpty(tfAttr interface{}) string {
@@ -86,4 +90,12 @@ func StringOrNull(s string) types.String {
 		return types.StringNull()
 	}
 	return types.StringValue(s)
+}
+
+func Map[T, V any](items []T, fn func(T) V) []V {
+	result := make([]V, len(items))
+	for i, t := range items {
+		result[i] = fn(t)
+	}
+	return result
 }

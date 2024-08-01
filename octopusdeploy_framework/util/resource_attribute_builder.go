@@ -207,11 +207,3 @@ func List(elementType attr.Type) *AttributeBuilder[schema.ListAttribute] {
 func Set(elementType attr.Type) *AttributeBuilder[schema.SetAttribute] {
 	return NewAttributeBuilder[schema.SetAttribute]().ElementType(elementType)
 }
-
-func Map(elementType attr.Type) *AttributeBuilder[schema.MapAttribute] {
-	return NewAttributeBuilder[schema.MapAttribute]().ElementType(elementType)
-}
-
-func Object(attributeTypes map[string]attr.Type) *AttributeBuilder[schema.ObjectAttribute] {
-	return NewAttributeBuilder[schema.ObjectAttribute]().AttributeTypes(attributeTypes)
-}

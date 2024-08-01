@@ -24,10 +24,10 @@ data "octopusdeploy_variables" "example" {
 
 - `name` (String) The name of variable to find.
 - `owner_id` (String) Owner ID for the variable to find.
-- `scope` (Block List, Min: 1, Max: 1) As variable names can appear more than once under different scopes, a VariableScope must also be provided (see [below for nested schema](#nestedblock--scope))
 
 ### Optional
 
+- `scope` (Block List) As variable names can appear more than once under different scopes, a VariableScope must also be provided (see [below for nested schema](#nestedblock--scope))
 - `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
 
 ### Read-Only
@@ -36,9 +36,9 @@ data "octopusdeploy_variables" "example" {
 - `id` (String) The identifier of the variable to find.
 - `is_editable` (Boolean) Indicates whether or not this variable is considered editable.
 - `is_sensitive` (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
-- `prompt` (List of Object) (see [below for nested schema](#nestedatt--prompt))
+- `prompt` (Attributes List) (see [below for nested schema](#nestedatt--prompt))
 - `sensitive_value` (String, Sensitive)
-- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
+- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `UsernamePasswordAccount`, `Certificate`, `Sensitive`, `String`, `WorkerPool`.
 - `value` (String)
 
 <a id="nestedblock--scope"></a>
@@ -60,25 +60,25 @@ Optional:
 
 Read-Only:
 
-- `description` (String)
-- `display_settings` (List of Object) (see [below for nested schema](#nestedobjatt--prompt--display_settings))
+- `description` (String) The description of this variable prompt option.
+- `display_settings` (Attributes List) (see [below for nested schema](#nestedatt--prompt--display_settings))
 - `is_required` (Boolean)
 - `label` (String)
 
-<a id="nestedobjatt--prompt--display_settings"></a>
+<a id="nestedatt--prompt--display_settings"></a>
 ### Nested Schema for `prompt.display_settings`
 
 Read-Only:
 
-- `control_type` (String)
-- `select_option` (List of Object) (see [below for nested schema](#nestedobjatt--prompt--display_settings--select_option))
+- `control_type` (String) The type of control for rendering this prompted variable. Valid types are `SingleLineText`, `MultiLineText`, `Checkbox`, `Select`.
+- `select_option` (Attributes List) If the `control_type` is `Select`, then this value defines an option. (see [below for nested schema](#nestedatt--prompt--display_settings--select_option))
 
-<a id="nestedobjatt--prompt--display_settings--select_option"></a>
+<a id="nestedatt--prompt--display_settings--select_option"></a>
 ### Nested Schema for `prompt.display_settings.select_option`
 
 Read-Only:
 
-- `display_name` (String)
-- `value` (String)
+- `display_name` (String) The display name for the select value
+- `value` (String) The select value
 
 

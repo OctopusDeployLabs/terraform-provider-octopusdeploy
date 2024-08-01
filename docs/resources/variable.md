@@ -96,7 +96,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 ### Required
 
 - `name` (String) The name of this resource.
-- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `UsernamePasswordAccount`, `Certificate`, `Sensitive`, `String`, or `WorkerPool`.
+- `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `UsernamePasswordAccount`, `Certificate`, `Sensitive`, `String`, `WorkerPool`.
 
 ### Optional
 
@@ -106,10 +106,10 @@ resource "octopusdeploy_variable" "prompted_variable" {
 - `owner_id` (String)
 - `pgp_key` (String, Sensitive)
 - `project_id` (String, Deprecated)
-- `prompt` (Block List, Max: 1) (see [below for nested schema](#nestedblock--prompt))
-- `scope` (Block List, Max: 1) (see [below for nested schema](#nestedblock--scope))
+- `prompt` (Block List) (see [below for nested schema](#nestedblock--prompt))
+- `scope` (Block List) (see [below for nested schema](#nestedblock--scope))
 - `sensitive_value` (String, Sensitive)
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this variable.
 - `value` (String)
 
 ### Read-Only
@@ -124,7 +124,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 Optional:
 
 - `description` (String) The description of this variable prompt option.
-- `display_settings` (Block List, Max: 1) (see [below for nested schema](#nestedblock--prompt--display_settings))
+- `display_settings` (Block List) (see [below for nested schema](#nestedblock--prompt--display_settings))
 - `is_required` (Boolean)
 - `label` (String)
 

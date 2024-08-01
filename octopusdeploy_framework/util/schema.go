@@ -113,7 +113,6 @@ func GetNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
 func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
 	return datasourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
-		Optional:    true,
 		Computed:    true,
 	}
 }
