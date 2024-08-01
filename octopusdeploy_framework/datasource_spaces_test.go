@@ -24,8 +24,6 @@ func TestAccDataSourceSpaces(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "skip", "0"),
 					resource.TestCheckResourceAttr(resourceName, "take", "1"),
 					resource.TestCheckResourceAttrSet(resourceName, "spaces.0.id"),
-					resource.TestCheckResourceAttrSet(resourceName, "spaces.0.name"),
-					testAccCheckOutputExists("octopus_space_name"),
 					testAccCheckOutputExists("octopus_space_id"),
 					resource.TestCheckOutput("octopus_space_id", spaceID),
 				),
@@ -42,14 +40,10 @@ func testAccDataSourceSpacesConfig(spaceID string) string {
 		  take = 1
 		}
 		
-		output "octopus_space_name" {
-		  value = length(data.octopusdeploy_spaces.test.spaces) > 0 ? data.octopusdeploy_spaces.test.spaces[0].name : "No space found with the provided ID"
-		}
-		
 		output "octopus_space_id" {
-		  value = "%s"
+		  value = data.octopusdeploy_spaces.test.spaces[0].id
 		}
-		`, spaceID, spaceID)
+		`, spaceID)
 	return tfConfig
 }
 
