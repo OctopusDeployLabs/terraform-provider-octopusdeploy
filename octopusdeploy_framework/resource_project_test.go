@@ -158,20 +158,20 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 		  	versioning_strategy {
 				template = "#{Octopus.Version.LastMajor}.#{Octopus.Version.LastMinor}.#{Octopus.Version.LastPatch}.#{Octopus.Version.NextRevision}"
 		  	}
-		  //   connectivity_policy {
-		//     allow_deployments_to_no_targets = true
-		// 	skip_machine_behavior           = "None"
-		//   }
+		    connectivity_policy {
+		    allow_deployments_to_no_targets = true
+			skip_machine_behavior           = "None"
+		  }
 
-		//   version_control_settings {
-		// 	default_branch = "foo"
-		// 	url            = "https://example.com/"
-		// 	username       = "bar"
-		//   }
+		  version_control_settings {
+			default_branch = "foo"
+			url            = "https://example.com/"
+			username       = "bar"
+		  }
 
-		//   versioning_strategy {
-		//     template = "alskdjaslkdj"
-		//   }
+		  versioning_strategy {
+		    template = "alskdjaslkdj"
+		  }
 		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
 }
 

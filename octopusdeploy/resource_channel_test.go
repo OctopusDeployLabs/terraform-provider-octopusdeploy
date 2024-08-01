@@ -198,6 +198,58 @@ func testAccChannelBasic(localName string, lifecycleLocalName string, lifecycleN
 		}`, localName, description, name, projectLocalName)
 }
 
+func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string) string {
+	projectGroup := internalTest.NewProjectGroupTestOptions()
+	projectGroup.LocalName = projectGroupLocalName
+	projectGroup.Resource.Name = projectGroupName
+
+	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
+		internalTest.ProjectGroupConfiguration(projectGroup)+"\n"+
+		`resource "octopusdeploy_project" "%s" {
+			description      = "%s"
+			lifecycle_id     = octopusdeploy_lifecycle.%s.id
+			name             = "%s"
+			project_group_id = octopusdeploy_project_group.%s.id
+
+			template {
+				default_value = "default-value"
+				help_text     = "help-test"
+				label         = "label"
+				name          = "2"
+
+				display_settings = {
+					"Octopus.ControlType": "SingleLineText"
+				}
+			}
+
+			template {
+				default_value = "default-value"
+				help_text     = "help-test"
+				label         = "label"
+				name          = "1"
+
+				display_settings = {
+					"Octopus.ControlType": "SingleLineText"
+				}
+			}
+
+		  //   connectivity_policy {
+		//     allow_deployments_to_no_targets = true
+		// 	skip_machine_behavior           = "None"
+		//   }
+
+		//   version_control_settings {
+		// 	default_branch = "foo"
+		// 	url            = "https://example.com/"
+		// 	username       = "bar"
+		//   }
+
+		//   versioning_strategy {
+		//     template = "alskdjaslkdj"
+		//   }
+		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
+}
+
 func testAccChannelWithOneRule(name, description, versionRange, actionName string) string {
 	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
