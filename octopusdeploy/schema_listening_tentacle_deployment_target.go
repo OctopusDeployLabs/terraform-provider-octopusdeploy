@@ -57,7 +57,7 @@ func getListeningTentacleDeploymentTargetDataSchema() map[string]*schema.Schema 
 		Computed:    true,
 		Description: "A list of listening tentacle deployment targets that match the filter(s).",
 		Elem:        &schema.Resource{Schema: dataSchema},
-		Optional:    true,
+		Optional:    false,
 		Type:        schema.TypeList,
 	}
 
