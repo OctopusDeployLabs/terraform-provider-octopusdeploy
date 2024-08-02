@@ -168,16 +168,6 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 					stringvalidator.OneOf(tenantedDeploymentModes...),
 				},
 			},
-			RunbookSchemaAttributeNames.ConnectivityPolicy: resourceSchema.ListNestedAttribute{
-				Optional: true,
-				Computed: true,
-				NestedObject: resourceSchema.NestedAttributeObject{
-					Attributes: getConnectivityPolicySchema(),
-				},
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(1),
-				},
-			},
 			RunbookSchemaAttributeNames.EnvironmentScope: resourceSchema.StringAttribute{
 				Description: "Determines how the runbook is scoped to environments.",
 				Computed:    true,
@@ -199,22 +189,29 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 					stringvalidator.OneOf(defaultGuidedFailureModes...),
 				},
 			},
-			RunbookSchemaAttributeNames.RetentionPolicy: resourceSchema.ListNestedAttribute{
-				Description: "Sets the runbook retention policy.",
+			RunbookSchemaAttributeNames.ForcePackageDownload: resourceSchema.BoolAttribute{
+				Description: "Whether to force packages to be re-downloaded or not.",
 				Computed:    true,
 				Optional:    true,
-				Default:     getDefaultRunbookRetentionPeriod(),
-				NestedObject: resourceSchema.NestedAttributeObject{
-					Attributes: getRunbookRetentionPeriodSchema(),
+			},
+		},
+		Blocks: map[string]resourceSchema.Block{
+			RunbookSchemaAttributeNames.ConnectivityPolicy: resourceSchema.ListNestedBlock{
+				NestedObject: resourceSchema.NestedBlockObject{
+					Attributes: getConnectivityPolicySchema(),
 				},
 				Validators: []validator.List{
 					listvalidator.SizeAtMost(1),
 				},
 			},
-			RunbookSchemaAttributeNames.ForcePackageDownload: resourceSchema.BoolAttribute{
-				Description: "Whether to force packages to be re-downloaded or not.",
-				Computed:    true,
-				Optional:    true,
+			RunbookSchemaAttributeNames.RetentionPolicy: resourceSchema.ListNestedBlock{
+				Description: "Sets the runbook retention policy.",
+				NestedObject: resourceSchema.NestedBlockObject{
+					Attributes: getRunbookRetentionPeriodSchema(),
+				},
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(1),
+				},
 			},
 		},
 	}

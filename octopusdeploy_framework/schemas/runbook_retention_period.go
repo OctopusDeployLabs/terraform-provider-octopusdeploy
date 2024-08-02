@@ -8,9 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/defaults"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -53,8 +51,8 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 	}
 }
 
-func getDefaultRunbookRetentionPeriod() defaults.List {
-	return listdefault.StaticValue(types.ListValueMust(
+func GetDefaultRunbookRetentionPeriod() types.List {
+	return types.ListValueMust(
 		types.ObjectType{AttrTypes: GetRunbookRetentionPeriodObjectType()},
 		[]attr.Value{
 			MapFromRunbookRetentionPeriod(&runbooks.RunbookRetentionPeriod{
@@ -62,7 +60,7 @@ func getDefaultRunbookRetentionPeriod() defaults.List {
 				ShouldKeepForever: false,
 			}),
 		},
-	))
+	)
 }
 
 func MapFromRunbookRetentionPeriod(retentionPeriod *runbooks.RunbookRetentionPeriod) attr.Value {

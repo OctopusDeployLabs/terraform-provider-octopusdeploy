@@ -183,6 +183,8 @@ func mapToRunbook(data schemas.RunbookTypeResourceModel) *runbooks.Runbook {
 	}
 	if !data.RunRetentionPolicy.IsNull() {
 		runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(data.RunRetentionPolicy)
+	} else if runbook.RunRetentionPolicy == nil {
+		runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(schemas.GetDefaultRunbookRetentionPeriod())
 	}
 	if !data.ForcePackageDownload.IsNull() {
 		runbook.ForcePackageDownload = data.ForcePackageDownload.ValueBool()
