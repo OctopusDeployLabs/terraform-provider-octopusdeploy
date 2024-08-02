@@ -43,7 +43,33 @@ func (r *runbookTypeResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	runbook := mapToRunbook(plan)
+	name := plan.Name.ValueString()
+	projectId := plan.ProjectID.ValueString()
+
+	runbook := runbooks.NewRunbook(name, projectId)
+	if !plan.ID.IsNull() {
+		runbook.ID = plan.ID.ValueString()
+	}
+
+	runbook.Description = plan.Description.ValueString()
+	runbook.RunbookProcessID = plan.RunbookProcessID.ValueString()
+	runbook.PublishedRunbookSnapshotID = plan.PublishedRunbookSnapshotID.ValueString()
+	runbook.SpaceID = plan.SpaceID.ValueString()
+	if !plan.MultiTenancyMode.IsNull() {
+		runbook.MultiTenancyMode = core.TenantedDeploymentMode(plan.MultiTenancyMode.ValueString())
+	}
+	if !plan.ConnectivityPolicy.IsNull() {
+		runbook.ConnectivityPolicy = schemas.MapToConnectivityPolicy(plan.ConnectivityPolicy)
+	}
+	runbook.EnvironmentScope = plan.EnvironmentScope.ValueString()
+	runbook.Environments = util.ExpandStringList(plan.Environments)
+	runbook.DefaultGuidedFailureMode = plan.DefaultGuidedFailureMode.ValueString()
+	if !plan.RunRetentionPolicy.IsNull() {
+		runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(plan.RunRetentionPolicy)
+	} else {
+		runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(schemas.GetDefaultRunbookRetentionPeriod())
+	}
+	runbook.ForcePackageDownload = plan.ForcePackageDownload.ValueBool()
 
 	util.Create(ctx, schemas.RunbookResourceDescription, plan)
 
@@ -143,54 +169,6 @@ func (r *runbookTypeResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	util.Deleted(ctx, schemas.RunbookResourceDescription, state)
 	resp.State.RemoveResource(ctx)
-}
-
-func mapToRunbook(data schemas.RunbookTypeResourceModel) *runbooks.Runbook {
-	name := data.Name.ValueString()
-	projectId := data.ProjectID.ValueString()
-
-	runbook := runbooks.NewRunbook(name, projectId)
-	if !data.ID.IsNull() {
-		runbook.ID = data.ID.ValueString()
-	}
-
-	if !data.Description.IsNull() {
-		runbook.Description = data.Description.ValueString()
-	}
-	if !data.RunbookProcessID.IsNull() {
-		runbook.RunbookProcessID = data.RunbookProcessID.ValueString()
-	}
-	if !data.PublishedRunbookSnapshotID.IsNull() {
-		runbook.PublishedRunbookSnapshotID = data.PublishedRunbookSnapshotID.ValueString()
-	}
-	if !data.SpaceID.IsNull() {
-		runbook.SpaceID = data.SpaceID.ValueString()
-	}
-	if !data.MultiTenancyMode.IsNull() {
-		runbook.MultiTenancyMode = core.TenantedDeploymentMode(data.MultiTenancyMode.ValueString())
-	}
-	if !data.ConnectivityPolicy.IsNull() {
-		runbook.ConnectivityPolicy = schemas.MapToConnectivityPolicy(data.ConnectivityPolicy)
-	}
-	if !data.EnvironmentScope.IsNull() {
-		runbook.EnvironmentScope = data.EnvironmentScope.ValueString()
-	}
-	if !data.Environments.IsNull() {
-		runbook.Environments = util.ExpandStringList(data.Environments)
-	}
-	if !data.DefaultGuidedFailureMode.IsNull() {
-		runbook.DefaultGuidedFailureMode = data.DefaultGuidedFailureMode.ValueString()
-	}
-	if !data.RunRetentionPolicy.IsNull() {
-		runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(data.RunRetentionPolicy)
-	} else if runbook.RunRetentionPolicy == nil {
-		runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(schemas.GetDefaultRunbookRetentionPeriod())
-	}
-	if !data.ForcePackageDownload.IsNull() {
-		runbook.ForcePackageDownload = data.ForcePackageDownload.ValueBool()
-	}
-
-	return runbook
 }
 
 func mapToState(data *schemas.RunbookTypeResourceModel, runbook *runbooks.Runbook) {
