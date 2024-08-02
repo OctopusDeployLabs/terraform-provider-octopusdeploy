@@ -34,6 +34,7 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 	return map[string]resourceSchema.Attribute{
 		runbookRetentionPeriodSchemeAttributeNames.QuantityToKeep: resourceSchema.Int64Attribute{
 			Description: "How many runs to keep per environment.",
+			Computed:    true,
 			Optional:    true,
 			Default:     int64default.StaticInt64(0),
 			Validators: []validator.Int64{
@@ -42,6 +43,7 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 		},
 		runbookRetentionPeriodSchemeAttributeNames.ShouldKeepForever: resourceSchema.BoolAttribute{
 			Description: "Indicates if items should never be deleted. The default value is `false`.",
+			Computed:    true,
 			Optional:    true,
 			Default:     booldefault.StaticBool(false),
 			Validators: []validator.Bool{

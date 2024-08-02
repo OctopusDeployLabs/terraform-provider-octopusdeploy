@@ -56,6 +56,7 @@ func getConnectivityPolicySchema() map[string]resourceSchema.Attribute {
 			Optional: true,
 		},
 		runbookConnectivityPolicySchemeAttributeNames.SkipMachineBehavior: resourceSchema.StringAttribute{
+			Computed: true,
 			Optional: true,
 			Default:  stringdefault.StaticString(skipMachineBehaviorNames.None),
 			Validators: []validator.String{
