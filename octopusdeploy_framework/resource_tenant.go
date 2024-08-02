@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"sort"
 )
 
 type tenantTypeResource struct {
@@ -153,6 +154,7 @@ func mapStateToTenant(data *schemas.TenantModel) (*tenants.Tenant, error) {
 	} else {
 		tenant.TenantTags = []string{}
 	}
+	sort.Strings(tenant.TenantTags)
 
 	return tenant, nil
 }
@@ -163,5 +165,6 @@ func mapTenantToState(data *schemas.TenantModel, tenant *tenants.Tenant) {
 	data.Description = types.StringValue(tenant.Description)
 	data.SpaceID = types.StringValue(tenant.SpaceID)
 	data.Name = types.StringValue(tenant.Name)
+	sort.Strings(tenant.TenantTags)
 	data.TenantTags = util.Ternary(tenant.TenantTags != nil && len(tenant.TenantTags) > 0, util.FlattenStringList(tenant.TenantTags), types.ListValueMust(types.StringType, make([]attr.Value, 0)))
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
 	"os"
-	"sort"
 	"testing"
 )
 
@@ -95,7 +94,6 @@ func testTenantResourceUpdated(t *testing.T, name string) resource.TestCheckFunc
 		if err != nil {
 			return fmt.Errorf("failed to retrieve tenant by ID: %s", err)
 		}
-		sort.Strings(tenant.TenantTags)
 
 		assert.NotEmpty(t, tenant.ID, "Tenant ID did not match expected value")
 		assert.Equal(t, tenant.Description, fmt.Sprintf("Updated description"))
