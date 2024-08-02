@@ -176,10 +176,11 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 					stringvalidator.OneOf(environmentScopeTypes...),
 				},
 			},
-			RunbookSchemaAttributeNames.Environments: resourceSchema.ListNestedAttribute{
+			RunbookSchemaAttributeNames.Environments: resourceSchema.ListAttribute{
 				Description: fmt.Sprintf("When %s is set to \"%s\", this is the list of environments the runbook can be run agains.", RunbookSchemaAttributeNames.EnvironmentScope, environmentScopeNames.Specified),
 				Optional:    true,
 				Computed:    true,
+				ElementType: types.StringType,
 			},
 			RunbookSchemaAttributeNames.DefaultGuidedFailureMode: resourceSchema.StringAttribute{
 				Description: "Sets the runbook guided failure mode.",
