@@ -100,6 +100,8 @@ func (r *tenantTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	tflog.Debug(ctx, fmt.Sprintf("updating tenant '%s'", data.ID.ValueString()))
 
+	tenantFromApi, err := tenants.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
+
 	tenant, err := mapStateToTenant(data)
 	tenant.ID = state.ID.ValueString()
 	if err != nil {
@@ -109,6 +111,7 @@ func (r *tenantTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	tflog.Info(ctx, fmt.Sprintf("updating Tenant (%s)", data.ID))
 
+	tenant.ProjectEnvironments = tenantFromApi.ProjectEnvironments
 	updatedTenant, err := tenants.Update(r.Config.Client, tenant)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to update tenant", err.Error())
