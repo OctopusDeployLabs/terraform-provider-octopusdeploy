@@ -8,7 +8,7 @@ import (
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -116,9 +116,8 @@ func GetTenantResourceSchema() map[string]resourceSchema.Attribute {
 		"cloned_from_tenant_id": resourceSchema.StringAttribute{
 			Description: "The ID of the tenant from which this tenant was cloned.",
 			Optional:    true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
+			Computed:    true,
+			Default:     stringdefault.StaticString(""),
 		},
 		"description": util.GetDescriptionResourceSchema("tenant"),
 		"id":          util.GetIdResourceSchema(),
