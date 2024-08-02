@@ -189,7 +189,11 @@ func mapToState(data *schemas.RunbookTypeResourceModel, runbook *runbooks.Runboo
 	data.EnvironmentScope = types.StringValue(runbook.EnvironmentScope)
 	data.Environments = util.FlattenStringList(runbook.Environments)
 	data.DefaultGuidedFailureMode = types.StringValue(runbook.DefaultGuidedFailureMode)
-	data.ForcePackageDownload = types.BoolValue(runbook.ForcePackageDownload)
+
+	// work-around for bug in Octopus API that does not honor setting ForcePackageDownload to true
+	if data.ForcePackageDownload.IsNull() || data.ForcePackageDownload == types.BoolValue(false) || runbook.ForcePackageDownload {
+		data.ForcePackageDownload = types.BoolValue(runbook.ForcePackageDownload)
+	}
 	data.RunRetentionPolicy = types.ListValueMust(
 		types.ObjectType{AttrTypes: schemas.GetRunbookRetentionPeriodObjectType()},
 		[]attr.Value{
