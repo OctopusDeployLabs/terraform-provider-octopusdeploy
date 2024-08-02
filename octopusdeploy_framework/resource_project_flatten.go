@@ -48,8 +48,6 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 		ClonedFromProjectID:             util.StringOrNull(project.ClonedFromProjectID),
 	}
 
-	var diags diag.Diagnostics
-
 	model.IncludedLibraryVariableSets = util.FlattenStringList(project.IncludedLibraryVariableSets)
 	model.AutoDeployReleaseOverrides = flattenAutoDeployReleaseOverrides(project.AutoDeployReleaseOverrides)
 
@@ -73,9 +71,10 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 
 	model.Template = flattenTemplates(project.Templates)
 
-	diags, resourceModel, diagnostics, done := processPersistenceSettings(ctx, project, model, diags)
-	if done {
-		return resourceModel, diagnostics
+	diags := processPersistenceSettings(ctx, project, model)
+
+	if diags.HasError() {
+		return model, diags
 	}
 
 	// Extension Settings
@@ -98,7 +97,8 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 	return model, diags
 }
 
-func processPersistenceSettings(ctx context.Context, project *projects.Project, model *projectResourceModel, diags diag.Diagnostics) (diag.Diagnostics, *projectResourceModel, diag.Diagnostics, bool) {
+func processPersistenceSettings(ctx context.Context, project *projects.Project, model *projectResourceModel) diag.Diagnostics {
+	var diags diag.Diagnostics
 	if project.PersistenceSettings != nil {
 		if project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 			gitSettings := project.PersistenceSettings.(projects.GitPersistenceSettings)
@@ -118,10 +118,6 @@ func processPersistenceSettings(ctx context.Context, project *projects.Project, 
 				model.GitUsernamePasswordPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()})
 				model.GitAnonymousPersistenceSettings, diags = flattenGitPersistenceSettings(ctx, gitSettings)
 			}
-
-			if diags.HasError() {
-				return nil, nil, diags, true
-			}
 		} else {
 			model.GitLibraryPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitLibraryPersistenceSettingsAttrTypes()})
 			model.GitUsernamePasswordPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitUsernamePasswordPersistenceSettingsAttrTypes()})
@@ -133,7 +129,7 @@ func processPersistenceSettings(ctx context.Context, project *projects.Project, 
 		model.GitAnonymousPersistenceSettings = types.ListNull(types.ObjectType{AttrTypes: getGitAnonymousPersistenceSettingsAttrTypes()})
 		model.IsVersionControlled = types.BoolValue(false)
 	}
-	return diags, nil, nil, false
+	return diags
 }
 
 func flattenConnectivityPolicy(policy *core.ConnectivityPolicy) types.List {
