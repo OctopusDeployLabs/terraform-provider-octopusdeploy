@@ -88,8 +88,8 @@ func getStepResourceBlockSchema(resourceDescription string) resourceSchema.ListN
 				DeploymentProcessWindowSize:          getWindowSizeResourceSchema(),
 			},
 			Blocks: map[string]resourceSchema.Block{
-				DeploymentProcessAction:          NewActionResourceSchemaBuilder().WithActionType().WithExecutionLocation().WithPackages().WithWorkerPool().WithWorkerPoolVariable().WithGitDependency().Build(),
-				DeploymentProcessRunScriptAction: NewActionResourceSchemaBuilder().WithExecutionLocation().WithScriptFromPackage().WithPackages().WithWorkerPool().WithWorkerPoolVariable().WithScript().WithVariableSubstitutionInFiles().Build(),
+				DeploymentProcessAction:          NewActionResourceSchemaBuilder().WithActionType().WithExecutionLocation().WithWorkerPool().WithWorkerPoolVariable().WithGitDependency().Build(),
+				DeploymentProcessRunScriptAction: NewActionResourceSchemaBuilder().WithExecutionLocation().WithScriptFromPackage().WithWorkerPool().WithWorkerPoolVariable().WithScript().WithVariableSubstitutionInFiles().Build(),
 				//DeploymentProcessRunKubectlScriptAction: getKubectlActionResourceSchema(),
 				//DeploymentProcessApplyTerraformTemplateAction: getApplyTerraformTemplateActionSchema(),
 				//DeploymentProcessApplyKubernetesSecretAction: getDeployKubernetesSecretActionResourceSchema(),

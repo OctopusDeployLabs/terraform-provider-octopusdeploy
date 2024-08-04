@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/validators"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -96,6 +97,9 @@ func NewActionResourceSchemaBuilder() *ActionResourceSchemaBuilder {
 	}
 
 	builder.blocks["action_template"] = resourceSchema.ListNestedBlock{
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
+		},
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
 				"id": GetIdResourceSchema(),
@@ -228,8 +232,20 @@ func (b *ActionResourceSchemaBuilder) WithWorkerPoolVariable() *ActionResourceSc
 
 func (b *ActionResourceSchemaBuilder) WithPackages() *ActionResourceSchemaBuilder {
 	b.WithPrimaryPackage()
-	b.blocks["package"] = getPackageSchema()
 
+	additionalAttributes := map[string]resourceSchema.Attribute{
+		"extract_during_deployment": resourceSchema.BoolAttribute{
+			Optional:    true,
+			Computed:    true,
+			Default:     booldefault.StaticBool(true),
+			Description: "Whether to extract the package during deployment",
+		},
+		"name": GetNameResourceSchema(false),
+	}
+
+	packageSchema := getPackageSchema(additionalAttributes)
+
+	b.blocks["package"] = packageSchema
 	return b
 }
 
@@ -288,7 +304,10 @@ func (b *ActionResourceSchemaBuilder) WithProperties(deprecated string) *ActionR
 }
 
 func (b *ActionResourceSchemaBuilder) WithGitDependency() *ActionResourceSchemaBuilder {
-	b.blocks["git_dependency"] = resourceSchema.SetNestedBlock{
+	b.blocks["git_dependency"] = resourceSchema.ListNestedBlock{
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
+		},
 		Description: "Configuration for resource sourcing from a git repository.",
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
@@ -330,56 +349,61 @@ func (b *ActionResourceSchemaBuilder) WithGitDependency() *ActionResourceSchemaB
 }
 
 func (b *ActionResourceSchemaBuilder) WithPrimaryPackage() *ActionResourceSchemaBuilder {
-	b.blocks["primary_package"] = getPackageSchema()
+	b.blocks["primary_package"] = getPackageSchema(nil)
 
 	return b
 }
 
-func (b *ActionResourceSchemaBuilder) Build() resourceSchema.SingleNestedBlock {
-	return resourceSchema.SingleNestedBlock{
-		Attributes: b.attributes,
-		Blocks:     b.blocks,
+func (b *ActionResourceSchemaBuilder) Build() resourceSchema.ListNestedBlock {
+	return resourceSchema.ListNestedBlock{
+		Validators: []validator.List{
+			listvalidator.SizeAtMost(1),
+		},
+		NestedObject: resourceSchema.NestedBlockObject{
+			Attributes: b.attributes,
+			Blocks:     b.blocks,
+		},
 	}
 }
 
-func getPackageSchema() resourceSchema.ListNestedBlock {
-	return resourceSchema.ListNestedBlock{
-		Description: "The package associated with this action.",
-		NestedObject: resourceSchema.NestedBlockObject{
-			Attributes: map[string]resourceSchema.Attribute{
-				"acquisition_location": resourceSchema.StringAttribute{
-					Default:     stringdefault.StaticString("Server"),
-					Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
-					Optional:    true,
-					Computed:    true,
-					Validators: []validator.String{
-						stringvalidator.OneOf("Server", "ExecutionTarget", "NotAcquired"),
-					},
-				},
-				"feed_id": resourceSchema.StringAttribute{
-					Default:     stringdefault.StaticString("feeds-builtin"),
-					Description: "The feed ID associated with this package reference.",
-					Optional:    true,
-					Computed:    true,
-				},
-				"extract_during_deployment": resourceSchema.BoolAttribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "Whether to extract the package during deployment",
-				},
-				"id":   GetIdResourceSchema(),
-				"name": GetNameResourceSchema(false),
-				"package_id": resourceSchema.StringAttribute{
-					Description: "The ID of the package.",
-					Required:    true,
-				},
-				"properties": resourceSchema.MapAttribute{
-					Computed:    true,
-					Optional:    true,
-					Description: "A list of properties associated with this package.",
-					ElementType: types.StringType,
-				},
+func getPackageSchema(additionalAttributes map[string]resourceSchema.Attribute) resourceSchema.ListNestedBlock {
+	attributes := map[string]resourceSchema.Attribute{
+		"acquisition_location": resourceSchema.StringAttribute{
+			Default:     stringdefault.StaticString("Server"),
+			Description: "Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression",
+			Optional:    true,
+			Computed:    true,
+			Validators: []validator.String{
+				stringvalidator.OneOf("Server", "ExecutionTarget", "NotAcquired"),
 			},
 		},
+		"feed_id": resourceSchema.StringAttribute{
+			Default:     stringdefault.StaticString("feeds-builtin"),
+			Description: "The feed ID associated with this package reference.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"id": GetIdResourceSchema(),
+		"package_id": resourceSchema.StringAttribute{
+			Description: "The ID of the package.",
+			Required:    true,
+		},
+		"properties": resourceSchema.MapAttribute{
+			Computed:    true,
+			Optional:    true,
+			Description: "A list of properties associated with this package.",
+			ElementType: types.StringType,
+		},
+	}
+
+	if additionalAttributes != nil {
+		for k, v := range additionalAttributes {
+			attributes[k] = v
+		}
+	}
+
+	return resourceSchema.ListNestedBlock{
+		Description:  "The package associated with this action.",
+		NestedObject: resourceSchema.NestedBlockObject{Attributes: attributes},
 	}
 }

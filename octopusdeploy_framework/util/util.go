@@ -50,6 +50,9 @@ func SetToStringArray(ctx context.Context, set types.Set) ([]string, diag.Diagno
 }
 
 func FlattenStringList(list []string) types.List {
+	if list == nil || len(list) == 0 {
+		return types.ListNull(types.StringType)
+	}
 	elements := make([]attr.Value, 0, len(list))
 	for _, s := range list {
 		elements = append(elements, types.StringValue(s))
@@ -88,6 +91,8 @@ func SetBool(attrs map[string]attr.Value, attr string, b *bool) {
 	if v, ok := attrs[attr]; ok {
 		*b = v.(types.Bool).ValueBool()
 	}
+}
+
 func ToValueSlice(slice []string) []attr.Value {
 	values := make([]attr.Value, len(slice))
 	for i, s := range slice {

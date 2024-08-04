@@ -43,7 +43,7 @@ func (d *deploymentProcessResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("[INFO] creating deployment process: %#v", plan))
+	tflog.Info(ctx, fmt.Sprintf("creating deployment process: %#v", plan))
 	spaceID := plan.SpaceID.ValueString()
 	project, err := projects.GetByID(d.Client, plan.SpaceID.ValueString(), plan.ProjectID.ValueString())
 	if err != nil {
@@ -66,9 +66,9 @@ func (d *deploymentProcessResource) Create(ctx context.Context, req resource.Cre
 		}
 	}
 
-	err = mappers.MapSchemaToDeploymentProcess(plan, current)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to map plan to deployment process", err.Error())
+	resp.Diagnostics.Append(mappers.MapSchemaToDeploymentProcess(plan, current)...)
+
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -78,7 +78,11 @@ func (d *deploymentProcessResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	mappers.MapDeploymentProcessTo(ctx, current, &plan)
+	resp.Diagnostics.Append(mappers.MapDeploymentProcessToState(ctx, current, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
