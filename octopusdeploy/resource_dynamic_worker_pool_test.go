@@ -5,13 +5,14 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
+	internalTest.SkipCI(t, "[The worker image specified does not exist.] ")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_dynamic_worker_pool." + localName
 
@@ -22,9 +23,9 @@ func TestAccOctopusDeployDynamicWorkerPoolBasic(t *testing.T) {
 	sortOrder := acctest.RandIntRange(50, 100)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testDynamicWorkerPoolDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		CheckDestroy:             testDynamicWorkerPoolDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testDynamicWorkerPoolBasic(localName, name, workerType, description, isDefault, sortOrder),
@@ -60,9 +61,8 @@ func testDynamicWorkerPoolBasic(
 
 func testDynamicWorkerPoolExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
 		workerPoolID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := client.WorkerPools.GetByID(workerPoolID); err != nil {
+		if _, err := octoClient.WorkerPools.GetByID(workerPoolID); err != nil {
 			return err
 		}
 
@@ -71,10 +71,9 @@ func testDynamicWorkerPoolExists(prefix string) resource.TestCheckFunc {
 }
 
 func testDynamicWorkerPoolDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		workerPoolID := rs.Primary.ID
-		workerPool, err := client.WorkerPools.GetByID(workerPoolID)
+		workerPool, err := octoClient.WorkerPools.GetByID(workerPoolID)
 		if err == nil {
 			if workerPool != nil {
 				return fmt.Errorf("dynamic worker pool (%s) still exists", rs.Primary.ID)

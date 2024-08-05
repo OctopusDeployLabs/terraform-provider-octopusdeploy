@@ -2,6 +2,11 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"path/filepath"
+	stdslices "slices"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -24,9 +29,9 @@ func TestAccKubernetesClusterDeploymentTargetBasic(t *testing.T) {
 	newClusterURL := "http://www.example.com"
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testDeploymentTargetCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKubernetesClusterDeploymentTargetBasic(accountLocalName, accountName, accountUsername, environmentLocalName, environmentName, userRoleLocalName, userRoleName, localName, name, clusterURL),
@@ -54,9 +59,9 @@ func TestAccKubernetesClusterDeploymentTargetAws(t *testing.T) {
 	name := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testDeploymentTargetCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKubernetesClusterDeploymentTargetAws(
@@ -94,9 +99,9 @@ func TestAccKubernetesClusterDeploymentTargetGcp(t *testing.T) {
 	region := acctest.RandStringFromCharSet(16, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy: testDeploymentTargetCheckDestroy,
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		CheckDestroy:             testDeploymentTargetCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccKubernetesClusterDeploymentTargetGcp(
@@ -223,4 +228,229 @@ func testAccKubernetesClusterDeploymentTargetAws(
 			 cluster_name = "%s"
 		   }
 	     }`, localName, clusterURL, environmentID, name, userRoleID, awsAccountID, clusterName)
+}
+
+// TestK8sTargetResource verifies that a k8s machine can be reimported with the correct settings
+func TestK8sTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "29-k8starget", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "29a-k8stargetds"), newSpaceId, []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := machines.MachinesQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Machines.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a machine called \"Test\"")
+	}
+	resource := resources.Items[0]
+
+	if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) != "https://cluster" {
+		t.Fatal("The machine must have a Endpoint.ClusterUrl of \"https://cluster\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) + "\")")
+	}
+
+	// Verify the environment data lookups work
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "29a-k8stargetds"), "data_lookup")
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if lookup != resource.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
+	}
+}
+
+// TestK8sTargetResource verifies that a k8s machine can be reimported with the correct settings
+func TestK8sTargetWithCertResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "47-k8stargetwithcert", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := machines.MachinesQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Machines.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a machine called \"Test\"")
+	}
+	resource := resources.Items[0]
+
+	if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) != "https://cluster" {
+		t.Fatal("The machine must have a Endpoint.ClusterUrl of \"https://cluster\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) + "\")")
+	}
+
+	if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.GetAuthenticationType()) != "KubernetesCertificate" {
+		t.Fatal("The machine must have a Endpoint.AuthenticationType of \"KubernetesCertificate\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.GetAuthenticationType()) + "\")")
+	}
+}
+
+// TestK8sPodAuthTargetResource verifies that a k8s machine with pod auth can be reimported with the correct settings
+func TestK8sPodAuthTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "48-k8stargetpodauth", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := machines.MachinesQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := client.Machines.Get(query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a machine called \"Test\"")
+	}
+	resource := resources.Items[0]
+
+	if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) != "https://cluster" {
+		t.Fatal("The machine must have a Endpoint.ClusterUrl of \"https://cluster\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterURL) + "\")")
+	}
+
+	if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.GetAuthenticationType()) != "KubernetesPodService" {
+		t.Fatal("The machine must have a Endpoint.Authentication.AuthenticationType of \"KubernetesPodService\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.GetAuthenticationType()) + "\")")
+	}
+
+	if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.(*machines.KubernetesPodAuthentication).TokenPath) != "/var/run/secrets/kubernetes.io/serviceaccount/token" {
+		t.Fatal("The machine must have a Endpoint.Authentication.TokenPath of \"/var/run/secrets/kubernetes.io/serviceaccount/token\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).Authentication.(*machines.KubernetesPodAuthentication).TokenPath) + "\")")
+	}
+
+	if fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) != "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" {
+		t.Fatal("The machine must have a Endpoint.ClusterCertificatePath of \"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt\" (was \"" + fmt.Sprint(resource.Endpoint.(*machines.KubernetesEndpoint).ClusterCertificatePath) + "\")")
+	}
+}
+
+func TestKubernetesDeploymentTargetData(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "55-kubernetesagentdeploymenttarget", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "55a-kubernetesagentdeploymenttargetds"), newSpaceId, []string{})
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := machines.MachinesQuery{
+		DeploymentTargetTypes: []string{"KubernetesTentacle"},
+		PartialName:           "minimum-agent",
+		Skip:                  0,
+		Take:                  1,
+	}
+
+	resources, err := machines.Get(client, newSpaceId, query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	var foundAgent = resources.Items[0]
+
+	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "55a-kubernetesagentdeploymenttargetds"), "data_lookup")
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if lookup != foundAgent.ID {
+		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + foundAgent.ID + "\".")
+	}
+}
+
+func TestKubernetesDeploymentTargetResource(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "55-kubernetesagentdeploymenttarget", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := machines.MachinesQuery{
+		DeploymentTargetTypes: []string{"KubernetesTentacle"},
+		Skip:                  0,
+		Take:                  3,
+	}
+
+	resources, err := machines.Get(client, newSpaceId, query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) != 3 {
+		t.Fatalf("Space must have three deployment targets with type KubernetesTentacle")
+	}
+
+	optionalAgentName := "optional-agent"
+	optionalAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == optionalAgentName })
+	optionalAgentDeploymentTarget := resources.Items[optionalAgentIndex]
+	optionalAgentEndpoint := optionalAgentDeploymentTarget.Endpoint.(*machines.KubernetesTentacleEndpoint)
+
+	expectedDefaultNamespace := "kubernetes-namespace"
+	if optionalAgentEndpoint.DefaultNamespace != expectedDefaultNamespace {
+		t.Fatalf("Expected  \"%s\" to have a default namespace of \"%s\", instead has \"%s\"", optionalAgentName, expectedDefaultNamespace, optionalAgentEndpoint.DefaultNamespace)
+	}
+
+	if !optionalAgentDeploymentTarget.IsDisabled {
+		t.Fatalf("Expected  \"%s\" to be disabled", optionalAgentName)
+	}
+
+	if !optionalAgentEndpoint.UpgradeLocked {
+		t.Fatalf("Expected  \"%s\" to have upgrade locked", optionalAgentName)
+	}
+
+	tenantedAgentName := "tenanted-agent"
+	tenantedAgentIndex := stdslices.IndexFunc(resources.Items, func(t *machines.DeploymentTarget) bool { return t.Name == tenantedAgentName })
+	tenantedAgentDeploymentTarget := resources.Items[tenantedAgentIndex]
+
+	if tenantedAgentDeploymentTarget.TenantedDeploymentMode != "Tenanted" {
+		t.Fatalf("Expected \"%s\" to be tenanted, but it was \"%s\"", tenantedAgentName, tenantedAgentDeploymentTarget.TenantedDeploymentMode)
+	}
+
+	if len(tenantedAgentDeploymentTarget.TenantIDs) != 1 {
+		t.Fatalf("Expected \"%s\" to have 1 tenant, but it has %d", tenantedAgentName, len(tenantedAgentDeploymentTarget.TenantIDs))
+	}
+
+	if len(tenantedAgentDeploymentTarget.TenantTags) != 2 {
+		t.Fatalf("Expected \"%s\" to have 2 tenant tags, but it has %d", tenantedAgentName, len(tenantedAgentDeploymentTarget.TenantTags))
+	}
 }

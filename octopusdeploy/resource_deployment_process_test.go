@@ -2,8 +2,14 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"os"
+	"strings"
 	"testing"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
@@ -70,8 +76,8 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -86,11 +92,11 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
+	internalTest.SkipCI(t, "Unsupported block type on `template` block")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
 
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
+	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -99,8 +105,8 @@ func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -113,7 +119,7 @@ func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.action_type", "Octopus.TerraformPlan"),
 					// resource.TestCheckResourceAttr(prefix, "step.0.action.0.can_be_used_for_project_versioning", "true"),
-					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.channels"),
+					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.channels.0"),
 					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.container"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.condition", "Success"),
 					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.environments"),
@@ -129,8 +135,7 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
 
-	// TODO: replace with client reference
-	spaceID := os.Getenv("OCTOPUS_SPACE")
+	spaceID := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -139,8 +144,8 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 			testAccProjectGroupCheckDestroy,
 			testAccLifecycleCheckDestroy,
 		),
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -152,10 +157,10 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 					resource.TestCheckResourceAttr(resourceName, "step.0.start_trigger", "StartAfterPrevious"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.action_type", "Octopus.TransferPackage"),
-					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.channels"),
-					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.container"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.container.#", "1"),
+					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.channels.0"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.condition", "Success"),
-					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.environments"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.environments.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.run_on_server", "false"),
 				),
 				Config: testAccProcessWithImpliedPrimaryPackage(spaceID, localName),
@@ -197,6 +202,7 @@ func testAccDeploymentProcessBasic(localName string) string {
 					script_file_name = "Run.ps132"
 					script_source = "Package"
 					tenant_tags = ["tag/tag"]
+					sort_order  = 1
 
 					primary_package {
 						acquisition_location = "Server"
@@ -229,6 +235,7 @@ func testAccDeploymentProcessBasic(localName string) string {
 
 			  run_script_action {
 				  name = "Step2"
+ 				  sort_order = 1
 				  run_on_server = true
 				  script_body = "Write-Host 'hi'"
 			  }
@@ -268,6 +275,7 @@ func testAccProcessWithImpliedPrimaryPackage(spaceID string, localName string) s
 					is_disabled                        = false
 					is_required                        = false
 					name                               = "Test"
+					sort_order  					   = 1
 
 					primary_package {
 						acquisition_location = "Server"
@@ -281,6 +289,8 @@ func testAccProcessWithImpliedPrimaryPackage(spaceID string, localName string) s
 
 					properties = {
 							"Octopus.Action.Package.TransferPath" = "/var"
+							"Octopus.Action.Package.FeedId": "feeds-builtin"
+							"Octopus.Action.RunOnServer": "False"
 							"Octopus.Action.Package.PackageId" = "test-package"
 							"Octopus.Action.Package.DownloadOnTentacle" = "False"
 					}
@@ -353,9 +363,7 @@ func testAccBuildTestAction(action string) string {
 
 func testAccCheckOctopusDeployDeploymentProcess() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*client.Client)
-
-		process, err := getDeploymentProcess(s, client)
+		process, err := getDeploymentProcess(s, octoClient)
 		if err != nil {
 			return err
 		}
@@ -390,8 +398,7 @@ func testAccDeploymentProcessExists(prefix string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", prefix)
 		}
 
-		client := testAccProvider.Meta().(*client.Client)
-		if _, err := client.DeploymentProcesses.GetByID(rs.Primary.ID); err != nil {
+		if _, err := octoClient.DeploymentProcesses.GetByID(rs.Primary.ID); err != nil {
 			return err
 		}
 
@@ -400,16 +407,121 @@ func testAccDeploymentProcessExists(prefix string) resource.TestCheckFunc {
 }
 
 func testAccDeploymentProcessCheckDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*client.Client)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_deployment_process" {
 			continue
 		}
 
-		if deploymentProcess, err := client.DeploymentProcesses.GetByID(rs.Primary.ID); err == nil {
+		if deploymentProcess, err := octoClient.DeploymentProcesses.GetByID(rs.Primary.ID); err == nil {
 			return fmt.Errorf("deployment process (%s) still exists", deploymentProcess.GetID())
 		}
 	}
 
 	return nil
+}
+
+func TestDeploymentProcessWithGitDependency(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "51-deploymentprocesswithgitdependency", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	project, err := client.Projects.GetByName("Test")
+	deploymentProcess, err := deployments.GetDeploymentProcessByID(client, newSpaceId, project.DeploymentProcessID)
+
+	if len(deploymentProcess.Steps) == 0 {
+		t.Fatalf("Expected deployment process to have steps.")
+	}
+
+	expectedGitUri := "https://github.com/OctopusSamples/OctoPetShop.git"
+	expectedDefaultBranch := "main"
+
+	for _, step := range deploymentProcess.Steps {
+		action := step.Actions[0]
+
+		if len(action.GitDependencies) == 0 {
+			t.Fatalf(fmt.Sprint(action.Name) + " - Expected action to have git dependency configured.")
+		}
+
+		gitDependency := action.GitDependencies[0]
+
+		if fmt.Sprint(gitDependency.RepositoryUri) != expectedGitUri {
+			t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have repository uri equal to " + fmt.Sprint(expectedGitUri))
+		}
+
+		if fmt.Sprint(gitDependency.DefaultBranch) != expectedDefaultBranch {
+			t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have default branch equal to " + fmt.Sprint(expectedDefaultBranch))
+		}
+
+		if fmt.Sprint(gitDependency.GitCredentialType) == "Library" {
+			if len(strings.TrimSpace(gitDependency.GitCredentialId)) == 0 {
+				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency library type to have a defined git credential id.")
+			}
+		} else {
+			if len(strings.TrimSpace(gitDependency.GitCredentialId)) > 0 {
+				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency of non-library type to not have a defined git credential id.")
+			}
+		}
+	}
+}
+
+// TestTerraformApplyStepWithWorkerPool verifies that a terraform apply step with a custom worker pool is deployed successfully
+// See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/601
+func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
+	testFramework := test.OctopusContainerTest{}
+
+	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "50-applyterraformtemplateaction", []string{})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Assert
+	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	query := projects.ProjectsQuery{
+		PartialName: "Test",
+		Skip:        0,
+		Take:        1,
+	}
+
+	resources, err := projects.Get(client, newSpaceId, query)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(resources.Items) == 0 {
+		t.Fatalf("Space must have a project called \"Test\"")
+	}
+	resource := resources.Items[0]
+
+	// Get worker pool
+	wpQuery := workerpools.WorkerPoolsQuery{
+		PartialName: "Docker",
+		Skip:        0,
+		Take:        1,
+	}
+
+	workerpools, err := workerpools.Get(client, newSpaceId, wpQuery)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if len(workerpools.Items) == 0 {
+		t.Fatalf("Space must have a worker pool called \"Docker\"")
+	}
+
+	// Get deployment process
+	process, err := deployments.GetDeploymentProcessByID(client, "", resource.DeploymentProcessID)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Worker pool must be assigned
+	if process.Steps[0].Actions[0].WorkerPool != workerpools.Items[0].GetID() {
+		t.Fatalf("Action must use the worker pool \"Docker\"")
+	}
 }
