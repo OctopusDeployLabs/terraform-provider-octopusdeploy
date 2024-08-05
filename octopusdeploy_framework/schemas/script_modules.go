@@ -208,6 +208,6 @@ func MapToScriptModuleFromState(data *ScriptModuleResourceModel, scriptModule *v
 
 	flattenScript(scriptModule)
 
-	var script, _ = types.ListValue(types.StringType, flattenScript(scriptModule))
+	var script, _ = types.ListValue(ScriptObjectType(), flattenScript(scriptModule))
 	data.Script = script
 }
