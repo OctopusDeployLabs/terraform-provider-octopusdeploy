@@ -38,13 +38,13 @@ data "octopusdeploy_script_modules" "example" {
 
 Required:
 
-- `name` (String) The name of this resource.
 - `script` (Attributes List) The script associated with this script module. (see [below for nested schema](#nestedatt--script_modules--script))
 
 Optional:
 
 - `description` (String) The description of this script module.
 - `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
 - `space_id` (String) The space ID associated with this Script Module.
 - `variable_set_id` (String) The variable set ID for this script module.
 
