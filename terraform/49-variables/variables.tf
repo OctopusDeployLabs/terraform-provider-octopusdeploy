@@ -1,17 +1,8 @@
-resource "octopusdeploy_variable" "unscoped_project_variable" {
-  depends_on = [
-    octopusdeploy_project.test_project,
-  ]
-  owner_id = octopusdeploy_project.test_project.id
-  type     = "String"
-  name     = "UnscopedVariable"
-  value    = "UnscopedVariable"
-}
+
 
 resource "octopusdeploy_variable" "scoped_project_variable_action" {
   depends_on = [
     octopusdeploy_project.test_project,
-    octopusdeploy_variable.unscoped_project_variable,
   ]
   owner_id = octopusdeploy_project.test_project.id
   type     = "String"
@@ -20,6 +11,17 @@ resource "octopusdeploy_variable" "scoped_project_variable_action" {
   scope {
     actions = [octopusdeploy_deployment_process.test_deployment_process.step[0].run_script_action[0].id]
   }
+}
+
+resource "octopusdeploy_variable" "unscoped_project_variable" {
+  depends_on = [
+    octopusdeploy_project.test_project,
+    octopusdeploy_variable.scoped_project_variable_action,
+  ]
+  owner_id = octopusdeploy_project.test_project.id
+  type     = "String"
+  name     = "UnscopedVariable"
+  value    = "UnscopedVariable"
 }
 
 resource "octopusdeploy_variable" "scoped_project_variable_channel" {
