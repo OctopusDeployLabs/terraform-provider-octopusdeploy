@@ -85,6 +85,13 @@ func ToValueSlice(slice []string) []attr.Value {
 	return values
 }
 
+func StringOrNull(s string) types.String {
+	if s == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(s)
+}
+
 func Map[T, V any](items []T, fn func(T) V) []V {
 	result := make([]V, len(items))
 	for i, t := range items {
