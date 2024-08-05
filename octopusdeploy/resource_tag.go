@@ -29,8 +29,8 @@ func resourceTag() *schema.Resource {
 }
 
 func resourceTagCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	log.Printf("[INFO] creating tag")
 
@@ -73,8 +73,8 @@ func tagCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.
 }
 
 func resourceTagDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	tagSetID := d.Get("tag_set_id").(string)
 	tagSetSpaceID := d.Get("tag_set_space_id").(string)
@@ -121,8 +121,8 @@ func resourceTagDelete(ctx context.Context, d *schema.ResourceData, m interface{
 }
 
 func resourceTagRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	// validate the tag ID
 	if d.Id() == "" || !strings.Contains(d.Id(), "/") {
@@ -152,8 +152,8 @@ func resourceTagRead(ctx context.Context, d *schema.ResourceData, m interface{})
 }
 
 func resourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	name := d.Get("name").(string)
 	tagSetID := d.Get("tag_set_id").(string)

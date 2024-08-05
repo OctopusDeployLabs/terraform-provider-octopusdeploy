@@ -25,8 +25,8 @@ func resourceTenant() *schema.Resource {
 }
 
 func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	tenant := expandTenant(d)
 
@@ -49,8 +49,8 @@ func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceTenantDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	log.Printf("[INFO] deleting tenant (%s)", d.Id())
 
@@ -82,8 +82,8 @@ func resourceTenantRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceTenantUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	log.Printf("[INFO] updating tenant (%s)", d.Id())
 
