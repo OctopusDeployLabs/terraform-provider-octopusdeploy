@@ -1,12 +1,11 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"testing"
 )
 
 func TestAccDataSourceScriptModules(t *testing.T) {
@@ -15,7 +14,7 @@ func TestAccDataSourceScriptModules(t *testing.T) {
 	take := 10
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{

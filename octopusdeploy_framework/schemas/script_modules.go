@@ -1,9 +1,11 @@
 package schemas
 
 import (
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,6 +22,99 @@ type ScriptModuleResourceModel struct {
 	Script        types.List   `tfsdk:"script"`
 }
 
+type ScriptModuleDataSourceModel struct {
+	ID            types.String `tfsdk:"id"`
+	SpaceID       types.String `tfsdk:"space_id"`
+	IDs           types.List   `tfsdk:"ids"`
+	PartialName   types.String `tfsdk:"partial_name"`
+	Skip          types.Int64  `tfsdk:"skip"`
+	Take          types.Int64  `tfsdk:"take"`
+	ScriptModules types.List   `tfsdk:"script_modules"`
+}
+
+func GetDatasourceScriptModuleSchema() datasourceSchema.Schema {
+	description := "script module"
+	return datasourceSchema.Schema{
+		Attributes: map[string]datasourceSchema.Attribute{
+			"id":           util.GetIdDatasourceSchema(),
+			"space_id":     util.GetSpaceIdDatasourceSchema(description),
+			"ids":          util.GetQueryIDsDatasourceSchema(),
+			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
+			"skip":         util.GetQuerySkipDatasourceSchema(),
+			"take":         util.GetQueryTakeDatasourceSchema(),
+			"script_modules": datasourceSchema.ListNestedAttribute{
+				Computed: true,
+				Optional: true,
+				NestedObject: datasourceSchema.NestedAttributeObject{
+					Attributes: GetScriptModuleDatasourceSchema(),
+				},
+			},
+		},
+	}
+}
+
+func GetScriptModuleDatasourceSchema() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{
+		"description": GetDescriptionDatasourceSchema("script module"),
+		"id":          GetIdDatasourceSchema(),
+		"name":        GetNameDatasourceSchema(false),
+		"space_id":    GetSpaceIdDatasourceSchema("Script Module"),
+		"variable_set_id": datasourceSchema.StringAttribute{
+			Computed:    true,
+			Description: "The variable set ID for this script module.",
+			Optional:    true,
+		},
+		"script": datasourceSchema.ListNestedAttribute{
+			Description: "The script associated with this script module.",
+			Required:    true,
+			NestedObject: datasourceSchema.NestedAttributeObject{
+				Attributes: map[string]datasourceSchema.Attribute{
+					"body": datasourceSchema.StringAttribute{
+						Description: "The body of this script module.",
+						Required:    true,
+					},
+					"syntax": datasourceSchema.StringAttribute{
+						Description: "The syntax of the script. Valid types are `Bash`, `CSharp`, `FSharp`, `PowerShell`, or `Python`.",
+						Required:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOfCaseInsensitive(
+								"Bash",
+								"CSharp",
+								"FSharp",
+								"PowerShell",
+								"Python"),
+						},
+					},
+				},
+			},
+			Validators: []validator.List{
+				listvalidator.SizeAtMost(1),
+				listvalidator.SizeAtLeast(1),
+			},
+		},
+	}
+}
+
+func FlattenScriptModule(scriptModule *variables.ScriptModule) attr.Value {
+	attrs := map[string]attr.Value{
+		"description":     types.StringValue(scriptModule.Description),
+		"id":              types.StringValue(scriptModule.GetID()),
+		"name":            types.StringValue(scriptModule.Name),
+		"script":          types.ListValueMust(ScriptObjectType(), flattenScript(scriptModule)),
+		"space_id":        types.StringValue(scriptModule.SpaceID),
+		"variable_set_id": types.StringValue(scriptModule.VariableSetID),
+	}
+
+	return types.ObjectValueMust(ScriptModuleObjectType(), attrs)
+}
+
+func ScriptObjectType() types.ObjectType {
+	return types.ObjectType{AttrTypes: map[string]attr.Type{
+		"body":   types.StringType,
+		"syntax": types.StringType,
+	}}
+}
+
 func ScriptModuleObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"description":     types.StringType,
@@ -27,10 +122,7 @@ func ScriptModuleObjectType() map[string]attr.Type {
 		"name":            types.StringType,
 		"space_id":        types.StringType,
 		"variable_set_id": types.StringType,
-		"script": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{
-			"body":   types.StringType,
-			"syntax": types.StringType,
-		}}},
+		"script":          types.ListType{ElemType: ScriptObjectType()},
 	}
 }
 

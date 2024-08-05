@@ -26,7 +26,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_offline_package_drop_deployment_targets":         dataSourceOfflinePackageDropDeploymentTargets(),
 			"octopusdeploy_polling_tentacle_deployment_targets":             dataSourcePollingTentacleDeploymentTargets(),
 			"octopusdeploy_projects":                                        dataSourceProjects(),
-			"octopusdeploy_script_modules":                                  dataSourceScriptModules(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
 			"octopusdeploy_tag_sets":                                        dataSourceTagSets(),
 			"octopusdeploy_teams":                                           dataSourceTeams(),
