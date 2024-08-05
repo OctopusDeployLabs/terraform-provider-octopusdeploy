@@ -131,12 +131,12 @@ Optional:
 
 Required:
 
-- `base_path` (String) The base path associated with these version control settings.
-- `default_branch` (String) The default branch associated with these version control settings.
 - `url` (String) The URL associated with these version control settings.
 
 Optional:
 
+- `base_path` (String) The base path associated with these version control settings.
+- `default_branch` (String) The default branch associated with these version control settings.
 - `protected_branches` (Set of String) A list of protected branch patterns.
 
 
@@ -145,13 +145,13 @@ Optional:
 
 Required:
 
-- `base_path` (String) The base path associated with these version control settings.
-- `default_branch` (String) The default branch associated with these version control settings.
 - `git_credential_id` (String)
 - `url` (String) The URL associated with these version control settings.
 
 Optional:
 
+- `base_path` (String) The base path associated with these version control settings.
+- `default_branch` (String) The default branch associated with these version control settings.
 - `protected_branches` (Set of String) A list of protected branch patterns.
 
 
@@ -160,14 +160,14 @@ Optional:
 
 Required:
 
-- `base_path` (String) The base path associated with these version control settings.
-- `default_branch` (String) The default branch associated with these version control settings.
 - `password` (String, Sensitive) The password for the Git credential
 - `url` (String) The URL associated with these version control settings.
 - `username` (String) The username for the Git credential.
 
 Optional:
 
+- `base_path` (String) The base path associated with these version control settings.
+- `default_branch` (String) The default branch associated with these version control settings.
 - `protected_branches` (Set of String) A list of protected branch patterns.
 
 
