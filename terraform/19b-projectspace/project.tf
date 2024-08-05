@@ -22,7 +22,6 @@ resource "octopusdeploy_project" "deploy_frontend_project" {
   project_group_id                     = octopusdeploy_project_group.project_group_test.id
   tenanted_deployment_participation    = "Untenanted"
   space_id                             = octopusdeploy_space.octopus_project_space_test.id
-  release_notes_template               = "Release not template in Test project"
   included_library_variable_sets       = []
   versioning_strategy {
     template = "#{Octopus.Version.LastMajor}.#{Octopus.Version.LastMinor}.#{Octopus.Version.LastPatch}.#{Octopus.Version.NextRevision}"
@@ -33,6 +32,7 @@ resource "octopusdeploy_project" "deploy_frontend_project" {
     exclude_unhealthy_targets       = false
     skip_machine_behavior           = "SkipUnavailableMachines"
   }
+
   depends_on = [
     octopusdeploy_space.octopus_project_space_test,
     octopusdeploy_project_group.project_group_test,
