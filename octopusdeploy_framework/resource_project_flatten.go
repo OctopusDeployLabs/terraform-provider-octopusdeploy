@@ -43,7 +43,7 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 		IsVersionControlled:             types.BoolValue(project.IsVersionControlled),
 		TenantedDeploymentParticipation: types.StringValue(string(project.TenantedDeploymentMode)),
 		VariableSetID:                   types.StringValue(project.VariableSetID),
-		ReleaseNotesTemplate:            types.StringValue(project.ReleaseNotesTemplate),
+		ReleaseNotesTemplate:            util.StringOrNull(project.ReleaseNotesTemplate),
 		Slug:                            types.StringValue(project.Slug),
 		ClonedFromProjectID:             util.StringOrNull(project.ClonedFromProjectID),
 	}
