@@ -26,8 +26,8 @@ func resourceChannel() *schema.Resource {
 }
 
 func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	channel := expandChannel(d)
 
@@ -50,8 +50,8 @@ func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceChannelDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	tflog.Info(ctx, fmt.Sprintf("deleting channel (%s)", d.Id()))
 
@@ -84,8 +84,8 @@ func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	tflog.Info(ctx, fmt.Sprintf("updating channel (%s)", d.Id()))
 

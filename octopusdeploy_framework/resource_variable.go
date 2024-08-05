@@ -55,8 +55,8 @@ func (r *variableTypeResource) Configure(ctx context.Context, req resource.Confi
 }
 
 func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	var data schemas.VariableTypeResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -106,8 +106,8 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 }
 
 func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	var data schemas.VariableTypeResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -135,8 +135,8 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 }
 
 func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	var data, state schemas.VariableTypeResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -191,8 +191,8 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 }
 
 func (r *variableTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	var data schemas.VariableTypeResourceModel
 

@@ -80,8 +80,8 @@ func (t *tenantProjectResource) Configure(_ context.Context, req resource.Config
 }
 
 func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	var plan TenantProjectModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -141,8 +141,8 @@ func (t *tenantProjectResource) Read(ctx context.Context, req resource.ReadReque
 }
 
 func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 
 	// read plan and state
 	var plan, state TenantProjectModel
@@ -186,8 +186,8 @@ func (t *tenantProjectResource) getSpaceId(plan TenantProjectModel) string {
 }
 
 func (t *tenantProjectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	internal.Mutex.Lock()
-	defer internal.Mutex.Unlock()
+	internal.MutexStore.Lock("global")
+	defer internal.MutexStore.Unlock("global")
 	var data TenantProjectModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
