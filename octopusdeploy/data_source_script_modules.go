@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
@@ -15,7 +16,7 @@ func dataSourceScriptModules() *schema.Resource {
 	return &schema.Resource{
 		Description: "Provides information about existing script modules.",
 		ReadContext: dataSourceScriptModulesRead,
-		Schema:      getScriptModuleDataSchema(),
+		Schema:      schemas.getScriptModuleDataSchema(),
 	}
 }
 
@@ -38,7 +39,7 @@ func dataSourceScriptModulesRead(ctx context.Context, d *schema.ResourceData, m 
 
 	flattenedScriptModules := []interface{}{}
 	for _, scriptModule := range existingScriptModules.Items {
-		flattenedScriptModules = append(flattenedScriptModules, flattenScriptModule(scriptModule))
+		flattenedScriptModules = append(flattenedScriptModules, schemas.flattenScriptModule(scriptModule))
 	}
 
 	d.Set("script_modules", flattenedScriptModules)
