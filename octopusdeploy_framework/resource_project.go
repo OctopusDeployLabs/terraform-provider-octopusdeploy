@@ -42,7 +42,7 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	project := expandProject(ctx, plan)
-	// Password doesn't return from API so this is work around
+	// PersistenceSettings.Password doesn't return from API so this is work around
 	persistenceSettings := project.PersistenceSettings
 	createdProject, err := projects.Add(r.Client, project)
 	if err != nil {
@@ -87,6 +87,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 	stateProject := expandProject(ctx, state)
+	// PersistenceSettings.Password doesn't return from API so this is work around
 	persistenceSettings := stateProject.PersistenceSettings
 
 	project, err := projects.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
@@ -129,6 +130,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 	updatedProject := expandProject(ctx, plan)
 	updatedProject.ID = existingProject.ID
 	updatedProject.Links = existingProject.Links
+	// PersistenceSettings.Password doesn't return from API so this is work around
 	persistenceSettings := updatedProject.PersistenceSettings
 
 	if updatedProject.PersistenceSettings != nil && updatedProject.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {

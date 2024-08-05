@@ -3,6 +3,14 @@ package util
 import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type AttributeBuilder[T any] struct {
@@ -129,6 +137,35 @@ func (b *AttributeBuilder[T]) Description(desc string) *AttributeBuilder[T] {
 		a.Description = desc
 	case *schema.ObjectAttribute:
 		a.Description = desc
+	}
+	return b
+}
+
+func (b *AttributeBuilder[T]) Default(defaultValue interface{}) *AttributeBuilder[T] {
+	switch a := any(&b.attr).(type) {
+	case *schema.StringAttribute:
+		if strDefault, ok := defaultValue.(string); ok {
+			a.Default = stringdefault.StaticString(strDefault)
+		}
+	case *schema.BoolAttribute:
+		if boolDefault, ok := defaultValue.(bool); ok {
+			a.Default = booldefault.StaticBool(boolDefault)
+		}
+	case *schema.Int64Attribute:
+		if intDefault, ok := defaultValue.(int64); ok {
+			a.Default = int64default.StaticInt64(intDefault)
+		}
+	case *schema.NumberAttribute:
+	case *schema.Float64Attribute:
+		if floatDefault, ok := defaultValue.(float64); ok {
+			a.Default = float64default.StaticFloat64(floatDefault)
+		}
+	case *schema.ListAttribute:
+		a.Default = listdefault.StaticValue(types.List{})
+	case *schema.SetAttribute:
+		a.Default = setdefault.StaticValue(types.Set{})
+	case *schema.MapAttribute:
+		a.Default = mapdefault.StaticValue(types.Map{})
 	}
 	return b
 }

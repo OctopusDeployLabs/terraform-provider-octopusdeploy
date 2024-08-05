@@ -134,22 +134,14 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 			project_group_id = octopusdeploy_project_group.%s.id
 
 			template {
-				default_value = "default-value"
-				help_text     = "help-test"
-				label         = "label"
 				name          = "2"
-
 				display_settings = {
 					"Octopus.ControlType": "SingleLineText"
 				}
 			}
 
 			template {
-				default_value = "default-value"
-				help_text     = "help-test"
-				label         = "label"
 				name          = "1"
-
 				display_settings = {
 					"Octopus.ControlType": "SingleLineText"
 				}

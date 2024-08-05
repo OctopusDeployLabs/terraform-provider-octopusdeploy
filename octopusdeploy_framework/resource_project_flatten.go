@@ -236,7 +236,7 @@ func flattenServiceNowExtensionSettings(settings *projects.ServiceNowExtensionSe
 		"connection_id":                       types.StringValue(settings.ConnectionID()),
 		"is_enabled":                          types.BoolValue(settings.IsChangeControlled()),
 		"is_state_automatically_transitioned": types.BoolValue(settings.IsStateAutomaticallyTransitioned),
-		"standard_change_template_name":       types.StringValue(settings.StandardChangeTemplateName),
+		"standard_change_template_name":       util.StringOrNull(settings.StandardChangeTemplateName),
 	})
 
 	return types.ListValueMust(types.ObjectType{AttrTypes: getServiceNowExtensionSettingsAttrTypes()}, []attr.Value{obj})
@@ -249,22 +249,13 @@ func flattenTemplates(templates []actiontemplates.ActionTemplateParameter) types
 
 	templateList := make([]attr.Value, 0, len(templates))
 	for _, template := range templates {
-		helpText := types.StringNull()
-		if template.HelpText != "" {
-			helpText = types.StringValue(template.HelpText)
-		}
-
-		defaultValue := types.StringNull()
-		if template.DefaultValue != nil && template.DefaultValue.Value != "" {
-			defaultValue = types.StringValue(template.DefaultValue.Value)
-		}
 
 		obj := types.ObjectValueMust(getTemplateAttrTypes(), map[string]attr.Value{
 			"id":            types.StringValue(template.Resource.ID),
 			"name":          types.StringValue(template.Name),
-			"label":         types.StringValue(template.Label),
-			"help_text":     helpText,
-			"default_value": defaultValue,
+			"label":         util.StringOrNull(template.Label),
+			"help_text":     util.StringOrNull(template.HelpText),
+			"default_value": util.StringOrNull(template.DefaultValue.Value),
 			"display_settings": types.MapValueMust(
 				types.StringType,
 				convertMapStringToMapAttrValue(template.DisplaySettings),
