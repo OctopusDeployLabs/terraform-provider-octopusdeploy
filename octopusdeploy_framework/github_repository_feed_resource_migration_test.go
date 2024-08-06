@@ -2,13 +2,14 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func TestGitHubFeed_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
@@ -90,7 +91,7 @@ func testGitHubFeedUpdated(t *testing.T) resource.TestCheckFunc {
 
 		githubRepositoryFeed := feed.(*feeds.GitHubRepositoryFeed)
 
-		assert.Equal(t, "Feeds-1001", githubRepositoryFeed.ID, "Feed ID did not match expected value")
+		assert.Regexp(t, "^Feeds\\-\\d+$", githubRepositoryFeed.GetID(), "Feed ID did not match expected value")
 		assert.Equal(t, "Updated Test GitHub Feed", githubRepositoryFeed.Name, "Feed name did not match expected value")
 		assert.Equal(t, "username_Updated", githubRepositoryFeed.Username, "Feed username did not match expected value")
 		assert.Equal(t, true, githubRepositoryFeed.Password.HasValue, "Feed password should be set")

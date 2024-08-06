@@ -2,11 +2,12 @@ package octopusdeploy
 
 import (
 	"fmt"
+	"path/filepath"
+	"testing"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"path/filepath"
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -67,12 +68,13 @@ func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, project
 	resource "octopusdeploy_tenant" "%s" {
 		description = "%s"
 		name        = "%s"
+	}
 
-		project_environment {
-		  project_id   = "${octopusdeploy_project.%s.id}"
-		  environments = ["${octopusdeploy_environment.%s.id}"]
-		}
-	}`, localName, description, name, projectLocalName, environmentLocalName)
+	resource "octopusdeploy_tenant_project" "project_environment" {
+		tenant_id = octopusdeploy_tenant.%s.id
+		project_id   = "${octopusdeploy_project.%s.id}"
+		environment_ids = ["${octopusdeploy_environment.%s.id}"]
+	}`, localName, description, name, localName, projectLocalName, environmentLocalName)
 }
 
 func testTenantExists(prefix string) resource.TestCheckFunc {
@@ -83,7 +85,7 @@ func testTenantExists(prefix string) resource.TestCheckFunc {
 			return fmt.Errorf("Not found: %s", prefix)
 		}
 
-		if _, err := octoClient.Tenants.GetByID(rs.Primary.ID); err != nil {
+		if _, err := tenants.GetByID(octoClient, octoClient.GetSpaceID(), rs.Primary.ID); err != nil {
 			return err
 		}
 

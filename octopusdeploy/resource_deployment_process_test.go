@@ -2,12 +2,14 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"strings"
 	"testing"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
@@ -63,6 +65,20 @@ import (
 // 		}`, options.LocalName, options.Project.LocalName, options.StepName, options.ActionType, options.ActionName, options.PackageName, options.PackageID)
 // }
 
+func testAccProjectCheckDestroy(s *terraform.State) error {
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_project" {
+			continue
+		}
+
+		if project, err := octoClient.Projects.GetByID(rs.Primary.ID); err == nil {
+			return fmt.Errorf("project (%s) still exists", project.GetID())
+		}
+	}
+
+	return nil
+}
+
 func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
@@ -90,7 +106,7 @@ func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 }
 
 func TestAccOctopusDeployDeploymentProcessWithActionTemplate(t *testing.T) {
-	SkipCI(t, "Unsupported block type on `template` block")
+	internalTest.SkipCI(t, "Unsupported block type on `template` block")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
 

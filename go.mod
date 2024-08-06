@@ -3,7 +3,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.21
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.43.0
+	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.49.1
 	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240725054341-2848f54d101e
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -31,6 +31,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Microsoft/hcsshim v0.12.4 // indirect
+	github.com/OctopusDeploy/go-octodiff v1.0.0 // indirect
 	github.com/ProtonMail/go-crypto v1.1.0-alpha.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect

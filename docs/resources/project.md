@@ -67,43 +67,53 @@ resource "octopusdeploy_project" "example" {
 ### Required
 
 - `lifecycle_id` (String) The lifecycle ID associated with this project.
-- `name` (String) The name of the project in Octopus Deploy. This name must be unique.
+- `name` (String) The name of this resource.
 - `project_group_id` (String) The project group ID associated with this project.
 
 ### Optional
 
 - `allow_deployments_to_no_targets` (Boolean, Deprecated)
 - `auto_create_release` (Boolean)
-- `auto_deploy_release_overrides` (List of String)
-- `cloned_from_project_id` (String)
-- `connectivity_policy` (Block List, Max: 1) (see [below for nested schema](#nestedblock--connectivity_policy))
+- `auto_deploy_release_overrides` (Block List) (see [below for nested schema](#nestedblock--auto_deploy_release_overrides))
+- `cloned_from_project_id` (String) The ID of the project this project was cloned from.
+- `connectivity_policy` (Block List) (see [below for nested schema](#nestedblock--connectivity_policy))
 - `default_guided_failure_mode` (String)
 - `default_to_skip_if_already_installed` (Boolean)
 - `deployment_changes_template` (String)
 - `description` (String) The description of this project.
 - `discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
-- `git_anonymous_persistence_settings` (Block List, Max: 1) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_anonymous_persistence_settings))
-- `git_library_persistence_settings` (Block List, Max: 1) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_library_persistence_settings))
-- `git_username_password_persistence_settings` (Block List, Max: 1) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_username_password_persistence_settings))
+- `git_anonymous_persistence_settings` (Block List) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_anonymous_persistence_settings))
+- `git_library_persistence_settings` (Block List) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_library_persistence_settings))
+- `git_username_password_persistence_settings` (Block List) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_username_password_persistence_settings))
 - `id` (String) The unique ID for this resource.
-- `included_library_variable_sets` (List of String)
+- `included_library_variable_sets` (List of String) The list of included library variable set IDs.
 - `is_disabled` (Boolean)
 - `is_discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
 - `is_version_controlled` (Boolean)
-- `jira_service_management_extension_settings` (Block List, Max: 1) Provides extension settings for the Jira Service Management (JSM) integration for this project. (see [below for nested schema](#nestedblock--jira_service_management_extension_settings))
-- `release_creation_strategy` (Block List, Max: 1) (see [below for nested schema](#nestedblock--release_creation_strategy))
+- `jira_service_management_extension_settings` (Block List) Provides extension settings for the Jira Service Management (JSM) integration for this project. (see [below for nested schema](#nestedblock--jira_service_management_extension_settings))
+- `release_creation_strategy` (Block List) (see [below for nested schema](#nestedblock--release_creation_strategy))
 - `release_notes_template` (String)
-- `servicenow_extension_settings` (Block List, Max: 1) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedblock--servicenow_extension_settings))
+- `servicenow_extension_settings` (Block List) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedblock--servicenow_extension_settings))
 - `slug` (String) A human-readable, unique identifier, used to identify a project.
 - `space_id` (String) The space ID associated with this project.
 - `template` (Block List) (see [below for nested schema](#nestedblock--template))
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `versioning_strategy` (Block Set) (see [below for nested schema](#nestedblock--versioning_strategy))
+- `versioning_strategy` (Block List) (see [below for nested schema](#nestedblock--versioning_strategy))
 
 ### Read-Only
 
 - `deployment_process_id` (String)
 - `variable_set_id` (String)
+
+<a id="nestedblock--auto_deploy_release_overrides"></a>
+### Nested Schema for `auto_deploy_release_overrides`
+
+Optional:
+
+- `environment_id` (String)
+- `release_id` (String)
+- `tenant_id` (String)
+
 
 <a id="nestedblock--connectivity_policy"></a>
 ### Nested Schema for `connectivity_policy`
@@ -150,7 +160,7 @@ Optional:
 
 Required:
 
-- `password` (String, Sensitive) The password for the Git credential.
+- `password` (String, Sensitive) The password for the Git credential
 - `url` (String) The URL associated with these version control settings.
 - `username` (String) The username for the Git credential.
 
@@ -177,7 +187,7 @@ Required:
 Optional:
 
 - `channel_id` (String)
-- `release_creation_package` (Block List, Max: 1) (see [below for nested schema](#nestedblock--release_creation_strategy--release_creation_package))
+- `release_creation_package` (Block List) (see [below for nested schema](#nestedblock--release_creation_strategy--release_creation_package))
 - `release_creation_package_step_id` (String)
 
 <a id="nestedblock--release_creation_strategy--release_creation_package"></a>
@@ -209,15 +219,15 @@ Optional:
 
 Required:
 
-- `name` (String) The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`.
+- `name` (String) The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods.
 
 Optional:
 
 - `default_value` (String) A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.
 - `display_settings` (Map of String) The display settings for the parameter.
 - `help_text` (String) The help presented alongside the parameter input.
-- `id` (String) The unique ID for this resource.
-- `label` (String) The label shown beside the parameter when presented in the deployment process. Example: `Server name`.
+- `id` (String) The ID of the template parameter.
+- `label` (String) The label shown beside the parameter when presented in the deployment process.
 
 
 <a id="nestedblock--versioning_strategy"></a>
@@ -225,7 +235,7 @@ Optional:
 
 Optional:
 
-- `donor_package` (Block List, Max: 1) (see [below for nested schema](#nestedblock--versioning_strategy--donor_package))
+- `donor_package` (Block List) (see [below for nested schema](#nestedblock--versioning_strategy--donor_package))
 - `donor_package_step_id` (String)
 - `template` (String)
 

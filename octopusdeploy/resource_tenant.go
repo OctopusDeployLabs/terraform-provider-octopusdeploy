@@ -6,6 +6,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,8 +25,8 @@ func resourceTenant() *schema.Resource {
 }
 
 func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 
 	tenant := expandTenant(d)
 
@@ -48,8 +49,8 @@ func resourceTenantCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceTenantDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 
 	log.Printf("[INFO] deleting tenant (%s)", d.Id())
 
@@ -81,13 +82,18 @@ func resourceTenantRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceTenantUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 
 	log.Printf("[INFO] updating tenant (%s)", d.Id())
 
-	tenant := expandTenant(d)
 	client := m.(*client.Client)
+	tenantFromApi, err := tenants.GetByID(client, d.Get("space_id").(string), d.Id())
+
+	tenant := expandTenant(d)
+
+	// the project environments are not managed here, so we need to maintain the collection when updating
+	tenant.ProjectEnvironments = tenantFromApi.ProjectEnvironments
 	updatedTenant, err := tenants.Update(client, tenant)
 	if err != nil {
 		return diag.FromErr(err)

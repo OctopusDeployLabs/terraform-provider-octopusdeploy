@@ -3,14 +3,15 @@ package octopusdeploy_framework
 import (
 	"context"
 	"flag"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"github.com/testcontainers/testcontainers-go"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"github.com/testcontainers/testcontainers-go"
 )
 
 var createSharedContainer = flag.Bool("createSharedContainer", false, "Set to true to run integration tests in containers")
@@ -28,6 +29,10 @@ func TestMain(m *testing.M) {
 
 		testFramework := test.OctopusContainerTest{}
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
+		if err != nil {
+			log.Printf("Failed to arrange containers: (%s)", err.Error())
+		}
+
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
 
@@ -53,6 +58,10 @@ func TestMain(m *testing.M) {
 			if err != nil {
 				log.Printf("Failed to create client: (%s)", err.Error())
 				panic(m)
+			}
+			octoContainer = &test.OctopusContainer{
+				Container: nil,
+				URI:       url,
 			}
 		}
 		code := m.Run()
