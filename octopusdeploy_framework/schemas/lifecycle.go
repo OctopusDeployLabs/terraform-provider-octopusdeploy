@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -14,10 +15,10 @@ func GetResourceLifecycleSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages lifecycles in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":          util.ResourceString().Optional().Computed().Description("The unique ID for this resource.").Build(),
-			"space_id":    util.ResourceString().Optional().Description("The space ID associated with this resource.").Build(),
+			"id":          util.ResourceString().Optional().Computed().Description("The unique ID for this resource.").PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"space_id":    util.ResourceString().Optional().Computed().Description("The space ID associated with this resource.").PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
 			"name":        util.ResourceString().Required().Description("The name of this resource.").Build(),
-			"description": util.ResourceString().Optional().Description("The description of this lifecycle.").Build(),
+			"description": util.ResourceString().Optional().Computed().Default("").Description("The description of this lifecycle.").Build(),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			"phase":                     getResourcePhaseBlockSchema(),

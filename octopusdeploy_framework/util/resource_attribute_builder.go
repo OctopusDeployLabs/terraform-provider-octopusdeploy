@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -217,6 +218,51 @@ func (b *AttributeBuilder[T]) Build() T {
 	return b.attr
 }
 
+func (b *AttributeBuilder[T]) PlanModifiers(modifiers ...any) *AttributeBuilder[T] {
+	switch a := any(&b.attr).(type) {
+	case *schema.StringAttribute:
+		if stringModifiers, ok := convertToTypedSlice[planmodifier.String](modifiers); ok {
+			a.PlanModifiers = append(a.PlanModifiers, stringModifiers...)
+		}
+	case *schema.BoolAttribute:
+		if boolModifiers, ok := convertToTypedSlice[planmodifier.Bool](modifiers); ok {
+			a.PlanModifiers = append(a.PlanModifiers, boolModifiers...)
+		}
+	case *schema.Int64Attribute:
+		if int64Modifiers, ok := convertToTypedSlice[planmodifier.Int64](modifiers); ok {
+			a.PlanModifiers = append(a.PlanModifiers, int64Modifiers...)
+		}
+	case *schema.Float64Attribute:
+		if float64Modifiers, ok := convertToTypedSlice[planmodifier.Float64](modifiers); ok {
+			a.PlanModifiers = append(a.PlanModifiers, float64Modifiers...)
+		}
+	case *schema.ListAttribute:
+		if listModifiers, ok := convertToTypedSlice[planmodifier.List](modifiers); ok {
+			a.PlanModifiers = append(a.PlanModifiers, listModifiers...)
+		}
+	case *schema.SetAttribute:
+		if setModifiers, ok := convertToTypedSlice[planmodifier.Set](modifiers); ok {
+			a.PlanModifiers = append(a.PlanModifiers, setModifiers...)
+		}
+	case *schema.MapAttribute:
+		if mapModifiers, ok := convertToTypedSlice[planmodifier.Map](modifiers); ok {
+			a.PlanModifiers = append(a.PlanModifiers, mapModifiers...)
+		}
+	}
+	return b
+}
+
+func convertToTypedSlice[T any](slice []any) ([]T, bool) {
+	typedSlice := make([]T, 0, len(slice))
+	for _, item := range slice {
+		if typed, ok := item.(T); ok {
+			typedSlice = append(typedSlice, typed)
+		} else {
+			return nil, false
+		}
+	}
+	return typedSlice, true
+}
 func ResourceString() *AttributeBuilder[schema.StringAttribute] {
 	return NewAttributeBuilder[schema.StringAttribute]()
 }
