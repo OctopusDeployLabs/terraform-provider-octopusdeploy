@@ -91,7 +91,7 @@ func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing lifecycles.",
 		Attributes: map[string]datasourceSchema.Attribute{
-			"id":           util.DataSourceString().Optional().Description("The ID of the lifecycle.").Build(),
+			"id":           util.DataSourceString().Computed().Description("The ID of the lifecycle.").Build(),
 			"space_id":     util.DataSourceString().Optional().Description("The space ID associated with this lifecycle.").Build(),
 			"ids":          util.DataSourceList(types.StringType).Optional().Description("A list of lifecycle IDs to filter by.").Build(),
 			"partial_name": util.DataSourceString().Optional().Description("A partial name to filter lifecycles by.").Build(),

@@ -26,7 +26,6 @@ data "octopusdeploy_lifecycles" "example" {
 
 ### Optional
 
-- `id` (String) The ID of the lifecycle.
 - `ids` (List of String) A list of lifecycle IDs to filter by.
 - `partial_name` (String) A partial name to filter lifecycles by.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
@@ -35,6 +34,7 @@ data "octopusdeploy_lifecycles" "example" {
 
 ### Read-Only
 
+- `id` (String) The ID of the lifecycle.
 - `lifecycles` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles))
 
 <a id="nestedatt--lifecycles"></a>
