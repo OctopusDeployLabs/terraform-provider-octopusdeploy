@@ -6,11 +6,13 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -166,6 +168,8 @@ func NewActionResourceSchemaBuilder() *ActionResourceSchemaBuilder {
 	builder.attributes["notes"] = resourceSchema.StringAttribute{
 		Description: "The notes associated with this deployment action.",
 		Optional:    true,
+		Computed:    true,
+		Default:     stringdefault.StaticString(""),
 	}
 
 	builder.WithPackages()
@@ -176,6 +180,9 @@ func NewActionResourceSchemaBuilder() *ActionResourceSchemaBuilder {
 		Optional:    true,
 		Default:     int64default.StaticInt64(-1),
 		Computed:    true,
+		PlanModifiers: []planmodifier.Int64{
+			int64planmodifier.UseStateForUnknown(),
+		},
 	}
 
 	builder.attributes["slug"] = GetSlugResourceSchema("action")
@@ -216,6 +223,8 @@ func (b *ActionResourceSchemaBuilder) WithWorkerPool() *ActionResourceSchemaBuil
 	b.attributes["worker_pool_id"] = resourceSchema.StringAttribute{
 		Description: "The worker pool associated with this deployment action.",
 		Optional:    true,
+		Computed:    true,
+		Default:     stringdefault.StaticString(""),
 	}
 
 	return b
@@ -225,6 +234,8 @@ func (b *ActionResourceSchemaBuilder) WithWorkerPoolVariable() *ActionResourceSc
 	b.attributes["worker_pool_variable"] = resourceSchema.StringAttribute{
 		Description: "The worker pool variable associated with this deployment action.",
 		Optional:    true,
+		Computed:    true,
+		Default:     stringdefault.StaticString(""),
 	}
 
 	return b
@@ -253,10 +264,14 @@ func (b *ActionResourceSchemaBuilder) WithScriptFromPackage() *ActionResourceSch
 	b.attributes["script_file_name"] = resourceSchema.StringAttribute{
 		Description: "The script file name in the package",
 		Optional:    true,
+		Computed:    true,
+		Default:     stringdefault.StaticString(""),
 	}
 	b.attributes["script_parameters"] = resourceSchema.StringAttribute{
 		Description: "Parameters expected by the script. Use platform specific calling convention. e.g. -Path #{VariableStoringPath} for PowerShell or -- #{VariableStoringPath} for ScriptCS",
 		Optional:    true,
+		Computed:    true,
+		Default:     stringdefault.StaticString(""),
 	}
 	b.attributes["script_source"] = resourceSchema.StringAttribute{
 		Computed: true,
@@ -269,11 +284,14 @@ func (b *ActionResourceSchemaBuilder) WithScriptFromPackage() *ActionResourceSch
 func (b *ActionResourceSchemaBuilder) WithScript() *ActionResourceSchemaBuilder {
 	b.attributes["script_body"] = resourceSchema.StringAttribute{
 		Optional: true,
+		Computed: true,
+		Default:  stringdefault.StaticString(""),
 	}
 
 	b.attributes["script_syntax"] = resourceSchema.StringAttribute{
 		Computed: true,
 		Optional: true,
+		Default:  stringdefault.StaticString(""),
 	}
 
 	return b
@@ -283,6 +301,8 @@ func (b *ActionResourceSchemaBuilder) WithVariableSubstitutionInFiles() *ActionR
 	b.attributes["variable_substitution_in_files"] = resourceSchema.StringAttribute{
 		Description: "A newline-separated list of file names to transform, relative to the package contents. Extended wildcard syntax is supported.",
 		Optional:    true,
+		Computed:    true,
+		Default:     stringdefault.StaticString(""),
 	}
 
 	return b
@@ -304,9 +324,9 @@ func (b *ActionResourceSchemaBuilder) WithProperties(deprecated string) *ActionR
 }
 
 func (b *ActionResourceSchemaBuilder) WithGitDependency() *ActionResourceSchemaBuilder {
-	b.blocks["git_dependency"] = resourceSchema.ListNestedBlock{
-		Validators: []validator.List{
-			listvalidator.SizeAtMost(1),
+	b.blocks["git_dependency"] = resourceSchema.SetNestedBlock{
+		Validators: []validator.Set{
+			setvalidator.SizeAtMost(1),
 		},
 		Description: "Configuration for resource sourcing from a git repository.",
 		NestedObject: resourceSchema.NestedBlockObject{
@@ -349,16 +369,14 @@ func (b *ActionResourceSchemaBuilder) WithGitDependency() *ActionResourceSchemaB
 }
 
 func (b *ActionResourceSchemaBuilder) WithPrimaryPackage() *ActionResourceSchemaBuilder {
-	b.blocks["primary_package"] = getPackageSchema(nil)
-
+	packageSchema := getPackageSchema(nil)
+	packageSchema.Validators = append(packageSchema.Validators, listvalidator.SizeAtMost(1))
+	b.blocks["primary_package"] = packageSchema
 	return b
 }
 
 func (b *ActionResourceSchemaBuilder) Build() resourceSchema.ListNestedBlock {
 	return resourceSchema.ListNestedBlock{
-		Validators: []validator.List{
-			listvalidator.SizeAtMost(1),
-		},
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: b.attributes,
 			Blocks:     b.blocks,

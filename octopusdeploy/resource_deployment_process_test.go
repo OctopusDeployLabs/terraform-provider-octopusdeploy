@@ -190,8 +190,8 @@ func testAccDeploymentProcessBasic(localName string) string {
 				window_size = "5"
 
 				run_script_action {
-					channels = ["Channels-1"]
-					environments = ["Environments-1"]
+					//channels = ["Channels-1"]
+					//environments = ["Environments-1"]
 					//excluded_environments = ["Environments-2"]
 					is_disabled = false
 					is_required = true
@@ -236,16 +236,16 @@ func testAccDeploymentProcessBasic(localName string) string {
 			}
 
  			//step {
-			//  name = "Step2"
-			//  start_trigger = "StartWithPrevious"
-			//  target_roles = ["WebServer"]
+			// name = "Step2"
+			// start_trigger = "StartWithPrevious"
+			// target_roles = ["WebServer"]
 			//
-			//  run_script_action {
+			// run_script_action {
 			//	  name = "Step2"
  			//	  sort_order = 1
 			//	  run_on_server = true
 			//	  script_body = "Write-Host 'hi'"
-			//  }
+			// }
 			//}
 		}`, localName, projectLocalName)
 }

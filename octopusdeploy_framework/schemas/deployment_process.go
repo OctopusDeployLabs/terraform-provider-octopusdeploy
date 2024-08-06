@@ -3,7 +3,9 @@ package schemas
 import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -45,11 +47,18 @@ type DeploymentProcessResourceModel struct {
 func GetDeploymentProcessResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":                            GetIdResourceSchema(),
-			"space_id":                      GetSpaceIdResourceSchema(DeploymentProcessDescription),
-			DeploymentProcessBranch:         GetBranchResourceSchema(DeploymentProcessDescription),
-			DeploymentProcessLastSnapshotId: resourceSchema.StringAttribute{Optional: true},
-			DeploymentProcessProjectId:      GetProjectIdResourceSchema(DeploymentProcessDescription),
+			"id":                    GetIdResourceSchema(),
+			"space_id":              GetSpaceIdResourceSchema(DeploymentProcessDescription),
+			DeploymentProcessBranch: GetBranchResourceSchema(DeploymentProcessDescription),
+			DeploymentProcessLastSnapshotId: resourceSchema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			DeploymentProcessProjectId: GetProjectIdResourceSchema(DeploymentProcessDescription),
 			DeploymentProcessVersion: resourceSchema.StringAttribute{
 				Computed:    true,
 				Optional:    true,

@@ -2,6 +2,8 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -187,9 +189,11 @@ func GetProjectIdResourceSchema(resourceDescription string) resourceSchema.Attri
 
 func getConditionExpressionResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
-		Computed:    true,
-		Description: "The expression to evaluate to determine whether to run this step when 'condition' is 'Variable'",
-		Optional:    true,
+		Computed:      true,
+		Description:   "The expression to evaluate to determine whether to run this step when 'condition' is 'Variable'",
+		Optional:      true,
+		Default:       stringdefault.StaticString(""),
+		PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 	}
 }
 
@@ -230,17 +234,22 @@ func getStartTriggerResourceSchema() resourceSchema.Attribute {
 
 func getTargetRolesResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.ListAttribute{
-		ElementType: types.StringType,
-		Computed:    true,
-		Description: "The roles that this step run against, or runs on behalf of",
-		Optional:    true,
+		ElementType:   types.StringType,
+		Computed:      true,
+		Description:   "The roles that this step run against, or runs on behalf of",
+		Optional:      true,
+		Default:       listdefault.StaticValue(types.ListNull(types.StringType)),
+		PlanModifiers: []planmodifier.List{listplanmodifier.UseStateForUnknown()},
 	}
 }
 
 func getWindowSizeResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
-		Description: "The maximum number of targets to deploy to simultaneously",
-		Optional:    true,
+		Description:   "The maximum number of targets to deploy to simultaneously",
+		Optional:      true,
+		Computed:      true,
+		Default:       stringdefault.StaticString(""),
+		PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 	}
 }
 

@@ -29,7 +29,7 @@ func MapDeploymentProcessToState(ctx context.Context, deploymentProcess *deploym
 	return mapStepsToState(ctx, state, deploymentProcess)
 }
 
-func MapSchemaToDeploymentProcess(plan schemas.DeploymentProcessResourceModel, deploymentProcess *deployments.DeploymentProcess) diag.Diagnostics {
+func MapStateToDeploymentProcess(plan schemas.DeploymentProcessResourceModel, deploymentProcess *deployments.DeploymentProcess) diag.Diagnostics {
 	// this should not map the version number from the schema
 
 	deploymentProcess.Branch = plan.Branch.ValueString()
@@ -61,18 +61,21 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 			"start_trigger":       types.StringValue(string(deploymentStep.StartTrigger)),
 		}
 
+		newStep[schemas.DeploymentProcessWindowSize] = types.StringValue("")
+		newStep[schemas.DeploymentProcessConditionExpression] = types.StringValue("")
+		newStep[schemas.DeploymentProcessTargetRoles] = types.ListNull(types.StringType)
 		for propertyName, propertyValue := range deploymentStep.Properties {
 			switch propertyName {
 			case "Octopus.Action.TargetRoles":
-				newStep["target_roles"] = util.FlattenStringList(strings.Split(propertyValue.Value, ","))
+				newStep[schemas.DeploymentProcessTargetRoles] = util.FlattenStringList(strings.Split(propertyValue.Value, ","))
 			case "Octopus.Action.MaxParallelism":
-				newStep["window_size"] = types.StringValue(propertyValue.Value)
+				newStep[schemas.DeploymentProcessWindowSize] = types.StringValue(propertyValue.Value)
 			case "Octopus.Step.ConditionVariableExpression":
-				newStep["condition_expression"] = types.StringValue(propertyValue.Value)
+				newStep[schemas.DeploymentProcessConditionExpression] = types.StringValue(propertyValue.Value)
 			}
 		}
 
-		var newActions = make(map[string][]attr.Value)
+		newActions := make(map[string][]attr.Value)
 		for i, a := range deploymentStep.Actions {
 			newAction := map[string]attr.Value{
 				"sort_order": types.Int64Value(int64(i)),
@@ -105,17 +108,27 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 				break
 			}
 
-			newActions[srcAction.ActionType] = append(newActions[srcAction.ActionType], types.ObjectValueMust(getActionTypeAttrs(srcAction.ActionType), newAction))
+			terraformActionKeyName := getActionTypeTerraformKeyName(srcAction.ActionType)
+			if _, ok := newActions[terraformActionKeyName]; !ok {
+				newActions[terraformActionKeyName] = make([]attr.Value, 0)
+			}
+			newActions[terraformActionKeyName] = append(newActions[terraformActionKeyName], types.ObjectValueMust(getActionTypeAttrs(srcAction.ActionType), newAction))
+
 		}
 
-		for actionType, actionsByType := range newActions {
-			newStep[actionType] = types.ListValueMust(types.ObjectType{AttrTypes: getActionTypeAttrs(actionType)}, actionsByType)
-			if diags.HasError() {
-				return diags
+		for _, actionType := range []string{schemas.DeploymentProcessAction, schemas.DeploymentProcessRunScriptAction} {
+			if len(newActions[actionType]) > 0 {
+				newStep[actionType] = types.ListValueMust(types.ObjectType{AttrTypes: getActionTypeAttrs(actionType)}, newActions[actionType])
+			} else {
+				newStep[actionType] = types.ListNull(types.ObjectType{AttrTypes: getActionTypeAttrs(actionType)})
 			}
 		}
 
-		steps = append(steps, types.ObjectValueMust(getStepTypeAttrs(), newStep))
+		mappedStep, diags := types.ObjectValue(getStepTypeAttrs(), newStep)
+		if diags.HasError() {
+			return diags
+		}
+		steps = append(steps, mappedStep)
 	}
 
 	updatedSteps, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: getStepTypeAttrs()}, steps)
@@ -145,6 +158,15 @@ func getStepTypeAttrs() map[string]attr.Type {
 	return attrs
 }
 
+func getActionTypeTerraformKeyName(actionTypeName string) string {
+	switch actionTypeName {
+	case "Octopus.Script":
+		return schemas.DeploymentProcessRunScriptAction
+	default:
+		return schemas.DeploymentProcessAction
+	}
+}
+
 func getActionTypeAttrs(actionType string) map[string]attr.Type {
 	attrs := map[string]attr.Type{
 		"can_be_used_for_project_versioning": types.BoolType,
@@ -161,21 +183,32 @@ func getActionTypeAttrs(actionType string) map[string]attr.Type {
 		"is_required":                        types.BoolType,
 		"name":                               types.StringType,
 		"notes":                              types.StringType,
-		"primary_package":                    types.ObjectType{AttrTypes: getPackageReferenceAttrTypes(true)},
-		"package":                            types.ObjectType{AttrTypes: getPackageReferenceAttrTypes(false)},
+		"primary_package":                    types.ListType{ElemType: types.ObjectType{AttrTypes: getPackageReferenceAttrTypes(true)}},
+		"package":                            types.ListType{ElemType: types.ObjectType{AttrTypes: getPackageReferenceAttrTypes(false)}},
 		"properties":                         types.MapType{ElemType: types.StringType},
 		"sort_order":                         types.Int64Type,
 		"slug":                               types.StringType,
 		"tenant_tags":                        types.ListType{ElemType: types.StringType},
 	}
 	switch actionType {
+	case schemas.DeploymentProcessRunScriptAction:
+		attrs["run_on_server"] = types.BoolType
+		attrs["script_file_name"] = types.StringType
+		attrs["script_parameters"] = types.StringType
+		attrs["script_source"] = types.StringType
+		attrs["script_file_name"] = types.StringType
+		attrs["script_body"] = types.StringType
+		attrs["script_syntax"] = types.StringType
+		attrs["worker_pool_id"] = types.StringType
+		attrs["worker_pool_variable"] = types.StringType
+		attrs["variable_substitution_in_files"] = types.StringType
+		break
 	case "Octopus.Script":
 		attrs["run_on_server"] = types.BoolType
 		attrs["script_file_name"] = types.StringType
 		attrs["script_parameters"] = types.StringType
 		attrs["script_source"] = types.StringType
 		attrs["script_file_name"] = types.StringType
-		attrs["script_parameters"] = types.StringType
 		attrs["script_body"] = types.StringType
 		attrs["script_syntax"] = types.StringType
 		attrs["worker_pool_id"] = types.StringType
@@ -187,34 +220,25 @@ func getActionTypeAttrs(actionType string) map[string]attr.Type {
 		attrs["run_on_server"] = types.BoolType
 		attrs["worker_pool_id"] = types.StringType
 		attrs["worker_pool_variable"] = types.StringType
-		for key, attrType := range getGitDependencyAttrTypes() {
-			attrs[key] = attrType
-		}
 	}
 
 	return attrs
 }
 
 func mapRunScriptActionToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
-	diag := mapDeploymentActionToState(ctx, action, newAction)
+	diag := mapBaseDeploymentActionToState(ctx, action, newAction)
 	if diag.HasError() {
 		return diag
 	}
 
-	newAction["action_type"] = types.StringValue("run_script_action")
-
-	//if len(action.WorkerPool) > 0 {
 	newAction["worker_pool_id"] = types.StringValue(action.WorkerPool)
-	//}
-
-	//if len(action.WorkerPoolVariable) > 0 {
 	newAction["worker_pool_variable"] = types.StringValue(action.WorkerPoolVariable)
-	//}
 
 	mapPropertyToStateBool(action, newAction, "run_on_server", "Octopus.Action.RunOnServer", false)
 	mapPropertyToStateString(action, newAction, "script_body", "Octopus.Action.Script.ScriptBody")
-	mapPropertyToStateString(action, newAction, "script_parameters", "Octopus.Action.Script.ScriptFileName")
+	mapPropertyToStateString(action, newAction, "script_file_name", "Octopus.Action.Script.ScriptFileName")
 	mapPropertyToStateString(action, newAction, "script_source", "Octopus.Action.Script.ScriptSource")
+	mapPropertyToStateString(action, newAction, "script_parameters", "Octopus.Action.Script.ScriptParameters")
 	mapPropertyToStateString(action, newAction, "script_syntax", "Octopus.Action.Script.Syntax")
 	mapPropertyToStateString(action, newAction, "script_file_name", "Octopus.Action.Script.ScriptFileName")
 	mapPropertyToStateString(action, newAction, "variable_substitution_in_files", "Octopus.Action.SubstituteInFiles.TargetFiles")
@@ -240,46 +264,29 @@ func mapPropertyToStateString(action *deployments.DeploymentAction, actionState 
 }
 
 func mapDeploymentActionToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diags := mapBaseDeploymentActionToState(ctx, action, newAction)
+	if diags.HasError() {
+		return diags
+	}
+
+	newAction["action_type"] = types.StringValue(action.ActionType)
+	return nil
+}
+
+func mapBaseDeploymentActionToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
 	newAction["can_be_used_for_project_versioning"] = types.BoolValue(action.CanBeUsedForProjectVersioning)
 	newAction["is_disabled"] = types.BoolValue(action.IsDisabled)
 	newAction["is_required"] = types.BoolValue(action.IsRequired)
-	newAction["action_type"] = types.StringValue(action.ActionType)
-
-	//if len(action.Channels) > 0 {
 	newAction["channels"] = util.FlattenStringList(action.Channels)
-	//}
-
-	//if len(action.Condition) > 0 {
 	newAction["condition"] = types.StringValue(action.Condition)
-	//}
-
-	//if action.Container != nil {
 	newAction["container"] = mapContainerToState(action.Container)
-	//}
-
-	//if len(action.Environments) > 0 {
 	newAction["environments"] = util.FlattenStringList(action.Environments)
-	//}
-
 	newAction["excluded_environments"] = util.FlattenStringList(action.ExcludedEnvironments)
-
-	//if len(action.ID) > 0 {
 	newAction["id"] = types.StringValue(action.ID)
-	//}
-
-	//if len(action.Name) > 0 {
 	newAction["name"] = types.StringValue(action.Name)
-	//}
-
-	//if len(action.Slug) > 0 {
 	newAction["slug"] = types.StringValue(action.Slug)
-	//}
-
-	//if len(action.Notes) > 0 {
 	newAction["notes"] = types.StringValue(action.Notes)
-	//}
 
-	//if len(action.Properties) > 0 {
 	updatedProperties, diags := mapPropertiesToState(ctx, action.Properties)
 	if diags.HasError() {
 		return diags
@@ -315,6 +322,7 @@ func mapDeploymentActionToState(ctx context.Context, action *deployments.Deploym
 		newAction["action_template"] = types.ListNull(types.ObjectType{AttrTypes: attrTypes})
 	}
 
+	hasPackageReference := false
 	if len(action.Packages) > 0 {
 		var packageReferences []attr.Value
 		for _, packageReference := range action.Packages {
@@ -323,23 +331,31 @@ func mapDeploymentActionToState(ctx context.Context, action *deployments.Deploym
 				return diags
 			}
 			if len(packageReference.Name) == 0 {
-				newAction["primary_package"] = types.ObjectValueMust(getPackageReferenceAttrTypes(true), packageReferenceAttribute)
+
+				newAction["primary_package"] = types.ListValueMust(types.ObjectType{AttrTypes: getPackageReferenceAttrTypes(true)}, []attr.Value{types.ObjectValueMust(getPackageReferenceAttrTypes(true), packageReferenceAttribute)})
 				// TODO: consider these properties
 				// actionProperties["Octopus.Action.Package.DownloadOnTentacle"] = packageReference.AcquisitionLocation
 				// flattenedAction["properties"] = actionProperties
 			} else {
 				packageReferences = append(packageReferences, types.ObjectValueMust(getPackageReferenceAttrTypes(false), packageReferenceAttribute))
 				newAction["package"] = types.ListValueMust(types.ObjectType{AttrTypes: getPackageReferenceAttrTypes(false)}, packageReferences)
+				hasPackageReference = true
 			}
 		}
 	} else {
-		newAction["primary_package"] = types.ObjectNull(getPackageReferenceAttrTypes(true))
+		newAction["primary_package"] = types.ListNull(types.ObjectType{AttrTypes: getPackageReferenceAttrTypes(true)})
+	}
+
+	if !hasPackageReference {
 		newAction["package"] = types.ListNull(types.ObjectType{AttrTypes: getPackageReferenceAttrTypes(false)})
 	}
 
 	if len(action.GitDependencies) > 0 {
-		mappedGitDependencies := mapGitDependencyToState(action.GitDependencies[0])
-		newAction["git_dependencies"] = types.ObjectValueMust(getGitDependencyAttrTypes(), mappedGitDependencies)
+		var gitDepenedencyList []attr.Value
+		gitDepenedencyList = append(gitDepenedencyList, types.ObjectValueMust(getGitDependencyAttrTypes(), mapGitDependencyToState(action.GitDependencies[0])))
+		newAction["git_dependency"] = types.SetValueMust(types.ObjectType{AttrTypes: getGitDependencyAttrTypes()}, gitDepenedencyList)
+	} else {
+		newAction["git_dependency"] = types.SetNull(types.ObjectType{AttrTypes: getGitDependencyAttrTypes()})
 	}
 
 	return nil
@@ -415,10 +431,14 @@ func mapContainerToState(container *deployments.DeploymentActionContainer) types
 		return types.ListNull(types.ObjectType{AttrTypes: attributeTypes})
 	}
 
-	return types.ListValueMust(types.ObjectType{AttrTypes: attributeTypes}, []attr.Value{types.ObjectValueMust(attributeTypes, map[string]attr.Value{
+	list := make([]attr.Value, 0)
+	containerAttributes := map[string]attr.Value{
 		"feed_id": types.StringValue(container.FeedID),
 		"image":   types.StringValue(container.Image),
-	}))
+	}
+
+	list = append(list, types.ObjectValueMust(attributeTypes, containerAttributes))
+	return types.ListValueMust(types.ObjectType{AttrTypes: attributeTypes}, list)
 }
 
 func mapPropertiesToState(ctx context.Context, properties map[string]core.PropertyValue) (types.Map, diag.Diagnostics) {
@@ -471,10 +491,10 @@ func mapStepsToDeploymentProcess(steps types.List, current *deployments.Deployme
 				continue
 			}
 			switch key {
-			case "action":
+			case schemas.DeploymentProcessAction:
 				step.Actions = append(step.Actions, getBaseAction(attr))
 				break
-			case "run_script_action":
+			case schemas.DeploymentProcessRunScriptAction:
 				step.Actions = append(step.Actions, mapRunScriptAction(attr))
 				break
 			}
@@ -564,6 +584,7 @@ func getBaseAction(actionAttribute attr.Value) *deployments.DeploymentAction {
 	util.SetBool(actionAttrs, "is_disabled", &action.IsDisabled)
 	util.SetBool(actionAttrs, "is_required", &action.IsRequired)
 	util.SetString(actionAttrs, "notes", &action.Notes)
+	action.Channels = util.ExpandStringList(actionAttrs["channels"].(types.List))
 
 	action.Container = getContainer(actionAttrs)
 
@@ -683,13 +704,13 @@ func getPackageReference(attrs map[string]attr.Value) *packages.PackageReference
 }
 
 func setActionTemplate(attrs map[string]attr.Value, action *deployments.DeploymentAction) {
-	templateListAttributes := getAttributesForSingleElementList(attrs, "template_list")
-	if templateListAttributes == nil {
-		if id, ok := templateListAttributes["id"]; ok {
+	actionTemplate := getAttributesForSingleElementList(attrs, "action_template")
+	if actionTemplate != nil {
+		if id, ok := actionTemplate["id"]; ok {
 			action.Properties["Octopus.Action.Template.Id"] = core.NewPropertyValue(id.(types.String).ValueString(), false)
 		}
 
-		if v, ok := templateListAttributes["version"]; ok {
+		if v, ok := actionTemplate["version"]; ok {
 			action.Properties["Octopus.Action.Template.Version"] = core.NewPropertyValue(v.(types.String).ValueString(), false)
 		}
 	}
