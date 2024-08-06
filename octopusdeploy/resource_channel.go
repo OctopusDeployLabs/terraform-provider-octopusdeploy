@@ -6,6 +6,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -25,8 +26,8 @@ func resourceChannel() *schema.Resource {
 }
 
 func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 
 	channel := expandChannel(d)
 
@@ -49,8 +50,8 @@ func resourceChannelCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceChannelDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 
 	tflog.Info(ctx, fmt.Sprintf("deleting channel (%s)", d.Id()))
 
@@ -83,8 +84,8 @@ func resourceChannelRead(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceChannelUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	mutex.Lock()
-	defer mutex.Unlock()
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 
 	tflog.Info(ctx, fmt.Sprintf("updating channel (%s)", d.Id()))
 

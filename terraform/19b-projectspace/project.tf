@@ -1,8 +1,10 @@
 data "octopusdeploy_lifecycles" "lifecycle_default_lifecycle" {
   ids          = null
   partial_name = "Default Lifecycle"
+  space_id     = octopusdeploy_space.octopus_project_space_test.id
   skip         = 0
   take         = 1
+  depends_on = [octopusdeploy_space.octopus_project_space_test]
 }
 
 
@@ -30,4 +32,9 @@ resource "octopusdeploy_project" "deploy_frontend_project" {
     exclude_unhealthy_targets       = false
     skip_machine_behavior           = "SkipUnavailableMachines"
   }
+
+  depends_on = [
+    octopusdeploy_space.octopus_project_space_test,
+    octopusdeploy_project_group.project_group_test,
+  ]
 }

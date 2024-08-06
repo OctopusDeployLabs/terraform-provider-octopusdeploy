@@ -3,14 +3,15 @@ package octopusdeploy_framework
 import (
 	"context"
 	"flag"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"github.com/testcontainers/testcontainers-go"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"github.com/testcontainers/testcontainers-go"
 )
 
 var createSharedContainer = flag.Bool("createSharedContainer", false, "Set to true to run integration tests in containers")
@@ -65,11 +66,5 @@ func TestMain(m *testing.M) {
 		}
 		code := m.Run()
 		os.Exit(code)
-	}
-}
-
-func SkipCI(t *testing.T, reason string) {
-	if os.Getenv("Skip_Legacy_Tests") == "" {
-		t.Skip(reason)
 	}
 }

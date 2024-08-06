@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -14,6 +15,14 @@ func GetProviderName() string {
 
 func GetTypeName(name string) string {
 	return fmt.Sprintf("%s_%s", GetProviderName(), name)
+}
+
+func GetResourceSchemaDescription(resourceName string) string {
+	return fmt.Sprintf("This resource manages %ss in Octopus Deploy.", resourceName)
+}
+
+func GetDataSourceDescription(resourceName string) string {
+	return fmt.Sprintf("Provides information about existing %s.", resourceName)
 }
 
 func GetStringOrEmpty(tfAttr interface{}) string {
@@ -53,6 +62,7 @@ func FlattenStringList(list []string) types.List {
 	if list == nil || len(list) == 0 {
 		return types.ListNull(types.StringType)
 	}
+	
 	elements := make([]attr.Value, 0, len(list))
 	for _, s := range list {
 		elements = append(elements, types.StringValue(s))
@@ -60,7 +70,7 @@ func FlattenStringList(list []string) types.List {
 	return types.ListValueMust(types.StringType, elements)
 }
 
-func Ternary(condition bool, whenTrue, whenFalse attr.Value) attr.Value {
+func Ternary[T interface{}](condition bool, whenTrue T, whenFalse T) T {
 	if condition {
 		return whenTrue
 	}
@@ -108,4 +118,19 @@ func ToValueSlice(slice []string) []attr.Value {
 		values[i] = types.StringValue(s)
 	}
 	return values
+}
+
+func StringOrNull(s string) types.String {
+	if s == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(s)
+}
+
+func Map[T, V any](items []T, fn func(T) V) []V {
+	result := make([]V, len(items))
+	for i, t := range items {
+		result[i] = fn(t)
+	}
+	return result
 }
