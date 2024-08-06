@@ -40,8 +40,8 @@ func (t *tentacleCertificateResource) Configure(_ context.Context, req resource.
 }
 
 func (t *tentacleCertificateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data schemas.TentacleCertificateResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	var plan schemas.TentacleCertificateResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -53,9 +53,11 @@ func (t *tentacleCertificateResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	data.Base64 = types.StringValue(certificate)
-	data.Thumbprint = types.StringValue(thumbprint)
-	data.ID = types.StringValue(util.GenerateRandomCryptoString(20))
+	plan.Base64 = types.StringValue(certificate)
+	plan.Thumbprint = types.StringValue(thumbprint)
+	plan.ID = types.StringValue(util.GenerateRandomCryptoString(20))
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 
 }
 
