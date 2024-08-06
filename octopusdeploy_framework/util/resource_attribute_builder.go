@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -247,6 +248,39 @@ func (b *AttributeBuilder[T]) PlanModifiers(modifiers ...any) *AttributeBuilder[
 	case *schema.MapAttribute:
 		if mapModifiers, ok := convertToTypedSlice[planmodifier.Map](modifiers); ok {
 			a.PlanModifiers = append(a.PlanModifiers, mapModifiers...)
+		}
+	}
+	return b
+}
+func (b *AttributeBuilder[T]) Validators(validators ...any) *AttributeBuilder[T] {
+	switch a := any(&b.attr).(type) {
+	case *schema.StringAttribute:
+		if stringValidators, ok := convertToTypedSlice[validator.String](validators); ok {
+			a.Validators = append(a.Validators, stringValidators...)
+		}
+	case *schema.BoolAttribute:
+		if boolValidators, ok := convertToTypedSlice[validator.Bool](validators); ok {
+			a.Validators = append(a.Validators, boolValidators...)
+		}
+	case *schema.Int64Attribute:
+		if int64Validators, ok := convertToTypedSlice[validator.Int64](validators); ok {
+			a.Validators = append(a.Validators, int64Validators...)
+		}
+	case *schema.Float64Attribute:
+		if float64Validators, ok := convertToTypedSlice[validator.Float64](validators); ok {
+			a.Validators = append(a.Validators, float64Validators...)
+		}
+	case *schema.ListAttribute:
+		if listValidators, ok := convertToTypedSlice[validator.List](validators); ok {
+			a.Validators = append(a.Validators, listValidators...)
+		}
+	case *schema.SetAttribute:
+		if setValidators, ok := convertToTypedSlice[validator.Set](validators); ok {
+			a.Validators = append(a.Validators, setValidators...)
+		}
+	case *schema.MapAttribute:
+		if mapValidators, ok := convertToTypedSlice[validator.Map](validators); ok {
+			a.Validators = append(a.Validators, mapValidators...)
 		}
 	}
 	return b

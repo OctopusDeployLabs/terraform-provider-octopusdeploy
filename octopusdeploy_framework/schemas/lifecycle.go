@@ -36,20 +36,20 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 				"id":   util.ResourceString().Optional().Computed().Description("The unique ID for this resource.").Build(),
 				"name": util.ResourceString().Required().Description("The name of this resource.").Build(),
 				"automatic_deployment_targets": util.ResourceList(types.StringType).
-					Optional().
+					Optional().Computed().
 					Description("Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase").
 					Build(),
 				"optional_deployment_targets": util.ResourceList(types.StringType).
-					Optional().
+					Optional().Computed().
 					Description("Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to").
 					Build(),
 				"minimum_environments_before_promotion": util.ResourceInt64().
-					Optional().
+					Optional().Computed().
 					Default(int64default.StaticInt64(0)).
 					Description("The number of units required before a release can enter the next phase. If 0, all environments are required.").
 					Build(),
 				"is_optional_phase": util.ResourceBool().
-					Optional().
+					Optional().Computed().
 					Default(booldefault.StaticBool(false)).
 					Description("If false a release must be deployed to this phase before it can be deployed to the next phase.").
 					Build(),
@@ -68,17 +68,17 @@ func getResourceRetentionPolicyBlockSchema() resourceSchema.ListNestedBlock {
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
 				"quantity_to_keep": util.ResourceInt64().
-					Optional().
+					Optional().Computed().
 					Default(int64default.StaticInt64(30)).
 					Description("The number of days/releases to keep. The default value is 30. If 0 then all are kept.").
 					Build(),
 				"should_keep_forever": util.ResourceBool().
-					Optional().
+					Optional().Computed().
 					Default(booldefault.StaticBool(false)).
 					Description("Indicates if items should never be deleted. The default value is false.").
 					Build(),
 				"unit": util.ResourceString().
-					Optional().
+					Optional().Computed().
 					Default(stringdefault.StaticString("Days")).
 					Description("The unit of quantity to keep. Valid units are Days or Items. The default value is Days.").
 					Build(),
