@@ -21,7 +21,7 @@ func GetTenantProjectVariableResourceSchema() schema.Schema {
 			"environment_id": util.GetRequiredStringResourceSchema("The ID of the environment."),
 			"template_id":    util.GetRequiredStringResourceSchema("The ID of the variable template."),
 			"value": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: "The value of the variable.",
 				Sensitive:   true,
 			},
