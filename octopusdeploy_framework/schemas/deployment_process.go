@@ -34,6 +34,16 @@ const (
 	DeploymentProcessWindowSize                   = "window_size"
 )
 
+var ActionsAttributeNames = [...]string{
+	DeploymentProcessAction,
+	DeploymentProcessRunScriptAction,
+	DeploymentProcessRunKubectlScriptAction,
+	DeploymentProcessPackageAction,
+	DeploymentProcessWindowsServiceAction,
+	DeploymentProcessManualInterventionAction,
+	DeploymentProcessApplyKubernetesSecretAction,
+}
+
 type DeploymentProcessResourceModel struct {
 	ID             types.String `tfsdk:"id"`
 	SpaceID        types.String `tfsdk:"space_id"`

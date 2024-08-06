@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -178,7 +177,12 @@ func NewActionResourceSchemaBuilder() *ActionResourceSchemaBuilder {
 	builder.attributes["sort_order"] = resourceSchema.Int64Attribute{
 		Description: "Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions",
 		Optional:    true,
-		Default:     int64default.StaticInt64(-1),
+		Computed:    true,
+	}
+
+	builder.attributes["computed_sort_order"] = resourceSchema.Int64Attribute{
+		Description: "This is the final sort order for the action. This will be provided by the API.",
+		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),

@@ -81,16 +81,25 @@ func GetStringSlice(list types.List) []string {
 	return result
 }
 
-func SetString(attrs map[string]attr.Value, attr string, s *string) {
-	if v, ok := attrs[attr]; ok {
+func SetString(attrs map[string]attr.Value, attrName string, s *string) {
+	if v, ok := attrs[attrName]; ok {
 		*s = v.(types.String).ValueString()
 	}
 }
 
-func SetBool(attrs map[string]attr.Value, attr string, b *bool) {
-	if v, ok := attrs[attr]; ok {
+func SetBool(attrs map[string]attr.Value, attrName string, b *bool) {
+	if v, ok := attrs[attrName]; ok {
 		*b = v.(types.Bool).ValueBool()
 	}
+}
+
+func TrySetInt64(attrs map[string]attr.Value, attrName string, i *int64) bool {
+	if v, ok := attrs[attrName]; ok {
+		*i = v.(types.Int64).ValueInt64()
+		return true
+	}
+
+	return false
 }
 
 func ToValueSlice(slice []string) []attr.Value {

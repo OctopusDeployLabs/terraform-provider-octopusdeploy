@@ -12,8 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -29,14 +31,13 @@ func MapDeploymentProcessToState(ctx context.Context, deploymentProcess *deploym
 	return mapStepsToState(ctx, state, deploymentProcess)
 }
 
-func MapStateToDeploymentProcess(plan schemas.DeploymentProcessResourceModel, deploymentProcess *deployments.DeploymentProcess) diag.Diagnostics {
+func MapStateToDeploymentProcess(ctx context.Context, state *schemas.DeploymentProcessResourceModel, deploymentProcess *deployments.DeploymentProcess) diag.Diagnostics {
 	// this should not map the version number from the schema
-
-	deploymentProcess.Branch = plan.Branch.ValueString()
-	deploymentProcess.SpaceID = plan.SpaceID.ValueString()
-	deploymentProcess.LastSnapshotID = plan.LastSnapshotID.ValueString()
-	deploymentProcess.ProjectID = plan.ProjectID.ValueString()
-	mapStepsToDeploymentProcess(plan.Steps, deploymentProcess)
+	deploymentProcess.Branch = state.Branch.ValueString()
+	deploymentProcess.SpaceID = state.SpaceID.ValueString()
+	deploymentProcess.LastSnapshotID = state.LastSnapshotID.ValueString()
+	deploymentProcess.ProjectID = state.ProjectID.ValueString()
+	mapStepsToDeploymentProcess(ctx, state.Steps, deploymentProcess)
 
 	return nil
 }
@@ -77,9 +78,16 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 
 		newActions := make(map[string][]attr.Value)
 		for i, a := range deploymentStep.Actions {
+
 			newAction := map[string]attr.Value{
-				"sort_order": types.Int64Value(int64(i)),
+				"computed_sort_order": types.Int64Value(int64(i)),
 			}
+
+			sortOrder := getSortOrderStateValue(deploymentStep, a, state)
+			if sortOrder != nil {
+				newAction["sort_order"] = sortOrder
+			}
+
 			srcAction := deploymentStep.Actions[i]
 			switch srcAction.ActionType {
 			//case "Octopus.KubernetesDeploySecret":
@@ -140,6 +148,43 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 	return nil
 }
 
+func getSortOrderStateValue(step *deployments.DeploymentStep, a *deployments.DeploymentAction, state *schemas.DeploymentProcessResourceModel) attr.Value {
+	for _, s := range state.Steps.Elements() {
+		stepAttrs := s.(types.Object).Attributes()
+		if step.Name == stepAttrs["name"].(types.String).ValueString() {
+			for key, stepAttr := range stepAttrs {
+				if isAction(key) {
+					actions := stepAttr.(types.List)
+					for _, action := range actions.Elements() {
+						actionAttrs := action.(types.Object).Attributes()
+						name := actionAttrs["name"].(types.String).ValueString()
+						if a.Name == name {
+							if v, ok := actionAttrs["sort_order"]; ok {
+								return v
+							} else {
+								return nil
+							}
+						}
+					}
+
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func isAction(key string) bool {
+	for _, k := range schemas.ActionsAttributeNames {
+		if k == key {
+			return true
+		}
+	}
+
+	return false
+}
+
 func getStepTypeAttrs() map[string]attr.Type {
 	attrs := map[string]attr.Type{
 		"id":                               types.StringType,
@@ -189,6 +234,7 @@ func getActionTypeAttrs(actionType string) map[string]attr.Type {
 		"sort_order":                         types.Int64Type,
 		"slug":                               types.StringType,
 		"tenant_tags":                        types.ListType{ElemType: types.StringType},
+		"computed_sort_order":                types.Int64Type,
 	}
 	switch actionType {
 	case schemas.DeploymentProcessRunScriptAction:
@@ -427,7 +473,7 @@ func getGitDependencyAttrTypes() map[string]attr.Type {
 
 func mapContainerToState(container *deployments.DeploymentActionContainer) types.List {
 	attributeTypes := map[string]attr.Type{"feed_id": types.StringType, "image": types.StringType}
-	if container == nil {
+	if container == nil || (container.Image == "" && container.FeedID == "") {
 		return types.ListNull(types.ObjectType{AttrTypes: attributeTypes})
 	}
 
@@ -457,7 +503,7 @@ func mapPropertiesToState(ctx context.Context, properties map[string]core.Proper
 	return types.MapValueFrom(ctx, types.StringType, stateMap)
 }
 
-func mapStepsToDeploymentProcess(steps types.List, current *deployments.DeploymentProcess) {
+func mapStepsToDeploymentProcess(ctx context.Context, steps types.List, current *deployments.DeploymentProcess) {
 	if steps.IsNull() || steps.IsUnknown() {
 		return
 	}
@@ -486,6 +532,7 @@ func mapStepsToDeploymentProcess(steps types.List, current *deployments.Deployme
 			step.Properties["Octopus.Action.MaxParallelism"] = core.NewPropertyValue(windowSize.(types.String).ValueString(), false)
 		}
 
+		var sort_order map[string]int64 = make(map[string]int64)
 		for key, attr := range attrs {
 			if attr.IsNull() {
 				continue
@@ -493,11 +540,45 @@ func mapStepsToDeploymentProcess(steps types.List, current *deployments.Deployme
 			switch key {
 			case schemas.DeploymentProcessAction:
 				step.Actions = append(step.Actions, getBaseAction(attr))
+				actionAttrs := getActionAttributes(attr)
+				if posn, ok := actionAttrs["sort_order"].(types.Int64); ok && !posn.IsNull() && posn.ValueInt64() >= 0 {
+					name := actionAttrs["name"].(types.String).ValueString()
+					sort_order[name] = posn.ValueInt64()
+				}
 				break
 			case schemas.DeploymentProcessRunScriptAction:
 				step.Actions = append(step.Actions, mapRunScriptAction(attr))
+				actionAttrs := getActionAttributes(attr)
+				if posn, ok := actionAttrs["sort_order"].(types.Int64); ok && !posn.IsNull() && posn.ValueInt64() >= 0 {
+					name := actionAttrs["name"].(types.String).ValueString()
+					sort_order[name] = posn.ValueInt64()
+				}
 				break
 			}
+		}
+
+		// Now that we have extracted all the steps off each of the properties into a single array, sort the array by the sort_order if provided
+		if len(sort_order) > 0 {
+
+			sort_order_entries := make(map[int64][]string)
+			// Validate there are no duplicate sort_order entries
+			for step_name, sort_order := range sort_order {
+				sort_order_entries[sort_order] = append(sort_order_entries[sort_order], step_name)
+			}
+			for _, matching_names := range sort_order_entries {
+				if len(matching_names) > 1 {
+					tflog.Warn(ctx, fmt.Sprintf("The following actions have the same sort_order: %v", matching_names))
+				}
+			}
+
+			// Validate that every step has a sort_order
+			if len(sort_order) != len(step.Actions) {
+				tflog.Warn(ctx, fmt.Sprintf("Not all actions on step '%s' have a `sort_order` parameter so they may be sorted in an unexpected order", step.Name))
+			}
+
+			sort.SliceStable(step.Actions, func(i, j int) bool {
+				return sort_order[step.Actions[i].Name] < sort_order[step.Actions[j].Name]
+			})
 		}
 
 		current.Steps = append(current.Steps, step)
@@ -578,7 +659,6 @@ func getBaseAction(actionAttribute attr.Value) *deployments.DeploymentAction {
 	util.SetString(actionAttrs, "action_type", &actionType)
 
 	action := deployments.NewDeploymentAction(name, actionType)
-
 	util.SetString(actionAttrs, "id", &action.ID)
 	util.SetString(actionAttrs, "condition", &action.Condition)
 	util.SetBool(actionAttrs, "is_disabled", &action.IsDisabled)

@@ -66,7 +66,7 @@ func (d *deploymentProcessResource) Create(ctx context.Context, req resource.Cre
 		}
 	}
 
-	resp.Diagnostics.Append(mappers.MapStateToDeploymentProcess(plan, current)...)
+	resp.Diagnostics.Append(mappers.MapStateToDeploymentProcess(ctx, &plan, current)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -159,7 +159,7 @@ func (d *deploymentProcessResource) Update(ctx context.Context, req resource.Upd
 		}
 	}
 
-	resp.Diagnostics.Append(mappers.MapStateToDeploymentProcess(plan, current)...)
+	resp.Diagnostics.Append(mappers.MapStateToDeploymentProcess(ctx, &plan, current)...)
 
 	if resp.Diagnostics.HasError() {
 		return

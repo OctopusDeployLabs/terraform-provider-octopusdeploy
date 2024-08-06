@@ -235,18 +235,18 @@ func testAccDeploymentProcessBasic(localName string) string {
 				}
 			}
 
- 			//step {
-			// name = "Step2"
-			// start_trigger = "StartWithPrevious"
-			// target_roles = ["WebServer"]
-			//
-			// run_script_action {
-			//	  name = "Step2"
- 			//	  sort_order = 1
-			//	  run_on_server = true
-			//	  script_body = "Write-Host 'hi'"
-			// }
-			//}
+ 			step {
+				name = "Step2"
+				start_trigger = "StartWithPrevious"
+				target_roles = ["WebServer"]
+				
+				run_script_action {
+					  name = "Step2"
+					  sort_order = 1
+					  run_on_server = true
+					  script_body = "Write-Host 'hi'"
+				}
+			}
 		}`, localName, projectLocalName)
 }
 
