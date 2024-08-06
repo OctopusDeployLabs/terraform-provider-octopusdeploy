@@ -34,6 +34,7 @@ type GitCredentialModel struct {
 	Description types.String `tfsdk:"description"`
 	Type        types.String `tfsdk:"type"`
 	Username    types.String `tfsdk:"username"`
+	Password    types.String `tfsdk:"password"`
 }
 
 func NewGitCredentialsDataSource() datasource.DataSource {
