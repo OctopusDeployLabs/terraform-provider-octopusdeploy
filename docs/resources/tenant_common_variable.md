@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_tenant_common_variable Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages tenant common variables in Octopus Deploy.
+  Manages a tenant common variable in Octopus Deploy.
 ---
 
 # octopusdeploy_tenant_common_variable (Resource)
 
-This resource manages tenant common variables in Octopus Deploy.
+Manages a tenant common variable in Octopus Deploy.
 
 
 
@@ -17,17 +17,14 @@ This resource manages tenant common variables in Octopus Deploy.
 
 ### Required
 
-- `library_variable_set_id` (String)
-- `template_id` (String)
-- `tenant_id` (String)
+- `library_variable_set_id` (String) The ID of the library variable set.
+- `template_id` (String) The ID of the variable template.
+- `tenant_id` (String) The ID of the tenant.
 
 ### Optional
 
-- `space_id` (String)
-- `value` (String, Sensitive)
-
-### Read-Only
-
-- `id` (String) The ID of this resource.
+- `id` (String) The unique ID for this resource.
+- `space_id` (String) The space ID associated with this Tenant Common Variable.
+- `value` (String, Sensitive) The value of the variable.
 
 

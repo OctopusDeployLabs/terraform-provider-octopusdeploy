@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_git_credential Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages Git credentials in Octopus Deploy.
+  Manages a Git credential in Octopus Deploy.
 ---
 
 # octopusdeploy_git_credential (Resource)
 
-This resource manages Git credentials in Octopus Deploy.
+Manages a Git credential in Octopus Deploy.
 
 
 
@@ -17,15 +17,15 @@ This resource manages Git credentials in Octopus Deploy.
 
 ### Required
 
-- `name` (String) The name of the Git credential. This name must be unique.
+- `name` (String) The name of this resource.
 - `password` (String, Sensitive) The password for the Git credential.
 - `username` (String) The username for the Git credential.
 
 ### Optional
 
-- `description` (String) The description of this Git credential.
+- `description` (String) The description of this Git Credential.
 - `id` (String) The unique ID for this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this Git Credential.
 - `type` (String) The Git credential authentication type.
 
 

@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_git_credentials Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  Provides information about existing GitCredentials.
+  A list of Git Credentials that match the filter(s).
 ---
 
 # octopusdeploy_git_credentials (Data Source)
 
-Provides information about existing GitCredentials.
+A list of Git Credentials that match the filter(s).
 
 
 
@@ -17,26 +17,28 @@ Provides information about existing GitCredentials.
 
 ### Optional
 
-- `name` (String) A filter to search by name.
+- `id` (String) The unique ID for this resource.
+- `name` (String) A filter search by exact name
 - `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this Git Credential.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- `git_credentials` (Block List) A list of Git Credentials that match the filter(s). (see [below for nested schema](#nestedblock--git_credentials))
-- `id` (String) The ID of this resource.
+- `git_credentials` (Attributes List) A list of Git Credentials that match the filter(s). (see [below for nested schema](#nestedatt--git_credentials))
 
-<a id="nestedblock--git_credentials"></a>
+<a id="nestedatt--git_credentials"></a>
 ### Nested Schema for `git_credentials`
+
+Optional:
+
+- `id` (String) The unique ID for this resource.
+- `name` (String) A filter search by exact name
+- `space_id` (String) The space ID associated with this Git Credential.
 
 Read-Only:
 
-- `description` (String) The description of this Git credential.
-- `id` (String) The unique ID for this resource.
-- `name` (String) The name of the Git credential. This name must be unique.
-- `password` (String, Sensitive) The password for the Git credential.
-- `space_id` (String) The space ID associated with this resource.
+- `description` (String) The description of this Git Credential.
 - `type` (String) The Git credential authentication type.
 - `username` (String) The username for the Git credential.
 

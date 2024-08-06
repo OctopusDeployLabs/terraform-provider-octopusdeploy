@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_lifecycles Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  Provides information about existing lifecycles.
+  
 ---
 
 # octopusdeploy_lifecycles (Data Source)
 
-Provides information about existing lifecycles.
+
 
 ## Example Usage
 
@@ -26,45 +26,57 @@ data "octopusdeploy_lifecycles" "example" {
 
 ### Optional
 
+- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
-- `partial_name` (String) A filter to search by the partial match of a name.
+- `partial_name` (String) A filter to search by a partial name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this lifecycle.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `lifecycles` (Block List) A list of lifecycles that match the filter(s). (see [below for nested schema](#nestedblock--lifecycles))
+- `lifecycles` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles))
 
-<a id="nestedblock--lifecycles"></a>
+<a id="nestedatt--lifecycles"></a>
 ### Nested Schema for `lifecycles`
+
+Required:
+
+- `name` (String) The name of this resource.
+
+Optional:
+
+- `id` (String) The unique ID for this resource.
+- `space_id` (String) The space ID associated with this lifecycle.
 
 Read-Only:
 
 - `description` (String) The description of this lifecycle.
-- `id` (String) The unique ID for this resource.
-- `name` (String) The name of this resource.
-- `phase` (List of Object) (see [below for nested schema](#nestedatt--lifecycles--phase))
-- `release_retention_policy` (List of Object) (see [below for nested schema](#nestedatt--lifecycles--release_retention_policy))
-- `space_id` (String) The space ID associated with this resource.
-- `tentacle_retention_policy` (List of Object) (see [below for nested schema](#nestedatt--lifecycles--tentacle_retention_policy))
+- `phase` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--phase))
+- `release_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--release_retention_policy))
+- `tentacle_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--tentacle_retention_policy))
 
 <a id="nestedatt--lifecycles--phase"></a>
 ### Nested Schema for `lifecycles.phase`
 
+Required:
+
+- `name` (String) The name of this resource.
+
+Optional:
+
+- `id` (String) The unique ID for this resource.
+
 Read-Only:
 
 - `automatic_deployment_targets` (List of String)
-- `id` (String)
 - `is_optional_phase` (Boolean)
 - `minimum_environments_before_promotion` (Number)
-- `name` (String)
 - `optional_deployment_targets` (List of String)
-- `release_retention_policy` (List of Object) (see [below for nested schema](#nestedobjatt--lifecycles--phase--release_retention_policy))
-- `tentacle_retention_policy` (List of Object) (see [below for nested schema](#nestedobjatt--lifecycles--phase--tentacle_retention_policy))
+- `release_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--phase--release_retention_policy))
+- `tentacle_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--phase--tentacle_retention_policy))
 
-<a id="nestedobjatt--lifecycles--phase--release_retention_policy"></a>
+<a id="nestedatt--lifecycles--phase--release_retention_policy"></a>
 ### Nested Schema for `lifecycles.phase.release_retention_policy`
 
 Read-Only:
@@ -74,7 +86,7 @@ Read-Only:
 - `unit` (String)
 
 
-<a id="nestedobjatt--lifecycles--phase--tentacle_retention_policy"></a>
+<a id="nestedatt--lifecycles--phase--tentacle_retention_policy"></a>
 ### Nested Schema for `lifecycles.phase.tentacle_retention_policy`
 
 Read-Only:
