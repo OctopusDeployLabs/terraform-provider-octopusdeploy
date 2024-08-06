@@ -99,6 +99,7 @@ func GetGitCredentialAttrTypes() map[string]attr.Type {
 		"description": types.StringType,
 		"type":        types.StringType,
 		"username":    types.StringType,
+		"password":    types.StringType,
 	}
 }
 
