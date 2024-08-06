@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	uuid "github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccOctopusDeployAzureOpenIDConnectAccountBasic(t *testing.T) {
-	SkipCI(t, "audience is not set on initial creation")
+	internalTest.SkipCI(t, "audience is not set on initial creation")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_azure_openid_connect." + localName
 

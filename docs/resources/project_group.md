@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_project_group Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages project groups in Octopus Deploy.
+  
 ---
 
 # octopusdeploy_project_group (Resource)
 
-This resource manages project groups in Octopus Deploy.
+
 
 ## Example Usage
 

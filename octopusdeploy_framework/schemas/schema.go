@@ -2,6 +2,8 @@ package schemas
 
 import (
 	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	//"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
@@ -12,6 +14,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+var SchemaAttributeNames = struct {
+	ID          string
+	Name        string
+	Description string
+	SpaceID     string
+}{
+	ID:          "id",
+	Name:        "name",
+	Description: "description",
+	SpaceID:     "space_id",
+}
 
 func GetQueryIDsDatasourceSchema() datasourceSchema.Attribute {
 	return datasourceSchema.ListAttribute{
@@ -153,6 +167,23 @@ func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute 
 	return datasourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
 		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func GetBooleanDatasourceAttribute(description string, isOptional bool) datasourceSchema.Attribute {
+	return datasourceSchema.BoolAttribute{
+		Description: description,
+		Optional:    isOptional,
+		Computed:    true,
+	}
+}
+
+func GetBooleanResourceAttribute(description string, defaultValue bool, isOptional bool) resourceSchema.Attribute {
+	return resourceSchema.BoolAttribute{
+		Default:     booldefault.StaticBool(defaultValue),
+		Description: description,
+		Optional:    isOptional,
 		Computed:    true,
 	}
 }

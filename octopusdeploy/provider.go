@@ -26,7 +26,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_machine_policies":                                dataSourceMachinePolicies(),
 			"octopusdeploy_offline_package_drop_deployment_targets":         dataSourceOfflinePackageDropDeploymentTargets(),
 			"octopusdeploy_polling_tentacle_deployment_targets":             dataSourcePollingTentacleDeploymentTargets(),
-			"octopusdeploy_projects":                                        dataSourceProjects(),
 			"octopusdeploy_script_modules":                                  dataSourceScriptModules(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
 			"octopusdeploy_tag_sets":                                        dataSourceTagSets(),
@@ -34,7 +33,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_tenants":                                         dataSourceTenants(),
 			"octopusdeploy_users":                                           dataSourceUsers(),
 			"octopusdeploy_user_roles":                                      dataSourceUserRoles(),
-			"octopusdeploy_variables":                                       dataSourceVariable(),
 			"octopusdeploy_worker_pools":                                    dataSourceWorkerPools(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -60,7 +58,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_offline_package_drop_deployment_target":         resourceOfflinePackageDropDeploymentTarget(),
 			"octopusdeploy_polling_tentacle_deployment_target":             resourcePollingTentacleDeploymentTarget(),
 			"octopusdeploy_polling_subscription_id":                        resourcePollingSubscriptionId(),
-			"octopusdeploy_project":                                        resourceProject(),
 			"octopusdeploy_project_deployment_target_trigger":              resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_external_feed_create_release_trigger":           resourceExternalFeedCreateReleaseTrigger(),
 			"octopusdeploy_project_scheduled_trigger":                      resourceProjectScheduledTrigger(),
@@ -80,7 +77,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_user":                                           resourceUser(),
 			"octopusdeploy_user_role":                                      resourceUserRole(),
 			"octopusdeploy_username_password_account":                      resourceUsernamePasswordAccount(),
-			"octopusdeploy_variable":                                       resourceVariable(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
