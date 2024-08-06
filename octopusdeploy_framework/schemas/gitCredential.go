@@ -54,6 +54,7 @@ func GetGitCredentialDataSourceSchema() map[string]datasourceSchema.Attribute {
 		"take":     util.GetQueryTakeDatasourceSchema(),
 		"git_credentials": datasourceSchema.ListNestedAttribute{
 			Computed:    true,
+			Optional:    false,
 			Description: "A list of Git Credentials that match the filter(s).",
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: GetGitCredentialAttributes(),
