@@ -52,7 +52,7 @@ func getGitCredentialDataSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Description: "A list of Git Credentials that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
+			Optional:    false,
 			Type:        schema.TypeList,
 		},
 		"name":     getQueryName(),

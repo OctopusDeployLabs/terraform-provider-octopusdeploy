@@ -112,7 +112,7 @@ func getMachinePolicyDataSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Description: "A list of machine policies that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
+			Optional:    false,
 			Type:        schema.TypeList,
 		},
 		"partial_name": getQueryPartialName(),

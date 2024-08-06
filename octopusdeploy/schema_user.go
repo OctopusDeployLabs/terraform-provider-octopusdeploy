@@ -74,7 +74,7 @@ func getUserDataSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Description: "A list of users that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
+			Optional:    false,
 			Type:        schema.TypeList,
 		},
 	}
