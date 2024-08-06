@@ -34,7 +34,7 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 			Description: "How many runs to keep per environment.",
 			Computed:    true,
 			Optional:    true,
-			Default:     int64default.StaticInt64(0),
+			Default:     int64default.StaticInt64(100),
 			Validators: []validator.Int64{
 				int64validator.AtLeast(0),
 			},
@@ -51,21 +51,16 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 	}
 }
 
-func GetDefaultRunbookRetentionPeriod() types.List {
-	return types.ListValueMust(
-		types.ObjectType{AttrTypes: GetRunbookRetentionPeriodObjectType()},
-		[]attr.Value{
-			MapFromRunbookRetentionPeriod(&runbooks.RunbookRetentionPeriod{
-				QuantityToKeep:    100,
-				ShouldKeepForever: false,
-			}),
-		},
-	)
+func GetDefaultRunbookRetentionPeriod() *runbooks.RunbookRetentionPeriod {
+	return &runbooks.RunbookRetentionPeriod{
+		QuantityToKeep:    100,
+		ShouldKeepForever: false,
+	}
 }
 
 func MapFromRunbookRetentionPeriod(retentionPeriod *runbooks.RunbookRetentionPeriod) attr.Value {
 	if retentionPeriod == nil {
-		return nil
+		return MapFromRunbookRetentionPeriod(GetDefaultRunbookRetentionPeriod())
 	}
 
 	attrs := map[string]attr.Value{
@@ -78,7 +73,7 @@ func MapFromRunbookRetentionPeriod(retentionPeriod *runbooks.RunbookRetentionPer
 
 func MapToRunbookRetentionPeriod(flattenedRunbookRetentionPeriod types.List) *runbooks.RunbookRetentionPeriod {
 	if flattenedRunbookRetentionPeriod.IsNull() || len(flattenedRunbookRetentionPeriod.Elements()) == 0 {
-		return nil
+		return GetDefaultRunbookRetentionPeriod()
 	}
 	obj := flattenedRunbookRetentionPeriod.Elements()[0].(types.Object)
 	attrs := obj.Attributes()

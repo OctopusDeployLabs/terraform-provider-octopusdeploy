@@ -1,14 +1,22 @@
 package schemas
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -128,10 +136,7 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(RunbookResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			RunbookSchemaAttributeNames.ID: resourceSchema.StringAttribute{
-				Description: "The unique ID for this runbook.",
-				Computed:    true,
-			},
+			RunbookSchemaAttributeNames.ID: util.GetIdResourceSchema(),
 			RunbookSchemaAttributeNames.Name: resourceSchema.StringAttribute{
 				Description: "The name of the runbook in Octopus Deploy. This name must be unique.",
 				Required:    true,
@@ -142,11 +147,7 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 					),
 				},
 			},
-			RunbookSchemaAttributeNames.Description: resourceSchema.StringAttribute{
-				Description: "The description of this runbook.",
-				Optional:    true,
-				Computed:    true,
-			},
+			RunbookSchemaAttributeNames.Description: util.GetDescriptionResourceSchema(RunbookResourceDescription),
 			RunbookSchemaAttributeNames.ProjectID: resourceSchema.StringAttribute{
 				Description: "The project that this runbook belongs to.",
 				Required:    true,
@@ -154,26 +155,42 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 			RunbookSchemaAttributeNames.RunbookProcessID: resourceSchema.StringAttribute{
 				Description: "The runbook process ID.",
 				Computed:    true,
+				Optional:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			RunbookSchemaAttributeNames.PublishedRunbookSnapshotID: resourceSchema.StringAttribute{
 				Description: "The published snapshot ID.",
 				Computed:    true,
+				Optional:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			RunbookSchemaAttributeNames.SpaceID: util.GetSpaceIdResourceSchema(RunbookResourceDescription),
 			RunbookSchemaAttributeNames.MultiTenancyMode: resourceSchema.StringAttribute{
 				Description: fmt.Sprintf("The tenanted deployment mode of the runbook. Valid modes are %s", strings.Join(util.Map(tenantedDeploymentModes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 				Computed:    true,
 				Optional:    true,
+				//Default:     stringdefault.StaticString(tenantedDeploymentModeNames.Untenanted),
 				Validators: []validator.String{
 					stringvalidator.OneOf(tenantedDeploymentModes...),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			RunbookSchemaAttributeNames.EnvironmentScope: resourceSchema.StringAttribute{
 				Description: "Determines how the runbook is scoped to environments.",
 				Computed:    true,
 				Optional:    true,
+				//Default:     stringdefault.StaticString(environmentScopeNames.All),
 				Validators: []validator.String{
 					stringvalidator.OneOf(environmentScopeTypes...),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			RunbookSchemaAttributeNames.Environments: resourceSchema.ListAttribute{
@@ -181,19 +198,31 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
+				//Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, nil)),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 			},
 			RunbookSchemaAttributeNames.DefaultGuidedFailureMode: resourceSchema.StringAttribute{
 				Description: "Sets the runbook guided failure mode.",
-				Computed:    true,
 				Optional:    true,
+				Computed:    true,
+				//Default:     stringdefault.StaticString(defaultGuidedFailureModeNames.EnvironmentDefault),
 				Validators: []validator.String{
 					stringvalidator.OneOf(defaultGuidedFailureModes...),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			RunbookSchemaAttributeNames.ForcePackageDownload: resourceSchema.BoolAttribute{
 				Description: "Whether to force packages to be re-downloaded or not.",
 				Computed:    true,
 				Optional:    true,
+				//Default:     booldefault.StaticBool(false),
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 		Blocks: map[string]resourceSchema.Block{
@@ -216,4 +245,50 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 			},
 		},
 	}
+}
+
+func (data *RunbookTypeResourceModel) RefreshFromApiResponse(ctx context.Context, runbook *runbooks.Runbook) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if runbook == nil {
+		return diags
+	}
+
+	data.ID = types.StringValue(runbook.ID)
+	data.Name = types.StringValue(runbook.Name)
+	data.ProjectID = types.StringValue(runbook.ProjectID)
+	data.Description = types.StringValue(runbook.Description)
+	data.RunbookProcessID = types.StringValue(runbook.RunbookProcessID)
+	data.PublishedRunbookSnapshotID = types.StringValue(runbook.PublishedRunbookSnapshotID)
+	data.SpaceID = types.StringValue(runbook.SpaceID)
+	data.MultiTenancyMode = types.StringValue(string(runbook.MultiTenancyMode))
+	data.EnvironmentScope = types.StringValue(runbook.EnvironmentScope)
+	data.Environments = util.FlattenStringList(runbook.Environments)
+	data.DefaultGuidedFailureMode = types.StringValue(runbook.DefaultGuidedFailureMode)
+	data.ForcePackageDownload = types.BoolValue(runbook.ForcePackageDownload)
+	if !data.ConnectivityPolicy.IsNull() {
+		result, d := types.ListValueFrom(
+			ctx,
+			types.ObjectType{AttrTypes: GetConnectivityPolicyObjectType()},
+			[]any{MapFromConnectivityPolicy(runbook.ConnectivityPolicy)},
+		)
+		diags.Append(d...)
+		data.ConnectivityPolicy = result
+	} else {
+		data.ConnectivityPolicy = types.ListValueMust(
+			types.ObjectType{AttrTypes: GetConnectivityPolicyObjectType()},
+			[]attr.Value{MapFromConnectivityPolicy(GetDefaultConnectivityPolicy())},
+		)
+	}
+	if !data.RunRetentionPolicy.IsNull() {
+		result, d := types.ListValueFrom(
+			ctx,
+			types.ObjectType{AttrTypes: GetRunbookRetentionPeriodObjectType()},
+			[]any{MapFromRunbookRetentionPeriod(runbook.RunRetentionPolicy)},
+		)
+		diags.Append(d...)
+		data.RunRetentionPolicy = result
+	}
+
+	return diags
 }

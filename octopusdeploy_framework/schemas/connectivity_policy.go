@@ -6,7 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -50,10 +56,18 @@ func getConnectivityPolicySchema() map[string]resourceSchema.Attribute {
 		runbookConnectivityPolicySchemeAttributeNames.AllowDeploymentsToNoTargets: resourceSchema.BoolAttribute{
 			Computed: true,
 			Optional: true,
+			Default:  booldefault.StaticBool(true),
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		runbookConnectivityPolicySchemeAttributeNames.ExcludeUnhealthyTargets: resourceSchema.BoolAttribute{
 			Computed: true,
 			Optional: true,
+			Default:  booldefault.StaticBool(false),
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		runbookConnectivityPolicySchemeAttributeNames.SkipMachineBehavior: resourceSchema.StringAttribute{
 			Computed: true,
@@ -64,18 +78,34 @@ func getConnectivityPolicySchema() map[string]resourceSchema.Attribute {
 					skipMachineBehaviors...,
 				),
 			},
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		runbookConnectivityPolicySchemeAttributeNames.TargetRoles: resourceSchema.ListAttribute{
 			Computed:    true,
 			Optional:    true,
 			ElementType: types.StringType,
+			Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, nil)),
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 		},
+	}
+}
+
+func GetDefaultConnectivityPolicy() *core.ConnectivityPolicy {
+	return &core.ConnectivityPolicy{
+		AllowDeploymentsToNoTargets: true,
+		ExcludeUnhealthyTargets:     false,
+		SkipMachineBehavior:         core.SkipMachineBehaviorNone,
+		TargetRoles:                 []string{},
 	}
 }
 
 func MapFromConnectivityPolicy(connectivityPolicy *core.ConnectivityPolicy) attr.Value {
 	if connectivityPolicy == nil {
-		return nil
+		return MapFromConnectivityPolicy(GetDefaultConnectivityPolicy())
 	}
 
 	attrs := map[string]attr.Value{
@@ -90,7 +120,7 @@ func MapFromConnectivityPolicy(connectivityPolicy *core.ConnectivityPolicy) attr
 
 func MapToConnectivityPolicy(flattenedConnectivityPolicy types.List) *core.ConnectivityPolicy {
 	if flattenedConnectivityPolicy.IsNull() || len(flattenedConnectivityPolicy.Elements()) == 0 {
-		return nil
+		return GetDefaultConnectivityPolicy()
 	}
 
 	obj := flattenedConnectivityPolicy.Elements()[0].(types.Object)

@@ -8,10 +8,8 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.ResourceWithImportState = &runbookTypeResource{}
@@ -58,17 +56,11 @@ func (r *runbookTypeResource) Create(ctx context.Context, req resource.CreateReq
 	if !plan.MultiTenancyMode.IsNull() {
 		runbook.MultiTenancyMode = core.TenantedDeploymentMode(plan.MultiTenancyMode.ValueString())
 	}
-	if !plan.ConnectivityPolicy.IsNull() {
-		runbook.ConnectivityPolicy = schemas.MapToConnectivityPolicy(plan.ConnectivityPolicy)
-	}
+	runbook.ConnectivityPolicy = schemas.MapToConnectivityPolicy(plan.ConnectivityPolicy)
 	runbook.EnvironmentScope = plan.EnvironmentScope.ValueString()
 	runbook.Environments = util.ExpandStringList(plan.Environments)
 	runbook.DefaultGuidedFailureMode = plan.DefaultGuidedFailureMode.ValueString()
-	if !plan.RunRetentionPolicy.IsNull() {
-		runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(plan.RunRetentionPolicy)
-	} else {
-		runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(schemas.GetDefaultRunbookRetentionPeriod())
-	}
+	runbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(plan.RunRetentionPolicy)
 	runbook.ForcePackageDownload = plan.ForcePackageDownload.ValueBool()
 
 	util.Create(ctx, schemas.RunbookResourceDescription, plan)
@@ -79,7 +71,11 @@ func (r *runbookTypeResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	mapToState(&plan, createdRunbook)
+	resp.Diagnostics.Append(plan.RefreshFromApiResponse(ctx, createdRunbook)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 
 	util.Created(ctx, schemas.RunbookResourceDescription, createdRunbook)
@@ -100,21 +96,25 @@ func (r *runbookTypeResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	mapToState(&state, runbook)
+	resp.Diagnostics.Append(state.RefreshFromApiResponse(ctx, runbook)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 
 	util.Read(ctx, schemas.RunbookResourceDescription, runbook)
 }
 
 func (r *runbookTypeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data, state schemas.RunbookTypeResourceModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	var plan, state schemas.RunbookTypeResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	util.Update(ctx, schemas.RunbookResourceDescription, data)
+	util.Update(ctx, schemas.RunbookResourceDescription, plan)
 
 	runbook, err := runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
@@ -122,31 +122,35 @@ func (r *runbookTypeResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	updatedRunbook := runbooks.NewRunbook(data.Name.ValueString(), data.ProjectID.ValueString())
+	updatedRunbook := runbooks.NewRunbook(plan.Name.ValueString(), plan.ProjectID.ValueString())
 	updatedRunbook.ID = runbook.GetID()
 	updatedRunbook.SpaceID = runbook.SpaceID
-	updatedRunbook.Description = data.Description.ValueString()
-	updatedRunbook.RunbookProcessID = data.RunbookProcessID.ValueString()
-	updatedRunbook.PublishedRunbookSnapshotID = data.PublishedRunbookSnapshotID.ValueString()
-	if !data.MultiTenancyMode.IsNull() {
-		updatedRunbook.MultiTenancyMode = core.TenantedDeploymentMode(data.MultiTenancyMode.ValueString())
+	updatedRunbook.Description = plan.Description.ValueString()
+	updatedRunbook.RunbookProcessID = plan.RunbookProcessID.ValueString()
+	updatedRunbook.PublishedRunbookSnapshotID = plan.PublishedRunbookSnapshotID.ValueString()
+	if !plan.MultiTenancyMode.IsNull() {
+		updatedRunbook.MultiTenancyMode = core.TenantedDeploymentMode(plan.MultiTenancyMode.ValueString())
 	}
-	updatedRunbook.ConnectivityPolicy = schemas.MapToConnectivityPolicy(data.ConnectivityPolicy)
-	updatedRunbook.EnvironmentScope = data.EnvironmentScope.ValueString()
-	updatedRunbook.Environments = util.ExpandStringList(data.Environments)
-	updatedRunbook.DefaultGuidedFailureMode = data.DefaultGuidedFailureMode.ValueString()
-	updatedRunbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(data.RunRetentionPolicy)
-	updatedRunbook.ForcePackageDownload = data.ForcePackageDownload.ValueBool()
+	updatedRunbook.ConnectivityPolicy = schemas.MapToConnectivityPolicy(plan.ConnectivityPolicy)
+	updatedRunbook.EnvironmentScope = plan.EnvironmentScope.ValueString()
+	updatedRunbook.Environments = util.ExpandStringList(plan.Environments)
+	updatedRunbook.DefaultGuidedFailureMode = plan.DefaultGuidedFailureMode.ValueString()
+	updatedRunbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(plan.RunRetentionPolicy)
+	updatedRunbook.ForcePackageDownload = plan.ForcePackageDownload.ValueBool()
 
 	updatedRunbook, err = runbooks.Update(r.Config.Client, updatedRunbook)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update runbook", err.Error())
 	}
 
-	util.Updated(ctx, schemas.RunbookResourceDescription, updatedRunbook)
+	resp.Diagnostics.Append(plan.RefreshFromApiResponse(ctx, updatedRunbook)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-	mapToState(&data, updatedRunbook)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+
+	util.Updated(ctx, schemas.RunbookResourceDescription, updatedRunbook)
 }
 
 func (*runbookTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -169,35 +173,4 @@ func (r *runbookTypeResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	util.Deleted(ctx, schemas.RunbookResourceDescription, state)
 	resp.State.RemoveResource(ctx)
-}
-
-func mapToState(data *schemas.RunbookTypeResourceModel, runbook *runbooks.Runbook) {
-	data.ID = types.StringValue(runbook.ID)
-	data.Name = types.StringValue(runbook.Name)
-	data.ProjectID = types.StringValue(runbook.ProjectID)
-	data.Description = types.StringValue(runbook.Description)
-	data.RunbookProcessID = types.StringValue(runbook.RunbookProcessID)
-	data.PublishedRunbookSnapshotID = types.StringValue(runbook.PublishedRunbookSnapshotID)
-	data.SpaceID = types.StringValue(runbook.SpaceID)
-	data.MultiTenancyMode = types.StringValue(string(runbook.MultiTenancyMode))
-	data.ConnectivityPolicy = types.ListValueMust(
-		types.ObjectType{AttrTypes: schemas.GetConnectivityPolicyObjectType()},
-		[]attr.Value{
-			schemas.MapFromConnectivityPolicy(runbook.ConnectivityPolicy),
-		},
-	)
-	data.EnvironmentScope = types.StringValue(runbook.EnvironmentScope)
-	data.Environments = util.FlattenStringList(runbook.Environments)
-	data.DefaultGuidedFailureMode = types.StringValue(runbook.DefaultGuidedFailureMode)
-
-	// work-around for bug in Octopus API that does not honor setting ForcePackageDownload to true
-	if data.ForcePackageDownload.IsNull() || data.ForcePackageDownload == types.BoolValue(false) || runbook.ForcePackageDownload {
-		data.ForcePackageDownload = types.BoolValue(runbook.ForcePackageDownload)
-	}
-	data.RunRetentionPolicy = types.ListValueMust(
-		types.ObjectType{AttrTypes: schemas.GetRunbookRetentionPeriodObjectType()},
-		[]attr.Value{
-			schemas.MapFromRunbookRetentionPeriod(runbook.RunRetentionPolicy),
-		},
-	)
 }
