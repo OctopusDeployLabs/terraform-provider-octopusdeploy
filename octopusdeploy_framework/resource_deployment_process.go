@@ -25,7 +25,7 @@ func NewDeploymentProcessResource() resource.Resource {
 }
 
 func (d *deploymentProcessResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = util.GetTypeName("actions")
+	resp.TypeName = util.GetTypeName("deployment_process")
 }
 
 func (d *deploymentProcessResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
