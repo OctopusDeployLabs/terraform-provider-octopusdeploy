@@ -29,7 +29,7 @@ resource "octopusdeploy_artifactory_generic_feed" "example" {
 ### Required
 
 - `feed_uri` (String)
-- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `name` (String) The name of this resource.
 - `repository` (String)
 
 ### Optional
@@ -38,7 +38,7 @@ resource "octopusdeploy_artifactory_generic_feed" "example" {
 - `layout_regex` (String)
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this helm feed.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ## Import

@@ -29,7 +29,8 @@ func (r *artifactoryGenericFeedTypeResource) Metadata(ctx context.Context, req r
 
 func (r *artifactoryGenericFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetArtifactoryGenericFeedResourceSchema(),
+		Attributes:  schemas.GetArtifactoryGenericFeedResourceSchema(),
+		Description: "This resource manages a Artifactory Generic feed in Octopus Deploy.",
 	}
 }
 
