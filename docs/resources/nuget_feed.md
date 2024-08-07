@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_nuget_feed Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  This resource manages a NuGet feed in Octopus Deploy.
+  This resource manages a Nuget feed in Octopus Deploy.
 ---
 
 # octopusdeploy_nuget_feed (Resource)
 
-This resource manages a NuGet feed in Octopus Deploy.
+This resource manages a Nuget feed in Octopus Deploy.
 
 ## Example Usage
 
