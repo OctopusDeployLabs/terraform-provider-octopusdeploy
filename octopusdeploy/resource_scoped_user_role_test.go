@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccScopedUserRole(t *testing.T) {
-	SkipCI(t, "Error: octopus deploy api returned an error on endpoint /api/scopeduserroles - [You cannot use a role with Space level permissions at the System level. Space level permissions: AccountCreate]")
+	internalTest.SkipCI(t, "Error: octopus deploy api returned an error on endpoint /api/scopeduserroles - [You cannot use a role with Space level permissions at the System level. Space level permissions: AccountCreate]")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	teamResource := "octopusdeploy_team." + localName
 	environmentResource := "octopusdeploy_environment." + localName

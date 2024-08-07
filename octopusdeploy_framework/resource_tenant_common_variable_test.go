@@ -2,19 +2,19 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"strings"
-	"testing"
 
-	localtest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 )
 
 func TestAccTenantCommonVariableBasic(t *testing.T) {
-	SkipCI(t, "project_environment have been refactor [deprecated] - will enable this test later after Ben fix")
 	//SkipCI(t, "A managed resource \"octopusdeploy_project_group\" \"ewtxiwplhaenzmhpaqyx\" has\n        not been declared in the root module.")
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -59,53 +59,57 @@ func TestAccTenantCommonVariableBasic(t *testing.T) {
 }
 
 func testAccTenantCommonVariableBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, tenantLocalName string, tenantName string, tenantDescription string, localName string, value string) string {
-	projectGroup := localtest.NewProjectGroupTestOptions()
+	projectGroup := internalTest.NewProjectGroupTestOptions()
 	allowDynamicInfrastructure := false
 	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
 	projectGroup.LocalName = projectGroupLocalName
+
 	var tfConfig = fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
-		localtest.ProjectGroupConfiguration(projectGroup)+"\n"+
+		internalTest.ProjectGroupConfiguration(projectGroup)+"\n"+
 		testAccEnvironment(environmentLocalName, environmentName, description, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
-		resource "octopusdeploy_library_variable_set" "test-library-variable-set" {
-			name = "test"
+        resource "octopusdeploy_library_variable_set" "test-library-variable-set" {
+            name = "test"
 
-			template {
-				default_value = "Default Value???"
-				help_text     = "This is the help text"
-				label         = "Test Label"
-				name          = "Test Template"
+            template {
+                default_value = "Default Value???"
+                help_text     = "This is the help text"
+                label         = "Test Label"
+                name          = "Test Template"
 
-				display_settings = {
-					"Octopus.ControlType" = "Sensitive"
-				}
-			}
-		}
+                display_settings = {
+                    "Octopus.ControlType" = "Sensitive"
+                }
+            }
+        }
 
-		resource "octopusdeploy_project" "%s" {
-			included_library_variable_sets = [octopusdeploy_library_variable_set.test-library-variable-set.id]
-			lifecycle_id                   = octopusdeploy_lifecycle.%s.id
-			name                           = "%s"
-			project_group_id               = octopusdeploy_project_group.%s.id
-		}
+        resource "octopusdeploy_project" "%[1]s" {
+            included_library_variable_sets = [octopusdeploy_library_variable_set.test-library-variable-set.id]
+            lifecycle_id                   = octopusdeploy_lifecycle.%[2]s.id
+            name                           = "%[3]s"
+            project_group_id               = octopusdeploy_project_group.%[4]s.id
+            depends_on                     = [octopusdeploy_library_variable_set.test-library-variable-set]
+        }
 
-		resource "octopusdeploy_tenant" "%s" {
-			name = "%s"
-		}
+        resource "octopusdeploy_tenant" "%[5]s" {
+            name = "%[6]s"
+        }
 
-		resource "octopusdeploy_tenant_project" "project_environment" {
-			tenant_id = octopusdeploy_tenant.%s.id
-			project_id   = octopusdeploy_project.%s.id
-			environment_ids = [octopusdeploy_environment.%s.id]
-		}
+        resource "octopusdeploy_tenant_project" "project_environment" {
+            tenant_id        = octopusdeploy_tenant.%[5]s.id
+            project_id       = octopusdeploy_project.%[1]s.id
+            environment_ids  = [octopusdeploy_environment.%[7]s.id]
+            depends_on       = [octopusdeploy_project.%[1]s, octopusdeploy_tenant.%[5]s, octopusdeploy_environment.%[7]s]
+        }
 
-		resource "octopusdeploy_tenant_common_variable" "%s" {
-			library_variable_set_id = octopusdeploy_library_variable_set.test-library-variable-set.id
-			template_id             = octopusdeploy_library_variable_set.test-library-variable-set.template[0].id
-			tenant_id               = octopusdeploy_tenant.%s.id
-			value                   = "%s"
-		}`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, projectLocalName, environmentLocalName, localName, tenantLocalName, value)
+        resource "octopusdeploy_tenant_common_variable" "%[8]s" {
+            library_variable_set_id = octopusdeploy_library_variable_set.test-library-variable-set.id
+            template_id             = octopusdeploy_library_variable_set.test-library-variable-set.template[0].id
+            tenant_id               = octopusdeploy_tenant.%[5]s.id
+            value                   = "%[9]s"
+            depends_on              = [octopusdeploy_library_variable_set.test-library-variable-set, octopusdeploy_tenant_project.project_environment]
+        }`, projectLocalName, lifecycleLocalName, projectName, projectGroupLocalName, tenantLocalName, tenantName, environmentLocalName, localName, value)
 	return tfConfig
 }
 

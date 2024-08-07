@@ -2,15 +2,15 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"strings"
-	"testing"
 )
 
 func TestAccTenantProjectVariableBasic(t *testing.T) {
-	SkipCI(t, "project_environment have been refactor [deprecated] - will enable this test later after Ben fix")
 	lifecycleLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -121,7 +121,11 @@ func testTenantProjectVariable(localName string, environmentLocalName string, pr
 		tenant_id      = octopusdeploy_tenant.%s.id
 		template_id    = octopusdeploy_project.%s.template[0].id
 		value          = "%s"
-	}`, localName, environmentLocalName, projectLocalName, tenantLocalName, templateLocalName, value)
+ 		depends_on     = [
+            octopusdeploy_project.%s,
+            octopusdeploy_tenant_project.project_environment
+        ]
+	}`, localName, environmentLocalName, projectLocalName, tenantLocalName, templateLocalName, value, projectLocalName)
 }
 
 func testTenantProjectVariableExists(prefix string) resource.TestCheckFunc {
