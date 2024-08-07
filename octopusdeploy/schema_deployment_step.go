@@ -133,6 +133,7 @@ func flattenDeploymentSteps(deploymentSteps []*deployments.DeploymentStep) []map
 			}
 
 			action := fp(deploymentStep.Actions[i])
+
 			action["sort_order"] = i + 1
 			flattenedDeploymentStep[step_type_name] = append(flattenedDeploymentStep[step_type_name].([]map[string]interface{}), action)
 		}
