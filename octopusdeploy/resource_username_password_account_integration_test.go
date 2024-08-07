@@ -1,4 +1,4 @@
-package octopusdeploy_framework
+package octopusdeploy
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"

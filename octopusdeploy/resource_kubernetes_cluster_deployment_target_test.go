@@ -149,13 +149,6 @@ func testAccKubernetesClusterDeploymentTargetBasic(accountLocalName string, acco
 	     }`, localName, clusterURL, environmentID, name, userRoleID, usernamePasswordAccountID)
 }
 
-func testUsernamePasswordMinimum(localName string, name string, username string) string {
-	return fmt.Sprintf(`resource "octopusdeploy_username_password_account" "%s" {
-		name     = "%s"
-		username = "%s"
-	}`, localName, name, username)
-}
-
 func testAccKubernetesClusterDeploymentTargetGcp(
 	accountLocalName string,
 	accountName string,

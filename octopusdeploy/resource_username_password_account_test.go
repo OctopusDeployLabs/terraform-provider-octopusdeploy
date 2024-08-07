@@ -1,16 +1,16 @@
-package octopusdeploy_framework
+package octopusdeploy
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"testing"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccUsernamePasswordBasic(t *testing.T) {
@@ -26,7 +26,8 @@ func TestAccUsernamePasswordBasic(t *testing.T) {
 	config := testUsernamePasswordBasic(localName, description, name, username, password, tenantedDeploymentParticipation)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { TestAccPreCheck(t) },
+		CheckDestroy:             testAccountCheckDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -47,17 +48,6 @@ func TestAccUsernamePasswordBasic(t *testing.T) {
 	})
 }
 
-func testAccountExists(prefix string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		accountID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := octoClient.Accounts.GetByID(accountID); err != nil {
-			return err
-		}
-
-		return nil
-	}
-}
-
 func testUsernamePasswordBasic(localName string, description string, name string, username string, password string, tenantedDeploymentParticipation core.TenantedDeploymentMode) string {
 	return fmt.Sprintf(`resource "octopusdeploy_username_password_account" "%s" {
 		description                       = "%s"
@@ -66,6 +56,13 @@ func testUsernamePasswordBasic(localName string, description string, name string
 		tenanted_deployment_participation = "%s"
 		username                          = "%s"
 	}`, localName, description, name, password, tenantedDeploymentParticipation, username)
+}
+
+func testUsernamePasswordMinimum(localName string, name string, username string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_username_password_account" "%s" {
+		name     = "%s"
+		username = "%s"
+	}`, localName, name, username)
 }
 
 // TestUsernamePasswordVariableResource verifies that a project variable referencing a username/password account
