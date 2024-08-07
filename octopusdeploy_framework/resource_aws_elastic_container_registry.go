@@ -28,7 +28,8 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Metadata(ctx context.Conte
 
 func (r *awsElasticContainerRegistryFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetAwsElasticContainerRegistryFeedResourceSchema(),
+		Attributes:  schemas.GetAwsElasticContainerRegistryFeedResourceSchema(),
+		Description: "This resource manages an AWS Elastic Container Registry in Octopus Deploy.",
 	}
 }
 

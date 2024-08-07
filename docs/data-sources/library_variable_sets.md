@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_library_variable_sets Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  Provides information about existing library variable sets.
 ---
 
 # octopusdeploy_library_variable_sets (Data Source)
 
-
+Provides information about existing library variable sets.
 
 
 

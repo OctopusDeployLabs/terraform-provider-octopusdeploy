@@ -28,7 +28,8 @@ func (r *dockerContainerRegistryFeedTypeResource) Metadata(ctx context.Context, 
 
 func (r *dockerContainerRegistryFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetDockerContainerRegistryFeedResourceSchema(),
+		Attributes:  schemas.GetDockerContainerRegistryFeedResourceSchema(),
+		Description: "This resource manages a Docker Container Registry in Octopus Deploy.",
 	}
 }
 
