@@ -35,7 +35,8 @@ func (r *tagTypeResource) Metadata(ctx context.Context, req resource.MetadataReq
 
 func (r *tagTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetTagSchema(),
+		Attributes:  schemas.GetTagSchema(),
+		Description: "This resource manages tags in Octopus Deploy.",
 	}
 }
 
