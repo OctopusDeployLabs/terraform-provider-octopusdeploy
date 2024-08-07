@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -68,7 +67,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_ssh_connection_deployment_target":               resourceSSHConnectionDeploymentTarget(),
 			"octopusdeploy_ssh_key_account":                                resourceSSHKeyAccount(),
 			"octopusdeploy_static_worker_pool":                             resourceStaticWorkerPool(),
-			"octopusdeploy_tag":                                            resourceTag(),
 			"octopusdeploy_tag_set":                                        resourceTagSet(),
 			"octopusdeploy_team":                                           resourceTeam(),
 			"octopusdeploy_tenant":                                         resourceTenant(),
