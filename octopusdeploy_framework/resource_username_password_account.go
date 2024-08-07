@@ -1,0 +1,181 @@
+package octopusdeploy_framework
+
+import (
+	"context"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+)
+
+var _ resource.Resource = &usernamePasswordAccountResource{}
+
+type usernamePasswordAccountResource struct {
+	*Config
+}
+
+type usernamePasswordAccountResourceModel struct {
+	ID                              types.String `tfsdk:"id"`
+	SpaceID                         types.String `tfsdk:"space_id"`
+	Name                            types.String `tfsdk:"name"`
+	Description                     types.String `tfsdk:"description"`
+	Environments                    types.List   `tfsdk:"environments"`
+	Password                        types.String `tfsdk:"password"`
+	TenantedDeploymentParticipation types.String `tfsdk:"tenanted_deployment_participation"`
+	Tenants                         types.List   `tfsdk:"tenants"`
+	TenantTags                      types.List   `tfsdk:"tenant_tags"`
+	Username                        types.String `tfsdk:"username"`
+}
+
+func NewUsernamePasswordAccountResource() resource.Resource {
+	return &usernamePasswordAccountResource{}
+}
+
+func (r *usernamePasswordAccountResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = util.GetTypeName("username_password_account")
+}
+
+func (r *usernamePasswordAccountResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schemas.GetUsernamePasswordAccountResourceSchema()
+}
+
+func (r *usernamePasswordAccountResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	r.Config = ResourceConfiguration(req, resp)
+}
+func (r *usernamePasswordAccountResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan usernamePasswordAccountResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	tflog.Debug(ctx, "Creating username password account", map[string]interface{}{
+		"name": plan.Name.ValueString(),
+	})
+
+	account := expandUsernamePasswordAccount(ctx, plan)
+	createdAccount, err := accounts.Add(r.Client, account)
+	if err != nil {
+		resp.Diagnostics.AddError("Error creating username password account", err.Error())
+		return
+	}
+
+	state := flattenUsernamePasswordAccount(ctx, createdAccount.(*accounts.UsernamePasswordAccount), plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+}
+
+func (r *usernamePasswordAccountResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state usernamePasswordAccountResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	account, err := accounts.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error reading username password account", err.Error())
+		return
+	}
+
+	newState := flattenUsernamePasswordAccount(ctx, account.(*accounts.UsernamePasswordAccount), state)
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
+}
+
+func (r *usernamePasswordAccountResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan usernamePasswordAccountResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	account := expandUsernamePasswordAccount(ctx, plan)
+	updatedAccount, err := accounts.Update(r.Client, account)
+	if err != nil {
+		resp.Diagnostics.AddError("Error updating username password account", err.Error())
+		return
+	}
+
+	state := flattenUsernamePasswordAccount(ctx, updatedAccount.(*accounts.UsernamePasswordAccount), plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+}
+
+func (r *usernamePasswordAccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state usernamePasswordAccountResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	err := accounts.DeleteByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error deleting username password account", err.Error())
+		return
+	}
+}
+
+func expandUsernamePasswordAccount(ctx context.Context, model usernamePasswordAccountResourceModel) *accounts.UsernamePasswordAccount {
+	account, _ := accounts.NewUsernamePasswordAccount(model.Name.ValueString())
+
+	account.SetID(model.ID.ValueString())
+	account.SetDescription(model.Description.ValueString())
+	account.SetSpaceID(model.SpaceID.ValueString())
+	account.SetUsername(model.Username.ValueString())
+	account.SetPassword(core.NewSensitiveValue(model.Password.ValueString()))
+	account.SetEnvironmentIDs(expandStringList(ctx, model.Environments))
+	account.SetTenantedDeploymentMode(core.TenantedDeploymentMode(model.TenantedDeploymentParticipation.ValueString()))
+	account.SetTenantIDs(expandStringList(ctx, model.Tenants))
+	account.SetTenantTags(expandStringList(ctx, model.TenantTags))
+
+	return account
+}
+
+func flattenUsernamePasswordAccount(ctx context.Context, account *accounts.UsernamePasswordAccount, model usernamePasswordAccountResourceModel) usernamePasswordAccountResourceModel {
+	model.ID = types.StringValue(account.GetID())
+	model.SpaceID = types.StringValue(account.GetSpaceID())
+	model.Name = types.StringValue(account.GetName())
+	model.Description = types.StringValue(account.GetDescription())
+	model.Username = types.StringValue(account.GetUsername())
+	model.TenantedDeploymentParticipation = types.StringValue(string(account.GetTenantedDeploymentMode()))
+
+	model.Environments = flattenStringList(ctx, account.GetEnvironmentIDs(), model.Environments)
+	model.Tenants = flattenStringList(ctx, account.GetTenantIDs(), model.Tenants)
+	model.TenantTags = flattenStringList(ctx, account.TenantTags, model.TenantTags)
+
+	// Note: We don't flatten the password as it's sensitive and not returned by the API
+
+	return model
+}
+
+func expandStringList(ctx context.Context, list types.List) []string {
+	if list.IsNull() || list.IsUnknown() {
+		return nil
+	}
+
+	var result []string
+	list.ElementsAs(context.Background(), &result, false)
+	if len(result) == 0 {
+		return nil
+	}
+
+	return result
+}
+
+func flattenStringList(ctx context.Context, slice []string, currentList types.List) types.List {
+	if len(slice) == 0 && currentList.IsNull() {
+		return types.ListNull(types.StringType)
+	}
+	if slice == nil {
+		return types.ListNull(types.StringType)
+	}
+
+	valueSlice := make([]attr.Value, len(slice))
+	for i, s := range slice {
+		valueSlice[i] = types.StringValue(s)
+	}
+
+	return types.ListValueMust(types.StringType, valueSlice)
+}
