@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -14,7 +16,8 @@ import (
 )
 
 const (
-	VariableResourceDescription = "variable"
+	VariableResourceDescription    = "variable"
+	VariablesDataSourceDescription = "variables"
 )
 
 var VariableSchemaAttributeNames = struct {
@@ -61,37 +64,92 @@ var VariableTypeNames = struct {
 	AmazonWebServicesAccount string
 	AzureAccount             string
 	GoogleCloudAccount       string
+	UsernamePasswordAccount  string
 	Certificate              string
 	Sensitive                string
 	String                   string
 	WorkerPool               string
-	UsernamePasswordAccount  string
 }{
 	AmazonWebServicesAccount: "AmazonWebServicesAccount",
 	AzureAccount:             "AzureAccount",
 	GoogleCloudAccount:       "GoogleCloudAccount",
+	UsernamePasswordAccount:  "UsernamePasswordAccount",
 	Certificate:              "Certificate",
 	Sensitive:                "Sensitive",
 	String:                   "String",
 	WorkerPool:               "WorkerPool",
-	UsernamePasswordAccount:  "UsernamePasswordAccount",
 }
 
-var variableTypes = []string{
+var VariableTypes = []string{
 	VariableTypeNames.AmazonWebServicesAccount,
 	VariableTypeNames.AzureAccount,
 	VariableTypeNames.GoogleCloudAccount,
+	VariableTypeNames.UsernamePasswordAccount,
 	VariableTypeNames.Certificate,
 	VariableTypeNames.Sensitive,
 	VariableTypeNames.String,
 	VariableTypeNames.WorkerPool,
-	VariableTypeNames.UsernamePasswordAccount,
+}
+
+func GetVariableDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{
+		Description: util.GetDataSourceDescription(VariablesDataSourceDescription),
+		Attributes: map[string]datasourceSchema.Attribute{
+			//request
+			SchemaAttributeNames.Name: datasourceSchema.StringAttribute{
+				Required:    true,
+				Description: "The name of variable to find.",
+			},
+			VariableSchemaAttributeNames.OwnerID: datasourceSchema.StringAttribute{
+				Required:    true,
+				Description: "Owner ID for the variable to find.",
+			},
+			SchemaAttributeNames.SpaceID: util.GetQuerySpaceIDDatasourceSchema(),
+
+			//response
+			SchemaAttributeNames.ID: datasourceSchema.StringAttribute{
+				Computed:    true,
+				Description: "The identifier of the variable to find.",
+			},
+			SchemaAttributeNames.Description: datasourceSchema.StringAttribute{
+				Computed:    true,
+				Description: "The description of this variable.",
+			},
+			VariableSchemaAttributeNames.IsEditable: datasourceSchema.BoolAttribute{
+				Description: "Indicates whether or not this variable is considered editable.",
+				Computed:    true,
+			},
+			VariableSchemaAttributeNames.IsSensitive: datasourceSchema.BoolAttribute{
+				Description: "Indicates whether or not this resource is considered sensitive and should be kept secret.",
+				Computed:    true,
+			},
+			VariableSchemaAttributeNames.Type: datasourceSchema.StringAttribute{
+				Computed:    true,
+				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s.", strings.Join(util.Map(VariableTypes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
+			},
+			VariableSchemaAttributeNames.SensitiveValue: datasourceSchema.StringAttribute{
+				Computed:  true,
+				Sensitive: true,
+			},
+			VariableSchemaAttributeNames.Value: datasourceSchema.StringAttribute{
+				Computed: true,
+			},
+			VariableSchemaAttributeNames.Prompt: getVariablePromptDatasourceSchema(),
+		},
+		Blocks: map[string]datasourceSchema.Block{
+			VariableSchemaAttributeNames.Scope: getVariableScopeDatasourceSchema(),
+		},
+	}
 }
 
 func GetVariableResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
+		Description: util.GetResourceSchemaDescription(VariableResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			SchemaAttributeNames.ID:          GetIdResourceSchema(),
+			SchemaAttributeNames.ID: resourceSchema.StringAttribute{
+				Description: "The ID of this resource.",
+				Computed:    true,
+			},
 			SchemaAttributeNames.Name:        GetNameResourceSchema(true),
 			SchemaAttributeNames.Description: GetDescriptionResourceSchema(VariableResourceDescription),
 			SchemaAttributeNames.SpaceID:     GetSpaceIdResourceSchema(VariableResourceDescription),
@@ -117,7 +175,6 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 				false,
 				true),
 			VariableSchemaAttributeNames.KeyFingerprint: resourceSchema.StringAttribute{
-				Optional: true,
 				Computed: true,
 			},
 			VariableSchemaAttributeNames.PgpKey: resourceSchema.StringAttribute{
@@ -128,7 +185,6 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 				},
 			},
 			VariableSchemaAttributeNames.EncryptedValue: resourceSchema.StringAttribute{
-				Optional: true,
 				Computed: true,
 			},
 			VariableSchemaAttributeNames.SensitiveValue: resourceSchema.StringAttribute{
@@ -140,10 +196,10 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 			},
 			VariableSchemaAttributeNames.Type: resourceSchema.StringAttribute{
 				Required:    true,
-				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s", strings.Join(variableTypes, ", ")),
+				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s.", strings.Join(util.Map(VariableTypes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 				Validators: []validator.String{
 					stringvalidator.OneOf(
-						variableTypes...,
+						VariableTypes...,
 					),
 				},
 			},
@@ -178,4 +234,19 @@ type VariableTypeResourceModel struct {
 	Prompt         types.List   `tfsdk:"prompt"`
 	Scope          types.List   `tfsdk:"scope"`
 	SpaceID        types.String `tfsdk:"space_id"`
+}
+
+type VariablesDataSourceModel struct {
+	OwnerID        types.String `tfsdk:"owner_id"`
+	Name           types.String `tfsdk:"name"`
+	Scope          types.List   `tfsdk:"scope"`
+	SpaceID        types.String `tfsdk:"space_id"`
+	Description    types.String `tfsdk:"description"`
+	ID             types.String `tfsdk:"id"`
+	IsEditable     types.Bool   `tfsdk:"is_editable"`
+	IsSensitive    types.Bool   `tfsdk:"is_sensitive"`
+	Prompt         types.List   `tfsdk:"prompt"`
+	SensitiveValue types.String `tfsdk:"sensitive_value"`
+	Type           types.String `tfsdk:"type"`
+	Value          types.String `tfsdk:"value"`
 }

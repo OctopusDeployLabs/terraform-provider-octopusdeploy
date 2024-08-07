@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -20,6 +21,13 @@ func GetQueryIDsDatasourceSchema() datasourceSchema.Attribute {
 	return datasourceSchema.ListAttribute{
 		Description: "A filter to search by a list of IDs.",
 		ElementType: types.StringType,
+		Optional:    true,
+	}
+}
+
+func GetQuerySpaceIDDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
+		Description: "A Space ID to filter by. Will revert what is specified on the provider if not set.",
 		Optional:    true,
 	}
 }
@@ -105,7 +113,6 @@ func GetNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
 func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
 	return datasourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
-		Optional:    true,
 		Computed:    true,
 	}
 }
@@ -308,6 +315,7 @@ func GetPackageAcquisitionLocationOptionsResourceSchema() resourceSchema.Attribu
 		},
 	}
 }
+
 func GetFeedUriResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Required: true,

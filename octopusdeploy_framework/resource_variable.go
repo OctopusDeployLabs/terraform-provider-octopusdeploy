@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
@@ -77,8 +76,8 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 	newVariable.IsEditable = data.IsEditable.ValueBool()
 	newVariable.IsSensitive = data.IsSensitive.ValueBool()
 	newVariable.Type = data.Type.ValueString()
-	newVariable.Scope = expandVariableScopes(data.Scope)
-	newVariable.Prompt = expandPromptedVariableSettings(data.Prompt)
+	newVariable.Scope = schemas.MapToVariableScope(data.Scope)
+	newVariable.Prompt = schemas.MapToVariablePromptOptions(data.Prompt)
 	newVariable.SpaceID = data.SpaceID.ValueString()
 
 	if newVariable.IsSensitive {
@@ -160,8 +159,8 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 	updatedVariable.IsEditable = data.IsEditable.ValueBool()
 	updatedVariable.IsSensitive = data.IsSensitive.ValueBool()
 	updatedVariable.Type = data.Type.ValueString()
-	updatedVariable.Scope = expandVariableScopes(data.Scope)
-	updatedVariable.Prompt = expandPromptedVariableSettings(data.Prompt)
+	updatedVariable.Scope = schemas.MapToVariableScope(data.Scope)
+	updatedVariable.Prompt = schemas.MapToVariablePromptOptions(data.Prompt)
 	updatedVariable.SpaceID = state.SpaceID.ValueString()
 
 	if updatedVariable.IsSensitive {
@@ -289,15 +288,15 @@ func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *varia
 
 	if !data.Prompt.IsNull() {
 		data.Prompt = types.ListValueMust(
-			types.ObjectType{AttrTypes: variablePromptOptionsObjectType()},
-			[]attr.Value{flattenPromptedVariableSettings(variable.Prompt)},
+			types.ObjectType{AttrTypes: schemas.VariablePromptOptionsObjectType()},
+			[]attr.Value{schemas.MapFromVariablePromptOptions(variable.Prompt)},
 		)
 	}
 
 	if !data.Scope.IsNull() {
 		data.Scope = types.ListValueMust(
-			types.ObjectType{AttrTypes: variableScopeObjectType()},
-			[]attr.Value{flattenVariableScopes(variable.Scope)},
+			types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()},
+			[]attr.Value{schemas.MapFromVariableScope(variable.Scope)},
 		)
 	}
 
@@ -305,216 +304,4 @@ func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *varia
 	data.KeyFingerprint = types.StringNull()
 
 	data.ID = types.StringValue(variable.GetID())
-}
-
-func variablePromptOptionsObjectType() map[string]attr.Type {
-	return map[string]attr.Type{
-		schemas.SchemaAttributeNames.Description: types.StringType,
-		schemas.VariableSchemaAttributeNames.DisplaySettings: types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: variablePromptOptionsDisplaySettingsObjectType(),
-			},
-		},
-		schemas.VariableSchemaAttributeNames.IsRequired: types.BoolType,
-		schemas.VariableSchemaAttributeNames.Label:      types.StringType,
-	}
-}
-
-func variablePromptOptionsDisplaySettingsObjectType() map[string]attr.Type {
-	return map[string]attr.Type{
-		schemas.VariableSchemaAttributeNames.ControlType: types.StringType,
-		schemas.VariableSchemaAttributeNames.SelectOption: types.ListType{
-			ElemType: variablePromptoOptionsDisplaySettingsSelectOptionObjectType(),
-		},
-	}
-}
-
-func variablePromptoOptionsDisplaySettingsSelectOptionObjectType() attr.Type {
-	return types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			schemas.VariableSchemaAttributeNames.Value:       types.StringType,
-			schemas.VariableSchemaAttributeNames.DisplayName: types.StringType,
-		},
-	}
-}
-
-func flattenPromptedVariableSettings(variablePromptOptions *variables.VariablePromptOptions) attr.Value {
-	if variablePromptOptions == nil {
-		return nil
-	}
-
-	attrs := map[string]attr.Value{
-		schemas.SchemaAttributeNames.Description:             types.StringValue(variablePromptOptions.Description),
-		schemas.VariableSchemaAttributeNames.IsRequired:      types.BoolValue(variablePromptOptions.IsRequired),
-		schemas.VariableSchemaAttributeNames.Label:           types.StringValue(variablePromptOptions.Label),
-		schemas.VariableSchemaAttributeNames.DisplaySettings: types.ListNull(types.ObjectType{AttrTypes: variablePromptOptionsDisplaySettingsObjectType()}),
-	}
-	if variablePromptOptions.DisplaySettings != nil {
-		attrs[schemas.VariableSchemaAttributeNames.DisplaySettings] = types.ListValueMust(
-			types.ObjectType{
-				AttrTypes: variablePromptOptionsDisplaySettingsObjectType(),
-			},
-			[]attr.Value{
-				flattenDisplaySettings(variablePromptOptions.DisplaySettings),
-			},
-		)
-	}
-
-	return types.ObjectValueMust(variablePromptOptionsObjectType(), attrs)
-}
-
-func flattenDisplaySettings(displaySettings *resources.DisplaySettings) attr.Value {
-	if displaySettings == nil {
-		return nil
-	}
-
-	attrs := map[string]attr.Value{
-		schemas.VariableSchemaAttributeNames.ControlType: types.StringValue(string(displaySettings.ControlType)),
-	}
-	if displaySettings.ControlType == resources.ControlTypeSelect {
-		if len(displaySettings.SelectOptions) > 0 {
-			attrs[schemas.VariableSchemaAttributeNames.SelectOption] = types.ListValueMust(
-				variablePromptoOptionsDisplaySettingsSelectOptionObjectType(),
-				flattenSelectOptions(displaySettings.SelectOptions),
-			)
-		}
-	} else {
-		attrs[schemas.VariableSchemaAttributeNames.SelectOption] = types.ListNull(variablePromptoOptionsDisplaySettingsSelectOptionObjectType())
-	}
-
-	return types.ObjectValueMust(
-		variablePromptOptionsDisplaySettingsObjectType(),
-		attrs,
-	)
-}
-
-func flattenSelectOptions(selectOptions []*resources.SelectOption) []attr.Value {
-
-	options := make([]attr.Value, len(selectOptions))
-	for _, option := range selectOptions {
-		options = append(options, types.ObjectValueMust(
-			variablePromptOptionsDisplaySettingsObjectType(),
-			map[string]attr.Value{
-				schemas.VariableSchemaAttributeNames.Value:       types.StringValue(option.Value),
-				schemas.VariableSchemaAttributeNames.DisplayName: types.StringValue(option.DisplayName),
-			},
-		))
-	}
-	return options
-}
-
-func expandPromptedVariableSettings(flattenedVariablePromptOptions types.List) *variables.VariablePromptOptions {
-	if flattenedVariablePromptOptions.IsNull() {
-		return nil
-	}
-
-	obj := flattenedVariablePromptOptions.Elements()[0].(types.Object)
-	attrs := obj.Attributes()
-
-	var promptOptions variables.VariablePromptOptions
-	if description, ok := attrs[schemas.SchemaAttributeNames.Description].(types.String); ok && !description.IsNull() {
-		promptOptions.Description = description.ValueString()
-	}
-
-	if isRequired, ok := attrs[schemas.VariableSchemaAttributeNames.IsRequired].(types.Bool); ok && !isRequired.IsNull() {
-		promptOptions.IsRequired = isRequired.ValueBool()
-	}
-
-	if label, ok := attrs[schemas.VariableSchemaAttributeNames.Label].(types.String); ok && !label.IsNull() {
-		promptOptions.Label = label.ValueString()
-	}
-
-	if displaySettings, ok := attrs[schemas.VariableSchemaAttributeNames.DisplaySettings].(types.List); ok && !displaySettings.IsNull() {
-		promptOptions.DisplaySettings = expandDisplaySettings(displaySettings)
-	}
-
-	return &promptOptions
-}
-
-func expandDisplaySettings(flattenedDisplaySettings types.List) *resources.DisplaySettings {
-	if flattenedDisplaySettings.IsNull() {
-		return nil
-	}
-
-	obj := flattenedDisplaySettings.Elements()[0].(types.Object)
-	attrs := obj.Attributes()
-
-	ct, _ := attrs[schemas.VariableSchemaAttributeNames.ControlType].(types.String)
-	controlType := resources.ControlType(ct.ValueString())
-
-	var selectOptions []*resources.SelectOption
-	if controlType == resources.ControlTypeSelect {
-		selectOptions = expandSelectOptions(attrs[schemas.VariableSchemaAttributeNames.SelectOption].(types.List))
-	}
-
-	return resources.NewDisplaySettings(controlType, selectOptions)
-}
-
-func expandSelectOptions(flattenedSelectOptions types.List) []*resources.SelectOption {
-	if flattenedSelectOptions.IsNull() || flattenedSelectOptions.IsUnknown() {
-		return nil
-	}
-
-	options := make([]*resources.SelectOption, len(flattenedSelectOptions.Elements()))
-	for _, option := range flattenedSelectOptions.Elements() {
-		attrs := option.(types.Object).Attributes()
-		options = append(options, &resources.SelectOption{
-			DisplayName: attrs[schemas.VariableSchemaAttributeNames.DisplayName].(types.String).ValueString(),
-			Value:       attrs[schemas.VariableSchemaAttributeNames.Value].(types.String).ValueString(),
-		})
-	}
-
-	return options
-}
-
-func variableScopeObjectType() map[string]attr.Type {
-	return map[string]attr.Type{
-		schemas.VariableScopeFieldNames.Actions:      types.ListType{ElemType: types.StringType},
-		schemas.VariableScopeFieldNames.Channels:     types.ListType{ElemType: types.StringType},
-		schemas.VariableScopeFieldNames.Environments: types.ListType{ElemType: types.StringType},
-		schemas.VariableScopeFieldNames.Machines:     types.ListType{ElemType: types.StringType},
-		schemas.VariableScopeFieldNames.Processes:    types.ListType{ElemType: types.StringType},
-		schemas.VariableScopeFieldNames.Roles:        types.ListType{ElemType: types.StringType},
-		schemas.VariableScopeFieldNames.TenantTags:   types.ListType{ElemType: types.StringType},
-	}
-}
-
-func flattenVariableScopes(variableScopes variables.VariableScope) attr.Value {
-	if variableScopes.IsEmpty() {
-		return nil
-	}
-
-	flattenedScopes := map[string]attr.Value{}
-	flattenedScopes[schemas.VariableScopeFieldNames.Actions] = util.Ternary(variableScopes.Actions != nil, util.FlattenStringList(variableScopes.Actions), types.ListNull(types.StringType))
-	flattenedScopes[schemas.VariableScopeFieldNames.Channels] = util.Ternary(variableScopes.Channels != nil, util.FlattenStringList(variableScopes.Channels), types.ListNull(types.StringType))
-	flattenedScopes[schemas.VariableScopeFieldNames.Environments] = util.Ternary(variableScopes.Environments != nil, util.FlattenStringList(variableScopes.Environments), types.ListNull(types.StringType))
-	flattenedScopes[schemas.VariableScopeFieldNames.Machines] = util.Ternary(variableScopes.Machines != nil, util.FlattenStringList(variableScopes.Machines), types.ListNull(types.StringType))
-	flattenedScopes[schemas.VariableScopeFieldNames.Processes] = util.Ternary(variableScopes.ProcessOwners != nil, util.FlattenStringList(variableScopes.ProcessOwners), types.ListNull(types.StringType))
-	flattenedScopes[schemas.VariableScopeFieldNames.Roles] = util.Ternary(variableScopes.Roles != nil, util.FlattenStringList(variableScopes.Roles), types.ListNull(types.StringType))
-	flattenedScopes[schemas.VariableScopeFieldNames.TenantTags] = util.Ternary(variableScopes.TenantTags != nil, util.FlattenStringList(variableScopes.TenantTags), types.ListNull(types.StringType))
-
-	return types.ObjectValueMust(
-		variableScopeObjectType(),
-		flattenedScopes,
-	)
-}
-
-func expandVariableScopes(flattenedVariableScopes types.List) variables.VariableScope {
-	if flattenedVariableScopes.IsNull() {
-		return variables.VariableScope{}
-	}
-
-	obj := flattenedVariableScopes.Elements()[0].(types.Object)
-	attrs := obj.Attributes()
-	scopes := variables.VariableScope{}
-
-	scopes.Actions = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Actions].(types.List))
-	scopes.Channels = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Channels].(types.List))
-	scopes.Environments = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Environments].(types.List))
-	scopes.Machines = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Machines].(types.List))
-	scopes.ProcessOwners = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Processes].(types.List))
-	scopes.Roles = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.Roles].(types.List))
-	scopes.TenantTags = util.ExpandStringList(attrs[schemas.VariableScopeFieldNames.TenantTags].(types.List))
-
-	return scopes
 }
