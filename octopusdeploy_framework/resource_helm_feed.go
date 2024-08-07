@@ -29,7 +29,8 @@ func (r *helmFeedTypeResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *helmFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetHelmFeedResourceSchema(),
+		Attributes:  schemas.GetHelmFeedResourceSchema(),
+		Description: "This resource manages a Helm Feed in Octopus Deploy.",
 	}
 }
 
