@@ -115,11 +115,17 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 					return d
 				}
 				break
-			//case "Octopus.TentaclePackage":
+			case "Octopus.TentaclePackage":
+				d := mapPackageActionToState(ctx, a, newAction)
 			//	flatten_action_func("deploy_package_action", i, flattenDeployPackageAction)
 			//case "Octopus.TerraformApply":
 			//	flatten_action_func("apply_terraform_template_action", i, flattenApplyTerraformTemplateAction)
-			//case "Octopus.WindowsService":
+			case "Octopus.WindowsService":
+				d := mapWindowsServiceActionToState(ctx, a, newAction)
+				if d.HasError() {
+					return d
+				}
+				break
 			//	flatten_action_func("deploy_windows_service_action", i, flattenDeployWindowsServiceAction)
 			default:
 				diag := mapDeploymentActionToState(ctx, a, newAction)
@@ -309,6 +315,28 @@ func getActionTypeAttrs(actionType string) map[string]attr.Type {
 	}
 
 	return attrs
+}
+
+func mapWindowsServiceActionToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diag := mapBaseDeploymentActionToState(ctx, action, newAction)
+	if diag.HasError() {
+		return diag
+	}
+
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.Arguments", "arguments")
+	mapPropertyToStateBool(action, newAction, "Octopus.Action.WindowsService.CreateOrUpdateService", "create_or_update_service", false)
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.CustomAccountName", "custom_account_name")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.CustomAccountPassword", "custom_account_password")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.Dependencies", "custom_account_name")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.Description", "dependencies")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.CustomAccountName", "description")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.DisplayName", "display_name")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.ExecutablePath", "executable_path")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.ServiceAccount", "service_account")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.ServiceName", "service_name")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.WindowsService.StartMode", "start_mode")
+
+	return nil
 }
 
 func mapRunScriptActionToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
@@ -648,7 +676,12 @@ func mapStepsToDeploymentProcess(ctx context.Context, steps types.List, current 
 			}
 
 			actionMapping := func(mappingFunc func(attr attr.Value) *deployments.DeploymentAction) {
-				step.Actions = append(step.Actions, mappingFunc(attributes))
+				action := mappingFunc(attributes)
+				if action.ActionType == "" {
+					action.ActionType = schemas.ActionsAttributeToActionTypeMap[key]
+				}
+
+				step.Actions = append(step.Actions, action)
 				actionAttrs := getActionAttributes(attributes)
 				if posn, ok := actionAttrs["sort_order"].(types.Int64); ok && !posn.IsNull() && posn.ValueInt64() >= 0 {
 					name := actionAttrs["name"].(types.String).ValueString()
@@ -675,9 +708,9 @@ func mapStepsToDeploymentProcess(ctx context.Context, steps types.List, current 
 			case schemas.DeploymentProcessApplyKubernetesSecretAction:
 				actionMapping(mapKubernetesSecretAction)
 				break
-			//case schemas.DeploymentProcessWindowsServiceAction:
-			//	actionMapping(mapWindowsServiceAction)
-			//	break
+			case schemas.DeploymentProcessWindowsServiceAction:
+				actionMapping(mapWindowsServiceAction)
+				break
 			case schemas.DeploymentProcessManualInterventionAction:
 				actionMapping(mapManualInterventionAction)
 				//	break
@@ -724,11 +757,36 @@ func mapManualInterventionAction(actionAttribute attr.Value) *deployments.Deploy
 		return nil
 	}
 
-	action.ActionType = "Octopus.Manual"
-
 	mapAttributeToProperty(action, actionAttrs, "instructions", "Octopus.Action.Manual.Instructions")
 	mapAttributeToProperty(action, actionAttrs, "responsible_teams", "Octopus.Action.Manual.ResponsibleTeamIds")
 
+	return action
+}
+
+func mapWindowsServiceAction(actionAttribute attr.Value) *deployments.DeploymentAction {
+	actionAttrs := getActionAttributes(actionAttribute)
+	if actionAttrs == nil {
+		return nil
+	}
+
+	action := getBaseAction(actionAttribute)
+	if action == nil {
+		return nil
+	}
+
+	ensureFeatureIsEnabled(action, "Octopus.Features.WindowsService")
+	mapBooleanAttributeToProperty(action, actionAttrs, "create_or_update_service", "Octopus.Action.WindowsService.CreateOrUpdateService")
+
+	mapAttributeToProperty(action, actionAttrs, "service_name", "Octopus.Action.WindowsService.ServiceName")
+	mapAttributeToProperty(action, actionAttrs, "display_name", "Octopus.Action.WindowsService.DisplayName")
+	mapAttributeToProperty(action, actionAttrs, "description", "Octopus.Action.WindowsService.Description")
+	mapAttributeToProperty(action, actionAttrs, "executable_path", "Octopus.Action.WindowsService.ExecutablePath")
+	mapAttributeToProperty(action, actionAttrs, "arguments", "Octopus.Action.WindowsService.Arguments")
+	mapAttributeToProperty(action, actionAttrs, "service_account", "Octopus.Action.WindowsService.ServiceAccount")
+	mapAttributeToProperty(action, actionAttrs, "custom_account_name", "Octopus.Action.WindowsService.CustomAccountName")
+	mapAttributeToProperty(action, actionAttrs, "custom_account_password", "Octopus.Action.WindowsService.CustomAccountPassword")
+	mapAttributeToProperty(action, actionAttrs, "start_mode", "Octopus.Action.WindowsService.StartMode")
+	mapAttributeToProperty(action, actionAttrs, "dependencies", "Octopus.Action.WindowsService.Dependencies")
 	return action
 }
 
@@ -742,7 +800,6 @@ func mapKubernetesSecretAction(actionAttribute attr.Value) *deployments.Deployme
 	if action == nil {
 		return nil
 	}
-	action.ActionType = "Octopus.KubernetesDeploySecret"
 
 	mapAttributeToProperty(action, actionAttrs, "secret_name", "Octopus.Action.KubernetesContainers.SecretName")
 	mapAttributeToProperty(action, actionAttrs, "kubernetes_object_status_check_enabled", "Octopus.Action.Kubernetes.ResourceStatusCheck")
@@ -772,8 +829,6 @@ func mapRunScriptAction(actionAttribute attr.Value) *deployments.DeploymentActio
 		return nil
 	}
 
-	action.ActionType = "Octopus.Script"
-
 	mapAttributeToProperty(action, actionAttrs, "script_file_name", "Octopus.Action.Script.ScriptFileName")
 	mapAttributeToProperty(action, actionAttrs, "script_body", "Octopus.Action.Script.ScriptBody")
 	mapAttributeToProperty(action, actionAttrs, "script_parameters", "Octopus.Action.Script.ScriptParameters")
@@ -784,17 +839,7 @@ func mapRunScriptAction(actionAttribute attr.Value) *deployments.DeploymentActio
 		action.Properties["Octopus.Action.SubstituteInFiles.TargetFiles"] = core.NewPropertyValue(variableSubstitutionInFiles.(types.String).ValueString(), false)
 		action.Properties["Octopus.Action.SubstituteInFiles.Enabled"] = core.NewPropertyValue(formatBoolForActionProperty(true), false)
 
-		const substituteInFilesFeature = "Octopus.Features.SubstituteInFiles"
-		const enabledFeatures = "Octopus.Action.EnabledFeatures"
-		if len(action.Properties[enabledFeatures].Value) == 0 {
-			action.Properties[enabledFeatures] = core.NewPropertyValue(substituteInFilesFeature, false)
-		} else {
-			// fixing https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/641
-			currentFeatures := action.Properties[enabledFeatures].Value
-			if !strings.Contains(currentFeatures, substituteInFilesFeature) {
-				action.Properties[enabledFeatures] = core.NewPropertyValue(currentFeatures+","+substituteInFilesFeature, false)
-			}
-		}
+		ensureFeatureIsEnabled(action, "Octopus.Action.SubstituteInFiles")
 	}
 
 	return action
@@ -834,6 +879,13 @@ func mapAttributeToProperty(action *deployments.DeploymentAction, attrs map[stri
 	util.SetString(attrs, attributeName, &value)
 	if value != "" {
 		action.Properties[propertyName] = core.NewPropertyValue(value, false)
+	}
+}
+
+func mapBooleanAttributeToProperty(action *deployments.DeploymentAction, attrs map[string]attr.Value, attributeName string, propertyName string) {
+	if v, ok := attrs[attributeName]; ok {
+		b := v.(types.Bool).ValueBool()
+		action.Properties[propertyName] = core.NewPropertyValue(formatBoolForActionProperty(b), false)
 	}
 }
 
@@ -1041,4 +1093,17 @@ func isAction(key string) bool {
 	}
 
 	return false
+}
+
+func ensureFeatureIsEnabled(action *deployments.DeploymentAction, feature string) {
+	const enabledFeatures = "Octopus.Action.EnabledFeatures"
+	if len(action.Properties[enabledFeatures].Value) == 0 {
+		action.Properties[enabledFeatures] = core.NewPropertyValue(feature, false)
+	} else {
+		// fixing https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/641
+		currentFeatures := action.Properties[enabledFeatures].Value
+		if !strings.Contains(currentFeatures, feature) {
+			action.Properties[enabledFeatures] = core.NewPropertyValue(currentFeatures+","+feature, false)
+		}
+	}
 }
