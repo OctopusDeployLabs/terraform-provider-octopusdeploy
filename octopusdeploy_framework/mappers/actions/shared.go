@@ -241,6 +241,11 @@ func GetBaseAction(actionAttribute attr.Value) *deployments.DeploymentAction {
 	action.Environments = getArray(actionAttrs, "environments")
 	action.ExcludedEnvironments = getArray(actionAttrs, "excluded_environments")
 
+	// TODO map properties from state
+	for k, v := range actionAttrs["properties"].(types.Map).Elements() {
+		action.Properties[k] = core.NewPropertyValue(v.(types.String).ValueString(), false)
+	}
+
 	features := getArray(actionAttrs, "features")
 	if features != nil {
 		action.Properties["Octopus.Action.EnabledFeatures"] = core.NewPropertyValue(strings.Join(features, ","), false)
