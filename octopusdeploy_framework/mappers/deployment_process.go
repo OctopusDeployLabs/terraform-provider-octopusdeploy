@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/mappers/deployment_process"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/mappers/actions"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -17,14 +17,14 @@ import (
 	"strings"
 )
 
-var actionMappers = map[string]deployment_process.MappableAction{
-	schemas.DeploymentProcessAction:                      &deployment_process.Action{},
-	schemas.DeploymentProcessRunScriptAction:             &deployment_process.RunScriptActionMapper{},
-	schemas.DeploymentProcessRunKubectlScriptAction:      &deployment_process.KubectlScriptActionMapper{},
-	schemas.DeploymentProcessPackageAction:               &deployment_process.PackageActionMapper{},
-	schemas.DeploymentProcessWindowsServiceAction:        &deployment_process.WindowsServiceActionMapper{},
-	schemas.DeploymentProcessManualInterventionAction:    &deployment_process.ManualInterventionActionMapper{},
-	schemas.DeploymentProcessApplyKubernetesSecretAction: &deployment_process.KubernetesSecretActionMapper{},
+var actionMappers = map[string]actions.MappableAction{
+	schemas.DeploymentProcessAction:                      &actions.Action{},
+	schemas.DeploymentProcessRunScriptAction:             &actions.RunScriptActionMapper{},
+	schemas.DeploymentProcessRunKubectlScriptAction:      &actions.KubectlScriptActionMapper{},
+	schemas.DeploymentProcessPackageAction:               &actions.PackageActionMapper{},
+	schemas.DeploymentProcessWindowsServiceAction:        &actions.WindowsServiceActionMapper{},
+	schemas.DeploymentProcessManualInterventionAction:    &actions.ManualInterventionActionMapper{},
+	schemas.DeploymentProcessApplyKubernetesSecretAction: &actions.KubernetesSecretActionMapper{},
 	//schemas.DeploymentProcessApplyTerraformTemplateAction: "Octopus.TerraformApply",
 }
 
@@ -57,7 +57,7 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 
 	var steps []attr.Value
 	for _, deploymentStep := range process.Steps {
-		properties, diags := deployment_process.MapPropertiesToState(ctx, deploymentStep.Properties)
+		properties, diags := actions.MapPropertiesToState(ctx, deploymentStep.Properties)
 		if diags.HasError() {
 			return diags
 		}
@@ -207,13 +207,13 @@ func getActionTypeAttrs(actionType string) map[string]attr.Type {
 		"features":                           types.ListType{ElemType: types.StringType},
 		"action_template":                    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"id": types.StringType, "version": types.StringType}}},
 		"id":                                 types.StringType,
-		"git_dependency":                     types.SetType{ElemType: types.ObjectType{AttrTypes: deployment_process.GetGitDependencyAttrTypes()}},
+		"git_dependency":                     types.SetType{ElemType: types.ObjectType{AttrTypes: actions.GetGitDependencyAttrTypes()}},
 		"is_disabled":                        types.BoolType,
 		"is_required":                        types.BoolType,
 		"name":                               types.StringType,
 		"notes":                              types.StringType,
-		"primary_package":                    types.ListType{ElemType: types.ObjectType{AttrTypes: deployment_process.GetPackageReferenceAttrTypes(true)}},
-		"package":                            types.ListType{ElemType: types.ObjectType{AttrTypes: deployment_process.GetPackageReferenceAttrTypes(false)}},
+		"primary_package":                    types.ListType{ElemType: types.ObjectType{AttrTypes: actions.GetPackageReferenceAttrTypes(true)}},
+		"package":                            types.ListType{ElemType: types.ObjectType{AttrTypes: actions.GetPackageReferenceAttrTypes(false)}},
 		"properties":                         types.MapType{ElemType: types.StringType},
 		"sort_order":                         types.Int64Type,
 		"slug":                               types.StringType,
@@ -347,7 +347,7 @@ func mapStepsToDeploymentProcess(ctx context.Context, steps types.List, current 
 				}
 
 				step.Actions = append(step.Actions, action)
-				actionAttrs := deployment_process.GetActionAttributes(attributes)
+				actionAttrs := actions.GetActionAttributes(attributes)
 				if posn, ok := actionAttrs["sort_order"].(types.Int64); ok && !posn.IsNull() && posn.ValueInt64() >= 0 {
 					name := actionAttrs["name"].(types.String).ValueString()
 					sort_order[name] = posn.ValueInt64()
