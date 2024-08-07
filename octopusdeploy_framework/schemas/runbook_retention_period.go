@@ -1,6 +1,8 @@
 package schemas
 
 import (
+	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -8,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -34,9 +38,11 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 			Description: "How many runs to keep per environment.",
 			Computed:    true,
 			Optional:    true,
-			Default:     int64default.StaticInt64(100),
 			Validators: []validator.Int64{
 				int64validator.AtLeast(0),
+			},
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
 			},
 		},
 		runbookRetentionPeriodSchemeAttributeNames.ShouldKeepForever: resourceSchema.BoolAttribute{
@@ -46,6 +52,9 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 			Default:     booldefault.StaticBool(false),
 			Validators: []validator.Bool{
 				boolvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName(runbookRetentionPeriodSchemeAttributeNames.QuantityToKeep)),
+			},
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
 			},
 		},
 	}
@@ -85,5 +94,6 @@ func MapToRunbookRetentionPeriod(flattenedRunbookRetentionPeriod types.List) *ru
 	if shouldKeepForever, ok := attrs[runbookRetentionPeriodSchemeAttributeNames.ShouldKeepForever].(types.Bool); ok && !shouldKeepForever.IsNull() {
 		runbookRetentionPeriod.ShouldKeepForever = shouldKeepForever.ValueBool()
 	}
+	fmt.Printf("runbook retention period: %#v", runbookRetentionPeriod)
 	return &runbookRetentionPeriod
 }

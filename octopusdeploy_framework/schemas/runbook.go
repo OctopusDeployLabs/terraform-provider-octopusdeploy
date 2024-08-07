@@ -10,6 +10,7 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -172,7 +173,6 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 				Description: fmt.Sprintf("The tenanted deployment mode of the runbook. Valid modes are %s", strings.Join(util.Map(tenantedDeploymentModes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 				Computed:    true,
 				Optional:    true,
-				//Default:     stringdefault.StaticString(tenantedDeploymentModeNames.Untenanted),
 				Validators: []validator.String{
 					stringvalidator.OneOf(tenantedDeploymentModes...),
 				},
@@ -184,7 +184,6 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 				Description: "Determines how the runbook is scoped to environments.",
 				Computed:    true,
 				Optional:    true,
-				//Default:     stringdefault.StaticString(environmentScopeNames.All),
 				Validators: []validator.String{
 					stringvalidator.OneOf(environmentScopeTypes...),
 				},
@@ -197,7 +196,6 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
-				//Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, nil)),
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.UseStateForUnknown(),
 				},
@@ -206,7 +204,6 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 				Description: "Sets the runbook guided failure mode.",
 				Optional:    true,
 				Computed:    true,
-				//Default:     stringdefault.StaticString(defaultGuidedFailureModeNames.EnvironmentDefault),
 				Validators: []validator.String{
 					stringvalidator.OneOf(defaultGuidedFailureModes...),
 				},
@@ -218,7 +215,6 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 				Description: "Whether to force packages to be re-downloaded or not.",
 				Computed:    true,
 				Optional:    true,
-				//Default:     booldefault.StaticBool(false),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -269,7 +265,7 @@ func (data *RunbookTypeResourceModel) RefreshFromApiResponse(ctx context.Context
 		result, d := types.ListValueFrom(
 			ctx,
 			types.ObjectType{AttrTypes: GetConnectivityPolicyObjectType()},
-			[]any{MapFromConnectivityPolicy(runbook.ConnectivityPolicy)},
+			[]attr.Value{MapFromConnectivityPolicy(runbook.ConnectivityPolicy)},
 		)
 		diags.Append(d...)
 		data.ConnectivityPolicy = result
@@ -283,7 +279,7 @@ func (data *RunbookTypeResourceModel) RefreshFromApiResponse(ctx context.Context
 		result, d := types.ListValueFrom(
 			ctx,
 			types.ObjectType{AttrTypes: GetRunbookRetentionPeriodObjectType()},
-			[]any{MapFromRunbookRetentionPeriod(runbook.RunRetentionPolicy)},
+			[]attr.Value{MapFromRunbookRetentionPeriod(runbook.RunRetentionPolicy)},
 		)
 		diags.Append(d...)
 		data.RunRetentionPolicy = result
