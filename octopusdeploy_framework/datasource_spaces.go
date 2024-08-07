@@ -42,7 +42,7 @@ func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			"take":         schemas.GetQueryTakeDatasourceSchema(),
 
 			// response
-			"id": schemas.GetIdDatasourceSchema(),
+			"id": schemas.GetIdDatasourceSchema(false),
 		},
 		Blocks: map[string]schema.Block{
 			"spaces": schema.ListNestedBlock{

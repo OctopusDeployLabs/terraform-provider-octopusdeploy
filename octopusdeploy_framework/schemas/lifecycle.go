@@ -89,8 +89,8 @@ func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
 	description := "lifecycle"
 	return datasourceSchema.Schema{
 		Attributes: map[string]datasourceSchema.Attribute{
-			"id":           util.GetIdDatasourceSchema(),
-			"space_id":     util.GetSpaceIdDatasourceSchema(description),
+			"id":           GetIdDatasourceSchema(false),
+			"space_id":     GetSpaceIdDatasourceSchema(description, false),
 			"ids":          util.GetQueryIDsDatasourceSchema(),
 			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 			"skip":         util.GetQuerySkipDatasourceSchema(),
@@ -99,8 +99,8 @@ func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
 				Computed: true,
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: map[string]datasourceSchema.Attribute{
-						"id":                        util.GetIdDatasourceSchema(),
-						"space_id":                  util.GetSpaceIdDatasourceSchema(description),
+						"id":                        GetIdDatasourceSchema(true),
+						"space_id":                  GetSpaceIdDatasourceSchema(description, true),
 						"name":                      util.GetNameDatasourceSchema(true),
 						"description":               util.GetDescriptionDatasourceSchema(description),
 						"phase":                     getDatasourcePhasesSchema(),
@@ -118,7 +118,7 @@ func getDatasourcePhasesSchema() datasourceSchema.ListNestedAttribute {
 		Computed: true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				"id":                                    util.GetIdDatasourceSchema(),
+				"id":                                    GetIdDatasourceSchema(false),
 				"name":                                  util.GetNameDatasourceSchema(true),
 				"automatic_deployment_targets":          datasourceSchema.ListAttribute{ElementType: types.StringType, Computed: true},
 				"optional_deployment_targets":           datasourceSchema.ListAttribute{ElementType: types.StringType, Computed: true},

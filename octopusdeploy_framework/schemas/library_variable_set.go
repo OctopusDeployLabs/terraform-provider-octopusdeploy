@@ -41,8 +41,8 @@ func getLibraryVariableSetDataSchema() map[string]datasourceSchema.Attribute {
 			Description: "A filter to search by content type.",
 			Optional:    true,
 		},
-		"id":           util.GetIdDatasourceSchema(),
-		"space_id":     util.GetSpaceIdDatasourceSchema("library variable set"),
+		"id":           GetIdDatasourceSchema(false),
+		"space_id":     GetSpaceIdDatasourceSchema("library variable set", false),
 		"ids":          util.GetQueryIDsDatasourceSchema(),
 		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 		"skip":         util.GetQuerySkipDatasourceSchema(),
@@ -53,9 +53,9 @@ func getLibraryVariableSetDataSchema() map[string]datasourceSchema.Attribute {
 func GetLibraryVariableSetObjectDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"description": GetDescriptionDatasourceSchema("library variable set"),
-		"id":          GetIdDatasourceSchema(),
+		"id":          GetIdDatasourceSchema(true),
 		"name":        GetNameDatasourceSchema(false),
-		"space_id":    GetSpaceIdDatasourceSchema("library variable set"),
+		"space_id":    GetSpaceIdDatasourceSchema("library variable set", true),
 		"template_ids": datasourceSchema.MapAttribute{
 			ElementType: types.StringType,
 			Computed:    true,

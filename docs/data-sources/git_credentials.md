@@ -32,13 +32,13 @@ A list of Git Credentials that match the filter(s).
 
 Optional:
 
-- `id` (String) The unique ID for this resource.
 - `name` (String) A filter search by exact name
-- `space_id` (String) The space ID associated with this Git Credential.
 
 Read-Only:
 
 - `description` (String) The description of this Git Credential.
+- `id` (String) The unique ID for this resource.
+- `space_id` (String) The space ID associated with this Git Credential.
 - `type` (String) The Git credential authentication type.
 - `username` (String) The username for the Git credential.
 

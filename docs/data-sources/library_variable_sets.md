@@ -32,13 +32,13 @@ Provides information about existing library variable sets.
 Optional:
 
 - `description` (String) The description of this library variable set.
-- `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
-- `space_id` (String) The space ID associated with this library variable set.
 - `template` (List of Object) (see [below for nested schema](#nestedatt--library_variable_sets--template))
 
 Read-Only:
 
+- `id` (String) The unique ID for this resource.
+- `space_id` (String) The space ID associated with this library variable set.
 - `template_ids` (Map of String)
 - `variable_set_id` (String)
 

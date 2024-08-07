@@ -28,21 +28,21 @@ Provides information about existing tenants.
 - `space_id` (String) The space ID associated with this tenants.
 - `tags` (List of String) A filter to search by a list of tags.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
+
+### Read-Only
+
 - `tenants` (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
 
 <a id="nestedblock--tenants"></a>
 ### Nested Schema for `tenants`
 
-Optional:
+Read-Only:
 
 - `cloned_from_tenant_id` (String) The ID of the tenant from which this tenant was cloned.
+- `description` (String) The description of this tenants.
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `space_id` (String) The space ID associated with this tenant.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-
-Read-Only:
-
-- `description` (String) The description of this tenants.
 
 

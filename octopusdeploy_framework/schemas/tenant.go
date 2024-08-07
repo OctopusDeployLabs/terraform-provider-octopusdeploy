@@ -66,7 +66,7 @@ func GetTenantsDataSourceSchema() map[string]datasourceSchema.Attribute {
 			Description: "A filter to search for a cloned tenant by its ID.",
 			Optional:    true,
 		},
-		"id":  util.GetIdDatasourceSchema(),
+		"id":  GetIdDatasourceSchema(false),
 		"ids": util.GetQueryIDsDatasourceSchema(),
 		"is_clone": datasourceSchema.BoolAttribute{
 			Description: "A filter to search for cloned resources.",
@@ -83,7 +83,7 @@ func GetTenantsDataSourceSchema() map[string]datasourceSchema.Attribute {
 		},
 		"skip":     util.GetQuerySkipDatasourceSchema(),
 		"tags":     util.GetQueryDatasourceTags(),
-		"space_id": util.GetSpaceIdDatasourceSchema("tenants"),
+		"space_id": GetSpaceIdDatasourceSchema("tenants", false),
 		"take":     util.GetQueryTakeDatasourceSchema(),
 	}
 }
@@ -92,17 +92,16 @@ func GetTenantDataSourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"cloned_from_tenant_id": datasourceSchema.StringAttribute{
 			Description: "The ID of the tenant from which this tenant was cloned.",
-			Optional:    true,
+			Computed:    true,
 		},
 		"description": util.GetDescriptionDatasourceSchema("tenants"),
-		"id":          util.GetIdDatasourceSchema(),
-		"name":        util.GetNameDatasourceSchema(false),
-		"space_id":    util.GetSpaceIdDatasourceSchema("tenant"),
+		"id":          GetIdDatasourceSchema(true),
+		"name":        GetReadonlyNameDatasourceSchema(),
+		"space_id":    GetSpaceIdDatasourceSchema("tenant", true),
 		"tenant_tags": datasourceSchema.ListAttribute{
 			Computed:    true,
 			Description: "A list of tenant tags associated with this resource.",
 			ElementType: types.StringType,
-			Optional:    true,
 		},
 	}
 }

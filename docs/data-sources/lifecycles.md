@@ -44,16 +44,13 @@ Required:
 
 - `name` (String) The name of this resource.
 
-Optional:
-
-- `id` (String) The unique ID for this resource.
-- `space_id` (String) The space ID associated with this lifecycle.
-
 Read-Only:
 
 - `description` (String) The description of this lifecycle.
+- `id` (String) The unique ID for this resource.
 - `phase` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--phase))
 - `release_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--release_retention_policy))
+- `space_id` (String) The space ID associated with this lifecycle.
 - `tentacle_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--tentacle_retention_policy))
 
 <a id="nestedatt--lifecycles--phase"></a>
