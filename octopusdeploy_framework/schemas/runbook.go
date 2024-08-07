@@ -10,7 +10,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -274,12 +273,12 @@ func (data *RunbookTypeResourceModel) RefreshFromApiResponse(ctx context.Context
 		)
 		diags.Append(d...)
 		data.ConnectivityPolicy = result
-	} else {
+	} /*else {
 		data.ConnectivityPolicy = types.ListValueMust(
 			types.ObjectType{AttrTypes: GetConnectivityPolicyObjectType()},
 			[]attr.Value{MapFromConnectivityPolicy(GetDefaultConnectivityPolicy())},
 		)
-	}
+	}*/
 	if !data.RunRetentionPolicy.IsNull() {
 		result, d := types.ListValueFrom(
 			ctx,
