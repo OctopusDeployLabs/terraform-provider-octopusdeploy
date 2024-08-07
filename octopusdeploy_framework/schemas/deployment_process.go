@@ -34,14 +34,14 @@ const (
 	DeploymentProcessWindowSize                   = "window_size"
 )
 
-var ActionsAttributeNames = [...]string{
-	DeploymentProcessAction,
-	DeploymentProcessRunScriptAction,
-	DeploymentProcessRunKubectlScriptAction,
-	DeploymentProcessPackageAction,
-	DeploymentProcessWindowsServiceAction,
-	DeploymentProcessManualInterventionAction,
-	DeploymentProcessApplyKubernetesSecretAction,
+var ActionsAttributeToActionTypeMap = map[string]string{
+	DeploymentProcessAction:                      "",
+	DeploymentProcessRunScriptAction:             "Octopus.Script",
+	DeploymentProcessRunKubectlScriptAction:      "Octopus.KubernetesRunScript",
+	DeploymentProcessPackageAction:               "Octopus.TentaclePackage",
+	DeploymentProcessWindowsServiceAction:        "Octopus.WindowsService",
+	DeploymentProcessManualInterventionAction:    "Octopus.Manual",
+	DeploymentProcessApplyKubernetesSecretAction: "Octopus.KubernetesDeploySecret",
 }
 
 type DeploymentProcessResourceModel struct {
@@ -107,15 +107,14 @@ func getStepResourceBlockSchema(resourceDescription string) resourceSchema.ListN
 				DeploymentProcessWindowSize:          getWindowSizeResourceSchema(),
 			},
 			Blocks: map[string]resourceSchema.Block{
-				DeploymentProcessAction:          NewActionResourceSchemaBuilder().WithActionType().WithExecutionLocation().WithWorkerPool().WithWorkerPoolVariable().WithGitDependency().Build(),
-				DeploymentProcessRunScriptAction: NewActionResourceSchemaBuilder().WithExecutionLocation().WithScriptFromPackage().WithWorkerPool().WithWorkerPoolVariable().WithScript().WithVariableSubstitutionInFiles().Build(),
-				//DeploymentProcessRunKubectlScriptAction: getKubectlActionResourceSchema(),
-				//DeploymentProcessApplyTerraformTemplateAction: getApplyTerraformTemplateActionSchema(),
-				//DeploymentProcessApplyKubernetesSecretAction: getDeployKubernetesSecretActionResourceSchema(),
-				//DeploymentProcessPackageAction: getPackageActionResourceSchema(),
-				//DeploymentProcessWindowsServiceAction: getWindowsServiceActionResourceSchema(),
-				//DeploymentProcessManualInterventionAction: getManualInterventionActionResourceSchema(),
-
+				DeploymentProcessAction:                       NewActionResourceSchemaBuilder().WithActionType().WithExecutionLocation().WithWorkerPool().WithWorkerPoolVariable().WithGitDependency().Build(),
+				DeploymentProcessRunScriptAction:              NewActionResourceSchemaBuilder().WithExecutionLocation().WithScriptFromPackage().WithWorkerPool().WithWorkerPoolVariable().WithScript().WithVariableSubstitutionInFiles().Build(),
+				DeploymentProcessRunKubectlScriptAction:       NewActionResourceSchemaBuilder().WithExecutionLocation().WithScriptFromPackage().WithPackages().WithWorkerPool().WithWorkerPoolVariable().WithScript().WithVariableSubstitutionInFiles().WithNamespace().Build(),
+				DeploymentProcessApplyTerraformTemplateAction: NewActionResourceSchemaBuilder().WithExecutionLocation().WithPrimaryPackage().WithWorkerPool().WithWorkerPoolVariable().WithTerraform().Build(),
+				DeploymentProcessApplyKubernetesSecretAction:  NewActionResourceSchemaBuilder().WithExecutionLocation().WithWorkerPool().WithWorkerPoolVariable().WithKubernetesSecret().Build(),
+				DeploymentProcessPackageAction:                NewActionResourceSchemaBuilder().WithPrimaryPackage().WithWindowsServiceFeature().Build(),
+				DeploymentProcessWindowsServiceAction:         NewActionResourceSchemaBuilder().WithPrimaryPackage().WithWindowsService().Build(),
+				DeploymentProcessManualInterventionAction:     NewActionResourceSchemaBuilder().WithManualIntervention().Build(),
 			},
 		},
 	}

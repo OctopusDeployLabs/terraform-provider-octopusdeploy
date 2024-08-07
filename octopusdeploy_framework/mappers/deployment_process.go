@@ -124,11 +124,11 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 
 		}
 
-		for _, actionType := range []string{schemas.DeploymentProcessAction, schemas.DeploymentProcessRunScriptAction} {
-			if len(newActions[actionType]) > 0 {
-				newStep[actionType] = types.ListValueMust(types.ObjectType{AttrTypes: getActionTypeAttrs(actionType)}, newActions[actionType])
+		for actionAttributeName, _ := range schemas.ActionsAttributeToActionTypeMap {
+			if len(newActions[actionAttributeName]) > 0 {
+				newStep[actionAttributeName] = types.ListValueMust(types.ObjectType{AttrTypes: getActionTypeAttrs(actionAttributeName)}, newActions[actionAttributeName])
 			} else {
-				newStep[actionType] = types.ListNull(types.ObjectType{AttrTypes: getActionTypeAttrs(actionType)})
+				newStep[actionAttributeName] = types.ListNull(types.ObjectType{AttrTypes: getActionTypeAttrs(actionAttributeName)})
 			}
 		}
 
@@ -176,7 +176,7 @@ func getSortOrderStateValue(step *deployments.DeploymentStep, a *deployments.Dep
 }
 
 func isAction(key string) bool {
-	for _, k := range schemas.ActionsAttributeNames {
+	for _, k := range schemas.ActionsAttributeToActionTypeMap {
 		if k == key {
 			return true
 		}
@@ -196,20 +196,23 @@ func getStepTypeAttrs() map[string]attr.Type {
 		schemas.DeploymentProcessStartTrigger:        types.StringType,
 		schemas.DeploymentProcessTargetRoles:         types.ListType{ElemType: types.StringType},
 		schemas.DeploymentProcessWindowSize:          types.StringType,
-		schemas.DeploymentProcessAction:              types.ListType{ElemType: types.ObjectType{AttrTypes: getActionTypeAttrs(schemas.DeploymentProcessAction)}},
-		schemas.DeploymentProcessRunScriptAction:     types.ListType{ElemType: types.ObjectType{AttrTypes: getActionTypeAttrs(schemas.DeploymentProcessRunScriptAction)}},
+	}
+
+	for actionAttributeName, _ := range schemas.ActionsAttributeToActionTypeMap {
+		attrs[actionAttributeName] = types.ListType{ElemType: types.ObjectType{AttrTypes: getActionTypeAttrs(actionAttributeName)}}
 	}
 
 	return attrs
 }
 
 func getActionTypeTerraformKeyName(actionTypeName string) string {
-	switch actionTypeName {
-	case "Octopus.Script":
-		return schemas.DeploymentProcessRunScriptAction
-	default:
-		return schemas.DeploymentProcessAction
+	for actionAttributeName, actionType := range schemas.ActionsAttributeToActionTypeMap {
+		if actionType == actionTypeName {
+			return actionAttributeName
+		}
 	}
+
+	return schemas.DeploymentProcessAction
 }
 
 func getActionTypeAttrs(actionType string) map[string]attr.Type {
@@ -237,6 +240,20 @@ func getActionTypeAttrs(actionType string) map[string]attr.Type {
 		"computed_sort_order":                types.Int64Type,
 	}
 	switch actionType {
+	case schemas.DeploymentProcessRunKubectlScriptAction:
+		attrs["namespace"] = types.StringType
+		attrs["script_body"] = types.StringType
+		attrs["script_syntax"] = types.StringType
+		attrs["worker_pool_id"] = types.StringType
+		attrs["worker_pool_variable"] = types.StringType
+		attrs["variable_substitution_in_files"] = types.StringType
+		attrs["run_on_server"] = types.BoolType
+		attrs["script_file_name"] = types.StringType
+		attrs["script_parameters"] = types.StringType
+		attrs["script_source"] = types.StringType
+		attrs["script_file_name"] = types.StringType
+		attrs["script_body"] = types.StringType
+		attrs["script_syntax"] = types.StringType
 	case schemas.DeploymentProcessRunScriptAction:
 		attrs["run_on_server"] = types.BoolType
 		attrs["script_file_name"] = types.StringType
@@ -533,28 +550,47 @@ func mapStepsToDeploymentProcess(ctx context.Context, steps types.List, current 
 		}
 
 		var sort_order map[string]int64 = make(map[string]int64)
-		for key, attr := range attrs {
-			if attr.IsNull() {
+		for key, attributes := range attrs {
+			if attributes.IsNull() {
 				continue
 			}
+
+			actionMapping := func(mappingFunc func(attr attr.Value) *deployments.DeploymentAction) {
+				step.Actions = append(step.Actions, mappingFunc(attributes))
+				actionAttrs := getActionAttributes(attributes)
+				if posn, ok := actionAttrs["sort_order"].(types.Int64); ok && !posn.IsNull() && posn.ValueInt64() >= 0 {
+					name := actionAttrs["name"].(types.String).ValueString()
+					sort_order[name] = posn.ValueInt64()
+				}
+			}
+
 			switch key {
 			case schemas.DeploymentProcessAction:
-				step.Actions = append(step.Actions, getBaseAction(attr))
-				actionAttrs := getActionAttributes(attr)
-				if posn, ok := actionAttrs["sort_order"].(types.Int64); ok && !posn.IsNull() && posn.ValueInt64() >= 0 {
-					name := actionAttrs["name"].(types.String).ValueString()
-					sort_order[name] = posn.ValueInt64()
-				}
+				actionMapping(getBaseAction)
 				break
 			case schemas.DeploymentProcessRunScriptAction:
-				step.Actions = append(step.Actions, mapRunScriptAction(attr))
-				actionAttrs := getActionAttributes(attr)
-				if posn, ok := actionAttrs["sort_order"].(types.Int64); ok && !posn.IsNull() && posn.ValueInt64() >= 0 {
-					name := actionAttrs["name"].(types.String).ValueString()
-					sort_order[name] = posn.ValueInt64()
-				}
+				actionMapping(mapRunScriptAction)
 				break
+			//case schemas.DeploymentProcessPackageAction:
+			//	actionMapping(mapPackageAction)
+			//	break
+			case schemas.DeploymentProcessRunKubectlScriptAction:
+				actionMapping(mapRunKubectlScriptAction)
+				break
+				//case schemas.DeploymentProcessApplyTerraformTemplateAction:
+				//	actionMapping(mapTerraformTemplateAction)
+				//	break
+				//case schemas.DeploymentProcessApplyKubernetesSecretAction:
+				//	actionMapping(mapKubernetesSecretAction)
+				//	break
+				//case schemas.DeploymentProcessWindowsServiceAction:
+				//	actionMapping(mapWindowsServiceAction)
+				//	break
+				//case schemas.DeploymentProcessManualInterventionAction:
+				//	actionMapping(mapManualInterventionAction)
+				//	break
 			}
+
 		}
 
 		// Now that we have extracted all the steps off each of the properties into a single array, sort the array by the sort_order if provided
@@ -621,6 +657,21 @@ func mapRunScriptAction(actionAttribute attr.Value) *deployments.DeploymentActio
 		}
 	}
 
+	return action
+}
+
+func mapRunKubectlScriptAction(actionAttribute attr.Value) *deployments.DeploymentAction {
+	actionAttrs := getActionAttributes(actionAttribute)
+	if actionAttrs == nil {
+		return nil
+	}
+
+	action := mapRunScriptAction(actionAttribute)
+	if action == nil {
+		return nil
+	}
+	action.ActionType = "Octopus.KubernetesRunScript"
+	mapAttributeToProperty(action, actionAttrs, "namespace", "Octopus.Action.KubernetesContainers.Namespace")
 	return action
 }
 
