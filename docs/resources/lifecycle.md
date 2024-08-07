@@ -33,8 +33,8 @@ resource "octopusdeploy_lifecycle" "example" {
     name                         = "foo"
 
     release_retention_policy {
-      quantity_to_keep    = 0 // true only if quantity_to_keep = 0
-      should_keep_forever = true
+      quantity_to_keep    = 0 
+      should_keep_forever = true // true only if quantity_to_keep = 0
       unit                = "Days"
     }
 
