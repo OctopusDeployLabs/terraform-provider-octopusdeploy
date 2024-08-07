@@ -30,14 +30,11 @@ A list of Git Credentials that match the filter(s).
 <a id="nestedatt--git_credentials"></a>
 ### Nested Schema for `git_credentials`
 
-Optional:
-
-- `name` (String) A filter search by exact name
-
 Read-Only:
 
 - `description` (String) The description of this Git Credential.
 - `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
 - `space_id` (String) The space ID associated with this Git Credential.
 - `type` (String) The Git credential authentication type.
 - `username` (String) The username for the Git credential.
