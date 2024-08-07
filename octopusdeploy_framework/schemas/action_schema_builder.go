@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -177,12 +178,14 @@ func NewActionResourceSchemaBuilder() *ActionResourceSchemaBuilder {
 		Description: "Order used by terraform to ensure correct ordering of actions. This property must be either omitted from all actions, or provided on all actions",
 		Optional:    true,
 		Computed:    true,
+		Default:     int64default.StaticInt64(-1),
 	}
 
 	builder.attributes["computed_sort_order"] = schema.Int64Attribute{
 		Description: "This is the final sort order for the action. This will be provided by the API.",
 		Optional:    true,
 		Computed:    true,
+
 		PlanModifiers: []planmodifier.Int64{
 			int64planmodifier.UseStateForUnknown(),
 		},
@@ -408,6 +411,7 @@ func (b *ActionResourceSchemaBuilder) WithTerraform() *ActionResourceSchemaBuild
 				"allow_additional_plugin_downloads": schema.BoolAttribute{
 					Default:  booldefault.StaticBool(true),
 					Optional: true,
+					Computed: true,
 				},
 				"apply_parameters": schema.StringAttribute{
 					Optional: true,
@@ -561,6 +565,7 @@ func (b *ActionResourceSchemaBuilder) WithKubernetesSecret() *ActionResourceSche
 		Optional:    true,
 		Default:     booldefault.StaticBool(true),
 		Description: "Indicates the status of the Kubernetes Object Status feature",
+		Computed:    true,
 	}
 
 	return b
@@ -638,6 +643,7 @@ func getDeployWindowsServiceSchema() map[string]schema.Attribute {
 			Description: "Which built-in account will the service run under. Can be LocalSystem, NT Authority\\NetworkService, NT Authority\\LocalService, _CUSTOM or an expression",
 			Default:     stringdefault.StaticString("LocalSystem"),
 			Optional:    true,
+			Computed:    true,
 		},
 		"service_name": schema.StringAttribute{
 			Description: "The name of the service",
@@ -647,6 +653,7 @@ func getDeployWindowsServiceSchema() map[string]schema.Attribute {
 			Default:     stringdefault.StaticString("auto"),
 			Description: "When will the service start. Can be auto, delayed-auto, manual, unchanged or an expression",
 			Optional:    true,
+			Computed:    true,
 		},
 	}
 }

@@ -35,13 +35,14 @@ const (
 )
 
 var ActionsAttributeToActionTypeMap = map[string]string{
-	DeploymentProcessAction:                      "",
-	DeploymentProcessRunScriptAction:             "Octopus.Script",
-	DeploymentProcessRunKubectlScriptAction:      "Octopus.KubernetesRunScript",
-	DeploymentProcessPackageAction:               "Octopus.TentaclePackage",
-	DeploymentProcessWindowsServiceAction:        "Octopus.WindowsService",
-	DeploymentProcessManualInterventionAction:    "Octopus.Manual",
-	DeploymentProcessApplyKubernetesSecretAction: "Octopus.KubernetesDeploySecret",
+	DeploymentProcessAction:                       "",
+	DeploymentProcessRunScriptAction:              "Octopus.Script",
+	DeploymentProcessRunKubectlScriptAction:       "Octopus.KubernetesRunScript",
+	DeploymentProcessPackageAction:                "Octopus.TentaclePackage",
+	DeploymentProcessWindowsServiceAction:         "Octopus.WindowsService",
+	DeploymentProcessManualInterventionAction:     "Octopus.Manual",
+	DeploymentProcessApplyKubernetesSecretAction:  "Octopus.KubernetesDeploySecret",
+	DeploymentProcessApplyTerraformTemplateAction: "Octopus.TerraformApply",
 }
 
 type DeploymentProcessResourceModel struct {

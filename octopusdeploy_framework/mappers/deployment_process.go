@@ -2,6 +2,7 @@ package mappers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
@@ -90,16 +91,28 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 
 			srcAction := deploymentStep.Actions[i]
 			switch srcAction.ActionType {
-			//case "Octopus.KubernetesDeploySecret":
-			//	flatten_action_func("deploy_kubernetes_secret_action", i, flattenDeployKubernetesSecretAction)
-			//case "Octopus.KubernetesRunScript":
+			case "Octopus.KubernetesDeploySecret":
+				d := mapKubernetesDeploySecretToState(ctx, a, newAction)
+				if d.HasError() {
+					return d
+				}
+				break
+			case "Octopus.KubernetesRunScript":
+				d := mapKubectlScriptToState(ctx, a, newAction)
+				if d.HasError() {
+					return d
+				}
 			//	flatten_action_func("run_kubectl_script_action", i, flattenKubernetesRunScriptAction)
-			//case "Octopus.Manual":
+			case "Octopus.Manual":
+				d := mapManualInterventionToState(ctx, a, newAction)
+				if d.HasError() {
+					return d
+				}
 			//	flatten_action_func("manual_intervention_action", i, flattenManualInterventionAction)
 			case "Octopus.Script":
-				diag := mapRunScriptActionToState(ctx, a, newAction)
-				if diag.HasError() {
-					return diag
+				d := mapRunScriptActionToState(ctx, a, newAction)
+				if d.HasError() {
+					return d
 				}
 				break
 			//case "Octopus.TentaclePackage":
@@ -116,11 +129,11 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 				break
 			}
 
-			terraformActionKeyName := getActionTypeTerraformKeyName(srcAction.ActionType)
+			terraformActionKeyName := getActionTypeTerraformAttributeName(srcAction.ActionType)
 			if _, ok := newActions[terraformActionKeyName]; !ok {
 				newActions[terraformActionKeyName] = make([]attr.Value, 0)
 			}
-			newActions[terraformActionKeyName] = append(newActions[terraformActionKeyName], types.ObjectValueMust(getActionTypeAttrs(srcAction.ActionType), newAction))
+			newActions[terraformActionKeyName] = append(newActions[terraformActionKeyName], types.ObjectValueMust(getActionTypeAttrs(terraformActionKeyName), newAction))
 
 		}
 
@@ -175,16 +188,6 @@ func getSortOrderStateValue(step *deployments.DeploymentStep, a *deployments.Dep
 	return nil
 }
 
-func isAction(key string) bool {
-	for _, k := range schemas.ActionsAttributeToActionTypeMap {
-		if k == key {
-			return true
-		}
-	}
-
-	return false
-}
-
 func getStepTypeAttrs() map[string]attr.Type {
 	attrs := map[string]attr.Type{
 		"id":                               types.StringType,
@@ -205,7 +208,7 @@ func getStepTypeAttrs() map[string]attr.Type {
 	return attrs
 }
 
-func getActionTypeTerraformKeyName(actionTypeName string) string {
+func getActionTypeTerraformAttributeName(actionTypeName string) string {
 	for actionAttributeName, actionType := range schemas.ActionsAttributeToActionTypeMap {
 		if actionType == actionTypeName {
 			return actionAttributeName
@@ -266,17 +269,37 @@ func getActionTypeAttrs(actionType string) map[string]attr.Type {
 		attrs["worker_pool_variable"] = types.StringType
 		attrs["variable_substitution_in_files"] = types.StringType
 		break
-	case "Octopus.Script":
+	case schemas.DeploymentProcessApplyTerraformTemplateAction:
 		attrs["run_on_server"] = types.BoolType
-		attrs["script_file_name"] = types.StringType
-		attrs["script_parameters"] = types.StringType
-		attrs["script_source"] = types.StringType
-		attrs["script_file_name"] = types.StringType
-		attrs["script_body"] = types.StringType
-		attrs["script_syntax"] = types.StringType
 		attrs["worker_pool_id"] = types.StringType
 		attrs["worker_pool_variable"] = types.StringType
-		attrs["variable_substitution_in_files"] = types.StringType
+		attrs["advanced_options"] = types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"allow_additional_plugin_downloads": types.BoolType, "apply_parameters": types.StringType, "init_parameters": types.StringType, "plugin_cache_directory": types.StringType, "workspace": types.StringType}}}
+		attrs["aws_account"] = types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"region": types.StringType, "variable": types.StringType, "use_instance_role": types.BoolType, "role": types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"arn": types.StringType, "external_id": types.StringType, "role_session_name": types.StringType, "session_duration": types.Int64Type}}}}}}
+		attrs["azure_account"] = types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"variable": types.StringType}}}
+		attrs["google_cloud_account"] = types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"variable": types.StringType, "use_vm_service_account": types.BoolType, "project": types.StringType, "region": types.StringType, "zone": types.StringType, "service_account_emails": types.StringType, "impersonate_service_account": types.BoolType}}}
+		attrs["template"] = types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"additional_variable_files": types.StringType, "directory": types.StringType, "run_automatic_file_substitution": types.BoolType, "target_files": types.StringType}}}
+		attrs["template_parameters"] = types.StringType
+		attrs["inline_template"] = types.StringType
+		break
+	case schemas.DeploymentProcessApplyKubernetesSecretAction:
+		attrs["run_on_server"] = types.BoolType
+		attrs["worker_pool_id"] = types.StringType
+		attrs["worker_pool_variable"] = types.StringType
+		attrs["secret_name"] = types.StringType
+		attrs["secret_values"] = types.MapType{ElemType: types.StringType}
+		attrs["kubernetes_object_status_check_enabled"] = types.BoolType
+		break
+	case schemas.DeploymentProcessPackageAction:
+		attrs["windows_service"] = types.SetType{ElemType: types.ObjectType{AttrTypes: getWindowsServiceAttrTypes()}}
+		break
+	case schemas.DeploymentProcessWindowsServiceAction:
+		for k, v := range getWindowsServiceAttrTypes() {
+			attrs[k] = v
+		}
+		break
+	case schemas.DeploymentProcessManualInterventionAction:
+		attrs["instructions"] = types.StringType
+		attrs["responsible_teams"] = types.StringType
 		break
 	default:
 		attrs["action_type"] = types.StringType
@@ -297,19 +320,72 @@ func mapRunScriptActionToState(ctx context.Context, action *deployments.Deployme
 	newAction["worker_pool_id"] = types.StringValue(action.WorkerPool)
 	newAction["worker_pool_variable"] = types.StringValue(action.WorkerPoolVariable)
 
-	mapPropertyToStateBool(action, newAction, "run_on_server", "Octopus.Action.RunOnServer", false)
-	mapPropertyToStateString(action, newAction, "script_body", "Octopus.Action.Script.ScriptBody")
-	mapPropertyToStateString(action, newAction, "script_file_name", "Octopus.Action.Script.ScriptFileName")
-	mapPropertyToStateString(action, newAction, "script_source", "Octopus.Action.Script.ScriptSource")
-	mapPropertyToStateString(action, newAction, "script_parameters", "Octopus.Action.Script.ScriptParameters")
-	mapPropertyToStateString(action, newAction, "script_syntax", "Octopus.Action.Script.Syntax")
-	mapPropertyToStateString(action, newAction, "script_file_name", "Octopus.Action.Script.ScriptFileName")
-	mapPropertyToStateString(action, newAction, "variable_substitution_in_files", "Octopus.Action.SubstituteInFiles.TargetFiles")
+	mapPropertyToStateBool(action, newAction, "Octopus.Action.RunOnServer", "run_on_server", false)
+	mapPropertyToStateString(action, newAction, "Octopus.Action.Script.ScriptBody", "script_body")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.Script.ScriptFileName", "script_file_name")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.Script.ScriptSource", "script_source")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.Script.ScriptParameters", "script_parameters")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.Script.Syntax", "script_syntax")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.Script.ScriptFileName", "script_file_name")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.SubstituteInFiles.TargetFiles", "variable_substitution_in_files")
 
 	return nil
 }
 
-func mapPropertyToStateBool(action *deployments.DeploymentAction, actionState map[string]attr.Value, attrName string, propertyName string, defaultValue bool) {
+func mapKubectlScriptToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diag := mapBaseDeploymentActionToState(ctx, action, newAction)
+	if diag.HasError() {
+		return diag
+	}
+
+	mapPropertyToStateString(action, newAction, "Octopus.Action.KubernetesContainers.Namespace", "namespace")
+
+	return nil
+}
+
+func mapManualInterventionToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diag := mapBaseDeploymentActionToState(ctx, action, newAction)
+	if diag.HasError() {
+		return diag
+	}
+
+	mapPropertyToStateString(action, newAction, "Octopus.Action.Manual.Instructions", "instructions")
+	mapPropertyToStateString(action, newAction, "Octopus.Action.Manual.ResponsibleTeamIds", "responsible_teams")
+
+	return nil
+}
+
+func mapKubernetesDeploySecretToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diag := mapBaseDeploymentActionToState(ctx, action, newAction)
+	if diag.HasError() {
+		return diag
+	}
+
+	mapPropertyToStateBool(action, newAction, "Octopus.Action.RunOnServer", "run_on_server", false)
+	mapPropertyToStateString(action, newAction, "Octopus.Action.KubernetesContainers.SecretName", "secret_name")
+	mapPropertyToStateBool(action, newAction, "Octopus.Action.Kubernetes.ResourceStatusCheck", "kubernetes_object_status_check_enabled", false)
+	newAction["worker_pool_id"] = types.StringValue(action.WorkerPool)
+	newAction["worker_pool_variable"] = types.StringValue(action.WorkerPoolVariable)
+
+	if v, ok := action.Properties["Octopus.Action.KubernetesContainers.SecretValues"]; ok {
+		var secretKeyValues map[string]string
+		json.Unmarshal([]byte(v.Value), &secretKeyValues)
+		mappedSecrets := make(map[string]attr.Value)
+		for key, value := range secretKeyValues {
+			mappedSecrets[key] = types.StringValue(value)
+		}
+		newAction["secret_values"], diag = types.MapValue(types.StringType, mappedSecrets)
+		if diag.HasError() {
+			return diag
+		}
+	} else {
+		newAction["secret_values"] = types.MapNull(types.StringType)
+	}
+
+	return nil
+}
+
+func mapPropertyToStateBool(action *deployments.DeploymentAction, actionState map[string]attr.Value, propertyName string, attrName string, defaultValue bool) {
 	if v, ok := action.Properties[propertyName]; ok {
 		parsedValue, _ := strconv.ParseBool(v.Value)
 		actionState[attrName] = types.BoolValue(parsedValue)
@@ -318,7 +394,7 @@ func mapPropertyToStateBool(action *deployments.DeploymentAction, actionState ma
 	}
 }
 
-func mapPropertyToStateString(action *deployments.DeploymentAction, actionState map[string]attr.Value, attrName string, propertyName string) {
+func mapPropertyToStateString(action *deployments.DeploymentAction, actionState map[string]attr.Value, propertyName string, attrName string) {
 	if v, ok := action.Properties[propertyName]; ok {
 		actionState[attrName] = types.StringValue(v.Value)
 	} else {
@@ -488,6 +564,22 @@ func getGitDependencyAttrTypes() map[string]attr.Type {
 	}
 }
 
+func getWindowsServiceAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"arguments":                types.StringType,
+		"create_or_update_service": types.BoolType,
+		"custom_account_name":      types.StringType,
+		"custom_account_password":  types.StringType,
+		"dependencies":             types.StringType,
+		"description":              types.StringType,
+		"display_name":             types.StringType,
+		"executable_path":          types.StringType,
+		"service_account":          types.StringType,
+		"service_name":             types.StringType,
+		"start_mode":               types.StringType,
+	}
+}
+
 func mapContainerToState(container *deployments.DeploymentActionContainer) types.List {
 	attributeTypes := map[string]attr.Type{"feed_id": types.StringType, "image": types.StringType}
 	if container == nil || (container.Image == "" && container.FeedID == "") {
@@ -577,17 +669,17 @@ func mapStepsToDeploymentProcess(ctx context.Context, steps types.List, current 
 			case schemas.DeploymentProcessRunKubectlScriptAction:
 				actionMapping(mapRunKubectlScriptAction)
 				break
-				//case schemas.DeploymentProcessApplyTerraformTemplateAction:
-				//	actionMapping(mapTerraformTemplateAction)
-				//	break
-				//case schemas.DeploymentProcessApplyKubernetesSecretAction:
-				//	actionMapping(mapKubernetesSecretAction)
-				//	break
-				//case schemas.DeploymentProcessWindowsServiceAction:
-				//	actionMapping(mapWindowsServiceAction)
-				//	break
-				//case schemas.DeploymentProcessManualInterventionAction:
-				//	actionMapping(mapManualInterventionAction)
+			//case schemas.DeploymentProcessApplyTerraformTemplateAction:
+			//	actionMapping(mapTerraformTemplateAction)
+			//	break
+			case schemas.DeploymentProcessApplyKubernetesSecretAction:
+				actionMapping(mapKubernetesSecretAction)
+				break
+			//case schemas.DeploymentProcessWindowsServiceAction:
+			//	actionMapping(mapWindowsServiceAction)
+			//	break
+			case schemas.DeploymentProcessManualInterventionAction:
+				actionMapping(mapManualInterventionAction)
 				//	break
 			}
 
@@ -619,6 +711,54 @@ func mapStepsToDeploymentProcess(ctx context.Context, steps types.List, current 
 
 		current.Steps = append(current.Steps, step)
 	}
+}
+
+func mapManualInterventionAction(actionAttribute attr.Value) *deployments.DeploymentAction {
+	actionAttrs := getActionAttributes(actionAttribute)
+	if actionAttrs == nil {
+		return nil
+	}
+
+	action := getBaseAction(actionAttribute)
+	if action == nil {
+		return nil
+	}
+
+	action.ActionType = "Octopus.Manual"
+
+	mapAttributeToProperty(action, actionAttrs, "instructions", "Octopus.Action.Manual.Instructions")
+	mapAttributeToProperty(action, actionAttrs, "responsible_teams", "Octopus.Action.Manual.ResponsibleTeamIds")
+
+	return action
+}
+
+func mapKubernetesSecretAction(actionAttribute attr.Value) *deployments.DeploymentAction {
+	actionAttrs := getActionAttributes(actionAttribute)
+	if actionAttrs == nil {
+		return nil
+	}
+
+	action := getBaseAction(actionAttribute)
+	if action == nil {
+		return nil
+	}
+	action.ActionType = "Octopus.KubernetesDeploySecret"
+
+	mapAttributeToProperty(action, actionAttrs, "secret_name", "Octopus.Action.KubernetesContainers.SecretName")
+	mapAttributeToProperty(action, actionAttrs, "kubernetes_object_status_check_enabled", "Octopus.Action.Kubernetes.ResourceStatusCheck")
+
+	if attrValue, ok := actionAttrs["secret_values"]; ok {
+		secretValues := attrValue.(types.Map)
+		mappedValues := make(map[string]string)
+		for key, value := range secretValues.Elements() {
+			mappedValues[key] = value.String()
+		}
+
+		j, _ := json.Marshal(secretValues)
+		action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] = core.NewPropertyValue(string(j), false)
+	}
+
+	return action
 }
 
 func mapRunScriptAction(actionAttribute attr.Value) *deployments.DeploymentAction {
@@ -891,4 +1031,14 @@ func getGitDependency(gitAttrs map[string]attr.Value) *gitdependencies.GitDepend
 	util.SetString(gitAttrs, "git_credential_id", &gitDependency.GitCredentialId)
 	gitDependency.FilePathFilters = getArray(gitAttrs, "file_path_filters")
 	return gitDependency
+}
+
+func isAction(key string) bool {
+	for k, _ := range schemas.ActionsAttributeToActionTypeMap {
+		if k == key {
+			return true
+		}
+	}
+
+	return false
 }
