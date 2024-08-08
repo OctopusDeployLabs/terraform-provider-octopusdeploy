@@ -3,7 +3,10 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -11,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"strings"
 )
 
 const spaceManagersTeamIDPrefix = "teams-spacemanagers-"
@@ -129,7 +131,9 @@ func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	spaceResult, err := spaces.GetByID(s.Client, data.ID.ValueString())
 
 	if err != nil {
-		resp.Diagnostics.AddError("unable to query spaces", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "space"); err != nil {
+			resp.Diagnostics.AddError("unable to query spaces", err.Error())
+		}
 		return
 	}
 

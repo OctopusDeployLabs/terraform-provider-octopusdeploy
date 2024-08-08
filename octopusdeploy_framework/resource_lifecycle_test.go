@@ -2,6 +2,9 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"path/filepath"
+	"testing"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
@@ -13,8 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
-	"path/filepath"
-	"testing"
 )
 
 func TestExpandLifecycleWithNil(t *testing.T) {
@@ -31,7 +32,6 @@ func TestExpandLifecycle(t *testing.T) {
 	tentacleRetention := core.NewRetentionPeriod(2, "Items", false)
 
 	data := &lifecycleTypeResourceModel{
-		ID:          types.StringValue(Id),
 		Description: types.StringValue(description),
 		Name:        types.StringValue(name),
 		SpaceID:     types.StringValue(spaceID),
@@ -62,6 +62,7 @@ func TestExpandLifecycle(t *testing.T) {
 			},
 		),
 	}
+	data.ID = types.StringValue(Id)
 
 	lifecycle := expandLifecycle(data)
 

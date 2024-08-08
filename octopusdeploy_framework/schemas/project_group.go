@@ -43,9 +43,10 @@ func GetProjectGroupResourceSchema() map[string]resourceSchema.Attribute {
 }
 
 type ProjectGroupTypeResourceModel struct {
-	ID                types.String `tfsdk:"id"`
 	Name              types.String `tfsdk:"name"`
 	SpaceID           types.String `tfsdk:"space_id"`
 	Description       types.String `tfsdk:"description"`
 	RetentionPolicyID types.String `tfsdk:"retention_policy_id"`
+
+	ResourceModel
 }

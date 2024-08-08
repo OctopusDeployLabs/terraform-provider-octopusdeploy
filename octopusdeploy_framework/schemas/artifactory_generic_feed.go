@@ -33,7 +33,6 @@ func GetArtifactoryGenericFeedResourceSchema() map[string]resourceSchema.Attribu
 
 type ArtifactoryGenericFeedTypeResourceModel struct {
 	FeedUri                           types.String `tfsdk:"feed_uri"`
-	ID                                types.String `tfsdk:"id"`
 	Name                              types.String `tfsdk:"name"`
 	PackageAcquisitionLocationOptions types.List   `tfsdk:"package_acquisition_location_options"`
 	Password                          types.String `tfsdk:"password"`
@@ -41,4 +40,6 @@ type ArtifactoryGenericFeedTypeResourceModel struct {
 	Username                          types.String `tfsdk:"username"`
 	Repository                        types.String `tfsdk:"repository"`
 	LayoutRegex                       types.String `tfsdk:"layout_regex"`
+
+	ResourceModel
 }
