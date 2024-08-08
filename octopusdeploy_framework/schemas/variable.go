@@ -218,7 +218,6 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 }
 
 type VariableTypeResourceModel struct {
-	ResourceModel
 	Name           types.String `tfsdk:"name"`
 	Description    types.String `tfsdk:"description"`
 	OwnerID        types.String `tfsdk:"owner_id"`
@@ -234,10 +233,11 @@ type VariableTypeResourceModel struct {
 	Prompt         types.List   `tfsdk:"prompt"`
 	Scope          types.List   `tfsdk:"scope"`
 	SpaceID        types.String `tfsdk:"space_id"`
+
+	ResourceModel
 }
 
 type VariablesDataSourceModel struct {
-	ResourceModel
 	OwnerID        types.String `tfsdk:"owner_id"`
 	Name           types.String `tfsdk:"name"`
 	Scope          types.List   `tfsdk:"scope"`
@@ -249,4 +249,6 @@ type VariablesDataSourceModel struct {
 	SensitiveValue types.String `tfsdk:"sensitive_value"`
 	Type           types.String `tfsdk:"type"`
 	Value          types.String `tfsdk:"value"`
+
+	ResourceModel
 }

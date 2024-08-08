@@ -9,8 +9,9 @@ type IResourceModel interface {
 }
 
 type ResourceModel struct {
-	IResourceModel
 	ID types.String `tfsdk:"id"`
+
+	IResourceModel `tfsdk:"-"`
 }
 
 func (r ResourceModel) GetID() string {
