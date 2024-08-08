@@ -32,10 +32,11 @@ func GetAwsElasticContainerRegistryFeedResourceSchema() map[string]resourceSchem
 
 type AwsElasticContainerRegistryFeedTypeResourceModel struct {
 	AccessKey                         types.String `tfsdk:"access_key"`
-	ID                                types.String `tfsdk:"id"`
 	Name                              types.String `tfsdk:"name"`
 	PackageAcquisitionLocationOptions types.List   `tfsdk:"package_acquisition_location_options"`
 	Region                            types.String `tfsdk:"region"`
 	SecretKey                         types.String `tfsdk:"secret_key"`
 	SpaceID                           types.String `tfsdk:"space_id"`
+
+	ResourceModel
 }

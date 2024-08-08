@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
@@ -26,7 +27,6 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 	}
 
 	model := &projectResourceModel{
-		ID:                              types.StringValue(project.GetID()),
 		SpaceID:                         types.StringValue(project.SpaceID),
 		Name:                            types.StringValue(project.Name),
 		Description:                     types.StringValue(project.Description),
@@ -47,6 +47,8 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 		Slug:                            types.StringValue(project.Slug),
 		ClonedFromProjectID:             util.StringOrNull(project.ClonedFromProjectID),
 	}
+
+	model.ID = types.StringValue(project.GetID())
 
 	model.IncludedLibraryVariableSets = util.FlattenStringList(project.IncludedLibraryVariableSets)
 	model.AutoDeployReleaseOverrides = flattenAutoDeployReleaseOverrides(project.AutoDeployReleaseOverrides)

@@ -5,6 +5,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/extensions"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -82,7 +83,10 @@ func (r *environmentTypeResource) Read(ctx context.Context, req resource.ReadReq
 
 	environment, err := environments.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load environment", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "environment"); err != nil {
+			resp.Diagnostics.AddError("unable to load environment", err.Error())
+		}
+		return
 	}
 
 	updateEnvironment(ctx, &data, environment)

@@ -2,8 +2,10 @@ package octopusdeploy_framework
 
 import (
 	"context"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -18,13 +20,14 @@ type gitCredentialResource struct {
 }
 
 type gitCredentialResourceModel struct {
-	ID          types.String `tfsdk:"id"`
 	SpaceID     types.String `tfsdk:"space_id"`
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
 	Type        types.String `tfsdk:"type"`
 	Username    types.String `tfsdk:"username"`
 	Password    types.String `tfsdk:"password"`
+
+	schemas.ResourceModel
 }
 
 func NewGitCredentialResource() resource.Resource {
@@ -92,7 +95,9 @@ func (g *gitCredentialResource) Read(ctx context.Context, req resource.ReadReque
 
 	gitCredential, err := credentials.GetByID(g.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error reading Git credential", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "git credential"); err != nil {
+			resp.Diagnostics.AddError("Error reading Git credential", err.Error())
+		}
 		return
 	}
 

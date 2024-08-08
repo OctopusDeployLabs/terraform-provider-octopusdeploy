@@ -11,7 +11,7 @@ type IResourceModel interface {
 type ResourceModel struct {
 	ID types.String `tfsdk:"id"`
 
-	IResourceModel `tfsdk:"-"`
+	IResourceModel `tfsdk:"-"` // Ignore resource model interface in object conversion
 }
 
 func (r ResourceModel) GetID() string {
