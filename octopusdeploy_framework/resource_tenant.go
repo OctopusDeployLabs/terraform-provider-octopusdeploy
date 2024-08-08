@@ -29,7 +29,8 @@ func (r *tenantTypeResource) Metadata(ctx context.Context, req resource.Metadata
 
 func (r *tenantTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetTenantResourceSchema(),
+		Attributes:  schemas.GetTenantResourceSchema(),
+		Description: "This resource manages tenants in Octopus Deploy.",
 	}
 }
 

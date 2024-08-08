@@ -43,9 +43,6 @@ Read-Only:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `space_id` (String) The space ID associated with this tenant.
-
-Read-Only:
-
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
 

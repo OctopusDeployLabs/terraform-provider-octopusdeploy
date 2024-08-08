@@ -55,39 +55,39 @@ data "octopusdeploy_listening_tentacle_deployment_targets" "listening_tentacle_d
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `listening_tentacle_deployment_targets` (Block List) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--listening_tentacle_deployment_targets))
+- `listening_tentacle_deployment_targets` (List of Object) A list of listening tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedatt--listening_tentacle_deployment_targets))
 
-<a id="nestedblock--listening_tentacle_deployment_targets"></a>
+<a id="nestedatt--listening_tentacle_deployment_targets"></a>
 ### Nested Schema for `listening_tentacle_deployment_targets`
 
 Read-Only:
 
 - `certificate_signature_algorithm` (String)
-- `environments` (List of String) A list of environment IDs associated with this listening tentacle.
+- `environments` (List of String)
 - `has_latest_calamari` (Boolean)
-- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- `id` (String) The unique ID for this resource.
-- `is_disabled` (Boolean) Represents the disabled status of this deployment target.
-- `is_in_process` (Boolean) Represents the in-process status of this deployment target.
-- `machine_policy_id` (String) The machine policy ID that is associated with this deployment target.
-- `name` (String) The name of this resource.
-- `operating_system` (String) The operating system that is associated with this deployment target.
-- `proxy_id` (String) The proxy ID that is associated with this deployment target.
-- `roles` (List of String) A list of role IDs that are associated with this deployment target.
-- `shell_name` (String) The shell name associated with this deployment target.
-- `shell_version` (String) The shell version associated with this deployment target.
-- `space_id` (String) The space ID associated with this resource.
-- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- `status_summary` (String) A summary elaborating on the status of this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
-- `tentacle_url` (String) The tenant URL of this deployment target.
-- `tentacle_version_details` (List of Object) (see [below for nested schema](#nestedatt--listening_tentacle_deployment_targets--tentacle_version_details))
-- `thumbprint` (String) The thumbprint of this deployment target.
-- `uri` (String) The URI of this deployment target.
+- `health_status` (String)
+- `id` (String)
+- `is_disabled` (Boolean)
+- `is_in_process` (Boolean)
+- `machine_policy_id` (String)
+- `name` (String)
+- `operating_system` (String)
+- `proxy_id` (String)
+- `roles` (List of String)
+- `shell_name` (String)
+- `shell_version` (String)
+- `space_id` (String)
+- `status` (String)
+- `status_summary` (String)
+- `tenant_tags` (List of String)
+- `tenanted_deployment_participation` (String)
+- `tenants` (List of String)
+- `tentacle_url` (String)
+- `tentacle_version_details` (List of Object) (see [below for nested schema](#nestedobjatt--listening_tentacle_deployment_targets--tentacle_version_details))
+- `thumbprint` (String)
+- `uri` (String)
 
-<a id="nestedatt--listening_tentacle_deployment_targets--tentacle_version_details"></a>
+<a id="nestedobjatt--listening_tentacle_deployment_targets--tentacle_version_details"></a>
 ### Nested Schema for `listening_tentacle_deployment_targets.tentacle_version_details`
 
 Read-Only:
