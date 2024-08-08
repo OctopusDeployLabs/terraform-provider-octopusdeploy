@@ -40,15 +40,15 @@ data "octopusdeploy_project_groups" "example" {
 <a id="nestedblock--project_groups"></a>
 ### Nested Schema for `project_groups`
 
-Required:
-
-- `name` (String) The name of this resource.
-
 Optional:
 
 - `description` (String) The description of this project group.
 - `id` (String) The unique ID for this resource.
 - `retention_policy_id` (String) The ID of the retention policy associated with this project group.
 - `space_id` (String) The space ID associated with this project group.
+
+Read-Only:
+
+- `name` (String) The name of this resource.
 
 

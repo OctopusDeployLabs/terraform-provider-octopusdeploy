@@ -40,14 +40,11 @@ data "octopusdeploy_lifecycles" "example" {
 <a id="nestedatt--lifecycles"></a>
 ### Nested Schema for `lifecycles`
 
-Required:
-
-- `name` (String) The name of this resource.
-
 Read-Only:
 
 - `description` (String) The description of this lifecycle.
 - `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
 - `phase` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--phase))
 - `release_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--release_retention_policy))
 - `space_id` (String) The space ID associated with this lifecycle.

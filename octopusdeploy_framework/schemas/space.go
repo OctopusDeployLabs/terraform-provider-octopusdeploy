@@ -60,7 +60,7 @@ func GetSpaceResourceSchema() map[string]resourceSchema.Attribute {
 func GetSpaceDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":          GetIdDatasourceSchema(true),
-		"description": GetDescriptionDatasourceSchema(spaceDescription),
+		"description": GetReadonlyDescriptionDatasourceSchema(spaceDescription),
 		"name": datasourceSchema.StringAttribute{
 			Description: fmt.Sprintf("The name of this resource, no more than %d characters long", 20),
 			Validators: []validator.String{

@@ -101,7 +101,7 @@ func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
 					Attributes: map[string]datasourceSchema.Attribute{
 						"id":                        GetIdDatasourceSchema(true),
 						"space_id":                  GetSpaceIdDatasourceSchema(description, true),
-						"name":                      util.GetNameDatasourceSchema(true),
+						"name":                      GetReadonlyNameDatasourceSchema(),
 						"description":               util.GetDescriptionDatasourceSchema(description),
 						"phase":                     getDatasourcePhasesSchema(),
 						"release_retention_policy":  getDatasourceRetentionPolicySchema(),
