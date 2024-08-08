@@ -28,7 +28,8 @@ func (r *nugetFeedTypeResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *nugetFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetNugetFeedResourceSchema(),
+		Attributes:  schemas.GetNugetFeedResourceSchema(),
+		Description: "This resource manages a Nuget feed in Octopus Deploy.",
 	}
 }
 

@@ -50,6 +50,7 @@ func getAccountResourceDataSchema() map[string]*schema.Schema {
 			Description: "A list of accounts that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
 			Type:        schema.TypeList,
+			Optional:    false,
 		},
 		"id":           getDataSchemaID(),
 		"space_id":     getQuerySpaceID(),

@@ -44,7 +44,10 @@ func dataSourceTenantsRead(ctx context.Context, d *schema.ResourceData, meta int
 		flattenedTenants = append(flattenedTenants, flattenTenant(tenant))
 	}
 
-	d.Set("tenants", flattenedTenants)
+	if err := d.Set("tenants", flattenedTenants); err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId("Tenants " + time.Now().UTC().String())
 
 	return nil

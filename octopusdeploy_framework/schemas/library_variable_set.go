@@ -22,7 +22,8 @@ type LibraryVariableSetResourceModel struct {
 
 func GetLibraryVariableSetDataSourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
-		Attributes: getLibraryVariableSetDataSchema(),
+		Attributes:  getLibraryVariableSetDataSchema(),
+		Description: "Provides information about existing library variable sets.",
 		Blocks: map[string]datasourceSchema.Block{
 			"library_variable_sets": datasourceSchema.ListNestedBlock{
 				Description: "A list of library variable sets that match the filter(s).",
@@ -97,6 +98,7 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 				Computed: true,
 			},
 		},
+		Description: "This resource manages library variable sets in Octopus Deploy.",
 		Blocks: map[string]resourceSchema.Block{
 			"template": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
