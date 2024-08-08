@@ -55,20 +55,41 @@ func GetQueryTakeDatasourceSchema() datasourceSchema.Attribute {
 	}
 }
 
-func GetIdDatasourceSchema() datasourceSchema.Attribute {
+func GetReadonlyNameDatasourceSchema() datasourceSchema.Attribute {
 	return datasourceSchema.StringAttribute{
-		Description: "The unique ID for this resource.",
+		Description: "The name of this resource.",
 		Computed:    true,
-		Optional:    true,
 	}
 }
 
-func GetSpaceIdDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
-	return datasourceSchema.StringAttribute{
-		Description: "The space ID associated with this " + resourceDescription + ".",
-		Computed:    true,
-		Optional:    true,
+func GetIdDatasourceSchema(isReadOnly bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The unique ID for this resource.",
 	}
+
+	if isReadOnly {
+		s.Computed = true
+	} else {
+		s.Computed = true
+		s.Optional = true
+	}
+
+	return s
+}
+
+func GetSpaceIdDatasourceSchema(resourceDescription string, isReadOnly bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The space ID associated with this " + resourceDescription + ".",
+	}
+
+	if isReadOnly {
+		s.Computed = true
+	} else {
+		s.Computed = true
+		s.Optional = true
+	}
+
+	return s
 }
 
 func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) datasourceSchema.Attribute {
@@ -109,6 +130,13 @@ func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema
 	return datasourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
 		Optional:    true,
+	}
+}
+
+func GetReadonlyDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
+		Description: "The description of this " + resourceDescription + ".",
+		Computed:    true,
 	}
 }
 
@@ -154,12 +182,19 @@ func GetDescriptionResourceSchema(resourceDescription string) resourceSchema.Att
 	}
 }
 
-func GetSlugDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
-	return datasourceSchema.StringAttribute{
+func GetSlugDatasourceSchema(resourceDescription string, isReadOnly bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
-		Optional:    true,
-		Computed:    true,
 	}
+
+	if isReadOnly {
+		s.Computed = true
+	} else {
+		s.Optional = true
+		s.Computed = true
+	}
+
+	return s
 }
 
 func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute {
@@ -190,7 +225,12 @@ func GetBooleanResourceAttribute(description string, defaultValue bool, isOption
 func GetIds(ids types.List) []string {
 	var result = make([]string, 0, len(ids.Elements()))
 	for _, id := range ids.Elements() {
-		result = append(result, id.String())
+		strVal, ok := id.(types.String)
+
+		if !ok || strVal.IsNull() || strVal.IsUnknown() {
+			continue
+		}
+		result = append(result, strVal.ValueString())
 	}
 	return result
 }

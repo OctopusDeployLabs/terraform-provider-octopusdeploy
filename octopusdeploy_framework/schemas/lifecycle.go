@@ -30,7 +30,7 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 	return resourceSchema.ListNestedBlock{
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
-				"id":   util.GetIdResourceSchema(),
+				"id":   GetIdResourceSchema(),
 				"name": util.GetNameResourceSchema(true),
 				"automatic_deployment_targets": resourceSchema.ListAttribute{
 					ElementType: types.StringType,
@@ -89,19 +89,20 @@ func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
 	description := "lifecycle"
 	return datasourceSchema.Schema{
 		Attributes: map[string]datasourceSchema.Attribute{
-			"id":           util.GetIdDatasourceSchema(),
-			"space_id":     util.GetSpaceIdDatasourceSchema(description),
+			"id":           GetIdDatasourceSchema(false),
+			"space_id":     GetSpaceIdDatasourceSchema(description, false),
 			"ids":          util.GetQueryIDsDatasourceSchema(),
 			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 			"skip":         util.GetQuerySkipDatasourceSchema(),
 			"take":         util.GetQueryTakeDatasourceSchema(),
 			"lifecycles": datasourceSchema.ListNestedAttribute{
 				Computed: true,
+				Optional: false,
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: map[string]datasourceSchema.Attribute{
-						"id":                        util.GetIdDatasourceSchema(),
-						"space_id":                  util.GetSpaceIdDatasourceSchema(description),
-						"name":                      util.GetNameDatasourceSchema(true),
+						"id":                        GetIdDatasourceSchema(true),
+						"space_id":                  GetSpaceIdDatasourceSchema(description, true),
+						"name":                      GetReadonlyNameDatasourceSchema(),
 						"description":               util.GetDescriptionDatasourceSchema(description),
 						"phase":                     getDatasourcePhasesSchema(),
 						"release_retention_policy":  getDatasourceRetentionPolicySchema(),
@@ -118,8 +119,8 @@ func getDatasourcePhasesSchema() datasourceSchema.ListNestedAttribute {
 		Computed: true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				"id":                                    util.GetIdDatasourceSchema(),
-				"name":                                  util.GetNameDatasourceSchema(true),
+				"id":                                    GetIdDatasourceSchema(true),
+				"name":                                  GetReadonlyNameDatasourceSchema(),
 				"automatic_deployment_targets":          datasourceSchema.ListAttribute{ElementType: types.StringType, Computed: true},
 				"optional_deployment_targets":           datasourceSchema.ListAttribute{ElementType: types.StringType, Computed: true},
 				"minimum_environments_before_promotion": datasourceSchema.Int64Attribute{Computed: true},

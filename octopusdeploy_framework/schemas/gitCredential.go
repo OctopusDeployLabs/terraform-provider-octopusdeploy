@@ -47,13 +47,14 @@ func GetGitCredentialResourceSchema() resourceSchema.Schema {
 
 func GetGitCredentialDataSourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"id":       util.GetIdDatasourceSchema(),
-		"space_id": util.GetSpaceIdDatasourceSchema(GitCredentialResourceDescription),
+		"id":       GetIdDatasourceSchema(true),
+		"space_id": GetSpaceIdDatasourceSchema(GitCredentialResourceDescription, false),
 		"name":     util.GetQueryNameDatasourceSchema(),
 		"skip":     util.GetQuerySkipDatasourceSchema(),
 		"take":     util.GetQueryTakeDatasourceSchema(),
 		"git_credentials": datasourceSchema.ListNestedAttribute{
 			Computed:    true,
+			Optional:    false,
 			Description: "A list of Git Credentials that match the filter(s).",
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: GetGitCredentialAttributes(),
@@ -64,9 +65,9 @@ func GetGitCredentialDataSourceSchema() map[string]datasourceSchema.Attribute {
 
 func GetGitCredentialAttributes() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"id":          util.GetIdDatasourceSchema(),
-		"space_id":    util.GetSpaceIdDatasourceSchema(GitCredentialResourceDescription),
-		"name":        util.GetQueryNameDatasourceSchema(),
+		"id":          GetIdDatasourceSchema(true),
+		"space_id":    GetSpaceIdDatasourceSchema(GitCredentialResourceDescription, true),
+		"name":        GetReadonlyNameDatasourceSchema(),
 		"description": util.GetDescriptionDatasourceSchema(GitCredentialResourceDescription),
 		"type": datasourceSchema.StringAttribute{
 			Computed:    true,

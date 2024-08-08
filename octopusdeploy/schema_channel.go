@@ -73,7 +73,7 @@ func getChannelDataSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Description: "A channel that matches the specified filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
+			Optional:    false,
 			Type:        schema.TypeList,
 		},
 		"ids":          getQueryIDs(),

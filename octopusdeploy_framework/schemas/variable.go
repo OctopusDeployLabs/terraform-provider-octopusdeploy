@@ -64,31 +64,31 @@ var VariableTypeNames = struct {
 	AmazonWebServicesAccount string
 	AzureAccount             string
 	GoogleCloudAccount       string
+	UsernamePasswordAccount  string
 	Certificate              string
 	Sensitive                string
 	String                   string
 	WorkerPool               string
-	UsernamePasswordAccount  string
 }{
 	AmazonWebServicesAccount: "AmazonWebServicesAccount",
 	AzureAccount:             "AzureAccount",
 	GoogleCloudAccount:       "GoogleCloudAccount",
+	UsernamePasswordAccount:  "UsernamePasswordAccount",
 	Certificate:              "Certificate",
 	Sensitive:                "Sensitive",
 	String:                   "String",
 	WorkerPool:               "WorkerPool",
-	UsernamePasswordAccount:  "UsernamePasswordAccount",
 }
 
 var VariableTypes = []string{
 	VariableTypeNames.AmazonWebServicesAccount,
 	VariableTypeNames.AzureAccount,
 	VariableTypeNames.GoogleCloudAccount,
+	VariableTypeNames.UsernamePasswordAccount,
 	VariableTypeNames.Certificate,
 	VariableTypeNames.Sensitive,
 	VariableTypeNames.String,
 	VariableTypeNames.WorkerPool,
-	VariableTypeNames.UsernamePasswordAccount,
 }
 
 func GetVariableDatasourceSchema() datasourceSchema.Schema {
@@ -113,19 +113,19 @@ func GetVariableDatasourceSchema() datasourceSchema.Schema {
 			},
 			SchemaAttributeNames.Description: datasourceSchema.StringAttribute{
 				Computed:    true,
-				Description: "The description of this variable",
+				Description: "The description of this variable.",
 			},
-			VariableSchemaAttributeNames.IsEditable: GetBooleanDatasourceAttribute(
-				"Indicates whether or not this variable is considered editable.",
-				true,
-			),
-			VariableSchemaAttributeNames.IsSensitive: GetBooleanDatasourceAttribute(
-				"Indicates whether or not this resource is considered sensitive and should be kept secret.",
-				true,
-			),
+			VariableSchemaAttributeNames.IsEditable: datasourceSchema.BoolAttribute{
+				Description: "Indicates whether or not this variable is considered editable.",
+				Computed:    true,
+			},
+			VariableSchemaAttributeNames.IsSensitive: datasourceSchema.BoolAttribute{
+				Description: "Indicates whether or not this resource is considered sensitive and should be kept secret.",
+				Computed:    true,
+			},
 			VariableSchemaAttributeNames.Type: datasourceSchema.StringAttribute{
 				Computed:    true,
-				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s", strings.Join(VariableTypes, ", ")),
+				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s.", strings.Join(util.Map(VariableTypes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 			},
 			VariableSchemaAttributeNames.SensitiveValue: datasourceSchema.StringAttribute{
 				Computed:  true,
@@ -134,18 +134,22 @@ func GetVariableDatasourceSchema() datasourceSchema.Schema {
 			VariableSchemaAttributeNames.Value: datasourceSchema.StringAttribute{
 				Computed: true,
 			},
+			VariableSchemaAttributeNames.Prompt: getVariablePromptDatasourceSchema(),
 		},
 		Blocks: map[string]datasourceSchema.Block{
-			VariableSchemaAttributeNames.Scope:  getVariableScopeDatasourceSchema(),
-			VariableSchemaAttributeNames.Prompt: getVariablePromptDatasourceSchema(),
+			VariableSchemaAttributeNames.Scope: getVariableScopeDatasourceSchema(),
 		},
 	}
 }
 
 func GetVariableResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
+		Description: util.GetResourceSchemaDescription(VariableResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			SchemaAttributeNames.ID:          GetIdResourceSchema(),
+			SchemaAttributeNames.ID: resourceSchema.StringAttribute{
+				Description: "The ID of this resource.",
+				Computed:    true,
+			},
 			SchemaAttributeNames.Name:        GetNameResourceSchema(true),
 			SchemaAttributeNames.Description: GetDescriptionResourceSchema(VariableResourceDescription),
 			SchemaAttributeNames.SpaceID:     GetSpaceIdResourceSchema(VariableResourceDescription),
@@ -171,7 +175,6 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 				false,
 				true),
 			VariableSchemaAttributeNames.KeyFingerprint: resourceSchema.StringAttribute{
-				Optional: true,
 				Computed: true,
 			},
 			VariableSchemaAttributeNames.PgpKey: resourceSchema.StringAttribute{
@@ -182,7 +185,6 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 				},
 			},
 			VariableSchemaAttributeNames.EncryptedValue: resourceSchema.StringAttribute{
-				Optional: true,
 				Computed: true,
 			},
 			VariableSchemaAttributeNames.SensitiveValue: resourceSchema.StringAttribute{
@@ -194,7 +196,7 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 			},
 			VariableSchemaAttributeNames.Type: resourceSchema.StringAttribute{
 				Required:    true,
-				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s", strings.Join(VariableTypes, ", ")),
+				Description: fmt.Sprintf("The type of variable represented by this resource. Valid types are %s.", strings.Join(util.Map(VariableTypes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 				Validators: []validator.String{
 					stringvalidator.OneOf(
 						VariableTypes...,

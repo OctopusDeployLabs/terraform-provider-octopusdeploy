@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_tenant_project Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource represents the connection between tenants and projects.
+  
 ---
 
 # octopusdeploy_tenant_project (Resource)
 
-This resource represents the connection between tenants and projects.
+
 
 
 
@@ -22,11 +22,8 @@ This resource represents the connection between tenants and projects.
 
 ### Optional
 
-- `environment_ids` (List of String) The environment ID associated with this tenant.
-- `space_id` (String) The space ID associated with this resource.
-
-### Read-Only
-
-- `id` (String) The ID of this resource.
+- `environment_ids` (List of String) The environment IDs associated with this tenant.
+- `id` (String) The unique ID for this resource.
+- `space_id` (String) The space ID associated with this project tenant.
 
 

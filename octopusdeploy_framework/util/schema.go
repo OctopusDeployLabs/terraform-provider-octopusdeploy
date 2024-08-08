@@ -60,22 +60,6 @@ func GetQueryTakeDatasourceSchema() datasourceSchema.Attribute {
 	}
 }
 
-func GetIdDatasourceSchema() datasourceSchema.Attribute {
-	return datasourceSchema.StringAttribute{
-		Description: "The unique ID for this resource.",
-		Computed:    true,
-		Optional:    true,
-	}
-}
-
-func GetSpaceIdDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
-	return datasourceSchema.StringAttribute{
-		Description: "The space ID associated with this " + resourceDescription + ".",
-		Computed:    true,
-		Optional:    true,
-	}
-}
-
 func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) datasourceSchema.Attribute {
 	s := datasourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The name of this resource, no more than %d characters long", maxLength),
@@ -113,7 +97,6 @@ func GetNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
 func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
 	return datasourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
-		Optional:    true,
 		Computed:    true,
 	}
 }
@@ -174,12 +157,19 @@ func GetDescriptionResourceSchema(resourceDescription string) resourceSchema.Att
 	}
 }
 
-func GetSlugDatasourceSchema(resourceDescription string) resourceSchema.Attribute {
-	return resourceSchema.StringAttribute{
+func GetSlugDatasourceSchema(resourceDescription string, isReadOnly bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
-		Optional:    true,
-		Computed:    true,
 	}
+
+	if isReadOnly {
+		s.Computed = true
+	} else {
+		s.Optional = true
+		s.Computed = true
+	}
+
+	return s
 }
 
 func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute {
@@ -193,7 +183,6 @@ func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute 
 func GetSortOrderDataSourceSchema(resourceDescription string) resourceSchema.Attribute {
 	return resourceSchema.Int64Attribute{
 		Description: fmt.Sprintf("The order number to sort an %s", resourceDescription),
-		Optional:    true,
 		Computed:    true,
 	}
 }
@@ -316,6 +305,7 @@ func GetPackageAcquisitionLocationOptionsResourceSchema() resourceSchema.Attribu
 		},
 	}
 }
+
 func GetFeedUriResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Required: true,

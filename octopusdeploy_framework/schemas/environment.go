@@ -27,21 +27,20 @@ const (
 
 func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"id":                 util.GetIdDatasourceSchema(),
-		"slug":               util.GetSlugDatasourceSchema(EnvironmentResourceDescription),
-		"name":               util.GetNameDatasourceWithMaxLengthSchema(true, 50),
+		"id":                 GetIdDatasourceSchema(true),
+		"slug":               util.GetSlugDatasourceSchema(EnvironmentResourceDescription, true),
+		"name":               GetReadonlyNameDatasourceSchema(),
 		"description":        util.GetDescriptionDatasourceSchema(EnvironmentResourceDescription),
 		EnvironmentSortOrder: util.GetSortOrderDataSourceSchema(EnvironmentResourceDescription),
 		EnvironmentAllowDynamicInfrastructure: datasourceSchema.BoolAttribute{
-			Optional: true,
+			Computed: true,
 		},
 		EnvironmentUseGuidedFailure: datasourceSchema.BoolAttribute{
-			Optional: true,
+			Computed: true,
 		},
-		"space_id": util.GetSpaceIdDatasourceSchema(EnvironmentResourceDescription),
+		"space_id": GetSpaceIdDatasourceSchema(EnvironmentResourceDescription, true),
 		EnvironmentJiraExtensionSettings: datasourceSchema.ListNestedAttribute{
 			Description: "Provides extension settings for the Jira integration for this environment.",
-			Optional:    true,
 			Computed:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
@@ -62,7 +61,6 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 		},
 		EnvironmentJiraServiceManagementExtensionSettings: datasourceSchema.ListNestedAttribute{
 			Description: "Provides extension settings for the Jira Service Management (JSM) integration for this environment.",
-			Optional:    true,
 			Computed:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
@@ -72,7 +70,6 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 		},
 		EnvironmentServiceNowExtensionSettings: datasourceSchema.ListNestedAttribute{
 			Description: "Provides extension settings for the ServiceNow integration for this environment.",
-			Optional:    true,
 			Computed:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{

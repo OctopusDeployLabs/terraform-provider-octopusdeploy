@@ -15,7 +15,7 @@ func GetProjectGroupDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":       util.GetIdResourceSchema(),
 		"space_id": util.GetSpaceIdResourceSchema(projectGroupDescription),
-		"name":     util.GetNameResourceSchema(true),
+		"name":     GetReadonlyNameDatasourceSchema(),
 		"retention_policy_id": datasourceSchema.StringAttribute{
 			Computed:    true,
 			Optional:    true,

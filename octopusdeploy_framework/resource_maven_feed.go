@@ -28,7 +28,8 @@ func (r *mavenFeedTypeResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *mavenFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetMavenFeedResourceSchema(),
+		Attributes:  schemas.GetMavenFeedResourceSchema(),
+		Description: "This resource manages a Maven feed in Octopus Deploy.",
 	}
 }
 
