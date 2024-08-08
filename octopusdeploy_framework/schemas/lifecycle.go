@@ -97,6 +97,7 @@ func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
 			"take":         util.GetQueryTakeDatasourceSchema(),
 			"lifecycles": datasourceSchema.ListNestedAttribute{
 				Computed: true,
+				Optional: false,
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: map[string]datasourceSchema.Attribute{
 						"id":                        GetIdDatasourceSchema(true),

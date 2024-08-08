@@ -67,7 +67,7 @@ func getTenantDataSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Description: "A list of tenants that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
+			Optional:    false,
 			Type:        schema.TypeList,
 		},
 		"take": getQueryTake(),
