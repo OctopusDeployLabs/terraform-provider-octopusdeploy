@@ -32,7 +32,7 @@ func GetArtifactoryGenericFeedResourceSchema() map[string]resourceSchema.Attribu
 }
 
 type ArtifactoryGenericFeedTypeResourceModel struct {
-	ResourceModel
+	*ResourceModel
 	FeedUri                           types.String `tfsdk:"feed_uri"`
 	Name                              types.String `tfsdk:"name"`
 	PackageAcquisitionLocationOptions types.List   `tfsdk:"package_acquisition_location_options"`
