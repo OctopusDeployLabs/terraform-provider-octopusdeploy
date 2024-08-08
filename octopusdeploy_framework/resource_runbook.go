@@ -3,15 +3,14 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ resource.ResourceWithImportState = &runbookTypeResource{}
@@ -94,15 +93,9 @@ func (r *runbookTypeResource) Read(ctx context.Context, req resource.ReadRequest
 
 	runbook, err := runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		if apiError, ok := err.(*core.APIError); ok {
-			if apiError.StatusCode == http.StatusNotFound {
-				tflog.Info(ctx, fmt.Sprintf("updating %s: %#v", schemas.RunbookResourceDescription, runbook))
-				resp.State.RemoveResource(ctx)
-				return
-			}
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, schemas.RunbookResourceDescription); err != nil {
+			resp.Diagnostics.AddError("failed to load runbook", err.Error())
 		}
-
-		resp.Diagnostics.AddError("failed to load runbook", err.Error())
 		return
 	}
 

@@ -104,7 +104,6 @@ var defaultGuidedFailureModes = []string{
 }
 
 type RunbookTypeResourceModel struct {
-	ID                         types.String `tfsdk:"id"`
 	Name                       types.String `tfsdk:"name"`
 	ProjectID                  types.String `tfsdk:"project_id"`
 	Description                types.String `tfsdk:"description"`
@@ -118,6 +117,8 @@ type RunbookTypeResourceModel struct {
 	DefaultGuidedFailureMode   types.String `tfsdk:"default_guided_failure_mode"`
 	RunRetentionPolicy         types.List   `tfsdk:"retention_policy"`
 	ForcePackageDownload       types.Bool   `tfsdk:"force_package_download"`
+
+	ResourceModel
 }
 
 type RunbookRetentionPeriodModel struct {
