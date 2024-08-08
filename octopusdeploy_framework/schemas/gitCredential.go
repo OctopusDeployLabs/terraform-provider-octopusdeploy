@@ -47,7 +47,7 @@ func GetGitCredentialResourceSchema() resourceSchema.Schema {
 
 func GetGitCredentialDataSourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"id":       GetIdDatasourceSchema(false),
+		"id":       GetIdDatasourceSchema(true),
 		"space_id": GetSpaceIdDatasourceSchema(GitCredentialResourceDescription, false),
 		"name":     util.GetQueryNameDatasourceSchema(),
 		"skip":     util.GetQuerySkipDatasourceSchema(),

@@ -57,7 +57,7 @@ func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 			"take":         util.GetQueryTakeDatasourceSchema(),
 
 			// response
-			"id": schemas.GetIdDatasourceSchema(false),
+			"id": schemas.GetIdDatasourceSchema(true),
 		},
 		Blocks: map[string]schema.Block{
 			"project_groups": schema.ListNestedBlock{

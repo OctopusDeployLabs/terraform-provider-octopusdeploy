@@ -26,13 +26,16 @@ data "octopusdeploy_project_groups" "example" {
 
 ### Optional
 
-- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `partial_name` (String) A filter to search by a partial name.
 - `project_groups` (Block List) A list of project groups that match the filter(s). (see [below for nested schema](#nestedblock--project_groups))
 - `skip` (Number) A filter to specify the number of items to skip in the response.
 - `space_id` (String) The space ID associated with this project group.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 <a id="nestedblock--project_groups"></a>
 ### Nested Schema for `project_groups`

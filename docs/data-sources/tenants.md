@@ -18,7 +18,6 @@ Provides information about existing tenants.
 ### Optional
 
 - `cloned_from_tenant_id` (String) A filter to search for a cloned tenant by its ID.
-- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `is_clone` (Boolean) A filter to search for cloned resources.
 - `name` (String) A filter to search by name.
@@ -31,6 +30,7 @@ Provides information about existing tenants.
 
 ### Read-Only
 
+- `id` (String) The unique ID for this resource.
 - `tenants` (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
 
 <a id="nestedblock--tenants"></a>

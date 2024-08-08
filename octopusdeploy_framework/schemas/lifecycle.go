@@ -30,7 +30,7 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 	return resourceSchema.ListNestedBlock{
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
-				"id":   util.GetIdResourceSchema(),
+				"id":   GetIdResourceSchema(),
 				"name": util.GetNameResourceSchema(true),
 				"automatic_deployment_targets": resourceSchema.ListAttribute{
 					ElementType: types.StringType,
@@ -118,8 +118,8 @@ func getDatasourcePhasesSchema() datasourceSchema.ListNestedAttribute {
 		Computed: true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				"id":                                    GetIdDatasourceSchema(false),
-				"name":                                  util.GetNameDatasourceSchema(true),
+				"id":                                    GetIdDatasourceSchema(true),
+				"name":                                  GetReadonlyNameDatasourceSchema(),
 				"automatic_deployment_targets":          datasourceSchema.ListAttribute{ElementType: types.StringType, Computed: true},
 				"optional_deployment_targets":           datasourceSchema.ListAttribute{ElementType: types.StringType, Computed: true},
 				"minimum_environments_before_promotion": datasourceSchema.Int64Attribute{Computed: true},

@@ -28,7 +28,6 @@ data "octopusdeploy_environments" "example" {
 ### Optional
 
 - `id` (String) The unique ID for this resource.
-- `ids` (List of String) A filter to search by a list of IDs.
 - `name` (String) A filter search by exact name
 - `partial_name` (String) A filter to search by a partial name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
@@ -38,6 +37,7 @@ data "octopusdeploy_environments" "example" {
 ### Read-Only
 
 - `environments` (Block List) Provides information about existing environments. (see [below for nested schema](#nestedblock--environments))
+- `ids` (String) The unique ID for this resource.
 
 <a id="nestedblock--environments"></a>
 ### Nested Schema for `environments`

@@ -133,6 +133,13 @@ func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema
 	}
 }
 
+func GetReadonlyDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
+		Description: "The description of this " + resourceDescription + ".",
+		Computed:    true,
+	}
+}
+
 func GetIdResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",

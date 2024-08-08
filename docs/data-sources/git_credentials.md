@@ -17,7 +17,6 @@ A list of Git Credentials that match the filter(s).
 
 ### Optional
 
-- `id` (String) The unique ID for this resource.
 - `name` (String) A filter search by exact name
 - `skip` (Number) A filter to specify the number of items to skip in the response.
 - `space_id` (String) The space ID associated with this Git Credential.
@@ -26,6 +25,7 @@ A list of Git Credentials that match the filter(s).
 ### Read-Only
 
 - `git_credentials` (Attributes List) A list of Git Credentials that match the filter(s). (see [below for nested schema](#nestedatt--git_credentials))
+- `id` (String) The unique ID for this resource.
 
 <a id="nestedatt--git_credentials"></a>
 ### Nested Schema for `git_credentials`

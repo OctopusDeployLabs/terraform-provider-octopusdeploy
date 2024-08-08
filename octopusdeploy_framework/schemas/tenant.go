@@ -66,7 +66,7 @@ func GetTenantsDataSourceSchema() map[string]datasourceSchema.Attribute {
 			Description: "A filter to search for a cloned tenant by its ID.",
 			Optional:    true,
 		},
-		"id":  GetIdDatasourceSchema(false),
+		"id":  GetIdDatasourceSchema(true),
 		"ids": util.GetQueryIDsDatasourceSchema(),
 		"is_clone": datasourceSchema.BoolAttribute{
 			Description: "A filter to search for cloned resources.",

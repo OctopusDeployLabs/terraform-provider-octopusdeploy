@@ -56,19 +56,13 @@ Read-Only:
 <a id="nestedatt--lifecycles--phase"></a>
 ### Nested Schema for `lifecycles.phase`
 
-Required:
-
-- `name` (String) The name of this resource.
-
-Optional:
-
-- `id` (String) The unique ID for this resource.
-
 Read-Only:
 
 - `automatic_deployment_targets` (List of String)
+- `id` (String) The unique ID for this resource.
 - `is_optional_phase` (Boolean)
 - `minimum_environments_before_promotion` (Number)
+- `name` (String) The name of this resource.
 - `optional_deployment_targets` (List of String)
 - `release_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--phase--release_retention_policy))
 - `tentacle_retention_policy` (Attributes List) (see [below for nested schema](#nestedatt--lifecycles--phase--tentacle_retention_policy))
