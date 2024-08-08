@@ -155,7 +155,6 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 			RunbookSchemaAttributeNames.RunbookProcessID: resourceSchema.StringAttribute{
 				Description: "The runbook process ID.",
 				Computed:    true,
-				Optional:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -163,7 +162,6 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 			RunbookSchemaAttributeNames.PublishedRunbookSnapshotID: resourceSchema.StringAttribute{
 				Description: "The published snapshot ID.",
 				Computed:    true,
-				Optional:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -192,7 +190,7 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 				},
 			},
 			RunbookSchemaAttributeNames.Environments: resourceSchema.ListAttribute{
-				Description: fmt.Sprintf("When %s is set to \"%s\", this is the list of environments the runbook can be run agains.", RunbookSchemaAttributeNames.EnvironmentScope, environmentScopeNames.Specified),
+				Description: fmt.Sprintf("When %s is set to \"%s\", this is the list of environments the runbook can be run against.", RunbookSchemaAttributeNames.EnvironmentScope, environmentScopeNames.Specified),
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
