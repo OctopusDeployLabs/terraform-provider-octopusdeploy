@@ -114,3 +114,59 @@ func TestUsernamePasswordVariableResource(t *testing.T) {
 		t.Fatalf("The variable must have type of UsernamePasswordAccount.")
 	}
 }
+
+func TestAccUsernamePasswordAccountImport(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	resourceName := "octopusdeploy_username_password_account." + localName
+
+	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	password := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tenantedDeploymentParticipation := core.TenantedDeploymentModeTenantedOrUntenanted
+	username := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		Steps: []resource.TestStep{
+			// Create and test the resource
+			{
+				Config: testAccUsernamePasswordAccountBasic(localName, description, name, username, password, tenantedDeploymentParticipation),
+				Check: resource.ComposeTestCheckFunc(
+					testAccountExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "description", description),
+					resource.TestCheckResourceAttr(resourceName, "username", username),
+					resource.TestCheckResourceAttr(resourceName, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateIdFunc:       testAccUsernamePasswordAccountImportStateIdFunc(resourceName),
+			},
+		},
+	})
+}
+
+func testAccUsernamePasswordAccountImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("Not found: %s", resourceName)
+		}
+
+		return rs.Primary.ID, nil
+	}
+}
+func testAccUsernamePasswordAccountBasic(localName, description, name, username, password string, tenantedDeploymentParticipation core.TenantedDeploymentMode) string {
+	return fmt.Sprintf(`resource "octopusdeploy_username_password_account" "%s" {
+			name                              = "%s"
+			description                       = "%s"
+			username                          = "%s"
+			password                          = "%s"
+			tenanted_deployment_participation = "%s"
+		}`, localName, name, description, username, password, tenantedDeploymentParticipation)
+}

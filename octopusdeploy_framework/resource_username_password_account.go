@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
@@ -13,6 +14,7 @@ import (
 )
 
 var _ resource.Resource = &usernamePasswordAccountResource{}
+var _ resource.ResourceWithImportState = &usernamePasswordAccountResource{}
 
 type usernamePasswordAccountResource struct {
 	*Config
@@ -115,6 +117,43 @@ func (r *usernamePasswordAccountResource) Delete(ctx context.Context, req resour
 		resp.Diagnostics.AddError("Error deleting username password account", err.Error())
 		return
 	}
+}
+
+func (r *usernamePasswordAccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	accountID := req.ID
+
+	account, err := accounts.GetByID(r.Client, r.Client.GetSpaceID(), accountID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading username password account",
+			fmt.Sprintf("Unable to read username password account with ID %s: %s", accountID, err.Error()),
+		)
+		return
+	}
+
+	usernamePasswordAccount, ok := account.(*accounts.UsernamePasswordAccount)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected account type",
+			fmt.Sprintf("Expected username password account, got: %T", account),
+		)
+		return
+	}
+
+	state := usernamePasswordAccountResourceModel{
+		ID:                              types.StringValue(usernamePasswordAccount.GetID()),
+		SpaceID:                         types.StringValue(usernamePasswordAccount.GetSpaceID()),
+		Name:                            types.StringValue(usernamePasswordAccount.GetName()),
+		Description:                     types.StringValue(usernamePasswordAccount.GetDescription()),
+		Username:                        types.StringValue(usernamePasswordAccount.GetUsername()),
+		TenantedDeploymentParticipation: types.StringValue(string(usernamePasswordAccount.GetTenantedDeploymentMode())),
+		Environments:                    flattenStringList(ctx, usernamePasswordAccount.GetEnvironmentIDs(), types.ListNull(types.StringType)),
+		Tenants:                         flattenStringList(ctx, usernamePasswordAccount.GetTenantIDs(), types.ListNull(types.StringType)),
+		TenantTags:                      flattenStringList(ctx, usernamePasswordAccount.TenantTags, types.ListNull(types.StringType)),
+		Password:                        types.StringNull(),
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func expandUsernamePasswordAccount(ctx context.Context, model usernamePasswordAccountResourceModel) *accounts.UsernamePasswordAccount {
