@@ -1,7 +1,9 @@
 package schemas
 
 import (
+	"fmt"
 	"strings"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
