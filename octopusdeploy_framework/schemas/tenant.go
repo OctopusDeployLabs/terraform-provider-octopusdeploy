@@ -5,6 +5,10 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -105,3 +109,28 @@ func GetTenantDataSourceSchema() map[string]datasourceSchema.Attribute {
 		},
 	}
 }
+
+func GetTenantResourceSchema() map[string]resourceSchema.Attribute {
+	return map[string]resourceSchema.Attribute{
+		"cloned_from_tenant_id": resourceSchema.StringAttribute{
+			Description: "The ID of the tenant from which this tenant was cloned.",
+			Optional:    true,
+			Computed:    true,
+			Default:     stringdefault.StaticString(""),
+		},
+		"description": util.GetDescriptionResourceSchema("tenant"),
+		"id":          util.GetIdResourceSchema(),
+		"name":        util.GetNameResourceSchema(true),
+		"space_id":    util.GetSpaceIdResourceSchema("tenant"),
+		"tenant_tags": resourceSchema.ListAttribute{
+			Description: "A list of tenant tags associated with this resource.",
+			ElementType: types.StringType,
+			Optional:    true,
+			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
+		},
+	}
+}
+
