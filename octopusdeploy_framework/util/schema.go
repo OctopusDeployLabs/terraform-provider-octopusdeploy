@@ -175,7 +175,6 @@ func GetSlugDatasourceSchema(resourceDescription string, isReadOnly bool) dataso
 func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
-		Optional:    true,
 		Computed:    true,
 	}
 }
@@ -189,7 +188,7 @@ func GetSortOrderDataSourceSchema(resourceDescription string) resourceSchema.Att
 
 func GetSortOrderResourceSchema(resourceDescription string) resourceSchema.Attribute {
 	return resourceSchema.Int64Attribute{
-		Description: fmt.Sprintf("The order number to sort an %s", resourceDescription),
+		Description: fmt.Sprintf("The order number to sort an %s.", resourceDescription),
 		Optional:    true,
 		Computed:    true,
 	}
