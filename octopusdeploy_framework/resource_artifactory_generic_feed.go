@@ -3,7 +3,9 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -77,7 +79,9 @@ func (r *artifactoryGenericFeedTypeResource) Read(ctx context.Context, req resou
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load artifactoryGeneric feed", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "artifactory generic feed"); err != nil {
+			resp.Diagnostics.AddError("unable to load artifactoryGeneric feed", err.Error())
+		}
 		return
 	}
 

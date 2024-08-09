@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_git_credentials Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  A list of Git Credentials that match the filter(s).
+  Use this data source to retrieve information about Git credentials in Octopus Deploy.
 ---
 
 # octopusdeploy_git_credentials (Data Source)
 
-A list of Git Credentials that match the filter(s).
+Use this data source to retrieve information about Git credentials in Octopus Deploy.
 
 
 
@@ -17,14 +17,14 @@ A list of Git Credentials that match the filter(s).
 
 ### Optional
 
-- `name` (String) A filter search by exact name
-- `skip` (Number) A filter to specify the number of items to skip in the response.
+- `name` (String) The name of the Git Credential to filter by.
+- `skip` (Number) The number of records to skip.
 - `space_id` (String) The space ID associated with this Git Credential.
-- `take` (Number) A filter to specify the number of items to take (or return) in the response.
+- `take` (Number) The number of records to take.
 
 ### Read-Only
 
-- `git_credentials` (Attributes List) A list of Git Credentials that match the filter(s). (see [below for nested schema](#nestedatt--git_credentials))
+- `git_credentials` (Attributes List) Provides information about existing GitCredentials. (see [below for nested schema](#nestedatt--git_credentials))
 - `id` (String) The unique ID for this resource.
 
 <a id="nestedatt--git_credentials"></a>
@@ -34,7 +34,8 @@ Read-Only:
 
 - `description` (String) The description of this Git Credential.
 - `id` (String) The unique ID for this resource.
-- `name` (String) The name of this resource.
+- `name` (String) The name of this Git Credential.
+- `password` (String, Sensitive) The password for the Git credential.
 - `space_id` (String) The space ID associated with this Git Credential.
 - `type` (String) The Git credential authentication type.
 - `username` (String) The username for the Git credential.

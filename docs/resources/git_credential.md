@@ -17,7 +17,7 @@ Manages a Git credential in Octopus Deploy.
 
 ### Required
 
-- `name` (String) The name of this resource.
+- `name` (String) The name of this Git Credential.
 - `password` (String, Sensitive) The password for the Git credential.
 - `username` (String) The username for the Git credential.
 
