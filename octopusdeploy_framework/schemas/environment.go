@@ -177,7 +177,6 @@ func MapServiceNowExtensionSettings(serviceNowExtensionSettings *environments.Se
 }
 
 type EnvironmentTypeResourceModel struct {
-	ID                                     types.String `tfsdk:"id"`
 	Slug                                   types.String `tfsdk:"slug"`
 	Name                                   types.String `tfsdk:"name"`
 	Description                            types.String `tfsdk:"description"`
@@ -188,4 +187,6 @@ type EnvironmentTypeResourceModel struct {
 	JiraExtensionSettings                  types.List   `tfsdk:"jira_extension_settings"`
 	JiraServiceManagementExtensionSettings types.List   `tfsdk:"jira_service_management_extension_settings"`
 	ServiceNowExtensionSettings            types.List   `tfsdk:"servicenow_extension_settings"`
+
+	ResourceModel
 }

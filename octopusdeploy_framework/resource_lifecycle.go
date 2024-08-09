@@ -3,8 +3,11 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -12,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"strings"
 )
 
 type lifecycleTypeResource struct {
@@ -23,13 +25,14 @@ var _ resource.Resource = &lifecycleTypeResource{}
 var _ resource.ResourceWithImportState = &lifecycleTypeResource{}
 
 type lifecycleTypeResourceModel struct {
-	ID                      types.String `tfsdk:"id"`
 	SpaceID                 types.String `tfsdk:"space_id"`
 	Name                    types.String `tfsdk:"name"`
 	Description             types.String `tfsdk:"description"`
 	Phase                   types.List   `tfsdk:"phase"`
 	ReleaseRetentionPolicy  types.List   `tfsdk:"release_retention_policy"`
 	TentacleRetentionPolicy types.List   `tfsdk:"tentacle_retention_policy"`
+
+	schemas.ResourceModel
 }
 
 func NewLifecycleResource() resource.Resource {
@@ -88,7 +91,9 @@ func (r *lifecycleTypeResource) Read(ctx context.Context, req resource.ReadReque
 
 	lifecycle, err := lifecycles.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load lifecycle", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "lifecycle"); err != nil {
+			resp.Diagnostics.AddError("unable to load lifecycle", err.Error())
+		}
 		return
 	}
 	data = flattenLifecycleResource(lifecycle)
@@ -195,8 +200,7 @@ func setDefaultRetentionPolicies(data *lifecycleTypeResourceModel) {
 }
 
 func flattenLifecycleResource(lifecycle *lifecycles.Lifecycle) *lifecycleTypeResourceModel {
-	return &lifecycleTypeResourceModel{
-		ID:                      types.StringValue(lifecycle.ID),
+	flattenedLifecycle := &lifecycleTypeResourceModel{
 		SpaceID:                 types.StringValue(lifecycle.SpaceID),
 		Name:                    types.StringValue(lifecycle.Name),
 		Description:             types.StringValue(lifecycle.Description),
@@ -204,6 +208,9 @@ func flattenLifecycleResource(lifecycle *lifecycles.Lifecycle) *lifecycleTypeRes
 		ReleaseRetentionPolicy:  flattenRetentionPeriod(lifecycle.ReleaseRetentionPolicy),
 		TentacleRetentionPolicy: flattenRetentionPeriod(lifecycle.TentacleRetentionPolicy),
 	}
+	flattenedLifecycle.ID = types.StringValue(lifecycle.GetID())
+
+	return flattenedLifecycle
 }
 
 func flattenPhases(phases []*lifecycles.Phase) types.List {

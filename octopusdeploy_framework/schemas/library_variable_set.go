@@ -12,12 +12,13 @@ import (
 
 type LibraryVariableSetResourceModel struct {
 	Description   types.String `tfsdk:"description"`
-	ID            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
 	SpaceID       types.String `tfsdk:"space_id"`
 	Template      types.List   `tfsdk:"template"`
 	TemplateIds   types.Map    `tfsdk:"template_ids"`
 	VariableSetId types.String `tfsdk:"variable_set_id"`
+
+	ResourceModel
 }
 
 func GetLibraryVariableSetDataSourceSchema() datasourceSchema.Schema {
