@@ -105,7 +105,8 @@ func resourceRunbookProcessDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	runbookProcess := &runbookprocess.RunbookProcess{
-		Version: current.Version,
+		ProjectID: current.ProjectID,
+		Version:   current.Version,
 	}
 	runbookProcess.Links = current.Links
 	runbookProcess.ID = d.Id()

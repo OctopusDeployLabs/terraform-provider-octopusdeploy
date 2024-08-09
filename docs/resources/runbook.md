@@ -22,16 +22,16 @@ This resource manages runbooks in Octopus Deploy.
 
 ### Optional
 
-- `connectivity_policy` (Block List, Max: 1) (see [below for nested schema](#nestedblock--connectivity_policy))
+- `connectivity_policy` (Block List) (see [below for nested schema](#nestedblock--connectivity_policy))
 - `default_guided_failure_mode` (String) Sets the runbook guided failure mode.
 - `description` (String) The description of this runbook.
 - `environment_scope` (String) Determines how the runbook is scoped to environments.
 - `environments` (List of String) When environment_scope is set to "Specified", this is the list of environments the runbook can be run against.
-- `force_package_download` (Boolean) Whether to force packages to be re-downloaded or not
+- `force_package_download` (Boolean) Whether to force packages to be re-downloaded or not.
 - `id` (String) The unique ID for this resource.
-- `multi_tenancy_mode` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `retention_policy` (Block List, Max: 1) Sets the runbook retention policy (see [below for nested schema](#nestedblock--retention_policy))
-- `space_id` (String) The space ID associated with this resource.
+- `multi_tenancy_mode` (String) The tenanted deployment mode of the runbook. Valid modes are `Untenanted`, `TenantedOrUntenanted`, `Tenanted`
+- `retention_policy` (Block List) Sets the runbook retention policy. (see [below for nested schema](#nestedblock--retention_policy))
+- `space_id` (String) The space ID associated with this runbook.
 
 ### Read-Only
 
