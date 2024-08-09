@@ -34,25 +34,25 @@ data "octopusdeploy_users" "example" {
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `users` (Block List) A list of users that match the filter(s). (see [below for nested schema](#nestedblock--users))
+- `users` (List of Object) A list of users that match the filter(s). (see [below for nested schema](#nestedatt--users))
 
-<a id="nestedblock--users"></a>
+<a id="nestedatt--users"></a>
 ### Nested Schema for `users`
 
 Read-Only:
 
 - `can_password_be_edited` (Boolean)
-- `display_name` (String) The display name of this resource.
-- `email_address` (String) The email address of this resource.
-- `id` (String) The unique ID for this resource.
-- `identity` (Set of Object) (see [below for nested schema](#nestedatt--users--identity))
+- `display_name` (String)
+- `email_address` (String)
+- `id` (String)
+- `identity` (Set of Object) (see [below for nested schema](#nestedobjatt--users--identity))
 - `is_active` (Boolean)
 - `is_requestor` (Boolean)
 - `is_service` (Boolean)
-- `password` (String, Sensitive) The password associated with this resource.
-- `username` (String, Sensitive) The username associated with this resource.
+- `password` (String)
+- `username` (String)
 
-<a id="nestedatt--users--identity"></a>
+<a id="nestedobjatt--users--identity"></a>
 ### Nested Schema for `users.identity`
 
 Read-Only:
