@@ -129,7 +129,7 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 					Attributes: map[string]resourceSchema.Attribute{
 						"environment_type": resourceSchema.StringAttribute{
 							Description: fmt.Sprintf("The Jira environment type of this Octopus deployment environment. Valid values are %s.", strings.Join(util.Map(jiraEnvironmentTypes, func(item string) string { return fmt.Sprintf("`\"%s\"`", item) }), ", ")),
-							Required:    true,
+							Optional:    true,
 							Validators: []validator.String{
 								stringvalidator.OneOfCaseInsensitive(
 									jiraEnvironmentTypes...,
@@ -145,7 +145,7 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 					Attributes: map[string]resourceSchema.Attribute{
 						"is_enabled": resourceSchema.BoolAttribute{
 							Description: "Specifies whether or not this extension is enabled for this project.",
-							Required:    true,
+							Optional:    true,
 						},
 					},
 				},
@@ -156,7 +156,7 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 					Attributes: map[string]resourceSchema.Attribute{
 						"is_enabled": resourceSchema.BoolAttribute{
 							Description: "Specifies whether or not this extension is enabled for this project.",
-							Required:    true,
+							Optional:    true,
 						},
 					},
 				},
