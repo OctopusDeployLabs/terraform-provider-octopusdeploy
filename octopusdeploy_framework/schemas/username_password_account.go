@@ -24,3 +24,17 @@ func GetUsernamePasswordAccountResourceSchema() schema.Schema {
 		},
 	}
 }
+
+type UsernamePasswordAccountResourceModel struct {
+	SpaceID                         types.String `tfsdk:"space_id"`
+	Name                            types.String `tfsdk:"name"`
+	Description                     types.String `tfsdk:"description"`
+	Environments                    types.List   `tfsdk:"environments"`
+	Password                        types.String `tfsdk:"password"`
+	TenantedDeploymentParticipation types.String `tfsdk:"tenanted_deployment_participation"`
+	Tenants                         types.List   `tfsdk:"tenants"`
+	TenantTags                      types.List   `tfsdk:"tenant_tags"`
+	Username                        types.String `tfsdk:"username"`
+
+	ResourceModel
+}

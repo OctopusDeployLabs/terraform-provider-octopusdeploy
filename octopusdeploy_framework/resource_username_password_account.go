@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -18,19 +19,6 @@ var _ resource.ResourceWithImportState = &usernamePasswordAccountResource{}
 
 type usernamePasswordAccountResource struct {
 	*Config
-}
-
-type usernamePasswordAccountResourceModel struct {
-	ID                              types.String `tfsdk:"id"`
-	SpaceID                         types.String `tfsdk:"space_id"`
-	Name                            types.String `tfsdk:"name"`
-	Description                     types.String `tfsdk:"description"`
-	Environments                    types.List   `tfsdk:"environments"`
-	Password                        types.String `tfsdk:"password"`
-	TenantedDeploymentParticipation types.String `tfsdk:"tenanted_deployment_participation"`
-	Tenants                         types.List   `tfsdk:"tenants"`
-	TenantTags                      types.List   `tfsdk:"tenant_tags"`
-	Username                        types.String `tfsdk:"username"`
 }
 
 func NewUsernamePasswordAccountResource() resource.Resource {
@@ -49,7 +37,7 @@ func (r *usernamePasswordAccountResource) Configure(_ context.Context, req resou
 	r.Config = ResourceConfiguration(req, resp)
 }
 func (r *usernamePasswordAccountResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan usernamePasswordAccountResourceModel
+	var plan schemas.UsernamePasswordAccountResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -71,7 +59,7 @@ func (r *usernamePasswordAccountResource) Create(ctx context.Context, req resour
 }
 
 func (r *usernamePasswordAccountResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state usernamePasswordAccountResourceModel
+	var state schemas.UsernamePasswordAccountResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -79,7 +67,9 @@ func (r *usernamePasswordAccountResource) Read(ctx context.Context, req resource
 
 	account, err := accounts.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error reading username password account", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "usernamePasswordAccountResource"); err != nil {
+			resp.Diagnostics.AddError("unable to load username password account", err.Error())
+		}
 		return
 	}
 
@@ -88,7 +78,7 @@ func (r *usernamePasswordAccountResource) Read(ctx context.Context, req resource
 }
 
 func (r *usernamePasswordAccountResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan usernamePasswordAccountResourceModel
+	var plan schemas.UsernamePasswordAccountResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -106,7 +96,7 @@ func (r *usernamePasswordAccountResource) Update(ctx context.Context, req resour
 }
 
 func (r *usernamePasswordAccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state usernamePasswordAccountResourceModel
+	var state schemas.UsernamePasswordAccountResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -140,8 +130,7 @@ func (r *usernamePasswordAccountResource) ImportState(ctx context.Context, req r
 		return
 	}
 
-	state := usernamePasswordAccountResourceModel{
-		ID:                              types.StringValue(usernamePasswordAccount.GetID()),
+	state := schemas.UsernamePasswordAccountResourceModel{
 		SpaceID:                         types.StringValue(usernamePasswordAccount.GetSpaceID()),
 		Name:                            types.StringValue(usernamePasswordAccount.GetName()),
 		Description:                     types.StringValue(usernamePasswordAccount.GetDescription()),
@@ -152,11 +141,12 @@ func (r *usernamePasswordAccountResource) ImportState(ctx context.Context, req r
 		TenantTags:                      flattenStringList(ctx, usernamePasswordAccount.TenantTags, types.ListNull(types.StringType)),
 		Password:                        types.StringNull(),
 	}
+	state.ID = types.StringValue(usernamePasswordAccount.ID)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func expandUsernamePasswordAccount(ctx context.Context, model usernamePasswordAccountResourceModel) *accounts.UsernamePasswordAccount {
+func expandUsernamePasswordAccount(ctx context.Context, model schemas.UsernamePasswordAccountResourceModel) *accounts.UsernamePasswordAccount {
 	account, _ := accounts.NewUsernamePasswordAccount(model.Name.ValueString())
 
 	account.SetID(model.ID.ValueString())
@@ -172,7 +162,7 @@ func expandUsernamePasswordAccount(ctx context.Context, model usernamePasswordAc
 	return account
 }
 
-func flattenUsernamePasswordAccount(ctx context.Context, account *accounts.UsernamePasswordAccount, model usernamePasswordAccountResourceModel) usernamePasswordAccountResourceModel {
+func flattenUsernamePasswordAccount(ctx context.Context, account *accounts.UsernamePasswordAccount, model schemas.UsernamePasswordAccountResourceModel) schemas.UsernamePasswordAccountResourceModel {
 	model.ID = types.StringValue(account.GetID())
 	model.SpaceID = types.StringValue(account.GetSpaceID())
 	model.Name = types.StringValue(account.GetName())
