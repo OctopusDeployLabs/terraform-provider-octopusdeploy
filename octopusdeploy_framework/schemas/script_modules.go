@@ -44,7 +44,6 @@ func GetDatasourceScriptModuleSchema() datasourceSchema.Schema {
 			"take":         util.GetQueryTakeDatasourceSchema(),
 			"script_modules": datasourceSchema.ListNestedAttribute{
 				Computed: true,
-				Optional: true,
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: GetScriptModuleDatasourceSchema(),
 				},
@@ -62,20 +61,19 @@ func GetScriptModuleDatasourceSchema() map[string]datasourceSchema.Attribute {
 		"variable_set_id": datasourceSchema.StringAttribute{
 			Computed:    true,
 			Description: "The variable set ID for this script module.",
-			Optional:    true,
 		},
 		"script": datasourceSchema.ListNestedAttribute{
 			Description: "The script associated with this script module.",
-			Required:    true,
+			Computed:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
 					"body": datasourceSchema.StringAttribute{
 						Description: "The body of this script module.",
-						Required:    true,
+						Computed:    true,
 					},
 					"syntax": datasourceSchema.StringAttribute{
 						Description: "The syntax of the script. Valid types are `Bash`, `CSharp`, `FSharp`, `PowerShell`, or `Python`.",
-						Required:    true,
+						Computed:    true,
 						Validators: []validator.String{
 							stringvalidator.OneOfCaseInsensitive(
 								"Bash",
@@ -134,11 +132,11 @@ func GetScriptModuleSchemaBlock() map[string]resourceSchema.Block {
 				Attributes: map[string]resourceSchema.Attribute{
 					"body": resourceSchema.StringAttribute{
 						Description: "The body of this script module.",
-						Required:    true,
+						Computed:    true,
 					},
 					"syntax": resourceSchema.StringAttribute{
 						Description: "The syntax of the script. Valid types are `Bash`, `CSharp`, `FSharp`, `PowerShell`, or `Python`.",
-						Required:    true,
+						Computed:    true,
 						Validators: []validator.String{
 							stringvalidator.OneOfCaseInsensitive(
 								"Bash",

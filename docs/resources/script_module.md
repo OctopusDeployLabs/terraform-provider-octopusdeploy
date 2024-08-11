@@ -35,14 +35,17 @@ resource "octopusdeploy_script_module" "example" {
 
 - `description` (String) The description of this script module.
 - `id` (String) The unique ID for this resource.
-- `script` (Block List) The script associated with this script module. (see [below for nested schema](#nestedblock--script))
 - `space_id` (String) The space ID associated with this Script Module.
 - `variable_set_id` (String) The variable set ID for this script module.
+
+### Read-Only
+
+- `script` (Block List) The script associated with this script module. (see [below for nested schema](#nestedblock--script))
 
 <a id="nestedblock--script"></a>
 ### Nested Schema for `script`
 
-Required:
+Read-Only:
 
 - `body` (String) The body of this script module.
 - `syntax` (String) The syntax of the script. Valid types are `Bash`, `CSharp`, `FSharp`, `PowerShell`, or `Python`.
