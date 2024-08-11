@@ -26,7 +26,6 @@ func TestAccOctopusDeployTagSetAndTag(t *testing.T) {
 	tagColor := "#6e6e6e"
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy:             testAccOctopusDeployTagSetDestroy,
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
@@ -59,24 +58,26 @@ func TestAccOctopusDeployTagSetAndTag(t *testing.T) {
 
 func testTagSetConfig(localName, name, description string) string {
 	return fmt.Sprintf(`
-resource "octopusdeploy_tag_set" "%s" {
-  name        = "%s"
-  description = "%s"
-}`, localName, name, description)
-}
-func testTagSetAndTagConfig(localName, tagSetName, tagSetDescription, tagName, tagColor string) string {
-	return fmt.Sprintf(`
-resource "octopusdeploy_tag_set" "%s" {
-  name        = "%s"
-  description = "%s"
+		resource "octopusdeploy_tag_set" "%s" {
+		  name        = "%s"
+		  description = "%s"
+		}`, localName, name, description)
 }
 
-resource "octopusdeploy_tag" "%s" {
-  name        = "%s"
-  color       = "%s"
-  description = "Test tag"
-  tag_set     = octopusdeploy_tag_set.%s.id
-}`, localName, tagSetName, tagSetDescription, localName, tagName, tagColor, localName)
+func testTagSetAndTagConfig(localName, tagSetName, tagSetDescription, tagName, tagColor string) string {
+	var tfConfig = fmt.Sprintf(`
+    resource "octopusdeploy_tag_set" "%s" {
+      name        = "%s"
+      description = "%s"
+    }
+    
+    resource "octopusdeploy_tag" "%s" {
+      name        = "%s"
+      color       = "%s"
+      description = "Test tag"
+      tag_set_id  = octopusdeploy_tag_set.%s.id
+    }`, tagSetName, tagSetName, tagSetDescription, tagName, tagName, tagColor, tagSetName)
+	return tfConfig
 }
 
 func testAccOctopusDeployTagSetExists(n string) resource.TestCheckFunc {
@@ -123,22 +124,6 @@ func testAccOctopusDeployTagExists(n string) resource.TestCheckFunc {
 
 		return fmt.Errorf("tag not found in tag set")
 	}
-}
-
-func testAccOctopusDeployTagSetDestroy(s *terraform.State) error {
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "octopusdeploy_tag_set" {
-			continue
-		}
-
-		_, err := tagsets.GetByID(octoClient, rs.Primary.Attributes["space_id"], rs.Primary.ID)
-		if err == nil {
-			return fmt.Errorf("tag set still exists")
-		}
-	}
-
-	return nil
 }
 
 // TestTagSetResource verifies that a tag set can be reimported with the correct settings
