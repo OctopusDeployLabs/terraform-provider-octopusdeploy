@@ -14,7 +14,7 @@ func GetUsernamePasswordAccountResourceSchema() schema.Schema {
 			"id":                                util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The unique ID for this resource.").Build(),
 			"space_id":                          util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The space ID associated with this resource.").Build(),
 			"name":                              util.ResourceString().Required().Description("The name of the username-password account.").Build(),
-			"description":                       util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Default("").Description("The description of this username/password resource.").Build(),
+			"description":                       util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Default("").Description("The description of this username/password account.").Build(),
 			"environments":                      util.ResourceList(types.StringType).Optional().Description("A list of environment IDs associated with this resource.").Build(),
 			"password":                          util.ResourceString().Optional().Sensitive().Description("The password associated with this resource.").Build(),
 			"tenanted_deployment_participation": util.ResourceString().Optional().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.").Build(),
