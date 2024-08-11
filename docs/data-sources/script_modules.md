@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_script_modules Data Source - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  Provides information about existing script modules.
 ---
 
 # octopusdeploy_script_modules (Data Source)
 
-
+Provides information about existing script modules.
 
 ## Example Usage
 
@@ -40,14 +40,11 @@ data "octopusdeploy_script_modules" "example" {
 <a id="nestedatt--script_modules"></a>
 ### Nested Schema for `script_modules`
 
-Optional:
-
-- `description` (String) The description of this script module.
-- `name` (String) The name of this resource.
-
 Read-Only:
 
+- `description` (String) The description of this script module.
 - `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
 - `script` (Attributes List) The script associated with this script module. (see [below for nested schema](#nestedatt--script_modules--script))
 - `space_id` (String) The space ID associated with this Script Module.
 - `variable_set_id` (String) The variable set ID for this script module.
