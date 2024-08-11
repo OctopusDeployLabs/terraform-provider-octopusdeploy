@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_tentacle_certificate Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  Manages a tentacle certificate in Octopus Deploy.
+  Generates a X.509 self-signed certificate for use with a Octopus Deploy Tentacle.
 ---
 
 # octopusdeploy_tentacle_certificate (Resource)
 
-Manages a tentacle certificate in Octopus Deploy.
+Generates a X.509 self-signed certificate for use with a Octopus Deploy Tentacle.
 
 ## Octopus certificates
 The X.509 certificates generated are self-signed, 2048-bit private keys and intended for use [only between Octopus Server and Tentacle](https://octopus.com/docs/security/octopus-tentacle-communication#Octopus-Tentaclecommunication-Octopuscertificates) communications. There is an insightful discussion of [why Octopus uses self-signed certificates](https://octopus.com/blog/why-self-signed-certificates) by default.
@@ -43,11 +43,11 @@ resource "octopusdeploy_kubernetes_agent_deployment_target" "agent" {
 ### Optional
 
 - `dependencies` (Map of String) Optional map of dependencies that when modified will trigger a re-creation of this resource.
-- `id` (String) The unique ID for this resource.
 
 ### Read-Only
 
 - `base64` (String, Sensitive) The base64 encoded pfx certificate.
+- `id` (String) The unique ID for this resource.
 - `thumbprint` (String) The SHA1 sum of the certificate represented in hexadecimal.
 
 

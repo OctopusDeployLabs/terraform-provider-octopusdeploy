@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -10,9 +9,12 @@ import (
 
 func GetTentacleCertificateSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "Manages a tentacle certificate in Octopus Deploy.",
+		Description: "Generates a X.509 self-signed certificate for use with a Octopus Deploy Tentacle.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id": util.GetIdResourceSchema(),
+			"id": resourceSchema.StringAttribute{
+				Description: "The unique ID for this resource.",
+				Computed:    true,
+			},
 			"base64": resourceSchema.StringAttribute{
 				Computed:    true,
 				Sensitive:   true,

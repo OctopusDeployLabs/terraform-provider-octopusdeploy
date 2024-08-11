@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_helm_feed Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  This resource manages a Helm feed in Octopus Deploy.
+  
 ---
 
 # octopusdeploy_helm_feed (Resource)
 
-This resource manages a Helm feed in Octopus Deploy.
+
 
 ## Example Usage
 
@@ -25,14 +25,14 @@ resource "octopusdeploy_helm_feed" "example" {
 ### Required
 
 - `feed_uri` (String)
-- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `name` (String) The name of this resource.
 
 ### Optional
 
 - `id` (String) The unique ID for this resource.
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this helm feed.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ## Import

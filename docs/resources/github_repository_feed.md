@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_github_repository_feed Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  This resource manages a GitHub repository feed in Octopus Deploy.
+  
 ---
 
 # octopusdeploy_github_repository_feed (Resource)
 
-This resource manages a GitHub repository feed in Octopus Deploy.
+
 
 ## Example Usage
 
@@ -27,7 +27,7 @@ resource "octopusdeploy_github_repository_feed" "example" {
 ### Required
 
 - `feed_uri` (String)
-- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `name` (String) The name of this resource.
 
 ### Optional
 
@@ -36,7 +36,7 @@ resource "octopusdeploy_github_repository_feed" "example" {
 - `id` (String) The unique ID for this resource.
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this github repository feed.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ## Import
