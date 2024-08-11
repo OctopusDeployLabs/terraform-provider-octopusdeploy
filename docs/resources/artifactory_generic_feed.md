@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_artifactory_generic_feed Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages a Artifactory Generic feed in Octopus Deploy.
 ---
 
 # octopusdeploy_artifactory_generic_feed (Resource)
 
-
+This resource manages a Artifactory Generic feed in Octopus Deploy.
 
 ## Example Usage
 
