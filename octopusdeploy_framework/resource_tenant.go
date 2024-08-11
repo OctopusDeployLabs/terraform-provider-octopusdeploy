@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -109,7 +110,7 @@ func (r *tenantTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 	tenant, err := mapStateToTenant(data)
 	tenant.ID = state.ID.ValueString()
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "tenant"); err != nil {
+		if err := errors.ProcessUpdateApiErrorV2(ctx, resp, data, err, "tenant"); err != nil {
 			resp.Diagnostics.AddError("unable to load tenant", err.Error())
 		}
 		return

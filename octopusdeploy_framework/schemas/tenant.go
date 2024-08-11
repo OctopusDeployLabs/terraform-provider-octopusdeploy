@@ -15,10 +15,11 @@ import (
 type TenantModel struct {
 	ClonedFromTenantId types.String `tfsdk:"cloned_from_tenant_id"`
 	Description        types.String `tfsdk:"description"`
-	ID                 types.String `tfsdk:"id"`
 	Name               types.String `tfsdk:"name"`
 	SpaceID            types.String `tfsdk:"space_id"`
 	TenantTags         types.List   `tfsdk:"tenant_tags"`
+
+	ResourceModel
 }
 
 type TenantsModel struct {
@@ -133,4 +134,3 @@ func GetTenantResourceSchema() map[string]resourceSchema.Attribute {
 		},
 	}
 }
-
