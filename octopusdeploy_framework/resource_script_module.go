@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/scriptmodules"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -73,7 +74,9 @@ func (r *scriptModuleTypeResource) Read(ctx context.Context, req resource.ReadRe
 	client := r.Config.Client
 	scriptModule, err := scriptmodules.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load script module", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "Script Module"); err != nil {
+			resp.Diagnostics.AddError("unable to load script module", err.Error())
+		}
 		return
 	}
 

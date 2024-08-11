@@ -15,11 +15,12 @@ import (
 
 type ScriptModuleResourceModel struct {
 	Description   types.String `tfsdk:"description"`
-	ID            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
 	SpaceID       types.String `tfsdk:"space_id"`
 	VariableSetId types.String `tfsdk:"variable_set_id"`
 	Script        types.List   `tfsdk:"script"`
+
+	ResourceModel
 }
 
 type ScriptModuleDataSourceModel struct {
