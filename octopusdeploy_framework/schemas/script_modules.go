@@ -133,11 +133,11 @@ func GetScriptModuleSchemaBlock() map[string]resourceSchema.Block {
 				Attributes: map[string]resourceSchema.Attribute{
 					"body": resourceSchema.StringAttribute{
 						Description: "The body of this script module.",
-						Computed:    true,
+						Required:    true,
 					},
 					"syntax": resourceSchema.StringAttribute{
 						Description: "The syntax of the script. Valid types are `Bash`, `CSharp`, `FSharp`, `PowerShell`, or `Python`.",
-						Computed:    true,
+						Required:    true,
 						Validators: []validator.String{
 							stringvalidator.OneOfCaseInsensitive(
 								"Bash",
