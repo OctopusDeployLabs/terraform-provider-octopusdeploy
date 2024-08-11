@@ -70,6 +70,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewLibraryVariableSetDataSource,
 		NewVariablesDataSource,
 		NewProjectsDataSource,
+		NewTenantsDataSource,
 		NewScriptModuleDataSource,
 	}
 }
@@ -93,6 +94,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewLibraryVariableSetFeedResource,
 		NewVariableResource,
 		NewProjectResource,
+		NewDockerContainerRegistryFeedResource,
 		NewScriptModuleResource,
 	}
 }

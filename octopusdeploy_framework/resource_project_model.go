@@ -1,11 +1,11 @@
 package octopusdeploy_framework
 
 import (
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type projectResourceModel struct {
-	ID                                     types.String `tfsdk:"id"`
 	SpaceID                                types.String `tfsdk:"space_id"`
 	Name                                   types.String `tfsdk:"name"`
 	Description                            types.String `tfsdk:"description"`
@@ -37,6 +37,8 @@ type projectResourceModel struct {
 	ServiceNowExtensionSettings            types.List   `tfsdk:"servicenow_extension_settings"`
 	IncludedLibraryVariableSets            types.List   `tfsdk:"included_library_variable_sets"`
 	AutoDeployReleaseOverrides             types.List   `tfsdk:"auto_deploy_release_overrides"`
+
+	schemas.ResourceModel
 }
 
 type connectivityPolicyModel struct {

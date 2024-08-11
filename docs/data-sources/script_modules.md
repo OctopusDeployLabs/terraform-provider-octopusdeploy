@@ -26,13 +26,16 @@ data "octopusdeploy_script_modules" "example" {
 
 ### Optional
 
-- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `partial_name` (String) A filter to search by a partial name.
 - `script_modules` (Attributes List) (see [below for nested schema](#nestedatt--script_modules))
 - `skip` (Number) A filter to specify the number of items to skip in the response.
 - `space_id` (String) The space ID associated with this script module.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 <a id="nestedatt--script_modules"></a>
 ### Nested Schema for `script_modules`
@@ -44,10 +47,13 @@ Required:
 Optional:
 
 - `description` (String) The description of this script module.
-- `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
-- `space_id` (String) The space ID associated with this Script Module.
 - `variable_set_id` (String) The variable set ID for this script module.
+
+Read-Only:
+
+- `id` (String) The unique ID for this resource.
+- `space_id` (String) The space ID associated with this Script Module.
 
 <a id="nestedatt--script_modules--script"></a>
 ### Nested Schema for `script_modules.script`

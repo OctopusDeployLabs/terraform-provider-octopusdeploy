@@ -8,7 +8,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
 )
@@ -35,6 +34,7 @@ type GitCredentialModel struct {
 	Description types.String `tfsdk:"description"`
 	Type        types.String `tfsdk:"type"`
 	Username    types.String `tfsdk:"username"`
+	Password    types.String `tfsdk:"password"`
 }
 
 func NewGitCredentialsDataSource() datasource.DataSource {
@@ -46,10 +46,7 @@ func (g *gitCredentialsDataSource) Metadata(_ context.Context, req datasource.Me
 }
 
 func (g *gitCredentialsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Description: "A list of Git Credentials that match the filter(s).",
-		Attributes:  schemas.GetGitCredentialDataSourceSchema(),
-	}
+	resp.Schema = schemas.GetGitCredentialDataSourceSchema()
 }
 
 func (g *gitCredentialsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -102,6 +99,7 @@ func GetGitCredentialAttrTypes() map[string]attr.Type {
 		"description": types.StringType,
 		"type":        types.StringType,
 		"username":    types.StringType,
+		"password":    types.StringType,
 	}
 }
 

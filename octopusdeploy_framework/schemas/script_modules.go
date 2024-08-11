@@ -36,8 +36,8 @@ func GetDatasourceScriptModuleSchema() datasourceSchema.Schema {
 	description := "script module"
 	return datasourceSchema.Schema{
 		Attributes: map[string]datasourceSchema.Attribute{
-			"id":           util.GetIdDatasourceSchema(),
-			"space_id":     util.GetSpaceIdDatasourceSchema(description),
+			"id":           GetIdDatasourceSchema(true),
+			"space_id":     GetSpaceIdDatasourceSchema(description, false),
 			"ids":          util.GetQueryIDsDatasourceSchema(),
 			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 			"skip":         util.GetQuerySkipDatasourceSchema(),
@@ -56,9 +56,9 @@ func GetDatasourceScriptModuleSchema() datasourceSchema.Schema {
 func GetScriptModuleDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"description": GetDescriptionDatasourceSchema("script module"),
-		"id":          GetIdDatasourceSchema(),
+		"id":          GetIdDatasourceSchema(true),
 		"name":        GetNameDatasourceSchema(false),
-		"space_id":    GetSpaceIdDatasourceSchema("Script Module"),
+		"space_id":    GetSpaceIdDatasourceSchema("Script Module", true),
 		"variable_set_id": datasourceSchema.StringAttribute{
 			Computed:    true,
 			Description: "The variable set ID for this script module.",

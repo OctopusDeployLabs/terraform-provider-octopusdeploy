@@ -3,8 +3,10 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -28,7 +30,8 @@ func (r *githubRepositoryFeedTypeResource) Metadata(ctx context.Context, req res
 
 func (r *githubRepositoryFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetGitHubRepositoryFeedResourceSchema(),
+		Attributes:  schemas.GetGitHubRepositoryFeedResourceSchema(),
+		Description: "This resource manages a GitHub repository feed in Octopus Deploy.",
 	}
 }
 
@@ -77,7 +80,9 @@ func (r *githubRepositoryFeedTypeResource) Read(ctx context.Context, req resourc
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load github repository feed", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "github repository feed"); err != nil {
+			resp.Diagnostics.AddError("unable to load github repository feed", err.Error())
+		}
 		return
 	}
 

@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_library_variable_set Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages library variable sets in Octopus Deploy.
 ---
 
 # octopusdeploy_library_variable_set (Resource)
 
-
+This resource manages library variable sets in Octopus Deploy.
 
 
 

@@ -22,9 +22,7 @@ resource "octopusdeploy_azure_subscription_account" "example" {
 
 ### Required
 
-- `management_endpoint` (String)
 - `name` (String) The name of this resource.
-- `storage_endpoint_suffix` (String) The storage endpoint suffix associated with this Azure subscription account.
 - `subscription_id` (String) The subscription ID of this resource.
 
 ### Optional
@@ -34,7 +32,9 @@ resource "octopusdeploy_azure_subscription_account" "example" {
 - `certificate_thumbprint` (String, Sensitive)
 - `description` (String) The description of this Azure subscription account.
 - `environments` (List of String) A list of environment IDs associated with this resource.
+- `management_endpoint` (String)
 - `space_id` (String) The space ID associated with this resource.
+- `storage_endpoint_suffix` (String) The storage endpoint suffix associated with this Azure subscription account.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this resource.

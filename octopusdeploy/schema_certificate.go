@@ -170,7 +170,7 @@ func getCertificateDataSchema() map[string]*schema.Schema {
 			Computed:    true,
 			Description: "A list of certificates that match the filter(s).",
 			Elem:        &schema.Resource{Schema: dataSchema},
-			Optional:    true,
+			Optional:    false,
 			Type:        schema.TypeList,
 		},
 		"first_result": getQueryFirstResult(),

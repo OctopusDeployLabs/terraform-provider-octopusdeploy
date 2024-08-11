@@ -27,9 +27,9 @@ Provides information about existing users.
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `teams` (Block List) A list of teams that match the filter(s). (see [below for nested schema](#nestedblock--teams))
+- `teams` (List of Object) A list of teams that match the filter(s). (see [below for nested schema](#nestedatt--teams))
 
-<a id="nestedblock--teams"></a>
+<a id="nestedatt--teams"></a>
 ### Nested Schema for `teams`
 
 Read-Only:
@@ -38,14 +38,14 @@ Read-Only:
 - `can_be_renamed` (Boolean)
 - `can_change_members` (Boolean)
 - `can_change_roles` (Boolean)
-- `description` (String) The user-friendly description of this team.
-- `external_security_group` (List of Object) (see [below for nested schema](#nestedatt--teams--external_security_group))
-- `id` (String) The unique ID for this resource.
-- `name` (String) The name of this team.
-- `space_id` (String) The space associated with this team.
-- `users` (Set of String) A list of user IDs designated to be members of this team.
+- `description` (String)
+- `external_security_group` (List of Object) (see [below for nested schema](#nestedobjatt--teams--external_security_group))
+- `id` (String)
+- `name` (String)
+- `space_id` (String)
+- `users` (Set of String)
 
-<a id="nestedatt--teams--external_security_group"></a>
+<a id="nestedobjatt--teams--external_security_group"></a>
 ### Nested Schema for `teams.external_security_group`
 
 Read-Only:

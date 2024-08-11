@@ -193,6 +193,7 @@ func getProjectsDataSourceAttribute() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
 		Description: "A list of projects that match the filter(s).",
 		Computed:    true,
+		Optional:    false,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
 				"allow_deployments_to_no_targets":            util.DataSourceBool().Computed().Deprecated("Allow deployments to be created when there are no targets.").Build(),

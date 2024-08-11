@@ -7,6 +7,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -125,7 +126,9 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 
 	variable, err := variables.GetByID(r.Config.Client, data.SpaceID.ValueString(), variableOwnerID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load variable", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, schemas.VariableResourceDescription); err != nil {
+			resp.Diagnostics.AddError("unable to load variable", err.Error())
+		}
 		return
 	}
 
