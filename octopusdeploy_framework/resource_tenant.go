@@ -79,7 +79,9 @@ func (r *tenantTypeResource) Read(ctx context.Context, req resource.ReadRequest,
 	client := r.Config.Client
 	tenant, err := tenants.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load tenant", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "tenant"); err != nil {
+			resp.Diagnostics.AddError("unable to load tenant", err.Error())
+		}
 		return
 	}
 
@@ -107,7 +109,9 @@ func (r *tenantTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 	tenant, err := mapStateToTenant(data)
 	tenant.ID = state.ID.ValueString()
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load tenant", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "tenant"); err != nil {
+			resp.Diagnostics.AddError("unable to load tenant", err.Error())
+		}
 		return
 	}
 
