@@ -21,11 +21,14 @@ Manages a tenant project variable in Octopus Deploy.
 - `project_id` (String) The ID of the project.
 - `template_id` (String) The ID of the variable template.
 - `tenant_id` (String) The ID of the tenant.
-- `value` (String, Sensitive) The value of the variable.
 
 ### Optional
 
-- `id` (String) The unique ID for this resource.
 - `space_id` (String) The space ID associated with this Tenant Project Variable.
+- `value` (String, Sensitive) The value of the variable.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 

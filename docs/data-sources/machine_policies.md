@@ -26,29 +26,29 @@ Provides information about existing machine policies.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `machine_policies` (Block List) A list of machine policies that match the filter(s). (see [below for nested schema](#nestedblock--machine_policies))
+- `machine_policies` (List of Object) A list of machine policies that match the filter(s). (see [below for nested schema](#nestedatt--machine_policies))
 
-<a id="nestedblock--machine_policies"></a>
+<a id="nestedatt--machine_policies"></a>
 ### Nested Schema for `machine_policies`
 
 Read-Only:
 
-- `connection_connect_timeout` (Number) In nanoseconds. Minimum value: 10000000000 (10 seconds).
+- `connection_connect_timeout` (Number)
 - `connection_retry_count_limit` (Number)
-- `connection_retry_sleep_interval` (Number) In nanoseconds.
-- `connection_retry_time_limit` (Number) In nanoseconds.
-- `description` (String) The description of this machine policy.
-- `id` (String) The unique ID for this resource.
+- `connection_retry_sleep_interval` (Number)
+- `connection_retry_time_limit` (Number)
+- `description` (String)
+- `id` (String)
 - `is_default` (Boolean)
-- `machine_cleanup_policy` (Set of Object) (see [below for nested schema](#nestedatt--machine_policies--machine_cleanup_policy))
-- `machine_connectivity_policy` (Set of Object) (see [below for nested schema](#nestedatt--machine_policies--machine_connectivity_policy))
-- `machine_health_check_policy` (Set of Object) (see [below for nested schema](#nestedatt--machine_policies--machine_health_check_policy))
-- `machine_update_policy` (Set of Object) (see [below for nested schema](#nestedatt--machine_policies--machine_update_policy))
-- `name` (String) The name of this resource.
-- `polling_request_queue_timeout` (Number) In nanoseconds.
-- `space_id` (String) The space ID associated with this resource.
+- `machine_cleanup_policy` (Set of Object) (see [below for nested schema](#nestedobjatt--machine_policies--machine_cleanup_policy))
+- `machine_connectivity_policy` (Set of Object) (see [below for nested schema](#nestedobjatt--machine_policies--machine_connectivity_policy))
+- `machine_health_check_policy` (Set of Object) (see [below for nested schema](#nestedobjatt--machine_policies--machine_health_check_policy))
+- `machine_update_policy` (Set of Object) (see [below for nested schema](#nestedobjatt--machine_policies--machine_update_policy))
+- `name` (String)
+- `polling_request_queue_timeout` (Number)
+- `space_id` (String)
 
-<a id="nestedatt--machine_policies--machine_cleanup_policy"></a>
+<a id="nestedobjatt--machine_policies--machine_cleanup_policy"></a>
 ### Nested Schema for `machine_policies.machine_cleanup_policy`
 
 Read-Only:
@@ -57,7 +57,7 @@ Read-Only:
 - `delete_machines_elapsed_timespan` (Number)
 
 
-<a id="nestedatt--machine_policies--machine_connectivity_policy"></a>
+<a id="nestedobjatt--machine_policies--machine_connectivity_policy"></a>
 ### Nested Schema for `machine_policies.machine_connectivity_policy`
 
 Read-Only:
@@ -65,7 +65,7 @@ Read-Only:
 - `machine_connectivity_behavior` (String)
 
 
-<a id="nestedatt--machine_policies--machine_health_check_policy"></a>
+<a id="nestedobjatt--machine_policies--machine_health_check_policy"></a>
 ### Nested Schema for `machine_policies.machine_health_check_policy`
 
 Read-Only:
@@ -96,7 +96,7 @@ Read-Only:
 
 
 
-<a id="nestedatt--machine_policies--machine_update_policy"></a>
+<a id="nestedobjatt--machine_policies--machine_update_policy"></a>
 ### Nested Schema for `machine_policies.machine_update_policy`
 
 Read-Only:
