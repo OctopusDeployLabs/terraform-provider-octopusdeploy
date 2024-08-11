@@ -45,14 +45,14 @@ func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			//request
 			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"space_id":     util.GetSpaceIdDatasourceSchema(schemas.EnvironmentResourceDescription),
+			"space_id":     schemas.GetSpaceIdDatasourceSchema(schemas.EnvironmentResourceDescription, false),
 			"name":         util.GetQueryNameDatasourceSchema(),
 			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 			"skip":         util.GetQuerySkipDatasourceSchema(),
 			"take":         util.GetQueryTakeDatasourceSchema(),
 
 			//response
-			"id": util.GetIdDatasourceSchema(),
+			"id": schemas.GetIdDatasourceSchema(true),
 		},
 		Blocks: map[string]schema.Block{
 			"environments": schema.ListNestedBlock{

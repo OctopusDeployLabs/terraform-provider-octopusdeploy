@@ -3,6 +3,8 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
@@ -12,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"strings"
 )
 
 var _ resource.Resource = &tenantProjectVariableResource{}
@@ -23,13 +24,14 @@ type tenantProjectVariableResource struct {
 }
 
 type tenantProjectVariableResourceModel struct {
-	ID            types.String `tfsdk:"id"`
 	SpaceID       types.String `tfsdk:"space_id"`
 	TenantID      types.String `tfsdk:"tenant_id"`
 	ProjectID     types.String `tfsdk:"project_id"`
 	EnvironmentID types.String `tfsdk:"environment_id"`
 	TemplateID    types.String `tfsdk:"template_id"`
 	Value         types.String `tfsdk:"value"`
+
+	schemas.ResourceModel
 }
 
 func NewTenantProjectVariableResource() resource.Resource {

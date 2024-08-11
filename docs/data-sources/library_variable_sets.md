@@ -18,34 +18,34 @@ Provides information about existing library variable sets.
 ### Optional
 
 - `content_type` (String) A filter to search by content type.
-- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
-- `library_variable_sets` (Block List) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedblock--library_variable_sets))
 - `partial_name` (String) A filter to search by a partial name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
 - `space_id` (String) The space ID associated with this library variable set.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
+- `library_variable_sets` (Block List) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedblock--library_variable_sets))
+
 <a id="nestedblock--library_variable_sets"></a>
 ### Nested Schema for `library_variable_sets`
 
-Optional:
+Read-Only:
 
 - `description` (String) The description of this library variable set.
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `space_id` (String) The space ID associated with this library variable set.
 - `template` (List of Object) (see [below for nested schema](#nestedatt--library_variable_sets--template))
-
-Read-Only:
-
 - `template_ids` (Map of String)
 - `variable_set_id` (String)
 
 <a id="nestedatt--library_variable_sets--template"></a>
 ### Nested Schema for `library_variable_sets.template`
 
-Optional:
+Read-Only:
 
 - `default_value` (String)
 - `display_settings` (Map of String)

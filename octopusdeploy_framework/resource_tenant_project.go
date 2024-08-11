@@ -21,11 +21,12 @@ import (
 )
 
 type TenantProjectModel struct {
-	ID             types.String `tfsdk:"id"`
 	SpaceID        types.String `tfsdk:"space_id"`
 	TenantID       types.String `tfsdk:"tenant_id"`
 	ProjectID      types.String `tfsdk:"project_id"`
 	EnvironmentIDs types.List   `tfsdk:"environment_ids"`
+
+	schemas.ResourceModel
 }
 
 type tenantProjectResource struct {
