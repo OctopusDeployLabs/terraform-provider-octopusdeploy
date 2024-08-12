@@ -330,7 +330,7 @@ func findByIdOrNameAndSetTag(ctx context.Context, data *schemas.TagResourceModel
 		}
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("%s (%s) not found; deleting from state", tag.ID))
+	tflog.Info(ctx, fmt.Sprintf("%s (%s) not found; deleting from state", tag.ID, tag.ID))
 	data.ID = types.StringValue("")
 	return nil
 }
