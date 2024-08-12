@@ -38,12 +38,6 @@ func DeleteFromStateV2(ctx context.Context, resp *resource.ReadResponse, resourc
 	return nil
 }
 
-func DeleteFromUpdateStateV2(ctx context.Context, resp *resource.UpdateResponse, resource schemas.IResourceModel, resourceDescription string) error {
-	log.Printf("[INFO] %s (%s) not found; deleting from state", resourceDescription, resource.GetID())
-	resp.State.RemoveResource(ctx)
-	return nil
-}
-
 func ProcessApiErrorV2(ctx context.Context, resp *resource.ReadResponse, resource schemas.IResourceModel, err error, resourceDescription string) error {
 	if err == nil {
 		return nil
@@ -52,20 +46,6 @@ func ProcessApiErrorV2(ctx context.Context, resp *resource.ReadResponse, resourc
 	if apiError, ok := err.(*core.APIError); ok {
 		if apiError.StatusCode == http.StatusNotFound {
 			return DeleteFromStateV2(ctx, resp, resource, resourceDescription)
-		}
-	}
-
-	return nil
-}
-
-func ProcessUpdateApiErrorV2(ctx context.Context, resp *resource.UpdateResponse, resource schemas.IResourceModel, err error, resourceDescription string) error {
-	if err == nil {
-		return nil
-	}
-
-	if apiError, ok := err.(*core.APIError); ok {
-		if apiError.StatusCode == http.StatusNotFound {
-			return DeleteFromUpdateStateV2(ctx, resp, resource, resourceDescription)
 		}
 	}
 
