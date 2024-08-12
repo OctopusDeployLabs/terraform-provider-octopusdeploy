@@ -22,9 +22,9 @@ func TestAccTag(t *testing.T) {
 		CheckDestroy:             testAccTagDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTagConfig(tagSetName, tagName, tagColor),
+				Config: testTagConfig(tagSetName, tagName, tagColor),
 				Check: resource.ComposeTestCheckFunc(
-					testAccTagExists(tagResourceName),
+					testTagExists(tagResourceName),
 					resource.TestCheckResourceAttr(tagResourceName, "name", tagName),
 					resource.TestCheckResourceAttr(tagResourceName, "color", tagColor),
 					resource.TestCheckResourceAttrSet(tagResourceName, "id"),
@@ -33,9 +33,9 @@ func TestAccTag(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccTagConfigUpdate(tagSetName, tagName, "#ff0000"),
+				Config: testTagConfigUpdate(tagSetName, tagName, "#ff0000"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccTagExists(tagResourceName),
+					testTagExists(tagResourceName),
 					resource.TestCheckResourceAttr(tagResourceName, "name", tagName),
 					resource.TestCheckResourceAttr(tagResourceName, "color", "#ff0000"),
 					resource.TestCheckResourceAttrSet(tagResourceName, "id"),
@@ -53,7 +53,7 @@ func TestAccTag(t *testing.T) {
 	})
 }
 
-func testAccTagConfig(tagSetName, tagName, tagColor string) string {
+func testTagConfig(tagSetName, tagName, tagColor string) string {
 	var tfConfig = fmt.Sprintf(`
 		resource "octopusdeploy_tag_set" "%s" {
 			name        = "%s"
@@ -70,7 +70,7 @@ func testAccTagConfig(tagSetName, tagName, tagColor string) string {
 	return tfConfig
 }
 
-func testAccTagConfigUpdate(tagSetName, tagName, tagColor string) string {
+func testTagConfigUpdate(tagSetName, tagName, tagColor string) string {
 	var tfConfig = fmt.Sprintf(`
 		resource "octopusdeploy_tag_set" "%s" {
 			name        = "%s"
@@ -85,33 +85,6 @@ func testAccTagConfigUpdate(tagSetName, tagName, tagColor string) string {
 		}
 	`, tagSetName, tagSetName, tagName, tagName, tagColor, tagSetName)
 	return tfConfig
-}
-
-func testAccTagExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Tag ID is set")
-		}
-
-		tagSetID := rs.Primary.Attributes["tag_set_id"]
-		tagSet, err := tagsets.GetByID(octoClient, rs.Primary.Attributes["space_id"], tagSetID)
-		if err != nil {
-			return err
-		}
-
-		for _, tag := range tagSet.Tags {
-			if tag.ID == rs.Primary.ID {
-				return nil
-			}
-		}
-
-		return fmt.Errorf("Tag not found")
-	}
 }
 
 func testAccTagDestroy(s *terraform.State) error {
