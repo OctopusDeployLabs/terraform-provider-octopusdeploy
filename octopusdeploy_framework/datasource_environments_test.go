@@ -14,7 +14,7 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := fmt.Sprintf("data.octopusdeploy_environments.%s", localName)
 
-	spaceName := "env_datasource_test" // acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	spaceName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
