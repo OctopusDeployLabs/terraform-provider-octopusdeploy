@@ -80,6 +80,9 @@ func (r *tagTypeResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *tagTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
+
 	var data *schemas.TagResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
