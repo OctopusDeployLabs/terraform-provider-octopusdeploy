@@ -24,7 +24,7 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentsDataSourceID(prefix),
 				),
-				Config: testAccDataSourceEnvironmentsEmpty(acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)),
+				Config: testAccDataSourceEnvironmentsEmpty(localName),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
