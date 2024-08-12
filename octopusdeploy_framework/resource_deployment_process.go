@@ -8,7 +8,9 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/mappers"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -122,6 +124,46 @@ func (d *deploymentProcessResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+}
+
+func (r *deploymentProcessResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	var plan *schemas.DeploymentProcessResourceModel
+
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var state *schemas.DeploymentProcessResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for stepIdx, planStep := range plan.Steps.Elements() {
+		planStepAttrs := planStep.(types.Object).Attributes()
+		for actionIdx, action := range planStepAttrs["action"].(types.List).Elements() {
+			primaryPackages := action.(types.Object).Attributes()["primary_package"].(types.List).Elements()
+			for primaryPackageIdx, primaryPackage := range primaryPackages {
+				properties := primaryPackage.(types.Object).Attributes()["properties"].(types.Map).Elements()
+				if _, exists := properties["Extract"]; !exists {
+					properties["Extract"] = types.StringValue("true")
+					primaryPackage.(types.Object).Attributes()["properties"] = types.MapValueMust(types.StringType, properties)
+
+					propertyPath := fmt.Sprintf("step[%v].action[%v].primary_package[%v].properties", stepIdx, actionIdx, primaryPackageIdx)
+					mapValue := types.MapValueMust(types.StringType, properties)
+					resp.Plan.SetAttribute(ctx, path.Root(propertyPath), mapValue)
+
+					//properties := action.(types.Object).Attributes()["properties"].(types.Map).Elements()
+				}
+			}
+		}
+	}
+
 }
 
 func (d *deploymentProcessResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
