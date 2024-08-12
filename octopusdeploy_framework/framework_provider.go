@@ -95,6 +95,9 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewVariableResource,
 		NewProjectResource,
 		NewDockerContainerRegistryFeedResource,
+		NewUsernamePasswordAccountResource,
+		NewRunbookResource,
+		NewTenantResource,
 		NewScriptModuleResource,
 	}
 }

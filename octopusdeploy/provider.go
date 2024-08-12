@@ -57,7 +57,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_project_deployment_target_trigger":              resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_external_feed_create_release_trigger":           resourceExternalFeedCreateReleaseTrigger(),
 			"octopusdeploy_project_scheduled_trigger":                      resourceProjectScheduledTrigger(),
-			"octopusdeploy_runbook":                                        resourceRunbook(),
 			"octopusdeploy_runbook_process":                                resourceRunbookProcess(),
 			"octopusdeploy_scoped_user_role":                               resourceScopedUserRole(),
 			"octopusdeploy_ssh_connection_deployment_target":               resourceSSHConnectionDeploymentTarget(),
@@ -66,12 +65,10 @@ func Provider() *schema.Provider {
 			"octopusdeploy_tag":                                            resourceTag(),
 			"octopusdeploy_tag_set":                                        resourceTagSet(),
 			"octopusdeploy_team":                                           resourceTeam(),
-			"octopusdeploy_tenant":                                         resourceTenant(),
 			"octopusdeploy_tentacle_certificate":                           resourceTentacleCertificate(),
 			"octopusdeploy_token_account":                                  resourceTokenAccount(),
 			"octopusdeploy_user":                                           resourceUser(),
 			"octopusdeploy_user_role":                                      resourceUserRole(),
-			"octopusdeploy_username_password_account":                      resourceUsernamePasswordAccount(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {
