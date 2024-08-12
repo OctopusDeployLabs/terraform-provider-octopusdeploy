@@ -20,10 +20,22 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
+				Config: createTestAccDataSourceEnvironmentsConfig(localName),
+			},
+			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentsDataSourceID(prefix),
+					resource.TestCheckResourceAttr(prefix, "environments.#", "3"),
 				),
 				Config: testAccDataSourceEnvironmentsConfig(localName, take),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentsDataSourceID(prefix),
+					resource.TestCheckResourceAttr(prefix, "environments.#", "1"),
+					resource.TestCheckResourceAttr(prefix, "environments.0.Name", localName),
+				),
+				Config: testAccDataSourceEnvironmentByNameConfig(localName),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -56,6 +68,28 @@ func testAccDataSourceEnvironmentsConfig(localName string, take int) string {
 	}`, localName, take)
 }
 
+func testAccDataSourceEnvironmentByNameConfig(localName string) string {
+	return fmt.Sprintf(`data "octopusdeploy_environments" "%[1]s" {
+		name = "%[1]s"	
+	}`, localName)
+}
+
 func testAccDataSourceEnvironmentsEmpty(localName string) string {
 	return fmt.Sprintf(`data "octopusdeploy_environments" "%s" {}`, localName)
+}
+
+func createTestAccDataSourceEnvironmentsConfig(name string) string {
+	return fmt.Sprintf(`
+		resource "octopusdeploy_environment" "%[1]s" {
+			name = "%[1]s
+		}
+		
+		resource "octopusdeploy_environment" "%[1]s-1" {
+			name = "%[1]s-1"
+		}
+
+		resource "octopusdeploy_environment" "%[1]s-2" {
+			name = "%[1]s-2"
+		}
+	`, name)
 }
