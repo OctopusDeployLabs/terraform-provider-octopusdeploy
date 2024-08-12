@@ -16,13 +16,12 @@ import (
 )
 
 func TestTagSetAndTag(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	tagSetPrefix := "octopusdeploy_tag_set." + localName
-	tagPrefix := "octopusdeploy_tag." + localName
-
 	tagSetName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	tagSetDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tagSetPrefix := "octopusdeploy_tag_set." + tagSetName
+	tagSetDescription := "TagSet Description" + tagSetName
+
 	tagName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tagPrefix := "octopusdeploy_tag." + tagName
 	tagColor := "#6e6e6e"
 
 	resource.Test(t, resource.TestCase{
@@ -30,7 +29,7 @@ func TestTagSetAndTag(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testTagSetConfig(localName, tagSetName, tagSetDescription),
+				Config: testTagSetConfig(tagSetName, tagSetDescription),
 				Check: resource.ComposeTestCheckFunc(
 					testTagSetExists(tagSetPrefix),
 					resource.TestCheckResourceAttr(tagSetPrefix, "name", tagSetName),
@@ -38,7 +37,7 @@ func TestTagSetAndTag(t *testing.T) {
 				),
 			},
 			{
-				Config: testTagSetAndTagConfig(localName, tagSetName, tagSetDescription, tagName, tagColor),
+				Config: testTagSetAndTagConfig(tagSetName, tagSetDescription, tagName, tagColor),
 				Check: resource.ComposeTestCheckFunc(
 					testTagSetExists(tagSetPrefix),
 					testTagExists(tagPrefix),
@@ -47,7 +46,7 @@ func TestTagSetAndTag(t *testing.T) {
 					resource.TestCheckResourceAttr(tagPrefix, "name", tagName),
 					resource.TestCheckResourceAttr(tagPrefix, "color", tagColor),
 					resource.TestCheckResourceAttrSet(tagPrefix, "id"),
-					resource.TestCheckResourceAttrSet(tagPrefix, "space_id"),
+					resource.TestCheckResourceAttrSet(tagPrefix, "tag_set_space_id"),
 					resource.TestCheckResourceAttrSet(tagPrefix, "tag_set_id"),
 					resource.TestCheckResourceAttrPair(tagPrefix, "tag_set_id", tagSetPrefix, "id"),
 				),
@@ -56,15 +55,15 @@ func TestTagSetAndTag(t *testing.T) {
 	})
 }
 
-func testTagSetConfig(localName, name, description string) string {
+func testTagSetConfig(name, description string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_tag_set" "%s" {
 		  name        = "%s"
 		  description = "%s"
-		}`, localName, name, description)
+		}`, name, name, description)
 }
 
-func testTagSetAndTagConfig(localName, tagSetName, tagSetDescription, tagName, tagColor string) string {
+func testTagSetAndTagConfig(tagSetName, tagSetDescription, tagName, tagColor string) string {
 	var tfConfig = fmt.Sprintf(`
     resource "octopusdeploy_tag_set" "%s" {
       name        = "%s"
