@@ -81,7 +81,7 @@ func testAccDataSourceEnvironmentsEmpty(localName string) string {
 func createTestAccDataSourceEnvironmentsConfig(name string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_environment" "%[1]s" {
-			name = "%[1]s
+			name = "%[1]s"
 		}
 		
 		resource "octopusdeploy_environment" "%[1]s-1" {
