@@ -1,4 +1,4 @@
-package octopusdeploy
+package internal
 
 import (
 	"crypto/rand"
@@ -21,7 +21,7 @@ func generateRandomBytes(length int) []byte {
 	return randomBytes
 }
 
-func generateRandomCryptoString(length int) string {
+func GenerateRandomCryptoString(length int) string {
 	result := make([]byte, length)
 	bufferSize := int(float64(length) * 1.3)
 	for i, j, randomBytes := 0, 0, []byte{}; i < length; j++ {
@@ -37,7 +37,7 @@ func generateRandomCryptoString(length int) string {
 	return string(result)
 }
 
-func generateRandomSerialNumber() big.Int {
+func GenerateRandomSerialNumber() big.Int {
 	random := rand.Reader
 	randomSerialNumber, err := rand.Int(random, big.NewInt(9223372036854775807))
 	if err != nil {

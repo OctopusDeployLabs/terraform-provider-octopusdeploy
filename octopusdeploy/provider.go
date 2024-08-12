@@ -65,7 +65,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_tag":                                            resourceTag(),
 			"octopusdeploy_tag_set":                                        resourceTagSet(),
 			"octopusdeploy_team":                                           resourceTeam(),
-			"octopusdeploy_tentacle_certificate":                           resourceTentacleCertificate(),
 			"octopusdeploy_token_account":                                  resourceTokenAccount(),
 			"octopusdeploy_user":                                           resourceUser(),
 			"octopusdeploy_user_role":                                      resourceUserRole(),
