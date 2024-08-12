@@ -154,11 +154,13 @@ func (r *deploymentProcessResource) ModifyPlan(ctx context.Context, req resource
 					properties["Extract"] = types.StringValue("true")
 					primaryPackage.(types.Object).Attributes()["properties"] = types.MapValueMust(types.StringType, properties)
 
-					propertyPath := fmt.Sprintf("step[%v].action[%v].primary_package[%v].properties", stepIdx, actionIdx, primaryPackageIdx)
-					mapValue := types.MapValueMust(types.StringType, properties)
-					resp.Plan.SetAttribute(ctx, path.Root(propertyPath), mapValue)
+					propertyPath := path.Root("step").AtListIndex(stepIdx).
+						AtName("action").AtListIndex(actionIdx).
+						AtName("primary_package").AtListIndex(primaryPackageIdx).
+						AtName("properties")
 
-					//properties := action.(types.Object).Attributes()["properties"].(types.Map).Elements()
+					//mapValue := types.MapValueMust(types.StringType, properties)
+					resp.Plan.SetAttribute(ctx, propertyPath, types.MapValueMust(types.StringType, properties))
 				}
 			}
 		}

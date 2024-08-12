@@ -247,8 +247,8 @@ func getPackageRequirementResourceSchema() resourceSchema.Attribute {
 func getPropertiesResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.MapAttribute{
 		ElementType: types.StringType,
-		Computed:    true,
-		Optional:    true,
+		//Computed:    true,
+		Optional: true,
 	}
 }
 
