@@ -1,4 +1,4 @@
-package schemas
+package octopusdeploy_framework
 
 //
 //func TestExpandTag(t *testing.T) {
