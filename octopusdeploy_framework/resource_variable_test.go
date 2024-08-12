@@ -3,7 +3,9 @@ package octopusdeploy_framework
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
@@ -320,6 +322,9 @@ func TestVariableResource(t *testing.T) {
 	// Assert
 	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
 	project, err := client.Projects.GetByName("Test")
+
+	// Add a short delay before querying the API
+	time.Sleep(5 * time.Second)
 	variableSet, err := client.Variables.GetAll(project.ID)
 
 	if err != nil {
@@ -327,7 +332,15 @@ func TestVariableResource(t *testing.T) {
 	}
 
 	if len(variableSet.Variables) != 7 {
-		t.Fatalf("Expected 7 variables to be created.")
+		var report strings.Builder
+		report.WriteString(fmt.Sprintf("Expected 7 variables, but found %d.\nReturned variables:\n", len(variableSet.Variables)))
+
+		for _, v := range variableSet.Variables {
+			report.WriteString(fmt.Sprintf("- Name: %s\n  Type: %s\n  Value: %s\n  Scope: %+v\n\n",
+				v.Name, v.Type, v.Value, v.Scope))
+		}
+
+		t.Fatalf(report.String())
 	}
 
 	for _, variable := range variableSet.Variables {

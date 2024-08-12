@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_nuget_feed Resource - terraform-provider-octopusdeploy"
 subcategory: "Feeds"
 description: |-
-  This resource manages a NuGet feed in Octopus Deploy.
+  This resource manages a Nuget feed in Octopus Deploy.
 ---
 
 # octopusdeploy_nuget_feed (Resource)
 
-This resource manages a NuGet feed in Octopus Deploy.
+This resource manages a Nuget feed in Octopus Deploy.
 
 ## Example Usage
 
@@ -27,8 +27,8 @@ resource "octopusdeploy_nuget_feed" "example" {
 
 ### Required
 
-- `feed_uri` (String) The feed URI can be a URL or a folder path.
-- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `feed_uri` (String)
+- `name` (String) The name of this resource.
 
 ### Optional
 
@@ -38,7 +38,7 @@ resource "octopusdeploy_nuget_feed" "example" {
 - `is_enhanced_mode` (Boolean) This will improve performance of the NuGet feed but may not be supported by some older feeds. Disable if the operation, Create Release does not return the latest version for a package.
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this nuget feed.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ## Import

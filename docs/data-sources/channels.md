@@ -34,25 +34,25 @@ data "octopusdeploy_channels" "example" {
 
 ### Read-Only
 
-- `channels` (Block List) A channel that matches the specified filter(s). (see [below for nested schema](#nestedblock--channels))
+- `channels` (List of Object) A channel that matches the specified filter(s). (see [below for nested schema](#nestedatt--channels))
 - `id` (String) The ID of this resource.
 
-<a id="nestedblock--channels"></a>
+<a id="nestedatt--channels"></a>
 ### Nested Schema for `channels`
 
 Read-Only:
 
-- `description` (String) The description of this channel.
-- `id` (String) The unique ID for this resource.
-- `is_default` (Boolean) Indicates if this is the default channel for the associated project.
-- `lifecycle_id` (String) The lifecycle ID associated with this channel.
-- `name` (String) The name of this resource.
-- `project_id` (String) The project ID associated with this channel.
-- `rule` (List of Object) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--channels--rule))
-- `space_id` (String) The space ID associated with this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `description` (String)
+- `id` (String)
+- `is_default` (Boolean)
+- `lifecycle_id` (String)
+- `name` (String)
+- `project_id` (String)
+- `rule` (List of Object) (see [below for nested schema](#nestedobjatt--channels--rule))
+- `space_id` (String)
+- `tenant_tags` (List of String)
 
-<a id="nestedatt--channels--rule"></a>
+<a id="nestedobjatt--channels--rule"></a>
 ### Nested Schema for `channels.rule`
 
 Read-Only:

@@ -45,47 +45,47 @@ data "octopusdeploy_azure_service_fabric_cluster_deployment_targets" "example" {
 
 ### Read-Only
 
-- `azure_service_fabric_cluster_deployment_targets` (Block List) A list of Azure service fabric cluster deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--azure_service_fabric_cluster_deployment_targets))
+- `azure_service_fabric_cluster_deployment_targets` (List of Object) A list of Azure service fabric cluster deployment targets that match the filter(s). (see [below for nested schema](#nestedatt--azure_service_fabric_cluster_deployment_targets))
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
-<a id="nestedblock--azure_service_fabric_cluster_deployment_targets"></a>
+<a id="nestedatt--azure_service_fabric_cluster_deployment_targets"></a>
 ### Nested Schema for `azure_service_fabric_cluster_deployment_targets`
 
 Read-Only:
 
 - `aad_client_credential_secret` (String)
 - `aad_credential_type` (String)
-- `aad_user_credential_password` (String, Sensitive)
+- `aad_user_credential_password` (String)
 - `aad_user_credential_username` (String)
 - `certificate_store_location` (String)
 - `certificate_store_name` (String)
 - `client_certificate_variable` (String)
 - `connection_endpoint` (String)
-- `endpoint` (List of Object) (see [below for nested schema](#nestedatt--azure_service_fabric_cluster_deployment_targets--endpoint))
-- `environments` (List of String) A list of environment IDs associated with this resource.
+- `endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--azure_service_fabric_cluster_deployment_targets--endpoint))
+- `environments` (List of String)
 - `has_latest_calamari` (Boolean)
-- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- `id` (String) The unique ID for this resource.
+- `health_status` (String)
+- `id` (String)
 - `is_disabled` (Boolean)
 - `is_in_process` (Boolean)
 - `machine_policy_id` (String)
-- `name` (String) The name of this resource.
+- `name` (String)
 - `operating_system` (String)
 - `roles` (List of String)
 - `security_mode` (String)
 - `server_certificate_thumbprint` (String)
 - `shell_name` (String)
 - `shell_version` (String)
-- `space_id` (String) The space ID associated with this resource.
-- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- `status_summary` (String) A summary elaborating on the status of this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `space_id` (String)
+- `status` (String)
+- `status_summary` (String)
+- `tenant_tags` (List of String)
+- `tenanted_deployment_participation` (String)
+- `tenants` (List of String)
 - `thumbprint` (String)
 - `uri` (String)
 
-<a id="nestedatt--azure_service_fabric_cluster_deployment_targets--endpoint"></a>
+<a id="nestedobjatt--azure_service_fabric_cluster_deployment_targets--endpoint"></a>
 ### Nested Schema for `azure_service_fabric_cluster_deployment_targets.endpoint`
 
 Read-Only:

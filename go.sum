@@ -22,8 +22,8 @@ github.com/OctopusDeploy/go-octodiff v1.0.0 h1:U+ORg6azniwwYo+O44giOw6TiD5USk8S4
 github.com/OctopusDeploy/go-octodiff v1.0.0/go.mod h1:Mze0+EkOWTgTmi8++fyUc6r0aLZT7qD9gX+31t8MmIU=
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.49.1 h1:lzC3tcnfvC07Ilqn5J51qhOnW79kGD6nTIxCBOdmAe8=
 github.com/OctopusDeploy/go-octopusdeploy/v2 v2.49.1/go.mod h1:ggvOXzMnq+w0pLg6C9zdjz6YBaHfO3B3tqmmB7JQdaw=
-github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240725054341-2848f54d101e h1:FIvWa8wNg8IBG5uVhqkKvcBhaxx4TgN7T8/5Ed4VQUE=
-github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240725054341-2848f54d101e/go.mod h1:Oq9KbiRNDBB5jFmrwnrgLX0urIqR/1ptY18TzkqXm7M=
+github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240729041805-46db6fb717b4 h1:QfbVf0bOIRMp/WHAWsuVDB7KHoWnRsGbvDuOf2ua7k4=
+github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240729041805-46db6fb717b4/go.mod h1:Oq9KbiRNDBB5jFmrwnrgLX0urIqR/1ptY18TzkqXm7M=
 github.com/ProtonMail/go-crypto v1.1.0-alpha.2 h1:bkyFVUP+ROOARdgCiJzNQo2V2kiB97LyUpzH9P6Hrlg=
 github.com/ProtonMail/go-crypto v1.1.0-alpha.2/go.mod h1:rA3QumHc/FZ8pAHreoekgiAbzpNsfQAosU5td4SnOrE=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
@@ -166,6 +166,8 @@ github.com/hashicorp/terraform-plugin-docs v0.13.0 h1:6e+VIWsVGb6jYJewfzq2ok2smP
 github.com/hashicorp/terraform-plugin-docs v0.13.0/go.mod h1:W0oCmHAjIlTHBbvtppWHe8fLfZ2BznQbuv8+UD8OucQ=
 github.com/hashicorp/terraform-plugin-framework v1.9.0 h1:caLcDoxiRucNi2hk8+j3kJwkKfvHznubyFsJMWfZqKU=
 github.com/hashicorp/terraform-plugin-framework v1.9.0/go.mod h1:qBXLDn69kM97NNVi/MQ9qgd1uWWsVftGSnygYG1tImM=
+github.com/hashicorp/terraform-plugin-framework v1.11.0 h1:M7+9zBArexHFXDx/pKTxjE6n/2UCXY6b8FIq9ZYhwfE=
+github.com/hashicorp/terraform-plugin-framework v1.11.0/go.mod h1:qBXLDn69kM97NNVi/MQ9qgd1uWWsVftGSnygYG1tImM=
 github.com/hashicorp/terraform-plugin-framework-validators v0.12.0 h1:HOjBuMbOEzl7snOdOoUfE2Jgeto6JOjLVQ39Ls2nksc=
 github.com/hashicorp/terraform-plugin-framework-validators v0.12.0/go.mod h1:jfHGE/gzjxYz6XoUwi/aYiiKrJDeutQNUtGQXkaHklg=
 github.com/hashicorp/terraform-plugin-go v0.23.0 h1:AALVuU1gD1kPb48aPQUjug9Ir/125t+AAurhqphJ2Co=
