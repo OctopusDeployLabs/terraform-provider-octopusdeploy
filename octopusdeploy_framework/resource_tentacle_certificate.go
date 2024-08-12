@@ -9,6 +9,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/hex"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"software.sslmate.com/src/go-pkcs12"
 	"strings"
 	"time"
@@ -55,7 +56,7 @@ func (t *tentacleCertificateResource) Create(ctx context.Context, req resource.C
 
 	plan.Base64 = types.StringValue(certificate)
 	plan.Thumbprint = types.StringValue(thumbprint)
-	plan.ID = types.StringValue(util.GenerateRandomCryptoString(20))
+	plan.ID = types.StringValue(internal.GenerateRandomCryptoString(20))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 
@@ -89,7 +90,7 @@ func generateCertificate(fullName string) (string, string, error) {
 		return "", "", err
 	}
 
-	serialNumber := util.GenerateRandomSerialNumber()
+	serialNumber := internal.GenerateRandomSerialNumber()
 	template := x509.Certificate{
 		SerialNumber: &serialNumber,
 		Subject: pkix.Name{
