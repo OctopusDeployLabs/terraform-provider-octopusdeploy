@@ -136,9 +136,9 @@ func (r *usernamePasswordAccountResource) ImportState(ctx context.Context, req r
 		Description:                     types.StringValue(usernamePasswordAccount.GetDescription()),
 		Username:                        types.StringValue(usernamePasswordAccount.GetUsername()),
 		TenantedDeploymentParticipation: types.StringValue(string(usernamePasswordAccount.GetTenantedDeploymentMode())),
-		Environments:                    flattenStringList(ctx, usernamePasswordAccount.GetEnvironmentIDs(), types.ListNull(types.StringType)),
-		Tenants:                         flattenStringList(ctx, usernamePasswordAccount.GetTenantIDs(), types.ListNull(types.StringType)),
-		TenantTags:                      flattenStringList(ctx, usernamePasswordAccount.TenantTags, types.ListNull(types.StringType)),
+		Environments:                    flattenStringList(usernamePasswordAccount.GetEnvironmentIDs(), types.ListNull(types.StringType)),
+		Tenants:                         flattenStringList(usernamePasswordAccount.GetTenantIDs(), types.ListNull(types.StringType)),
+		TenantTags:                      flattenStringList(usernamePasswordAccount.TenantTags, types.ListNull(types.StringType)),
 		Password:                        types.StringNull(),
 	}
 	state.ID = types.StringValue(usernamePasswordAccount.ID)
@@ -154,10 +154,10 @@ func expandUsernamePasswordAccount(ctx context.Context, model schemas.UsernamePa
 	account.SetSpaceID(model.SpaceID.ValueString())
 	account.SetUsername(model.Username.ValueString())
 	account.SetPassword(core.NewSensitiveValue(model.Password.ValueString()))
-	account.SetEnvironmentIDs(expandStringList(ctx, model.Environments))
+	account.SetEnvironmentIDs(expandStringList(model.Environments))
 	account.SetTenantedDeploymentMode(core.TenantedDeploymentMode(model.TenantedDeploymentParticipation.ValueString()))
-	account.SetTenantIDs(expandStringList(ctx, model.Tenants))
-	account.SetTenantTags(expandStringList(ctx, model.TenantTags))
+	account.SetTenantIDs(expandStringList(model.Tenants))
+	account.SetTenantTags(expandStringList(model.TenantTags))
 
 	return account
 }
@@ -170,16 +170,16 @@ func flattenUsernamePasswordAccount(ctx context.Context, account *accounts.Usern
 	model.Username = types.StringValue(account.GetUsername())
 	model.TenantedDeploymentParticipation = types.StringValue(string(account.GetTenantedDeploymentMode()))
 
-	model.Environments = flattenStringList(ctx, account.GetEnvironmentIDs(), model.Environments)
-	model.Tenants = flattenStringList(ctx, account.GetTenantIDs(), model.Tenants)
-	model.TenantTags = flattenStringList(ctx, account.TenantTags, model.TenantTags)
+	model.Environments = flattenStringList(account.GetEnvironmentIDs(), model.Environments)
+	model.Tenants = flattenStringList(account.GetTenantIDs(), model.Tenants)
+	model.TenantTags = flattenStringList(account.TenantTags, model.TenantTags)
 
 	// Note: We don't flatten the password as it's sensitive and not returned by the API
 
 	return model
 }
 
-func expandStringList(ctx context.Context, list types.List) []string {
+func expandStringList(list types.List) []string {
 	if list.IsNull() || list.IsUnknown() {
 		return nil
 	}
@@ -193,7 +193,7 @@ func expandStringList(ctx context.Context, list types.List) []string {
 	return result
 }
 
-func flattenStringList(ctx context.Context, slice []string, currentList types.List) types.List {
+func flattenStringList(slice []string, currentList types.List) types.List {
 	if len(slice) == 0 && currentList.IsNull() {
 		return types.ListNull(types.StringType)
 	}
