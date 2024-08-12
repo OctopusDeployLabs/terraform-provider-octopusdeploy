@@ -54,7 +54,7 @@ func TestAccTag(t *testing.T) {
 }
 
 func testAccTagConfig(tagSetName, tagName, tagColor string) string {
-	return fmt.Sprintf(`
+	var tfConfig = fmt.Sprintf(`
 		resource "octopusdeploy_tag_set" "%s" {
 			name        = "%s"
 			description = "Test tag set"
@@ -67,10 +67,11 @@ func testAccTagConfig(tagSetName, tagName, tagColor string) string {
 			tag_set_id  = octopusdeploy_tag_set.%s.id
 		}
 	`, tagSetName, tagSetName, tagName, tagName, tagColor, tagSetName)
+	return tfConfig
 }
 
 func testAccTagConfigUpdate(tagSetName, tagName, tagColor string) string {
-	return fmt.Sprintf(`
+	var tfConfig = fmt.Sprintf(`
 		resource "octopusdeploy_tag_set" "%s" {
 			name        = "%s"
 			description = "Test tag set"
@@ -83,6 +84,7 @@ func testAccTagConfigUpdate(tagSetName, tagName, tagColor string) string {
 			tag_set_id  = octopusdeploy_tag_set.%s.id
 		}
 	`, tagSetName, tagSetName, tagName, tagName, tagColor, tagSetName)
+	return tfConfig
 }
 
 func testAccTagExists(n string) resource.TestCheckFunc {
@@ -142,9 +144,8 @@ func testAccTagImportStateIdFunc(resourceName string) resource.ImportStateIdFunc
 			return "", fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		tagSetID := rs.Primary.Attributes["tag_set_id"]
 		tagID := rs.Primary.ID
 
-		return fmt.Sprintf("%s/%s", tagSetID, tagID), nil
+		return fmt.Sprintf("%s", tagID), nil
 	}
 }

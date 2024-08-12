@@ -106,8 +106,6 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	defer resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-
 	name := data.Name.ValueString()
 	tagSetID := data.TagSetId.ValueString()
 	tagSetSpaceID := data.TagSetSpaceId.ValueString()
@@ -121,24 +119,28 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 
 		sourceTagSet, err := tagsets.GetByID(t.Client, sourceTagSetSpaceID, sourceTagSetID)
 		if err != nil {
-			// if spaceID has change, tag has been deleted, recreate required
+			// if spaceID has changed, tag has been deleted, recreate required
 			if !data.TagSetSpaceId.Equal(state.TagSetSpaceId) {
 				tagCreate(ctx, data, resp.Diagnostics, t.Client)
+				if !resp.Diagnostics.HasError() {
+					resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+				}
 				return
 			}
-			resp.Diagnostics.AddError("", err.Error())
+			resp.Diagnostics.AddError("Failed to get source tag set", err.Error())
+			return
 		}
 
 		destinationTagSet, err := tagsets.GetByID(t.Client, destinationTagSetSpaceID, destinationTagSetID)
 		if err != nil {
-			resp.Diagnostics.AddError("", err.Error())
+			resp.Diagnostics.AddError("Failed to get destination tag set", err.Error())
+			return
 		}
 
 		// check to see if the name already exists in the destination tag set
 		for _, tag := range destinationTagSet.Tags {
 			if tag.Name == name {
-				data.ID = types.StringValue("")
-				resp.Diagnostics.AddError(`the tag name '%s' is already in use by another tag in this tag set; tag names must be unique`, name)
+				resp.Diagnostics.AddError("Tag name already exists", fmt.Sprintf("the tag name '%s' is already in use by another tag in this tag set; tag names must be unique", name))
 				return
 			}
 		}
@@ -148,14 +150,12 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 		// check to see that the tag is not applied to a tenant
 		isUsed, err := isTagUsedByTenants(ctx, t.Client, sourceTagSetSpaceID, tag)
 		if err != nil {
-			data.ID = types.StringValue("")
-			resp.Diagnostics.AddError("", err.Error())
+			resp.Diagnostics.AddError("Failed to check if tag is used by tenants", err.Error())
 			return
 		}
 
 		if isUsed {
-			data.ID = types.StringValue("")
-			resp.Diagnostics.AddError("the tag may not be transferred; it is being used by one or more tenant(s)", err.Error())
+			resp.Diagnostics.AddError("Tag in use", "the tag may not be transferred; it is being used by one or more tenant(s)")
 			return
 		}
 
@@ -165,11 +165,11 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 		for i := 0; i < len(sourceTagSet.Tags); i++ {
 			if sourceTagSet.Tags[i].ID == data.ID.ValueString() {
 				sourceTagSet.Tags = slices.Delete(sourceTagSet.Tags, i, i+1)
-
 				if _, err := tagsets.Update(t.Client, sourceTagSet); err != nil {
-					resp.Diagnostics.AddError("", err.Error())
+					resp.Diagnostics.AddError("Failed to update source tag set", err.Error())
 					return
 				}
+				break
 			}
 		}
 
@@ -179,10 +179,16 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 
 		updatedTagSet, err := tagsets.Update(t.Client, destinationTagSet)
 		if err != nil {
-			resp.Diagnostics.AddError("", err.Error())
+			resp.Diagnostics.AddError("Failed to update destination tag set", err.Error())
+			return
 		}
 
-		findByIdOrNameAndSetTag(ctx, data, tag, updatedTagSet)
+		if err := findByIdOrNameAndSetTag(ctx, data, tag, updatedTagSet); err != nil {
+			resp.Diagnostics.AddError("Failed to find updated tag", "")
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		return
 	}
 
@@ -193,23 +199,37 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	// find and update the tag that matches the one updated in configuration
+	var updatedTag *tagsets.Tag
 	for i := 0; i < len(tagSet.Tags); i++ {
 		if tagSet.Tags[i].ID == data.ID.ValueString() || tagSet.Tags[i].Name == data.Name.ValueString() {
 			tagSet.Tags[i] = schemas.MapFromStateToTag(data)
 
 			updatedTagSet, err := tagsets.Update(t.Client, tagSet)
 			if err != nil {
-				resp.Diagnostics.AddError("", err.Error())
+				resp.Diagnostics.AddError("Failed to update tag set", err.Error())
 				return
 			}
 
-			findByIdOrNameAndSetTag(ctx, data, tagSet.Tags[i], updatedTagSet)
+			// Find the updated tag in the updatedTagSet
+			for _, t := range updatedTagSet.Tags {
+				if t.ID == data.ID.ValueString() || t.Name == data.Name.ValueString() {
+					updatedTag = t
+					break
+				}
+			}
+
+			if updatedTag == nil {
+				resp.Diagnostics.AddError("Updated tag not found", "The updated tag was not found in the response from the API")
+				return
+			}
+
+			schemas.MapFromTagToState(data, updatedTag, updatedTagSet)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}
 	}
 
-	resp.Diagnostics.AddError("unable to update tag", err.Error())
-	return
+	resp.Diagnostics.AddError("Unable to update tag", "Tag not found in tag set")
 }
 
 func (r *tagTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
