@@ -175,13 +175,12 @@ func mapPackageReferenceToState(ctx context.Context, packageReference *packages.
 		"package_id":           types.StringValue(packageReference.PackageID),
 		"properties":           properties,
 	}
-
-	if len(packageReference.Name) > 0 {
-		if v, ok := packageReference.Properties["Extract"]; ok {
+	if v, ok := packageReference.Properties["Extract"]; ok {
+		if len(packageReference.Name) > 0 {
 			extractDuringDeployment, _ := strconv.ParseBool(v)
 			reference["extract_during_deployment"] = types.BoolValue(extractDuringDeployment)
+			reference["name"] = types.StringValue(packageReference.Name)
 		}
-		reference["name"] = types.StringValue(packageReference.Name)
 	}
 
 	return reference, nil

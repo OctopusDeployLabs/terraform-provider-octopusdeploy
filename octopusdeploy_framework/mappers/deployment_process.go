@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-var actionMappers = map[string]actions.MappableAction{
+var ActionMappers = map[string]actions.MappableAction{
 	schemas.DeploymentProcessAction:                      &actions.Action{},
 	schemas.DeploymentProcessRunScriptAction:             &actions.RunScriptActionMapper{},
 	schemas.DeploymentProcessRunKubectlScriptAction:      &actions.KubectlScriptActionMapper{},
@@ -51,93 +51,143 @@ func MapStateToDeploymentProcess(ctx context.Context, state *schemas.DeploymentP
 }
 
 func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResourceModel, process *deployments.DeploymentProcess) diag.Diagnostics {
+	// this is supposed to be updating the in-memory state
 	if process.Steps == nil || len(process.Steps) == 0 {
+		//return types.ListNull(types.ObjectType{AttrTypes: getStepTypeAttrs()}), nil
 		return nil
 	}
 
-	var steps []attr.Value
-	for _, deploymentStep := range process.Steps {
-		properties, diags := actions.MapPropertiesToState(ctx, deploymentStep.Properties)
-		if diags.HasError() {
-			return diags
-		}
-		newStep := map[string]attr.Value{
-			"id":                  types.StringValue(deploymentStep.ID),
-			"condition":           types.StringValue(string(deploymentStep.Condition)),
-			"name":                types.StringValue(deploymentStep.Name),
-			"package_requirement": types.StringValue(string(deploymentStep.PackageRequirement)),
-			"properties":          properties,
-			"start_trigger":       types.StringValue(string(deploymentStep.StartTrigger)),
-		}
+	//steps := make([]attr.Value, 0)
 
-		newStep[schemas.DeploymentProcessWindowSize] = types.StringValue("")
-		newStep[schemas.DeploymentProcessConditionExpression] = types.StringValue("")
-		newStep[schemas.DeploymentProcessTargetRoles] = types.ListNull(types.StringType)
-		for propertyName, propertyValue := range deploymentStep.Properties {
-			switch propertyName {
-			case "Octopus.Action.TargetRoles":
-				newStep[schemas.DeploymentProcessTargetRoles] = util.FlattenStringList(strings.Split(propertyValue.Value, ","))
-			case "Octopus.Action.MaxParallelism":
-				newStep[schemas.DeploymentProcessWindowSize] = types.StringValue(propertyValue.Value)
-			case "Octopus.Step.ConditionVariableExpression":
-				newStep[schemas.DeploymentProcessConditionExpression] = types.StringValue(propertyValue.Value)
+	for _, step := range state.Steps.Elements() {
+		stepAttrs := step.(types.Object).Attributes()
+		name := stepAttrs["name"].(types.String).ValueString()
+		var currentStep *deployments.DeploymentStep
+		for _, processStep := range process.Steps {
+			if processStep.Name == name {
+				currentStep = processStep
+				break
 			}
 		}
 
-		newActions := make(map[string][]attr.Value)
-		for i, a := range deploymentStep.Actions {
-			newAction := map[string]attr.Value{
-				"computed_sort_order": types.Int64Value(int64(i)),
-			}
-			sortOrder := getSortOrderStateValue(deploymentStep, a, state)
-			if sortOrder != nil {
-				newAction["sort_order"] = sortOrder
-			}
+		stepAttrs["id"] = types.StringValue(currentStep.ID)
 
-			srcAction := deploymentStep.Actions[i]
-			terraformActionKeyName := getActionTypeTerraformAttributeName(srcAction.ActionType)
+		for actionKey, _ := range ActionMappers {
+			for _, action := range stepAttrs[actionKey].(types.List).Elements() {
+				actionAttrs := action.(types.Object).Attributes()
+				actionName := actionAttrs["name"].(types.String).ValueString()
+				var currentAction *deployments.DeploymentAction
+				for _, stepAction := range currentStep.Actions {
+					if stepAction.Name == actionName {
+						currentAction = stepAction
+						break
+					}
+				}
 
-			d := actionMappers[terraformActionKeyName].ToState(ctx, a, newAction)
-			if d.HasError() {
-				return d
-			}
-			//switch srcAction.ActionType {
-			//	flatten_action_func("deploy_package_action", i, flattenDeployPackageAction)
-			//case "Octopus.TerraformApply":
-			//	flatten_action_func("apply_terraform_template_action", i, flattenApplyTerraformTemplateAction)
-
-			//}
-
-			if _, ok := newActions[terraformActionKeyName]; !ok {
-				newActions[terraformActionKeyName] = make([]attr.Value, 0)
-			}
-			newActions[terraformActionKeyName] = append(newActions[terraformActionKeyName], types.ObjectValueMust(getActionTypeAttrs(terraformActionKeyName), newAction))
-
-		}
-
-		for actionAttributeName, _ := range schemas.ActionsAttributeToActionTypeMap {
-			if len(newActions[actionAttributeName]) > 0 {
-				newStep[actionAttributeName] = types.ListValueMust(types.ObjectType{AttrTypes: getActionTypeAttrs(actionAttributeName)}, newActions[actionAttributeName])
-			} else {
-				newStep[actionAttributeName] = types.ListNull(types.ObjectType{AttrTypes: getActionTypeAttrs(actionAttributeName)})
+				actionAttrs["id"] = types.StringValue(currentAction.ID)
+				actionAttrs["channels"] = types.ListValueMust(types.StringType, []attr.Value{})
 			}
 		}
 
-		mappedStep, diags := types.ObjectValue(getStepTypeAttrs(), newStep)
-		if diags.HasError() {
-			return diags
-		}
-		steps = append(steps, mappedStep)
+		//steps = append(steps, types.ObjectValueMust(getStepTypeAttrs(), stepAttrs))
+		tflog.Debug(ctx, name)
 	}
 
-	updatedSteps, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: getStepTypeAttrs()}, steps)
-	if diags.HasError() {
-		return diags
-	}
-
-	state.Steps = updatedSteps
+	//return types.ListValueMust(types.ObjectType{AttrTypes: getStepTypeAttrs()}, steps), nil
 	return nil
 }
+
+//func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResourceModel, process *deployments.DeploymentProcess) diag.Diagnostics {
+// this is creating a new set of nested resources, but only mapping directly to the attributes
+// the attribute updates seem to work but are not being maintained when the method returns back to the resource_deployment_process file
+
+//	if process.Steps == nil || len(process.Steps) == 0 {
+//		return nil
+//	}
+//
+//	var steps []attr.Value
+//	for _, deploymentStep := range process.Steps {
+//		properties, diags := actions.MapPropertiesToState(ctx, deploymentStep.Properties)
+//		if diags.HasError() {
+//			return diags
+//		}
+//		newStep := map[string]attr.Value{
+//			"id":                  types.StringValue(deploymentStep.ID),
+//			"condition":           types.StringValue(string(deploymentStep.Condition)),
+//			"name":                types.StringValue(deploymentStep.Name),
+//			"package_requirement": types.StringValue(string(deploymentStep.PackageRequirement)),
+//			"properties":          properties,
+//			"start_trigger":       types.StringValue(string(deploymentStep.StartTrigger)),
+//		}
+//
+//		newStep[schemas.DeploymentProcessWindowSize] = types.StringValue("")
+//		newStep[schemas.DeploymentProcessConditionExpression] = types.StringValue("")
+//		newStep[schemas.DeploymentProcessTargetRoles] = types.ListNull(types.StringType)
+//		for propertyName, propertyValue := range deploymentStep.Properties {
+//			switch propertyName {
+//			case "Octopus.Action.TargetRoles":
+//				newStep[schemas.DeploymentProcessTargetRoles] = util.FlattenStringList(strings.Split(propertyValue.Value, ","))
+//			case "Octopus.Action.MaxParallelism":
+//				newStep[schemas.DeploymentProcessWindowSize] = types.StringValue(propertyValue.Value)
+//			case "Octopus.Step.ConditionVariableExpression":
+//				newStep[schemas.DeploymentProcessConditionExpression] = types.StringValue(propertyValue.Value)
+//			}
+//		}
+//
+//		newActions := make(map[string][]attr.Value)
+//		for i, a := range deploymentStep.Actions {
+//			newAction := map[string]attr.Value{
+//				"computed_sort_order": types.Int64Value(int64(i)),
+//			}
+//			sortOrder := getSortOrderStateValue(deploymentStep, a, state)
+//			if sortOrder != nil {
+//				newAction["sort_order"] = sortOrder
+//			}
+//
+//			srcAction := deploymentStep.Actions[i]
+//			terraformActionKeyName := getActionTypeTerraformAttributeName(srcAction.ActionType)
+//
+//			d := actionMappers[terraformActionKeyName].ToState(ctx, a, newAction)
+//			if d.HasError() {
+//				return d
+//			}
+//			//switch srcAction.ActionType {
+//			//	flatten_action_func("deploy_package_action", i, flattenDeployPackageAction)
+//			//case "Octopus.TerraformApply":
+//			//	flatten_action_func("apply_terraform_template_action", i, flattenApplyTerraformTemplateAction)
+//
+//			//}
+//
+//			if _, ok := newActions[terraformActionKeyName]; !ok {
+//				newActions[terraformActionKeyName] = make([]attr.Value, 0)
+//			}
+//			newActions[terraformActionKeyName] = append(newActions[terraformActionKeyName], types.ObjectValueMust(getActionTypeAttrs(terraformActionKeyName), newAction))
+//
+//		}
+//
+//		for actionAttributeName, _ := range schemas.ActionsAttributeToActionTypeMap {
+//			if len(newActions[actionAttributeName]) > 0 {
+//				newStep[actionAttributeName] = types.ListValueMust(types.ObjectType{AttrTypes: getActionTypeAttrs(actionAttributeName)}, newActions[actionAttributeName])
+//			} else {
+//				newStep[actionAttributeName] = types.ListNull(types.ObjectType{AttrTypes: getActionTypeAttrs(actionAttributeName)})
+//			}
+//		}
+//
+//		mappedStep, diags := types.ObjectValue(getStepTypeAttrs(), newStep)
+//		if diags.HasError() {
+//			return diags
+//		}
+//		steps = append(steps, mappedStep)
+//	}
+//
+//	updatedSteps, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: getStepTypeAttrs()}, steps)
+//	if diags.HasError() {
+//		return diags
+//	}
+//
+//	state.Steps = updatedSteps
+//	return nil
+//}
 
 func getSortOrderStateValue(step *deployments.DeploymentStep, a *deployments.DeploymentAction, state *schemas.DeploymentProcessResourceModel) attr.Value {
 	for _, s := range state.Steps.Elements() {
@@ -355,7 +405,7 @@ func mapStepsToDeploymentProcess(ctx context.Context, steps types.List, current 
 			}
 
 			if isAction(key) {
-				actionMapping(actionMappers[key].ToDeploymentAction)
+				actionMapping(ActionMappers[key].ToDeploymentAction)
 			}
 
 			switch key {
