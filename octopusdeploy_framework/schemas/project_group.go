@@ -15,7 +15,7 @@ func GetProjectGroupDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":       util.GetIdResourceSchema(),
 		"space_id": util.GetSpaceIdResourceSchema(projectGroupDescription),
-		"name":     util.GetNameResourceSchema(true),
+		"name":     GetReadonlyNameDatasourceSchema(),
 		"retention_policy_id": datasourceSchema.StringAttribute{
 			Computed:    true,
 			Optional:    true,
@@ -43,9 +43,10 @@ func GetProjectGroupResourceSchema() map[string]resourceSchema.Attribute {
 }
 
 type ProjectGroupTypeResourceModel struct {
-	ID                types.String `tfsdk:"id"`
 	Name              types.String `tfsdk:"name"`
 	SpaceID           types.String `tfsdk:"space_id"`
 	Description       types.String `tfsdk:"description"`
 	RetentionPolicyID types.String `tfsdk:"retention_policy_id"`
+
+	ResourceModel
 }

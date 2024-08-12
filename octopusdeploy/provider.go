@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -30,7 +29,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
 			"octopusdeploy_tag_sets":                                        dataSourceTagSets(),
 			"octopusdeploy_teams":                                           dataSourceTeams(),
-			"octopusdeploy_tenants":                                         dataSourceTenants(),
 			"octopusdeploy_users":                                           dataSourceUsers(),
 			"octopusdeploy_user_roles":                                      dataSourceUserRoles(),
 			"octopusdeploy_worker_pools":                                    dataSourceWorkerPools(),
@@ -48,7 +46,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_channel":                                        resourceChannel(),
 			"octopusdeploy_cloud_region_deployment_target":                 resourceCloudRegionDeploymentTarget(),
 			"octopusdeploy_deployment_process":                             resourceDeploymentProcess(),
-			"octopusdeploy_docker_container_registry":                      resourceDockerContainerRegistry(),
 			"octopusdeploy_dynamic_worker_pool":                            resourceDynamicWorkerPool(),
 			"octopusdeploy_gcp_account":                                    resourceGoogleCloudPlatformAccount(),
 			"octopusdeploy_kubernetes_agent_deployment_target":             resourceKubernetesAgentDeploymentTarget(),

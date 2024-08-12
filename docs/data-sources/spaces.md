@@ -26,12 +26,15 @@ data "octopusdeploy_spaces" "spaces" {
 
 ### Optional
 
-- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `partial_name` (String) A filter to search by a partial name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
 - `spaces` (Block List) Provides information about existing spaces. (see [below for nested schema](#nestedblock--spaces))
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 <a id="nestedblock--spaces"></a>
 ### Nested Schema for `spaces`
@@ -40,7 +43,7 @@ Required:
 
 - `name` (String) The name of this resource, no more than 20 characters long
 
-Optional:
+Read-Only:
 
 - `description` (String) The description of this space.
 - `id` (String) The unique ID for this resource.

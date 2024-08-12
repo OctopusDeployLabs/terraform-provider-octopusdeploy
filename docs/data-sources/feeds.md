@@ -27,8 +27,6 @@ data "octopusdeploy_feeds" "example" {
 ### Optional
 
 - `feed_type` (String) A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, or `OctopusProject`.
-- `feeds` (Block List) (see [below for nested schema](#nestedblock--feeds))
-- `id` (String) The unique ID for this resource.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `name` (String) The name of this resource.
 - `partial_name` (String) A filter to search by a partial name.
@@ -36,15 +34,15 @@ data "octopusdeploy_feeds" "example" {
 - `space_id` (String) The space ID associated with this feeds.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
+### Read-Only
+
+- `feeds` (Block List) (see [below for nested schema](#nestedblock--feeds))
+- `id` (String) The unique ID for this resource.
+
 <a id="nestedblock--feeds"></a>
 ### Nested Schema for `feeds`
 
-Required:
-
-- `feed_uri` (String)
-- `name` (String) The name of this resource.
-
-Optional:
+Read-Only:
 
 - `access_key` (String) The AWS access key to use when authenticating against Amazon Web Services.
 - `api_version` (String)
@@ -52,15 +50,14 @@ Optional:
 - `download_attempts` (Number) The number of times a deployment should attempt to download a package from this feed before failing.
 - `download_retry_backoff_seconds` (Number) The number of seconds to apply as a linear back off between download attempts.
 - `feed_type` (String) A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, or `OctopusProject`.
+- `feed_uri` (String)
 - `id` (String) The unique ID for this resource.
 - `is_enhanced_mode` (Boolean)
+- `name` (String) The name of this resource.
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
+- `region` (String)
 - `registry_path` (String)
 - `secret_key` (String, Sensitive)
 - `space_id` (String) The space ID associated with this feeds.
 - `username` (String, Sensitive) The username associated with this resource.
-
-Read-Only:
-
-- `region` (String)

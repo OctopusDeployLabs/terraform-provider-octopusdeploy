@@ -2,12 +2,12 @@
 page_title: "octopusdeploy_lifecycle Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  
+  This resource manages lifecycles in Octopus Deploy.
 ---
 
 # octopusdeploy_lifecycle (Resource)
 
-
+This resource manages lifecycles in Octopus Deploy.
 
 ## Example Usage
 
@@ -64,10 +64,10 @@ resource "octopusdeploy_lifecycle" "example" {
 
 - `description` (String) The description of this lifecycle.
 - `id` (String) The unique ID for this resource.
-- `phase` (Block List) (see [below for nested schema](#nestedblock--phase))
-- `release_retention_policy` (Block List) (see [below for nested schema](#nestedblock--release_retention_policy))
-- `space_id` (String) The space ID associated with this lifecycle.
-- `tentacle_retention_policy` (Block List) (see [below for nested schema](#nestedblock--tentacle_retention_policy))
+- `phase` (Block List) Defines a phase in the lifecycle. (see [below for nested schema](#nestedblock--phase))
+- `release_retention_policy` (Block List) Defines the retention policy for releases or tentacles. (see [below for nested schema](#nestedblock--release_retention_policy))
+- `space_id` (String) The space ID associated with this resource.
+- `tentacle_retention_policy` (Block List) Defines the retention policy for releases or tentacles. (see [below for nested schema](#nestedblock--tentacle_retention_policy))
 
 <a id="nestedblock--phase"></a>
 ### Nested Schema for `phase`
@@ -78,22 +78,22 @@ Required:
 
 Optional:
 
-- `automatic_deployment_targets` (List of String)
+- `automatic_deployment_targets` (List of String) Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase
 - `id` (String) The unique ID for this resource.
-- `is_optional_phase` (Boolean)
-- `minimum_environments_before_promotion` (Number)
-- `optional_deployment_targets` (List of String)
-- `release_retention_policy` (Block List) (see [below for nested schema](#nestedblock--phase--release_retention_policy))
-- `tentacle_retention_policy` (Block List) (see [below for nested schema](#nestedblock--phase--tentacle_retention_policy))
+- `is_optional_phase` (Boolean) If false a release must be deployed to this phase before it can be deployed to the next phase.
+- `minimum_environments_before_promotion` (Number) The number of units required before a release can enter the next phase. If 0, all environments are required.
+- `optional_deployment_targets` (List of String) Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to
+- `release_retention_policy` (Block List) Defines the retention policy for releases or tentacles. (see [below for nested schema](#nestedblock--phase--release_retention_policy))
+- `tentacle_retention_policy` (Block List) Defines the retention policy for releases or tentacles. (see [below for nested schema](#nestedblock--phase--tentacle_retention_policy))
 
 <a id="nestedblock--phase--release_retention_policy"></a>
 ### Nested Schema for `phase.release_retention_policy`
 
 Optional:
 
-- `quantity_to_keep` (Number)
-- `should_keep_forever` (Boolean)
-- `unit` (String)
+- `quantity_to_keep` (Number) The number of days/releases to keep. The default value is 30. If 0 then all are kept.
+- `should_keep_forever` (Boolean) Indicates if items should never be deleted. The default value is false.
+- `unit` (String) The unit of quantity to keep. Valid units are Days or Items. The default value is Days.
 
 
 <a id="nestedblock--phase--tentacle_retention_policy"></a>
@@ -101,9 +101,9 @@ Optional:
 
 Optional:
 
-- `quantity_to_keep` (Number)
-- `should_keep_forever` (Boolean)
-- `unit` (String)
+- `quantity_to_keep` (Number) The number of days/releases to keep. The default value is 30. If 0 then all are kept.
+- `should_keep_forever` (Boolean) Indicates if items should never be deleted. The default value is false.
+- `unit` (String) The unit of quantity to keep. Valid units are Days or Items. The default value is Days.
 
 
 
@@ -112,9 +112,9 @@ Optional:
 
 Optional:
 
-- `quantity_to_keep` (Number)
-- `should_keep_forever` (Boolean)
-- `unit` (String)
+- `quantity_to_keep` (Number) The number of days/releases to keep. The default value is 30. If 0 then all are kept.
+- `should_keep_forever` (Boolean) Indicates if items should never be deleted. The default value is false.
+- `unit` (String) The unit of quantity to keep. Valid units are Days or Items. The default value is Days.
 
 
 <a id="nestedblock--tentacle_retention_policy"></a>
@@ -122,9 +122,9 @@ Optional:
 
 Optional:
 
-- `quantity_to_keep` (Number)
-- `should_keep_forever` (Boolean)
-- `unit` (String)
+- `quantity_to_keep` (Number) The number of days/releases to keep. The default value is 30. If 0 then all are kept.
+- `should_keep_forever` (Boolean) Indicates if items should never be deleted. The default value is false.
+- `unit` (String) The unit of quantity to keep. Valid units are Days or Items. The default value is Days.
 
 ## Import
 

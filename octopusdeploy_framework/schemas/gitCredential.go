@@ -5,58 +5,55 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 const (
-	GitCredentialResourceDescription = "Git Credential"
-	GitCredentialResourceName        = "git_credential"
-	GitCredentialDatasourceName      = "git_credentials"
+	GitCredentialResourceName   = "git_credential"
+	GitCredentialDatasourceName = "git_credentials"
 )
 
 func GetGitCredentialResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "Manages a Git credential in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":          util.GetIdResourceSchema(),
-			"space_id":    util.GetSpaceIdResourceSchema(GitCredentialResourceDescription),
-			"name":        util.GetNameResourceSchema(true),
-			"description": util.GetDescriptionResourceSchema(GitCredentialResourceDescription),
-			"type": resourceSchema.StringAttribute{
-				Optional:    true,
-				Description: "The Git credential authentication type.",
-			},
-			"username": resourceSchema.StringAttribute{
-				Required:    true,
-				Description: "The username for the Git credential.",
-				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
-				},
-			},
-			"password": resourceSchema.StringAttribute{
-				Required:    true,
-				Sensitive:   true,
-				Description: "The password for the Git credential.",
-				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
-				},
-			},
+			"id":          util.ResourceString().Optional().Computed().Description("The unique ID for this resource.").Build(),
+			"space_id":    util.ResourceString().Optional().Computed().Description("The space ID associated with this Git Credential.").Build(),
+			"name":        util.ResourceString().Required().Description("The name of this Git Credential.").Build(),
+			"description": util.ResourceString().Optional().Description("The description of this Git Credential.").Build(),
+			"type": util.ResourceString().
+				Optional().
+				Description("The Git credential authentication type.").
+				Build(),
+			"username": util.ResourceString().
+				Required().
+				Description("The username for the Git credential.").
+				Validators(stringvalidator.LengthAtLeast(1)).
+				Build(),
+			"password": util.ResourceString().
+				Required().
+				Sensitive().
+				Description("The password for the Git credential.").
+				Validators(stringvalidator.LengthAtLeast(1)).
+				Build(),
 		},
 	}
 }
 
-func GetGitCredentialDataSourceSchema() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{
-		"id":       util.GetIdDatasourceSchema(),
-		"space_id": util.GetSpaceIdDatasourceSchema(GitCredentialResourceDescription),
-		"name":     util.GetQueryNameDatasourceSchema(),
-		"skip":     util.GetQuerySkipDatasourceSchema(),
-		"take":     util.GetQueryTakeDatasourceSchema(),
-		"git_credentials": datasourceSchema.ListNestedAttribute{
-			Computed:    true,
-			Description: "A list of Git Credentials that match the filter(s).",
-			NestedObject: datasourceSchema.NestedAttributeObject{
-				Attributes: GetGitCredentialAttributes(),
+func GetGitCredentialDataSourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{
+		Description: "Use this data source to retrieve information about Git credentials in Octopus Deploy.",
+		Attributes: map[string]datasourceSchema.Attribute{
+			"id":       util.DataSourceString().Computed().Description("The unique ID for this resource.").Build(),
+			"space_id": util.DataSourceString().Optional().Description("The space ID associated with this Git Credential.").Build(),
+			"name":     util.DataSourceString().Optional().Description("The name of the Git Credential to filter by.").Build(),
+			"skip":     util.DataSourceInt64().Optional().Description("The number of records to skip.").Build(),
+			"take":     util.DataSourceInt64().Optional().Description("The number of records to take.").Build(),
+			"git_credentials": datasourceSchema.ListNestedAttribute{
+				Computed:    true,
+				Description: "Provides information about existing GitCredentials.",
+				NestedObject: datasourceSchema.NestedAttributeObject{
+					Attributes: GetGitCredentialAttributes(),
+				},
 			},
 		},
 	}
@@ -64,17 +61,12 @@ func GetGitCredentialDataSourceSchema() map[string]datasourceSchema.Attribute {
 
 func GetGitCredentialAttributes() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"id":          util.GetIdDatasourceSchema(),
-		"space_id":    util.GetSpaceIdDatasourceSchema(GitCredentialResourceDescription),
-		"name":        util.GetQueryNameDatasourceSchema(),
-		"description": util.GetDescriptionDatasourceSchema(GitCredentialResourceDescription),
-		"type": datasourceSchema.StringAttribute{
-			Computed:    true,
-			Description: "The Git credential authentication type.",
-		},
-		"username": datasourceSchema.StringAttribute{
-			Computed:    true,
-			Description: "The username for the Git credential.",
-		},
+		"id":          util.DataSourceString().Computed().Description("The unique ID for this resource.").Build(),
+		"space_id":    util.DataSourceString().Computed().Description("The space ID associated with this Git Credential.").Build(),
+		"name":        util.DataSourceString().Computed().Description("The name of this Git Credential.").Build(),
+		"description": util.DataSourceString().Computed().Description("The description of this Git Credential.").Build(),
+		"type":        util.DataSourceString().Computed().Description("The Git credential authentication type.").Build(),
+		"username":    util.DataSourceString().Computed().Description("The username for the Git credential.").Build(),
+		"password":    util.DataSourceString().Computed().Sensitive().Description("The password for the Git credential.").Build(),
 	}
 }

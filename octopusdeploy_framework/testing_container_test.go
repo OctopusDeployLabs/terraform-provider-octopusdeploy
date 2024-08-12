@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 	if *createSharedContainer {
 
 		testFramework := test.OctopusContainerTest{}
-		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer(m)
+		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer()
 		if err != nil {
 			log.Printf("Failed to arrange containers: (%s)", err.Error())
 		}

@@ -24,12 +24,13 @@ type tenantCommonVariableResource struct {
 }
 
 type tenantCommonVariableResourceModel struct {
-	ID                   types.String `tfsdk:"id"`
 	SpaceID              types.String `tfsdk:"space_id"`
 	TenantID             types.String `tfsdk:"tenant_id"`
 	LibraryVariableSetID types.String `tfsdk:"library_variable_set_id"`
 	TemplateID           types.String `tfsdk:"template_id"`
 	Value                types.String `tfsdk:"value"`
+
+	schemas.ResourceModel
 }
 
 func NewTenantCommonVariableResource() resource.Resource {
