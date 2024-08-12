@@ -32,8 +32,10 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentsDataSourceID(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", localName),
 					resource.TestCheckResourceAttr(prefix, "environments.#", "1"),
-					resource.TestCheckResourceAttr(prefix, "environments.0.Name", localName),
+					resource.TestCheckResourceAttrSet(prefix, "environments.0.id"),
+					resource.TestCheckResourceAttr(prefix, "environments.0.name", localName),
 				),
 				Config: testAccDataSourceEnvironmentByNameConfig(localName),
 			},
