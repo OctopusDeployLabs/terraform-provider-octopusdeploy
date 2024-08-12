@@ -13,7 +13,10 @@ import (
 func TestAccDataSourceEnvironments(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := fmt.Sprintf("data.octopusdeploy_environments.%s", localName)
-	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
 	take := 10
 
 	resource.Test(t, resource.TestCase{
@@ -34,23 +37,23 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 				Config: fmt.Sprintf(`%s
 
 %s`,
-					createTestAccDataSourceEnvironmentsConfig(localName, name),
+					createTestAccDataSourceEnvironmentsConfig(environmentLocalName, environmentName),
 					testAccDataSourceEnvironmentsConfig(localName, take),
 				),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentsDataSourceID(prefix),
-					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "name", environmentName),
 					resource.TestCheckResourceAttr(prefix, "environments.#", "1"),
 					resource.TestCheckResourceAttrSet(prefix, "environments.0.id"),
-					resource.TestCheckResourceAttr(prefix, "environments.0.name", name),
+					resource.TestCheckResourceAttr(prefix, "environments.0.name", environmentName),
 				),
 				Config: fmt.Sprintf(`%s
 
 %s`,
-					createTestAccDataSourceEnvironmentsConfig(localName, name),
-					testAccDataSourceEnvironmentByNameConfig(localName, name),
+					createTestAccDataSourceEnvironmentsConfig(environmentLocalName, environmentName),
+					testAccDataSourceEnvironmentByNameConfig(localName, environmentName),
 				),
 			},
 		},
