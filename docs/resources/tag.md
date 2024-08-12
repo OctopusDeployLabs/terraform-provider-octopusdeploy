@@ -17,19 +17,19 @@ This resource manages tags in Octopus Deploy.
 
 ### Required
 
-- `color` (String)
-- `name` (String) The name of this resource.
+- `color` (String) The color of the tag.
+- `name` (String) The name of the tag.
 - `tag_set_id` (String) The ID of the associated tag set.
 
 ### Optional
 
-- `description` (String) The description of this tag.
-- `id` (String) The unique ID for this resource.
-- `sort_order` (Number)
-- `tag_set_space_id` (String) The Space ID of the associated tag set. Required if the tag set is not in the same space as what is configured on the provider
+- `description` (String) The description of the tag.
+- `id` (String) The ID of this resource.
+- `sort_order` (Number) The sort order of the tag.
+- `tag_set_space_id` (String) The Space ID of the associated tag set. Required if the tag set is not in the same space as what is configured on the provider.
 
 ### Read-Only
 
-- `canonical_tag_name` (String)
+- `canonical_tag_name` (String) The canonical name of the tag.
 
 

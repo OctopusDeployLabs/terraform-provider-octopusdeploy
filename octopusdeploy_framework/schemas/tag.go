@@ -14,6 +14,7 @@ func GetTagResourceSchema() resourceSchema.Schema {
 		Description: "This resource manages tags in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
 			"id": util.ResourceString().
+				Optional().
 				Computed().
 				Description("The ID of this resource.").
 				Build(),
