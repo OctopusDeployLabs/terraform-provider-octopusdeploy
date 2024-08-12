@@ -84,7 +84,7 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		Take:        util.GetNumber(data.Take),
 	}
 
-	existingEnvironments, err := environments.Get(e.Client, data.SpaceID.ValueString(), query)
+	existingEnvironments, err := environments.Get(e.Client, e.Client.GetSpaceID(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load environments", err.Error())
 		return
@@ -104,7 +104,9 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 				matchedEnvironment = env
 			}
 		}
-		mappedEnvironments = append(mappedEnvironments, schemas.MapFromEnvironment(ctx, matchedEnvironment))
+		if matchedEnvironment != nil {
+			mappedEnvironments = append(mappedEnvironments, schemas.MapFromEnvironment(ctx, matchedEnvironment))
+		}
 	}
 
 	data.Environments, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.EnvironmentObjectType()}, mappedEnvironments)
