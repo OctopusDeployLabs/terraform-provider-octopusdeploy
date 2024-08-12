@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -27,7 +28,7 @@ func resourcePollingSubscriptionIdDelete(ctx context.Context, d *schema.Resource
 }
 
 func resourcePollingSubscriptionIdCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var generatedSubscriptionId = generateRandomCryptoString(20)
+	var generatedSubscriptionId = internal.GenerateRandomCryptoString(20)
 	d.SetId(generatedSubscriptionId)
 	d.Set("polling_uri", "poll://"+generatedSubscriptionId+"/")
 
