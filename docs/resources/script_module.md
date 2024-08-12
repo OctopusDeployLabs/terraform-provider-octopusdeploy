@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_script_module Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages script modules in Octopus Deploy.
+  
 ---
 
 # octopusdeploy_script_module (Resource)
 
-This resource manages script modules in Octopus Deploy.
+
 
 ## Example Usage
 
@@ -30,13 +30,13 @@ resource "octopusdeploy_script_module" "example" {
 ### Required
 
 - `name` (String) The name of this resource.
-- `script` (Block Set, Min: 1, Max: 1) The script associated with this script module. (see [below for nested schema](#nestedblock--script))
 
 ### Optional
 
 - `description` (String) The description of this script module.
 - `id` (String) The unique ID for this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `script` (Block List) The script associated with this script module. (see [below for nested schema](#nestedblock--script))
+- `space_id` (String) The space ID associated with this Script Module.
 - `variable_set_id` (String) The variable set ID for this script module.
 
 <a id="nestedblock--script"></a>
