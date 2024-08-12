@@ -19,7 +19,7 @@ Provides information about an existing space.
 
 - `name` (String) The name of this resource, no more than 20 characters long
 
-### Optional
+### Read-Only
 
 - `description` (String) The description of this space.
 - `id` (String) The unique ID for this resource.
