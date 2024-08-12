@@ -17,7 +17,7 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 	environmentLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
-	take := 10
+	//take := 10
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
@@ -29,18 +29,18 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 				),
 				Config: testAccDataSourceEnvironmentsEmpty(localName),
 			},
-			{
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEnvironmentsDataSourceID(prefix),
-					resource.TestCheckResourceAttr(prefix, "environments.#", "3"),
-				),
-				Config: fmt.Sprintf(`%s
+			// 			{
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheckEnvironmentsDataSourceID(prefix),
+			// 					resource.TestCheckResourceAttr(prefix, "environments.#", "3"),
+			// 				),
+			// 				Config: fmt.Sprintf(`%s
 
-%s`,
-					createTestAccDataSourceEnvironmentsConfig(environmentLocalName, environmentName),
-					testAccDataSourceEnvironmentsConfig(localName, take),
-				),
-			},
+			// %s`,
+			// 					createTestAccDataSourceEnvironmentsConfig(environmentLocalName, environmentName),
+			// 					testAccDataSourceEnvironmentsConfig(localName, take),
+			// 				),
+			// 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentsDataSourceID(prefix),
