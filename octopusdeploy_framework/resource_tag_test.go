@@ -119,6 +119,6 @@ func testAccTagImportStateIdFunc(resourceName string) resource.ImportStateIdFunc
 
 		tagID := rs.Primary.ID
 
-		return fmt.Sprintf("%s", tagID), nil
+		return tagID, nil
 	}
 }
