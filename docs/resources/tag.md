@@ -24,12 +24,12 @@ This resource manages tags in Octopus Deploy.
 ### Optional
 
 - `description` (String) The description of the tag.
-- `id` (String) The ID of this resource.
 - `sort_order` (Number) The sort order of the tag.
 - `tag_set_space_id` (String) The Space ID of the associated tag set. Required if the tag set is not in the same space as what is configured on the provider.
 
 ### Read-Only
 
 - `canonical_tag_name` (String) The canonical name of the tag.
+- `id` (String) The ID of this resource.
 
 
