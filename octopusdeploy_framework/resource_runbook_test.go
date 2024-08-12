@@ -1,11 +1,12 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"strings"
 	"testing"
+
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
+	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 )
 
 // TestRunbookResource verifies that a runbook can be reimported with the correct settings
