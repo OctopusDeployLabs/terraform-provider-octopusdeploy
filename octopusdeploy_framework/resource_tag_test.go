@@ -1,29 +1,150 @@
 package octopusdeploy_framework
 
-//
-//func TestExpandTag(t *testing.T) {
-//	canonicalTagName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-//	color := "#FF0000"
-//	description := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-//	id := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-//	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-//	sortOrder := acctest.RandIntRange(0, 1000)
-//
-//	resourceDataMap := map[string]interface{}{
-//		"canonical_tag_name": canonicalTagName,
-//		"color":              color,
-//		"description":        description,
-//		"id":                 id,
-//		"name":               name,
-//		"sort_order":         sortOrder,
-//	}
-//
-//	d := schema.TestResourceDataRaw(t, GetTagSchema(), resourceDataMap)
-//	tag := expandTag(d)
-//
-//	require.Equal(t, tag.CanonicalTagName, canonicalTagName)
-//	require.Equal(t, tag.Color, color)
-//	require.Equal(t, tag.Description, description)
-//	require.Equal(t, tag.Name, name)
-//	require.Equal(t, tag.SortOrder, sortOrder)
-//}
+import (
+	"fmt"
+	"testing"
+
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tagsets"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+)
+
+func TestAccTag(t *testing.T) {
+	tagSetName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tagName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tagColor := "#6e6e6e"
+	tagResourceName := "octopusdeploy_tag." + tagName
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		CheckDestroy:             testAccTagDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagConfig(tagSetName, tagName, tagColor),
+				Check: resource.ComposeTestCheckFunc(
+					testAccTagExists(tagResourceName),
+					resource.TestCheckResourceAttr(tagResourceName, "name", tagName),
+					resource.TestCheckResourceAttr(tagResourceName, "color", tagColor),
+					resource.TestCheckResourceAttrSet(tagResourceName, "id"),
+					resource.TestCheckResourceAttrSet(tagResourceName, "tag_set_id"),
+					resource.TestCheckResourceAttrSet(tagResourceName, "tag_set_space_id"),
+				),
+			},
+			{
+				Config: testAccTagConfigUpdate(tagSetName, tagName, "#ff0000"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccTagExists(tagResourceName),
+					resource.TestCheckResourceAttr(tagResourceName, "name", tagName),
+					resource.TestCheckResourceAttr(tagResourceName, "color", "#ff0000"),
+					resource.TestCheckResourceAttrSet(tagResourceName, "id"),
+					resource.TestCheckResourceAttrSet(tagResourceName, "tag_set_id"),
+					resource.TestCheckResourceAttrSet(tagResourceName, "tag_set_space_id"),
+				),
+			},
+			{
+				ResourceName:      tagResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccTagImportStateIdFunc(tagResourceName),
+			},
+		},
+	})
+}
+
+func testAccTagConfig(tagSetName, tagName, tagColor string) string {
+	return fmt.Sprintf(`
+		resource "octopusdeploy_tag_set" "%s" {
+			name        = "%s"
+			description = "Test tag set"
+		}
+
+		resource "octopusdeploy_tag" "%s" {
+			name        = "%s"
+			color       = "%s"
+			description = "Test tag"
+			tag_set_id  = octopusdeploy_tag_set.%s.id
+		}
+	`, tagSetName, tagSetName, tagName, tagName, tagColor, tagSetName)
+}
+
+func testAccTagConfigUpdate(tagSetName, tagName, tagColor string) string {
+	return fmt.Sprintf(`
+		resource "octopusdeploy_tag_set" "%s" {
+			name        = "%s"
+			description = "Test tag set"
+		}
+
+		resource "octopusdeploy_tag" "%s" {
+			name        = "%s"
+			color       = "%s"
+			description = "Updated test tag"
+			tag_set_id  = octopusdeploy_tag_set.%s.id
+		}
+	`, tagSetName, tagSetName, tagName, tagName, tagColor, tagSetName)
+}
+
+func testAccTagExists(n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No Tag ID is set")
+		}
+
+		tagSetID := rs.Primary.Attributes["tag_set_id"]
+		tagSet, err := tagsets.GetByID(octoClient, rs.Primary.Attributes["space_id"], tagSetID)
+		if err != nil {
+			return err
+		}
+
+		for _, tag := range tagSet.Tags {
+			if tag.ID == rs.Primary.ID {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Tag not found")
+	}
+}
+
+func testAccTagDestroy(s *terraform.State) error {
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_tag" {
+			continue
+		}
+
+		tagSetID := rs.Primary.Attributes["tag_set_id"]
+		tagSet, err := tagsets.GetByID(octoClient, rs.Primary.Attributes["space_id"], tagSetID)
+		if err != nil {
+			return nil // If the tag set is gone, the tag is gone too
+		}
+
+		for _, tag := range tagSet.Tags {
+			if tag.ID == rs.Primary.ID {
+				return fmt.Errorf("Tag still exists")
+			}
+		}
+	}
+
+	return nil
+}
+
+func testAccTagImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("Not found: %s", resourceName)
+		}
+
+		tagSetID := rs.Primary.Attributes["tag_set_id"]
+		tagID := rs.Primary.ID
+
+		return fmt.Sprintf("%s/%s", tagSetID, tagID), nil
+	}
+}

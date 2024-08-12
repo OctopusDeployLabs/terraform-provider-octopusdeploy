@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"log"
@@ -30,14 +29,11 @@ func NewTagResource() resource.Resource {
 }
 
 func (r *tagTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = util.GetTypeName("tag")
+	resp.TypeName = util.GetTypeName(schemas.TagResourceName)
 }
 
 func (r *tagTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes:  schemas.GetTagSchema(),
-		Description: "This resource manages tags in Octopus Deploy.",
-	}
+	resp.Schema = schemas.GetTagResourceSchema()
 }
 
 func (r *tagTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -195,7 +191,7 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	// find and update the tag that matches the one updated in configuration
 	for i := 0; i < len(tagSet.Tags); i++ {
-		if tagSet.Tags[i].ID == data.ID.ValueString() {
+		if tagSet.Tags[i].ID == data.ID.ValueString() || tagSet.Tags[i].Name == data.Name.ValueString() {
 			tagSet.Tags[i] = schemas.MapFromStateToTag(data)
 
 			updatedTagSet, err := tagsets.Update(t.Client, tagSet)

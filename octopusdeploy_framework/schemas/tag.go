@@ -7,35 +7,51 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func GetTagSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"id": util.GetIdResourceSchema(),
-		"canonical_tag_name": resourceSchema.StringAttribute{
-			Computed: true,
-		},
-		"color": resourceSchema.StringAttribute{
-			Required: true,
-		},
-		"description": util.GetDescriptionResourceSchema("tag"),
-		"name":        util.GetNameResourceSchema(true),
-		"sort_order": resourceSchema.Int64Attribute{
-			Computed: true,
-			Optional: true,
-		},
-		"tag_set_id": resourceSchema.StringAttribute{
-			Description: "The ID of the associated tag set.",
-			Required:    true,
-		},
-		"tag_set_space_id": resourceSchema.StringAttribute{
-			Description: "The Space ID of the associated tag set. Required if the tag set is not in the same space as what is configured on the provider",
-			Computed:    true,
-			Optional:    true,
+const TagResourceName = "tag"
+
+func GetTagResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Description: "This resource manages tags in Octopus Deploy.",
+		Attributes: map[string]resourceSchema.Attribute{
+			"id": util.ResourceString().
+				Computed().
+				Description("The ID of this resource.").
+				Build(),
+			"canonical_tag_name": util.ResourceString().
+				Computed().
+				Description("The canonical name of the tag.").
+				Build(),
+			"color": util.ResourceString().
+				Required().
+				Description("The color of the tag.").
+				Build(),
+			"description": util.ResourceString().
+				Optional().
+				Description("The description of the tag.").
+				Build(),
+			"name": util.ResourceString().
+				Required().
+				Description("The name of the tag.").
+				Build(),
+			"sort_order": util.ResourceInt64().
+				Optional().
+				Computed().
+				Description("The sort order of the tag.").
+				Build(),
+			"tag_set_id": util.ResourceString().
+				Required().
+				Description("The ID of the associated tag set.").
+				Build(),
+			"tag_set_space_id": util.ResourceString().
+				Optional().
+				Computed().
+				Description("The Space ID of the associated tag set. Required if the tag set is not in the same space as what is configured on the provider.").
+				Build(),
 		},
 	}
 }
 
 type TagResourceModel struct {
-	ID               types.String `tfsdk:"id"`
 	CanonicalTagName types.String `tfsdk:"canonical_tag_name"`
 	Color            types.String `tfsdk:"color"`
 	Description      types.String `tfsdk:"description"`
@@ -43,6 +59,7 @@ type TagResourceModel struct {
 	SortOrder        types.Int64  `tfsdk:"sort_order"`
 	TagSetId         types.String `tfsdk:"tag_set_id"`
 	TagSetSpaceId    types.String `tfsdk:"tag_set_space_id"`
+	ResourceModel
 }
 
 func MapFromStateToTag(data *TagResourceModel) *tagsets.Tag {
