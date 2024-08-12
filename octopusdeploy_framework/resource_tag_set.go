@@ -49,7 +49,6 @@ func (r *tagSetResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	state := flattenTagSet(createdTagSet)
-	state.ID = types.StringValue(createdTagSet.ID)
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
@@ -69,7 +68,6 @@ func (r *tagSetResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	newState := flattenTagSet(tagSet)
-	state.ID = types.StringValue(tagSet.ID)
 	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
 }
 
@@ -88,7 +86,6 @@ func (r *tagSetResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	state := flattenTagSet(updatedTagSet)
-	state.ID = types.StringValue(updatedTagSet.ID)
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
@@ -119,7 +116,6 @@ func (r *tagSetResource) ImportState(ctx context.Context, req resource.ImportSta
 	}
 
 	state := flattenTagSet(tagSet)
-	state.ID = types.StringValue(tagSet.ID)
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
@@ -137,10 +133,12 @@ func expandTagSet(model schemas.TagSetResourceModel) *tagsets.TagSet {
 }
 
 func flattenTagSet(tagSet *tagsets.TagSet) schemas.TagSetResourceModel {
-	return schemas.TagSetResourceModel{
+	model := schemas.TagSetResourceModel{
 		Name:        types.StringValue(tagSet.Name),
 		Description: types.StringValue(tagSet.Description),
 		SortOrder:   types.Int64Value(int64(tagSet.SortOrder)),
 		SpaceID:     types.StringValue(tagSet.SpaceID),
 	}
+	model.ID = types.StringValue(tagSet.ID)
+	return model
 }

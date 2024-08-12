@@ -15,7 +15,7 @@ import (
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 )
 
-func TestAccOctopusDeployTagSetAndTag(t *testing.T) {
+func TestTagSetAndTag(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tagSetPrefix := "octopusdeploy_tag_set." + localName
 	tagPrefix := "octopusdeploy_tag." + localName
@@ -32,7 +32,7 @@ func TestAccOctopusDeployTagSetAndTag(t *testing.T) {
 			{
 				Config: testTagSetConfig(localName, tagSetName, tagSetDescription),
 				Check: resource.ComposeTestCheckFunc(
-					testAccOctopusDeployTagSetExists(tagSetPrefix),
+					testTagSetExists(tagSetPrefix),
 					resource.TestCheckResourceAttr(tagSetPrefix, "name", tagSetName),
 					resource.TestCheckResourceAttr(tagSetPrefix, "description", tagSetDescription),
 				),
@@ -40,8 +40,8 @@ func TestAccOctopusDeployTagSetAndTag(t *testing.T) {
 			{
 				Config: testTagSetAndTagConfig(localName, tagSetName, tagSetDescription, tagName, tagColor),
 				Check: resource.ComposeTestCheckFunc(
-					testAccOctopusDeployTagSetExists(tagSetPrefix),
-					testAccOctopusDeployTagExists(tagPrefix),
+					testTagSetExists(tagSetPrefix),
+					testTagExists(tagPrefix),
 					resource.TestCheckResourceAttr(tagSetPrefix, "name", tagSetName),
 					resource.TestCheckResourceAttr(tagSetPrefix, "description", tagSetDescription),
 					resource.TestCheckResourceAttr(tagPrefix, "name", tagName),
@@ -80,7 +80,7 @@ func testTagSetAndTagConfig(localName, tagSetName, tagSetDescription, tagName, t
 	return tfConfig
 }
 
-func testAccOctopusDeployTagSetExists(n string) resource.TestCheckFunc {
+func testTagSetExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -99,7 +99,7 @@ func testAccOctopusDeployTagSetExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccOctopusDeployTagExists(n string) resource.TestCheckFunc {
+func testTagExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -126,7 +126,6 @@ func testAccOctopusDeployTagExists(n string) resource.TestCheckFunc {
 	}
 }
 
-// TestTagSetResource verifies that a tag set can be reimported with the correct settings
 func TestTagSetResource(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "21-tagset", []string{})
