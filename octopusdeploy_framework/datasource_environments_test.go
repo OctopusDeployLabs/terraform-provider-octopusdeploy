@@ -20,19 +20,6 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: createTestAccDataSourceEnvironmentsConfig(localName),
-			},
-			{
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEnvironmentsDataSourceID(prefix),
-					resource.TestCheckResourceAttr(prefix, "name", localName),
-					resource.TestCheckResourceAttr(prefix, "environments.#", "1"),
-					resource.TestCheckResourceAttrSet(prefix, "environments.0.id"),
-					resource.TestCheckResourceAttr(prefix, "environments.0.name", localName),
-				),
-				Config: testAccDataSourceEnvironmentByNameConfig(localName),
-			},
-			{
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEnvironmentsDataSourceID(prefix),
 				),
@@ -43,7 +30,25 @@ func TestAccDataSourceEnvironments(t *testing.T) {
 					testAccCheckEnvironmentsDataSourceID(prefix),
 					resource.TestCheckResourceAttr(prefix, "environments.#", "3"),
 				),
-				Config: testAccDataSourceEnvironmentsConfig(localName, take),
+				Config: fmt.Sprintf(`%s
+				%s`,
+					createTestAccDataSourceEnvironmentsConfig(localName),
+					testAccDataSourceEnvironmentsConfig(localName, take),
+				),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEnvironmentsDataSourceID(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", localName),
+					resource.TestCheckResourceAttr(prefix, "environments.#", "1"),
+					resource.TestCheckResourceAttrSet(prefix, "environments.0.id"),
+					resource.TestCheckResourceAttr(prefix, "environments.0.name", localName),
+				),
+				Config: fmt.Sprintf(`%s
+				%s`,
+					createTestAccDataSourceEnvironmentsConfig(localName),
+					testAccDataSourceEnvironmentByNameConfig(localName),
+				),
 			},
 		},
 	})
