@@ -103,7 +103,7 @@ func TestAccProjectWithUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "description", description),
 					resource.TestCheckResourceAttr(prefix, "name", name),
 				),
-				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description, 2),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -114,16 +114,21 @@ func TestAccProjectWithUpdate(t *testing.T) {
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.windows_service.1.step_name"),
 					resource.TestCheckNoResourceAttr(prefix, "deployment_step.0.iis_website.0.step_name"),
 				),
-				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description),
+				Config: testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, localName, name, description, 3),
 			},
 		},
 	})
 }
 
-func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string) string {
+func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, localName string, name string, description string, templateCount int) string {
 	projectGroup := internaltest.NewProjectGroupTestOptions()
 	projectGroup.LocalName = projectGroupLocalName
 	projectGroup.Resource.Name = projectGroupName
+
+	var templates string
+	for i := 0; i < templateCount; i++ {
+		templates += fmt.Sprintf("\ntemplate {\n\t\t\t\tname          = \"%d\"\n\t\t\t\tdisplay_settings = {\n\t\t\t\t\t\"Octopus.ControlType\": \"SingleLineText\"\n\t\t\t\t}\n\t\t\t}\n", i)
+	}
 
 	return fmt.Sprintf(testAccLifecycle(lifecycleLocalName, lifecycleName)+"\n"+
 		internaltest.ProjectGroupConfiguration(projectGroup)+"\n"+
@@ -133,20 +138,8 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 			name             = "%s"
 			project_group_id = octopusdeploy_project_group.%s.id
 
-			template {
-				name          = "2"
-				display_settings = {
-					"Octopus.ControlType": "SingleLineText"
-				}
-			}
-
-			template {
-				name          = "1"
-				display_settings = {
-					"Octopus.ControlType": "SingleLineText"
-				}
-			}
-
+			%s
+			
 			versioning_strategy {
 				template = "#{Octopus.Version.LastMajor}.#{Octopus.Version.LastMinor}.#{Octopus.Version.LastPatch}.#{Octopus.Version.NextRevision}"
 			}
@@ -156,7 +149,7 @@ func testAccProjectBasic(lifecycleLocalName string, lifecycleName string, projec
 				skip_machine_behavior           = "None"
 			}
 
-		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName)
+		}`, localName, description, lifecycleLocalName, name, projectGroupLocalName, templates)
 }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
