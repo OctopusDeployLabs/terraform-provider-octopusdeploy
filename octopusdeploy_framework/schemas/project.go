@@ -129,7 +129,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"template": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"id":            util.ResourceString().Optional().Computed().Description("The ID of the template parameter.").Build(),
+						"id":            util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The ID of the template parameter.").Build(),
 						"name":          util.ResourceString().Required().Description("The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods.").Build(),
 						"label":         util.ResourceString().Optional().Description("The label shown beside the parameter when presented in the deployment process.").Build(),
 						"help_text":     util.ResourceString().Optional().Description("The help presented alongside the parameter input.").Build(),
