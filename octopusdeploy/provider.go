@@ -61,7 +61,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_ssh_connection_deployment_target":               resourceSSHConnectionDeploymentTarget(),
 			"octopusdeploy_ssh_key_account":                                resourceSSHKeyAccount(),
 			"octopusdeploy_static_worker_pool":                             resourceStaticWorkerPool(),
-			"octopusdeploy_tag":                                            resourceTag(),
 			"octopusdeploy_team":                                           resourceTeam(),
 			"octopusdeploy_token_account":                                  resourceTokenAccount(),
 			"octopusdeploy_user":                                           resourceUser(),
