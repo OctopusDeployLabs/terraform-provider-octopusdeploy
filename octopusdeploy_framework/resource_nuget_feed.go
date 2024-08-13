@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -23,6 +24,8 @@ type nugetFeedTypeResource struct {
 func NewNugetFeedResource() resource.Resource {
 	return &nugetFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &nugetFeedTypeResource{}
 
 func (r *nugetFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("nuget_feed")
@@ -183,4 +186,8 @@ func updateDataFromNugetFeed(data *schemas.NugetFeedTypeResourceModel, spaceId s
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*nugetFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

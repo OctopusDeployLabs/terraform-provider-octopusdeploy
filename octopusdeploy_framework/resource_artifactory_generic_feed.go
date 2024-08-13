@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
@@ -24,6 +25,8 @@ type artifactoryGenericFeedTypeResource struct {
 func NewArtifactoryGenericFeedResource() resource.Resource {
 	return &artifactoryGenericFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &artifactoryGenericFeedTypeResource{}
 
 func (r *artifactoryGenericFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("artifactory_generic_feed")
@@ -184,4 +187,8 @@ func updateDataFromArtifactoryGenericFeed(data *schemas.ArtifactoryGenericFeedTy
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*artifactoryGenericFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

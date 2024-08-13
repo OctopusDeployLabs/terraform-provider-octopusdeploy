@@ -9,6 +9,7 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -23,6 +24,8 @@ type tenantTypeResource struct {
 func NewTenantResource() resource.Resource {
 	return &tenantTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &tenantTypeResource{}
 
 func (r *tenantTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("tenant")
@@ -171,4 +174,8 @@ func mapTenantToState(data *schemas.TenantModel, tenant *tenants.Tenant) {
 	data.Name = types.StringValue(tenant.Name)
 	sort.Strings(tenant.TenantTags)
 	data.TenantTags = util.Ternary(tenant.TenantTags != nil && len(tenant.TenantTags) > 0, util.FlattenStringList(tenant.TenantTags), types.ListValueMust(types.StringType, make([]attr.Value, 0)))
+}
+
+func (*tenantTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

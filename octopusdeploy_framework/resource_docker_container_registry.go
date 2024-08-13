@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -23,6 +24,8 @@ type dockerContainerRegistryFeedTypeResource struct {
 func NewDockerContainerRegistryFeedResource() resource.Resource {
 	return &dockerContainerRegistryFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &dockerContainerRegistryFeedTypeResource{}
 
 func (r *dockerContainerRegistryFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("docker_container_registry")
@@ -184,4 +187,8 @@ func updateDataFromDockerContainerRegistryFeed(data *schemas.DockerContainerRegi
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.ID)
+}
+
+func (*dockerContainerRegistryFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

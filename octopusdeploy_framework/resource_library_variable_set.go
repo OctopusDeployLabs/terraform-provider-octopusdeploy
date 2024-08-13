@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/libraryvariablesets"
@@ -20,6 +21,8 @@ type libraryVariableSetFeedTypeResource struct {
 func NewLibraryVariableSetFeedResource() resource.Resource {
 	return &libraryVariableSetFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &libraryVariableSetFeedTypeResource{}
 
 func (r *libraryVariableSetFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("library_variable_set")
@@ -108,4 +111,8 @@ func (r *libraryVariableSetFeedTypeResource) Delete(ctx context.Context, req res
 		resp.Diagnostics.AddError("unable to delete library variable set", err.Error())
 		return
 	}
+}
+
+func (*libraryVariableSetFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

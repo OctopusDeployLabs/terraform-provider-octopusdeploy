@@ -8,6 +8,7 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -20,6 +21,8 @@ type scriptModuleTypeResource struct {
 func NewScriptModuleResource() resource.Resource {
 	return &scriptModuleTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &scriptModuleTypeResource{}
 
 func (r *scriptModuleTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("script_module")
@@ -127,4 +130,8 @@ func (r *scriptModuleTypeResource) Delete(ctx context.Context, req resource.Dele
 		resp.Diagnostics.AddError("unable to delete script module", err.Error())
 		return
 	}
+}
+
+func (*scriptModuleTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

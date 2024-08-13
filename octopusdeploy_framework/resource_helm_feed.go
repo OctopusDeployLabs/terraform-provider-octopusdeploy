@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
@@ -24,6 +25,8 @@ type helmFeedTypeResource struct {
 func NewHelmFeedResource() resource.Resource {
 	return &helmFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &helmFeedTypeResource{}
 
 func (r *helmFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("helm_feed")
@@ -178,4 +181,8 @@ func updateDataFromHelmFeed(data *schemas.HelmFeedTypeResourceModel, spaceId str
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*helmFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
