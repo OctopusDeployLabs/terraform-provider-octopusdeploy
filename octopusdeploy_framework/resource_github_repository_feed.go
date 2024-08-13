@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -23,6 +24,8 @@ type githubRepositoryFeedTypeResource struct {
 func NewGitHubRepositoryFeedResource() resource.Resource {
 	return &githubRepositoryFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &githubRepositoryFeedTypeResource{}
 
 func (r *githubRepositoryFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("github_repository_feed")
@@ -182,4 +185,8 @@ func updateDataFromGitHubRepositoryFeed(data *schemas.GitHubRepositoryFeedTypeRe
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*githubRepositoryFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

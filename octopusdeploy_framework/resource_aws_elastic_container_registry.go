@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -19,6 +20,8 @@ import (
 type awsElasticContainerRegistryFeedTypeResource struct {
 	*Config
 }
+
+var _ resource.ResourceWithImportState = &awsElasticContainerRegistryFeedTypeResource{}
 
 func NewAwsElasticContainerRegistryFeedResource() resource.Resource {
 	return &awsElasticContainerRegistryFeedTypeResource{}
@@ -174,4 +177,8 @@ func updateDataFromAwsElasticContainerRegistryFeed(data *schemas.AwsElasticConta
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*awsElasticContainerRegistryFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

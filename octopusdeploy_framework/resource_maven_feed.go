@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -23,6 +24,8 @@ type mavenFeedTypeResource struct {
 func NewMavenFeedResource() resource.Resource {
 	return &mavenFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &mavenFeedTypeResource{}
 
 func (r *mavenFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("maven_feed")
@@ -180,4 +183,8 @@ func updateDataFromMavenFeed(data *schemas.MavenFeedTypeResourceModel, spaceId s
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.ID)
+}
+
+func (*mavenFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
