@@ -2,13 +2,15 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
+	"strings"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"strings"
 )
 
 type spaceDataSource struct {
@@ -56,6 +58,10 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		if strings.EqualFold(spaceResult.Name, data.Name.ValueString()) {
 			matchedSpace = spaceResult
 		}
+	}
+	if matchedSpace == nil {
+		resp.Diagnostics.AddError(fmt.Sprintf("unable to find space with name %s", data.Name.ValueString()), "")
+		return
 	}
 
 	mapSpaceToState(ctx, &data, matchedSpace)
