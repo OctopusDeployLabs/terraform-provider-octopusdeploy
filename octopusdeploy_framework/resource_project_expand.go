@@ -10,6 +10,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/url"
 )
 
@@ -50,9 +51,9 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		var gitLibrarySettingsList []gitLibraryPersistenceSettingsModel
 		diags := model.GitLibraryPersistenceSettings.ElementsAs(ctx, &gitLibrarySettingsList, false)
 		if diags.HasError() {
-			fmt.Printf("Error converting Git library persistence settings: %v\n", diags)
+			tflog.Error(ctx, fmt.Sprintf("Error converting Git library persistence settings: %v\n", diags))
 		} else {
-			fmt.Printf("Number of Git library persistence settings: %d\n", len(gitLibrarySettingsList))
+			tflog.Debug(ctx, fmt.Sprintf("Number of Git library persistence settings: %d\n", len(gitLibrarySettingsList)))
 			if len(gitLibrarySettingsList) > 0 {
 				project.PersistenceSettings = expandGitLibraryPersistenceSettings(ctx, gitLibrarySettingsList[0])
 				project.IsVersionControlled = true
@@ -62,9 +63,9 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		var gitUsernamePasswordSettingsList []gitUsernamePasswordPersistenceSettingsModel
 		diags := model.GitUsernamePasswordPersistenceSettings.ElementsAs(ctx, &gitUsernamePasswordSettingsList, false)
 		if diags.HasError() {
-			fmt.Printf("Error converting Git username/password persistence settings: %v\n", diags)
+			tflog.Error(ctx, fmt.Sprintf("Error converting Git username/password persistence settings: %v\n", diags))
 		} else {
-			fmt.Printf("Number of Git username/password persistence settings: %d\n", len(gitUsernamePasswordSettingsList))
+			tflog.Debug(ctx, fmt.Sprintf("Number of Git username/password persistence settings: %d\n", len(gitUsernamePasswordSettingsList)))
 			if len(gitUsernamePasswordSettingsList) > 0 {
 				project.PersistenceSettings = expandGitUsernamePasswordPersistenceSettings(ctx, gitUsernamePasswordSettingsList[0])
 				project.IsVersionControlled = true
@@ -74,9 +75,9 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		var gitAnonymousSettingsList []gitAnonymousPersistenceSettingsModel
 		diags := model.GitAnonymousPersistenceSettings.ElementsAs(ctx, &gitAnonymousSettingsList, false)
 		if diags.HasError() {
-			fmt.Printf("Error converting Git anonymous persistence settings: %v\n", diags)
+			tflog.Error(ctx, fmt.Sprintf("Error converting Git anonymous persistence settings: %v\n", diags))
 		} else {
-			fmt.Printf("Number of Git anonymous persistence settings: %d\n", len(gitAnonymousSettingsList))
+			tflog.Debug(ctx, fmt.Sprintf("Number of Git anonymous persistence settings: %d\n", len(gitAnonymousSettingsList)))
 			if len(gitAnonymousSettingsList) > 0 {
 				project.PersistenceSettings = expandGitAnonymousPersistenceSettings(ctx, gitAnonymousSettingsList[0])
 				project.IsVersionControlled = true
@@ -116,13 +117,13 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		var templates []templateModel
 		diags := model.Template.ElementsAs(ctx, &templates, false)
 		if diags.HasError() {
-			fmt.Printf("Error converting templates: %v\n", diags)
+			tflog.Error(ctx, fmt.Sprintf("Error converting templates: %v\n", diags))
 		} else {
-			fmt.Printf("Number of templates: %d\n", len(templates))
+			tflog.Info(ctx, fmt.Sprintf("Number of templates: %d\n", len(templates)))
 			project.Templates = expandTemplates(templates)
 		}
 	} else {
-		fmt.Println("Template is null")
+		tflog.Debug(ctx, "Template is null")
 		project.Templates = []actiontemplates.ActionTemplateParameter{}
 	}
 
