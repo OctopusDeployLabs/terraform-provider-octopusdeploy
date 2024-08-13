@@ -53,6 +53,7 @@ func (e *feedsDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	}
 
 	query := feeds.FeedsQuery{
+		Name:        data.Name.ValueString(),
 		IDs:         util.GetIds(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        util.GetNumber(data.Skip),
