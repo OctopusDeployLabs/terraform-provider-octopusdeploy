@@ -282,6 +282,7 @@ func (b *ActionResourceSchemaBuilder) WithScriptFromPackage() *ActionResourceSch
 	b.attributes["script_source"] = schema.StringAttribute{
 		Computed: true,
 		Optional: true,
+		Default:  stringdefault.StaticString(""),
 	}
 
 	return b

@@ -38,6 +38,9 @@ func testAccRunKubectlScriptAction() string {
 			primary_package {
 				package_id = "MyPackage"
 				feed_id = "feeds-builtin"
+				properties = {
+					"Extract" = "true"
+				}
 			}
 
 			script_file_name = "Test.ps1"
