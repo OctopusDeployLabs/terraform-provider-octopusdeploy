@@ -147,7 +147,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 
 					Attributes: map[string]resourceSchema.Attribute{
 						"donor_package_step_id": util.ResourceString().Optional().Build(),
-						"template":              util.ResourceString().Optional().Computed().Default("#{Octopus.Version.LastMajor}.#{Octopus.Version.LastMinor}.#{Octopus.Version.NextPatch}").Build(),
+						"template":              util.ResourceString().Optional().Computed().Build(),
 					},
 					Blocks: map[string]resourceSchema.Block{
 						"donor_package": resourceSchema.ListNestedBlock{
