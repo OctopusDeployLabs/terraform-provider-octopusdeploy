@@ -171,7 +171,7 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 					resource.TestCheckResourceAttr(resourceName, "step.0.start_trigger", "StartAfterPrevious"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.action_type", "Octopus.TransferPackage"),
-					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.container.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.container.#", "0"),
 					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.channels.0"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.condition", "Success"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.environments.#", "0"),
@@ -226,6 +226,9 @@ func testAccDeploymentProcessBasic(localName string) string {
 						acquisition_location = "Server"
 						feed_id = "feeds-builtin"
 						package_id = "MyPackage"
+						properties = {
+							"Extract" = "true"
+						}
 					}
 
 					package {
@@ -234,6 +237,9 @@ func testAccDeploymentProcessBasic(localName string) string {
 						feed_id = "feeds-builtin"
 						name = "ThePackage"
 						package_id = "MyPackage"
+						properties = {
+							"Extract" = "true"
+						}
 					}
 
 					package {
@@ -242,6 +248,9 @@ func testAccDeploymentProcessBasic(localName string) string {
 						feed_id = "feeds-builtin"
 						name = "ThePackage2"
 						package_id = "MyPackage2"
+						properties = {
+							"Extract" = "true"
+						}
 					}
 					
 					action_template {

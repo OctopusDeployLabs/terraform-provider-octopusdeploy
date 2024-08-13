@@ -685,6 +685,9 @@ func getPackageSchema(additionalAttributes map[string]schema.Attribute) schema.L
 			Optional:    true,
 			Description: "A list of properties associated with this package.",
 			ElementType: types.StringType,
+			Validators: []validator.Map{
+				validators.PackageMustContainExtractProperty(),
+			},
 		},
 	}
 

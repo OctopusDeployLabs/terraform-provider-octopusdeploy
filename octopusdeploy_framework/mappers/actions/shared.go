@@ -175,6 +175,7 @@ func mapPackageReferenceToState(ctx context.Context, packageReference *packages.
 		"package_id":           types.StringValue(packageReference.PackageID),
 		"properties":           properties,
 	}
+
 	if v, ok := packageReference.Properties["Extract"]; ok {
 		if len(packageReference.Name) > 0 {
 			extractDuringDeployment, _ := strconv.ParseBool(v)
