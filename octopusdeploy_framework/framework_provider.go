@@ -2,9 +2,9 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"os"
 
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -70,6 +70,9 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewLibraryVariableSetDataSource,
 		NewVariablesDataSource,
 		NewProjectsDataSource,
+		NewTenantsDataSource,
+		NewTagSetsDataSource,
+		NewScriptModuleDataSource,
 	}
 }
 
@@ -93,7 +96,14 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewLibraryVariableSetFeedResource,
 		NewVariableResource,
 		NewProjectResource,
+		NewTagResource,
 		NewDockerContainerRegistryFeedResource,
+		NewTagSetResource,
+		NewUsernamePasswordAccountResource,
+		NewRunbookResource,
+		NewTenantResource,
+		NewTentacleCertificateResource,
+		NewScriptModuleResource,
 	}
 }
 

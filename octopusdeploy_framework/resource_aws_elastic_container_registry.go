@@ -3,8 +3,11 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -17,6 +20,8 @@ import (
 type awsElasticContainerRegistryFeedTypeResource struct {
 	*Config
 }
+
+var _ resource.ResourceWithImportState = &awsElasticContainerRegistryFeedTypeResource{}
 
 func NewAwsElasticContainerRegistryFeedResource() resource.Resource {
 	return &awsElasticContainerRegistryFeedTypeResource{}
@@ -78,7 +83,9 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Read(ctx context.Context, 
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load aws elastic container registry", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "aws elastic container registry"); err != nil {
+			resp.Diagnostics.AddError("unable to load aws elastic container registry", err.Error())
+		}
 		return
 	}
 
@@ -170,4 +177,8 @@ func updateDataFromAwsElasticContainerRegistryFeed(data *schemas.AwsElasticConta
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*awsElasticContainerRegistryFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

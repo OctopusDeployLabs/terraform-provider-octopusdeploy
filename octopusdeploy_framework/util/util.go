@@ -44,6 +44,7 @@ func ExpandStringList(list types.List) []string {
 	}
 	return result
 }
+
 func SetToStringArray(ctx context.Context, set types.Set) ([]string, diag.Diagnostics) {
 	teams := make([]types.String, 0, len(set.Elements()))
 	diags := diag.Diagnostics{}

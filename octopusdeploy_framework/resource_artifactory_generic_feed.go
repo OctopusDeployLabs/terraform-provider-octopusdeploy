@@ -3,7 +3,10 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -22,6 +25,8 @@ type artifactoryGenericFeedTypeResource struct {
 func NewArtifactoryGenericFeedResource() resource.Resource {
 	return &artifactoryGenericFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &artifactoryGenericFeedTypeResource{}
 
 func (r *artifactoryGenericFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("artifactory_generic_feed")
@@ -77,7 +82,9 @@ func (r *artifactoryGenericFeedTypeResource) Read(ctx context.Context, req resou
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load artifactoryGeneric feed", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "artifactory generic feed"); err != nil {
+			resp.Diagnostics.AddError("unable to load artifactoryGeneric feed", err.Error())
+		}
 		return
 	}
 
@@ -180,4 +187,8 @@ func updateDataFromArtifactoryGenericFeed(data *schemas.ArtifactoryGenericFeedTy
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*artifactoryGenericFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

@@ -23,7 +23,7 @@ resource "octopusdeploy_username_password_account" "example" {
 
 ### Required
 
-- `name` (String) The name of this resource.
+- `name` (String) The name of the username-password account.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ### Optional

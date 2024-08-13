@@ -3,8 +3,11 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -21,6 +24,8 @@ type dockerContainerRegistryFeedTypeResource struct {
 func NewDockerContainerRegistryFeedResource() resource.Resource {
 	return &dockerContainerRegistryFeedTypeResource{}
 }
+
+var _ resource.ResourceWithImportState = &dockerContainerRegistryFeedTypeResource{}
 
 func (r *dockerContainerRegistryFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("docker_container_registry")
@@ -76,7 +81,9 @@ func (r *dockerContainerRegistryFeedTypeResource) Read(ctx context.Context, req 
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load docker container registry feed", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "docker container registry feed"); err != nil {
+			resp.Diagnostics.AddError("unable to load docker container registry feed", err.Error())
+		}
 		return
 	}
 
@@ -180,4 +187,8 @@ func updateDataFromDockerContainerRegistryFeed(data *schemas.DockerContainerRegi
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.ID)
+}
+
+func (*dockerContainerRegistryFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
