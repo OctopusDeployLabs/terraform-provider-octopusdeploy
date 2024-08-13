@@ -28,6 +28,8 @@ func GetTagResourceSchema() resourceSchema.Schema {
 			"description": util.ResourceString().
 				Optional().
 				Description("The description of the tag.").
+				Default("").
+				Computed().
 				Build(),
 			"name": util.ResourceString().
 				Required().
