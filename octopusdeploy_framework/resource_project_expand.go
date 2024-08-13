@@ -139,7 +139,7 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 }
 
 func expandGitLibraryPersistenceSettings(ctx context.Context, model gitLibraryPersistenceSettingsModel) projects.GitPersistenceSettings {
-	url, _ := url.Parse(model.URL.ValueString())
+	gitUrl, _ := url.Parse(model.URL.ValueString())
 	var protectedBranches []string
 	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
 
@@ -150,12 +150,12 @@ func expandGitLibraryPersistenceSettings(ctx context.Context, model gitLibraryPe
 		},
 		model.DefaultBranch.ValueString(),
 		protectedBranches,
-		url,
+		gitUrl,
 	)
 }
 
 func expandGitUsernamePasswordPersistenceSettings(ctx context.Context, model gitUsernamePasswordPersistenceSettingsModel) projects.GitPersistenceSettings {
-	url, _ := url.Parse(model.URL.ValueString())
+	gitUrl, _ := url.Parse(model.URL.ValueString())
 	var protectedBranches []string
 	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
 
@@ -169,12 +169,12 @@ func expandGitUsernamePasswordPersistenceSettings(ctx context.Context, model git
 		usernamePasswordCredential,
 		model.DefaultBranch.ValueString(),
 		protectedBranches,
-		url,
+		gitUrl,
 	)
 }
 
 func expandGitAnonymousPersistenceSettings(ctx context.Context, model gitAnonymousPersistenceSettingsModel) projects.GitPersistenceSettings {
-	url, _ := url.Parse(model.URL.ValueString())
+	gitUrl, _ := url.Parse(model.URL.ValueString())
 	var protectedBranches []string
 	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
 
@@ -183,7 +183,7 @@ func expandGitAnonymousPersistenceSettings(ctx context.Context, model gitAnonymo
 		&credentials.Anonymous{},
 		model.DefaultBranch.ValueString(),
 		protectedBranches,
-		url,
+		gitUrl,
 	)
 }
 
