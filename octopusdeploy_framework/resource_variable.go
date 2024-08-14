@@ -211,7 +211,7 @@ func (r *variableTypeResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	if _, err := variables.DeleteSingle(r.Config.Client, r.Config.SpaceID, variableOwnerID.ValueString(), data.ID.ValueString()); err != nil {
+	if _, err := variables.DeleteSingle(r.Config.Client, data.SpaceID.ValueString(), variableOwnerID.ValueString(), data.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("unable to delete variable", err.Error())
 		return
 	}
