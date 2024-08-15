@@ -36,11 +36,12 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"lifecycle_id":                         util.ResourceString().Required().Description("The lifecycle ID associated with this project.").Build(),
 			"project_group_id":                     util.ResourceString().Required().Description("The project group ID associated with this project.").Build(),
 			"tenanted_deployment_participation":    util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.").Build(),
-			"included_library_variable_sets":       util.ResourceList(types.StringType).Optional().Computed().PlanModifiers(listplanmodifier.UseStateForUnknown()).Description("The list of included library variable set IDs.").Build(),
-			"release_notes_template":               util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
-			"slug":                                 util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("A human-readable, unique identifier, used to identify a project.").Build(),
-			"deployment_process_id":                util.ResourceString().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
-			"variable_set_id":                      util.ResourceString().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"included_library_variable_sets": util.ResourceList(types.StringType).Optional().Computed().
+				PlanModifiers(listplanmodifier.UseStateForUnknown()).Description("The list of included library variable set IDs.").Build(),
+			"release_notes_template": util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"slug":                   util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("A human-readable, unique identifier, used to identify a project.").Build(),
+			"deployment_process_id":  util.ResourceString().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"variable_set_id":        util.ResourceString().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			// This is correct object that return from api for project object not a list string.
