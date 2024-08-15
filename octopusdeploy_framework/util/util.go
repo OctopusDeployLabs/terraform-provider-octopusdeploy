@@ -63,9 +63,9 @@ func FlattenStringList(list []string) types.List {
 	if list == nil {
 		return types.ListNull(types.StringType)
 	}
-	
+
 	if len(list) == 0 {
-		types.ListValueMust(types.StringType, []attr.Value{})
+		return types.ListValueMust(types.StringType, []attr.Value{})
 	}
 
 	elements := make([]attr.Value, 0, len(list))
