@@ -40,8 +40,6 @@ func expandProject(ctx context.Context, model projectResourceModel) *projects.Pr
 		var includedSets []string
 		model.IncludedLibraryVariableSets.ElementsAs(ctx, &includedSets, false)
 		project.IncludedLibraryVariableSets = includedSets
-	} else {
-		project.IncludedLibraryVariableSets = []string{}
 	}
 
 	if !model.ConnectivityPolicy.IsNull() {

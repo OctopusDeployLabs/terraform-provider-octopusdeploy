@@ -50,12 +50,7 @@ func flattenProject(ctx context.Context, project *projects.Project, state *proje
 
 	model.ID = types.StringValue(project.GetID())
 
-	if len(project.IncludedLibraryVariableSets) > 0 {
-		model.IncludedLibraryVariableSets = util.FlattenStringList(project.IncludedLibraryVariableSets)
-	} else {
-		model.IncludedLibraryVariableSets = types.ListValueMust(types.StringType, []attr.Value{})
-	}
-
+	model.IncludedLibraryVariableSets = util.FlattenStringList(project.IncludedLibraryVariableSets)
 	model.AutoDeployReleaseOverrides = flattenAutoDeployReleaseOverrides(project.AutoDeployReleaseOverrides)
 
 	if state.ConnectivityPolicy.IsNull() {
