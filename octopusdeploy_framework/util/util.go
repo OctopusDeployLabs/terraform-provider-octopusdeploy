@@ -60,10 +60,14 @@ func SetToStringArray(ctx context.Context, set types.Set) ([]string, diag.Diagno
 }
 
 func FlattenStringList(list []string) types.List {
-	if list == nil || len(list) == 0 {
+	if list == nil {
 		return types.ListNull(types.StringType)
 	}
 	
+	if len(list) == 0 {
+		types.ListValueMust(types.StringType, []attr.Value{})
+	}
+
 	elements := make([]attr.Value, 0, len(list))
 	for _, s := range list {
 		elements = append(elements, types.StringValue(s))
