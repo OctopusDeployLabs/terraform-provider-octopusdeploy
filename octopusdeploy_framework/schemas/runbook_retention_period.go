@@ -10,9 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -41,9 +38,6 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 			Validators: []validator.Int64{
 				int64validator.AtLeast(0),
 			},
-			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
-			},
 		},
 		runbookRetentionPeriodSchemeAttributeNames.ShouldKeepForever: resourceSchema.BoolAttribute{
 			Description: "Indicates if items should never be deleted. The default value is `false`.",
@@ -52,9 +46,6 @@ func getRunbookRetentionPeriodSchema() map[string]resourceSchema.Attribute {
 			Default:     booldefault.StaticBool(false),
 			Validators: []validator.Bool{
 				boolvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName(runbookRetentionPeriodSchemeAttributeNames.QuantityToKeep)),
-			},
-			PlanModifiers: []planmodifier.Bool{
-				boolplanmodifier.UseStateForUnknown(),
 			},
 		},
 	}
