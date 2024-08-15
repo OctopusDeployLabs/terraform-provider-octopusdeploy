@@ -56,16 +56,16 @@ func (k KubernetesSecretActionMapper) ToDeploymentAction(actionAttribute attr.Va
 	}
 
 	mapAttributeToProperty(action, actionAttrs, "secret_name", "Octopus.Action.KubernetesContainers.SecretName")
-	mapAttributeToProperty(action, actionAttrs, "kubernetes_object_status_check_enabled", "Octopus.Action.Kubernetes.ResourceStatusCheck")
+	mapBooleanAttributeToProperty(action, actionAttrs, "kubernetes_object_status_check_enabled", "Octopus.Action.Kubernetes.ResourceStatusCheck")
 
 	if attrValue, ok := actionAttrs["secret_values"]; ok {
 		secretValues := attrValue.(types.Map)
 		mappedValues := make(map[string]string)
 		for key, value := range secretValues.Elements() {
-			mappedValues[key] = value.String()
+			mappedValues[key] = value.(types.String).ValueString()
 		}
 
-		j, _ := json.Marshal(secretValues)
+		j, _ := json.Marshal(mappedValues)
 		action.Properties["Octopus.Action.KubernetesContainers.SecretValues"] = core.NewPropertyValue(string(j), false)
 	}
 

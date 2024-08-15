@@ -185,7 +185,16 @@ func mapPackageReferenceToState(ctx context.Context, actionState attr.Value, pac
 		"feed_id":              types.StringValue(packageReference.FeedID),
 		"id":                   types.StringValue(packageReference.ID),
 		"package_id":           types.StringValue(packageReference.PackageID),
-		"properties":           properties,
+	}
+
+	if properties.IsNull() || properties.IsUnknown() {
+		var diags diag.Diagnostics
+		reference["properties"], diags = types.MapValueFrom(ctx, types.StringType, map[string]attr.Value{})
+		if diags.HasError() {
+			return make(map[string]attr.Value), diags
+		}
+	} else {
+		reference["properties"] = properties
 	}
 
 	if v, ok := packageReference.Properties["Extract"]; ok {
