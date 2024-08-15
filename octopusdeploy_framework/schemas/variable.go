@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"strings"
 
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -176,6 +177,11 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 				true),
 			VariableSchemaAttributeNames.KeyFingerprint: resourceSchema.StringAttribute{
 				Computed: true,
+				Optional: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			VariableSchemaAttributeNames.PgpKey: resourceSchema.StringAttribute{
 				Optional:  true,
@@ -186,6 +192,11 @@ func GetVariableResourceSchema() resourceSchema.Schema {
 			},
 			VariableSchemaAttributeNames.EncryptedValue: resourceSchema.StringAttribute{
 				Computed: true,
+				Optional: true,
+				Default:  stringdefault.StaticString(""),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			VariableSchemaAttributeNames.SensitiveValue: resourceSchema.StringAttribute{
 				Optional:  true,

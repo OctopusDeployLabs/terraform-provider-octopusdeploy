@@ -91,7 +91,7 @@ func MapFromVariablePromptOptions(variablePromptOptions *variables.VariablePromp
 
 func MapFromDisplaySettings(displaySettings *resources.DisplaySettings) attr.Value {
 	if displaySettings == nil {
-		return nil
+		return types.ObjectNull(VariableDisplaySettingsObjectType())
 	}
 
 	attrs := map[string]attr.Value{

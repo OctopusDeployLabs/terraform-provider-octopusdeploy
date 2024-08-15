@@ -303,8 +303,5 @@ func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *varia
 		)
 	}
 
-	data.EncryptedValue = types.StringNull()
-	data.KeyFingerprint = types.StringNull()
-
 	data.ID = types.StringValue(variable.GetID())
 }
