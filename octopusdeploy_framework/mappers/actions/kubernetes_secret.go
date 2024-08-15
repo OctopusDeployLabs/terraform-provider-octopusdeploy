@@ -50,7 +50,7 @@ func (k KubernetesSecretActionMapper) ToDeploymentAction(actionAttribute attr.Va
 		return nil
 	}
 
-	action := GetBaseAction(actionAttribute)
+	action := getBaseAction(actionAttribute)
 	if action == nil {
 		return nil
 	}

@@ -237,7 +237,7 @@ func GetActionAttributes(actionAttribute attr.Value) map[string]attr.Value {
 	return actionAttrsElements[0].(types.Object).Attributes()
 }
 
-func GetBaseAction(actionAttribute attr.Value) *deployments.DeploymentAction {
+func getBaseAction(actionAttribute attr.Value) *deployments.DeploymentAction {
 	actionAttrs := GetActionAttributes(actionAttribute)
 	if actionAttrs == nil {
 		return nil

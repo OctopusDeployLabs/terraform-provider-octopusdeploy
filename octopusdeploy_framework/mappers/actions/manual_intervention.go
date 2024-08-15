@@ -29,7 +29,7 @@ func (m *ManualInterventionActionMapper) ToDeploymentAction(actionAttribute attr
 		return nil
 	}
 
-	action := GetBaseAction(actionAttribute)
+	action := getBaseAction(actionAttribute)
 	if action == nil {
 		return nil
 	}

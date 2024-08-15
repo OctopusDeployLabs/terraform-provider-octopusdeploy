@@ -27,7 +27,7 @@ func (w WindowsServiceActionMapper) ToDeploymentAction(actionAttribute attr.Valu
 		return nil
 	}
 
-	action := GetBaseAction(actionAttribute)
+	action := getBaseAction(actionAttribute)
 	if action == nil {
 		return nil
 	}
@@ -73,6 +73,7 @@ func getWindowsServiceAttrTypes() map[string]attr.Type {
 		"custom_account_name":      types.StringType,
 		"custom_account_password":  types.StringType,
 		"dependencies":             types.StringType,
+		"description":              types.StringType,
 		"display_name":             types.StringType,
 		"executable_path":          types.StringType,
 		"service_account":          types.StringType,

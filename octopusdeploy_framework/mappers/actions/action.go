@@ -25,7 +25,7 @@ func (a Action) ToState(ctx context.Context, actionState attr.Value, action *dep
 
 func (a Action) ToDeploymentAction(actionAttribute attr.Value) *deployments.DeploymentAction {
 
-	return GetBaseAction(actionAttribute)
+	return getBaseAction(actionAttribute)
 
 }
 

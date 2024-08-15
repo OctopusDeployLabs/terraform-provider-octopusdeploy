@@ -40,7 +40,7 @@ func (r RunScriptActionMapper) ToDeploymentAction(actionAttribute attr.Value) *d
 		return nil
 	}
 
-	action := GetBaseAction(actionAttribute)
+	action := getBaseAction(actionAttribute)
 	if action == nil {
 		return nil
 	}
