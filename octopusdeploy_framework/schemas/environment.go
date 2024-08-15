@@ -1,10 +1,12 @@
 package schemas
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/extensions"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -48,6 +50,28 @@ var jiraEnvironmentTypes = []string{
 	jiraEnvironmentTypeNames.Staging,
 	jiraEnvironmentTypeNames.Testing,
 	jiraEnvironmentTypeNames.Unmapped,
+}
+
+func EnvironmentObjectType() map[string]attr.Type {
+	return map[string]attr.Type{
+		"id":                                  types.StringType,
+		"name":                                types.StringType,
+		"slug":                                types.StringType,
+		"description":                         types.StringType,
+		EnvironmentAllowDynamicInfrastructure: types.BoolType,
+		EnvironmentSortOrder:                  types.Int64Type,
+		EnvironmentUseGuidedFailure:           types.BoolType,
+		"space_id":                            types.StringType,
+		EnvironmentJiraExtensionSettings: types.ListType{
+			ElemType: types.ObjectType{AttrTypes: JiraExtensionSettingsObjectType()},
+		},
+		EnvironmentJiraServiceManagementExtensionSettings: types.ListType{
+			ElemType: types.ObjectType{AttrTypes: JiraServiceManagementExtensionSettingsObjectType()},
+		},
+		EnvironmentServiceNowExtensionSettings: types.ListType{
+			ElemType: types.ObjectType{AttrTypes: ServiceNowExtensionSettingsObjectType()},
+		},
+	}
 }
 
 func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
@@ -199,6 +223,51 @@ func MapServiceNowExtensionSettings(serviceNowExtensionSettings *environments.Se
 	return types.ObjectValueMust(ServiceNowExtensionSettingsObjectType(), map[string]attr.Value{
 		"is_enabled": types.BoolValue(serviceNowExtensionSettings.IsChangeControlled()),
 	})
+}
+
+func MapFromEnvironment(ctx context.Context, environment *environments.Environment) EnvironmentTypeResourceModel {
+	var env EnvironmentTypeResourceModel
+	env.ID = types.StringValue(environment.ID)
+	env.SpaceID = types.StringValue(environment.SpaceID)
+	env.Slug = types.StringValue(environment.Slug)
+	env.Name = types.StringValue(environment.Name)
+	env.Description = types.StringValue(environment.Description)
+	env.AllowDynamicInfrastructure = types.BoolValue(environment.AllowDynamicInfrastructure)
+	env.SortOrder = types.Int64Value(int64(environment.SortOrder))
+	env.UseGuidedFailure = types.BoolValue(environment.UseGuidedFailure)
+	env.JiraExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: JiraExtensionSettingsObjectType()}, []any{})
+	env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: JiraServiceManagementExtensionSettingsObjectType()}, []any{})
+	env.ServiceNowExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ServiceNowExtensionSettingsObjectType()}, []any{})
+
+	for _, extensionSetting := range environment.ExtensionSettings {
+		switch extensionSetting.ExtensionID() {
+		case extensions.JiraExtensionID:
+			if jiraExtension, ok := extensionSetting.(*environments.JiraExtensionSettings); ok {
+				env.JiraExtensionSettings, _ = types.ListValueFrom(
+					ctx,
+					types.ObjectType{AttrTypes: JiraExtensionSettingsObjectType()},
+					[]any{MapJiraExtensionSettings(jiraExtension)},
+				)
+			}
+		case extensions.JiraServiceManagementExtensionID:
+			if jiraServiceManagementExtensionSettings, ok := extensionSetting.(*environments.JiraServiceManagementExtensionSettings); ok {
+				env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(
+					ctx,
+					types.ObjectType{AttrTypes: JiraServiceManagementExtensionSettingsObjectType()},
+					[]any{MapJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings)},
+				)
+			}
+		case extensions.ServiceNowExtensionID:
+			if serviceNowExtensionSettings, ok := extensionSetting.(*environments.ServiceNowExtensionSettings); ok {
+				env.ServiceNowExtensionSettings, _ = types.ListValueFrom(
+					ctx,
+					types.ObjectType{AttrTypes: ServiceNowExtensionSettingsObjectType()},
+					[]any{MapServiceNowExtensionSettings(serviceNowExtensionSettings)},
+				)
+			}
+		}
+	}
+	return env
 }
 
 type EnvironmentTypeResourceModel struct {

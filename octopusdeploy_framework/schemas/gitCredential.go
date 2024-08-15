@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 )
 
 const (
@@ -16,21 +17,23 @@ func GetGitCredentialResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "Manages a Git credential in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":          util.ResourceString().Optional().Computed().Description("The unique ID for this resource.").Build(),
-			"space_id":    util.ResourceString().Optional().Computed().Description("The space ID associated with this Git Credential.").Build(),
+			"id":          util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The unique ID for this resource.").Build(),
+			"space_id":    util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The space ID associated with this Git Credential.").Build(),
 			"name":        util.ResourceString().Required().Description("The name of this Git Credential.").Build(),
-			"description": util.ResourceString().Optional().Description("The description of this Git Credential.").Build(),
+			"description": util.ResourceString().Optional().Computed().Default("").Description("The description of this Git Credential.").Build(),
 			"type": util.ResourceString().
 				Optional().
 				Description("The Git credential authentication type.").
 				Build(),
 			"username": util.ResourceString().
 				Required().
+				PlanModifiers(stringplanmodifier.UseStateForUnknown()).
 				Description("The username for the Git credential.").
 				Validators(stringvalidator.LengthAtLeast(1)).
 				Build(),
 			"password": util.ResourceString().
 				Required().
+				PlanModifiers(stringplanmodifier.UseStateForUnknown()).
 				Sensitive().
 				Description("The password for the Git credential.").
 				Validators(stringvalidator.LengthAtLeast(1)).

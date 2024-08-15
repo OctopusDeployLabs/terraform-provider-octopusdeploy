@@ -4,6 +4,11 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -19,23 +24,23 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"name":                                 util.GetNameResourceSchema(true),
 			"description":                          util.GetDescriptionResourceSchema(ProjectResourceName),
 			"allow_deployments_to_no_targets":      util.ResourceBool().Optional().Deprecated("This value is only valid for an associated connectivity policy and should not be specified here.").Build(),
-			"auto_create_release":                  util.ResourceBool().Optional().Computed().Build(),
+			"auto_create_release":                  util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
 			"cloned_from_project_id":               util.ResourceString().Optional().Description("The ID of the project this project was cloned from.").Build(),
-			"default_guided_failure_mode":          util.ResourceString().Optional().Computed().Build(),
-			"default_to_skip_if_already_installed": util.ResourceBool().Optional().Computed().Build(),
-			"deployment_changes_template":          util.ResourceString().Optional().Computed().Build(),
-			"discrete_channel_release":             util.ResourceBool().Optional().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
-			"is_disabled":                          util.ResourceBool().Optional().Computed().Build(),
-			"is_discrete_channel_release":          util.ResourceBool().Optional().Computed().Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
-			"is_version_controlled":                util.ResourceBool().Optional().Computed().Build(),
+			"default_guided_failure_mode":          util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"default_to_skip_if_already_installed": util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
+			"deployment_changes_template":          util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"discrete_channel_release":             util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
+			"is_disabled":                          util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
+			"is_discrete_channel_release":          util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Description("Treats releases of different channels to the same environment as a separate deployment dimension").Build(),
+			"is_version_controlled":                util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
 			"lifecycle_id":                         util.ResourceString().Required().Description("The lifecycle ID associated with this project.").Build(),
 			"project_group_id":                     util.ResourceString().Required().Description("The project group ID associated with this project.").Build(),
-			"tenanted_deployment_participation":    util.ResourceString().Optional().Computed().Description("The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.").Build(),
-			"included_library_variable_sets":       util.ResourceList(types.StringType).Optional().Computed().Description("The list of included library variable set IDs.").Build(),
-			"release_notes_template":               util.ResourceString().Optional().Computed().Build(),
-			"slug":                                 util.ResourceString().Optional().Computed().Description("A human-readable, unique identifier, used to identify a project.").Build(),
-			"deployment_process_id":                util.ResourceString().Computed().Build(),
-			"variable_set_id":                      util.ResourceString().Computed().Build(),
+			"tenanted_deployment_participation":    util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.").Build(),
+			"included_library_variable_sets":       util.ResourceList(types.StringType).Optional().Computed().PlanModifiers(listplanmodifier.UseStateForUnknown()).Description("The list of included library variable set IDs.").Build(),
+			"release_notes_template":               util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"slug":                                 util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("A human-readable, unique identifier, used to identify a project.").Build(),
+			"deployment_process_id":                util.ResourceString().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"variable_set_id":                      util.ResourceString().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			// This is correct object that return from api for project object not a list string.
@@ -50,12 +55,18 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			},
 			"connectivity_policy": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
-					Attributes: map[string]resourceSchema.Attribute{
-						"allow_deployments_to_no_targets": util.ResourceBool().Optional().Computed().Build(),
-						"exclude_unhealthy_targets":       util.ResourceBool().Optional().Computed().Build(),
-						"skip_machine_behavior":           util.ResourceString().Optional().Build(),
-						"target_roles":                    util.ResourceList(types.StringType).Optional().Computed().Build(),
+					PlanModifiers: []planmodifier.Object{
+						objectplanmodifier.UseStateForUnknown(),
 					},
+					Attributes: map[string]resourceSchema.Attribute{
+						"allow_deployments_to_no_targets": util.ResourceBool().Optional().Computed().Default(false).PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
+						"exclude_unhealthy_targets":       util.ResourceBool().Optional().Computed().Default(false).PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
+						"skip_machine_behavior":           util.ResourceString().Optional().Computed().Default("None").PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+						"target_roles":                    util.ResourceList(types.StringType).Optional().Computed().PlanModifiers(listplanmodifier.UseStateForUnknown()).Build(),
+					},
+				},
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"git_anonymous_persistence_settings": resourceSchema.ListNestedBlock{
@@ -118,7 +129,7 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			"template": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"id":            util.ResourceString().Optional().Computed().Description("The ID of the template parameter.").Build(),
+						"id":            util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The ID of the template parameter.").Build(),
 						"name":          util.ResourceString().Required().Description("The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods.").Build(),
 						"label":         util.ResourceString().Optional().Description("The label shown beside the parameter when presented in the deployment process.").Build(),
 						"help_text":     util.ResourceString().Optional().Description("The help presented alongside the parameter input.").Build(),
@@ -133,9 +144,10 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 			},
 			"versioning_strategy": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
+
 					Attributes: map[string]resourceSchema.Attribute{
 						"donor_package_step_id": util.ResourceString().Optional().Build(),
-						"template":              util.ResourceString().Optional().Build(),
+						"template":              util.ResourceString().Optional().Computed().Build(),
 					},
 					Blocks: map[string]resourceSchema.Block{
 						"donor_package": resourceSchema.ListNestedBlock{

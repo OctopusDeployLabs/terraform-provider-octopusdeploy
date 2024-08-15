@@ -62,7 +62,7 @@ func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, project
 	sortOrder := acctest.RandIntRange(0, 10)
 	useGuidedFailure := false
 
-	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription)+"\n"+
+	return fmt.Sprintf(testAccProjectBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, 2)+"\n"+
 		testAccEnvironment(environmentLocalName, environmentName, environmentDescription, allowDynamicInfrastructure, sortOrder, useGuidedFailure)+"\n"+`
 	resource "octopusdeploy_tenant" "%s" {
 		description = "%s"
