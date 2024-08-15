@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -686,8 +687,8 @@ func getPackageSchema(additionalAttributes map[string]schema.Attribute) schema.L
 			Optional:    true,
 			Description: "A list of properties associated with this package.",
 			ElementType: types.StringType,
-			Validators: []validator.Map{
-				validators.PackageMustContainExtractProperty(),
+			PlanModifiers: []planmodifier.Map{
+				mapplanmodifier.UseStateForUnknown(),
 			},
 		},
 	}

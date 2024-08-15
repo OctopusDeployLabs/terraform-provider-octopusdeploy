@@ -316,7 +316,6 @@ func testAccProcessWithImpliedPrimaryPackage(spaceID string, localName string) s
 
 						properties = {
 							"SelectionMode" = "immediate"
-							"Extract" = "true"
 						}
 					}
 

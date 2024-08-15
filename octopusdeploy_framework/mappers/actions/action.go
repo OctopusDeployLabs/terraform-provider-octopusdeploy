@@ -10,8 +10,8 @@ import (
 
 type Action struct{}
 
-func (a Action) ToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
-	diags := mapBaseDeploymentActionToState(ctx, action, newAction)
+func (a Action) ToState(ctx context.Context, actionState attr.Value, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diags := mapBaseDeploymentActionToState(ctx, actionState, action, newAction)
 	if diags.HasError() {
 		return diags
 	}

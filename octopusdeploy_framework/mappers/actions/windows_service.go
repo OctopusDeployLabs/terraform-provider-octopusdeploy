@@ -10,8 +10,8 @@ import (
 
 type WindowsServiceActionMapper struct{}
 
-func (w WindowsServiceActionMapper) ToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
-	diag := mapBaseDeploymentActionToState(ctx, action, newAction)
+func (w WindowsServiceActionMapper) ToState(ctx context.Context, actionState attr.Value, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diag := mapBaseDeploymentActionToState(ctx, actionState, action, newAction)
 	if diag.HasError() {
 		return diag
 	}

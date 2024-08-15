@@ -14,8 +14,8 @@ type KubernetesSecretActionMapper struct{}
 
 var _ MappableAction = &KubernetesSecretActionMapper{}
 
-func (k KubernetesSecretActionMapper) ToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
-	diag := mapBaseDeploymentActionToState(ctx, action, newAction)
+func (k KubernetesSecretActionMapper) ToState(ctx context.Context, actionState attr.Value, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diag := mapBaseDeploymentActionToState(ctx, actionState, action, newAction)
 	if diag.HasError() {
 		return diag
 	}

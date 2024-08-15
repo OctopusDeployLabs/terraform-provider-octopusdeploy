@@ -13,8 +13,8 @@ type RunScriptActionMapper struct{}
 
 var _ MappableAction = &RunScriptActionMapper{}
 
-func (r RunScriptActionMapper) ToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
-	diag := mapBaseDeploymentActionToState(ctx, action, newAction)
+func (r RunScriptActionMapper) ToState(ctx context.Context, actionState attr.Value, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+	diag := mapBaseDeploymentActionToState(ctx, actionState, action, newAction)
 	if diag.HasError() {
 		return diag
 	}

@@ -107,6 +107,7 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 
 	var steps []attr.Value
 	for _, deploymentStep := range process.Steps {
+		stepFromState := getStepFromState(deploymentStep, state)
 		properties, diags := actions.MapPropertiesToState(ctx, deploymentStep.Properties)
 		if diags.HasError() {
 			return diags
@@ -136,6 +137,7 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 
 		newActions := make(map[string][]attr.Value)
 		for i, a := range deploymentStep.Actions {
+			actionFromState := getActionFromState(stepFromState, a)
 			newAction := map[string]attr.Value{
 				"computed_sort_order": types.Int64Value(int64(i)),
 			}
@@ -147,7 +149,7 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 			srcAction := deploymentStep.Actions[i]
 			terraformActionKeyName := getActionTypeTerraformAttributeName(srcAction.ActionType)
 
-			d := ActionMappers[terraformActionKeyName].ToState(ctx, a, newAction)
+			d := ActionMappers[terraformActionKeyName].ToState(ctx, actionFromState, a, newAction)
 			if d.HasError() {
 				return d
 			}
@@ -189,25 +191,42 @@ func mapStepsToState(ctx context.Context, state *schemas.DeploymentProcessResour
 	return nil
 }
 
-func getSortOrderStateValue(step *deployments.DeploymentStep, a *deployments.DeploymentAction, state *schemas.DeploymentProcessResourceModel) attr.Value {
+func getStepFromState(step *deployments.DeploymentStep, state *schemas.DeploymentProcessResourceModel) attr.Value {
 	for _, s := range state.Steps.Elements() {
 		stepAttrs := s.(types.Object).Attributes()
 		if step.Name == stepAttrs["name"].(types.String).ValueString() {
-			for key, stepAttr := range stepAttrs {
-				if isAction(key) {
-					actions := stepAttr.(types.List)
-					for _, action := range actions.Elements() {
-						actionAttrs := action.(types.Object).Attributes()
-						name := actionAttrs["name"].(types.String).ValueString()
-						if a.Name == name {
-							if v, ok := actionAttrs["sort_order"]; ok {
-								return v
-							} else {
-								return nil
-							}
-						}
-					}
+			return s
+		}
+	}
 
+	return nil
+}
+
+func getSortOrderStateValue(step *deployments.DeploymentStep, a *deployments.DeploymentAction, state *schemas.DeploymentProcessResourceModel) attr.Value {
+	s := getStepFromState(step, state)
+	if s != nil {
+		action := getActionFromState(s, a)
+		actionAttrs := action.(types.Object).Attributes()
+		if v, ok := actionAttrs["sort_order"]; ok {
+			return v
+		} else {
+			return nil
+		}
+	}
+	return nil
+
+}
+
+func getActionFromState(stepState attr.Value, a *deployments.DeploymentAction) attr.Value {
+	stepAttrs := stepState.(types.Object).Attributes()
+	for key, stepAttr := range stepAttrs {
+		if isAction(key) {
+			actions := stepAttr.(types.List)
+			for _, action := range actions.Elements() {
+				actionAttrs := action.(types.Object).Attributes()
+				name := actionAttrs["name"].(types.String).ValueString()
+				if a.Name == name {
+					return action
 				}
 			}
 		}

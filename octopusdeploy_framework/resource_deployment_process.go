@@ -86,39 +86,6 @@ func (d *deploymentProcessResource) Create(ctx context.Context, req resource.Cre
 	plan.Version = types.StringValue(fmt.Sprintf("%d", current.Version))
 	plan.LastSnapshotID = types.StringValue(current.LastSnapshotID)
 
-	//for _, step := range plan.Steps.Elements() {
-	//	stepAttrs := step.(types.Object).Attributes()
-	//	name := stepAttrs["name"].(types.String).ValueString()
-	//	var currentStep *deployments.DeploymentStep
-	//	for _, processStep := range current.Steps {
-	//		if processStep.Name == name {
-	//			currentStep = processStep
-	//			break
-	//		}
-	//	}
-	//
-	//	stepAttrs["id"] = types.StringValue(currentStep.ID)
-	//
-	//	for actionKey, _ := range mappers.ActionMappers {
-	//		for _, action := range stepAttrs[actionKey].(types.List).Elements() {
-	//			actionAttrs := action.(types.Object).Attributes()
-	//			actionName := actionAttrs["name"].(types.String).ValueString()
-	//			var currentAction *deployments.DeploymentAction
-	//			for _, stepAction := range currentStep.Actions {
-	//				if stepAction.Name == actionName {
-	//					currentAction = stepAction
-	//					break
-	//				}
-	//			}
-	//
-	//			actionAttrs["id"] = types.StringValue(currentAction.ID)
-	//			actionAttrs["channels"] = types.ListValueMust(types.StringType, []attr.Value{})
-	//		}
-	//	}
-	//
-	//	//return mapStepsToState(ctx, state, deploymentProcess)
-	//}
-
 	resp.Diagnostics.Append(mappers.MapDeploymentProcessToState(ctx, current, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return

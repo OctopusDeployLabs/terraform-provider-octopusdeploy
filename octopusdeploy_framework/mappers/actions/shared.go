@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func mapBaseDeploymentActionToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
+func mapBaseDeploymentActionToState(ctx context.Context, actionState attr.Value, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics {
 	newAction["can_be_used_for_project_versioning"] = types.BoolValue(action.CanBeUsedForProjectVersioning)
 	newAction["is_disabled"] = types.BoolValue(action.IsDisabled)
 	newAction["is_required"] = types.BoolValue(action.IsRequired)
@@ -66,7 +66,7 @@ func mapBaseDeploymentActionToState(ctx context.Context, action *deployments.Dep
 	if len(action.Packages) > 0 {
 		var packageReferences []attr.Value
 		for _, packageReference := range action.Packages {
-			packageReferenceAttribute, diags := mapPackageReferenceToState(ctx, packageReference)
+			packageReferenceAttribute, diags := mapPackageReferenceToState(ctx, actionState, packageReference)
 			if diags.HasError() {
 				return diags
 			}
@@ -162,10 +162,22 @@ func GetPackageReferenceAttrTypes(isPrimaryPackage bool) map[string]attr.Type {
 	return attrTypes
 }
 
-func mapPackageReferenceToState(ctx context.Context, packageReference *packages.PackageReference) (map[string]attr.Value, diag.Diagnostics) {
-	properties, diags := types.MapValueFrom(ctx, types.StringType, packageReference.Properties)
-	if diags.HasError() {
-		return nil, diags
+func mapPackageReferenceToState(ctx context.Context, actionState attr.Value, packageReference *packages.PackageReference) (map[string]attr.Value, diag.Diagnostics) {
+	actionAttrs := actionState.(types.Object).Attributes()
+
+	var properties attr.Value
+	if packageReference.Name == "" {
+		primaryPackage := actionAttrs["primary_package"].(types.List).Elements()
+		if len(primaryPackage) > 0 {
+			properties = primaryPackage[0].(types.Object).Attributes()["properties"]
+		}
+	} else {
+		for _, v := range actionAttrs["package"].(types.List).Elements() {
+			packageAttrs := v.(types.Object).Attributes()
+			if packageReference.Name == packageAttrs["name"].(types.String).ValueString() {
+				properties = packageAttrs["properties"]
+			}
+		}
 	}
 
 	reference := map[string]attr.Value{

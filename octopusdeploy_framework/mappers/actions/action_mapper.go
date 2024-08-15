@@ -8,6 +8,6 @@ import (
 )
 
 type MappableAction interface {
-	ToState(ctx context.Context, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics
+	ToState(ctx context.Context, actionState attr.Value, action *deployments.DeploymentAction, newAction map[string]attr.Value) diag.Diagnostics
 	ToDeploymentAction(actionAttribute attr.Value) *deployments.DeploymentAction
 }
