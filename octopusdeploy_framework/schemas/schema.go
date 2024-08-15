@@ -2,6 +2,8 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -147,6 +149,9 @@ func GetIdResourceSchema() resourceSchema.Attribute {
 		Description: "The unique ID for this resource.",
 		Computed:    true,
 		Optional:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	}
 }
 
@@ -155,6 +160,9 @@ func GetSpaceIdResourceSchema(resourceDescription string) resourceSchema.Attribu
 		Description: "The space ID associated with this " + resourceDescription + ".",
 		Computed:    true,
 		Optional:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	}
 }
 
