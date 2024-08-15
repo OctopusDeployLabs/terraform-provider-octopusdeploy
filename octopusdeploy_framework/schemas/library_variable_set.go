@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	types "github.com/hashicorp/terraform-plugin-framework/types"
@@ -96,9 +95,6 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 			"template_ids": resourceSchema.MapAttribute{
 				ElementType: types.StringType,
 				Computed:    true,
-				PlanModifiers: []planmodifier.Map{
-					mapplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"variable_set_id": resourceSchema.StringAttribute{
 				Computed: true,
