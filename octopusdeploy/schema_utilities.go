@@ -9,7 +9,7 @@ import (
 
 func getAccountTypeSchema(isRequired bool) *schema.Schema {
 	schema := &schema.Schema{
-		Description: "Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureOIDC`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
+		Description: "Specifies the type of the account. Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureOIDC`, `AzureSubscription`, `AmazonWebServicesOidcAccount`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
 		ForceNew:    true,
 		Type:        schema.TypeString,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
@@ -22,6 +22,7 @@ func getAccountTypeSchema(isRequired bool) *schema.Schema {
 			"SshKeyPair",
 			"Token",
 			"UsernamePassword",
+			"AmazonWebServicesOidcAccount",
 		}, false)),
 	}
 
