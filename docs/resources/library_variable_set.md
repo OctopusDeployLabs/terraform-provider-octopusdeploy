@@ -25,10 +25,10 @@ This resource manages library variable sets in Octopus Deploy.
 - `id` (String) The unique ID for this resource.
 - `space_id` (String) The space ID associated with this library variable set.
 - `template` (Block List) (see [below for nested schema](#nestedblock--template))
-- `template_ids` (Map of String)
 
 ### Read-Only
 
+- `template_ids` (Map of String)
 - `variable_set_id` (String)
 
 <a id="nestedblock--template"></a>
