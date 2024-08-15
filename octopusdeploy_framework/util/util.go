@@ -61,7 +61,11 @@ func SetToStringArray(ctx context.Context, set types.Set) ([]string, diag.Diagno
 
 func FlattenStringList(list []string) types.List {
 	if list == nil {
-		return types.ListValueMust(types.StringType, make([]attr.Value, 0))
+		return types.ListNull(types.StringType)
+	}
+
+	if len(list) == 0 {
+		return types.ListValueMust(types.StringType, []attr.Value{})
 	}
 
 	elements := make([]attr.Value, 0, len(list))
@@ -76,6 +80,41 @@ func Ternary[T interface{}](condition bool, whenTrue T, whenFalse T) T {
 		return whenTrue
 	}
 	return whenFalse
+}
+
+func GetStringSlice(list types.List) []string {
+	if list.IsNull() || list.IsUnknown() {
+		return nil
+	}
+
+	result := make([]string, 0, len(list.Elements()))
+	for _, element := range list.Elements() {
+		if str, ok := element.(types.String); ok {
+			result = append(result, str.ValueString())
+		}
+	}
+	return result
+}
+
+func SetString(attrs map[string]attr.Value, attrName string, s *string) {
+	if v, ok := attrs[attrName]; ok {
+		*s = v.(types.String).ValueString()
+	}
+}
+
+func SetBool(attrs map[string]attr.Value, attrName string, b *bool) {
+	if v, ok := attrs[attrName]; ok {
+		*b = v.(types.Bool).ValueBool()
+	}
+}
+
+func TrySetInt64(attrs map[string]attr.Value, attrName string, i *int64) bool {
+	if v, ok := attrs[attrName]; ok {
+		*i = v.(types.Int64).ValueInt64()
+		return true
+	}
+
+	return false
 }
 
 func ToValueSlice(slice []string) []attr.Value {

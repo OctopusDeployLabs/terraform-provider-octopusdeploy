@@ -171,7 +171,7 @@ func TestAccOctopusDeployDeploymentProcessWithImpliedPrimaryPackage(t *testing.T
 					resource.TestCheckResourceAttr(resourceName, "step.0.start_trigger", "StartAfterPrevious"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.action_type", "Octopus.TransferPackage"),
-					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.container.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.container.#", "0"),
 					resource.TestCheckNoResourceAttr(resourceName, "step.0.action.0.channels.0"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.condition", "Success"),
 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.environments.#", "0"),
@@ -206,9 +206,9 @@ func testAccDeploymentProcessBasic(localName string) string {
 				window_size = "5"
 
 				run_script_action {
-					// channels = ["Channels-1"]
-					// environments = ["Environments-1"]
-					// excluded_environments = ["Environments-2"]
+					//channels = ["Channels-1"]
+					//environments = ["Environments-1"]
+					//excluded_environments = ["Environments-2"]
 					is_disabled = false
 					is_required = true
 					name = "Test"
@@ -217,11 +217,18 @@ func testAccDeploymentProcessBasic(localName string) string {
 					script_source = "Package"
 					tenant_tags = ["tag/tag"]
 					sort_order  = 1
+					container {
+						feed_id = "Feeds-123"
+						image = "blah"
+					}
 
 					primary_package {
 						acquisition_location = "Server"
 						feed_id = "feeds-builtin"
 						package_id = "MyPackage"
+						properties = {
+							"Extract" = "true"
+						}
 					}
 
 					package {
@@ -230,6 +237,9 @@ func testAccDeploymentProcessBasic(localName string) string {
 						feed_id = "feeds-builtin"
 						name = "ThePackage"
 						package_id = "MyPackage"
+						properties = {
+							"Extract" = "true"
+						}
 					}
 
 					package {
@@ -238,21 +248,29 @@ func testAccDeploymentProcessBasic(localName string) string {
 						feed_id = "feeds-builtin"
 						name = "ThePackage2"
 						package_id = "MyPackage2"
+						properties = {
+							"Extract" = "true"
+						}
+					}
+					
+					action_template {
+						id = "actiontemplates-1"
+						version = "1.2.3"
 					}
 				}
 			}
 
  			step {
-			  name = "Step2"
-			  start_trigger = "StartWithPrevious"
-			  target_roles = ["WebServer"]
-
-			  run_script_action {
-				  name = "Step2"
- 				  sort_order = 1
-				  run_on_server = true
-				  script_body = "Write-Host 'hi'"
-			  }
+				name = "Step2"
+				start_trigger = "StartWithPrevious"
+				target_roles = ["WebServer"]
+				
+				run_script_action {
+					  name = "Step2"
+					  sort_order = 1
+					  run_on_server = true
+					  script_body = "Write-Host 'hi'"
+				}
 			}
 		}`, localName, projectLocalName)
 }
