@@ -237,6 +237,9 @@ func getPrompt(prompted bool) string {
     		description = "prompt"
     		is_required = true
     		label = "prompt"
+			display_settings {
+				control_type = "SingleLineText"
+			}
   		}`)
 }
 
