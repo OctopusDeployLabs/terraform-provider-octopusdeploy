@@ -3,6 +3,8 @@ package octopusdeploy
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"log"
+	"os"
 	"path/filepath"
 	stdslices "slices"
 	"testing"
@@ -14,6 +16,18 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 			"OCTOPUS__FeatureToggles__KubernetesAgentAsWorkerFeatureToggle": "true",
 		},
 	}
+
+	// If local - use local, otherwise create a new container
+	if os.Getenv("TF_ACC_LOCAL") == "" {
+		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer()
+		if err != nil {
+			log.Printf("Failed to arrange containers: (%s)", err.Error())
+		}
+		os.Setenv("OCTOPUS_URL", octoContainer.URI)
+		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
+		os.Setenv("TF_ACC", "1")
+	}
+
 	_, err := testFramework.Act(t, octoContainer, "../terraform", "58-kubernetesagentworker", []string{})
 	if err != nil {
 		t.Fatal(err.Error())
