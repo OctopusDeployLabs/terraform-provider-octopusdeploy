@@ -44,7 +44,6 @@ Optional:
 
 - `description` (String) The description of this project group.
 - `id` (String) The unique ID for this resource.
-- `retention_policy_id` (String) The ID of the retention policy associated with this project group.
 - `space_id` (String) The space ID associated with this project group.
 
 Read-Only:

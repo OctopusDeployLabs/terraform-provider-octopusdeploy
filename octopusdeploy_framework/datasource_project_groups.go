@@ -33,11 +33,10 @@ func NewProjectGroupsDataSource() datasource.DataSource {
 
 func getNestedGroupAttributes() map[string]attr.Type {
 	return map[string]attr.Type{
-		"id":                  types.StringType,
-		"space_id":            types.StringType,
-		"name":                types.StringType,
-		"retention_policy_id": types.StringType,
-		"description":         types.StringType,
+		"id":          types.StringType,
+		"space_id":    types.StringType,
+		"name":        types.StringType,
+		"description": types.StringType,
 	}
 }
 
