@@ -65,6 +65,20 @@ import (
 // 		}`, options.LocalName, options.Project.LocalName, options.StepName, options.ActionType, options.ActionName, options.PackageName, options.PackageID)
 // }
 
+func testAccProjectCheckDestroy(s *terraform.State) error {
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "octopusdeploy_project" {
+			continue
+		}
+
+		if project, err := octoClient.Projects.GetByID(rs.Primary.ID); err == nil {
+			return fmt.Errorf("project (%s) still exists", project.GetID())
+		}
+	}
+
+	return nil
+}
+
 func TestAccOctopusDeployDeploymentProcessBasic(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_process." + localName
@@ -422,7 +436,6 @@ func testAccDeploymentProcessCheckDestroy(s *terraform.State) error {
 
 func TestDeploymentProcessWithGitDependency(t *testing.T) {
 	testFramework := test.OctopusContainerTest{}
-
 	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "51-deploymentprocesswithgitdependency", []string{})
 
 	if err != nil {

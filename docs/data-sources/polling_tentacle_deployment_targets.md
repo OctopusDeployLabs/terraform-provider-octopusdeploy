@@ -36,39 +36,39 @@ Provides information about existing polling tentacle deployment targets.
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `polling_tentacle_deployment_targets` (Block List) A list of polling tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--polling_tentacle_deployment_targets))
+- `polling_tentacle_deployment_targets` (List of Object) A list of polling tentacle deployment targets that match the filter(s). (see [below for nested schema](#nestedatt--polling_tentacle_deployment_targets))
 
-<a id="nestedblock--polling_tentacle_deployment_targets"></a>
+<a id="nestedatt--polling_tentacle_deployment_targets"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets`
 
 Read-Only:
 
 - `certificate_signature_algorithm` (String)
-- `endpoint` (List of Object) (see [below for nested schema](#nestedatt--polling_tentacle_deployment_targets--endpoint))
-- `environments` (List of String) A list of environment IDs associated with this resource.
+- `endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--polling_tentacle_deployment_targets--endpoint))
+- `environments` (List of String)
 - `has_latest_calamari` (Boolean)
-- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- `id` (String) The unique ID for this resource.
+- `health_status` (String)
+- `id` (String)
 - `is_disabled` (Boolean)
 - `is_in_process` (Boolean)
 - `machine_policy_id` (String)
-- `name` (String) The name of this resource.
+- `name` (String)
 - `operating_system` (String)
 - `roles` (List of String)
 - `shell_name` (String)
 - `shell_version` (String)
-- `space_id` (String) The space ID associated with this resource.
-- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- `status_summary` (String) A summary elaborating on the status of this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `space_id` (String)
+- `status` (String)
+- `status_summary` (String)
+- `tenant_tags` (List of String)
+- `tenanted_deployment_participation` (String)
+- `tenants` (List of String)
 - `tentacle_url` (String)
-- `tentacle_version_details` (List of Object) (see [below for nested schema](#nestedatt--polling_tentacle_deployment_targets--tentacle_version_details))
+- `tentacle_version_details` (List of Object) (see [below for nested schema](#nestedobjatt--polling_tentacle_deployment_targets--tentacle_version_details))
 - `thumbprint` (String)
 - `uri` (String)
 
-<a id="nestedatt--polling_tentacle_deployment_targets--endpoint"></a>
+<a id="nestedobjatt--polling_tentacle_deployment_targets--endpoint"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets.endpoint`
 
 Read-Only:
@@ -172,7 +172,7 @@ Read-Only:
 
 
 
-<a id="nestedatt--polling_tentacle_deployment_targets--tentacle_version_details"></a>
+<a id="nestedobjatt--polling_tentacle_deployment_targets--tentacle_version_details"></a>
 ### Nested Schema for `polling_tentacle_deployment_targets.tentacle_version_details`
 
 Read-Only:

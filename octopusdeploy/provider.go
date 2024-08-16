@@ -2,7 +2,6 @@ package octopusdeploy
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -27,12 +26,8 @@ func Provider() *schema.Provider {
 			"octopusdeploy_machine_policies":                                dataSourceMachinePolicies(),
 			"octopusdeploy_offline_package_drop_deployment_targets":         dataSourceOfflinePackageDropDeploymentTargets(),
 			"octopusdeploy_polling_tentacle_deployment_targets":             dataSourcePollingTentacleDeploymentTargets(),
-			"octopusdeploy_projects":                                        dataSourceProjects(),
-			"octopusdeploy_script_modules":                                  dataSourceScriptModules(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
-			"octopusdeploy_tag_sets":                                        dataSourceTagSets(),
 			"octopusdeploy_teams":                                           dataSourceTeams(),
-			"octopusdeploy_tenants":                                         dataSourceTenants(),
 			"octopusdeploy_users":                                           dataSourceUsers(),
 			"octopusdeploy_user_roles":                                      dataSourceUserRoles(),
 			"octopusdeploy_worker_pools":                                    dataSourceWorkerPools(),
@@ -50,7 +45,6 @@ func Provider() *schema.Provider {
 			"octopusdeploy_channel":                                        resourceChannel(),
 			"octopusdeploy_cloud_region_deployment_target":                 resourceCloudRegionDeploymentTarget(),
 			"octopusdeploy_deployment_process":                             resourceDeploymentProcess(),
-			"octopusdeploy_docker_container_registry":                      resourceDockerContainerRegistry(),
 			"octopusdeploy_dynamic_worker_pool":                            resourceDynamicWorkerPool(),
 			"octopusdeploy_gcp_account":                                    resourceGoogleCloudPlatformAccount(),
 			"octopusdeploy_kubernetes_agent_deployment_target":             resourceKubernetesAgentDeploymentTarget(),
@@ -61,26 +55,18 @@ func Provider() *schema.Provider {
 			"octopusdeploy_offline_package_drop_deployment_target":         resourceOfflinePackageDropDeploymentTarget(),
 			"octopusdeploy_polling_tentacle_deployment_target":             resourcePollingTentacleDeploymentTarget(),
 			"octopusdeploy_polling_subscription_id":                        resourcePollingSubscriptionId(),
-			"octopusdeploy_project":                                        resourceProject(),
 			"octopusdeploy_project_deployment_target_trigger":              resourceProjectDeploymentTargetTrigger(),
 			"octopusdeploy_external_feed_create_release_trigger":           resourceExternalFeedCreateReleaseTrigger(),
 			"octopusdeploy_project_scheduled_trigger":                      resourceProjectScheduledTrigger(),
-			"octopusdeploy_runbook":                                        resourceRunbook(),
 			"octopusdeploy_runbook_process":                                resourceRunbookProcess(),
 			"octopusdeploy_scoped_user_role":                               resourceScopedUserRole(),
-			"octopusdeploy_script_module":                                  resourceScriptModule(),
 			"octopusdeploy_ssh_connection_deployment_target":               resourceSSHConnectionDeploymentTarget(),
 			"octopusdeploy_ssh_key_account":                                resourceSSHKeyAccount(),
 			"octopusdeploy_static_worker_pool":                             resourceStaticWorkerPool(),
-			"octopusdeploy_tag":                                            resourceTag(),
-			"octopusdeploy_tag_set":                                        resourceTagSet(),
 			"octopusdeploy_team":                                           resourceTeam(),
-			"octopusdeploy_tenant":                                         resourceTenant(),
-			"octopusdeploy_tentacle_certificate":                           resourceTentacleCertificate(),
 			"octopusdeploy_token_account":                                  resourceTokenAccount(),
 			"octopusdeploy_user":                                           resourceUser(),
 			"octopusdeploy_user_role":                                      resourceUserRole(),
-			"octopusdeploy_username_password_account":                      resourceUsernamePasswordAccount(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {

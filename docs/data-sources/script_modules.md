@@ -27,17 +27,17 @@ data "octopusdeploy_script_modules" "example" {
 ### Optional
 
 - `ids` (List of String) A filter to search by a list of IDs.
-- `partial_name` (String) A filter to search by the partial match of a name.
+- `partial_name` (String) A filter to search by a partial name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
+- `space_id` (String) The space ID associated with this script module.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `script_modules` (Block List) A list of script modules that match the filter(s). (see [below for nested schema](#nestedblock--script_modules))
+- `id` (String) The unique ID for this resource.
+- `script_modules` (Attributes List) (see [below for nested schema](#nestedatt--script_modules))
 
-<a id="nestedblock--script_modules"></a>
+<a id="nestedatt--script_modules"></a>
 ### Nested Schema for `script_modules`
 
 Read-Only:
@@ -45,8 +45,8 @@ Read-Only:
 - `description` (String) The description of this script module.
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
-- `script` (Set of Object) The script associated with this script module. (see [below for nested schema](#nestedatt--script_modules--script))
-- `space_id` (String) The space ID associated with this resource.
+- `script` (Attributes List) The script associated with this script module. (see [below for nested schema](#nestedatt--script_modules--script))
+- `space_id` (String) The space ID associated with this Script Module.
 - `variable_set_id` (String) The variable set ID for this script module.
 
 <a id="nestedatt--script_modules--script"></a>
@@ -54,7 +54,7 @@ Read-Only:
 
 Read-Only:
 
-- `body` (String)
-- `syntax` (String)
+- `body` (String) The body of this script module.
+- `syntax` (String) The syntax of the script. Valid types are `Bash`, `CSharp`, `FSharp`, `PowerShell`, or `Python`.
 
 

@@ -44,6 +44,7 @@ func ExpandStringList(list types.List) []string {
 	}
 	return result
 }
+
 func SetToStringArray(ctx context.Context, set types.Set) ([]string, diag.Diagnostics) {
 	teams := make([]types.String, 0, len(set.Elements()))
 	diags := diag.Diagnostics{}
@@ -83,6 +84,13 @@ func ToValueSlice(slice []string) []attr.Value {
 		values[i] = types.StringValue(s)
 	}
 	return values
+}
+
+func StringOrNull(s string) types.String {
+	if s == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(s)
 }
 
 func Map[T, V any](items []T, fn func(T) V) []V {

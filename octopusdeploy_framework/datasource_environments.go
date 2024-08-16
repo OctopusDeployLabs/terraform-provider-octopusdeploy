@@ -3,13 +3,12 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/extensions"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -45,14 +44,14 @@ func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			//request
 			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"space_id":     util.GetSpaceIdDatasourceSchema(schemas.EnvironmentResourceDescription),
+			"space_id":     schemas.GetSpaceIdDatasourceSchema(schemas.EnvironmentResourceDescription, false),
 			"name":         util.GetQueryNameDatasourceSchema(),
 			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 			"skip":         util.GetQuerySkipDatasourceSchema(),
 			"take":         util.GetQueryTakeDatasourceSchema(),
 
 			//response
-			"id": util.GetIdDatasourceSchema(),
+			"id": schemas.GetIdDatasourceSchema(true),
 		},
 		Blocks: map[string]schema.Block{
 			"environments": schema.ListNestedBlock{
@@ -90,78 +89,28 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		resp.Diagnostics.AddError("unable to load environments", err.Error())
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("environments returned from API: %#v", existingEnvironments))
-	var mappedEnvironments []schemas.EnvironmentTypeResourceModel
-	for _, environment := range existingEnvironments.Items {
-		var env schemas.EnvironmentTypeResourceModel
-		env.ID = types.StringValue(environment.ID)
-		env.SpaceID = types.StringValue(environment.SpaceID)
-		env.Slug = types.StringValue(environment.Slug)
-		env.Name = types.StringValue(environment.Name)
-		env.Description = types.StringValue(environment.Description)
-		env.AllowDynamicInfrastructure = types.BoolValue(environment.AllowDynamicInfrastructure)
-		env.SortOrder = types.Int64Value(int64(environment.SortOrder))
-		env.UseGuidedFailure = types.BoolValue(environment.UseGuidedFailure)
-		env.JiraExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.JiraExtensionSettingsObjectType()}, []any{})
-		env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.JiraServiceManagementExtensionSettingsObjectType()}, []any{})
-		env.ServiceNowExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.ServiceNowExtensionSettingsObjectType()}, []any{})
 
-		for _, extensionSetting := range environment.ExtensionSettings {
-			switch extensionSetting.ExtensionID() {
-			case extensions.JiraExtensionID:
-				if jiraExtension, ok := extensionSetting.(*environments.JiraExtensionSettings); ok {
-					env.JiraExtensionSettings, _ = types.ListValueFrom(
-						ctx,
-						types.ObjectType{AttrTypes: schemas.JiraExtensionSettingsObjectType()},
-						[]any{schemas.MapJiraExtensionSettings(jiraExtension)},
-					)
-				}
-			case extensions.JiraServiceManagementExtensionID:
-				if jiraServiceManagementExtensionSettings, ok := extensionSetting.(*environments.JiraServiceManagementExtensionSettings); ok {
-					env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(
-						ctx,
-						types.ObjectType{AttrTypes: schemas.JiraServiceManagementExtensionSettingsObjectType()},
-						[]any{schemas.MapJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings)},
-					)
-				}
-			case extensions.ServiceNowExtensionID:
-				if serviceNowExtensionSettings, ok := extensionSetting.(*environments.ServiceNowExtensionSettings); ok {
-					env.ServiceNowExtensionSettings, _ = types.ListValueFrom(
-						ctx,
-						types.ObjectType{AttrTypes: schemas.ServiceNowExtensionSettingsObjectType()},
-						[]any{schemas.MapServiceNowExtensionSettings(serviceNowExtensionSettings)},
-					)
-				}
+	var mappedEnvironments []schemas.EnvironmentTypeResourceModel
+	if data.Name.IsNull() {
+		tflog.Debug(ctx, fmt.Sprintf("environments returned from API: %#v", existingEnvironments))
+		for _, environment := range existingEnvironments.Items {
+			mappedEnvironments = append(mappedEnvironments, schemas.MapFromEnvironment(ctx, environment))
+		}
+	} else { // if name has been specified, match by exact name rather than partial name as the API does
+		var matchedEnvironment *environments.Environment
+		tflog.Debug(ctx, fmt.Sprintf("matching environment by name: %s", data.Name))
+		for _, env := range existingEnvironments.Items {
+			if strings.EqualFold(env.Name, data.Name.ValueString()) {
+				matchedEnvironment = env
 			}
 		}
-
-		mappedEnvironments = append(mappedEnvironments, env)
+		if matchedEnvironment != nil {
+			mappedEnvironments = append(mappedEnvironments, schemas.MapFromEnvironment(ctx, matchedEnvironment))
+		}
 	}
 
-	data.Environments, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: environmentObjectType()}, mappedEnvironments)
+	data.Environments, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.EnvironmentObjectType()}, mappedEnvironments)
 	data.ID = types.StringValue("Environments " + time.Now().UTC().String())
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func environmentObjectType() map[string]attr.Type {
-	return map[string]attr.Type{
-		"id":          types.StringType,
-		"name":        types.StringType,
-		"slug":        types.StringType,
-		"description": types.StringType,
-		schemas.EnvironmentAllowDynamicInfrastructure: types.BoolType,
-		schemas.EnvironmentSortOrder:                  types.Int64Type,
-		schemas.EnvironmentUseGuidedFailure:           types.BoolType,
-		"space_id":                                    types.StringType,
-		schemas.EnvironmentJiraExtensionSettings: types.ListType{
-			ElemType: types.ObjectType{AttrTypes: schemas.JiraExtensionSettingsObjectType()},
-		},
-		schemas.EnvironmentJiraServiceManagementExtensionSettings: types.ListType{
-			ElemType: types.ObjectType{AttrTypes: schemas.JiraServiceManagementExtensionSettingsObjectType()},
-		},
-		schemas.EnvironmentServiceNowExtensionSettings: types.ListType{
-			ElemType: types.ObjectType{AttrTypes: schemas.ServiceNowExtensionSettingsObjectType()},
-		},
-	}
 }

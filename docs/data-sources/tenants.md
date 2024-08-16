@@ -21,16 +21,16 @@ Provides information about existing tenants.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `is_clone` (Boolean) A filter to search for cloned resources.
 - `name` (String) A filter to search by name.
-- `partial_name` (String) A filter to search by the partial match of a name.
+- `partial_name` (String) A filter to search by a partial name.
 - `project_id` (String) A filter to search by a project ID.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
+- `space_id` (String) The space ID associated with this tenants.
 - `tags` (List of String) A filter to search by a list of tags.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `id` (String) The unique ID for this resource.
 - `tenants` (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
 
 <a id="nestedblock--tenants"></a>
@@ -39,10 +39,10 @@ Provides information about existing tenants.
 Read-Only:
 
 - `cloned_from_tenant_id` (String) The ID of the tenant from which this tenant was cloned.
-- `description` (String) The description of this tenant.
+- `description` (String) The description of this tenants.
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this tenant.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 
 

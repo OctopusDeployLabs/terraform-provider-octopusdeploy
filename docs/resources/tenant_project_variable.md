@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_tenant_project_variable Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages tenant project variables in Octopus Deploy.
+  Manages a tenant project variable in Octopus Deploy.
 ---
 
 # octopusdeploy_tenant_project_variable (Resource)
 
-This resource manages tenant project variables in Octopus Deploy.
+Manages a tenant project variable in Octopus Deploy.
 
 
 
@@ -17,18 +17,18 @@ This resource manages tenant project variables in Octopus Deploy.
 
 ### Required
 
-- `environment_id` (String)
-- `project_id` (String)
-- `template_id` (String)
-- `tenant_id` (String)
+- `environment_id` (String) The ID of the environment.
+- `project_id` (String) The ID of the project.
+- `template_id` (String) The ID of the variable template.
+- `tenant_id` (String) The ID of the tenant.
 
 ### Optional
 
-- `space_id` (String)
-- `value` (String, Sensitive)
+- `space_id` (String) The space ID associated with this Tenant Project Variable.
+- `value` (String, Sensitive) The value of the variable.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The unique ID for this resource.
 
 

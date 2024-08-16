@@ -7,7 +7,7 @@ resource "octopusdeploy_account" "amazon_web_services_account" {
 }
 
 resource "octopusdeploy_account" "amazon_web_services_openid_connect_account" {
-  account_type = "AwsOIDCAccount"
+  account_type = "AmazonWebServicesOidcAccount"
   name         = "AWS OIDC Account (OK to Delete)"
   role_arn = "arn:aws:iam::sourceAccountId:roleroleName"
   session_duration = "3600"

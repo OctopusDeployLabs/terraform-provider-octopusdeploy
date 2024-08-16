@@ -25,15 +25,15 @@ resource "octopusdeploy_aws_elastic_container_registry" "example" {
 ### Required
 
 - `access_key` (String) The AWS access key to use when authenticating against Amazon Web Services.
-- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `name` (String) The name of this resource.
 - `region` (String) The AWS region where the registry resides.
 - `secret_key` (String, Sensitive) The AWS secret key to use when authenticating against Amazon Web Services.
 
 ### Optional
 
-- `id` (String) The unique ID for this feed.
+- `id` (String) The unique ID for this resource.
 - `package_acquisition_location_options` (List of String)
-- `space_id` (String) The space ID associated with this feed.
+- `space_id` (String) The space ID associated with this aws elastic container registry.
 
 ## Import
 

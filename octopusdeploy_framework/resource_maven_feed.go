@@ -3,8 +3,11 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -22,13 +25,16 @@ func NewMavenFeedResource() resource.Resource {
 	return &mavenFeedTypeResource{}
 }
 
+var _ resource.ResourceWithImportState = &mavenFeedTypeResource{}
+
 func (r *mavenFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("maven_feed")
 }
 
 func (r *mavenFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetMavenFeedResourceSchema(),
+		Attributes:  schemas.GetMavenFeedResourceSchema(),
+		Description: "This resource manages a Maven feed in Octopus Deploy.",
 	}
 }
 
@@ -75,7 +81,9 @@ func (r *mavenFeedTypeResource) Read(ctx context.Context, req resource.ReadReque
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load maven feed", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "maven feed"); err != nil {
+			resp.Diagnostics.AddError("unable to load maven feed", err.Error())
+		}
 		return
 	}
 
@@ -175,4 +183,8 @@ func updateDataFromMavenFeed(data *schemas.MavenFeedTypeResourceModel, spaceId s
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.ID)
+}
+
+func (*mavenFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

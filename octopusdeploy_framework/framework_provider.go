@@ -69,6 +69,10 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewFeedsDataSource,
 		NewLibraryVariableSetDataSource,
 		NewVariablesDataSource,
+		NewProjectsDataSource,
+		NewTenantsDataSource,
+		NewTagSetsDataSource,
+		NewScriptModuleDataSource,
 	}
 }
 
@@ -90,6 +94,15 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewTenantCommonVariableResource,
 		NewLibraryVariableSetFeedResource,
 		NewVariableResource,
+		NewProjectResource,
+		NewTagResource,
+		NewDockerContainerRegistryFeedResource,
+		NewTagSetResource,
+		NewUsernamePasswordAccountResource,
+		NewRunbookResource,
+		NewTenantResource,
+		NewTentacleCertificateResource,
+		NewScriptModuleResource,
 	}
 }
 

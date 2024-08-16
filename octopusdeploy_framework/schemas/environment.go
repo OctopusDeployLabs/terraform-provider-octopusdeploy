@@ -1,7 +1,12 @@
 package schemas
 
 import (
+	"context"
+	"fmt"
+	"strings"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/extensions"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -25,23 +30,66 @@ const (
 	EnvironmentServiceNowExtensionSettingsIsEnabled            = "is_enabled"
 )
 
+var jiraEnvironmentTypeNames = struct {
+	Development string
+	Production  string
+	Testing     string
+	Staging     string
+	Unmapped    string
+}{
+	Development: "development",
+	Production:  "production",
+	Testing:     "testing",
+	Staging:     "staging",
+	Unmapped:    "unmapped",
+}
+
+var jiraEnvironmentTypes = []string{
+	jiraEnvironmentTypeNames.Development,
+	jiraEnvironmentTypeNames.Production,
+	jiraEnvironmentTypeNames.Staging,
+	jiraEnvironmentTypeNames.Testing,
+	jiraEnvironmentTypeNames.Unmapped,
+}
+
+func EnvironmentObjectType() map[string]attr.Type {
+	return map[string]attr.Type{
+		"id":                                  types.StringType,
+		"name":                                types.StringType,
+		"slug":                                types.StringType,
+		"description":                         types.StringType,
+		EnvironmentAllowDynamicInfrastructure: types.BoolType,
+		EnvironmentSortOrder:                  types.Int64Type,
+		EnvironmentUseGuidedFailure:           types.BoolType,
+		"space_id":                            types.StringType,
+		EnvironmentJiraExtensionSettings: types.ListType{
+			ElemType: types.ObjectType{AttrTypes: JiraExtensionSettingsObjectType()},
+		},
+		EnvironmentJiraServiceManagementExtensionSettings: types.ListType{
+			ElemType: types.ObjectType{AttrTypes: JiraServiceManagementExtensionSettingsObjectType()},
+		},
+		EnvironmentServiceNowExtensionSettings: types.ListType{
+			ElemType: types.ObjectType{AttrTypes: ServiceNowExtensionSettingsObjectType()},
+		},
+	}
+}
+
 func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"id":                 util.GetIdDatasourceSchema(),
-		"slug":               util.GetSlugDatasourceSchema(EnvironmentResourceDescription),
-		"name":               util.GetNameDatasourceWithMaxLengthSchema(true, 50),
+		"id":                 GetIdDatasourceSchema(true),
+		"slug":               util.GetSlugDatasourceSchema(EnvironmentResourceDescription, true),
+		"name":               GetReadonlyNameDatasourceSchema(),
 		"description":        util.GetDescriptionDatasourceSchema(EnvironmentResourceDescription),
 		EnvironmentSortOrder: util.GetSortOrderDataSourceSchema(EnvironmentResourceDescription),
 		EnvironmentAllowDynamicInfrastructure: datasourceSchema.BoolAttribute{
-			Optional: true,
+			Computed: true,
 		},
 		EnvironmentUseGuidedFailure: datasourceSchema.BoolAttribute{
-			Optional: true,
+			Computed: true,
 		},
-		"space_id": util.GetSpaceIdDatasourceSchema(EnvironmentResourceDescription),
+		"space_id": GetSpaceIdDatasourceSchema(EnvironmentResourceDescription, true),
 		EnvironmentJiraExtensionSettings: datasourceSchema.ListNestedAttribute{
 			Description: "Provides extension settings for the Jira integration for this environment.",
-			Optional:    true,
 			Computed:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
@@ -49,11 +97,7 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 						Computed: true,
 						Validators: []validator.String{
 							stringvalidator.OneOfCaseInsensitive(
-								"development",
-								"production",
-								"testing",
-								"staging",
-								"unmapped",
+								jiraEnvironmentTypes...,
 							),
 						},
 					},
@@ -62,7 +106,6 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 		},
 		EnvironmentJiraServiceManagementExtensionSettings: datasourceSchema.ListNestedAttribute{
 			Description: "Provides extension settings for the Jira Service Management (JSM) integration for this environment.",
-			Optional:    true,
 			Computed:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
@@ -72,7 +115,6 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 		},
 		EnvironmentServiceNowExtensionSettings: datasourceSchema.ListNestedAttribute{
 			Description: "Provides extension settings for the ServiceNow integration for this environment.",
-			Optional:    true,
 			Computed:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
@@ -85,6 +127,7 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 
 func GetEnvironmentResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
+		Description: util.GetResourceSchemaDescription(EnvironmentResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":                 util.GetIdResourceSchema(),
 			"slug":               util.GetSlugResourceSchema(EnvironmentResourceDescription),
@@ -109,14 +152,11 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
 						"environment_type": resourceSchema.StringAttribute{
-							Optional: true,
+							Description: fmt.Sprintf("The Jira environment type of this Octopus deployment environment. Valid values are %s.", strings.Join(util.Map(jiraEnvironmentTypes, func(item string) string { return fmt.Sprintf("`\"%s\"`", item) }), ", ")),
+							Optional:    true,
 							Validators: []validator.String{
 								stringvalidator.OneOfCaseInsensitive(
-									"development",
-									"production",
-									"staging",
-									"testing",
-									"unmapped",
+									jiraEnvironmentTypes...,
 								),
 							},
 						},
@@ -127,7 +167,10 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 				Description: "Provides extension settings for the Jira Service Management (JSM) integration for this environment.",
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"is_enabled": resourceSchema.BoolAttribute{Optional: true},
+						"is_enabled": resourceSchema.BoolAttribute{
+							Description: "Specifies whether or not this extension is enabled for this project.",
+							Optional:    true,
+						},
 					},
 				},
 			},
@@ -135,7 +178,10 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 				Description: "Provides extension settings for the ServiceNow integration for this environment.",
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"is_enabled": resourceSchema.BoolAttribute{Optional: true},
+						"is_enabled": resourceSchema.BoolAttribute{
+							Description: "Specifies whether or not this extension is enabled for this project.",
+							Optional:    true,
+						},
 					},
 				},
 			},
@@ -179,8 +225,52 @@ func MapServiceNowExtensionSettings(serviceNowExtensionSettings *environments.Se
 	})
 }
 
+func MapFromEnvironment(ctx context.Context, environment *environments.Environment) EnvironmentTypeResourceModel {
+	var env EnvironmentTypeResourceModel
+	env.ID = types.StringValue(environment.ID)
+	env.SpaceID = types.StringValue(environment.SpaceID)
+	env.Slug = types.StringValue(environment.Slug)
+	env.Name = types.StringValue(environment.Name)
+	env.Description = types.StringValue(environment.Description)
+	env.AllowDynamicInfrastructure = types.BoolValue(environment.AllowDynamicInfrastructure)
+	env.SortOrder = types.Int64Value(int64(environment.SortOrder))
+	env.UseGuidedFailure = types.BoolValue(environment.UseGuidedFailure)
+	env.JiraExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: JiraExtensionSettingsObjectType()}, []any{})
+	env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: JiraServiceManagementExtensionSettingsObjectType()}, []any{})
+	env.ServiceNowExtensionSettings, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ServiceNowExtensionSettingsObjectType()}, []any{})
+
+	for _, extensionSetting := range environment.ExtensionSettings {
+		switch extensionSetting.ExtensionID() {
+		case extensions.JiraExtensionID:
+			if jiraExtension, ok := extensionSetting.(*environments.JiraExtensionSettings); ok {
+				env.JiraExtensionSettings, _ = types.ListValueFrom(
+					ctx,
+					types.ObjectType{AttrTypes: JiraExtensionSettingsObjectType()},
+					[]any{MapJiraExtensionSettings(jiraExtension)},
+				)
+			}
+		case extensions.JiraServiceManagementExtensionID:
+			if jiraServiceManagementExtensionSettings, ok := extensionSetting.(*environments.JiraServiceManagementExtensionSettings); ok {
+				env.JiraServiceManagementExtensionSettings, _ = types.ListValueFrom(
+					ctx,
+					types.ObjectType{AttrTypes: JiraServiceManagementExtensionSettingsObjectType()},
+					[]any{MapJiraServiceManagementExtensionSettings(jiraServiceManagementExtensionSettings)},
+				)
+			}
+		case extensions.ServiceNowExtensionID:
+			if serviceNowExtensionSettings, ok := extensionSetting.(*environments.ServiceNowExtensionSettings); ok {
+				env.ServiceNowExtensionSettings, _ = types.ListValueFrom(
+					ctx,
+					types.ObjectType{AttrTypes: ServiceNowExtensionSettingsObjectType()},
+					[]any{MapServiceNowExtensionSettings(serviceNowExtensionSettings)},
+				)
+			}
+		}
+	}
+	return env
+}
+
 type EnvironmentTypeResourceModel struct {
-	ID                                     types.String `tfsdk:"id"`
 	Slug                                   types.String `tfsdk:"slug"`
 	Name                                   types.String `tfsdk:"name"`
 	Description                            types.String `tfsdk:"description"`
@@ -191,4 +281,6 @@ type EnvironmentTypeResourceModel struct {
 	JiraExtensionSettings                  types.List   `tfsdk:"jira_extension_settings"`
 	JiraServiceManagementExtensionSettings types.List   `tfsdk:"jira_service_management_extension_settings"`
 	ServiceNowExtensionSettings            types.List   `tfsdk:"servicenow_extension_settings"`
+
+	ResourceModel
 }

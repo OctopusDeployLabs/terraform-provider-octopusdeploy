@@ -40,29 +40,29 @@ data "octopusdeploy_certificates" "example" {
 
 ### Read-Only
 
-- `certificates` (Block List) A list of certificates that match the filter(s). (see [below for nested schema](#nestedblock--certificates))
+- `certificates` (List of Object) A list of certificates that match the filter(s). (see [below for nested schema](#nestedatt--certificates))
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
-<a id="nestedblock--certificates"></a>
+<a id="nestedatt--certificates"></a>
 ### Nested Schema for `certificates`
 
 Read-Only:
 
 - `archived` (String)
-- `certificate_data` (String, Sensitive) The encoded data of the certificate.
-- `certificate_data_format` (String) Specifies the archive file format used for storing cryptography objects in the certificate. Valid formats are `Der`, `Pem`, `Pkcs12`, or `Unknown`.
-- `environments` (List of String) A list of environment IDs associated with this resource.
-- `has_private_key` (Boolean) Indicates if the certificate has a private key.
-- `id` (String) The unique ID for this resource.
-- `is_expired` (Boolean) Indicates if the certificate has expired.
+- `certificate_data` (String)
+- `certificate_data_format` (String)
+- `environments` (List of String)
+- `has_private_key` (Boolean)
+- `id` (String)
+- `is_expired` (Boolean)
 - `issuer_common_name` (String)
 - `issuer_distinguished_name` (String)
 - `issuer_organization` (String)
-- `name` (String) The name of this resource.
+- `name` (String)
 - `not_after` (String)
 - `not_before` (String)
 - `notes` (String)
-- `password` (String, Sensitive) The password associated with this resource.
+- `password` (String)
 - `replaced_by` (String)
 - `self_signed` (Boolean)
 - `serial_number` (String)
@@ -72,9 +72,9 @@ Read-Only:
 - `subject_common_name` (String)
 - `subject_distinguished_name` (String)
 - `subject_organization` (String)
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `tenant_tags` (List of String)
+- `tenanted_deployment_participation` (String)
+- `tenants` (List of String)
 - `thumbprint` (String)
 - `version` (Number)
 

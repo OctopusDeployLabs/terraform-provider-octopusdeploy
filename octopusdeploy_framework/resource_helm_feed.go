@@ -3,7 +3,10 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -23,13 +26,16 @@ func NewHelmFeedResource() resource.Resource {
 	return &helmFeedTypeResource{}
 }
 
+var _ resource.ResourceWithImportState = &helmFeedTypeResource{}
+
 func (r *helmFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("helm_feed")
 }
 
 func (r *helmFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetHelmFeedResourceSchema(),
+		Attributes:  schemas.GetHelmFeedResourceSchema(),
+		Description: "This resource manages a Helm Feed in Octopus Deploy.",
 	}
 }
 
@@ -76,7 +82,9 @@ func (r *helmFeedTypeResource) Read(ctx context.Context, req resource.ReadReques
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load helm feed", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "helm feed"); err != nil {
+			resp.Diagnostics.AddError("unable to load helm feed", err.Error())
+		}
 		return
 	}
 
@@ -173,4 +181,8 @@ func updateDataFromHelmFeed(data *schemas.HelmFeedTypeResourceModel, spaceId str
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*helmFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

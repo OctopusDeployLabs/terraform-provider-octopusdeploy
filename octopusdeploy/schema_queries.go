@@ -7,13 +7,13 @@ import (
 
 func getQueryAccountType() *schema.Schema {
 	return &schema.Schema{
-		Description: "A filter to search by a list of account types.  Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
+		Description: "A filter to search by a list of account types.  Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AmazonWebServicesOidcAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.",
 		Optional:    true,
 		Type:        schema.TypeString,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 			"AmazonWebServicesAccount",
 			"AmazonWebServicesRoleAccount",
-			"AwsOIDCAccount",
+			"AmazonWebServicesOidcAccount",
 			"AzureServicePrincipal",
 			"AzureOIDC",
 			"AzureSubscription",

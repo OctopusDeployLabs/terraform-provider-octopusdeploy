@@ -28,16 +28,16 @@ data "octopusdeploy_environments" "example" {
 ### Optional
 
 - `ids` (List of String) A filter to search by a list of IDs.
-- `name` (String) A filter to search by name.
-- `partial_name` (String) A filter to search by the partial match of a name.
+- `name` (String) A filter search by exact name
+- `partial_name` (String) A filter to search by a partial name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) The space ID associated with this resource.
+- `space_id` (String) The space ID associated with this environment.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- `environments` (Block List) A list of environments that match the filter(s). (see [below for nested schema](#nestedblock--environments))
-- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
+- `environments` (Block List) Provides information about existing environments. (see [below for nested schema](#nestedblock--environments))
+- `id` (String) The unique ID for this resource.
 
 <a id="nestedblock--environments"></a>
 ### Nested Schema for `environments`
@@ -47,12 +47,12 @@ Read-Only:
 - `allow_dynamic_infrastructure` (Boolean)
 - `description` (String) The description of this environment.
 - `id` (String) The unique ID for this resource.
-- `jira_extension_settings` (List of Object) Provides extension settings for the Jira integration for this environment. (see [below for nested schema](#nestedatt--environments--jira_extension_settings))
-- `jira_service_management_extension_settings` (List of Object) Provides extension settings for the Jira Service Management (JSM) integration for this environment. (see [below for nested schema](#nestedatt--environments--jira_service_management_extension_settings))
+- `jira_extension_settings` (Attributes List) Provides extension settings for the Jira integration for this environment. (see [below for nested schema](#nestedatt--environments--jira_extension_settings))
+- `jira_service_management_extension_settings` (Attributes List) Provides extension settings for the Jira Service Management (JSM) integration for this environment. (see [below for nested schema](#nestedatt--environments--jira_service_management_extension_settings))
 - `name` (String) The name of this resource.
-- `servicenow_extension_settings` (List of Object) Provides extension settings for the ServiceNow integration for this environment. (see [below for nested schema](#nestedatt--environments--servicenow_extension_settings))
-- `slug` (String)
-- `sort_order` (Number) The order number to sort an environment.
+- `servicenow_extension_settings` (Attributes List) Provides extension settings for the ServiceNow integration for this environment. (see [below for nested schema](#nestedatt--environments--servicenow_extension_settings))
+- `slug` (String) The unique slug of this environment
+- `sort_order` (Number) The order number to sort an environment
 - `space_id` (String) The space ID associated with this environment.
 - `use_guided_failure` (Boolean)
 

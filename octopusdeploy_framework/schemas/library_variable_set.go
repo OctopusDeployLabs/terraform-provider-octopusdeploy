@@ -7,22 +7,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type LibraryVariableSetResourceModel struct {
 	Description   types.String `tfsdk:"description"`
-	ID            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
 	SpaceID       types.String `tfsdk:"space_id"`
 	Template      types.List   `tfsdk:"template"`
 	TemplateIds   types.Map    `tfsdk:"template_ids"`
 	VariableSetId types.String `tfsdk:"variable_set_id"`
+
+	ResourceModel
 }
 
 func GetLibraryVariableSetDataSourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
-		Attributes: getLibraryVariableSetDataSchema(),
+		Attributes:  getLibraryVariableSetDataSchema(),
+		Description: "Provides information about existing library variable sets.",
 		Blocks: map[string]datasourceSchema.Block{
 			"library_variable_sets": datasourceSchema.ListNestedBlock{
 				Description: "A list of library variable sets that match the filter(s).",
@@ -40,8 +44,8 @@ func getLibraryVariableSetDataSchema() map[string]datasourceSchema.Attribute {
 			Description: "A filter to search by content type.",
 			Optional:    true,
 		},
-		"id":           util.GetIdDatasourceSchema(),
-		"space_id":     util.GetSpaceIdDatasourceSchema("library variable set"),
+		"id":           GetIdDatasourceSchema(true),
+		"space_id":     GetSpaceIdDatasourceSchema("library variable set", false),
 		"ids":          util.GetQueryIDsDatasourceSchema(),
 		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 		"skip":         util.GetQuerySkipDatasourceSchema(),
@@ -51,16 +55,16 @@ func getLibraryVariableSetDataSchema() map[string]datasourceSchema.Attribute {
 
 func GetLibraryVariableSetObjectDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"description": GetDescriptionDatasourceSchema("library variable set"),
-		"id":          GetIdDatasourceSchema(),
-		"name":        GetNameDatasourceSchema(false),
-		"space_id":    GetSpaceIdDatasourceSchema("library variable set"),
+		"description": GetReadonlyDescriptionDatasourceSchema("library variable set"),
+		"id":          GetIdDatasourceSchema(true),
+		"name":        GetReadonlyNameDatasourceSchema(),
+		"space_id":    GetSpaceIdDatasourceSchema("library variable set", true),
 		"template_ids": datasourceSchema.MapAttribute{
 			ElementType: types.StringType,
 			Computed:    true,
 		},
 		"template": datasourceSchema.ListAttribute{
-			Optional:    true,
+			Computed:    true,
 			ElementType: types.ObjectType{AttrTypes: TemplateObjectType()},
 		},
 		"variable_set_id": datasourceSchema.StringAttribute{
@@ -91,12 +95,15 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 			"template_ids": resourceSchema.MapAttribute{
 				ElementType: types.StringType,
 				Computed:    true,
-				Optional:    true,
 			},
 			"variable_set_id": resourceSchema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
+		Description: "This resource manages library variable sets in Octopus Deploy.",
 		Blocks: map[string]resourceSchema.Block{
 			"template": resourceSchema.ListNestedBlock{
 				NestedObject: resourceSchema.NestedBlockObject{
@@ -132,7 +139,7 @@ func MapToLibraryVariableSet(data *LibraryVariableSetResourceModel) *variables.L
 
 func FlattenTemplates(actionTemplateParameters []actiontemplates.ActionTemplateParameter) types.List {
 	if len(actionTemplateParameters) == 0 {
-		return types.ListNull(types.ObjectType{AttrTypes: TemplateObjectType()})
+		return types.ListValueMust(types.ObjectType{AttrTypes: TemplateObjectType()}, []attr.Value{})
 	}
 	actionTemplateList := make([]attr.Value, 0, len(actionTemplateParameters))
 
@@ -140,7 +147,7 @@ func FlattenTemplates(actionTemplateParameters []actiontemplates.ActionTemplateP
 		attrs := map[string]attr.Value{
 			"default_value":    util.Ternary(actionTemplateParams.DefaultValue.Value != "", types.StringValue(actionTemplateParams.DefaultValue.Value), types.StringNull()),
 			"display_settings": flattenDisplaySettingsMap(actionTemplateParams.DisplaySettings),
-			"help_text":        util.Ternary(actionTemplateParams.HelpText != "", types.StringValue(actionTemplateParams.HelpText), types.StringNull()),
+			"help_text":        util.Ternary(actionTemplateParams.HelpText != "", types.StringValue(actionTemplateParams.HelpText), types.StringValue("")),
 			"id":               types.StringValue(actionTemplateParams.GetID()),
 			"label":            util.Ternary(actionTemplateParams.Label != "", types.StringValue(actionTemplateParams.Label), types.StringNull()),
 			"name":             types.StringValue(actionTemplateParams.Name),

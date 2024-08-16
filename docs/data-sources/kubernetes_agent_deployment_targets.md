@@ -55,32 +55,32 @@ data "octopusdeploy_kubernetes_agent_deployment_targets" "kubernetes_agent_deplo
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `kubernetes_agent_deployment_targets` (Block List) A list of kubernetes agent deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--kubernetes_agent_deployment_targets))
+- `kubernetes_agent_deployment_targets` (List of Object) A list of kubernetes agent deployment targets that match the filter(s). (see [below for nested schema](#nestedatt--kubernetes_agent_deployment_targets))
 
-<a id="nestedblock--kubernetes_agent_deployment_targets"></a>
+<a id="nestedatt--kubernetes_agent_deployment_targets"></a>
 ### Nested Schema for `kubernetes_agent_deployment_targets`
 
 Read-Only:
 
-- `agent_helm_release_name` (String) Name of the Helm release that the agent belongs to.
-- `agent_kubernetes_namespace` (String) Name of the Kubernetes namespace where the agent is installed.
-- `agent_tentacle_version` (String) Current Tentacle version of the agent
-- `agent_upgrade_status` (String) Current upgrade availability status of the agent. One of 'NoUpgrades', 'UpgradeAvailable', 'UpgradeSuggested', 'UpgradeRequired'
-- `agent_version` (String) Current Helm chart version of the agent.
-- `communication_mode` (String) The communication mode used by the Kubernetes agent to communicate with Octopus Server. Currently, the only supported value is 'Polling'.
-- `default_namespace` (String) Optional default namespace that will be used when using Kubernetes deployment steps, can be overrides within step configurations.
-- `environments` (List of String) A list of environment IDs this Kubernetes agent can deploy to.
-- `id` (String) The unique ID for this resource.
-- `is_disabled` (Boolean) Whether the Kubernetes agent is disabled. If the agent is disabled, it will not be included in any deployments.
-- `machine_policy_id` (String) Optional ID of the machine policy that the Kubernetes agent will use. If not provided the default machine policy will be used.
-- `name` (String) The name of this resource.
-- `roles` (List of String) A list of target roles that are associated to this Kubernetes agent.
-- `space_id` (String) The space ID associated with this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
-- `thumbprint` (String) The thumbprint of the Kubernetes agent's certificate used by server to verify the identity of the agent. This is the same thumbprint that was used when installing the agent.
-- `upgrade_locked` (Boolean) If enabled the Kubernetes agent will not automatically upgrade and will stay on the currently installed version, even if the associated machine policy is configured to automatically upgrade.
-- `uri` (String) The URI of the Kubernetes agent's used by the server to queue messages. This is the same subscription uri that was used when installing the agent.
+- `agent_helm_release_name` (String)
+- `agent_kubernetes_namespace` (String)
+- `agent_tentacle_version` (String)
+- `agent_upgrade_status` (String)
+- `agent_version` (String)
+- `communication_mode` (String)
+- `default_namespace` (String)
+- `environments` (List of String)
+- `id` (String)
+- `is_disabled` (Boolean)
+- `machine_policy_id` (String)
+- `name` (String)
+- `roles` (List of String)
+- `space_id` (String)
+- `tenant_tags` (List of String)
+- `tenanted_deployment_participation` (String)
+- `tenants` (List of String)
+- `thumbprint` (String)
+- `upgrade_locked` (Boolean)
+- `uri` (String)
 
 

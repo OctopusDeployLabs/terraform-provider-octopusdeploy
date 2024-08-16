@@ -3,8 +3,11 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -22,13 +25,16 @@ func NewNugetFeedResource() resource.Resource {
 	return &nugetFeedTypeResource{}
 }
 
+var _ resource.ResourceWithImportState = &nugetFeedTypeResource{}
+
 func (r *nugetFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("nuget_feed")
 }
 
 func (r *nugetFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: schemas.GetNugetFeedResourceSchema(),
+		Attributes:  schemas.GetNugetFeedResourceSchema(),
+		Description: "This resource manages a Nuget feed in Octopus Deploy.",
 	}
 }
 
@@ -77,7 +83,9 @@ func (r *nugetFeedTypeResource) Read(ctx context.Context, req resource.ReadReque
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load nuget feed", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "nuget feed"); err != nil {
+			resp.Diagnostics.AddError("unable to load nuget feed", err.Error())
+		}
 		return
 	}
 
@@ -178,4 +186,8 @@ func updateDataFromNugetFeed(data *schemas.NugetFeedTypeResourceModel, spaceId s
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+}
+
+func (*nugetFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

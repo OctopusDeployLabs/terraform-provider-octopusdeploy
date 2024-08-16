@@ -78,10 +78,10 @@ func GetFeedsDataSourceSchema() map[string]datasourceSchema.Attribute {
 		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
 		"skip":         util.GetQuerySkipDatasourceSchema(),
 		"take":         util.GetQueryTakeDatasourceSchema(),
-		"space_id":     util.GetSpaceIdDatasourceSchema("feeds"),
+		"space_id":     GetSpaceIdDatasourceSchema("feeds", false),
 
 		// response
-		"id": util.GetIdDatasourceSchema(),
+		"id": GetIdDatasourceSchema(true),
 	}
 }
 
@@ -89,7 +89,7 @@ func GetFeedDataSourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"feed_type": datasourceSchema.StringAttribute{
 			Description: "A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, or `OctopusProject`.",
-			Optional:    true,
+			Computed:    true,
 			Validators: []validator.String{
 				stringvalidator.OneOf(
 					"AwsElasticContainerRegistry",
@@ -103,17 +103,17 @@ func GetFeedDataSourceSchema() map[string]datasourceSchema.Attribute {
 			},
 		},
 		"feed_uri": datasourceSchema.StringAttribute{
-			Required: true,
+			Computed: true,
 		},
-		"id": util.GetIdDatasourceSchema(),
+		"id": GetIdDatasourceSchema(true),
 		"is_enhanced_mode": datasourceSchema.BoolAttribute{
-			Optional: true,
+			Computed: true,
 		},
-		"name": util.GetNameDatasourceSchema(true),
+		"name": GetReadonlyNameDatasourceSchema(),
 		"password": datasourceSchema.StringAttribute{
 			Description: "The password associated with this resource.",
 			Sensitive:   true,
-			Optional:    true,
+			Computed:    true,
 			Validators: []validator.String{
 				stringvalidator.LengthAtLeast(1),
 			},
@@ -121,45 +121,42 @@ func GetFeedDataSourceSchema() map[string]datasourceSchema.Attribute {
 		"package_acquisition_location_options": datasourceSchema.ListAttribute{
 			Computed:    true,
 			ElementType: types.StringType,
-			Optional:    true,
 		},
 		"region": datasourceSchema.StringAttribute{
 			Computed: true,
 		},
 		"registry_path": datasourceSchema.StringAttribute{
-			Optional: true,
+			Computed: true,
 		},
 		"secret_key": datasourceSchema.StringAttribute{
-			Optional:  true,
+			Computed:  true,
 			Sensitive: true,
 		},
-		"space_id": util.GetSpaceIdDatasourceSchema("feeds"),
+		"space_id": GetSpaceIdDatasourceSchema("feeds", true),
 		"username": datasourceSchema.StringAttribute{
 			Description: "The username associated with this resource.",
 			Sensitive:   true,
-			Optional:    true,
+			Computed:    true,
 			Validators: []validator.String{
 				stringvalidator.LengthAtLeast(1),
 			},
 		},
 		"delete_unreleased_packages_after_days": datasourceSchema.Int64Attribute{
-			Optional: true,
+			Computed: true,
 		},
 		"access_key": datasourceSchema.StringAttribute{
-			Required:    true,
+			Computed:    true,
 			Description: "The AWS access key to use when authenticating against Amazon Web Services.",
 		},
 		"api_version": datasourceSchema.StringAttribute{
-			Optional: true,
+			Computed: true,
 		},
 		"download_attempts": datasourceSchema.Int64Attribute{
 			Description: "The number of times a deployment should attempt to download a package from this feed before failing.",
-			Optional:    true,
 			Computed:    true,
 		},
 		"download_retry_backoff_seconds": datasourceSchema.Int64Attribute{
 			Description: "The number of seconds to apply as a linear back off between download attempts.",
-			Optional:    true,
 			Computed:    true,
 		},
 	}
