@@ -71,6 +71,7 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 func mapSpaceToState(ctx context.Context, data *schemas.SpaceModel, space *spaces.Space) {
 	data.ID = types.StringValue(space.ID)
+	data.Name = types.StringValue(space.Name)
 	data.Description = types.StringValue(space.Description)
 	data.Slug = types.StringValue(space.Slug)
 	data.IsTaskQueueStopped = types.BoolValue(space.TaskQueueStopped)
