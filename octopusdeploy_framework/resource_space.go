@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
@@ -109,7 +110,13 @@ func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	data.SpaceManagersTeams, diags = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, createdSpace.SpaceManagersTeams))
+	//data.SpaceManagersTeams, diags = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, createdSpace.SpaceManagersTeams))
+	if len(createdSpace.SpaceManagersTeams) == 0 {
+		data.SpaceManagersTeams = types.SetValueMust(types.StringType, []attr.Value{types.StringValue("")})
+	} else {
+		data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, createdSpace.SpaceManagersTeams))
+	}
+
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -143,7 +150,12 @@ func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	data.IsTaskQueueStopped = types.BoolValue(spaceResult.TaskQueueStopped)
 	data.IsDefault = types.BoolValue(spaceResult.IsDefault)
 	data.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
-	data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, spaceResult.SpaceManagersTeams))
+	//data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, spaceResult.SpaceManagersTeams))
+	if len(spaceResult.SpaceManagersTeams) == 0 {
+		data.SpaceManagersTeams = types.SetValueMust(types.StringType, []attr.Value{types.StringValue("")})
+	} else {
+		data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, spaceResult.SpaceManagersTeams))
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	tflog.Info(ctx, fmt.Sprintf("space read (%s)", data.ID))
@@ -209,8 +221,11 @@ func (s *spaceResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	plan.IsTaskQueueStopped = types.BoolValue(spaceResult.TaskQueueStopped)
 	plan.IsDefault = types.BoolValue(spaceResult.IsDefault)
 	plan.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
-	plan.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, updatedSpace.SpaceManagersTeams))
-
+	if len(updatedSpace.SpaceManagersTeams) == 0 {
+		plan.SpaceManagersTeams = types.SetValueMust(types.StringType, []attr.Value{types.StringValue("")})
+	} else {
+		plan.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, updatedSpace.SpaceManagersTeams))
+	}
 	// save plan to state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

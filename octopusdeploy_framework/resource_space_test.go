@@ -1,13 +1,13 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccSpaceImportBasic(t *testing.T) {
@@ -19,7 +19,7 @@ func TestAccSpaceImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccSpaceCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -43,7 +43,7 @@ func TestAccSpaceBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccSpaceCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -56,6 +56,17 @@ func TestAccSpaceBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(prefix, "space_managers_teams.0"),
 				),
 				Config: testSpaceBasic(localName, name, slug),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testSpaceExists(prefix),
+					resource.TestCheckResourceAttrSet(prefix, "id"),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "slug", slug),
+					resource.TestCheckResourceAttr(prefix, "space_managers_teams.#", "1"),
+					resource.TestCheckResourceAttrSet(prefix, "space_managers_teams.0"),
+				),
+				Config: testSpaceBasicUpdated(localName, name, slug),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -96,6 +107,24 @@ func testSpaceBasic(localName string, name string, slug string) string {
 		}`, localName, name, slug)
 }
 
+func testSpaceBasicUpdated(localName string, name string, slug string) string {
+	userLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	userDisplayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	userEmailAddress := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "." + acctest.RandStringFromCharSet(20, acctest.CharSetAlpha) + "@example.com"
+	userPassword := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	userUsername := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+
+	return fmt.Sprintf(testAccUserBasic(userLocalName, userDisplayName, true, false, userPassword, userUsername, userEmailAddress)+"\n"+
+		`resource "octopusdeploy_space" "%s" {
+			name = "%s"
+			slug = "%s"
+			space_managers_teams  = []
+			lifecycle {
+			  ignore_changes = []
+			}
+		}`, localName, name, slug)
+}
+
 func testSpaceExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		spaceID := s.RootModule().Resources[prefix].Primary.ID
@@ -119,4 +148,29 @@ func testAccSpaceCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func testAccUserBasic(localName string, displayName string, isActive bool, isService bool, password string, username string, emailAddress string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_user" "%s" {
+		display_name  = "%s"
+		email_address = "%s"
+		is_active     = %v
+		is_service    = %v
+		password      = "%s"
+		username      = "%s"
+
+		identity {
+			provider = "Octopus ID"
+			claim {
+				name = "email"
+				is_identifying_claim = true
+				value = "%s"
+			}
+			claim {
+				name = "dn"
+				is_identifying_claim = false
+				value = "%s"
+			}
+		}
+	}`, localName, displayName, emailAddress, isActive, isService, password, username, emailAddress, displayName)
 }

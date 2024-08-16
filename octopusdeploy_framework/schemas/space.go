@@ -7,6 +7,7 @@ import (
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -36,6 +37,14 @@ func GetSpaceResourceSchema() map[string]resourceSchema.Attribute {
 			Description: "A list of team IDs designated to be managers of this space.",
 			Optional:    true,
 			Computed:    true,
+			Default: setdefault.StaticValue(
+				types.SetValueMust(
+					types.StringType,
+					[]attr.Value{
+						types.StringValue(""),
+					},
+				),
+			),
 		},
 		"space_managers_team_members": resourceSchema.SetAttribute{
 			ElementType: types.StringType,
