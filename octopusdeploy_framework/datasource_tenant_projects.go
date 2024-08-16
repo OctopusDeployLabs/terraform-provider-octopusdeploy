@@ -85,7 +85,7 @@ func (t *tenantProjectsDataSource) Read(ctx context.Context, req datasource.Read
 	environmentIDs := util.ExpandStringList(data.EnvironmentIDs)
 	spaceID := data.SpaceID.ValueString()
 
-	if tenantIDs == nil && projectIDs == nil {
+	if (tenantIDs == nil || len(tenantIDs) == 0) && (projectIDs == nil || len(projectIDs) == 0) {
 		resp.Diagnostics.AddError("must provide at least one tenant or one project", "tenant IDs and project IDs are nil")
 	}
 
