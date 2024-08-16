@@ -101,8 +101,10 @@ resource "octopusdeploy_variable" "prompted_variable" {
 ### Optional
 
 - `description` (String) The description of this variable.
+- `encrypted_value` (String)
 - `is_editable` (Boolean) Indicates whether or not this variable is considered editable.
 - `is_sensitive` (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
+- `key_fingerprint` (String)
 - `owner_id` (String)
 - `pgp_key` (String, Sensitive)
 - `project_id` (String, Deprecated)
@@ -114,9 +116,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 
 ### Read-Only
 
-- `encrypted_value` (String)
 - `id` (String) The ID of this resource.
-- `key_fingerprint` (String)
 
 <a id="nestedblock--prompt"></a>
 ### Nested Schema for `prompt`
