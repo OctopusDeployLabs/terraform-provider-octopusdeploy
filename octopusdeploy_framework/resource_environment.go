@@ -123,6 +123,7 @@ func (r *environmentTypeResource) Update(ctx context.Context, req resource.Updat
 	updatedEnv.AllowDynamicInfrastructure = data.AllowDynamicInfrastructure.ValueBool()
 	updatedEnv.UseGuidedFailure = data.UseGuidedFailure.ValueBool()
 	updatedEnv.SortOrder = util.GetNumber(data.SortOrder)
+	updatedEnv.SpaceID = data.SpaceID.ValueString()
 	if len(data.JiraExtensionSettings.Elements()) > 0 {
 		jiraExtensionSettings := mapJiraExtensionSettings(data.JiraExtensionSettings)
 		if jiraExtensionSettings != nil {
