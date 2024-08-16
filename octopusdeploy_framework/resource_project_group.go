@@ -44,10 +44,9 @@ func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	newGroup := projectgroups.ProjectGroup{
-		Name:              data.Name.ValueString(),
-		Description:       data.Description.ValueString(),
-		RetentionPolicyID: data.RetentionPolicyID.ValueString(),
-		SpaceID:           data.SpaceID.ValueString(),
+		Name:        data.Name.ValueString(),
+		Description: data.Description.ValueString(),
+		SpaceID:     data.SpaceID.ValueString(),
 	}
 
 	group, err := projectgroups.Add(r.Config.Client, &newGroup)
@@ -98,7 +97,6 @@ func (r *projectGroupTypeResource) Update(ctx context.Context, req resource.Upda
 
 	group.Name = data.Name.ValueString()
 	group.Description = data.Description.ValueString()
-	group.RetentionPolicyID = data.RetentionPolicyID.ValueString()
 	group.SpaceID = data.SpaceID.ValueString()
 
 	updatedProjectGroup, err := projectgroups.Update(r.Config.Client, *group)
@@ -129,6 +127,5 @@ func updateProjectGroup(data *schemas.ProjectGroupTypeResourceModel, group *proj
 	data.ID = types.StringValue(group.ID)
 	data.Name = types.StringValue(group.Name)
 	data.SpaceID = types.StringValue(group.SpaceID)
-	data.RetentionPolicyID = types.StringValue(group.RetentionPolicyID)
 	data.Description = types.StringValue(group.Description)
 }

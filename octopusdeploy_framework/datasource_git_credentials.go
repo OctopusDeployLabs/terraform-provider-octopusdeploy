@@ -27,14 +27,13 @@ type gitCredentialsDataSourceModel struct {
 	GitCredentials types.List   `tfsdk:"git_credentials"`
 }
 
-type GitCredentialModel struct {
+type GitCredentialDatasourceModel struct {
 	ID          types.String `tfsdk:"id"`
 	SpaceID     types.String `tfsdk:"space_id"`
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
 	Type        types.String `tfsdk:"type"`
 	Username    types.String `tfsdk:"username"`
-	Password    types.String `tfsdk:"password"`
 }
 
 func NewGitCredentialsDataSource() datasource.DataSource {
@@ -73,7 +72,7 @@ func (g *gitCredentialsDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	flattenedGitCredentials := make([]GitCredentialModel, 0, len(existingGitCredentials.Items))
+	flattenedGitCredentials := make([]GitCredentialDatasourceModel, 0, len(existingGitCredentials.Items))
 	for _, gitCredential := range existingGitCredentials.Items {
 		flattenedGitCredential := FlattenGitCredential(gitCredential)
 		flattenedGitCredentials = append(flattenedGitCredentials, *flattenedGitCredential)
@@ -99,16 +98,15 @@ func GetGitCredentialAttrTypes() map[string]attr.Type {
 		"description": types.StringType,
 		"type":        types.StringType,
 		"username":    types.StringType,
-		"password":    types.StringType,
 	}
 }
 
-func FlattenGitCredential(credential *credentials.Resource) *GitCredentialModel {
+func FlattenGitCredential(credential *credentials.Resource) *GitCredentialDatasourceModel {
 	if credential == nil {
 		return nil
 	}
 
-	model := &GitCredentialModel{
+	model := &GitCredentialDatasourceModel{
 		ID:          types.StringValue(credential.GetID()),
 		SpaceID:     types.StringValue(credential.SpaceID),
 		Name:        types.StringValue(credential.Name),

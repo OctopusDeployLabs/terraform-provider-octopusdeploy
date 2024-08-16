@@ -55,14 +55,14 @@ func GetGitCredentialDataSourceSchema() datasourceSchema.Schema {
 				Computed:    true,
 				Description: "Provides information about existing GitCredentials.",
 				NestedObject: datasourceSchema.NestedAttributeObject{
-					Attributes: GetGitCredentialAttributes(),
+					Attributes: GetGitCredentialDatasourceAttributes(),
 				},
 			},
 		},
 	}
 }
 
-func GetGitCredentialAttributes() map[string]datasourceSchema.Attribute {
+func GetGitCredentialDatasourceAttributes() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":          util.DataSourceString().Computed().Description("The unique ID for this resource.").Build(),
 		"space_id":    util.DataSourceString().Computed().Description("The space ID associated with this Git Credential.").Build(),
@@ -70,6 +70,5 @@ func GetGitCredentialAttributes() map[string]datasourceSchema.Attribute {
 		"description": util.DataSourceString().Computed().Description("The description of this Git Credential.").Build(),
 		"type":        util.DataSourceString().Computed().Description("The Git credential authentication type.").Build(),
 		"username":    util.DataSourceString().Computed().Description("The username for the Git credential.").Build(),
-		"password":    util.DataSourceString().Computed().Sensitive().Description("The password for the Git credential.").Build(),
 	}
 }
