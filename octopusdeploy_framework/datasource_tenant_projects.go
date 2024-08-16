@@ -87,6 +87,7 @@ func (t *tenantProjectsDataSource) Read(ctx context.Context, req datasource.Read
 
 	if (tenantIDs == nil || len(tenantIDs) == 0) && (projectIDs == nil || len(projectIDs) == 0) {
 		resp.Diagnostics.AddError("must provide at least one tenant or one project", "tenant IDs and project IDs are nil")
+		return
 	}
 
 	var tenantData []*tenants.Tenant
@@ -171,8 +172,8 @@ func getTenantByProjectID(c *client.Client, projectID string, spaceID string) ([
 	return tenantData, nil
 }
 
-func buildTenantProjectID(spaceID string, projectID string, tenantID string) string {
-	return fmt.Sprintf("%s:%s:%s", spaceID, projectID, tenantID)
+func buildTenantProjectID(spaceID string, tenantID string, projectID string) string {
+	return fmt.Sprintf("%s:%s:%s", spaceID, tenantID, projectID)
 }
 
 func tenantProjectType() map[string]attr.Type {
@@ -193,7 +194,7 @@ func flattenTenantProject(tenant *tenants.Tenant, projectID string) attr.Value {
 	environmentIdList, _ := types.ListValue(types.StringType, environmentIDs)
 
 	return types.ObjectValueMust(tenantProjectType(), map[string]attr.Value{
-		"id":              types.StringValue(buildTenantProjectID(tenant.SpaceID, projectID, tenant.ID)),
+		"id":              types.StringValue(buildTenantProjectID(tenant.SpaceID, tenant.ID, projectID)),
 		"tenant_id":       types.StringValue(tenant.ID),
 		"project_id":      types.StringValue(projectID),
 		"environment_ids": environmentIdList,
