@@ -118,7 +118,6 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 		g.ID = types.StringValue(projectGroup.ID)
 		g.SpaceID = types.StringValue(projectGroup.SpaceID)
 		g.Name = types.StringValue(projectGroup.Name)
-		g.RetentionPolicyID = types.StringValue(projectGroup.RetentionPolicyID)
 		g.Description = types.StringValue(projectGroup.Description)
 		newGroups = append(newGroups, g)
 	}
