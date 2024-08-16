@@ -274,7 +274,6 @@ func validateVariable(variableSet *variables.VariableSet, newVariable *variables
 }
 
 func mapVariableToState(ctx context.Context, data *schemas.VariableTypeResourceModel, variable *variables.Variable) {
-	//data.SpaceID =
 	data.Name = types.StringValue(variable.Name)
 	data.Description = types.StringValue(variable.Description)
 	if !data.IsEditable.IsNull() {

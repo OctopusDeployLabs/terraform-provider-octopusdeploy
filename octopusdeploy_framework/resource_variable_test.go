@@ -190,7 +190,7 @@ func testVariableBasic(spaceID string, environmentLocalName string,
 		  owner_id     = octopusdeploy_project.%s.id
 		  type         = "%s"
 		  value        = "%s"
-          #space_id     = "%s"
+          space_id     = "%s"
 
 		  %s
 
