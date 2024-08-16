@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
@@ -109,11 +110,9 @@ func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	data.SpaceManagersTeams, diags = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, createdSpace.SpaceManagersTeams))
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
-		return
-	}
+	effectiveTeams := s.getEffectiveTeams(ctx, createdSpace)
+	data.SpaceManagersTeams = types.SetValueMust(types.StringType, effectiveTeams)
+
 	tflog.Debug(ctx, fmt.Sprintf("state space %#v", data))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	util.Created(ctx, "space")
@@ -143,7 +142,9 @@ func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	data.IsTaskQueueStopped = types.BoolValue(spaceResult.TaskQueueStopped)
 	data.IsDefault = types.BoolValue(spaceResult.IsDefault)
 	data.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
-	data.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, spaceResult.SpaceManagersTeams))
+
+	effectiveTeams := s.getEffectiveTeams(ctx, spaceResult)
+	data.SpaceManagersTeams = types.SetValueMust(types.StringType, effectiveTeams)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	tflog.Info(ctx, fmt.Sprintf("space read (%s)", data.ID))
@@ -209,10 +210,20 @@ func (s *spaceResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	plan.IsTaskQueueStopped = types.BoolValue(spaceResult.TaskQueueStopped)
 	plan.IsDefault = types.BoolValue(spaceResult.IsDefault)
 	plan.SpaceManagersTeamMembers, _ = types.SetValueFrom(ctx, types.StringType, spaceResult.SpaceManagersTeamMembers)
-	plan.SpaceManagersTeams, _ = types.SetValueFrom(ctx, types.StringType, removeSpaceManagers(ctx, updatedSpace.SpaceManagersTeams))
+
+	effectiveTeams := s.getEffectiveTeams(ctx, updatedSpace)
+	plan.SpaceManagersTeams = types.SetValueMust(types.StringType, effectiveTeams)
 
 	// save plan to state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+}
+
+func (s *spaceResource) getEffectiveTeams(ctx context.Context, updatedSpace *spaces.Space) []attr.Value {
+	effectiveTeamMembers := make([]attr.Value, 0)
+	for _, t := range removeSpaceManagers(ctx, updatedSpace.SpaceManagersTeams) {
+		effectiveTeamMembers = append(effectiveTeamMembers, types.StringValue(t))
+	}
+	return effectiveTeamMembers
 }
 
 func (s *spaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
