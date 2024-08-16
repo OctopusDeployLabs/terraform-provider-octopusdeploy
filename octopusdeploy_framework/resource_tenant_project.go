@@ -90,7 +90,7 @@ func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	spaceId := t.getSpaceId(plan)
+	spaceId := util.GetSpaceId(plan.SpaceID, t.Client)
 
 	tflog.Info(ctx, fmt.Sprintf("connecting tenant (%s) to project (%s)", plan.TenantID, plan.ProjectID))
 
@@ -156,7 +156,7 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	spaceId := t.getSpaceId(plan)
+	spaceId := util.GetSpaceId(plan.SpaceID, t.Client)
 
 	tenant, err := tenants.GetByID(t.Client, spaceId, plan.TenantID.ValueString())
 	if err != nil {
@@ -178,14 +178,6 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 	tflog.Info(ctx, fmt.Sprintf("updated tenant (%s) connection to project (%#v)", plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
 }
 
-func (t *tenantProjectResource) getSpaceId(plan TenantProjectModel) string {
-	spaceId := plan.SpaceID.ValueString()
-	if spaceId == "" {
-		spaceId = t.Client.GetSpaceID()
-	}
-	return spaceId
-}
-
 func (t *tenantProjectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
@@ -197,7 +189,7 @@ func (t *tenantProjectResource) Delete(ctx context.Context, req resource.DeleteR
 
 	tflog.Info(ctx, fmt.Sprintf("removing tenant (%s) from project (%s)", data.TenantID.ValueString(), data.ProjectID.ValueString()))
 
-	spaceId := t.getSpaceId(data)
+	spaceId := util.GetSpaceId(data.SpaceID, t.Client)
 
 	tenant, err := tenants.GetByID(t.Client, spaceId, data.TenantID.ValueString())
 	if err != nil {

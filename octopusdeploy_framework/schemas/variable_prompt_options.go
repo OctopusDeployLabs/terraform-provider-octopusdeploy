@@ -84,6 +84,8 @@ func MapFromVariablePromptOptions(variablePromptOptions *variables.VariablePromp
 				MapFromDisplaySettings(variablePromptOptions.DisplaySettings),
 			},
 		)
+	} else {
+		attrs[VariableSchemaAttributeNames.DisplaySettings] = types.ListNull(types.ObjectType{AttrTypes: VariableDisplaySettingsObjectType()})
 	}
 
 	return types.ObjectValueMust(VariablePromptOptionsObjectType(), attrs)

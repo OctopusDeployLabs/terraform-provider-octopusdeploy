@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -99,4 +100,12 @@ func Map[T, V any](items []T, fn func(T) V) []V {
 		result[i] = fn(t)
 	}
 	return result
+}
+
+func GetSpaceId(planValue types.String, client *client.Client) string {
+	spaceId := planValue.ValueString()
+	if spaceId == "" {
+		spaceId = client.GetSpaceID()
+	}
+	return spaceId
 }

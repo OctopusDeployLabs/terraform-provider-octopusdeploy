@@ -71,6 +71,7 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
+	spaceId := util.GetSpaceId(data.SpaceID, r.Client)
 	name := data.Name.ValueString()
 	newVariable := variables.NewVariable(name)
 	newVariable.Description = data.Description.ValueString()
@@ -79,7 +80,7 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 	newVariable.Type = data.Type.ValueString()
 	newVariable.Scope = schemas.MapToVariableScope(data.Scope)
 	newVariable.Prompt = schemas.MapToVariablePromptOptions(data.Prompt)
-	newVariable.SpaceID = data.SpaceID.ValueString()
+	newVariable.SpaceID = spaceId
 
 	if newVariable.IsSensitive {
 		newVariable.Type = schemas.VariableTypeNames.Sensitive
@@ -90,7 +91,7 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 
 	tflog.Info(ctx, fmt.Sprintf("creating variable: %#v", newVariable))
 
-	variableSet, err := variables.AddSingle(r.Config.Client, r.Config.SpaceID, variableOwnerId.ValueString(), newVariable)
+	variableSet, err := variables.AddSingle(r.Config.Client, spaceId, variableOwnerId.ValueString(), newVariable)
 	if err != nil {
 		resp.Diagnostics.AddError("create variable failed", err.Error())
 		return
@@ -102,7 +103,7 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	mapVariableToState(&data, newVariable)
+	mapVariableToState(ctx, &data, newVariable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -124,7 +125,8 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	variable, err := variables.GetByID(r.Config.Client, data.SpaceID.ValueString(), variableOwnerID.ValueString(), data.ID.ValueString())
+	spaceId := util.GetSpaceId(data.SpaceID, r.Client)
+	variable, err := variables.GetByID(r.Config.Client, spaceId, variableOwnerID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, schemas.VariableResourceDescription); err != nil {
 			resp.Diagnostics.AddError("unable to load variable", err.Error())
@@ -133,7 +135,7 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("variable read (%s)", data.ID))
-	mapVariableToState(&data, variable)
+	mapVariableToState(ctx, &data, variable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -175,7 +177,8 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 
 	updatedVariable.ID = state.ID.ValueString()
 
-	variableSet, err := variables.UpdateSingle(r.Config.Client, state.SpaceID.ValueString(), variableOwnerId.ValueString(), updatedVariable)
+	spaceId := util.GetSpaceId(data.SpaceID, r.Client)
+	variableSet, err := variables.UpdateSingle(r.Config.Client, spaceId, variableOwnerId.ValueString(), updatedVariable)
 	if err != nil {
 		resp.Diagnostics.AddError("update variable failed", err.Error())
 		return
@@ -189,7 +192,7 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 
 	tflog.Info(ctx, fmt.Sprintf("variable updated (%s)", data.ID))
 
-	mapVariableToState(&data, updatedVariable)
+	mapVariableToState(ctx, &data, updatedVariable)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -211,7 +214,8 @@ func (r *variableTypeResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	if _, err := variables.DeleteSingle(r.Config.Client, data.SpaceID.ValueString(), variableOwnerID.ValueString(), data.ID.ValueString()); err != nil {
+	spaceId := util.GetSpaceId(data.SpaceID, r.Client)
+	if _, err := variables.DeleteSingle(r.Config.Client, spaceId, variableOwnerID.ValueString(), data.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("unable to delete variable", err.Error())
 		return
 	}
@@ -269,8 +273,8 @@ func validateVariable(variableSet *variables.VariableSet, newVariable *variables
 	return fmt.Errorf("unable to locate variable for owner ID %s", variableOwnerId)
 }
 
-func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *variables.Variable) {
-	data.SpaceID = types.StringValue(variable.SpaceID)
+func mapVariableToState(ctx context.Context, data *schemas.VariableTypeResourceModel, variable *variables.Variable) {
+	//data.SpaceID =
 	data.Name = types.StringValue(variable.Name)
 	data.Description = types.StringValue(variable.Description)
 	if !data.IsEditable.IsNull() {
@@ -289,19 +293,23 @@ func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *varia
 		}
 	}
 
-	if len(data.Prompt.Elements()) > 0 {
+	if variable.Prompt != nil {
 		data.Prompt = types.ListValueMust(
 			types.ObjectType{AttrTypes: schemas.VariablePromptOptionsObjectType()},
 			[]attr.Value{schemas.MapFromVariablePromptOptions(variable.Prompt)},
 		)
 	}
 
-	if !data.Scope.IsNull() {
+	if variable.Scope.IsEmpty() {
+		data.Scope = types.ListNull(types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()})
+	} else {
 		data.Scope = types.ListValueMust(
 			types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()},
 			[]attr.Value{schemas.MapFromVariableScope(variable.Scope)},
 		)
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Variable model: %v", data))
 
 	data.ID = types.StringValue(variable.GetID())
 }
