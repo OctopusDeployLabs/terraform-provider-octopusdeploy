@@ -101,10 +101,11 @@ func getKubernetesAgentWorkerSchema() map[string]*schema.Schema {
 			Type:        schema.TypeBool,
 		},
 		"worker_pool_ids": {
-			Elem:     &schema.Schema{Type: schema.TypeString},
-			MinItems: 1,
-			Required: true,
-			Type:     schema.TypeList,
+			Description: "A list of worker pool Ids specifying the pools in which this worker belongs",
+			Elem:        &schema.Schema{Type: schema.TypeString},
+			MinItems:    1,
+			Required:    true,
+			Type:        schema.TypeList,
 		},
 
 		// Read-only Values
