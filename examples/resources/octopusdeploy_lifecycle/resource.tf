@@ -20,7 +20,7 @@ resource "octopusdeploy_lifecycle" "example" {
 
     release_retention_policy {
       quantity_to_keep    = 1
-      should_keep_forever = true
+      should_keep_forever = false
       unit                = "Days"
     }
 
