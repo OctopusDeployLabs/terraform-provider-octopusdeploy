@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tagsets"
@@ -12,7 +13,9 @@ import (
 
 func TestAccTag(t *testing.T) {
 	tagSetName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tagSetMigrationName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tagName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	tenantName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	tagColor := "#6e6e6e"
 	tagResourceName := "octopusdeploy_tag." + tagName
 
@@ -44,6 +47,12 @@ func TestAccTag(t *testing.T) {
 				),
 			},
 			{
+				Config: testTagMigrationConfigUpdate(tenantName, tagSetName, tagSetMigrationName, tagName, "#ff0000"),
+				Check: resource.ComposeTestCheckFunc(
+					testTagMigrationWorksAsExpected(t, tagResourceName, tagSetMigrationName),
+				),
+			},
+			{
 				ResourceName:      tagResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -51,6 +60,35 @@ func TestAccTag(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testTagMigrationWorksAsExpected(t *testing.T, n string, tagSetMigrationName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		tagSetID := rs.Primary.Attributes["tag_set_id"]
+		tagSet, err := tagsets.GetByID(octoClient, rs.Primary.Attributes["tag_set_space_id"], tagSetID)
+		assert.Equal(t, tagSet.Name, tagSetMigrationName)
+
+		if err != nil {
+			return fmt.Errorf("error retrieving tag set: %s", err)
+		}
+
+		for _, tag := range tagSet.Tags {
+			if tag.ID == rs.Primary.ID {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("tag not found in tag set")
+	}
 }
 
 func testTagConfig(tagSetName, tagName, tagColor string) string {
@@ -84,6 +122,35 @@ func testTagConfigUpdate(tagSetName, tagName, tagColor string) string {
 			tag_set_id  = octopusdeploy_tag_set.%s.id
 		}
 	`, tagSetName, tagSetName, tagName, tagName, tagColor, tagSetName)
+	return tfConfig
+}
+
+func testTagMigrationConfigUpdate(tenantName, tagSetName, tagSetMigrationName, tagName, tagColor string) string {
+	var tfConfig = fmt.Sprintf(`
+		resource "octopusdeploy_tenant" "tenant1" {
+			name        = "%s"
+		}
+
+		resource "octopusdeploy_tag_set" "%s" {
+			name        = "%s"
+			description = "Test tag set"
+  			depends_on = [ octopusdeploy_tenant.tenant1 ]
+		}
+
+		resource "octopusdeploy_tag_set" "%s" {
+			name        = "%s"
+			description = "Test tag set"
+			depends_on = [ octopusdeploy_tenant.tenant1 ]
+		}
+
+		resource "octopusdeploy_tag" "%s" {
+			name        = "%s"
+			color       = "%s"
+			description = "Updated test tag"
+			tag_set_id  = octopusdeploy_tag_set.%s.id
+			depends_on = [ octopusdeploy_tenant.tenant1 ]
+		}
+	`, tenantName, tagSetName, tagSetName, tagSetMigrationName, tagSetMigrationName, tagName, tagName, tagColor, tagSetMigrationName)
 	return tfConfig
 }
 
