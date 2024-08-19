@@ -15,5 +15,9 @@ jobs:
         with:
           go-version: '1.22'
       - run: go generate main.go
+
+      - name: Stage new and modified files in docs folder
+        run: git add docs/
+
       - name: Check for file changes
-        run: git diff --exit-code
+        run: git diff --cached --exit-code
