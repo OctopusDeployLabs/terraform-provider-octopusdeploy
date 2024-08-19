@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"strings"
 )
 
 func GetResourceLifecycleSchema() resourceSchema.Schema {
@@ -202,11 +203,11 @@ func (v retentionPolicyValidator) ValidateObject(ctx context.Context, req valida
 
 	if !retentionPolicy.Unit.IsNull() {
 		unit := retentionPolicy.Unit.ValueString()
-		if !strings.EqualFold(unit, "Days") && !strings.EqualFold(unit,"Items") {
+		if !strings.EqualFold(unit, "Days") && !strings.EqualFold(unit, "Items") {
 			resp.Diagnostics.AddAttributeError(
 				req.Path.AtName("unit"),
 				"Invalid retention policy unit",
-				"Unit must be either 'Days' or 'Items'",
+				"Unit must be either 'Days' or 'Items' (case insensitive)",
 			)
 		}
 	}
