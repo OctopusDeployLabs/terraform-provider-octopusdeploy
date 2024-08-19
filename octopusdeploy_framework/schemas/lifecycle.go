@@ -202,7 +202,7 @@ func (v retentionPolicyValidator) ValidateObject(ctx context.Context, req valida
 
 	if !retentionPolicy.Unit.IsNull() {
 		unit := retentionPolicy.Unit.ValueString()
-		if unit != "Days" && unit != "Items" {
+		if !strings.EqualFold(unit, "Days") && !strings.EqualFold(unit,"Items") {
 			resp.Diagnostics.AddAttributeError(
 				req.Path.AtName("unit"),
 				"Invalid retention policy unit",
