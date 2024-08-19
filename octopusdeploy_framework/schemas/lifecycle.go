@@ -1,14 +1,19 @@
 package schemas
 
 import (
+	"context"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"strings"
 )
 
 func GetResourceLifecycleSchema() resourceSchema.Schema {
@@ -24,6 +29,21 @@ func GetResourceLifecycleSchema() resourceSchema.Schema {
 			"phase":                     getResourcePhaseBlockSchema(),
 			"release_retention_policy":  getResourceRetentionPolicyBlockSchema(),
 			"tentacle_retention_policy": getResourceRetentionPolicyBlockSchema(),
+		},
+	}
+}
+
+func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{
+		Description: "Provides information about existing lifecycles.",
+		Attributes: map[string]datasourceSchema.Attribute{
+			"id":           util.DataSourceString().Computed().Description("The ID of the lifecycle.").Build(),
+			"space_id":     util.DataSourceString().Optional().Description("The space ID associated with this lifecycle.").Build(),
+			"ids":          util.DataSourceList(types.StringType).Optional().Description("A list of lifecycle IDs to filter by.").Build(),
+			"partial_name": util.DataSourceString().Optional().Description("A partial name to filter lifecycles by.").Build(),
+			"skip":         util.DataSourceInt64().Optional().Description("A filter to specify the number of items to skip in the response.").Build(),
+			"take":         util.DataSourceInt64().Optional().Description("A filter to specify the number of items to take (or return) in the response.").Build(),
+			"lifecycles":   getLifecyclesAttribute(),
 		},
 	}
 }
@@ -70,6 +90,7 @@ func getResourceRetentionPolicyBlockSchema() resourceSchema.ListNestedBlock {
 				"quantity_to_keep": util.ResourceInt64().
 					Optional().Computed().
 					Default(int64default.StaticInt64(30)).
+					Validators(int64validator.AtLeast(0)).
 					Description("The number of days/releases to keep. The default value is 30. If 0 then all are kept.").
 					Build(),
 				"should_keep_forever": util.ResourceBool().
@@ -83,21 +104,9 @@ func getResourceRetentionPolicyBlockSchema() resourceSchema.ListNestedBlock {
 					Description("The unit of quantity to keep. Valid units are Days or Items. The default value is Days.").
 					Build(),
 			},
-		},
-	}
-}
-
-func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
-	return datasourceSchema.Schema{
-		Description: "Provides information about existing lifecycles.",
-		Attributes: map[string]datasourceSchema.Attribute{
-			"id":           util.DataSourceString().Computed().Description("The ID of the lifecycle.").Build(),
-			"space_id":     util.DataSourceString().Optional().Description("The space ID associated with this lifecycle.").Build(),
-			"ids":          util.DataSourceList(types.StringType).Optional().Description("A list of lifecycle IDs to filter by.").Build(),
-			"partial_name": util.DataSourceString().Optional().Description("A partial name to filter lifecycles by.").Build(),
-			"skip":         util.DataSourceInt64().Optional().Description("A filter to specify the number of items to skip in the response.").Build(),
-			"take":         util.DataSourceInt64().Optional().Description("A filter to specify the number of items to take (or return) in the response.").Build(),
-			"lifecycles":   getLifecyclesAttribute(),
+			Validators: []validator.Object{
+				retentionPolicyValidator{},
+			},
 		},
 	}
 }
@@ -147,5 +156,59 @@ func getRetentionPolicyAttribute() datasourceSchema.ListNestedAttribute {
 				"unit":                util.DataSourceString().Computed().Description("The unit of time for the retention policy.").Build(),
 			},
 		},
+	}
+}
+
+type retentionPolicyValidator struct{}
+
+func (v retentionPolicyValidator) Description(ctx context.Context) string {
+	return "validates that should_keep_forever is true only if quantity_to_keep is 0"
+}
+
+func (v retentionPolicyValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v retentionPolicyValidator) ValidateObject(ctx context.Context, req validator.ObjectRequest, resp *validator.ObjectResponse) {
+	var retentionPolicy struct {
+		QuantityToKeep    types.Int64  `tfsdk:"quantity_to_keep"`
+		ShouldKeepForever types.Bool   `tfsdk:"should_keep_forever"`
+		Unit              types.String `tfsdk:"unit"`
+	}
+
+	diags := tfsdk.ValueAs(ctx, req.ConfigValue, &retentionPolicy)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !retentionPolicy.QuantityToKeep.IsNull() && !retentionPolicy.ShouldKeepForever.IsNull() {
+		quantityToKeep := retentionPolicy.QuantityToKeep.ValueInt64()
+		shouldKeepForever := retentionPolicy.ShouldKeepForever.ValueBool()
+
+		if quantityToKeep == 0 && !shouldKeepForever {
+			resp.Diagnostics.AddAttributeError(
+				req.Path.AtName("should_keep_forever"),
+				"Invalid retention policy configuration",
+				"should_keep_forever must be true when quantity_to_keep is 0",
+			)
+		} else if quantityToKeep != 0 && shouldKeepForever {
+			resp.Diagnostics.AddAttributeError(
+				req.Path.AtName("should_keep_forever"),
+				"Invalid retention policy configuration",
+				"should_keep_forever must be false when quantity_to_keep is not 0",
+			)
+		}
+	}
+
+	if !retentionPolicy.Unit.IsNull() {
+		unit := retentionPolicy.Unit.ValueString()
+		if !strings.EqualFold(unit, "Days") && !strings.EqualFold(unit, "Items") {
+			resp.Diagnostics.AddAttributeError(
+				req.Path.AtName("unit"),
+				"Invalid retention policy unit",
+				"Unit must be either 'Days' or 'Items' (case insensitive)",
+			)
+		}
 	}
 }
