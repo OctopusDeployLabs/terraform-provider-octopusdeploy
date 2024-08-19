@@ -115,10 +115,10 @@ func MapFromDisplaySettings(displaySettings *resources.DisplaySettings) attr.Val
 }
 
 func MapFromSelectOptions(selectOptions []*resources.SelectOption) []attr.Value {
-	options := make([]attr.Value, len(selectOptions))
+	options := make([]attr.Value, 0, len(selectOptions))
 	for _, option := range selectOptions {
 		options = append(options, types.ObjectValueMust(
-			VariableDisplaySettingsObjectType(),
+			VariableSelectOptionsObjectType(),
 			map[string]attr.Value{
 				VariableSchemaAttributeNames.Value:       types.StringValue(option.Value),
 				VariableSchemaAttributeNames.DisplayName: types.StringValue(option.DisplayName),
