@@ -124,6 +124,77 @@ func TestAccOctopusDeployLibraryVariableSetWithUpdate(t *testing.T) {
 	})
 }
 
+func TestAccOctopusDeployLibraryVariableSetWithVariable(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	prefix := "octopusdeploy_library_variable_set." + localName
+
+	variableLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	variablePrefix := "octopusdeploy_variable." + variableLocalName
+
+	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	description := "Test variable set"
+	variableName := "Test.Variable " + name
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy:             testLibraryVariableSetDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		Steps: []resource.TestStep{
+			{
+				Config: testLibraryVariableSetWithVariable(localName, variableLocalName, name, description, variableName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOctopusDeployLibraryVariableSetExists(prefix),
+					resource.TestCheckResourceAttr(prefix, "name", name),
+					resource.TestCheckResourceAttr(prefix, "description", description),
+					resource.TestCheckResourceAttr(variablePrefix, "name", variableName),
+					resource.TestCheckResourceAttr(variablePrefix, "type", "String"),
+					resource.TestCheckResourceAttr(variablePrefix, "description", "Test variable"),
+					resource.TestCheckResourceAttr(variablePrefix, "is_sensitive", "false"),
+					resource.TestCheckResourceAttr(variablePrefix, "is_editable", "true"),
+					resource.TestCheckResourceAttr(variablePrefix, "value", "True"),
+					resource.TestCheckResourceAttr(variablePrefix, "prompt.0.description", "test description"),
+					resource.TestCheckResourceAttr(variablePrefix, "prompt.0.label", "test label"),
+					resource.TestCheckResourceAttr(variablePrefix, "prompt.0.is_required", "true"),
+					resource.TestCheckResourceAttr(variablePrefix, "prompt.0.display_settings.0.control_type", "Select"),
+					resource.TestCheckResourceAttr(variablePrefix, "prompt.0.display_settings.0.select_option.0.display_name", "hi"),
+					resource.TestCheckResourceAttr(variablePrefix, "prompt.0.display_settings.0.select_option.0.value", "there"),
+				),
+			},
+		},
+	})
+}
+
+func testLibraryVariableSetWithVariable(localName, variableLocalName, name, description, variableName string) string {
+	return fmt.Sprintf(`
+resource "octopusdeploy_library_variable_set" "%s" {
+  name = "%s"
+  description = "%s"
+}
+
+resource "octopusdeploy_variable" "%s" {
+  name = "%s"
+  type = "String"
+  description = "Test variable"
+  is_sensitive = false
+  is_editable = true
+  owner_id = octopusdeploy_library_variable_set.%s.id
+  value = "True"
+
+  prompt {
+    description = "test description"
+    label       = "test label"
+    is_required = true
+    display_settings {
+      control_type = "Select"
+      select_option {
+        display_name = "hi"
+        value = "there"
+      }
+    }
+  }
+}
+`, localName, name, description, variableLocalName, variableName, localName)
+}
 func testLibraryVariableSetBasic(localName string, name string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_library_variable_set" "%s" {
 		name = "%s"
