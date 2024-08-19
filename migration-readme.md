@@ -1,10 +1,8 @@
 
 
-Templates:
-
+# Templates
 
 ## Datasource
-
 
 ```golang
 import (
@@ -37,10 +35,11 @@ func NewBlahsDataSource() datasource.DataSource {
 }
 
 func (*blahsDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = ProviderTypeName + "_blahs"
+	resp.TypeName = util.GetTypeName("resource name")
 }
 
 func (*blahsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+    // this can be moved to a resource specific file in the `schemas` package
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			// request
@@ -89,8 +88,7 @@ func (b *blahsDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	for _, b  :-= range resp.Items {
 		map from api model to internal model
 	}
-	
-	
+		
 	 */
 	
 	// set state
@@ -100,12 +98,9 @@ func (b *blahsDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 }
 ```
 
-Resource:
-
+## Resource
 
 ```golang
-package octopusdeploy_framework
-
 import (
 	"context"
 	
@@ -134,8 +129,16 @@ func NewBlahResource() resource.Resource {
 }
 
 func (b *blahResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	//TODO implement me
-	panic("implement me")
+	// this can be moved to a seperate file in the `schemas` package    
+    resp.Schema = map[string]resourceSchema.Attribute {
+        Description: "some description",
+        Attributes: map[string]schema.Attribute{
+            "id":       util.GetIdResourceSchema(),
+            "space_id": util.GetSpaceIdResourceSchema("blahs"),
+            "name":     util.GetNameResourceSchema(true),
+            ...
+        },
+    }
 }
 
 func (b *blahResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -147,21 +150,48 @@ func (b *blahResource) Metadata(ctx context.Context, request resource.MetadataRe
 }
 
 func (b *blahResource) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
-	var data model
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	var plan model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	....
+
+    // map to api resource
+    newResource := ...
+
+    // call client for create
+    blah := blahResources.Add(b.Client, util.GetSpace(), newResource)
+
+    // map result to state
+    plan.Name := types.StringValue(blah.Name)
+    ...
+
+    // save back to state
+    resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+
 }
 
 func (b *blahResource) Read(ctx context.Context, request resource.ReadRequest, response *resource.ReadResponse) {
-	var data model
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	var state model
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	....
+
+    // call client, clean up the state if the resource cannot be read
+    blah,err := blahs.GetByID(b.Client, util.GetSpace(), state.ID.ValueString())
+    if err != nil {
+        if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "blah"); err != nil {
+			resp.Diagnostics.AddError("unable to load blah", err.Error())
+		}
+		return
+    }
+
+    // map result back to state
+    state.Name := types.StringValue(blah.Name)
+
+    // save back to state
+    resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (b *blahResource) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
@@ -185,8 +215,10 @@ func (b *blahResource) Update(ctx context.Context, request resource.UpdateReques
 	_, err = resources.Update(b.Client, result)
 
     // map result back to state
+    state.Name = types.ValueString(result.Name)
 
-	
+    // save back to state
+    resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (b *blahResource) Delete(ctx context.Context, request resource.DeleteRequest, response *resource.DeleteResponse) {
@@ -212,7 +244,7 @@ func (s *blahResource) ImportState(ctx context.Context, req resource.ImportState
 }
 ```
 
-# Gotchas
+# Notes
 
 ## SpaceID
 
@@ -242,3 +274,47 @@ if err := b.Client.Resource.DeleteById(data.ID.ValueString(); err != nil {
 }
 ```
 
+## Schemas
+
+The SDKv2 implementation would share a schema between the datasource and the resource, but Framework has each of the scema types in different packages:
+
+Datasource schema: `github.com/hashicorp/terraform-plugin-framework/datasource/schema`
+Resource schema: `github.com/hashicorp/terraform-plugin-framework/resource/schema`
+
+You will probably need to implement the schema for each Octopus resource twice, to counteract drift, the migration has placed the two definitions in the save file side-by-side.
+
+The import section will need aliases for each of the schema packages and each of the methods will return the appropriate type:
+
+```golang
+import (
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+    ...
+)
+
+func GetBlahDataSourceSchema() map[string]datasourceSchema.Attribute {
+    return map[string]datasourceSchema.Attribute{
+        "partial_name": util.GetQueryPartialNameDatasourceSchema(),
+        ...
+    }
+}
+
+func GetBlahResourceSchema() map[string]resourceSchema.Attribute {
+    return map[string]resourceSchema.Attribute{
+        "name":        util.GetNameResourceSchema(true)
+        ...
+    }
+}
+```
+
+There are times when you will need to convert to a List/Set/Object and the Framework functions will require a list of attribute types which is again in a different package, this can also be placed in the same schema file:
+```golang
+import "github.com/hashicorp/terraform-plugin-framework/attr"
+
+func BlahObjectType() map[string]attr.Type {
+    return map[string]attr.Type {
+        "name": types.StringType,
+        ...
+    }
+}
+```
