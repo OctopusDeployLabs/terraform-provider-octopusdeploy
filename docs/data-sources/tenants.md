@@ -31,18 +31,18 @@ Provides information about existing tenants.
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `tenants` (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
+- `tenants` (List of Object) A list of tenants that match the filter(s). (see [below for nested schema](#nestedatt--tenants))
 
-<a id="nestedblock--tenants"></a>
+<a id="nestedatt--tenants"></a>
 ### Nested Schema for `tenants`
 
 Read-Only:
 
-- `cloned_from_tenant_id` (String) The ID of the tenant from which this tenant was cloned.
-- `description` (String) The description of this tenant.
-- `id` (String) The unique ID for this resource.
-- `name` (String) The name of this resource.
-- `space_id` (String) The space ID associated with this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `cloned_from_tenant_id` (String)
+- `description` (String)
+- `id` (String)
+- `name` (String)
+- `space_id` (String)
+- `tenant_tags` (List of String)
 
 

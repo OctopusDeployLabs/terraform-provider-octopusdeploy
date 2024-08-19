@@ -24,20 +24,20 @@ Provides information about existing GitCredentials.
 
 ### Read-Only
 
-- `git_credentials` (Block List) A list of Git Credentials that match the filter(s). (see [below for nested schema](#nestedblock--git_credentials))
+- `git_credentials` (List of Object) A list of Git Credentials that match the filter(s). (see [below for nested schema](#nestedatt--git_credentials))
 - `id` (String) The ID of this resource.
 
-<a id="nestedblock--git_credentials"></a>
+<a id="nestedatt--git_credentials"></a>
 ### Nested Schema for `git_credentials`
 
 Read-Only:
 
-- `description` (String) The description of this Git credential.
-- `id` (String) The unique ID for this resource.
-- `name` (String) The name of the Git credential. This name must be unique.
-- `password` (String, Sensitive) The password for the Git credential.
-- `space_id` (String) The space ID associated with this resource.
-- `type` (String) The Git credential authentication type.
-- `username` (String) The username for the Git credential.
+- `description` (String)
+- `id` (String)
+- `name` (String)
+- `password` (String)
+- `space_id` (String)
+- `type` (String)
+- `username` (String)
 
 

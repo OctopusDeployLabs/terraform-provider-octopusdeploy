@@ -27,22 +27,22 @@ Provides information about existing library variable sets.
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `library_variable_sets` (Block List) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedblock--library_variable_sets))
+- `library_variable_sets` (List of Object) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedatt--library_variable_sets))
 
-<a id="nestedblock--library_variable_sets"></a>
+<a id="nestedatt--library_variable_sets"></a>
 ### Nested Schema for `library_variable_sets`
 
 Read-Only:
 
-- `description` (String) The description of this library variable set.
-- `id` (String) The unique ID for this resource.
-- `name` (String) The name of this resource.
-- `space_id` (String) The space ID associated with this resource.
-- `template` (List of Object) (see [below for nested schema](#nestedatt--library_variable_sets--template))
+- `description` (String)
+- `id` (String)
+- `name` (String)
+- `space_id` (String)
+- `template` (List of Object) (see [below for nested schema](#nestedobjatt--library_variable_sets--template))
 - `template_ids` (Map of String)
 - `variable_set_id` (String)
 
-<a id="nestedatt--library_variable_sets--template"></a>
+<a id="nestedobjatt--library_variable_sets--template"></a>
 ### Nested Schema for `library_variable_sets.template`
 
 Read-Only:

@@ -36,27 +36,27 @@ data "octopusdeploy_environments" "example" {
 
 ### Read-Only
 
-- `environments` (Block List) A list of environments that match the filter(s). (see [below for nested schema](#nestedblock--environments))
+- `environments` (List of Object) A list of environments that match the filter(s). (see [below for nested schema](#nestedatt--environments))
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
 
-<a id="nestedblock--environments"></a>
+<a id="nestedatt--environments"></a>
 ### Nested Schema for `environments`
 
 Read-Only:
 
 - `allow_dynamic_infrastructure` (Boolean)
-- `description` (String) The description of this environment.
-- `id` (String) The unique ID for this resource.
-- `jira_extension_settings` (List of Object) Provides extension settings for the Jira integration for this environment. (see [below for nested schema](#nestedatt--environments--jira_extension_settings))
-- `jira_service_management_extension_settings` (List of Object) Provides extension settings for the Jira Service Management (JSM) integration for this environment. (see [below for nested schema](#nestedatt--environments--jira_service_management_extension_settings))
-- `name` (String) The name of this resource.
-- `servicenow_extension_settings` (List of Object) Provides extension settings for the ServiceNow integration for this environment. (see [below for nested schema](#nestedatt--environments--servicenow_extension_settings))
+- `description` (String)
+- `id` (String)
+- `jira_extension_settings` (List of Object) (see [below for nested schema](#nestedobjatt--environments--jira_extension_settings))
+- `jira_service_management_extension_settings` (List of Object) (see [below for nested schema](#nestedobjatt--environments--jira_service_management_extension_settings))
+- `name` (String)
+- `servicenow_extension_settings` (List of Object) (see [below for nested schema](#nestedobjatt--environments--servicenow_extension_settings))
 - `slug` (String)
-- `sort_order` (Number) The order number to sort an environment.
-- `space_id` (String) The space ID associated with this environment.
+- `sort_order` (Number)
+- `space_id` (String)
 - `use_guided_failure` (Boolean)
 
-<a id="nestedatt--environments--jira_extension_settings"></a>
+<a id="nestedobjatt--environments--jira_extension_settings"></a>
 ### Nested Schema for `environments.jira_extension_settings`
 
 Read-Only:
@@ -64,7 +64,7 @@ Read-Only:
 - `environment_type` (String)
 
 
-<a id="nestedatt--environments--jira_service_management_extension_settings"></a>
+<a id="nestedobjatt--environments--jira_service_management_extension_settings"></a>
 ### Nested Schema for `environments.jira_service_management_extension_settings`
 
 Read-Only:
@@ -72,7 +72,7 @@ Read-Only:
 - `is_enabled` (Boolean)
 
 
-<a id="nestedatt--environments--servicenow_extension_settings"></a>
+<a id="nestedobjatt--environments--servicenow_extension_settings"></a>
 ### Nested Schema for `environments.servicenow_extension_settings`
 
 Read-Only:

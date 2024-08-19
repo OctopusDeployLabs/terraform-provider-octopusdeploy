@@ -36,10 +36,10 @@ data "octopusdeploy_feeds" "example" {
 
 ### Read-Only
 
-- `feeds` (Block List) A list of feeds that match the filter(s). (see [below for nested schema](#nestedblock--feeds))
+- `feeds` (List of Object) A list of feeds that match the filter(s). (see [below for nested schema](#nestedatt--feeds))
 - `id` (String) The ID of this resource.
 
-<a id="nestedblock--feeds"></a>
+<a id="nestedatt--feeds"></a>
 ### Nested Schema for `feeds`
 
 Read-Only:
@@ -47,17 +47,17 @@ Read-Only:
 - `access_key` (String)
 - `api_version` (String)
 - `delete_unreleased_packages_after_days` (Number)
-- `download_attempts` (Number) The number of times a deployment should attempt to download a package from this feed before failing.
-- `download_retry_backoff_seconds` (Number) The number of seconds to apply as a linear back off between download attempts.
+- `download_attempts` (Number)
+- `download_retry_backoff_seconds` (Number)
 - `feed_type` (String)
 - `feed_uri` (String)
-- `id` (String) The unique ID for this resource.
+- `id` (String)
 - `is_enhanced_mode` (Boolean)
-- `name` (String) A short, memorable, unique name for this feed. Example: ACME Builds.
+- `name` (String)
 - `package_acquisition_location_options` (List of String)
-- `password` (String, Sensitive) The password associated with this resource.
+- `password` (String)
 - `region` (String)
 - `registry_path` (String)
-- `secret_key` (String, Sensitive)
-- `space_id` (String) The space ID associated with this resource.
-- `username` (String, Sensitive) The username associated with this resource.
+- `secret_key` (String)
+- `space_id` (String)
+- `username` (String)

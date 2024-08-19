@@ -27,20 +27,20 @@ Provides information about existing worker pools.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `worker_pools` (Block List) A list of worker pools that match the filter(s). (see [below for nested schema](#nestedblock--worker_pools))
+- `worker_pools` (List of Object) A list of worker pools that match the filter(s). (see [below for nested schema](#nestedatt--worker_pools))
 
-<a id="nestedblock--worker_pools"></a>
+<a id="nestedatt--worker_pools"></a>
 ### Nested Schema for `worker_pools`
 
 Read-Only:
 
 - `can_add_workers` (Boolean)
-- `description` (String) The description of this worker pool.
-- `id` (String) The unique ID for this resource.
+- `description` (String)
+- `id` (String)
 - `is_default` (Boolean)
-- `name` (String) The name of this resource.
-- `sort_order` (Number) The order number to sort a dynamic worker pool.
-- `space_id` (String) The space ID associated with this resource.
+- `name` (String)
+- `sort_order` (Number)
+- `space_id` (String)
 - `worker_pool_type` (String)
 - `worker_type` (String)
 

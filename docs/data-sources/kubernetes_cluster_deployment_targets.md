@@ -36,52 +36,52 @@ Provides information about existing Kubernetes cluster deployment targets.
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `kubernetes_cluster_deployment_targets` (Block List) A list of Kubernetes cluster deployment targets that match the filter(s). (see [below for nested schema](#nestedblock--kubernetes_cluster_deployment_targets))
+- `kubernetes_cluster_deployment_targets` (List of Object) A list of Kubernetes cluster deployment targets that match the filter(s). (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets))
 
-<a id="nestedblock--kubernetes_cluster_deployment_targets"></a>
+<a id="nestedatt--kubernetes_cluster_deployment_targets"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets`
 
 Read-Only:
 
-- `authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--authentication))
-- `aws_account_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--aws_account_authentication))
-- `azure_service_principal_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--azure_service_principal_authentication))
-- `certificate_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--certificate_authentication))
+- `authentication` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--authentication))
+- `aws_account_authentication` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--aws_account_authentication))
+- `azure_service_principal_authentication` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--azure_service_principal_authentication))
+- `certificate_authentication` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--certificate_authentication))
 - `cluster_certificate` (String)
 - `cluster_certificate_path` (String)
 - `cluster_url` (String)
-- `container` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--container))
+- `container` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--container))
 - `container_options` (String)
 - `default_worker_pool_id` (String)
-- `endpoint` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--endpoint))
-- `environments` (List of String) A list of environment IDs associated with this resource.
-- `gcp_account_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--gcp_account_authentication))
+- `endpoint` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--endpoint))
+- `environments` (List of String)
+- `gcp_account_authentication` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--gcp_account_authentication))
 - `has_latest_calamari` (Boolean)
-- `health_status` (String) Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.
-- `id` (String) The unique ID for this resource.
+- `health_status` (String)
+- `id` (String)
 - `is_disabled` (Boolean)
 - `is_in_process` (Boolean)
 - `machine_policy_id` (String)
-- `name` (String) The name of this resource.
+- `name` (String)
 - `namespace` (String)
 - `operating_system` (String)
-- `pod_authentication` (List of Object) (see [below for nested schema](#nestedatt--kubernetes_cluster_deployment_targets--pod_authentication))
+- `pod_authentication` (List of Object) (see [below for nested schema](#nestedobjatt--kubernetes_cluster_deployment_targets--pod_authentication))
 - `proxy_id` (String)
 - `roles` (List of String)
 - `running_in_container` (Boolean)
 - `shell_name` (String)
 - `shell_version` (String)
 - `skip_tls_verification` (Boolean)
-- `space_id` (String) The space ID associated with this resource.
-- `status` (String) The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.
-- `status_summary` (String) A summary elaborating on the status of this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `space_id` (String)
+- `status` (String)
+- `status_summary` (String)
+- `tenant_tags` (List of String)
+- `tenanted_deployment_participation` (String)
+- `tenants` (List of String)
 - `thumbprint` (String)
 - `uri` (String)
 
-<a id="nestedatt--kubernetes_cluster_deployment_targets--authentication"></a>
+<a id="nestedobjatt--kubernetes_cluster_deployment_targets--authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.authentication`
 
 Read-Only:
@@ -89,7 +89,7 @@ Read-Only:
 - `account_id` (String)
 
 
-<a id="nestedatt--kubernetes_cluster_deployment_targets--aws_account_authentication"></a>
+<a id="nestedobjatt--kubernetes_cluster_deployment_targets--aws_account_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.aws_account_authentication`
 
 Read-Only:
@@ -104,7 +104,7 @@ Read-Only:
 - `use_instance_role` (Boolean)
 
 
-<a id="nestedatt--kubernetes_cluster_deployment_targets--azure_service_principal_authentication"></a>
+<a id="nestedobjatt--kubernetes_cluster_deployment_targets--azure_service_principal_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.azure_service_principal_authentication`
 
 Read-Only:
@@ -114,7 +114,7 @@ Read-Only:
 - `cluster_resource_group` (String)
 
 
-<a id="nestedatt--kubernetes_cluster_deployment_targets--certificate_authentication"></a>
+<a id="nestedobjatt--kubernetes_cluster_deployment_targets--certificate_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.certificate_authentication`
 
 Read-Only:
@@ -122,7 +122,7 @@ Read-Only:
 - `client_certificate` (String)
 
 
-<a id="nestedatt--kubernetes_cluster_deployment_targets--container"></a>
+<a id="nestedobjatt--kubernetes_cluster_deployment_targets--container"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.container`
 
 Read-Only:
@@ -131,7 +131,7 @@ Read-Only:
 - `image` (String)
 
 
-<a id="nestedatt--kubernetes_cluster_deployment_targets--endpoint"></a>
+<a id="nestedobjatt--kubernetes_cluster_deployment_targets--endpoint"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.endpoint`
 
 Read-Only:
@@ -235,7 +235,7 @@ Read-Only:
 
 
 
-<a id="nestedatt--kubernetes_cluster_deployment_targets--gcp_account_authentication"></a>
+<a id="nestedobjatt--kubernetes_cluster_deployment_targets--gcp_account_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.gcp_account_authentication`
 
 Read-Only:
@@ -250,7 +250,7 @@ Read-Only:
 - `zone` (String)
 
 
-<a id="nestedatt--kubernetes_cluster_deployment_targets--pod_authentication"></a>
+<a id="nestedobjatt--kubernetes_cluster_deployment_targets--pod_authentication"></a>
 ### Nested Schema for `kubernetes_cluster_deployment_targets.pod_authentication`
 
 Read-Only:

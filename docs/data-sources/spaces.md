@@ -34,20 +34,20 @@ data "octopusdeploy_spaces" "spaces" {
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `spaces` (Block List) A list of spaces that match the filter(s). (see [below for nested schema](#nestedblock--spaces))
+- `spaces` (List of Object) A list of spaces that match the filter(s). (see [below for nested schema](#nestedatt--spaces))
 
-<a id="nestedblock--spaces"></a>
+<a id="nestedatt--spaces"></a>
 ### Nested Schema for `spaces`
 
 Read-Only:
 
-- `description` (String) The description of this space.
-- `id` (String) The unique ID for this resource.
-- `is_default` (Boolean) Specifies if this space is the default space in Octopus.
-- `is_task_queue_stopped` (Boolean) Specifies the status of the task queue for this space.
-- `name` (String) The name of this resource, no more than 20 characters long
-- `slug` (String) The unique slug of this space.
-- `space_managers_team_members` (Set of String) A list of user IDs designated to be managers of this space.
-- `space_managers_teams` (Set of String) A list of team IDs designated to be managers of this space.
+- `description` (String)
+- `id` (String)
+- `is_default` (Boolean)
+- `is_task_queue_stopped` (Boolean)
+- `name` (String)
+- `slug` (String)
+- `space_managers_team_members` (Set of String)
+- `space_managers_teams` (Set of String)
 
 

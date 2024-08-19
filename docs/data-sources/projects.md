@@ -41,47 +41,47 @@ data "octopusdeploy_projects" "example" {
 ### Read-Only
 
 - `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `projects` (Block List) A list of projects that match the filter(s). (see [below for nested schema](#nestedblock--projects))
+- `projects` (List of Object) A list of projects that match the filter(s). (see [below for nested schema](#nestedatt--projects))
 
-<a id="nestedblock--projects"></a>
+<a id="nestedatt--projects"></a>
 ### Nested Schema for `projects`
 
 Read-Only:
 
-- `allow_deployments_to_no_targets` (Boolean, Deprecated)
+- `allow_deployments_to_no_targets` (Boolean)
 - `auto_create_release` (Boolean)
 - `auto_deploy_release_overrides` (List of String)
 - `cloned_from_project_id` (String)
-- `connectivity_policy` (List of Object) (see [below for nested schema](#nestedatt--projects--connectivity_policy))
+- `connectivity_policy` (List of Object) (see [below for nested schema](#nestedobjatt--projects--connectivity_policy))
 - `default_guided_failure_mode` (String)
 - `default_to_skip_if_already_installed` (Boolean)
 - `deployment_changes_template` (String)
 - `deployment_process_id` (String)
-- `description` (String) The description of this project.
-- `discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
-- `git_anonymous_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_anonymous_persistence_settings))
-- `git_library_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_library_persistence_settings))
-- `git_username_password_persistence_settings` (List of Object) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedatt--projects--git_username_password_persistence_settings))
-- `id` (String) The unique ID for this resource.
+- `description` (String)
+- `discrete_channel_release` (Boolean)
+- `git_anonymous_persistence_settings` (List of Object) (see [below for nested schema](#nestedobjatt--projects--git_anonymous_persistence_settings))
+- `git_library_persistence_settings` (List of Object) (see [below for nested schema](#nestedobjatt--projects--git_library_persistence_settings))
+- `git_username_password_persistence_settings` (List of Object) (see [below for nested schema](#nestedobjatt--projects--git_username_password_persistence_settings))
+- `id` (String)
 - `included_library_variable_sets` (List of String)
 - `is_disabled` (Boolean)
-- `is_discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
+- `is_discrete_channel_release` (Boolean)
 - `is_version_controlled` (Boolean)
-- `jira_service_management_extension_settings` (List of Object) Provides extension settings for the Jira Service Management (JSM) integration for this project. (see [below for nested schema](#nestedatt--projects--jira_service_management_extension_settings))
-- `lifecycle_id` (String) The lifecycle ID associated with this project.
-- `name` (String) The name of the project in Octopus Deploy. This name must be unique.
-- `project_group_id` (String) The project group ID associated with this project.
-- `release_creation_strategy` (List of Object) (see [below for nested schema](#nestedatt--projects--release_creation_strategy))
+- `jira_service_management_extension_settings` (List of Object) (see [below for nested schema](#nestedobjatt--projects--jira_service_management_extension_settings))
+- `lifecycle_id` (String)
+- `name` (String)
+- `project_group_id` (String)
+- `release_creation_strategy` (List of Object) (see [below for nested schema](#nestedobjatt--projects--release_creation_strategy))
 - `release_notes_template` (String)
-- `servicenow_extension_settings` (List of Object) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedatt--projects--servicenow_extension_settings))
-- `slug` (String) A human-readable, unique identifier, used to identify a project.
-- `space_id` (String) The space ID associated with this project.
-- `template` (List of Object) (see [below for nested schema](#nestedatt--projects--template))
-- `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
+- `servicenow_extension_settings` (List of Object) (see [below for nested schema](#nestedobjatt--projects--servicenow_extension_settings))
+- `slug` (String)
+- `space_id` (String)
+- `template` (List of Object) (see [below for nested schema](#nestedobjatt--projects--template))
+- `tenanted_deployment_participation` (String)
 - `variable_set_id` (String)
-- `versioning_strategy` (Set of Object) (see [below for nested schema](#nestedatt--projects--versioning_strategy))
+- `versioning_strategy` (Set of Object) (see [below for nested schema](#nestedobjatt--projects--versioning_strategy))
 
-<a id="nestedatt--projects--connectivity_policy"></a>
+<a id="nestedobjatt--projects--connectivity_policy"></a>
 ### Nested Schema for `projects.connectivity_policy`
 
 Read-Only:
@@ -92,7 +92,7 @@ Read-Only:
 - `target_roles` (List of String)
 
 
-<a id="nestedatt--projects--git_anonymous_persistence_settings"></a>
+<a id="nestedobjatt--projects--git_anonymous_persistence_settings"></a>
 ### Nested Schema for `projects.git_anonymous_persistence_settings`
 
 Read-Only:
@@ -103,7 +103,7 @@ Read-Only:
 - `url` (String)
 
 
-<a id="nestedatt--projects--git_library_persistence_settings"></a>
+<a id="nestedobjatt--projects--git_library_persistence_settings"></a>
 ### Nested Schema for `projects.git_library_persistence_settings`
 
 Read-Only:
@@ -115,7 +115,7 @@ Read-Only:
 - `url` (String)
 
 
-<a id="nestedatt--projects--git_username_password_persistence_settings"></a>
+<a id="nestedobjatt--projects--git_username_password_persistence_settings"></a>
 ### Nested Schema for `projects.git_username_password_persistence_settings`
 
 Read-Only:
@@ -128,7 +128,7 @@ Read-Only:
 - `username` (String)
 
 
-<a id="nestedatt--projects--jira_service_management_extension_settings"></a>
+<a id="nestedobjatt--projects--jira_service_management_extension_settings"></a>
 ### Nested Schema for `projects.jira_service_management_extension_settings`
 
 Read-Only:
@@ -138,7 +138,7 @@ Read-Only:
 - `service_desk_project_name` (String)
 
 
-<a id="nestedatt--projects--release_creation_strategy"></a>
+<a id="nestedobjatt--projects--release_creation_strategy"></a>
 ### Nested Schema for `projects.release_creation_strategy`
 
 Read-Only:
@@ -157,7 +157,7 @@ Read-Only:
 
 
 
-<a id="nestedatt--projects--servicenow_extension_settings"></a>
+<a id="nestedobjatt--projects--servicenow_extension_settings"></a>
 ### Nested Schema for `projects.servicenow_extension_settings`
 
 Read-Only:
@@ -168,7 +168,7 @@ Read-Only:
 - `standard_change_template_name` (String)
 
 
-<a id="nestedatt--projects--template"></a>
+<a id="nestedobjatt--projects--template"></a>
 ### Nested Schema for `projects.template`
 
 Read-Only:
@@ -181,7 +181,7 @@ Read-Only:
 - `name` (String)
 
 
-<a id="nestedatt--projects--versioning_strategy"></a>
+<a id="nestedobjatt--projects--versioning_strategy"></a>
 ### Nested Schema for `projects.versioning_strategy`
 
 Read-Only:
