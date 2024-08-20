@@ -11,10 +11,10 @@ const projectGroupDescription = "project group"
 
 func GetProjectGroupDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"id":          util.GetIdResourceSchema(),
-		"space_id":    util.GetSpaceIdResourceSchema(projectGroupDescription),
+		"id":          GetIdDatasourceSchema(true),
+		"space_id":    GetSpaceIdDatasourceSchema(projectGroupDescription, true),
 		"name":        GetReadonlyNameDatasourceSchema(),
-		"description": util.GetDescriptionResourceSchema(projectGroupDescription),
+		"description": GetReadonlyDescriptionDatasourceSchema(projectGroupDescription),
 	}
 }
 
