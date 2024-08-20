@@ -13,6 +13,8 @@ var testableSchemas = []EntitySchema{
 	LifecycleSchema{},
 	NugetFeedSchema{},
 	ProjectSchema{},
+	HelmFeedSchema{},
+	EnvironmentSchema{},
 }
 
 func TestSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {
