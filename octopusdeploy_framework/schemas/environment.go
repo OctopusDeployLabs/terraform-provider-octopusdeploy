@@ -30,6 +30,10 @@ const (
 	EnvironmentServiceNowExtensionSettingsIsEnabled            = "is_enabled"
 )
 
+type EnvironmentSchema struct{}
+
+var _ EntitySchema = EnvironmentSchema{}
+
 var jiraEnvironmentTypeNames = struct {
 	Development string
 	Production  string
@@ -74,7 +78,7 @@ func EnvironmentObjectType() map[string]attr.Type {
 	}
 }
 
-func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
+func (e EnvironmentSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":                 GetIdDatasourceSchema(true),
 		"slug":               GetSlugDatasourceSchema(EnvironmentResourceDescription, true),
@@ -125,7 +129,7 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 	}
 }
 
-func GetEnvironmentResourceSchema() resourceSchema.Schema {
+func (e EnvironmentSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(EnvironmentResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{

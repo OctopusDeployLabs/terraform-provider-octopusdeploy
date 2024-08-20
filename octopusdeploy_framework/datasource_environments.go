@@ -47,8 +47,8 @@ func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaReq
 			"space_id":     schemas.GetSpaceIdDatasourceSchema(schemas.EnvironmentResourceDescription, false),
 			"name":         schemas.GetQueryNameDatasourceSchema(),
 			"partial_name": schemas.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
+			"skip":         schemas.GetQuerySkipDatasourceSchema(),
+			"take":         schemas.GetQueryTakeDatasourceSchema(),
 
 			//response
 			"id": schemas.GetIdDatasourceSchema(true),
@@ -57,7 +57,7 @@ func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaReq
 			"environments": schema.ListNestedBlock{
 				Description: "Provides information about existing environments.",
 				NestedObject: schema.NestedBlockObject{
-					Attributes: schemas.GetEnvironmentDatasourceSchema(),
+					Attributes: environmentSchema.GetDatasourceSchemaAttributes(),
 				},
 			},
 		},

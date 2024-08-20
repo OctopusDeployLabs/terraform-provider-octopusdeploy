@@ -7,6 +7,7 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
 )
@@ -39,7 +40,10 @@ func (p *projectsDataSource) Metadata(_ context.Context, req datasource.Metadata
 }
 
 func (p *projectsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schemas.GetProjectDataSourceSchema()
+	resp.Schema = datasourceSchema.Schema{
+		Description: "Provides information about existing Octopus Deploy projects.",
+		Attributes:  schemas.ProjectSchema{}.GetDatasourceSchemaAttributes(),
+	}
 }
 
 func (p *projectsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

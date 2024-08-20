@@ -101,6 +101,19 @@ func Map[T, V any](items []T, fn func(T) V) []V {
 	return result
 }
 
+func GetIds(ids types.List) []string {
+	var result = make([]string, 0, len(ids.Elements()))
+	for _, id := range ids.Elements() {
+		strVal, ok := id.(types.String)
+
+		if !ok || strVal.IsNull() || strVal.IsUnknown() {
+			continue
+		}
+		result = append(result, strVal.ValueString())
+	}
+	return result
+}
+
 func GetNumber(val types.Int64) int {
 	v := 0
 	if !val.IsNull() {

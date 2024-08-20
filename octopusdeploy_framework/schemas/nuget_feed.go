@@ -11,6 +11,8 @@ const nugetFeedDescription = "nuget feed"
 
 type NugetFeedSchema struct{}
 
+var _ EntitySchema = NugetFeedSchema{}
+
 func (n NugetFeedSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Attributes: map[string]resourceSchema.Attribute{
@@ -34,11 +36,9 @@ func (n NugetFeedSchema) GetResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func (n NugetFeedSchema) GetDatasource() datasourceSchema.Schema {
-	return datasourceSchema.Schema{}
+func (n NugetFeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{}
 }
-
-var _ EntitySchema = NugetFeedSchema{}
 
 type NugetFeedTypeResourceModel struct {
 	DownloadAttempts                  types.Int64  `tfsdk:"download_attempts"`

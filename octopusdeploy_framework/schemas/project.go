@@ -12,10 +12,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+type ProjectSchema struct{}
+
+var _ EntitySchema = ProjectSchema{}
+
 const ProjectResourceName = "project"
 const ProjectDataSourceName = "projects"
 
-func GetProjectResourceSchema() resourceSchema.Schema {
+func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages projects in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
@@ -183,24 +187,20 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func GetProjectDataSourceSchema() datasourceSchema.Schema {
-	return datasourceSchema.Schema{
-		Description: "Provides information about existing Octopus Deploy projects.",
-		Attributes: map[string]datasourceSchema.Attribute{
-			"id":                     util.ResourceString().Computed().Description("An auto-generated identifier that includes the timestamp when this data source was last modified.").Build(),
-			"cloned_from_project_id": util.DataSourceString().Optional().Description("A filter to search for cloned resources by a project ID.").Build(),
-			"ids":                    GetQueryIDsDatasourceSchema(),
-			"is_clone":               util.DataSourceBool().Optional().Description("A filter to search for cloned resources.").Build(),
-			"name":                   util.DataSourceString().Optional().Description("A filter to search by name").Build(),
-			"partial_name":           GetQueryPartialNameDatasourceSchema(),
-			"skip":                   GetQuerySkipDatasourceSchema(),
-			"space_id":               util.ResourceString().Optional().Description("A Space ID to filter by. Will revert what is specified on the provider if not set").Build(),
-			"take":                   GetQueryTakeDatasourceSchema(),
-			"projects":               getProjectsDataSourceAttribute(),
-		},
+func (p ProjectSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{
+		"id":                     util.DataSourceString().Computed().Description("An auto-generated identifier that includes the timestamp when this data source was last modified.").Build(),
+		"cloned_from_project_id": util.DataSourceString().Optional().Description("A filter to search for cloned resources by a project ID.").Build(),
+		"ids":                    GetQueryIDsDatasourceSchema(),
+		"is_clone":               util.DataSourceBool().Optional().Description("A filter to search for cloned resources.").Build(),
+		"name":                   util.DataSourceString().Optional().Description("A filter to search by name").Build(),
+		"partial_name":           GetQueryPartialNameDatasourceSchema(),
+		"skip":                   GetQuerySkipDatasourceSchema(),
+		"space_id":               util.DataSourceString().Optional().Description("A Space ID to filter by. Will revert what is specified on the provider if not set").Build(),
+		"take":                   GetQueryTakeDatasourceSchema(),
+		"projects":               getProjectsDataSourceAttribute(),
 	}
 }
-
 func getProjectsDataSourceAttribute() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
 		Description: "A list of projects that match the filter(s).",

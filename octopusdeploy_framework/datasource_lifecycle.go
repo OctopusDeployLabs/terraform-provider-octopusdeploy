@@ -3,6 +3,8 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
@@ -40,7 +42,10 @@ func (l *lifecyclesDataSource) Metadata(ctx context.Context, req datasource.Meta
 
 func (l *lifecyclesDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	tflog.Debug(ctx, "lifecycles datasource Schema")
-	resp.Schema = lifecycleSchema.GetDatasource()
+	resp.Schema = datasourceSchema.Schema{
+		Description: "Provides information about existing lifecycles.",
+		Attributes:  schemas.LifecycleSchema{}.GetDatasourceSchemaAttributes(),
+	}
 }
 
 func (l *lifecyclesDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

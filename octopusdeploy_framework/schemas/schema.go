@@ -309,19 +309,6 @@ func GetBooleanResourceAttribute(description string, defaultValue bool, isOption
 	}
 }
 
-func GetIds(ids types.List) []string {
-	var result = make([]string, 0, len(ids.Elements()))
-	for _, id := range ids.Elements() {
-		strVal, ok := id.(types.String)
-
-		if !ok || strVal.IsNull() || strVal.IsUnknown() {
-			continue
-		}
-		result = append(result, strVal.ValueString())
-	}
-	return result
-}
-
 func GetRequiredStringResourceSchema(description string) resourceSchema.StringAttribute {
 	return resourceSchema.StringAttribute{
 		Required:    true,

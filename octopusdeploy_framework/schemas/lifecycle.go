@@ -16,11 +16,6 @@ import (
 	"strings"
 )
 
-type EntitySchema interface {
-	GetResourceSchema() resourceSchema.Schema
-	GetDatasource() datasourceSchema.Schema
-}
-
 var _ EntitySchema = LifecycleSchema{}
 
 type LifecycleSchema struct{}
@@ -42,18 +37,15 @@ func (l LifecycleSchema) GetResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func (l LifecycleSchema) GetDatasource() datasourceSchema.Schema {
-	return datasourceSchema.Schema{
-		Description: "Provides information about existing lifecycles.",
-		Attributes: map[string]datasourceSchema.Attribute{
-			"id":           util.DataSourceString().Computed().Description("The ID of the lifecycle.").Build(),
-			"space_id":     util.DataSourceString().Optional().Description("The space ID associated with this lifecycle.").Build(),
-			"ids":          util.DataSourceList(types.StringType).Optional().Description("A list of lifecycle IDs to filter by.").Build(),
-			"partial_name": util.DataSourceString().Optional().Description("A partial name to filter lifecycles by.").Build(),
-			"skip":         util.DataSourceInt64().Optional().Description("A filter to specify the number of items to skip in the response.").Build(),
-			"take":         util.DataSourceInt64().Optional().Description("A filter to specify the number of items to take (or return) in the response.").Build(),
-			"lifecycles":   getLifecyclesAttribute(),
-		},
+func (l LifecycleSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{
+		"id":           util.DataSourceString().Computed().Description("The ID of the lifecycle.").Build(),
+		"space_id":     util.DataSourceString().Optional().Description("The space ID associated with this lifecycle.").Build(),
+		"ids":          util.DataSourceList(types.StringType).Optional().Description("A list of lifecycle IDs to filter by.").Build(),
+		"partial_name": util.DataSourceString().Optional().Description("A partial name to filter lifecycles by.").Build(),
+		"skip":         util.DataSourceInt64().Optional().Description("A filter to specify the number of items to skip in the response.").Build(),
+		"take":         util.DataSourceInt64().Optional().Description("A filter to specify the number of items to take (or return) in the response.").Build(),
+		"lifecycles":   getLifecyclesAttribute(),
 	}
 }
 

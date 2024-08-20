@@ -19,6 +19,8 @@ type environmentTypeResource struct {
 	*Config
 }
 
+var environmentSchema = schemas.EnvironmentSchema{}
+
 func NewEnvironmentResource() resource.Resource {
 	return &environmentTypeResource{}
 }
@@ -28,7 +30,7 @@ func (r *environmentTypeResource) Metadata(ctx context.Context, req resource.Met
 }
 
 func (r *environmentTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetEnvironmentResourceSchema()
+	resp.Schema = environmentSchema.GetResourceSchema()
 }
 
 func (r *environmentTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
