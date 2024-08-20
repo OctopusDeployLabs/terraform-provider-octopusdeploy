@@ -52,7 +52,7 @@ func (t *tenantProjectResource) Metadata(ctx context.Context, req resource.Metad
 func (t *tenantProjectResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"id": util.GetIdResourceSchema(),
+			"id": schemas.GetIdResourceSchema(),
 			"tenant_id": schema.StringAttribute{
 				Description: "The tenant ID associated with this tenant.",
 				Required:    true,

@@ -42,7 +42,7 @@ func (t *tagSetsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	query := tagsets.TagSetsQuery{
-		IDs:         schemas.GetIds(data.IDs),
+		IDs:         util.GetIds(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        int(data.Skip.ValueInt64()),
 		Take:        int(data.Take.ValueInt64()),

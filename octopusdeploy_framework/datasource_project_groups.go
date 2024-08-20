@@ -50,10 +50,10 @@ func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 		Attributes: map[string]schema.Attribute{
 			// request
 			"space_id":     schemas.GetSpaceIdDatasourceSchema(description, false),
-			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
+			"ids":          schemas.GetQueryIDsDatasourceSchema(),
+			"partial_name": schemas.GetQueryPartialNameDatasourceSchema(),
+			"skip":         schemas.GetQuerySkipDatasourceSchema(),
+			"take":         schemas.GetQueryTakeDatasourceSchema(),
 
 			// response
 			"id": schemas.GetIdDatasourceSchema(true),

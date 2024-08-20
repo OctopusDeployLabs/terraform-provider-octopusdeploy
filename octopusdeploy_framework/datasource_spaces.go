@@ -68,7 +68,7 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	query := spaces.SpacesQuery{
-		IDs:         schemas.GetIds(data.IDs),
+		IDs:         util.GetIds(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        schemas.GetNumber(data.Skip),
 		Take:        schemas.GetNumber(data.Take),
