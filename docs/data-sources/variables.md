@@ -28,7 +28,7 @@ data "octopusdeploy_variables" "example" {
 ### Optional
 
 - `scope` (Block List) As variable names can appear more than once under different scopes, a VariableScope must also be provided (see [below for nested schema](#nestedblock--scope))
-- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
+- `space_id` (String) The space ID associated with this variable.
 
 ### Read-Only
 

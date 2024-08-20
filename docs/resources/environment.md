@@ -48,13 +48,10 @@ resource "octopusdeploy_environment" "example" {
 - `jira_extension_settings` (Block List) Provides extension settings for the Jira integration for this environment. (see [below for nested schema](#nestedblock--jira_extension_settings))
 - `jira_service_management_extension_settings` (Block List) Provides extension settings for the Jira Service Management (JSM) integration for this environment. (see [below for nested schema](#nestedblock--jira_service_management_extension_settings))
 - `servicenow_extension_settings` (Block List) Provides extension settings for the ServiceNow integration for this environment. (see [below for nested schema](#nestedblock--servicenow_extension_settings))
+- `slug` (String) The unique slug of this environment
 - `sort_order` (Number) The order number to sort an environment.
 - `space_id` (String) The space ID associated with this environment.
 - `use_guided_failure` (Boolean)
-
-### Read-Only
-
-- `slug` (String) The unique slug of this environment
 
 <a id="nestedblock--jira_extension_settings"></a>
 ### Nested Schema for `jira_extension_settings`
