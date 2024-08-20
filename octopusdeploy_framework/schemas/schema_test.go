@@ -17,11 +17,17 @@ var testableSchemas = []EntitySchema{
 	DockerContainerRegistryFeedSchema{},
 	EnvironmentSchema{},
 	RunbookSchema{},
+	GitCredentialSchema{},
 }
 
-func TestSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {
+func TestDatasourceSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {
 	for _, schema := range testableSchemas {
 		datasourceTest(t, schema)
+	}
+}
+
+func TestResourceSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {
+	for _, schema := range testableSchemas {
 		resourceTest(t, schema)
 	}
 }
@@ -63,9 +69,9 @@ func typeName(i interface{}) string {
 }
 
 func datasourceTest(t *testing.T, schema EntitySchema) {
-	dataSourceAttributes := schema.GetDatasourceSchemaAttributes()
+	dataSourceSchemaAttributes := schema.GetDatasourceSchemaAttributes()
 	schemaName := typeName(schema)
-	for name, attr := range dataSourceAttributes {
+	for name, attr := range dataSourceSchemaAttributes {
 		if strings.HasSuffix(reflect.TypeOf(attr).PkgPath(), "resource/schema") {
 			require.Fail(t, fmt.Sprintf("%s in %s must be from the data source schema", name, schemaName))
 		}

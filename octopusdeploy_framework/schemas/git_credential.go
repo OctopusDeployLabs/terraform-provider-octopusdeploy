@@ -13,7 +13,11 @@ const (
 	GitCredentialDatasourceName = "git_credentials"
 )
 
-func GetGitCredentialResourceSchema() resourceSchema.Schema {
+type GitCredentialSchema struct{}
+
+var _ EntitySchema = GitCredentialSchema{}
+
+func (g GitCredentialSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "Manages a Git credential in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
@@ -42,21 +46,18 @@ func GetGitCredentialResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func GetGitCredentialDataSourceSchema() datasourceSchema.Schema {
-	return datasourceSchema.Schema{
-		Description: "Use this data source to retrieve information about Git credentials in Octopus Deploy.",
-		Attributes: map[string]datasourceSchema.Attribute{
-			"id":       util.DataSourceString().Computed().Description("The unique ID for this resource.").Build(),
-			"space_id": util.DataSourceString().Optional().Description("The space ID associated with this Git Credential.").Build(),
-			"name":     util.DataSourceString().Optional().Description("The name of the Git Credential to filter by.").Build(),
-			"skip":     util.DataSourceInt64().Optional().Description("The number of records to skip.").Build(),
-			"take":     util.DataSourceInt64().Optional().Description("The number of records to take.").Build(),
-			"git_credentials": datasourceSchema.ListNestedAttribute{
-				Computed:    true,
-				Description: "Provides information about existing GitCredentials.",
-				NestedObject: datasourceSchema.NestedAttributeObject{
-					Attributes: GetGitCredentialDatasourceAttributes(),
-				},
+func (g GitCredentialSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{
+		"id":       util.DataSourceString().Computed().Description("The unique ID for this resource.").Build(),
+		"space_id": util.DataSourceString().Optional().Description("The space ID associated with this Git Credential.").Build(),
+		"name":     util.DataSourceString().Optional().Description("The name of the Git Credential to filter by.").Build(),
+		"skip":     util.DataSourceInt64().Optional().Description("The number of records to skip.").Build(),
+		"take":     util.DataSourceInt64().Optional().Description("The number of records to take.").Build(),
+		"git_credentials": datasourceSchema.ListNestedAttribute{
+			Computed:    true,
+			Description: "Provides information about existing GitCredentials.",
+			NestedObject: datasourceSchema.NestedAttributeObject{
+				Attributes: GetGitCredentialDatasourceAttributes(),
 			},
 		},
 	}
