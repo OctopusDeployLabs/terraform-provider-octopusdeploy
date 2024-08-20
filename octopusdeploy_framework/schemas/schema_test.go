@@ -19,6 +19,10 @@ var testableSchemas = []EntitySchema{
 	RunbookSchema{},
 	GitCredentialSchema{},
 	ArtifactoryGenericFeedSchema{},
+	AwsElasticContainerRegistrySchema{},
+	FeedSchema{},
+	FeedSchema{},
+	GitHubRepositoryFeedSchema{},
 }
 
 func TestDatasourceSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {
