@@ -58,6 +58,39 @@ func GetSpaceResourceSchema() map[string]resourceSchema.Attribute {
 	}
 }
 
+func GetSpacesDatasourceSchema() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{
+		"id":          GetIdDatasourceSchema(true),
+		"description": GetReadonlyDescriptionDatasourceSchema(spaceDescription),
+		"name": datasourceSchema.StringAttribute{
+			Description: fmt.Sprintf("The name of this resource, no more than %d characters long", 20),
+			Validators: []validator.String{
+				stringvalidator.LengthBetween(1, 20),
+			},
+			Computed: true,
+		},
+		"slug": GetSlugDatasourceSchema(spaceDescription, true),
+		"space_managers_teams": datasourceSchema.SetAttribute{
+			ElementType: types.StringType,
+			Description: "A list of team IDs designated to be managers of this space.",
+			Computed:    true,
+		},
+		"space_managers_team_members": datasourceSchema.SetAttribute{
+			ElementType: types.StringType,
+			Description: "A list of user IDs designated to be managers of this space.",
+			Computed:    true,
+		},
+		"is_task_queue_stopped": datasourceSchema.BoolAttribute{
+			Description: "Specifies the status of the task queue for this space.",
+			Computed:    true,
+		},
+		"is_default": datasourceSchema.BoolAttribute{
+			Description: "Specifies if this space is the default space in Octopus.",
+			Computed:    true,
+		},
+	}
+}
+
 func GetSpaceDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":          GetIdDatasourceSchema(true),
