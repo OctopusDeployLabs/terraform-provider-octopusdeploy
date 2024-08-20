@@ -100,3 +100,12 @@ func Map[T, V any](items []T, fn func(T) V) []V {
 	}
 	return result
 }
+
+func GetNumber(val types.Int64) int {
+	v := 0
+	if !val.IsNull() {
+		v = int(val.ValueInt64())
+	}
+
+	return v
+}

@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
@@ -14,11 +13,11 @@ func GetTenantCommonVariableResourceSchema() schema.Schema {
 	return schema.Schema{
 		Description: "Manages a tenant common variable in Octopus Deploy.",
 		Attributes: map[string]schema.Attribute{
-			"id":                      util.GetIdResourceSchema(),
-			"space_id":                util.GetSpaceIdResourceSchema(TenantCommonVariableResourceDescription),
-			"tenant_id":               util.GetRequiredStringResourceSchema("The ID of the tenant."),
-			"library_variable_set_id": util.GetRequiredStringResourceSchema("The ID of the library variable set."),
-			"template_id":             util.GetRequiredStringResourceSchema("The ID of the variable template."),
+			"id":                      GetIdResourceSchema(),
+			"space_id":                GetSpaceIdResourceSchema(TenantCommonVariableResourceDescription),
+			"tenant_id":               GetRequiredStringResourceSchema("The ID of the tenant."),
+			"library_variable_set_id": GetRequiredStringResourceSchema("The ID of the library variable set."),
+			"template_id":             GetRequiredStringResourceSchema("The ID of the variable template."),
 			"value": schema.StringAttribute{
 				Optional:    true,
 				Description: "The value of the variable.",

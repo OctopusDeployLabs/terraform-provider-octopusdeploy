@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -11,19 +10,19 @@ const projectGroupDescription = "project group"
 
 func GetProjectGroupDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
-		"id":          util.GetIdResourceSchema(),
-		"space_id":    util.GetSpaceIdResourceSchema(projectGroupDescription),
+		"id":          GetIdResourceSchema(),
+		"space_id":    GetSpaceIdResourceSchema(projectGroupDescription),
 		"name":        GetReadonlyNameDatasourceSchema(),
-		"description": util.GetDescriptionResourceSchema(projectGroupDescription),
+		"description": GetDescriptionResourceSchema(projectGroupDescription),
 	}
 }
 
 func GetProjectGroupResourceSchema() map[string]resourceSchema.Attribute {
 	return map[string]resourceSchema.Attribute{
-		"id":          util.GetIdResourceSchema(),
-		"space_id":    util.GetSpaceIdResourceSchema(projectGroupDescription),
-		"name":        util.GetNameResourceSchema(true),
-		"description": util.GetDescriptionResourceSchema(projectGroupDescription),
+		"id":          GetIdResourceSchema(),
+		"space_id":    GetSpaceIdResourceSchema(projectGroupDescription),
+		"name":        GetNameResourceSchema(true),
+		"description": GetDescriptionResourceSchema(projectGroupDescription),
 	}
 }
 

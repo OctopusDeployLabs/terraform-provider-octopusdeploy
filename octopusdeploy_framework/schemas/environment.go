@@ -77,10 +77,10 @@ func EnvironmentObjectType() map[string]attr.Type {
 func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":                 GetIdDatasourceSchema(true),
-		"slug":               util.GetSlugDatasourceSchema(EnvironmentResourceDescription, true),
+		"slug":               GetSlugDatasourceSchema(EnvironmentResourceDescription, true),
 		"name":               GetReadonlyNameDatasourceSchema(),
-		"description":        util.GetDescriptionDatasourceSchema(EnvironmentResourceDescription),
-		EnvironmentSortOrder: util.GetSortOrderDataSourceSchema(EnvironmentResourceDescription),
+		"description":        GetDescriptionDatasourceSchema(EnvironmentResourceDescription),
+		EnvironmentSortOrder: GetSortOrderDatasourceSchema(EnvironmentResourceDescription),
 		EnvironmentAllowDynamicInfrastructure: datasourceSchema.BoolAttribute{
 			Computed: true,
 		},
@@ -129,11 +129,11 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(EnvironmentResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":                 util.GetIdResourceSchema(),
-			"slug":               util.GetSlugResourceSchema(EnvironmentResourceDescription),
-			"name":               util.GetNameResourceSchema(true),
-			"description":        util.GetDescriptionResourceSchema(EnvironmentResourceDescription),
-			EnvironmentSortOrder: util.GetSortOrderResourceSchema(EnvironmentResourceDescription),
+			"id":                 GetIdResourceSchema(),
+			"slug":               GetSlugResourceSchema(EnvironmentResourceDescription),
+			"name":               GetNameResourceSchema(true),
+			"description":        GetDescriptionResourceSchema(EnvironmentResourceDescription),
+			EnvironmentSortOrder: GetSortOrderResourceSchema(EnvironmentResourceDescription),
 			EnvironmentAllowDynamicInfrastructure: resourceSchema.BoolAttribute{
 				Optional: true,
 				Computed: true,
@@ -144,7 +144,7 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 				Computed: true,
 				Default:  booldefault.StaticBool(false),
 			},
-			"space_id": util.GetSpaceIdResourceSchema(EnvironmentResourceDescription),
+			"space_id": GetSpaceIdResourceSchema(EnvironmentResourceDescription),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			EnvironmentJiraExtensionSettings: resourceSchema.ListNestedBlock{

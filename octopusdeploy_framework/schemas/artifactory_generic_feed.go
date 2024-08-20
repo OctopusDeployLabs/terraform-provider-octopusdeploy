@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -13,12 +12,12 @@ func GetArtifactoryGenericFeedResourceSchema() map[string]resourceSchema.Attribu
 		"feed_uri": resourceSchema.StringAttribute{
 			Required: true,
 		},
-		"id":                                   util.GetIdResourceSchema(),
-		"name":                                 util.GetNameResourceSchema(true),
-		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
-		"password":                             util.GetPasswordResourceSchema(false),
-		"space_id":                             util.GetSpaceIdResourceSchema(helmFeedDescription),
-		"username":                             util.GetUsernameResourceSchema(false),
+		"id":                                   GetIdResourceSchema(),
+		"name":                                 GetNameResourceSchema(true),
+		"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
+		"password":                             GetPasswordResourceSchema(false),
+		"space_id":                             GetSpaceIdResourceSchema(helmFeedDescription),
+		"username":                             GetUsernameResourceSchema(false),
 		"repository": resourceSchema.StringAttribute{
 			Computed: false,
 			Required: true,

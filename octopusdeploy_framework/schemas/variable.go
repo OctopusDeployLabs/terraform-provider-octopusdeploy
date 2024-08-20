@@ -104,7 +104,7 @@ func GetVariableDatasourceSchema() datasourceSchema.Schema {
 				Required:    true,
 				Description: "Owner ID for the variable to find.",
 			},
-			SchemaAttributeNames.SpaceID: util.GetQuerySpaceIDDatasourceSchema(),
+			SchemaAttributeNames.SpaceID: GetSpaceIdDatasourceSchema(VariablesDataSourceDescription, false),
 
 			//response
 			SchemaAttributeNames.ID: datasourceSchema.StringAttribute{

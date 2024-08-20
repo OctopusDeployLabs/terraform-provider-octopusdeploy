@@ -3,7 +3,6 @@ package schemas
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -88,7 +87,7 @@ func GetActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
 				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
-		"id": util.GetIdResourceSchema(),
+		"id": GetIdResourceSchema(),
 		"label": resourceSchema.StringAttribute{
 			Description: "The label shown beside the parameter when presented in the deployment process. Example: `Server name`.",
 			Optional:    true,

@@ -2,7 +2,6 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -72,7 +71,7 @@ func GetTenantsDataSourceSchema() map[string]datasourceSchema.Attribute {
 			Optional:    true,
 		},
 		"id":  GetIdDatasourceSchema(true),
-		"ids": util.GetQueryIDsDatasourceSchema(),
+		"ids": GetQueryIDsDatasourceSchema(),
 		"is_clone": datasourceSchema.BoolAttribute{
 			Description: "A filter to search for cloned resources.",
 			Optional:    true,
@@ -81,15 +80,15 @@ func GetTenantsDataSourceSchema() map[string]datasourceSchema.Attribute {
 			Description: "A filter to search by name.",
 			Optional:    true,
 		},
-		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
+		"partial_name": GetQueryPartialNameDatasourceSchema(),
 		"project_id": datasourceSchema.StringAttribute{
 			Description: "A filter to search by a project ID.",
 			Optional:    true,
 		},
-		"skip":     util.GetQuerySkipDatasourceSchema(),
-		"tags":     util.GetQueryDatasourceTags(),
+		"skip":     GetQuerySkipDatasourceSchema(),
+		"tags":     GetQueryDatasourceTags(),
 		"space_id": GetSpaceIdDatasourceSchema("tenants", false),
-		"take":     util.GetQueryTakeDatasourceSchema(),
+		"take":     GetQueryTakeDatasourceSchema(),
 	}
 }
 
@@ -99,7 +98,7 @@ func GetTenantDataSourceSchema() map[string]datasourceSchema.Attribute {
 			Description: "The ID of the tenant from which this tenant was cloned.",
 			Computed:    true,
 		},
-		"description": util.GetDescriptionDatasourceSchema("tenants"),
+		"description": GetDescriptionDatasourceSchema("tenants"),
 		"id":          GetIdDatasourceSchema(true),
 		"name":        GetReadonlyNameDatasourceSchema(),
 		"space_id":    GetSpaceIdDatasourceSchema("tenant", true),
@@ -119,10 +118,10 @@ func GetTenantResourceSchema() map[string]resourceSchema.Attribute {
 			Computed:    true,
 			Default:     stringdefault.StaticString(""),
 		},
-		"description": util.GetDescriptionResourceSchema("tenant"),
-		"id":          util.GetIdResourceSchema(),
-		"name":        util.GetNameResourceSchema(true),
-		"space_id":    util.GetSpaceIdResourceSchema("tenant"),
+		"description": GetDescriptionResourceSchema("tenant"),
+		"id":          GetIdResourceSchema(),
+		"name":        GetNameResourceSchema(true),
+		"space_id":    GetSpaceIdResourceSchema("tenant"),
 		"tenant_tags": resourceSchema.ListAttribute{
 			Description: "A list of tenant tags associated with this resource.",
 			ElementType: types.StringType,

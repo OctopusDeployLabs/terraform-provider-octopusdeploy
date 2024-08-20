@@ -43,10 +43,10 @@ func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaReq
 		Description: "Provides information about existing environments.",
 		Attributes: map[string]schema.Attribute{
 			//request
-			"ids":          util.GetQueryIDsDatasourceSchema(),
+			"ids":          schemas.GetQueryIDsDatasourceSchema(),
 			"space_id":     schemas.GetSpaceIdDatasourceSchema(schemas.EnvironmentResourceDescription, false),
-			"name":         util.GetQueryNameDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
+			"name":         schemas.GetQueryNameDatasourceSchema(),
+			"partial_name": schemas.GetQueryPartialNameDatasourceSchema(),
 			"skip":         util.GetQuerySkipDatasourceSchema(),
 			"take":         util.GetQueryTakeDatasourceSchema(),
 

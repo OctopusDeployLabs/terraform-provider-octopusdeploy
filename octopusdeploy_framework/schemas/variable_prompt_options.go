@@ -197,7 +197,7 @@ func getVariablePromptDatasourceSchema() datasourceSchema.ListNestedAttribute {
 		Computed: true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				SchemaAttributeNames.Description:             util.GetDescriptionDatasourceSchema("variable prompt option"),
+				SchemaAttributeNames.Description:             GetDescriptionDatasourceSchema("variable prompt option"),
 				VariableSchemaAttributeNames.DisplaySettings: getDisplaySettingsDatasourceSchema(),
 				VariableSchemaAttributeNames.IsRequired: datasourceSchema.BoolAttribute{
 					Computed: true,
@@ -255,7 +255,7 @@ func getVariablePromptResourceSchema() resourceSchema.ListNestedBlock {
 	return resourceSchema.ListNestedBlock{
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
-				SchemaAttributeNames.Description: util.GetDescriptionResourceSchema("variable prompt option"),
+				SchemaAttributeNames.Description: GetDescriptionResourceSchema("variable prompt option"),
 				VariableSchemaAttributeNames.IsRequired: resourceSchema.BoolAttribute{
 					Optional: true,
 				},

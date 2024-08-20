@@ -73,11 +73,11 @@ func GetFeedsDataSourceSchema() map[string]datasourceSchema.Attribute {
 					"OctopusProject"),
 			},
 		},
-		"ids":          util.GetQueryIDsDatasourceSchema(),
-		"name":         util.GetNameDatasourceSchema(false),
-		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-		"skip":         util.GetQuerySkipDatasourceSchema(),
-		"take":         util.GetQueryTakeDatasourceSchema(),
+		"ids":          GetQueryIDsDatasourceSchema(),
+		"name":         GetNameDatasourceSchema(false),
+		"partial_name": GetQueryPartialNameDatasourceSchema(),
+		"skip":         GetQuerySkipDatasourceSchema(),
+		"take":         GetQueryTakeDatasourceSchema(),
 		"space_id":     GetSpaceIdDatasourceSchema("feeds", false),
 
 		// response

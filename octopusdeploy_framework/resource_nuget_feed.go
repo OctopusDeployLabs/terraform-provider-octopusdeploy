@@ -12,7 +12,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -26,16 +25,14 @@ func NewNugetFeedResource() resource.Resource {
 }
 
 var _ resource.ResourceWithImportState = &nugetFeedTypeResource{}
+var nugetFeedSchema = schemas.NugetFeedSchema{}
 
 func (r *nugetFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("nuget_feed")
 }
 
 func (r *nugetFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes:  schemas.GetNugetFeedResourceSchema(),
-		Description: "This resource manages a Nuget feed in Octopus Deploy.",
-	}
+	resp.Schema = nugetFeedSchema.GetResourceSchema()
 }
 
 func (r *nugetFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

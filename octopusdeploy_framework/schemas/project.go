@@ -19,10 +19,10 @@ func GetProjectResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages projects in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":                                   util.GetIdResourceSchema(),
-			"space_id":                             util.GetSpaceIdResourceSchema(ProjectResourceName),
-			"name":                                 util.GetNameResourceSchema(true),
-			"description":                          util.GetDescriptionResourceSchema(ProjectResourceName),
+			"id":                                   GetIdResourceSchema(),
+			"space_id":                             GetSpaceIdResourceSchema(ProjectResourceName),
+			"name":                                 GetNameResourceSchema(true),
+			"description":                          GetDescriptionResourceSchema(ProjectResourceName),
 			"allow_deployments_to_no_targets":      util.ResourceBool().Optional().Deprecated("This value is only valid for an associated connectivity policy and should not be specified here.").Build(),
 			"auto_create_release":                  util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
 			"cloned_from_project_id":               util.ResourceString().Optional().Description("The ID of the project this project was cloned from.").Build(),
@@ -189,13 +189,13 @@ func GetProjectDataSourceSchema() datasourceSchema.Schema {
 		Attributes: map[string]datasourceSchema.Attribute{
 			"id":                     util.ResourceString().Computed().Description("An auto-generated identifier that includes the timestamp when this data source was last modified.").Build(),
 			"cloned_from_project_id": util.DataSourceString().Optional().Description("A filter to search for cloned resources by a project ID.").Build(),
-			"ids":                    util.GetQueryIDsDatasourceSchema(),
+			"ids":                    GetQueryIDsDatasourceSchema(),
 			"is_clone":               util.DataSourceBool().Optional().Description("A filter to search for cloned resources.").Build(),
 			"name":                   util.DataSourceString().Optional().Description("A filter to search by name").Build(),
-			"partial_name":           util.GetQueryPartialNameDatasourceSchema(),
-			"skip":                   util.GetQuerySkipDatasourceSchema(),
+			"partial_name":           GetQueryPartialNameDatasourceSchema(),
+			"skip":                   GetQuerySkipDatasourceSchema(),
 			"space_id":               util.ResourceString().Optional().Description("A Space ID to filter by. Will revert what is specified on the provider if not set").Build(),
-			"take":                   util.GetQueryTakeDatasourceSchema(),
+			"take":                   GetQueryTakeDatasourceSchema(),
 			"projects":               getProjectsDataSourceAttribute(),
 		},
 	}

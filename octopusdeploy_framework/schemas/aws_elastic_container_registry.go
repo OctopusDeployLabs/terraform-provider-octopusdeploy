@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -14,9 +13,9 @@ func GetAwsElasticContainerRegistryFeedResourceSchema() map[string]resourceSchem
 			Required:    true,
 			Description: "The AWS access key to use when authenticating against Amazon Web Services.",
 		},
-		"id":                                   util.GetIdResourceSchema(),
-		"name":                                 util.GetNameResourceSchema(true),
-		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
+		"id":                                   GetIdResourceSchema(),
+		"name":                                 GetNameResourceSchema(true),
+		"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
 		"region": resourceSchema.StringAttribute{
 			Required:    true,
 			Description: "The AWS region where the registry resides.",
@@ -26,7 +25,7 @@ func GetAwsElasticContainerRegistryFeedResourceSchema() map[string]resourceSchem
 			Sensitive:   true,
 			Description: "The AWS secret key to use when authenticating against Amazon Web Services.",
 		},
-		"space_id": util.GetSpaceIdResourceSchema(awsElasticContainerRegistryFeedDescription),
+		"space_id": GetSpaceIdResourceSchema(awsElasticContainerRegistryFeedDescription),
 	}
 }
 

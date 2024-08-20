@@ -46,10 +46,10 @@ func getLibraryVariableSetDataSchema() map[string]datasourceSchema.Attribute {
 		},
 		"id":           GetIdDatasourceSchema(true),
 		"space_id":     GetSpaceIdDatasourceSchema("library variable set", false),
-		"ids":          util.GetQueryIDsDatasourceSchema(),
-		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-		"skip":         util.GetQuerySkipDatasourceSchema(),
-		"take":         util.GetQueryTakeDatasourceSchema(),
+		"ids":          GetQueryIDsDatasourceSchema(),
+		"partial_name": GetQueryPartialNameDatasourceSchema(),
+		"skip":         GetQuerySkipDatasourceSchema(),
+		"take":         GetQueryTakeDatasourceSchema(),
 	}
 }
 

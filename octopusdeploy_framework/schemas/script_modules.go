@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -40,10 +39,10 @@ func GetDatasourceScriptModuleSchema() datasourceSchema.Schema {
 		Attributes: map[string]datasourceSchema.Attribute{
 			"id":           GetIdDatasourceSchema(true),
 			"space_id":     GetSpaceIdDatasourceSchema(description, false),
-			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
+			"ids":          GetQueryIDsDatasourceSchema(),
+			"partial_name": GetQueryPartialNameDatasourceSchema(),
+			"skip":         GetQuerySkipDatasourceSchema(),
+			"take":         GetQueryTakeDatasourceSchema(),
 			"script_modules": datasourceSchema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: datasourceSchema.NestedAttributeObject{

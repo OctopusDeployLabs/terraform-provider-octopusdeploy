@@ -1,7 +1,7 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -9,25 +9,36 @@ import (
 
 const nugetFeedDescription = "nuget feed"
 
-func GetNugetFeedResourceSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"download_attempts":              util.GetDownloadAttemptsResourceSchema(),
-		"download_retry_backoff_seconds": util.GetDownloadRetryBackoffSecondsResourceSchema(),
-		"feed_uri":                       util.GetFeedUriResourceSchema(),
-		"id":                             util.GetIdResourceSchema(),
-		"is_enhanced_mode": resourceSchema.BoolAttribute{
-			Computed:    true,
-			Default:     booldefault.StaticBool(true),
-			Description: "This will improve performance of the NuGet feed but may not be supported by some older feeds. Disable if the operation, Create Release does not return the latest version for a package.",
-			Optional:    true,
+type NugetFeedSchema struct{}
+
+func (n NugetFeedSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Attributes: map[string]resourceSchema.Attribute{
+			"download_attempts":              GetDownloadAttemptsResourceSchema(),
+			"download_retry_backoff_seconds": GetDownloadRetryBackoffSecondsResourceSchema(),
+			"feed_uri":                       GetFeedUriResourceSchema(),
+			"id":                             GetIdResourceSchema(),
+			"is_enhanced_mode": resourceSchema.BoolAttribute{
+				Computed:    true,
+				Default:     booldefault.StaticBool(true),
+				Description: "This will improve performance of the NuGet feed but may not be supported by some older feeds. Disable if the operation, Create Release does not return the latest version for a package.",
+				Optional:    true,
+			},
+			"name":                                 GetNameResourceSchema(true),
+			"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
+			"password":                             GetPasswordResourceSchema(false),
+			"space_id":                             GetSpaceIdResourceSchema(nugetFeedDescription),
+			"username":                             GetUsernameResourceSchema(false),
 		},
-		"name":                                 util.GetNameResourceSchema(true),
-		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
-		"password":                             util.GetPasswordResourceSchema(false),
-		"space_id":                             util.GetSpaceIdResourceSchema(nugetFeedDescription),
-		"username":                             util.GetUsernameResourceSchema(false),
+		Description: "This resource manages a Nuget feed in Octopus Deploy.",
 	}
 }
+
+func (n NugetFeedSchema) GetDatasource() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
+}
+
+var _ EntitySchema = NugetFeedSchema{}
 
 type NugetFeedTypeResourceModel struct {
 	DownloadAttempts                  types.Int64  `tfsdk:"download_attempts"`
