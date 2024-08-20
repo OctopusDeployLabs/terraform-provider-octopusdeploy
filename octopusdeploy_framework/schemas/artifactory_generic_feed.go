@@ -1,31 +1,41 @@
 package schemas
 
 import (
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const artifactoryGenericFeedDescription = "artifactory generic feed"
+type ArtifactoryGenericFeedSchema struct{}
 
-func GetArtifactoryGenericFeedResourceSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"feed_uri": resourceSchema.StringAttribute{
-			Required: true,
-		},
-		"id":                                   GetIdResourceSchema(),
-		"name":                                 GetNameResourceSchema(true),
-		"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
-		"password":                             GetPasswordResourceSchema(false),
-		"space_id":                             GetSpaceIdResourceSchema(helmFeedDescription),
-		"username":                             GetUsernameResourceSchema(false),
-		"repository": resourceSchema.StringAttribute{
-			Computed: false,
-			Required: true,
-		},
-		"layout_regex": resourceSchema.StringAttribute{
-			Computed: false,
-			Required: false,
-			Optional: true,
+func (a ArtifactoryGenericFeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{}
+}
+
+var _ EntitySchema = ArtifactoryGenericFeedSchema{}
+
+func (a ArtifactoryGenericFeedSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Description: "This resource manages a Artifactory Generic feed in Octopus Deploy.",
+		Attributes: map[string]resourceSchema.Attribute{
+			"feed_uri": resourceSchema.StringAttribute{
+				Required: true,
+			},
+			"id":                                   GetIdResourceSchema(),
+			"name":                                 GetNameResourceSchema(true),
+			"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
+			"password":                             GetPasswordResourceSchema(false),
+			"space_id":                             GetSpaceIdResourceSchema(helmFeedDescription),
+			"username":                             GetUsernameResourceSchema(false),
+			"repository": resourceSchema.StringAttribute{
+				Computed: false,
+				Required: true,
+			},
+			"layout_regex": resourceSchema.StringAttribute{
+				Computed: false,
+				Required: false,
+				Optional: true,
+			},
 		},
 	}
 }
