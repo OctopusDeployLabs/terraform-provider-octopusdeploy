@@ -63,7 +63,6 @@ func TestMain(m *testing.M) {
 				URI:       url,
 			}
 		}
-		
 		code := m.Run()
 		os.Exit(code)
 	}
