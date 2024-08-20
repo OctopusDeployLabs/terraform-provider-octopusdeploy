@@ -17,7 +17,7 @@ func GetArtifactoryGenericFeedResourceSchema() map[string]resourceSchema.Attribu
 		"name":                                 util.GetNameResourceSchema(true),
 		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
 		"password":                             util.GetPasswordResourceSchema(false),
-		"space_id":                             util.GetSpaceIdResourceSchema(helmFeedDescription),
+		"space_id":                             util.GetSpaceIdResourceSchema(artifactoryGenericFeedDescription),
 		"username":                             util.GetUsernameResourceSchema(false),
 		"repository": resourceSchema.StringAttribute{
 			Computed: false,
