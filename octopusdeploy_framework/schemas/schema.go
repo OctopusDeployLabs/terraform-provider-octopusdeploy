@@ -94,47 +94,6 @@ func GetSpaceIdDatasourceSchema(resourceDescription string, isReadOnly bool) dat
 	return s
 }
 
-func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) datasourceSchema.Attribute {
-	s := datasourceSchema.StringAttribute{
-		Description: fmt.Sprintf("The name of this resource, no more than %d characters long", maxLength),
-		Validators: []validator.String{
-			stringvalidator.LengthBetween(1, maxLength),
-		},
-	}
-
-	if isRequired {
-		s.Required = true
-	} else {
-		s.Optional = true
-	}
-
-	return s
-}
-
-func GetNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
-	s := datasourceSchema.StringAttribute{
-		Description: "The name of this resource.",
-		Validators: []validator.String{
-			stringvalidator.LengthAtLeast(1),
-		},
-	}
-
-	if isRequired {
-		s.Required = true
-	} else {
-		s.Optional = true
-	}
-
-	return s
-}
-
-func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
-	return datasourceSchema.StringAttribute{
-		Description: "The description of this " + resourceDescription + ".",
-		Optional:    true,
-	}
-}
-
 func GetReadonlyDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
 	return datasourceSchema.StringAttribute{
 		Description: "The description of this " + resourceDescription + ".",
