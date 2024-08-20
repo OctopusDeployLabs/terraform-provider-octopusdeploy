@@ -16,6 +16,7 @@ var testableSchemas = []EntitySchema{
 	HelmFeedSchema{},
 	DockerContainerRegistryFeedSchema{},
 	EnvironmentSchema{},
+	RunbookSchema{},
 }
 
 func TestSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {

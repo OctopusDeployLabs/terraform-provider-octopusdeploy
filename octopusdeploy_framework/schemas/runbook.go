@@ -3,6 +3,9 @@ package schemas
 import (
 	"context"
 	"fmt"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+
+	//datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"regexp"
 	"strings"
 
@@ -133,7 +136,15 @@ type RunbookConnectivityPolicyModel struct {
 	TargetRoles                 types.List   `tfsdk:"target_roles"`
 }
 
-func GetRunbookResourceSchema() resourceSchema.Schema {
+type RunbookSchema struct{}
+
+func (r RunbookSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{}
+}
+
+var _ EntitySchema = RunbookSchema{}
+
+func (r RunbookSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(RunbookResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
