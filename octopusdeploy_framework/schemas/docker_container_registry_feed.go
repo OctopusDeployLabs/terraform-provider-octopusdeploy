@@ -1,28 +1,40 @@
 package schemas
 
 import (
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const dockerContainerRegistryFeedDescription = "docker container registry feed"
 
-func GetDockerContainerRegistryFeedResourceSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"api_version": resourceSchema.StringAttribute{
-			Optional: true,
+type DockerContainerRegistryFeedSchema struct{}
+
+var _ EntitySchema = DockerContainerRegistryFeedSchema{}
+
+func (d DockerContainerRegistryFeedSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Attributes: map[string]resourceSchema.Attribute{
+			"api_version": resourceSchema.StringAttribute{
+				Optional: true,
+			},
+			"feed_uri":                             GetFeedUriResourceSchema(),
+			"id":                                   GetIdResourceSchema(),
+			"name":                                 GetNameResourceSchema(true),
+			"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
+			"password":                             GetPasswordResourceSchema(false),
+			"space_id":                             GetSpaceIdResourceSchema(dockerContainerRegistryFeedDescription),
+			"username":                             GetUsernameResourceSchema(false),
+			"registry_path": resourceSchema.StringAttribute{
+				Optional: true,
+			},
 		},
-		"feed_uri":                             GetFeedUriResourceSchema(),
-		"id":                                   GetIdResourceSchema(),
-		"name":                                 GetNameResourceSchema(true),
-		"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
-		"password":                             GetPasswordResourceSchema(false),
-		"space_id":                             GetSpaceIdResourceSchema(dockerContainerRegistryFeedDescription),
-		"username":                             GetUsernameResourceSchema(false),
-		"registry_path": resourceSchema.StringAttribute{
-			Optional: true,
-		},
+		Description: "This resource manages a Docker Container Registry in Octopus Deploy.",
 	}
+}
+
+func (d DockerContainerRegistryFeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
+	return map[string]datasourceSchema.Attribute{}
 }
 
 type DockerContainerRegistryFeedTypeResourceModel struct {

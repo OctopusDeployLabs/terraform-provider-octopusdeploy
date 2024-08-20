@@ -14,6 +14,7 @@ var testableSchemas = []EntitySchema{
 	NugetFeedSchema{},
 	ProjectSchema{},
 	HelmFeedSchema{},
+	DockerContainerRegistryFeedSchema{},
 	EnvironmentSchema{},
 }
 
