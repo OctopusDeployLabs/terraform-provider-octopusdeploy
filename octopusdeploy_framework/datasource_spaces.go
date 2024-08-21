@@ -48,7 +48,7 @@ func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			"spaces": schema.ListNestedBlock{
 				Description: "Provides information about existing spaces.",
 				NestedObject: schema.NestedBlockObject{
-					Attributes: schemas.GetSpaceDatasourceSchema(),
+					Attributes: schemas.GetSpacesDatasourceSchema(),
 				},
 			},
 		},

@@ -110,7 +110,8 @@ func testTagExists(n string) resource.TestCheckFunc {
 		}
 
 		tagSetID := rs.Primary.Attributes["tag_set_id"]
-		tagSet, err := tagsets.GetByID(octoClient, rs.Primary.Attributes["space_id"], tagSetID)
+		spaceID := rs.Primary.Attributes["tag_set_space_id"]
+		tagSet, err := tagsets.GetByID(octoClient, spaceID, tagSetID)
 		if err != nil {
 			return fmt.Errorf("error retrieving tag set: %s", err)
 		}
