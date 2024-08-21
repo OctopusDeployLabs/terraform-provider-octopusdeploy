@@ -60,12 +60,14 @@ func (e *feedsDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		Take:        util.GetNumber(data.Take),
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("Reading feeds with query %+v", query))
+
 	existingFeeds, err := feeds.Get(e.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load feeds", err.Error())
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("environments returned from API: %#v", existingFeeds))
+	tflog.Debug(ctx, fmt.Sprintf("Reading feeds returned %d items", len(existingFeeds.Items)))
 
 	flattenedFeeds := []interface{}{}
 	for _, feed := range existingFeeds.Items {

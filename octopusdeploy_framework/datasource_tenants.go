@@ -2,12 +2,14 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
 )
 
@@ -62,6 +64,8 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		Take:               int(data.Take.ValueInt64()),
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("Reading tenats with query: %+v", query))
+
 	existingTenants, err := tenants.Get(b.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load tenants", err.Error())
@@ -72,6 +76,8 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	for _, tenant := range existingTenants.Items {
 		flattenedTenants = append(flattenedTenants, schemas.FlattenTenant(tenant))
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Reading tenants returned %d items", len(flattenedTenants)))
 
 	data.ID = types.StringValue("Tenants " + time.Now().UTC().String())
 	data.Tenants, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.TenantObjectType()}, flattenedTenants)

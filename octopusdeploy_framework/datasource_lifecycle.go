@@ -62,11 +62,15 @@ func (l *lifecyclesDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		Take:        int(data.Take.ValueInt64()),
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("Reading lifecycles with query: %+v", query))
+
 	lifecyclesResult, err := lifecycles.Get(l.Config.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read lifecycles, got error: %s", err))
 		return
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Reading lifecycles returned %d items", len(lifecyclesResult.Items)))
 
 	data.Lifecycles = flattenLifecycles(lifecyclesResult.Items)
 	data.ID = types.StringValue("Lifecycles " + time.Now().UTC().String())

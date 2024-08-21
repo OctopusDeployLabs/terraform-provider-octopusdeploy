@@ -66,11 +66,15 @@ func (l *libraryVariableSetDataSource) Read(ctx context.Context, req datasource.
 		Take:        int(data.Take.ValueInt64()),
 	}
 
+	tflog.Debug(ctx, fmt.Sprintf("Reading library variable set with query: %+v", query))
+
 	existingLibraryVariableSets, err := libraryvariablesets.Get(l.Config.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read library variable sets, got error: %s", err))
 		return
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Read library variable set returned %d items", len(existingLibraryVariableSets.Items)))
 
 	data.LibraryVariableSets = flattenLibraryVariableSets(existingLibraryVariableSets.Items)
 
@@ -94,5 +98,6 @@ func flattenLibraryVariableSets(items []*variables.LibraryVariableSet) types.Lis
 		}
 		libraryVariableSetList = append(libraryVariableSetList, types.ObjectValueMust(schemas.GetLibraryVariableSetObjectType(), libraryVariableSetMap))
 	}
+
 	return types.ListValueMust(types.ObjectType{AttrTypes: schemas.GetLibraryVariableSetObjectType()}, libraryVariableSetList)
 }

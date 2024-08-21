@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
@@ -46,6 +47,9 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	// construct query
 	query := spaces.SpacesQuery{PartialName: data.Name.ValueString()}
+
+	tflog.Debug(ctx, fmt.Sprintf("Reading space with query %+v", query))
+
 	spacesResult, err := spaces.Get(b.Client, query)
 
 	if err != nil {
@@ -63,6 +67,8 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		resp.Diagnostics.AddError(fmt.Sprintf("unable to find space with name %s", data.Name.ValueString()), "")
 		return
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Reading space returned ID %s", matchedSpace.ID))
 
 	mapSpaceToState(ctx, &data, matchedSpace)
 
