@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workers"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,7 +24,7 @@ func resourceKubernetesAgentWorker() *schema.Resource {
 func resourceKubernetesAgentWorkerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	worker := expandKubernetesAgentWorker(d)
 	client := m.(*client.Client)
-	createdWorker, err := client.Workers.Add(worker)
+	createdWorker, err := workers.Add(client, worker)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -34,7 +35,7 @@ func resourceKubernetesAgentWorkerCreate(ctx context.Context, d *schema.Resource
 
 func resourceKubernetesAgentWorkerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	Worker, err := client.Workers.GetByID(d.Id())
+	Worker, err := workers.GetByID(client, d.Get("space_id").(string), d.Id())
 	if err != nil {
 		return errors.ProcessApiError(ctx, d, err, "kubernetes tentacle worker")
 	}
@@ -54,7 +55,7 @@ func resourceKubernetesAgentWorkerRead(ctx context.Context, d *schema.ResourceDa
 
 func resourceKubernetesAgentWorkerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	if err := client.Workers.DeleteByID(d.Id()); err != nil {
+	if err := workers.DeleteByID(client, d.Get("space_id").(string), d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
 	d.SetId("")
@@ -62,12 +63,12 @@ func resourceKubernetesAgentWorkerDelete(ctx context.Context, d *schema.Resource
 }
 
 func resourceKubernetesAgentWorkerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	Worker := expandKubernetesAgentWorker(d)
+	worker := expandKubernetesAgentWorker(d)
 	client := m.(*client.Client)
 
-	Worker.ID = d.Id()
+	worker.ID = d.Id()
 
-	updatedWorker, err := client.Workers.Update(Worker)
+	updatedWorker, err := workers.Update(client, worker)
 	if err != nil {
 		return diag.FromErr(err)
 	}
