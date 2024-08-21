@@ -21,26 +21,26 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 	}
 
 	// Use separate Octopus container as this test requires a custom environment variable to be set
-	octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer()
+	testSpecificOctoContainer, _, testSpecificSqlServerContainer, testSpecificNetwork, err := testFramework.ArrangeContainer()
 	if err != nil {
 		log.Printf("Failed to arrange containers: (%s)", err.Error())
 	}
 	os.Setenv("TF_ACC", "1")
 
-	inputVars := []string{"-var=octopus_server_58-kubernetesagentworker=" + octoContainer.URI, "-var=octopus_apikey_58-kubernetesagentworker=" + test.ApiKey}
+	inputVars := []string{"-var=octopus_server_58-kubernetesagentworker=" + testSpecificOctoContainer.URI, "-var=octopus_apikey_58-kubernetesagentworker=" + test.ApiKey}
 
-	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "58-kubernetesagentworker", inputVars)
+	newSpaceId, err := testFramework.Act(t, testSpecificOctoContainer, "../terraform", "58-kubernetesagentworker", inputVars)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "58a-kubernetesagentworkerds"), newSpaceId, inputVars)
+	err = testFramework.TerraformInitAndApply(t, testSpecificOctoContainer, filepath.Join("../terraform", "58a-kubernetesagentworkerds"), newSpaceId, inputVars)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	// Assert
-	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
+	client, err := octoclient.CreateClient(testSpecificOctoContainer.URI, newSpaceId, test.ApiKey)
 	query := machines.WorkersQuery{
 		CommunicationStyles: []string{"KubernetesTentacle"},
 		Skip:                0,
@@ -99,7 +99,7 @@ func TestKubernetesAgentWorkerResource(t *testing.T) {
 
 	// Waiting for the container logs to clear.
 	time.Sleep(5000 * time.Millisecond)
-	err = testFramework.CleanUp(ctx, octoContainer, sqlServerContainer, network)
+	err = testFramework.CleanUp(ctx, testSpecificOctoContainer, testSpecificSqlServerContainer, testSpecificNetwork)
 
 	if err != nil {
 		log.Printf("Failed to clean up containers: (%s)", err.Error())
