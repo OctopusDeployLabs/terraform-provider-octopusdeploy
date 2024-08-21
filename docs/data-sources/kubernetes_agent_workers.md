@@ -54,3 +54,5 @@ Read-Only:
 - `upgrade_locked` (Boolean) If enabled the Kubernetes agent will not automatically upgrade and will stay on the currently installed version, even if the associated machine policy is configured to automatically upgrade.
 - `uri` (String) The URI of the Kubernetes agent's used by the server to queue messages. This is the same subscription uri that was used when installing the agent.
 - `worker_pool_ids` (List of String) A list of worker pool Ids specifying the pools in which this worker belongs
+
+
