@@ -47,7 +47,7 @@ func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed: true,
 				Optional: false,
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: schemas.GetSpaceDatasourceSchema(),
+					Attributes: schemas.GetSpacesDatasourceSchema(),
 				},
 			},
 		},
