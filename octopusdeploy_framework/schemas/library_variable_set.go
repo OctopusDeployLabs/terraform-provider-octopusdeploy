@@ -25,31 +25,26 @@ type LibraryVariableSetResourceModel struct {
 
 func GetLibraryVariableSetDataSourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
-		Attributes:  getLibraryVariableSetDataSchema(),
 		Description: "Provides information about existing library variable sets.",
-		Blocks: map[string]datasourceSchema.Block{
-			"library_variable_sets": datasourceSchema.ListNestedBlock{
-				Description: "A list of library variable sets that match the filter(s).",
-				NestedObject: datasourceSchema.NestedBlockObject{
+		Attributes: map[string]datasourceSchema.Attribute{
+			"content_type": datasourceSchema.StringAttribute{
+				Description: "A filter to search by content type.",
+				Optional:    true,
+			},
+			"id":           GetIdDatasourceSchema(true),
+			"space_id":     GetSpaceIdDatasourceSchema("library variable set", false),
+			"ids":          util.GetQueryIDsDatasourceSchema(),
+			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
+			"skip":         util.GetQuerySkipDatasourceSchema(),
+			"take":         util.GetQueryTakeDatasourceSchema(),
+			"library_variable_sets": datasourceSchema.ListNestedAttribute{
+				Computed: true,
+				Optional: false,
+				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: GetLibraryVariableSetObjectDatasourceSchema(),
 				},
 			},
 		},
-	}
-}
-
-func getLibraryVariableSetDataSchema() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{
-		"content_type": datasourceSchema.StringAttribute{
-			Description: "A filter to search by content type.",
-			Optional:    true,
-		},
-		"id":           GetIdDatasourceSchema(true),
-		"space_id":     GetSpaceIdDatasourceSchema("library variable set", false),
-		"ids":          util.GetQueryIDsDatasourceSchema(),
-		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-		"skip":         util.GetQuerySkipDatasourceSchema(),
-		"take":         util.GetQueryTakeDatasourceSchema(),
 	}
 }
 
