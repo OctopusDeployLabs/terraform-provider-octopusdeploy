@@ -81,27 +81,22 @@ func GetTagSetDataSourceSchema() datasourceSchema.Schema {
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: map[string]datasourceSchema.Attribute{
 						"id": util.DataSourceString().
-							Optional().
 							Computed().
 							Description("The unique ID for this resource.").
 							Build(),
 						"name": util.DataSourceString().
-							Optional().
 							Computed().
 							Description("The name of this resource.").
 							Build(),
 						"description": util.DataSourceString().
-							Optional().
 							Computed().
 							Description("The description of this tag set.").
 							Build(),
 						"sort_order": util.DataSourceInt64().
-							Optional().
 							Computed().
 							Description("The sort order associated with this resource.").
 							Build(),
 						"space_id": util.DataSourceString().
-							Optional().
 							Computed().
 							Description("The space ID associated with this resource.").
 							Build(),

@@ -31,7 +31,7 @@ Provides information about existing tag sets.
 <a id="nestedatt--tag_sets"></a>
 ### Nested Schema for `tag_sets`
 
-Optional:
+Read-Only:
 
 - `description` (String) The description of this tag set.
 - `id` (String) The unique ID for this resource.

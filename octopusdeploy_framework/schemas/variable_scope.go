@@ -131,7 +131,7 @@ func getVariableScopeFieldResourceSchema(scopeDescription string) resourceSchema
 func getVariableScopeDatasourceSchema() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
 		Description: "As variable names can appear more than once under different scopes, a VariableScope must also be provided",
-		Computed:    true,
+		Required:    true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
 				variableScopeFieldNames.Actions:      getVariableScopeFieldDatasourceSchema(variableScopeFieldNames.Actions),
@@ -144,7 +144,6 @@ func getVariableScopeDatasourceSchema() datasourceSchema.ListNestedAttribute {
 			},
 		},
 		Validators: []validator.List{
-			listvalidator.IsRequired(),
 			listvalidator.SizeAtMost(1),
 		},
 	}
