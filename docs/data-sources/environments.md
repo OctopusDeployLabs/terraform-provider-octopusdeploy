@@ -36,10 +36,10 @@ data "octopusdeploy_environments" "example" {
 
 ### Read-Only
 
-- `environments` (Block List) Provides information about existing environments. (see [below for nested schema](#nestedblock--environments))
+- `environments` (Attributes List) (see [below for nested schema](#nestedatt--environments))
 - `id` (String) The unique ID for this resource.
 
-<a id="nestedblock--environments"></a>
+<a id="nestedatt--environments"></a>
 ### Nested Schema for `environments`
 
 Read-Only:

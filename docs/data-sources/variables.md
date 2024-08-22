@@ -24,10 +24,10 @@ data "octopusdeploy_variables" "example" {
 
 - `name` (String) The name of variable to find.
 - `owner_id` (String) Owner ID for the variable to find.
+- `scope` (Attributes List) As variable names can appear more than once under different scopes, a VariableScope must also be provided (see [below for nested schema](#nestedatt--scope))
 
 ### Optional
 
-- `scope` (Block List) As variable names can appear more than once under different scopes, a VariableScope must also be provided (see [below for nested schema](#nestedblock--scope))
 - `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
 
 ### Read-Only
@@ -41,7 +41,7 @@ data "octopusdeploy_variables" "example" {
 - `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `UsernamePasswordAccount`, `Certificate`, `Sensitive`, `String`, `WorkerPool`.
 - `value` (String)
 
-<a id="nestedblock--scope"></a>
+<a id="nestedatt--scope"></a>
 ### Nested Schema for `scope`
 
 Optional:

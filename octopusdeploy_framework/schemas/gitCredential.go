@@ -53,6 +53,7 @@ func GetGitCredentialDataSourceSchema() datasourceSchema.Schema {
 			"take":     util.DataSourceInt64().Optional().Description("The number of records to take.").Build(),
 			"git_credentials": datasourceSchema.ListNestedAttribute{
 				Computed:    true,
+				Optional:    false,
 				Description: "Provides information about existing GitCredentials.",
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: GetGitCredentialDatasourceAttributes(),

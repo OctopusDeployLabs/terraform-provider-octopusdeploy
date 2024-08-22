@@ -57,11 +57,10 @@ func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 
 			// response
 			"id": schemas.GetIdDatasourceSchema(true),
-		},
-		Blocks: map[string]schema.Block{
-			"project_groups": schema.ListNestedBlock{
+			"project_groups": schema.ListNestedAttribute{
+				Computed:    true,
 				Description: "A list of project groups that match the filter(s).",
-				NestedObject: schema.NestedBlockObject{
+				NestedObject: schema.NestedAttributeObject{
 					Attributes: schemas.GetProjectGroupDatasourceSchema(),
 				},
 			},

@@ -26,17 +26,17 @@ Provides information about existing tag sets.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-- `tag_sets` (List of Object) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedatt--tag_sets))
+- `tag_sets` (Attributes List) A list of tag sets that match the filter(s). (see [below for nested schema](#nestedatt--tag_sets))
 
 <a id="nestedatt--tag_sets"></a>
 ### Nested Schema for `tag_sets`
 
 Read-Only:
 
-- `description` (String)
-- `id` (String)
-- `name` (String)
-- `sort_order` (Number)
-- `space_id` (String)
+- `description` (String) The description of this tag set.
+- `id` (String) The unique ID for this resource.
+- `name` (String) The name of this resource.
+- `sort_order` (Number) The sort order associated with this resource.
+- `space_id` (String) The space ID associated with this resource.
 
 
