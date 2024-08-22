@@ -52,11 +52,10 @@ func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaReq
 
 			//response
 			"id": schemas.GetIdDatasourceSchema(true),
-		},
-		Blocks: map[string]schema.Block{
-			"environments": schema.ListNestedBlock{
-				Description: "Provides information about existing environments.",
-				NestedObject: schema.NestedBlockObject{
+			"environments": schema.ListNestedAttribute{
+				Computed: true,
+				Optional: false,
+				NestedObject: schema.NestedAttributeObject{
 					Attributes: schemas.GetEnvironmentDatasourceSchema(),
 				},
 			},
