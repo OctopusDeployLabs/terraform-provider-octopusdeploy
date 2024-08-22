@@ -35,9 +35,9 @@ data "octopusdeploy_project_groups" "example" {
 ### Read-Only
 
 - `id` (String) The unique ID for this resource.
-- `project_groups` (Block List) A list of project groups that match the filter(s). (see [below for nested schema](#nestedblock--project_groups))
+- `project_groups` (Attributes List) A list of project groups that match the filter(s). (see [below for nested schema](#nestedatt--project_groups))
 
-<a id="nestedblock--project_groups"></a>
+<a id="nestedatt--project_groups"></a>
 ### Nested Schema for `project_groups`
 
 Read-Only:

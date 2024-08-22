@@ -27,7 +27,6 @@ data "octopusdeploy_variables" "example" {
 
 ### Optional
 
-- `scope` (Block List) As variable names can appear more than once under different scopes, a VariableScope must also be provided (see [below for nested schema](#nestedblock--scope))
 - `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
 
 ### Read-Only
@@ -37,23 +36,10 @@ data "octopusdeploy_variables" "example" {
 - `is_editable` (Boolean) Indicates whether or not this variable is considered editable.
 - `is_sensitive` (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
 - `prompt` (Attributes List) (see [below for nested schema](#nestedatt--prompt))
+- `scope` (Attributes List) As variable names can appear more than once under different scopes, a VariableScope must also be provided (see [below for nested schema](#nestedatt--scope))
 - `sensitive_value` (String, Sensitive)
 - `type` (String) The type of variable represented by this resource. Valid types are `AmazonWebServicesAccount`, `AzureAccount`, `GoogleCloudAccount`, `UsernamePasswordAccount`, `Certificate`, `Sensitive`, `String`, `WorkerPool`.
 - `value` (String)
-
-<a id="nestedblock--scope"></a>
-### Nested Schema for `scope`
-
-Optional:
-
-- `actions` (List of String) A list of actions that are scoped to this variable value.
-- `channels` (List of String) A list of channels that are scoped to this variable value.
-- `environments` (List of String) A list of environments that are scoped to this variable value.
-- `machines` (List of String) A list of machines that are scoped to this variable value.
-- `processes` (List of String) A list of processes that are scoped to this variable value.
-- `roles` (List of String) A list of roles that are scoped to this variable value.
-- `tenant_tags` (List of String) A list of tenant tags that are scoped to this variable value.
-
 
 <a id="nestedatt--prompt"></a>
 ### Nested Schema for `prompt`
@@ -80,5 +66,21 @@ Read-Only:
 
 - `display_name` (String) The display name for the select value
 - `value` (String) The select value
+
+
+
+
+<a id="nestedatt--scope"></a>
+### Nested Schema for `scope`
+
+Optional:
+
+- `actions` (List of String) A list of actions that are scoped to this variable value.
+- `channels` (List of String) A list of channels that are scoped to this variable value.
+- `environments` (List of String) A list of environments that are scoped to this variable value.
+- `machines` (List of String) A list of machines that are scoped to this variable value.
+- `processes` (List of String) A list of processes that are scoped to this variable value.
+- `roles` (List of String) A list of roles that are scoped to this variable value.
+- `tenant_tags` (List of String) A list of tenant tags that are scoped to this variable value.
 
 
