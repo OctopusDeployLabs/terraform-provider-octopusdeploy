@@ -90,6 +90,13 @@ func GetTenantsDataSourceSchema() map[string]datasourceSchema.Attribute {
 		"tags":     util.GetQueryDatasourceTags(),
 		"space_id": GetSpaceIdDatasourceSchema("tenants", false),
 		"take":     util.GetQueryTakeDatasourceSchema(),
+		"tenants": datasourceSchema.ListNestedAttribute{
+			Computed: true,
+			Optional: false,
+			NestedObject: datasourceSchema.NestedAttributeObject{
+				Attributes: GetTenantDataSourceSchema(),
+			},
+		},
 	}
 }
 

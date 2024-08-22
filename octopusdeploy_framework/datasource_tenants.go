@@ -31,14 +31,6 @@ func (*tenantsDataSource) Schema(_ context.Context, req datasource.SchemaRequest
 	resp.Schema = datasourceSchema.Schema{
 		Description: "Provides information about existing tenants.",
 		Attributes:  schemas.GetTenantsDataSourceSchema(),
-		Blocks: map[string]datasourceSchema.Block{
-			"tenants": datasourceSchema.ListNestedBlock{
-				Description: "A list of tenants that match the filter(s).",
-				NestedObject: datasourceSchema.NestedBlockObject{
-					Attributes: schemas.GetTenantDataSourceSchema(),
-				},
-			},
-		},
 	}
 }
 
