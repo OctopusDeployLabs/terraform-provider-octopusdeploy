@@ -2,13 +2,11 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"fmt"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -60,14 +58,15 @@ func (e *feedsDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		Take:        util.GetNumber(data.Take),
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading feeds with query %+v", query))
+	util.DatasourceReading(ctx, "feeds", query)
 
 	existingFeeds, err := feeds.Get(e.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load feeds", err.Error())
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Reading feeds returned %d items", len(existingFeeds.Items)))
+
+	util.DatasourceResultCount(ctx, "feeds", len(existingFeeds.Items))
 
 	flattenedFeeds := []interface{}{}
 	for _, feed := range existingFeeds.Items {

@@ -84,7 +84,7 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		Take:        util.GetNumber(data.Take),
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading environments with query %+v", query))
+	util.DatasourceReading(ctx, "environments", query)
 
 	existingEnvironments, err := environments.Get(e.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
@@ -111,7 +111,7 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		}
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading environments data source returned %d items", len(mappedEnvironments)))
+	util.DatasourceResultCount(ctx, "environments", len(mappedEnvironments))
 
 	data.Environments, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.EnvironmentObjectType()}, mappedEnvironments)
 	data.ID = types.StringValue("Environments " + time.Now().UTC().String())

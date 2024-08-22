@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
 )
 
@@ -66,7 +65,7 @@ func (g *gitCredentialsDataSource) Read(ctx context.Context, req datasource.Read
 		Take: int(data.Take.ValueInt64()),
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading git credentials with query %+v", query))
+	util.DatasourceReading(ctx, "git credentials", query)
 
 	spaceID := data.SpaceID.ValueString()
 
@@ -76,7 +75,7 @@ func (g *gitCredentialsDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading git credentials returned %d items", len(existingGitCredentials.Items)))
+	util.DatasourceResultCount(ctx, "git credentials", len(existingGitCredentials.Items))
 
 	flattenedGitCredentials := make([]GitCredentialDatasourceModel, 0, len(existingGitCredentials.Items))
 	for _, gitCredential := range existingGitCredentials.Items {

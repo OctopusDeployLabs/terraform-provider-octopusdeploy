@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
 )
 
@@ -49,7 +48,7 @@ func (t *tagSetsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		Take:        int(data.Take.ValueInt64()),
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading tag sets %+v", query))
+	util.DatasourceReading(ctx, "tag sets", query)
 
 	spaceID := data.SpaceID.ValueString()
 
@@ -59,7 +58,7 @@ func (t *tagSetsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading tag sets returned %d items", len(existingTagSets.Items)))
+	util.DatasourceResultCount(ctx, "tag sets", len(existingTagSets.Items))
 
 	data.TagSets = flattenTagSets(existingTagSets.Items)
 	data.ID = types.StringValue(fmt.Sprintf("TagSets-%s", time.Now().UTC().String()))

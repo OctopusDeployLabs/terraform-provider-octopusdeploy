@@ -48,7 +48,7 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	// construct query
 	query := spaces.SpacesQuery{PartialName: data.Name.ValueString()}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading space with query %+v", query))
+	util.DatasourceReading(ctx, "space", query)
 
 	spacesResult, err := spaces.Get(b.Client, query)
 

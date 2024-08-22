@@ -3,7 +3,6 @@ package util
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -25,6 +24,14 @@ func Deleted(ctx context.Context, resource string, v ...any) {
 
 func Reading(ctx context.Context, resource string, v ...any) {
 	tflog.Info(ctx, fmt.Sprintf("reading %s: %#v", resource, v))
+}
+
+func DatasourceReading(ctx context.Context, resource string, v ...any) {
+	tflog.Debug(ctx, fmt.Sprintf("reading %s data source with query: %+v", resource, v))
+}
+
+func DatasourceResultCount(ctx context.Context, resource string, count int) {
+	tflog.Debug(ctx, fmt.Sprintf("reading %s returned %d items", resource, count))
 }
 
 func Read(ctx context.Context, resource string, v ...any) {

@@ -66,7 +66,7 @@ func (l *libraryVariableSetDataSource) Read(ctx context.Context, req datasource.
 		Take:        int(data.Take.ValueInt64()),
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading library variable set with query: %+v", query))
+	util.DatasourceReading(ctx, "library variable set", query)
 
 	existingLibraryVariableSets, err := libraryvariablesets.Get(l.Config.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
@@ -74,7 +74,7 @@ func (l *libraryVariableSetDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Read library variable set returned %d items", len(existingLibraryVariableSets.Items)))
+	util.DatasourceResultCount(ctx, "library variable set", len(existingLibraryVariableSets.Items))
 
 	data.LibraryVariableSets = flattenLibraryVariableSets(existingLibraryVariableSets.Items)
 

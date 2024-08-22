@@ -8,7 +8,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
 )
 
@@ -63,7 +62,7 @@ func (p *projectsDataSource) Read(ctx context.Context, req datasource.ReadReques
 		Take:                int(data.Take.ValueInt64()),
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading projects with query %+v", query))
+	util.DatasourceReading(ctx, "projects", query)
 
 	if !data.IDs.IsNull() {
 		var ids []string
@@ -82,7 +81,7 @@ func (p *projectsDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading projects returned %d items", len(existingProjects.Items)))
+	util.DatasourceResultCount(ctx, "projects", len(existingProjects.Items))
 
 	data.Projects = make([]projectResourceModel, 0, len(existingProjects.Items))
 	for _, project := range existingProjects.Items {

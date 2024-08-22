@@ -2,14 +2,12 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
 )
 
@@ -76,7 +74,7 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		Take:        schemas.GetNumber(data.Take),
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading Spaces with query %+v", query))
+	util.DatasourceReading(ctx, "spaces", query)
 
 	existingSpaces, err := spaces.Get(b.Client, query)
 	if err != nil {
@@ -91,7 +89,7 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		mappedSpaces = append(mappedSpaces, s)
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading spaces returned %d items", len(mappedSpaces)))
+	util.DatasourceResultCount(ctx, "spaces", len(mappedSpaces))
 
 	data.Spaces, _ = types.ListValueFrom(ctx, schemas.GetSpaceTypeAttributes(), mappedSpaces)
 	data.ID = types.StringValue("Spaces " + time.Now().UTC().String())

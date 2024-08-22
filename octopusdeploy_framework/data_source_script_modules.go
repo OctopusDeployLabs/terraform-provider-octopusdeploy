@@ -54,7 +54,7 @@ func (l *scriptModulesDataSource) Read(ctx context.Context, req datasource.ReadR
 		Take:        int(data.Take.ValueInt64()),
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("Reading script modules data source query: %+v", query))
+	util.DatasourceReading(ctx, "script modules", query)
 
 	spaceID := data.SpaceID.ValueString()
 	existingScriptModules, err := scriptmodules.Get(l.Config.Client, spaceID, query)
@@ -72,6 +72,6 @@ func (l *scriptModulesDataSource) Read(ctx context.Context, req datasource.ReadR
 		flattenedScriptModules)
 	data.ID = types.StringValue("Script Modules " + time.Now().UTC().String())
 
-	tflog.Debug(ctx, fmt.Sprintf("Read script modules data source returned %d items", len(existingScriptModules.Items)))
+	util.DatasourceResultCount(ctx, "script modules", len(existingScriptModules.Items))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
