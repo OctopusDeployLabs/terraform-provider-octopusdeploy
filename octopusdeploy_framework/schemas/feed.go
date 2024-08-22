@@ -82,6 +82,13 @@ func GetFeedsDataSourceSchema() map[string]datasourceSchema.Attribute {
 
 		// response
 		"id": GetIdDatasourceSchema(true),
+		"feeds": datasourceSchema.ListNestedAttribute{
+			Computed: true,
+			Optional: false,
+			NestedObject: datasourceSchema.NestedAttributeObject{
+				Attributes: GetFeedDataSourceSchema(),
+			},
+		},
 	}
 }
 

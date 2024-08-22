@@ -32,13 +32,6 @@ func (*feedsDataSource) Schema(_ context.Context, req datasource.SchemaRequest, 
 	resp.Schema = datasourceSchema.Schema{
 		Description: "Provides information about existing feeds.",
 		Attributes:  schemas.GetFeedsDataSourceSchema(),
-		Blocks: map[string]datasourceSchema.Block{
-			"feeds": datasourceSchema.ListNestedBlock{
-				NestedObject: datasourceSchema.NestedBlockObject{
-					Attributes: schemas.GetFeedDataSourceSchema(),
-				},
-			},
-		},
 	}
 }
 
