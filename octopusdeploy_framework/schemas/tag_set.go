@@ -76,6 +76,7 @@ func GetTagSetDataSourceSchema() datasourceSchema.Schema {
 				Build(),
 			"tag_sets": datasourceSchema.ListNestedAttribute{
 				Computed:    true,
+				Optional:    false,
 				Description: "A list of tag sets that match the filter(s).",
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: map[string]datasourceSchema.Attribute{
