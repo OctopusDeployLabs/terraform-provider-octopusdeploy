@@ -46,11 +46,11 @@ func (*tenantProjectsDataSource) Schema(_ context.Context, req datasource.Schema
 			"project_ids":     schemas.GetQueryIDsDatasourceSchema(),
 			"environment_ids": schemas.GetQueryIDsDatasourceSchema(),
 			"space_id":        schemas.GetSpaceIdDatasourceSchema("tenant projects", false),
-		},
-		Blocks: map[string]datasourceSchema.Block{
-			"tenant_projects": datasourceSchema.ListNestedBlock{
+			"tenant_projects": datasourceSchema.ListNestedAttribute{
+				Computed:    true,
+				Optional:    false,
 				Description: "A list of related tenants, projects and environments that match the filter(s).",
-				NestedObject: datasourceSchema.NestedBlockObject{
+				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: map[string]datasourceSchema.Attribute{
 						"id": schemas.GetIdDatasourceSchema(true),
 						"tenant_id": datasourceSchema.StringAttribute{

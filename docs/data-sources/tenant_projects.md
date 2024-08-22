@@ -24,9 +24,9 @@ Provides information about existing tenants.
 
 ### Read-Only
 
-- `tenant_projects` (Block List) A list of related tenants, projects and environments that match the filter(s). (see [below for nested schema](#nestedblock--tenant_projects))
+- `tenant_projects` (Attributes List) A list of related tenants, projects and environments that match the filter(s). (see [below for nested schema](#nestedatt--tenant_projects))
 
-<a id="nestedblock--tenant_projects"></a>
+<a id="nestedatt--tenant_projects"></a>
 ### Nested Schema for `tenant_projects`
 
 Read-Only:
