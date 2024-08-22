@@ -62,6 +62,8 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		Take:               int(data.Take.ValueInt64()),
 	}
 
+	util.DatasourceReading(ctx, "tenants", query)
+
 	existingTenants, err := tenants.Get(b.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load tenants", err.Error())
@@ -72,6 +74,8 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	for _, tenant := range existingTenants.Items {
 		flattenedTenants = append(flattenedTenants, schemas.FlattenTenant(tenant))
 	}
+
+	util.DatasourceResultCount(ctx, "tenants", len(flattenedTenants))
 
 	data.ID = types.StringValue("Tenants " + time.Now().UTC().String())
 	data.Tenants, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.TenantObjectType()}, flattenedTenants)

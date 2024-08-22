@@ -64,6 +64,9 @@ func (g *gitCredentialsDataSource) Read(ctx context.Context, req datasource.Read
 		Skip: int(data.Skip.ValueInt64()),
 		Take: int(data.Take.ValueInt64()),
 	}
+
+	util.DatasourceReading(ctx, "git credentials", query)
+
 	spaceID := data.SpaceID.ValueString()
 
 	existingGitCredentials, err := credentials.Get(g.Client, spaceID, query)
@@ -71,6 +74,8 @@ func (g *gitCredentialsDataSource) Read(ctx context.Context, req datasource.Read
 		resp.Diagnostics.AddError("Unable to query git credentials", err.Error())
 		return
 	}
+
+	util.DatasourceResultCount(ctx, "git credentials", len(existingGitCredentials.Items))
 
 	flattenedGitCredentials := make([]GitCredentialDatasourceModel, 0, len(existingGitCredentials.Items))
 	for _, gitCredential := range existingGitCredentials.Items {

@@ -54,6 +54,8 @@ func (l *scriptModulesDataSource) Read(ctx context.Context, req datasource.ReadR
 		Take:        int(data.Take.ValueInt64()),
 	}
 
+	util.DatasourceReading(ctx, "script modules", query)
+
 	spaceID := data.SpaceID.ValueString()
 	existingScriptModules, err := scriptmodules.Get(l.Config.Client, spaceID, query)
 	if err != nil {
@@ -70,5 +72,6 @@ func (l *scriptModulesDataSource) Read(ctx context.Context, req datasource.ReadR
 		flattenedScriptModules)
 	data.ID = types.StringValue("Script Modules " + time.Now().UTC().String())
 
+	util.DatasourceResultCount(ctx, "script modules", len(existingScriptModules.Items))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
