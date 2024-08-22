@@ -43,12 +43,11 @@ func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 
 			// response
 			"id": schemas.GetIdDatasourceSchema(true),
-		},
-		Blocks: map[string]schema.Block{
-			"spaces": schema.ListNestedBlock{
-				Description: "Provides information about existing spaces.",
-				NestedObject: schema.NestedBlockObject{
-					Attributes: schemas.GetSpacesDatasourceSchema(),
+			"spaces": schema.ListNestedAttribute{
+				Computed: true,
+				Optional: false,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: schemas.GetSpaceDatasourceSchema(),
 				},
 			},
 		},

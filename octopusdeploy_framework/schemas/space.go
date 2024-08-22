@@ -100,7 +100,7 @@ func GetSpaceDatasourceSchema() map[string]datasourceSchema.Attribute {
 			Validators: []validator.String{
 				stringvalidator.LengthBetween(1, 20),
 			},
-			Required: true,
+			Computed: true,
 		},
 		"slug": GetSlugDatasourceSchema(spaceDescription, true),
 		"space_managers_teams": datasourceSchema.SetAttribute{

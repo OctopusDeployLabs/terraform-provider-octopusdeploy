@@ -34,9 +34,9 @@ data "octopusdeploy_spaces" "spaces" {
 ### Read-Only
 
 - `id` (String) The unique ID for this resource.
-- `spaces` (Block List) Provides information about existing spaces. (see [below for nested schema](#nestedblock--spaces))
+- `spaces` (Attributes List) (see [below for nested schema](#nestedatt--spaces))
 
-<a id="nestedblock--spaces"></a>
+<a id="nestedatt--spaces"></a>
 ### Nested Schema for `spaces`
 
 Read-Only:
