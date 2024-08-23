@@ -274,7 +274,7 @@ func GetDownloadAttemptsResourceSchema() resourceSchema.Attribute {
 }
 
 func GetUsernameResourceSchema(isRequired bool) resourceSchema.Attribute {
-	s := &resourceSchema.StringAttribute{
+	s := resourceSchema.StringAttribute{
 		Description: "The username associated with this resource.",
 		Sensitive:   true,
 		Validators: []validator.String{

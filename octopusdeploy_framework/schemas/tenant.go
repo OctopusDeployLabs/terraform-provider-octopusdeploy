@@ -88,7 +88,7 @@ func GetTenantsDataSourceSchema() map[string]datasourceSchema.Attribute {
 		"skip":     GetQuerySkipDatasourceSchema(),
 		"tags":     GetQueryDatasourceTags(),
 		"space_id": GetSpaceIdDatasourceSchema("tenants", false),
-		"take":     util.GetQueryTakeDatasourceSchema(),
+		"take":     GetQueryTakeDatasourceSchema(),
 		"tenants": datasourceSchema.ListNestedAttribute{
 			Computed: true,
 			Optional: false,

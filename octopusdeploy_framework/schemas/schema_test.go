@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"fmt"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/stretchr/testify/require"
 	"reflect"
@@ -63,7 +64,7 @@ func checkResourceBlocks(t *testing.T, schemaName string, blocks map[string]reso
 
 func checkResourceAttributes(t *testing.T, schemaName string, attributes map[string]resourceSchema.Attribute) {
 	for name, attr := range attributes {
-		if strings.HasSuffix(reflect.TypeOf(attr).PkgPath(), "datasource/schema") {
+		if !strings.HasSuffix(reflect.TypeOf(attr).PkgPath(), "resource/schema") {
 			require.Fail(t, fmt.Sprintf("%s in %s must be from the resource schema", name, schemaName))
 		}
 	}
@@ -76,10 +77,36 @@ func typeName(i interface{}) string {
 func datasourceTest(t *testing.T, schema EntitySchema) {
 	dataSourceSchemaAttributes := schema.GetDatasourceSchemaAttributes()
 	schemaName := typeName(schema)
-	for name, attr := range dataSourceSchemaAttributes {
-		if strings.HasSuffix(reflect.TypeOf(attr).PkgPath(), "resource/schema") {
-			require.Fail(t, fmt.Sprintf("%s in %s must be from the data source schema", name, schemaName))
+
+	checkDatasourceAttributes(t, schemaName, dataSourceSchemaAttributes)
+	checkDatasourceBlocks(t, schemaName)
+}
+
+func checkDatasourceAttributes(t *testing.T, schemaName string, attributes map[string]datasourceSchema.Attribute) {
+	for name, attr := range attributes {
+		switch attrType := attr.(type) {
+		case datasourceSchema.ListNestedAttribute:
+			checkDatasourceAttributes(t, schemaName, attrType.NestedObject.Attributes)
+		default:
+			if !strings.HasSuffix(reflect.TypeOf(attr).PkgPath(), "datasource/schema") {
+				require.Fail(t, fmt.Sprintf("%s in %s must be from the data source schema", name, schemaName))
+			}
 		}
 	}
+}
 
+func checkDatasourceBlocks(t *testing.T, schemaName string, blocks map[string]datasourceSchema.Block) {
+	for _, block := range blocks {
+		switch b := block.(type) {
+		case datasourceSchema.ListNestedBlock:
+			checkDatasourceAttributes(t, schemaName, b.NestedObject.Attributes)
+			checkDatasourceBlocks(t, schemaName, b.NestedObject.Blocks)
+		case datasourceSchema.SetNestedBlock:
+			checkDatasourceAttributes(t, schemaName, b.NestedObject.Attributes)
+			checkDatasourceBlocks(t, schemaName, b.NestedObject.Blocks)
+		case datasourceSchema.SingleNestedBlock:
+			checkDatasourceAttributes(t, schemaName, b.Attributes)
+			checkDatasourceBlocks(t, schemaName, b.Blocks)
+		}
+	}
 }

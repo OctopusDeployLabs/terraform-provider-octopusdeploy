@@ -56,7 +56,7 @@ func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaReq
 				Computed: true,
 				Optional: false,
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: schemas.GetEnvironmentDatasourceSchema(),
+					Attributes: schemas.EnvironmentSchema{}.GetDatasourceSchemaAttributes(),
 				},
 			},
 		},
