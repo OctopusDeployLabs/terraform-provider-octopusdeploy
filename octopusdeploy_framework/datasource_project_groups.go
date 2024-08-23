@@ -57,11 +57,10 @@ func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 
 			// response
 			"id": schemas.GetIdDatasourceSchema(true),
-		},
-		Blocks: map[string]schema.Block{
-			"project_groups": schema.ListNestedBlock{
+			"project_groups": schema.ListNestedAttribute{
+				Computed:    true,
 				Description: "A list of project groups that match the filter(s).",
-				NestedObject: schema.NestedBlockObject{
+				NestedObject: schema.NestedAttributeObject{
 					Attributes: schemas.GetProjectGroupDatasourceSchema(),
 				},
 			},
@@ -104,6 +103,8 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 	}
 	spaceID := data.SpaceID.ValueString()
 
+	util.DatasourceReading(ctx, "project groups", query)
+
 	existingProjectGroups, err := projectgroups.Get(p.Client, spaceID, query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load project groups", err.Error())
@@ -121,7 +122,8 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 		newGroups = append(newGroups, g)
 	}
 
-	//groups, _ := types.ObjectValueFrom(ctx, types.ObjectType{AttrTypes: getNestedGroupAttributes()}, newGroups)
+	util.DatasourceResultCount(ctx, "project groups", len(newGroups))
+
 	for _, projectGroup := range newGroups {
 		tflog.Debug(ctx, "mapped group "+projectGroup.Name.ValueString())
 	}

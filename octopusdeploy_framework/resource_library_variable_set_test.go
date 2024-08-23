@@ -169,6 +169,13 @@ func testLibraryVariableSetWithVariable(localName, variableLocalName, name, desc
 resource "octopusdeploy_library_variable_set" "%s" {
   name = "%s"
   description = "%s"
+
+  template {
+    name             = "template"
+    # help_text        = ""
+    default_value    = ""
+    display_settings = { "Octopus.ControlType" = "SingleLineText" }
+  }
 }
 
 resource "octopusdeploy_variable" "%s" {

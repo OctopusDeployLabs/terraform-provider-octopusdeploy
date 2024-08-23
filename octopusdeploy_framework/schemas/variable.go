@@ -135,9 +135,7 @@ func GetVariableDatasourceSchema() datasourceSchema.Schema {
 				Computed: true,
 			},
 			VariableSchemaAttributeNames.Prompt: getVariablePromptDatasourceSchema(),
-		},
-		Blocks: map[string]datasourceSchema.Block{
-			VariableSchemaAttributeNames.Scope: getVariableScopeDatasourceSchema(),
+			VariableSchemaAttributeNames.Scope:  getVariableScopeDatasourceSchema(),
 		},
 	}
 }

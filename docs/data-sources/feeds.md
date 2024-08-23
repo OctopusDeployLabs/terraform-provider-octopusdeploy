@@ -36,10 +36,10 @@ data "octopusdeploy_feeds" "example" {
 
 ### Read-Only
 
-- `feeds` (Block List) (see [below for nested schema](#nestedblock--feeds))
+- `feeds` (Attributes List) (see [below for nested schema](#nestedatt--feeds))
 - `id` (String) The unique ID for this resource.
 
-<a id="nestedblock--feeds"></a>
+<a id="nestedatt--feeds"></a>
 ### Nested Schema for `feeds`
 
 Read-Only:

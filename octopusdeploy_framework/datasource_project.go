@@ -66,6 +66,8 @@ func (p *projectsDataSource) Read(ctx context.Context, req datasource.ReadReques
 		Take:                int(data.Take.ValueInt64()),
 	}
 
+	util.DatasourceReading(ctx, "projects", query)
+
 	if !data.IDs.IsNull() {
 		var ids []string
 		resp.Diagnostics.Append(data.IDs.ElementsAs(ctx, &ids, false)...)
@@ -82,6 +84,8 @@ func (p *projectsDataSource) Read(ctx context.Context, req datasource.ReadReques
 		resp.Diagnostics.AddError("Unable to query projects", err.Error())
 		return
 	}
+
+	util.DatasourceResultCount(ctx, "projects", len(existingProjects.Items))
 
 	data.Projects = make([]projectResourceModel, 0, len(existingProjects.Items))
 	for _, project := range existingProjects.Items {

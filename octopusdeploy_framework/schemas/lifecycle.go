@@ -115,6 +115,7 @@ func getResourceRetentionPolicyBlockSchema() resourceSchema.ListNestedBlock {
 func getLifecyclesAttribute() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
 		Computed: true,
+		Optional: false,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
 				"id":                        util.DataSourceString().Computed().Description("The ID of the lifecycle.").Build(),

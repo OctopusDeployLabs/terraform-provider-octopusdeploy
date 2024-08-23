@@ -63,6 +63,16 @@ var _ EntitySchema = FeedSchema{}
 
 func (f FeedSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{}
+		// response
+		"id": GetIdDatasourceSchema(true),
+		"feeds": datasourceSchema.ListNestedAttribute{
+			Computed: true,
+			Optional: false,
+			NestedObject: datasourceSchema.NestedAttributeObject{
+				Attributes: GetFeedDataSourceSchema(),
+			},
+		},
+	}
 }
 
 func (f FeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {

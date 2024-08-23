@@ -31,9 +31,9 @@ Provides information about existing tenants.
 ### Read-Only
 
 - `id` (String) The unique ID for this resource.
-- `tenants` (Block List) A list of tenants that match the filter(s). (see [below for nested schema](#nestedblock--tenants))
+- `tenants` (Attributes List) (see [below for nested schema](#nestedatt--tenants))
 
-<a id="nestedblock--tenants"></a>
+<a id="nestedatt--tenants"></a>
 ### Nested Schema for `tenants`
 
 Read-Only:

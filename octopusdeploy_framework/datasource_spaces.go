@@ -43,12 +43,11 @@ func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 
 			// response
 			"id": schemas.GetIdDatasourceSchema(true),
-		},
-		Blocks: map[string]schema.Block{
-			"spaces": schema.ListNestedBlock{
-				Description: "Provides information about existing spaces.",
-				NestedObject: schema.NestedBlockObject{
-					Attributes: schemas.GetSpaceDatasourceSchema(),
+			"spaces": schema.ListNestedAttribute{
+				Computed: true,
+				Optional: false,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: schemas.GetSpacesDatasourceSchema(),
 				},
 			},
 		},
@@ -74,6 +73,8 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		Take:        schemas.GetNumber(data.Take),
 	}
 
+	util.DatasourceReading(ctx, "spaces", query)
+
 	existingSpaces, err := spaces.Get(b.Client, query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load spaces", err.Error())
@@ -86,6 +87,8 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		mapSpaceToState(ctx, &s, space)
 		mappedSpaces = append(mappedSpaces, s)
 	}
+
+	util.DatasourceResultCount(ctx, "spaces", len(mappedSpaces))
 
 	data.Spaces, _ = types.ListValueFrom(ctx, schemas.GetSpaceTypeAttributes(), mappedSpaces)
 	data.ID = types.StringValue("Spaces " + time.Now().UTC().String())

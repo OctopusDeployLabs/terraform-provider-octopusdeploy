@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -71,6 +72,8 @@ func GetActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
 		"default_value": resourceSchema.StringAttribute{
 			Description: "A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.",
 			Optional:    true,
+			Computed:    true,
+			Default:     stringdefault.StaticString(""),
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
@@ -83,6 +86,8 @@ func GetActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
 		"help_text": resourceSchema.StringAttribute{
 			Description: "The help presented alongside the parameter input.",
 			Optional:    true,
+			Computed:    true,
+			Default:     stringdefault.StaticString(""),
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
