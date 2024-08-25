@@ -36,8 +36,8 @@ func (n NugetFeedSchema) GetResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func (n NugetFeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{}
+func (n NugetFeedSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
 }
 
 type NugetFeedTypeResourceModel struct {

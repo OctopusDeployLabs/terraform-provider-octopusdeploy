@@ -78,6 +78,31 @@ func EnvironmentObjectType() map[string]attr.Type {
 	}
 }
 
+func (e EnvironmentSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{
+		Description: "Provides information about existing environments.",
+		Attributes: map[string]datasourceSchema.Attribute{
+			//request
+			"ids":          GetQueryIDsDatasourceSchema(),
+			"space_id":     GetSpaceIdDatasourceSchema(EnvironmentResourceDescription, false),
+			"name":         GetQueryNameDatasourceSchema(),
+			"partial_name": GetQueryPartialNameDatasourceSchema(),
+			"skip":         GetQuerySkipDatasourceSchema(),
+			"take":         GetQueryTakeDatasourceSchema(),
+
+			//response
+			"id": GetIdDatasourceSchema(true),
+			"environments": datasourceSchema.ListNestedAttribute{
+				Computed: true,
+				Optional: false,
+				NestedObject: datasourceSchema.NestedAttributeObject{
+					Attributes: e.GetDatasourceSchemaAttributes(),
+				},
+			},
+		},
+	}
+}
+
 func (e EnvironmentSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":                 GetIdDatasourceSchema(true),

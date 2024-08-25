@@ -12,7 +12,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -31,10 +30,7 @@ func NewSpaceResource() resource.Resource {
 }
 
 func (s *spaceResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Description: "This resource manages spaces in Octopus Deploy.",
-		Attributes:  schemas.GetSpaceResourceSchema(),
-	}
+	resp.Schema = schemas.SpaceSchema{}.GetResourceSchema()
 }
 
 func (s *spaceResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {

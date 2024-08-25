@@ -29,7 +29,7 @@ func (r *libraryVariableSetFeedTypeResource) Metadata(ctx context.Context, req r
 }
 
 func (r *libraryVariableSetFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetLibraryVariableSetResourceSchema()
+	resp.Schema = schemas.LibraryVariableSetSchema{}.GetResourceSchema()
 }
 
 func (r *libraryVariableSetFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

@@ -33,8 +33,8 @@ func (d DockerContainerRegistryFeedSchema) GetResourceSchema() resourceSchema.Sc
 	}
 }
 
-func (d DockerContainerRegistryFeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{}
+func (d DockerContainerRegistryFeedSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
 }
 
 type DockerContainerRegistryFeedTypeResourceModel struct {

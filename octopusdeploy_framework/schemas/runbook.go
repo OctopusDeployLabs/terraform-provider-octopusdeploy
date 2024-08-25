@@ -138,8 +138,8 @@ type RunbookConnectivityPolicyModel struct {
 
 type RunbookSchema struct{}
 
-func (r RunbookSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{}
+func (r RunbookSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
 }
 
 var _ EntitySchema = RunbookSchema{}

@@ -21,9 +21,11 @@ var testableSchemas = []EntitySchema{
 	GitCredentialSchema{},
 	ArtifactoryGenericFeedSchema{},
 	AwsElasticContainerRegistrySchema{},
-	FeedSchema{},
-	FeedSchema{},
+	FeedsSchema{},
 	GitHubRepositoryFeedSchema{},
+	SpaceSchema{},
+	ScriptModuleSchema{},
+	LibraryVariableSetSchema{},
 }
 
 func TestDatasourceSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {
@@ -75,11 +77,11 @@ func typeName(i interface{}) string {
 }
 
 func datasourceTest(t *testing.T, schema EntitySchema) {
-	dataSourceSchemaAttributes := schema.GetDatasourceSchemaAttributes()
+	dataSourceSchema := schema.GetDatasourceSchema()
 	schemaName := typeName(schema)
 
-	checkDatasourceAttributes(t, schemaName, dataSourceSchemaAttributes)
-	checkDatasourceBlocks(t, schemaName)
+	checkDatasourceAttributes(t, schemaName, dataSourceSchema.Attributes)
+	checkDatasourceBlocks(t, schemaName, dataSourceSchema.Blocks)
 }
 
 func checkDatasourceAttributes(t *testing.T, schemaName string, attributes map[string]datasourceSchema.Attribute) {

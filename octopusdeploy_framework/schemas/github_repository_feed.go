@@ -29,8 +29,8 @@ func (g GitHubRepositoryFeedSchema) GetResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func (g GitHubRepositoryFeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{}
+func (g GitHubRepositoryFeedSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
 }
 
 type GitHubRepositoryFeedTypeResourceModel struct {

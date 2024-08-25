@@ -36,8 +36,8 @@ func (a ArtifactoryGenericFeedSchema) GetResourceSchema() resourceSchema.Schema 
 	}
 }
 
-func (a ArtifactoryGenericFeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{}
+func (a ArtifactoryGenericFeedSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
 }
 
 type ArtifactoryGenericFeedTypeResourceModel struct {

@@ -10,7 +10,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -27,10 +26,7 @@ func (*spaceDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest
 }
 
 func (*spaceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Description: "Provides information about an existing space.",
-		Attributes:  schemas.GetSpaceDatasourceSchema(),
-	}
+	resp.Schema = schemas.SpaceSchema{}.GetDatasourceSchema()
 }
 
 func (b *spaceDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

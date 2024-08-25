@@ -10,8 +10,8 @@ const helmFeedDescription = "helm feed"
 
 type HelmFeedSchema struct{}
 
-func (h HelmFeedSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{}
+func (h HelmFeedSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
 }
 
 var _ EntitySchema = HelmFeedSchema{}

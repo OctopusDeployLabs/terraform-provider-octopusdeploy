@@ -42,7 +42,7 @@ func (l *libraryVariableSetDataSource) Metadata(ctx context.Context, req datasou
 
 func (l *libraryVariableSetDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	tflog.Debug(ctx, "library variable set Schema")
-	resp.Schema = schemas.GetLibraryVariableSetDataSourceSchema()
+	resp.Schema = schemas.LibraryVariableSetSchema{}.GetDatasourceSchema()
 }
 
 func (l *libraryVariableSetDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

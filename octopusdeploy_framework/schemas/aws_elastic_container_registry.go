@@ -12,8 +12,8 @@ type AwsElasticContainerRegistrySchema struct{}
 
 var _ EntitySchema = AwsElasticContainerRegistrySchema{}
 
-func (a AwsElasticContainerRegistrySchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{}
+func (a AwsElasticContainerRegistrySchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
 }
 
 func (a AwsElasticContainerRegistrySchema) GetResourceSchema() resourceSchema.Schema {

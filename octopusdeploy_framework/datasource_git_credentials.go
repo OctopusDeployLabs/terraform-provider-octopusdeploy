@@ -8,7 +8,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
 )
@@ -46,10 +45,7 @@ func (g *gitCredentialsDataSource) Metadata(_ context.Context, req datasource.Me
 }
 
 func (g *gitCredentialsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = datasourceSchema.Schema{
-		Description: "Use this data source to retrieve information about Git credentials in Octopus Deploy.",
-		Attributes:  schemas.GitCredentialSchema{}.GetDatasourceSchemaAttributes(),
-	}
+	resp.Schema = schemas.GitCredentialSchema{}.GetDatasourceSchema()
 }
 
 func (g *gitCredentialsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
