@@ -8,5 +8,4 @@ import (
 type EntitySchema interface {
 	GetResourceSchema() resourceSchema.Schema
 	GetDatasourceSchema() datasourceSchema.Schema
-	//GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute
 }

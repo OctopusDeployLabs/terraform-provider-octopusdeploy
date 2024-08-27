@@ -12,7 +12,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -32,10 +31,7 @@ func (r *mavenFeedTypeResource) Metadata(ctx context.Context, req resource.Metad
 }
 
 func (r *mavenFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes:  schemas.GetMavenFeedResourceSchema(),
-		Description: "This resource manages a Maven feed in Octopus Deploy.",
-	}
+	resp.Schema = schemas.MavenFeedSchema{}.GetResourceSchema()
 }
 
 func (r *mavenFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

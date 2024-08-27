@@ -100,11 +100,7 @@ func (l LibraryVariableSetSchema) GetResourceSchema() resourceSchema.Schema {
 		},
 		Description: "This resource manages library variable sets in Octopus Deploy.",
 		Blocks: map[string]resourceSchema.Block{
-			"template": resourceSchema.ListNestedBlock{
-				NestedObject: resourceSchema.NestedBlockObject{
-					Attributes: GetActionTemplateParameterSchema(),
-				},
-			},
+			"template": GetActionTemplateParameterSchema(),
 		},
 	}
 }

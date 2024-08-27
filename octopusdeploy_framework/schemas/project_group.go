@@ -8,6 +8,8 @@ import (
 
 const projectGroupDescription = "project group"
 
+type 
+
 func GetProjectGroupDatasourceSchema() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":          GetIdResourceSchema(),
