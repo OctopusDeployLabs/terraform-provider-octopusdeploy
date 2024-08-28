@@ -25,7 +25,7 @@ func (*variablesDataSource) Metadata(_ context.Context, req datasource.MetadataR
 }
 
 func (*variablesDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schemas.GetVariableDatasourceSchema()
+	resp.Schema = schemas.VariableSchema{}.GetDatasourceSchema()
 }
 
 func (e *variablesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

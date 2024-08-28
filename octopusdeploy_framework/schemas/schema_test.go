@@ -30,6 +30,8 @@ var testableSchemas = []EntitySchema{
 	MavenFeedSchema{},
 	ProjectGroupSchema{},
 	TagSchema{},
+	UsernamePasswordAccountSchema{},
+	VariableSchema{},
 }
 
 func TestDatasourceSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {
