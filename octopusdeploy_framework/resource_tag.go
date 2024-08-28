@@ -33,7 +33,7 @@ func (r *tagTypeResource) Metadata(ctx context.Context, req resource.MetadataReq
 }
 
 func (r *tagTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetTagResourceSchema()
+	resp.Schema = schemas.TagSchema{}.GetResourceSchema()
 }
 
 func (r *tagTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
