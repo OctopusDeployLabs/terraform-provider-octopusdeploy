@@ -9,7 +9,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"golang.org/x/exp/slices"
 )
@@ -39,38 +38,7 @@ func (t *tenantProjectsDataSource) Configure(_ context.Context, req datasource.C
 }
 
 func (*tenantProjectsDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = datasourceSchema.Schema{
-		Description: "Provides information about existing tenants.",
-		Attributes: map[string]datasourceSchema.Attribute{
-			"tenant_ids":      schemas.GetQueryIDsDatasourceSchema(),
-			"project_ids":     schemas.GetQueryIDsDatasourceSchema(),
-			"environment_ids": schemas.GetQueryIDsDatasourceSchema(),
-			"space_id":        schemas.GetSpaceIdDatasourceSchema("tenant projects", false),
-			"tenant_projects": datasourceSchema.ListNestedAttribute{
-				Computed:    true,
-				Optional:    false,
-				Description: "A list of related tenants, projects and environments that match the filter(s).",
-				NestedObject: datasourceSchema.NestedAttributeObject{
-					Attributes: map[string]datasourceSchema.Attribute{
-						"id": schemas.GetIdDatasourceSchema(true),
-						"tenant_id": datasourceSchema.StringAttribute{
-							Description: "The tenant ID associated with this tenant.",
-							Computed:    true,
-						},
-						"project_id": datasourceSchema.StringAttribute{
-							Description: "The project ID associated with this tenant.",
-							Computed:    true,
-						},
-						"environment_ids": datasourceSchema.ListAttribute{
-							Description: "The environment IDs associated with this tenant.",
-							ElementType: types.StringType,
-							Computed:    true,
-						},
-					},
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.TenantProjectVariableSchema{}.GetDatasourceSchema()
 }
 
 func (t *tenantProjectsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
