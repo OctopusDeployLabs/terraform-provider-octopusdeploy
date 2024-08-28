@@ -7,20 +7,11 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"golang.org/x/exp/slices"
+	"slices"
+	"sync"
 )
-
-type TenantProjectsDataModel struct {
-	SpaceID        types.String `tfsdk:"space_id"`
-	TenantIDs      types.List   `tfsdk:"tenant_ids"`
-	ProjectIDs     types.List   `tfsdk:"project_ids"`
-	EnvironmentIDs types.List   `tfsdk:"environment_ids"`
-	TenantProjects types.List   `tfsdk:"tenant_projects"`
-}
 
 type tenantProjectsDataSource struct {
 	*Config
@@ -39,42 +30,11 @@ func (t *tenantProjectsDataSource) Configure(_ context.Context, req datasource.C
 }
 
 func (*tenantProjectsDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = datasourceSchema.Schema{
-		Description: "Provides information about existing tenants.",
-		Attributes: map[string]datasourceSchema.Attribute{
-			"tenant_ids":      schemas.GetQueryIDsDatasourceSchema(),
-			"project_ids":     schemas.GetQueryIDsDatasourceSchema(),
-			"environment_ids": schemas.GetQueryIDsDatasourceSchema(),
-			"space_id":        schemas.GetSpaceIdDatasourceSchema("tenant projects", false),
-			"tenant_projects": datasourceSchema.ListNestedAttribute{
-				Computed:    true,
-				Optional:    false,
-				Description: "A list of related tenants, projects and environments that match the filter(s).",
-				NestedObject: datasourceSchema.NestedAttributeObject{
-					Attributes: map[string]datasourceSchema.Attribute{
-						"id": schemas.GetIdDatasourceSchema(true),
-						"tenant_id": datasourceSchema.StringAttribute{
-							Description: "The tenant ID associated with this tenant.",
-							Computed:    true,
-						},
-						"project_id": datasourceSchema.StringAttribute{
-							Description: "The project ID associated with this tenant.",
-							Computed:    true,
-						},
-						"environment_ids": datasourceSchema.ListAttribute{
-							Description: "The environment IDs associated with this tenant.",
-							ElementType: types.StringType,
-							Computed:    true,
-						},
-					},
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.GetTenantProjectsDataSourceSchema()
 }
 
 func (t *tenantProjectsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data TenantProjectsDataModel
+	var data schemas.TenantProjectsDataModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -90,71 +50,104 @@ func (t *tenantProjectsDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	var tenantData []*tenants.Tenant
-	if tenantIDs == nil {
-		tenantData = make([]*tenants.Tenant, 0)
-		for _, projectID := range projectIDs {
-			// todo: should consider using concurrency
-			tenantsByProjectID, err := getTenantByProjectID(t.Client, projectID, spaceID)
-			if err != nil {
-				resp.Diagnostics.AddError("unable to load tenant data for project", err.Error())
+	tenantData, err := getTenantData(t.Client, tenantIDs, projectIDs, spaceID)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to load tenant data", err.Error())
+		return
+	}
+
+	mappedTenantProjects := make([]any, 0)
+
+	filterEnvAndMap := func(tenant *tenants.Tenant, projectID string, envIDs []string) {
+		if environmentIDs == nil || len(environmentIDs) == 0 {
+			mappedTenantProjects = append(mappedTenantProjects, schemas.MapTenantToTenantProject(tenant, projectID))
+			return
+		}
+		for _, envID := range envIDs {
+			if slices.Contains(environmentIDs, envID) {
+				mappedTenantProjects = append(mappedTenantProjects, schemas.MapTenantToTenantProject(tenant, projectID))
 				return
 			}
-			tenantData = append(tenantData, tenantsByProjectID...)
+		}
+	}
+
+	if projectIDs == nil || len(projectIDs) == 0 {
+		for _, tenant := range tenantData {
+			for projectID, envIDs := range tenant.ProjectEnvironments {
+				filterEnvAndMap(tenant, projectID, envIDs)
+			}
 		}
 	} else {
-		tenantQuery := tenants.TenantsQuery{
-			IDs: tenantIDs,
-		}
-		tenantResource, err := tenants.Get(t.Client, spaceID, tenantQuery)
-		if err != nil {
-			resp.Diagnostics.AddError("unable to load tenant data", err.Error())
-			return
-		}
-		tenantData, err = tenantResource.GetAllPages(t.Client.Sling())
-		if err != nil {
-			resp.Diagnostics.AddError("unable to load tenant data", err.Error())
-			return
+		for _, tenant := range tenantData {
+			for _, projectID := range projectIDs {
+				if envIDs, ok := tenant.ProjectEnvironments[projectID]; ok {
+					filterEnvAndMap(tenant, projectID, envIDs)
+				}
+			}
 		}
 	}
 
-	// todo: refactor
-	flattenedTenantProjects := make([]any, 0)
-	for _, tenant := range tenantData {
-		if projectIDs == nil {
-			for projectID, envIDs := range tenant.ProjectEnvironments {
-				if environmentIDs != nil {
-					for _, envID := range envIDs {
-						if slices.Contains(environmentIDs, envID) {
-							flattenedTenantProjects = append(flattenedTenantProjects, flattenTenantProject(tenant, projectID))
-							break
-						}
-					}
-				} else {
-					flattenedTenantProjects = append(flattenedTenantProjects, flattenTenantProject(tenant, projectID))
-				}
-			}
-			continue
-		}
-		for _, projectID := range projectIDs {
-			if envIDs, ok := tenant.ProjectEnvironments[projectID]; ok {
-				if environmentIDs != nil {
-					for _, envID := range envIDs {
-						if slices.Contains(environmentIDs, envID) {
-							flattenedTenantProjects = append(flattenedTenantProjects, flattenTenantProject(tenant, projectID))
-							break
-						}
-					}
-				} else {
-					flattenedTenantProjects = append(flattenedTenantProjects, flattenTenantProject(tenant, projectID))
-				}
-			}
-
-		}
-	}
-
-	data.TenantProjects, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: tenantProjectType()}, flattenedTenantProjects)
+	data.TenantProjects, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.TenantProjectType()}, mappedTenantProjects)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func getTenantData(c *client.Client, tenantIDs, ProjectIDs []string, spaceID string) ([]*tenants.Tenant, error) {
+	if tenantIDs == nil {
+		return getTenantByProjectIDs(c, ProjectIDs, spaceID)
+	}
+	return getTenantsByTenantIDs(c, tenantIDs, spaceID)
+}
+
+const maxConcurrentTenantByProjectIDRequests = 5
+
+func getTenantByProjectIDs(c *client.Client, projectIDs []string, spaceID string) ([]*tenants.Tenant, error) {
+	tenantData := make([]*tenants.Tenant, 0)
+	tenantOutCh := make(chan []*tenants.Tenant, len(projectIDs))
+	errorCh := make(chan error, 1)
+	var wg sync.WaitGroup
+	guardCh := make(chan struct{}, maxConcurrentTenantByProjectIDRequests)
+
+	for _, projectID := range projectIDs {
+		wg.Add(1)
+		guardCh <- struct{}{}
+		go func(projectID string) {
+			defer wg.Done()
+			defer func() { <-guardCh }()
+			tenantsByProjectID, err := getTenantByProjectID(c, projectID, spaceID)
+			if err != nil {
+				select {
+				case errorCh <- fmt.Errorf("unable to load tenant data for project %s: %w", projectID, err):
+				default:
+					// Avoid blocking if errorCh already has value
+				}
+				return
+			}
+			tenantOutCh <- tenantsByProjectID
+		}(projectID)
+	}
+
+	go func() {
+		wg.Wait()
+		close(tenantOutCh)
+		close(errorCh)
+	}()
+
+	if err := <-errorCh; err != nil {
+		return nil, err
+	}
+
+	seenTenantIDs := make(map[string]struct{})
+	for tenantsByProjectID := range tenantOutCh {
+		for _, tenantByProjectID := range tenantsByProjectID {
+			if _, ok := seenTenantIDs[tenantByProjectID.ID]; ok {
+				continue
+			}
+			seenTenantIDs[tenantByProjectID.ID] = struct{}{}
+			tenantData = append(tenantData, tenantByProjectID)
+		}
+	}
+
+	return tenantData, nil
 }
 
 func getTenantByProjectID(c *client.Client, projectID string, spaceID string) ([]*tenants.Tenant, error) {
@@ -172,31 +165,17 @@ func getTenantByProjectID(c *client.Client, projectID string, spaceID string) ([
 	return tenantData, nil
 }
 
-func buildTenantProjectID(spaceID string, tenantID string, projectID string) string {
-	return fmt.Sprintf("%s:%s:%s", spaceID, tenantID, projectID)
-}
-
-func tenantProjectType() map[string]attr.Type {
-	return map[string]attr.Type{
-		"id":              types.StringType,
-		"tenant_id":       types.StringType,
-		"project_id":      types.StringType,
-		"environment_ids": types.ListType{ElemType: types.StringType},
+func getTenantsByTenantIDs(c *client.Client, tenantIDs []string, spaceID string) ([]*tenants.Tenant, error) {
+	tenantQuery := tenants.TenantsQuery{
+		IDs: tenantIDs,
 	}
-}
-
-func flattenTenantProject(tenant *tenants.Tenant, projectID string) attr.Value {
-	environmentIDs := make([]attr.Value, len(tenant.ProjectEnvironments[projectID]))
-	for i, envID := range tenant.ProjectEnvironments[projectID] {
-		environmentIDs[i] = types.StringValue(envID)
+	tenantResource, err := tenants.Get(c, spaceID, tenantQuery)
+	if err != nil {
+		return nil, err
 	}
-
-	environmentIdList, _ := types.ListValue(types.StringType, environmentIDs)
-
-	return types.ObjectValueMust(tenantProjectType(), map[string]attr.Value{
-		"id":              types.StringValue(buildTenantProjectID(tenant.SpaceID, tenant.ID, projectID)),
-		"tenant_id":       types.StringValue(tenant.ID),
-		"project_id":      types.StringValue(projectID),
-		"environment_ids": environmentIdList,
-	})
+	tenantData, err := tenantResource.GetAllPages(c.Sling())
+	if err != nil {
+		return nil, err
+	}
+	return tenantData, nil
 }
