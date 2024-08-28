@@ -28,6 +28,7 @@ var testableSchemas = []EntitySchema{
 	LibraryVariableSetSchema{},
 	ActionTemplateParameterSchema{},
 	MavenFeedSchema{},
+	ProjectGroupSchema{},
 }
 
 func TestDatasourceSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {

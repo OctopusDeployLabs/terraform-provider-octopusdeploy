@@ -30,7 +30,7 @@ func (l *scriptModulesDataSource) Metadata(ctx context.Context, req datasource.M
 
 func (l *scriptModulesDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	tflog.Debug(ctx, "script modules datasource Schema")
-	resp.Schema = schemas.GetDatasourceScriptModuleSchema()
+	resp.Schema = schemas.ScriptModuleSchema{}.GetDatasourceSchema()
 }
 
 func (l *scriptModulesDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

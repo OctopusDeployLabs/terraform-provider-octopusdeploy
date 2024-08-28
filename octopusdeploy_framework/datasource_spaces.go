@@ -33,6 +33,7 @@ func (*spacesDataSource) Metadata(_ context.Context, _ datasource.MetadataReques
 }
 
 func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schemas.SpaceSchema{}.GetDatasourceSchema()
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			// request
@@ -47,7 +48,7 @@ func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed: true,
 				Optional: false,
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: schemas.GetSpacesDatasourceSchema(),
+					Attributes: schemas.SpaceSchema{}.GetDatasourceSchema().Attributes,
 				},
 			},
 		},
