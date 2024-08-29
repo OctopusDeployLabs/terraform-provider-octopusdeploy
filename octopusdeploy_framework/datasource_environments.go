@@ -10,7 +10,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -39,29 +38,7 @@ func (*environmentDataSource) Metadata(_ context.Context, req datasource.Metadat
 }
 
 func (*environmentDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Description: "Provides information about existing environments.",
-		Attributes: map[string]schema.Attribute{
-			//request
-			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"space_id":     schemas.GetSpaceIdDatasourceSchema(schemas.EnvironmentResourceDescription, false),
-			"name":         util.GetQueryNameDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
-
-			//response
-			"id": schemas.GetIdDatasourceSchema(true),
-		},
-		Blocks: map[string]schema.Block{
-			"environments": schema.ListNestedBlock{
-				Description: "Provides information about existing environments.",
-				NestedObject: schema.NestedBlockObject{
-					Attributes: schemas.GetEnvironmentDatasourceSchema(),
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.EnvironmentSchema{}.GetDatasourceSchema()
 }
 
 func (e *environmentDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -83,6 +60,8 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		Skip:        util.GetNumber(data.Skip),
 		Take:        util.GetNumber(data.Take),
 	}
+
+	util.DatasourceReading(ctx, "environments", query)
 
 	existingEnvironments, err := environments.Get(e.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
@@ -108,6 +87,8 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 			mappedEnvironments = append(mappedEnvironments, schemas.MapFromEnvironment(ctx, matchedEnvironment))
 		}
 	}
+
+	util.DatasourceResultCount(ctx, "environments", len(mappedEnvironments))
 
 	data.Environments, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.EnvironmentObjectType()}, mappedEnvironments)
 	data.ID = types.StringValue("Environments " + time.Now().UTC().String())

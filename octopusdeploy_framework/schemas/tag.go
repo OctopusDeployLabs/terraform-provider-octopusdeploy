@@ -3,13 +3,22 @@ package schemas
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tagsets"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const TagResourceName = "tag"
 
-func GetTagResourceSchema() resourceSchema.Schema {
+type TagSchema struct{}
+
+var _ EntitySchema = TagSchema{}
+
+func (t TagSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
+}
+
+func (t TagSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages tags in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{

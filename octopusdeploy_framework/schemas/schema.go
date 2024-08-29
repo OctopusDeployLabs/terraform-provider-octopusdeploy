@@ -2,12 +2,13 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	//"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -64,6 +65,30 @@ func GetReadonlyNameDatasourceSchema() datasourceSchema.Attribute {
 	}
 }
 
+func GetNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The name of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
+func GetQueryNameDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
+		Description: "A filter search by exact name",
+		Optional:    true,
+	}
+}
+
 func GetIdDatasourceSchema(isReadOnly bool) datasourceSchema.Attribute {
 	s := datasourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",
@@ -92,47 +117,6 @@ func GetSpaceIdDatasourceSchema(resourceDescription string, isReadOnly bool) dat
 	}
 
 	return s
-}
-
-func GetNameDatasourceWithMaxLengthSchema(isRequired bool, maxLength int) datasourceSchema.Attribute {
-	s := datasourceSchema.StringAttribute{
-		Description: fmt.Sprintf("The name of this resource, no more than %d characters long", maxLength),
-		Validators: []validator.String{
-			stringvalidator.LengthBetween(1, maxLength),
-		},
-	}
-
-	if isRequired {
-		s.Required = true
-	} else {
-		s.Optional = true
-	}
-
-	return s
-}
-
-func GetNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
-	s := datasourceSchema.StringAttribute{
-		Description: "The name of this resource.",
-		Validators: []validator.String{
-			stringvalidator.LengthAtLeast(1),
-		},
-	}
-
-	if isRequired {
-		s.Required = true
-	} else {
-		s.Optional = true
-	}
-
-	return s
-}
-
-func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
-	return datasourceSchema.StringAttribute{
-		Description: "The description of this " + resourceDescription + ".",
-		Optional:    true,
-	}
 }
 
 func GetReadonlyDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
@@ -190,6 +174,21 @@ func GetDescriptionResourceSchema(resourceDescription string) resourceSchema.Att
 	}
 }
 
+func GetDescriptionDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
+		Description: "The description of this " + resourceDescription + ".",
+		Computed:    true,
+	}
+}
+
+func GetQueryDatasourceTags() datasourceSchema.Attribute {
+	return datasourceSchema.ListAttribute{
+		Description: "A filter to search by a list of tags.",
+		ElementType: types.StringType,
+		Optional:    true,
+	}
+}
+
 func GetSlugDatasourceSchema(resourceDescription string, isReadOnly bool) datasourceSchema.Attribute {
 	s := datasourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
@@ -206,7 +205,7 @@ func GetSlugDatasourceSchema(resourceDescription string, isReadOnly bool) dataso
 }
 
 func GetSlugResourceSchema(resourceDescription string) resourceSchema.Attribute {
-	return datasourceSchema.StringAttribute{
+	return resourceSchema.StringAttribute{
 		Description: fmt.Sprintf("The unique slug of this %s", resourceDescription),
 		Optional:    true,
 		Computed:    true,
@@ -221,6 +220,86 @@ func GetBooleanDatasourceAttribute(description string, isOptional bool) datasour
 	}
 }
 
+func GetSortOrderDatasourceSchema(resourceDescription string) datasourceSchema.Attribute {
+	return datasourceSchema.Int64Attribute{
+		Description: fmt.Sprintf("The order number to sort an %s", resourceDescription),
+		Computed:    true,
+	}
+}
+
+func GetSortOrderResourceSchema(resourceDescription string) resourceSchema.Attribute {
+	return resourceSchema.Int64Attribute{
+		Description: fmt.Sprintf("The order number to sort an %s.", resourceDescription),
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func GetPasswordResourceSchema(isRequired bool) resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The password associated with this resource.",
+		Sensitive:   true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
+func GetPackageAcquisitionLocationOptionsResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.ListAttribute{
+		Computed:    true,
+		ElementType: types.StringType,
+		Optional:    true,
+		PlanModifiers: []planmodifier.List{
+			listplanmodifier.UseStateForUnknown(),
+		},
+	}
+}
+
+func GetDownloadAttemptsResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.Int64Attribute{
+		Default:     int64default.StaticInt64(5),
+		Description: "The number of times a deployment should attempt to download a package from this feed before failing.",
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func GetUsernameResourceSchema(isRequired bool) resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The username associated with this resource.",
+		Sensitive:   true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
+func GetDownloadRetryBackoffSecondsResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.Int64Attribute{
+		Default:     int64default.StaticInt64(10),
+		Description: "The number of seconds to apply as a linear back off between download attempts.",
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
 func GetBooleanResourceAttribute(description string, defaultValue bool, isOptional bool) resourceSchema.Attribute {
 	return resourceSchema.BoolAttribute{
 		Default:     booldefault.StaticBool(defaultValue),
@@ -230,17 +309,20 @@ func GetBooleanResourceAttribute(description string, defaultValue bool, isOption
 	}
 }
 
-func GetIds(ids types.List) []string {
-	var result = make([]string, 0, len(ids.Elements()))
-	for _, id := range ids.Elements() {
-		strVal, ok := id.(types.String)
-
-		if !ok || strVal.IsNull() || strVal.IsUnknown() {
-			continue
-		}
-		result = append(result, strVal.ValueString())
+func GetRequiredStringResourceSchema(description string) resourceSchema.StringAttribute {
+	return resourceSchema.StringAttribute{
+		Required:    true,
+		Description: description,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
 	}
-	return result
+}
+
+func GetFeedUriResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
+		Required: true,
+	}
 }
 
 func GetNumber(val types.Int64) int {

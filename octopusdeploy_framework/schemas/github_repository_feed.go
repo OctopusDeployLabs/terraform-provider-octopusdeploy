@@ -1,25 +1,36 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const gitHubRepositoryFeedDescription = "github repository feed"
 
-func GetGitHubRepositoryFeedResourceSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"download_attempts":                    util.GetDownloadAttemptsResourceSchema(),
-		"download_retry_backoff_seconds":       util.GetDownloadRetryBackoffSecondsResourceSchema(),
-		"feed_uri":                             util.GetFeedUriResourceSchema(),
-		"id":                                   util.GetIdResourceSchema(),
-		"name":                                 util.GetNameResourceSchema(true),
-		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
-		"password":                             util.GetPasswordResourceSchema(false),
-		"space_id":                             util.GetSpaceIdResourceSchema(gitHubRepositoryFeedDescription),
-		"username":                             util.GetUsernameResourceSchema(false),
+type GitHubRepositoryFeedSchema struct{}
+
+var _ EntitySchema = GitHubRepositoryFeedSchema{}
+
+func (g GitHubRepositoryFeedSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Description: "This resource manages a GitHub repository feed in Octopus Deploy.",
+		Attributes: map[string]resourceSchema.Attribute{
+			"download_attempts":                    GetDownloadAttemptsResourceSchema(),
+			"download_retry_backoff_seconds":       GetDownloadRetryBackoffSecondsResourceSchema(),
+			"feed_uri":                             GetFeedUriResourceSchema(),
+			"id":                                   GetIdResourceSchema(),
+			"name":                                 GetNameResourceSchema(true),
+			"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
+			"password":                             GetPasswordResourceSchema(false),
+			"space_id":                             GetSpaceIdResourceSchema(gitHubRepositoryFeedDescription),
+			"username":                             GetUsernameResourceSchema(false),
+		},
 	}
+}
+
+func (g GitHubRepositoryFeedSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
 }
 
 type GitHubRepositoryFeedTypeResourceModel struct {

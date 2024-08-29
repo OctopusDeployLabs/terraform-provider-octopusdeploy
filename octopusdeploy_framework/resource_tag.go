@@ -33,7 +33,7 @@ func (r *tagTypeResource) Metadata(ctx context.Context, req resource.MetadataReq
 }
 
 func (r *tagTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetTagResourceSchema()
+	resp.Schema = schemas.TagSchema{}.GetResourceSchema()
 }
 
 func (r *tagTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -110,17 +110,18 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 	tagSetID := data.TagSetId.ValueString()
 	tagSetSpaceID := data.TagSetSpaceId.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("updating tag (%s)", data.ID))
+	tflog.Info(ctx, fmt.Sprintf("updating tag (%s)", state.ID))
 
 	// if the tag is reassigned to another tag set
 	if !data.TagSetId.Equal(state.TagSetId) {
 		sourceTagSetID, destinationTagSetID := state.TagSetId.ValueString(), data.TagSetId.ValueString()
-		sourceTagSetSpaceID, destinationTagSetSpaceID := state.TagSetSpaceId.ValueString(), data.TagSetSpaceId.ValueString()
+		targetSpaceId := util.Ternary(data.TagSetSpaceId.ValueString() == "", data.TagSetSpaceId, state.TagSetSpaceId)
+		sourceTagSetSpaceID, destinationTagSetSpaceID := state.TagSetSpaceId.ValueString(), targetSpaceId.ValueString()
 
 		sourceTagSet, err := tagsets.GetByID(t.Client, sourceTagSetSpaceID, sourceTagSetID)
 		if err != nil {
 			// if spaceID has changed, tag has been deleted, recreate required
-			if !data.TagSetSpaceId.Equal(state.TagSetSpaceId) {
+			if !targetSpaceId.Equal(state.TagSetSpaceId) {
 				tagCreate(ctx, data, resp.Diagnostics, t.Client)
 				if !resp.Diagnostics.HasError() {
 					resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -146,15 +147,20 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 		}
 
 		tag := schemas.MapFromStateToTag(data)
+		if tag.ID == "" {
+			tag.ID = destinationTagSet.GetID() + "/" + strings.Split(state.ID.ValueString(), "/")[1]
+		}
 
 		// check to see that the tag is not applied to a tenant
 		isUsed, err := isTagUsedByTenants(ctx, t.Client, sourceTagSetSpaceID, tag)
 		if err != nil {
+			data.ID = types.StringValue("")
 			resp.Diagnostics.AddError("Failed to check if tag is used by tenants", err.Error())
 			return
 		}
 
 		if isUsed {
+			data.ID = types.StringValue("")
 			resp.Diagnostics.AddError("Tag in use", "the tag may not be transferred; it is being used by one or more tenant(s)")
 			return
 		}
@@ -163,7 +169,7 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 
 		// remove the tag from the source tag set and update through the API
 		for i := 0; i < len(sourceTagSet.Tags); i++ {
-			if sourceTagSet.Tags[i].ID == data.ID.ValueString() {
+			if sourceTagSet.Tags[i].ID == state.ID.ValueString() {
 				sourceTagSet.Tags = slices.Delete(sourceTagSet.Tags, i, i+1)
 				if _, err := tagsets.Update(t.Client, sourceTagSet); err != nil {
 					resp.Diagnostics.AddError("Failed to update source tag set", err.Error())
@@ -201,7 +207,7 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 	// find and update the tag that matches the one updated in configuration
 	var updatedTag *tagsets.Tag
 	for i := 0; i < len(tagSet.Tags); i++ {
-		if tagSet.Tags[i].ID == data.ID.ValueString() || tagSet.Tags[i].Name == data.Name.ValueString() {
+		if tagSet.Tags[i].ID == state.ID.ValueString() || tagSet.Tags[i].Name == data.Name.ValueString() {
 			tagSet.Tags[i] = schemas.MapFromStateToTag(data)
 
 			updatedTagSet, err := tagsets.Update(t.Client, tagSet)
@@ -212,7 +218,7 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 
 			// Find the updated tag in the updatedTagSet
 			for _, t := range updatedTagSet.Tags {
-				if t.ID == data.ID.ValueString() || t.Name == data.Name.ValueString() {
+				if t.ID == state.ID.ValueString() || t.Name == data.Name.ValueString() {
 					updatedTag = t
 					break
 				}

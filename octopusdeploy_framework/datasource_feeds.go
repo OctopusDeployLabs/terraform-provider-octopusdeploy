@@ -2,13 +2,10 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"fmt"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -31,17 +28,7 @@ func (e *feedsDataSource) Configure(_ context.Context, req datasource.ConfigureR
 }
 
 func (*feedsDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = datasourceSchema.Schema{
-		Description: "Provides information about existing feeds.",
-		Attributes:  schemas.GetFeedsDataSourceSchema(),
-		Blocks: map[string]datasourceSchema.Block{
-			"feeds": datasourceSchema.ListNestedBlock{
-				NestedObject: datasourceSchema.NestedBlockObject{
-					Attributes: schemas.GetFeedDataSourceSchema(),
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.FeedsSchema{}.GetDatasourceSchema()
 }
 
 func (e *feedsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -60,12 +47,15 @@ func (e *feedsDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		Take:        util.GetNumber(data.Take),
 	}
 
+	util.DatasourceReading(ctx, "feeds", query)
+
 	existingFeeds, err := feeds.Get(e.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load feeds", err.Error())
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("environments returned from API: %#v", existingFeeds))
+
+	util.DatasourceResultCount(ctx, "feeds", len(existingFeeds.Items))
 
 	flattenedFeeds := []interface{}{}
 	for _, feed := range existingFeeds.Items {

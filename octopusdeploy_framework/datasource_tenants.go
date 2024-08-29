@@ -6,7 +6,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
 )
@@ -28,18 +27,7 @@ func (e *tenantsDataSource) Configure(_ context.Context, req datasource.Configur
 }
 
 func (*tenantsDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = datasourceSchema.Schema{
-		Description: "Provides information about existing tenants.",
-		Attributes:  schemas.GetTenantsDataSourceSchema(),
-		Blocks: map[string]datasourceSchema.Block{
-			"tenants": datasourceSchema.ListNestedBlock{
-				Description: "A list of tenants that match the filter(s).",
-				NestedObject: datasourceSchema.NestedBlockObject{
-					Attributes: schemas.GetTenantDataSourceSchema(),
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.TenantSchema{}.GetDatasourceSchema()
 }
 
 func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -62,6 +50,8 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		Take:               int(data.Take.ValueInt64()),
 	}
 
+	util.DatasourceReading(ctx, "tenants", query)
+
 	existingTenants, err := tenants.Get(b.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load tenants", err.Error())
@@ -72,6 +62,8 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	for _, tenant := range existingTenants.Items {
 		flattenedTenants = append(flattenedTenants, schemas.FlattenTenant(tenant))
 	}
+
+	util.DatasourceResultCount(ctx, "tenants", len(flattenedTenants))
 
 	data.ID = types.StringValue("Tenants " + time.Now().UTC().String())
 	data.Tenants, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.TenantObjectType()}, flattenedTenants)

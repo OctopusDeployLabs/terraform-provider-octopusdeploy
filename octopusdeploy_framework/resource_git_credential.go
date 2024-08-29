@@ -39,7 +39,7 @@ func (g *gitCredentialResource) Metadata(_ context.Context, req resource.Metadat
 }
 
 func (g *gitCredentialResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetGitCredentialResourceSchema()
+	resp.Schema = schemas.GitCredentialSchema{}.GetResourceSchema()
 }
 
 func (g *gitCredentialResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

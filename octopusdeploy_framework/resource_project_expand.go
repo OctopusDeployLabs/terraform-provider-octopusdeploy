@@ -145,9 +145,7 @@ func expandGitLibraryPersistenceSettings(ctx context.Context, model gitLibraryPe
 
 	return projects.NewGitPersistenceSettings(
 		model.BasePath.ValueString(),
-		&credentials.Reference{
-			ID: model.GitCredentialID.ValueString(),
-		},
+		credentials.NewReference(model.GitCredentialID.ValueString()),
 		model.DefaultBranch.ValueString(),
 		protectedBranches,
 		gitUrl,
@@ -159,14 +157,12 @@ func expandGitUsernamePasswordPersistenceSettings(ctx context.Context, model git
 	var protectedBranches []string
 	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
 
-	usernamePasswordCredential := credentials.NewUsernamePassword(
-		model.Username.ValueString(),
-		core.NewSensitiveValue(model.Password.ValueString()),
-	)
-
 	return projects.NewGitPersistenceSettings(
 		model.BasePath.ValueString(),
-		usernamePasswordCredential,
+		credentials.NewUsernamePassword(
+			model.Username.ValueString(),
+			core.NewSensitiveValue(model.Password.ValueString()),
+		),
 		model.DefaultBranch.ValueString(),
 		protectedBranches,
 		gitUrl,
@@ -180,7 +176,7 @@ func expandGitAnonymousPersistenceSettings(ctx context.Context, model gitAnonymo
 
 	return projects.NewGitPersistenceSettings(
 		model.BasePath.ValueString(),
-		&credentials.Anonymous{},
+		credentials.NewAnonymous(),
 		model.DefaultBranch.ValueString(),
 		protectedBranches,
 		gitUrl,

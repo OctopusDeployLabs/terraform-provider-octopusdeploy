@@ -30,7 +30,7 @@ func (r *usernamePasswordAccountResource) Metadata(_ context.Context, req resour
 }
 
 func (r *usernamePasswordAccountResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetUsernamePasswordAccountResourceSchema()
+	resp.Schema = schemas.UsernamePasswordAccountSchema{}.GetResourceSchema()
 }
 
 func (r *usernamePasswordAccountResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

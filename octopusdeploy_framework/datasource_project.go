@@ -39,7 +39,7 @@ func (p *projectsDataSource) Metadata(_ context.Context, req datasource.Metadata
 }
 
 func (p *projectsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schemas.GetProjectDataSourceSchema()
+	resp.Schema = schemas.ProjectSchema{}.GetDatasourceSchema()
 }
 
 func (p *projectsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -62,6 +62,8 @@ func (p *projectsDataSource) Read(ctx context.Context, req datasource.ReadReques
 		Take:                int(data.Take.ValueInt64()),
 	}
 
+	util.DatasourceReading(ctx, "projects", query)
+
 	if !data.IDs.IsNull() {
 		var ids []string
 		resp.Diagnostics.Append(data.IDs.ElementsAs(ctx, &ids, false)...)
@@ -78,6 +80,8 @@ func (p *projectsDataSource) Read(ctx context.Context, req datasource.ReadReques
 		resp.Diagnostics.AddError("Unable to query projects", err.Error())
 		return
 	}
+
+	util.DatasourceResultCount(ctx, "projects", len(existingProjects.Items))
 
 	data.Projects = make([]projectResourceModel, 0, len(existingProjects.Items))
 	for _, project := range existingProjects.Items {

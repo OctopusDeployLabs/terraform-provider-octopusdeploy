@@ -3,13 +3,13 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -26,10 +26,7 @@ func (*spaceDataSource) Metadata(_ context.Context, _ datasource.MetadataRequest
 }
 
 func (*spaceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Description: "Provides information about an existing space.",
-		Attributes:  schemas.GetSpaceDatasourceSchema(),
-	}
+	resp.Schema = schemas.SpaceSchema{}.GetDatasourceSchema()
 }
 
 func (b *spaceDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -46,6 +43,9 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	// construct query
 	query := spaces.SpacesQuery{PartialName: data.Name.ValueString()}
+
+	util.DatasourceReading(ctx, "space", query)
+
 	spacesResult, err := spaces.Get(b.Client, query)
 
 	if err != nil {
@@ -63,6 +63,8 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		resp.Diagnostics.AddError(fmt.Sprintf("unable to find space with name %s", data.Name.ValueString()), "")
 		return
 	}
+
+	tflog.Debug(ctx, fmt.Sprintf("Reading space returned ID %s", matchedSpace.ID))
 
 	mapSpaceToState(ctx, &data, matchedSpace)
 

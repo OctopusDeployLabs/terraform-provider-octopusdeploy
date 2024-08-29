@@ -7,7 +7,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
@@ -45,28 +44,7 @@ func (p *projectGroupsDataSource) Metadata(_ context.Context, _ datasource.Metad
 }
 
 func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	description := "project group"
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			// request
-			"space_id":     schemas.GetSpaceIdDatasourceSchema(description, false),
-			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
-
-			// response
-			"id": schemas.GetIdDatasourceSchema(true),
-		},
-		Blocks: map[string]schema.Block{
-			"project_groups": schema.ListNestedBlock{
-				Description: "A list of project groups that match the filter(s).",
-				NestedObject: schema.NestedBlockObject{
-					Attributes: schemas.GetProjectGroupDatasourceSchema(),
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.ProjectGroupSchema{}.GetDatasourceSchema()
 }
 
 func (p *projectGroupsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -104,6 +82,8 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 	}
 	spaceID := data.SpaceID.ValueString()
 
+	util.DatasourceReading(ctx, "project groups", query)
+
 	existingProjectGroups, err := projectgroups.Get(p.Client, spaceID, query)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load project groups", err.Error())
@@ -121,7 +101,8 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 		newGroups = append(newGroups, g)
 	}
 
-	//groups, _ := types.ObjectValueFrom(ctx, types.ObjectType{AttrTypes: getNestedGroupAttributes()}, newGroups)
+	util.DatasourceResultCount(ctx, "project groups", len(newGroups))
+
 	for _, projectGroup := range newGroups {
 		tflog.Debug(ctx, "mapped group "+projectGroup.Name.ValueString())
 	}

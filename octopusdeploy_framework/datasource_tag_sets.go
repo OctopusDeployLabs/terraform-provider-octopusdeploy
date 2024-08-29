@@ -27,7 +27,7 @@ func (t *tagSetsDataSource) Metadata(_ context.Context, req datasource.MetadataR
 }
 
 func (t *tagSetsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schemas.GetTagSetDataSourceSchema()
+	resp.Schema = schemas.TagSetSchema{}.GetDatasourceSchema()
 }
 
 func (t *tagSetsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -42,11 +42,14 @@ func (t *tagSetsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	query := tagsets.TagSetsQuery{
-		IDs:         schemas.GetIds(data.IDs),
+		IDs:         util.GetIds(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        int(data.Skip.ValueInt64()),
 		Take:        int(data.Take.ValueInt64()),
 	}
+
+	util.DatasourceReading(ctx, "tag sets", query)
+
 	spaceID := data.SpaceID.ValueString()
 
 	existingTagSets, err := tagsets.Get(t.Client, spaceID, query)
@@ -55,8 +58,9 @@ func (t *tagSetsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	data.TagSets = flattenTagSets(existingTagSets.Items)
+	util.DatasourceResultCount(ctx, "tag sets", len(existingTagSets.Items))
 
+	data.TagSets = flattenTagSets(existingTagSets.Items)
 	data.ID = types.StringValue(fmt.Sprintf("TagSets-%s", time.Now().UTC().String()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

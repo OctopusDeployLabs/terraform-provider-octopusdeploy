@@ -12,7 +12,11 @@ import (
 const TagSetDataSourceName = "tag_sets"
 const TagSetResourceName = "tag_set"
 
-func GetTagSetResourceSchema() resourceSchema.Schema {
+type TagSetSchema struct{}
+
+var _ EntitySchema = TagSetSchema{}
+
+func (t TagSetSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages tag sets in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
@@ -46,7 +50,7 @@ func GetTagSetResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func GetTagSetDataSourceSchema() datasourceSchema.Schema {
+func (t TagSetSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing tag sets.",
 		Attributes: map[string]datasourceSchema.Attribute{
@@ -74,10 +78,34 @@ func GetTagSetDataSourceSchema() datasourceSchema.Schema {
 				Optional().
 				Description("A filter to specify the number of items to take (or return) in the response.").
 				Build(),
-			"tag_sets": datasourceSchema.ListAttribute{
+			"tag_sets": datasourceSchema.ListNestedAttribute{
 				Computed:    true,
-				ElementType: types.ObjectType{AttrTypes: GetTagSetAttrTypes()},
+				Optional:    false,
 				Description: "A list of tag sets that match the filter(s).",
+				NestedObject: datasourceSchema.NestedAttributeObject{
+					Attributes: map[string]datasourceSchema.Attribute{
+						"id": util.DataSourceString().
+							Computed().
+							Description("The unique ID for this resource.").
+							Build(),
+						"name": util.DataSourceString().
+							Computed().
+							Description("The name of this resource.").
+							Build(),
+						"description": util.DataSourceString().
+							Computed().
+							Description("The description of this tag set.").
+							Build(),
+						"sort_order": util.DataSourceInt64().
+							Computed().
+							Description("The sort order associated with this resource.").
+							Build(),
+						"space_id": util.DataSourceString().
+							Computed().
+							Description("The space ID associated with this resource.").
+							Build(),
+					},
+				},
 			},
 		},
 	}

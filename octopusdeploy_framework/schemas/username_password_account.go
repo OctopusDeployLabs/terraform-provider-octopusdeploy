@@ -2,12 +2,21 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func GetUsernamePasswordAccountResourceSchema() schema.Schema {
+type UsernamePasswordAccountSchema struct{}
+
+var _ EntitySchema = UsernamePasswordAccountSchema{}
+
+func (u UsernamePasswordAccountSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
+}
+
+func (u UsernamePasswordAccountSchema) GetResourceSchema() schema.Schema {
 	return schema.Schema{
 		Description: "This resource manages username-password accounts in Octopus Deploy.",
 		Attributes: map[string]schema.Attribute{

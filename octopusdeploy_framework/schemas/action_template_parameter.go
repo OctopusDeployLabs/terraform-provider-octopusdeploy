@@ -3,15 +3,20 @@ package schemas
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+type ActionTemplateParameterSchema struct{}
+
+var _ EntitySchema = ActionTemplateParameterSchema{}
 
 func expandActionTemplateParameter(tfTemplate map[string]attr.Value) actiontemplates.ActionTemplateParameter {
 	actionTemplateParameter := actiontemplates.NewActionTemplateParameter()
@@ -67,40 +72,77 @@ func TemplateObjectType() map[string]attr.Type {
 	}
 }
 
-func GetActionTemplateParameterSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"default_value": resourceSchema.StringAttribute{
-			Description: "A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.",
-			Optional:    true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+func (a ActionTemplateParameterSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
+}
+
+func (a ActionTemplateParameterSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Attributes: map[string]resourceSchema.Attribute{
+			"description": GetDescriptionResourceSchema("library variable set"),
+			"id":          GetIdResourceSchema(),
+			"name":        GetNameResourceSchema(true),
+			"space_id":    GetSpaceIdResourceSchema("library variable set"),
+			"template_ids": resourceSchema.MapAttribute{
+				ElementType: types.StringType,
+				Computed:    true,
+			},
+			"variable_set_id": resourceSchema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
-		"display_settings": resourceSchema.MapAttribute{
-			Description: "The display settings for the parameter.",
-			Optional:    true,
-			ElementType: types.StringType,
+		Description: "This resource manages library variable sets in Octopus Deploy.",
+		Blocks: map[string]resourceSchema.Block{
+			"template": GetActionTemplateParameterSchema(),
 		},
-		"help_text": resourceSchema.StringAttribute{
-			Description: "The help presented alongside the parameter input.",
-			Optional:    true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
-		},
-		"id": util.GetIdResourceSchema(),
-		"label": resourceSchema.StringAttribute{
-			Description: "The label shown beside the parameter when presented in the deployment process. Example: `Server name`.",
-			Optional:    true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
-		},
-		"name": resourceSchema.StringAttribute{
-			Description: "The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`",
-			Required:    true,
-			Validators: []validator.String{
-				stringvalidator.LengthAtLeast(1),
+	}
+}
+
+func GetActionTemplateParameterSchema() resourceSchema.ListNestedBlock {
+	return resourceSchema.ListNestedBlock{
+		NestedObject: resourceSchema.NestedBlockObject{
+			Attributes: map[string]resourceSchema.Attribute{
+				"default_value": resourceSchema.StringAttribute{
+					Description: "A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.",
+					Optional:    true,
+					Computed:    true,
+					Default:     stringdefault.StaticString(""),
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"display_settings": resourceSchema.MapAttribute{
+					Description: "The display settings for the parameter.",
+					Optional:    true,
+					ElementType: types.StringType,
+				},
+				"help_text": resourceSchema.StringAttribute{
+					Description: "The help presented alongside the parameter input.",
+					Optional:    true,
+					Computed:    true,
+					Default:     stringdefault.StaticString(""),
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"id": GetIdResourceSchema(),
+				"label": resourceSchema.StringAttribute{
+					Description: "The label shown beside the parameter when presented in the deployment process. Example: `Server name`.",
+					Optional:    true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
+				"name": resourceSchema.StringAttribute{
+					Description: "The name of the variable set by the parameter. The name can contain letters, digits, dashes and periods. Example: `ServerName`",
+					Required:    true,
+					Validators: []validator.String{
+						stringvalidator.LengthAtLeast(1),
+					},
+				},
 			},
 		},
 	}

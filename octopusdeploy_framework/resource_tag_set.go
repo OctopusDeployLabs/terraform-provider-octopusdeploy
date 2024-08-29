@@ -27,7 +27,7 @@ func (r *tagSetResource) Metadata(_ context.Context, req resource.MetadataReques
 }
 
 func (r *tagSetResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetTagSetResourceSchema()
+	resp.Schema = schemas.TagSetSchema{}.GetResourceSchema()
 }
 
 func (r *tagSetResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

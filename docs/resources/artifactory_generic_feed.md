@@ -14,7 +14,7 @@ This resource manages a Artifactory Generic feed in Octopus Deploy.
 
 ```terraform
 resource "octopusdeploy_artifactory_generic_feed" "example" {
-  feed_uri                       = "https://example.jfrog.io/"
+  feed_uri                       = "https://example.jfrog.io"
   password                       = "test-password"
   name                           = "Test Artifactory Generic Feed (OK to Delete)"
   username                       = "test-username"
@@ -38,7 +38,7 @@ resource "octopusdeploy_artifactory_generic_feed" "example" {
 - `layout_regex` (String)
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
-- `space_id` (String) The space ID associated with this helm feed.
+- `space_id` (String) The space ID associated with this artifactory generic feed.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ## Import

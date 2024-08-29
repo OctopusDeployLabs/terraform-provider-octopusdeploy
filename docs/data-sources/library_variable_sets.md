@@ -27,9 +27,9 @@ Provides information about existing library variable sets.
 ### Read-Only
 
 - `id` (String) The unique ID for this resource.
-- `library_variable_sets` (Block List) A list of library variable sets that match the filter(s). (see [below for nested schema](#nestedblock--library_variable_sets))
+- `library_variable_sets` (Attributes List) (see [below for nested schema](#nestedatt--library_variable_sets))
 
-<a id="nestedblock--library_variable_sets"></a>
+<a id="nestedatt--library_variable_sets"></a>
 ### Nested Schema for `library_variable_sets`
 
 Read-Only:

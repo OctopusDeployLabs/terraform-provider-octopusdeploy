@@ -12,7 +12,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -32,10 +31,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Metadata(ctx context.Conte
 }
 
 func (r *awsElasticContainerRegistryFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes:  schemas.GetAwsElasticContainerRegistryFeedResourceSchema(),
-		Description: "This resource manages an AWS Elastic Container Registry in Octopus Deploy.",
-	}
+	resp.Schema = schemas.AwsElasticContainerRegistrySchema{}.GetResourceSchema()
 }
 
 func (r *awsElasticContainerRegistryFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

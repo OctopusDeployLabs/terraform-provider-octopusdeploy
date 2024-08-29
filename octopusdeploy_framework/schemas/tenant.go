@@ -2,7 +2,6 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -37,6 +36,10 @@ type TenantsModel struct {
 	Take               types.Int64  `tfsdk:"take"`
 }
 
+type TenantSchema struct{}
+
+var _ EntitySchema = TenantSchema{}
+
 func TenantObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"cloned_from_tenant_id": types.StringType,
@@ -65,71 +68,80 @@ func FlattenTenant(tenant *tenants.Tenant) attr.Value {
 	})
 }
 
-func GetTenantsDataSourceSchema() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{
-		"cloned_from_tenant_id": datasourceSchema.StringAttribute{
-			Description: "A filter to search for a cloned tenant by its ID.",
-			Optional:    true,
+func (t TenantSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{
+		Description: "Provides information about existing tenants.",
+		Attributes: map[string]datasourceSchema.Attribute{
+			"cloned_from_tenant_id": datasourceSchema.StringAttribute{
+				Description: "A filter to search for a cloned tenant by its ID.",
+				Optional:    true,
+			},
+			"id":  GetIdDatasourceSchema(true),
+			"ids": GetQueryIDsDatasourceSchema(),
+			"is_clone": datasourceSchema.BoolAttribute{
+				Description: "A filter to search for cloned resources.",
+				Optional:    true,
+			},
+			"name": datasourceSchema.StringAttribute{
+				Description: "A filter to search by name.",
+				Optional:    true,
+			},
+			"partial_name": GetQueryPartialNameDatasourceSchema(),
+			"project_id": datasourceSchema.StringAttribute{
+				Description: "A filter to search by a project ID.",
+				Optional:    true,
+			},
+			"skip":     GetQuerySkipDatasourceSchema(),
+			"tags":     GetQueryDatasourceTags(),
+			"space_id": GetSpaceIdDatasourceSchema("tenants", false),
+			"take":     GetQueryTakeDatasourceSchema(),
+			"tenants": datasourceSchema.ListNestedAttribute{
+				Computed: true,
+				Optional: false,
+				NestedObject: datasourceSchema.NestedAttributeObject{
+					Attributes: map[string]datasourceSchema.Attribute{
+						"cloned_from_tenant_id": datasourceSchema.StringAttribute{
+							Description: "The ID of the tenant from which this tenant was cloned.",
+							Computed:    true,
+						},
+						"description": GetDescriptionDatasourceSchema("tenants"),
+						"id":          GetIdDatasourceSchema(true),
+						"name":        GetReadonlyNameDatasourceSchema(),
+						"space_id":    GetSpaceIdDatasourceSchema("tenant", true),
+						"tenant_tags": datasourceSchema.ListAttribute{
+							Computed:    true,
+							Description: "A list of tenant tags associated with this resource.",
+							ElementType: types.StringType,
+						},
+					},
+				},
+			},
 		},
-		"id":  GetIdDatasourceSchema(true),
-		"ids": util.GetQueryIDsDatasourceSchema(),
-		"is_clone": datasourceSchema.BoolAttribute{
-			Description: "A filter to search for cloned resources.",
-			Optional:    true,
-		},
-		"name": datasourceSchema.StringAttribute{
-			Description: "A filter to search by name.",
-			Optional:    true,
-		},
-		"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-		"project_id": datasourceSchema.StringAttribute{
-			Description: "A filter to search by a project ID.",
-			Optional:    true,
-		},
-		"skip":     util.GetQuerySkipDatasourceSchema(),
-		"tags":     util.GetQueryDatasourceTags(),
-		"space_id": GetSpaceIdDatasourceSchema("tenants", false),
-		"take":     util.GetQueryTakeDatasourceSchema(),
 	}
 }
 
-func GetTenantDataSourceSchema() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{
-		"cloned_from_tenant_id": datasourceSchema.StringAttribute{
-			Description: "The ID of the tenant from which this tenant was cloned.",
-			Computed:    true,
-		},
-		"description": util.GetDescriptionDatasourceSchema("tenants"),
-		"id":          GetIdDatasourceSchema(true),
-		"name":        GetReadonlyNameDatasourceSchema(),
-		"space_id":    GetSpaceIdDatasourceSchema("tenant", true),
-		"tenant_tags": datasourceSchema.ListAttribute{
-			Computed:    true,
-			Description: "A list of tenant tags associated with this resource.",
-			ElementType: types.StringType,
-		},
-	}
-}
-
-func GetTenantResourceSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"cloned_from_tenant_id": resourceSchema.StringAttribute{
-			Description: "The ID of the tenant from which this tenant was cloned.",
-			Optional:    true,
-			Computed:    true,
-			Default:     stringdefault.StaticString(""),
-		},
-		"description": util.GetDescriptionResourceSchema("tenant"),
-		"id":          util.GetIdResourceSchema(),
-		"name":        util.GetNameResourceSchema(true),
-		"space_id":    util.GetSpaceIdResourceSchema("tenant"),
-		"tenant_tags": resourceSchema.ListAttribute{
-			Description: "A list of tenant tags associated with this resource.",
-			ElementType: types.StringType,
-			Optional:    true,
-			Computed:    true,
-			PlanModifiers: []planmodifier.List{
-				listplanmodifier.UseStateForUnknown(),
+func (t TenantSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Description: "This resource manages tenants in Octopus Deploy.",
+		Attributes: map[string]resourceSchema.Attribute{
+			"cloned_from_tenant_id": resourceSchema.StringAttribute{
+				Description: "The ID of the tenant from which this tenant was cloned.",
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
+			},
+			"description": GetDescriptionResourceSchema("tenant"),
+			"id":          GetIdResourceSchema(),
+			"name":        GetNameResourceSchema(true),
+			"space_id":    GetSpaceIdResourceSchema("tenant"),
+			"tenant_tags": resourceSchema.ListAttribute{
+				Description: "A list of tenant tags associated with this resource.",
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
