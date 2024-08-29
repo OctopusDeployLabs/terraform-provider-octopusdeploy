@@ -22,7 +22,10 @@ func (t TagSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages tags in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id": GetIdResourceSchema(),
+			"id": util.ResourceString().
+				Computed().
+				Description("The ID of this resource.").
+				Build(),
 			"canonical_tag_name": util.ResourceString().
 				Computed().
 				Description("The canonical name of the tag.").
