@@ -43,9 +43,12 @@ resource "octopusdeploy_tag" "beta" {
 ### Optional
 
 - `description` (String) The description of this tag set.
-- `id` (String) The unique ID for this resource.
 - `sort_order` (Number) The sort order associated with this resource.
 - `space_id` (String) The space ID associated with this resource.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ## Import
 

@@ -20,7 +20,7 @@ func (u UsernamePasswordAccountSchema) GetResourceSchema() schema.Schema {
 	return schema.Schema{
 		Description: "This resource manages username-password accounts in Octopus Deploy.",
 		Attributes: map[string]schema.Attribute{
-			"id":                                util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The unique ID for this resource.").Build(),
+			"id":                                GetIdResourceSchema(),
 			"space_id":                          util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The space ID associated with this resource.").Build(),
 			"name":                              util.ResourceString().Required().Description("The name of the username-password account.").Build(),
 			"description":                       util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Default("").Description("The description of this username/password account.").Build(),

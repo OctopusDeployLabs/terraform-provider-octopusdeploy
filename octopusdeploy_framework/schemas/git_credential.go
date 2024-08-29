@@ -21,7 +21,7 @@ func (g GitCredentialSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "Manages a Git credential in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":          util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The unique ID for this resource.").Build(),
+			"id":          GetIdResourceSchema(),
 			"space_id":    util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The space ID associated with this Git Credential.").Build(),
 			"name":        util.ResourceString().Required().Description("The name of this Git Credential.").Build(),
 			"description": util.ResourceString().Optional().Computed().Default("").Description("The description of this Git Credential.").Build(),

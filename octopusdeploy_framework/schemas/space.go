@@ -77,6 +77,7 @@ func (s SpaceSchema) GetDatasourceSchema() datasourceSchema.Schema {
 					stringvalidator.LengthBetween(1, 20),
 				},
 				Computed: true,
+				Optional: true,
 			},
 			"slug": GetSlugDatasourceSchema(spaceDescription, true),
 			"space_managers_teams": datasourceSchema.SetAttribute{

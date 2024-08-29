@@ -23,7 +23,10 @@ description: |-
 ### Optional
 
 - `environment_ids` (List of String) The environment IDs associated with this tenant.
-- `id` (String) The unique ID for this resource.
 - `space_id` (String) The space ID associated with this project tenant.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 

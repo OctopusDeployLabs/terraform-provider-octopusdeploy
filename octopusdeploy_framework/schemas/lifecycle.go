@@ -24,7 +24,7 @@ func (l LifecycleSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages lifecycles in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":          util.ResourceString().Optional().Computed().Description("The unique ID for this resource.").PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+			"id":          GetIdResourceSchema(),
 			"space_id":    util.ResourceString().Optional().Computed().Description("The space ID associated with this resource.").PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
 			"name":        util.ResourceString().Required().Description("The name of this resource.").Build(),
 			"description": util.ResourceString().Optional().Computed().Default("").Description("The description of this lifecycle.").Build(),

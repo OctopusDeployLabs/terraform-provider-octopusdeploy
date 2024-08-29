@@ -31,12 +31,15 @@ resource "octopusdeploy_docker_container_registry" "example" {
 ### Optional
 
 - `api_version` (String)
-- `id` (String) The unique ID for this resource.
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
 - `registry_path` (String)
 - `space_id` (String) The space ID associated with this docker container registry feed.
 - `username` (String, Sensitive) The username associated with this resource.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ## Import
 

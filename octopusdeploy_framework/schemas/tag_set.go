@@ -20,12 +20,7 @@ func (t TagSetSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages tag sets in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id": util.ResourceString().
-				Optional().
-				Computed().
-				Description("The unique ID for this resource.").
-				PlanModifiers(stringplanmodifier.UseStateForUnknown()).
-				Build(),
+			"id": GetIdResourceSchema(),
 			"name": util.ResourceString().
 				Required().
 				Description("The name of this resource.").

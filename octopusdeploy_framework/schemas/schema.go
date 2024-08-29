@@ -130,7 +130,6 @@ func GetIdResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",
 		Computed:    true,
-		Optional:    true,
 		PlanModifiers: []planmodifier.String{
 			stringplanmodifier.UseStateForUnknown(),
 		},

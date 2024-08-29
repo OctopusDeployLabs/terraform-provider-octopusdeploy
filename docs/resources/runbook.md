@@ -28,13 +28,13 @@ This resource manages runbooks in Octopus Deploy.
 - `environment_scope` (String) Determines how the runbook is scoped to environments.
 - `environments` (List of String) When environment_scope is set to "Specified", this is the list of environments the runbook can be run against.
 - `force_package_download` (Boolean) Whether to force packages to be re-downloaded or not.
-- `id` (String) The unique ID for this resource.
 - `multi_tenancy_mode` (String) The tenanted deployment mode of the runbook. Valid modes are `Untenanted`, `TenantedOrUntenanted`, `Tenanted`
 - `retention_policy` (Block List) Sets the runbook retention policy. (see [below for nested schema](#nestedblock--retention_policy))
 - `space_id` (String) The space ID associated with this runbook.
 
 ### Read-Only
 
+- `id` (String) The unique ID for this resource.
 - `published_runbook_snapshot_id` (String) The published snapshot ID.
 - `runbook_process_id` (String) The runbook process ID.
 
