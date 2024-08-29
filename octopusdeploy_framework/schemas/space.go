@@ -69,7 +69,7 @@ func (s SpaceSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about an existing space.",
 		Attributes: map[string]datasourceSchema.Attribute{
-			"id":          GetIdDatasourceSchema(false),
+			"id":          GetIdDatasourceSchema(true),
 			"description": GetReadonlyDescriptionDatasourceSchema(spaceDescription),
 			"name": datasourceSchema.StringAttribute{
 				Description: fmt.Sprintf("The name of this resource, no more than %d characters long", 20),
