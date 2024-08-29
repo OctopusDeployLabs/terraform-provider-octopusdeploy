@@ -35,6 +35,7 @@ var testableSchemas = []EntitySchema{
 	VariableSchema{},
 	TenantProjectVariableSchema{},
 	TenantSchema{},
+	TenantProjectsSchema{},
 }
 
 func TestDatasourceSchemaDefinitionIsUsingCorrectTypes(t *testing.T) {

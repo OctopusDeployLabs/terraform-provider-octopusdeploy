@@ -34,31 +34,7 @@ func (t *tenantProjectResource) Metadata(ctx context.Context, req resource.Metad
 }
 
 func (t *tenantProjectResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			"id": schemas.GetIdResourceSchema(),
-			"tenant_id": schema.StringAttribute{
-				Description: "The tenant ID associated with this tenant.",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"project_id": schema.StringAttribute{
-				Description: "The project ID associated with this tenant.",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"environment_ids": schema.ListAttribute{
-				Description: "The environment IDs associated with this tenant.",
-				ElementType: types.StringType,
-				Optional:    true,
-			},
-			"space_id": schemas.GetSpaceIdResourceSchema("project tenant"),
-		}}
-	resp.Schema = schemas.GetTenantProjectsResourceSchema()
+	resp.Schema = schemas.TenantProjectsSchema{}.GetResourceSchema()
 }
 
 func (t *tenantProjectResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
