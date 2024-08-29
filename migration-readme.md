@@ -39,7 +39,7 @@ func (*blahsDataSource) Metadata(ctx context.Context, req datasource.MetadataReq
 }
 
 func (*blahsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-    // this can be moved to a resource specific file in the `schemas` package
+    // this can be moved to a resource specific file in the `schemas` package, see the Schemas section
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			// request
@@ -57,6 +57,7 @@ func (*blahsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest
 				Description: "blahs description",
 				NestedObject: schema.NestedBlockObject{
 					Attributes: map[string]schema.Attribute{
+						// all attributes in a datasource result should be readonly (computed = true, optional = false)
 						"id":       util.GetIdResourceSchema(),
 						"space_id": util.GetSpaceIdResourceSchema("blahs"),
 						"name":     util.GetNameResourceSchema(true),
@@ -129,11 +130,11 @@ func NewBlahResource() resource.Resource {
 }
 
 func (b *blahResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	// this can be moved to a seperate file in the `schemas` package    
+	// this can be moved to a seperate file in the `schemas` package, see the Schemas section
     resp.Schema = map[string]resourceSchema.Attribute {
         Description: "some description",
         Attributes: map[string]schema.Attribute{
-            "id":       util.GetIdResourceSchema(),
+            "id":       util.GetIdResourceSchema(), // the id on a resource should be readonly (computed = true, optional = false). The user cannot set this as the API will return a different value on create.
             "space_id": util.GetSpaceIdResourceSchema("blahs"),
             "name":     util.GetNameResourceSchema(true),
             ...
@@ -244,6 +245,62 @@ func (s *blahResource) ImportState(ctx context.Context, req resource.ImportState
 }
 ```
 
+## Schemas 
+
+The SDKv2 implementation would share a schema between the datasource and the resource, but Framework has each of the scema types in different packages:
+
+Datasource schema: `github.com/hashicorp/terraform-plugin-framework/datasource/schema`
+Resource schema: `github.com/hashicorp/terraform-plugin-framework/resource/schema`
+
+You will probably need to implement the schema for each Octopus resource twice, to counteract drift, the migration has placed the two definitions in the save file side-by-side.
+
+The import section will need aliases for each of the schema packages and each of the methods will return the appropriate type:
+
+```golang
+import (
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+    ...
+)
+
+type BlahSchema struct {}
+var _ EntitySchema = BlahSchema{}
+
+func (t BlahSchema) GetDatasourceSchema() datasourceSchema.Schema {
+    return datasourceSchema.Schema{
+        Description: "something here",
+        "partial_name": GetQueryPartialNameDatasourceSchema(),
+        ...
+    }
+}
+
+func (s SpaceSchema) GetResourceSchema() resourceSchema.Schema {
+    return resourceSchema.Schema{
+        Description: "This resource manages spaces in Octopus Deploy.",
+        Attributes: map[string]resourceSchema.Attribute{
+			"id"  : GetIdResourceSchema(),
+            "name": GetNameResourceSchema(true)
+            ...
+        }
+    }
+}
+```
+
+With this style of schema definition the schema type should be added to the collection in the `schemas_test.go` file to validate that all the types being returned for each attribute are coming from the correct schema package (resource vs datasource)
+
+
+There are times when you will need to convert to a List/Set/Object and the Framework functions will require a list of attribute types which is again in a different package, this can also be placed in the same schema file:
+```golang
+import "github.com/hashicorp/terraform-plugin-framework/attr"
+
+func BlahObjectType() map[string]attr.Type {
+    return map[string]attr.Type {
+        "name": types.StringType,
+        ...
+    }
+}
+```
+
 # Notes
 
 ## SpaceID
@@ -271,50 +328,5 @@ Returning a specific error
 if err := b.Client.Resource.DeleteById(data.ID.ValueString(); err != nil {
     resp.Diagnostics.AddError("unable to delete resource", err.Error())
     return
-}
-```
-
-## Schemas
-
-The SDKv2 implementation would share a schema between the datasource and the resource, but Framework has each of the scema types in different packages:
-
-Datasource schema: `github.com/hashicorp/terraform-plugin-framework/datasource/schema`
-Resource schema: `github.com/hashicorp/terraform-plugin-framework/resource/schema`
-
-You will probably need to implement the schema for each Octopus resource twice, to counteract drift, the migration has placed the two definitions in the save file side-by-side.
-
-The import section will need aliases for each of the schema packages and each of the methods will return the appropriate type:
-
-```golang
-import (
-	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-    ...
-)
-
-func GetBlahDataSourceSchema() map[string]datasourceSchema.Attribute {
-    return map[string]datasourceSchema.Attribute{
-        "partial_name": util.GetQueryPartialNameDatasourceSchema(),
-        ...
-    }
-}
-
-func GetBlahResourceSchema() map[string]resourceSchema.Attribute {
-    return map[string]resourceSchema.Attribute{
-        "name":        util.GetNameResourceSchema(true)
-        ...
-    }
-}
-```
-
-There are times when you will need to convert to a List/Set/Object and the Framework functions will require a list of attribute types which is again in a different package, this can also be placed in the same schema file:
-```golang
-import "github.com/hashicorp/terraform-plugin-framework/attr"
-
-func BlahObjectType() map[string]attr.Type {
-    return map[string]attr.Type {
-        "name": types.StringType,
-        ...
-    }
 }
 ```
