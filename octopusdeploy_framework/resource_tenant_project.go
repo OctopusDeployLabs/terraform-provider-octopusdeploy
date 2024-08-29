@@ -13,21 +13,9 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
-
-type TenantProjectModel struct {
-	SpaceID        types.String `tfsdk:"space_id"`
-	TenantID       types.String `tfsdk:"tenant_id"`
-	ProjectID      types.String `tfsdk:"project_id"`
-	EnvironmentIDs types.List   `tfsdk:"environment_ids"`
-
-	schemas.ResourceModel
-}
 
 type tenantProjectResource struct {
 	*Config
@@ -39,10 +27,6 @@ var _ resource.ResourceWithConfigure = &tenantProjectResource{}
 
 func NewTenantProjectResource() resource.Resource {
 	return &tenantProjectResource{}
-}
-
-func (t *TenantProjectModel) GetId(spaceID string) string {
-	return fmt.Sprintf("%s:%s:%s", spaceID, t.TenantID.ValueString(), t.ProjectID.ValueString())
 }
 
 func (t *tenantProjectResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -74,6 +58,7 @@ func (t *tenantProjectResource) Schema(ctx context.Context, req resource.SchemaR
 			},
 			"space_id": schemas.GetSpaceIdResourceSchema("project tenant"),
 		}}
+	resp.Schema = schemas.GetTenantProjectsResourceSchema()
 }
 
 func (t *tenantProjectResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -84,7 +69,7 @@ func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateR
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
 
-	var plan TenantProjectModel
+	var plan schemas.TenantProjectResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -107,7 +92,7 @@ func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("cannot update tenant environment", err.Error())
 	}
 
-	plan.ID = types.StringValue(plan.GetId(spaceId))
+	plan.ID = types.StringValue(schemas.BuildTenantProjectID(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
 	plan.SpaceID = types.StringValue(spaceId)
 	plan.EnvironmentIDs = util.FlattenStringList(tenant.ProjectEnvironments[plan.ProjectID.ValueString()])
 
@@ -116,7 +101,7 @@ func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateR
 }
 
 func (t *tenantProjectResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data TenantProjectModel
+	var data schemas.TenantProjectResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -146,7 +131,7 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 	defer internal.Mutex.Unlock()
 
 	// read plan and state
-	var plan, state TenantProjectModel
+	var plan, state schemas.TenantProjectResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -171,14 +156,14 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.AddError("cannot update tenant environment", err.Error())
 	}
 
-	plan.ID = types.StringValue(plan.GetId(spaceId))
+	plan.ID = types.StringValue(schemas.BuildTenantProjectID(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
 	plan.SpaceID = types.StringValue(spaceId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	tflog.Info(ctx, fmt.Sprintf("updated tenant (%s) connection to project (%#v)", plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
 }
 
-func (t *tenantProjectResource) getSpaceId(plan TenantProjectModel) string {
+func (t *tenantProjectResource) getSpaceId(plan schemas.TenantProjectResourceModel) string {
 	spaceId := plan.SpaceID.ValueString()
 	if spaceId == "" {
 		spaceId = t.Client.GetSpaceID()
@@ -189,7 +174,7 @@ func (t *tenantProjectResource) getSpaceId(plan TenantProjectModel) string {
 func (t *tenantProjectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
-	var data TenantProjectModel
+	var data schemas.TenantProjectResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
