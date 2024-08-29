@@ -24,6 +24,7 @@ var testableSchemas = []EntitySchema{
 	FeedsSchema{},
 	GitHubRepositoryFeedSchema{},
 	SpaceSchema{},
+	SpacesSchema{},
 	ScriptModuleSchema{},
 	LibraryVariableSetSchema{},
 	ActionTemplateParameterSchema{},

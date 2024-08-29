@@ -6,7 +6,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
 )
@@ -33,26 +32,7 @@ func (*spacesDataSource) Metadata(_ context.Context, _ datasource.MetadataReques
 }
 
 func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schemas.SpaceSchema{}.GetDatasourceSchema()
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			// request
-			"ids":          schemas.GetQueryIDsDatasourceSchema(),
-			"partial_name": schemas.GetQueryPartialNameDatasourceSchema(),
-			"skip":         schemas.GetQuerySkipDatasourceSchema(),
-			"take":         schemas.GetQueryTakeDatasourceSchema(),
-
-			// response
-			"id": schemas.GetIdDatasourceSchema(true),
-			"spaces": schema.ListNestedAttribute{
-				Computed: true,
-				Optional: false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: schemas.SpaceSchema{}.GetDatasourceSchema().Attributes,
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.SpacesSchema{}.GetDatasourceSchema()
 }
 
 func (b *spacesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
