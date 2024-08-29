@@ -16,7 +16,11 @@ import (
 	"strings"
 )
 
-func GetResourceLifecycleSchema() resourceSchema.Schema {
+var _ EntitySchema = LifecycleSchema{}
+
+type LifecycleSchema struct{}
+
+func (l LifecycleSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages lifecycles in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
@@ -33,7 +37,7 @@ func GetResourceLifecycleSchema() resourceSchema.Schema {
 	}
 }
 
-func GetDatasourceLifecycleSchema() datasourceSchema.Schema {
+func (l LifecycleSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing lifecycles.",
 		Attributes: map[string]datasourceSchema.Attribute{

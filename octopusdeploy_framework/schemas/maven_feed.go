@@ -1,26 +1,37 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const mavenFeedDescription = "maven feed"
 
-func GetMavenFeedResourceSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"download_attempts":                    util.GetDownloadAttemptsResourceSchema(),
-		"download_retry_backoff_seconds":       util.GetDownloadRetryBackoffSecondsResourceSchema(),
-		"feed_uri":                             util.GetFeedUriResourceSchema(),
-		"id":                                   util.GetIdResourceSchema(),
-		"name":                                 util.GetNameResourceSchema(true),
-		"package_acquisition_location_options": util.GetPackageAcquisitionLocationOptionsResourceSchema(),
-		"password":                             util.GetPasswordResourceSchema(false),
-		"space_id":                             util.GetSpaceIdResourceSchema(mavenFeedDescription),
-		"username":                             util.GetUsernameResourceSchema(false),
+type MavenFeedSchema struct{}
+
+func (m MavenFeedSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Description: "This resource manages a Maven feed in Octopus Deploy.",
+		Attributes: map[string]resourceSchema.Attribute{
+			"download_attempts":                    GetDownloadAttemptsResourceSchema(),
+			"download_retry_backoff_seconds":       GetDownloadRetryBackoffSecondsResourceSchema(),
+			"feed_uri":                             GetFeedUriResourceSchema(),
+			"id":                                   GetIdResourceSchema(),
+			"name":                                 GetNameResourceSchema(true),
+			"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
+			"password":                             GetPasswordResourceSchema(false),
+			"space_id":                             GetSpaceIdResourceSchema(mavenFeedDescription),
+			"username":                             GetUsernameResourceSchema(false),
+		},
 	}
 }
+
+func (m MavenFeedSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
+}
+
+var _ EntitySchema = MavenFeedSchema{}
 
 type MavenFeedTypeResourceModel struct {
 	DownloadAttempts                  types.Int64  `tfsdk:"download_attempts"`

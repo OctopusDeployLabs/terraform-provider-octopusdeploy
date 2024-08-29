@@ -11,7 +11,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -33,10 +32,7 @@ func (r *artifactoryGenericFeedTypeResource) Metadata(ctx context.Context, req r
 }
 
 func (r *artifactoryGenericFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes:  schemas.GetArtifactoryGenericFeedResourceSchema(),
-		Description: "This resource manages a Artifactory Generic feed in Octopus Deploy.",
-	}
+	resp.Schema = schemas.ArtifactoryGenericFeedSchema{}.GetResourceSchema()
 }
 
 func (r *artifactoryGenericFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

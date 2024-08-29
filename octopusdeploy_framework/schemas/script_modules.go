@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -12,6 +11,10 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 )
+
+type ScriptModuleSchema struct{}
+
+var _ EntitySchema = ScriptModuleSchema{}
 
 type ScriptModuleResourceModel struct {
 	Description   types.String `tfsdk:"description"`
@@ -33,17 +36,17 @@ type ScriptModuleDataSourceModel struct {
 	ScriptModules types.List   `tfsdk:"script_modules"`
 }
 
-func GetDatasourceScriptModuleSchema() datasourceSchema.Schema {
+func (s ScriptModuleSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	description := "script module"
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing script modules.",
 		Attributes: map[string]datasourceSchema.Attribute{
 			"id":           GetIdDatasourceSchema(true),
 			"space_id":     GetSpaceIdDatasourceSchema(description, false),
-			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
+			"ids":          GetQueryIDsDatasourceSchema(),
+			"partial_name": GetQueryPartialNameDatasourceSchema(),
+			"skip":         GetQuerySkipDatasourceSchema(),
+			"take":         GetQueryTakeDatasourceSchema(),
 			"script_modules": datasourceSchema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: datasourceSchema.NestedAttributeObject{
@@ -126,48 +129,47 @@ func ScriptModuleObjectType() map[string]attr.Type {
 	}
 }
 
-func GetScriptModuleSchemaBlock() map[string]resourceSchema.Block {
-	return map[string]resourceSchema.Block{
-		"script": resourceSchema.ListNestedBlock{
-			Description: "The script associated with this script module.",
-			NestedObject: resourceSchema.NestedBlockObject{
-				Attributes: map[string]resourceSchema.Attribute{
-					"body": resourceSchema.StringAttribute{
-						Description: "The body of this script module.",
-						Required:    true,
-					},
-					"syntax": resourceSchema.StringAttribute{
-						Description: "The syntax of the script. Valid types are `Bash`, `CSharp`, `FSharp`, `PowerShell`, or `Python`.",
-						Required:    true,
-						Validators: []validator.String{
-							stringvalidator.OneOfCaseInsensitive(
-								"Bash",
-								"CSharp",
-								"FSharp",
-								"PowerShell",
-								"Python"),
+func (s ScriptModuleSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Attributes: map[string]resourceSchema.Attribute{
+			"description": GetDescriptionResourceSchema("script module"),
+			"id":          GetIdResourceSchema(),
+			"name":        GetNameResourceSchema(true),
+			"space_id":    GetSpaceIdResourceSchema("Script Module"),
+			"variable_set_id": resourceSchema.StringAttribute{
+				Computed:    true,
+				Description: "The variable set ID for this script module.",
+				Optional:    true,
+			},
+		},
+		Blocks: map[string]resourceSchema.Block{
+			"script": resourceSchema.ListNestedBlock{
+				Description: "The script associated with this script module.",
+				NestedObject: resourceSchema.NestedBlockObject{
+					Attributes: map[string]resourceSchema.Attribute{
+						"body": resourceSchema.StringAttribute{
+							Description: "The body of this script module.",
+							Required:    true,
+						},
+						"syntax": resourceSchema.StringAttribute{
+							Description: "The syntax of the script. Valid types are `Bash`, `CSharp`, `FSharp`, `PowerShell`, or `Python`.",
+							Required:    true,
+							Validators: []validator.String{
+								stringvalidator.OneOfCaseInsensitive(
+									"Bash",
+									"CSharp",
+									"FSharp",
+									"PowerShell",
+									"Python"),
+							},
 						},
 					},
 				},
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(1),
+					listvalidator.SizeAtLeast(1),
+				},
 			},
-			Validators: []validator.List{
-				listvalidator.SizeAtMost(1),
-				listvalidator.SizeAtLeast(1),
-			},
-		},
-	}
-}
-
-func GetScriptModuleResourceSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"description": GetDescriptionResourceSchema("script module"),
-		"id":          GetIdResourceSchema(),
-		"name":        GetNameResourceSchema(true),
-		"space_id":    GetSpaceIdResourceSchema("Script Module"),
-		"variable_set_id": resourceSchema.StringAttribute{
-			Computed:    true,
-			Description: "The variable set ID for this script module.",
-			Optional:    true,
 		},
 	}
 }

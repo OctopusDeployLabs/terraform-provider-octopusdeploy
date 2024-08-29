@@ -3,6 +3,9 @@ package schemas
 import (
 	"context"
 	"fmt"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+
+	//datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"regexp"
 	"strings"
 
@@ -133,11 +136,19 @@ type RunbookConnectivityPolicyModel struct {
 	TargetRoles                 types.List   `tfsdk:"target_roles"`
 }
 
-func GetRunbookResourceSchema() resourceSchema.Schema {
+type RunbookSchema struct{}
+
+func (r RunbookSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{}
+}
+
+var _ EntitySchema = RunbookSchema{}
+
+func (r RunbookSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(RunbookResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			RunbookSchemaAttributeNames.ID: util.GetIdResourceSchema(),
+			RunbookSchemaAttributeNames.ID: GetIdResourceSchema(),
 			RunbookSchemaAttributeNames.Name: resourceSchema.StringAttribute{
 				Description: "The name of the runbook in Octopus Deploy. This name must be unique.",
 				Required:    true,
@@ -148,7 +159,7 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 					),
 				},
 			},
-			RunbookSchemaAttributeNames.Description: util.GetDescriptionResourceSchema(RunbookResourceDescription),
+			RunbookSchemaAttributeNames.Description: GetDescriptionResourceSchema(RunbookResourceDescription),
 			RunbookSchemaAttributeNames.ProjectID: resourceSchema.StringAttribute{
 				Description: "The project that this runbook belongs to.",
 				Required:    true,
@@ -167,7 +178,7 @@ func GetRunbookResourceSchema() resourceSchema.Schema {
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			RunbookSchemaAttributeNames.SpaceID: util.GetSpaceIdResourceSchema(RunbookResourceDescription),
+			RunbookSchemaAttributeNames.SpaceID: GetSpaceIdResourceSchema(RunbookResourceDescription),
 			RunbookSchemaAttributeNames.MultiTenancyMode: resourceSchema.StringAttribute{
 				Description: fmt.Sprintf("The tenanted deployment mode of the runbook. Valid modes are %s", strings.Join(util.Map(tenantedDeploymentModes, func(item string) string { return fmt.Sprintf("`%s`", item) }), ", ")),
 				Computed:    true,

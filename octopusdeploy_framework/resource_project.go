@@ -28,7 +28,7 @@ func (r *projectResource) Metadata(_ context.Context, req resource.MetadataReque
 }
 
 func (r *projectResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetProjectResourceSchema()
+	resp.Schema = schemas.ProjectSchema{}.GetResourceSchema()
 }
 
 func (r *projectResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

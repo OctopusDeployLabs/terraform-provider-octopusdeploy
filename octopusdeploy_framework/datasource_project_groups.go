@@ -7,7 +7,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
@@ -45,27 +44,7 @@ func (p *projectGroupsDataSource) Metadata(_ context.Context, _ datasource.Metad
 }
 
 func (p *projectGroupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	description := "project group"
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			// request
-			"space_id":     schemas.GetSpaceIdDatasourceSchema(description, false),
-			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
-
-			// response
-			"id": schemas.GetIdDatasourceSchema(true),
-			"project_groups": schema.ListNestedAttribute{
-				Computed:    true,
-				Description: "A list of project groups that match the filter(s).",
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: schemas.GetProjectGroupDatasourceSchema(),
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.ProjectGroupSchema{}.GetDatasourceSchema()
 }
 
 func (p *projectGroupsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

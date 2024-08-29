@@ -30,7 +30,7 @@ func (t *tenantProjectsDataSource) Configure(_ context.Context, req datasource.C
 }
 
 func (*tenantProjectsDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schemas.GetTenantProjectsDataSourceSchema()
+	resp.Schema = schemas.TenantProjectVariableSchema{}.GetDatasourceSchema()
 }
 
 func (t *tenantProjectsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

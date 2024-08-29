@@ -13,7 +13,11 @@ const (
 	GitCredentialDatasourceName = "git_credentials"
 )
 
-func GetGitCredentialResourceSchema() resourceSchema.Schema {
+type GitCredentialSchema struct{}
+
+var _ EntitySchema = GitCredentialSchema{}
+
+func (g GitCredentialSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "Manages a Git credential in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
@@ -42,7 +46,7 @@ func GetGitCredentialResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func GetGitCredentialDataSourceSchema() datasourceSchema.Schema {
+func (g GitCredentialSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Use this data source to retrieve information about Git credentials in Octopus Deploy.",
 		Attributes: map[string]datasourceSchema.Attribute{

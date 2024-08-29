@@ -5,7 +5,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
 
@@ -29,10 +28,7 @@ func (e *feedsDataSource) Configure(_ context.Context, req datasource.ConfigureR
 }
 
 func (*feedsDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = datasourceSchema.Schema{
-		Description: "Provides information about existing feeds.",
-		Attributes:  schemas.GetFeedsDataSourceSchema(),
-	}
+	resp.Schema = schemas.FeedsSchema{}.GetDatasourceSchema()
 }
 
 func (e *feedsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

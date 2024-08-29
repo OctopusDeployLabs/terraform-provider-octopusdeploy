@@ -28,7 +28,7 @@ func (*runbookTypeResource) Metadata(ctx context.Context, req resource.MetadataR
 }
 
 func (*runbookTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetRunbookResourceSchema()
+	resp.Schema = schemas.RunbookSchema{}.GetResourceSchema()
 }
 
 func (r *runbookTypeResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

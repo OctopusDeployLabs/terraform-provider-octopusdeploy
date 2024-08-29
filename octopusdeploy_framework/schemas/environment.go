@@ -30,6 +30,10 @@ const (
 	EnvironmentServiceNowExtensionSettingsIsEnabled            = "is_enabled"
 )
 
+type EnvironmentSchema struct{}
+
+var _ EntitySchema = EnvironmentSchema{}
+
 var jiraEnvironmentTypeNames = struct {
 	Development string
 	Production  string
@@ -74,13 +78,38 @@ func EnvironmentObjectType() map[string]attr.Type {
 	}
 }
 
-func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
+func (e EnvironmentSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{
+		Description: "Provides information about existing environments.",
+		Attributes: map[string]datasourceSchema.Attribute{
+			//request
+			"ids":          GetQueryIDsDatasourceSchema(),
+			"space_id":     GetSpaceIdDatasourceSchema(EnvironmentResourceDescription, false),
+			"name":         GetQueryNameDatasourceSchema(),
+			"partial_name": GetQueryPartialNameDatasourceSchema(),
+			"skip":         GetQuerySkipDatasourceSchema(),
+			"take":         GetQueryTakeDatasourceSchema(),
+
+			//response
+			"id": GetIdDatasourceSchema(true),
+			"environments": datasourceSchema.ListNestedAttribute{
+				Computed: true,
+				Optional: false,
+				NestedObject: datasourceSchema.NestedAttributeObject{
+					Attributes: e.GetDatasourceSchemaAttributes(),
+				},
+			},
+		},
+	}
+}
+
+func (e EnvironmentSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.Attribute {
 	return map[string]datasourceSchema.Attribute{
 		"id":                 GetIdDatasourceSchema(true),
-		"slug":               util.GetSlugDatasourceSchema(EnvironmentResourceDescription, true),
+		"slug":               GetSlugDatasourceSchema(EnvironmentResourceDescription, true),
 		"name":               GetReadonlyNameDatasourceSchema(),
-		"description":        util.GetDescriptionDatasourceSchema(EnvironmentResourceDescription),
-		EnvironmentSortOrder: util.GetSortOrderDataSourceSchema(EnvironmentResourceDescription),
+		"description":        GetDescriptionDatasourceSchema(EnvironmentResourceDescription),
+		EnvironmentSortOrder: GetSortOrderDatasourceSchema(EnvironmentResourceDescription),
 		EnvironmentAllowDynamicInfrastructure: datasourceSchema.BoolAttribute{
 			Computed: true,
 		},
@@ -125,15 +154,15 @@ func GetEnvironmentDatasourceSchema() map[string]datasourceSchema.Attribute {
 	}
 }
 
-func GetEnvironmentResourceSchema() resourceSchema.Schema {
+func (e EnvironmentSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(EnvironmentResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":                 util.GetIdResourceSchema(),
-			"slug":               util.GetSlugResourceSchema(EnvironmentResourceDescription),
-			"name":               util.GetNameResourceSchema(true),
-			"description":        util.GetDescriptionResourceSchema(EnvironmentResourceDescription),
-			EnvironmentSortOrder: util.GetSortOrderResourceSchema(EnvironmentResourceDescription),
+			"id":                 GetIdResourceSchema(),
+			"slug":               GetSlugResourceSchema(EnvironmentResourceDescription),
+			"name":               GetNameResourceSchema(true),
+			"description":        GetDescriptionResourceSchema(EnvironmentResourceDescription),
+			EnvironmentSortOrder: GetSortOrderResourceSchema(EnvironmentResourceDescription),
 			EnvironmentAllowDynamicInfrastructure: resourceSchema.BoolAttribute{
 				Optional: true,
 				Computed: true,
@@ -144,7 +173,7 @@ func GetEnvironmentResourceSchema() resourceSchema.Schema {
 				Computed: true,
 				Default:  booldefault.StaticBool(false),
 			},
-			"space_id": util.GetSpaceIdResourceSchema(EnvironmentResourceDescription),
+			"space_id": GetSpaceIdResourceSchema(EnvironmentResourceDescription),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			EnvironmentJiraExtensionSettings: resourceSchema.ListNestedBlock{

@@ -43,7 +43,7 @@ func (t *tenantProjectVariableResource) Metadata(_ context.Context, req resource
 }
 
 func (t *tenantProjectVariableResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetTenantProjectVariableResourceSchema()
+	resp.Schema = schemas.TenantProjectVariableSchema{}.GetResourceSchema()
 }
 
 func (t *tenantProjectVariableResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

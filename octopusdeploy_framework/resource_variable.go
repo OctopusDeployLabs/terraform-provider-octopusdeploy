@@ -48,7 +48,7 @@ func (r *variableTypeResource) Metadata(ctx context.Context, req resource.Metada
 }
 
 func (r *variableTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetVariableResourceSchema()
+	resp.Schema = schemas.VariableSchema{}.GetResourceSchema()
 }
 
 func (r *variableTypeResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

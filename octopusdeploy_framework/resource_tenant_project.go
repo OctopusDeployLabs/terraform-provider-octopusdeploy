@@ -34,7 +34,7 @@ func (t *tenantProjectResource) Metadata(ctx context.Context, req resource.Metad
 }
 
 func (t *tenantProjectResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GetTenantProjectsResourceSchema()
+	resp.Schema = schemas.TenantProjectsSchema{}.GetResourceSchema()
 }
 
 func (t *tenantProjectResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

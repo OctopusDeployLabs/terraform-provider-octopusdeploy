@@ -10,7 +10,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -29,10 +28,7 @@ func (r *scriptModuleTypeResource) Metadata(ctx context.Context, req resource.Me
 }
 
 func (r *scriptModuleTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes: schemas.GetScriptModuleResourceSchema(),
-		Blocks:     schemas.GetScriptModuleSchemaBlock(),
-	}
+	resp.Schema = schemas.ScriptModuleSchema{}.GetResourceSchema()
 }
 
 func (r *scriptModuleTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

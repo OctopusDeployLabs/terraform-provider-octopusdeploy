@@ -12,6 +12,10 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+type LibraryVariableSetSchema struct{}
+
+var _ EntitySchema = LibraryVariableSetSchema{}
+
 type LibraryVariableSetResourceModel struct {
 	Description   types.String `tfsdk:"description"`
 	Name          types.String `tfsdk:"name"`
@@ -23,7 +27,7 @@ type LibraryVariableSetResourceModel struct {
 	ResourceModel
 }
 
-func GetLibraryVariableSetDataSourceSchema() datasourceSchema.Schema {
+func (l LibraryVariableSetSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing library variable sets.",
 		Attributes: map[string]datasourceSchema.Attribute{
@@ -33,37 +37,33 @@ func GetLibraryVariableSetDataSourceSchema() datasourceSchema.Schema {
 			},
 			"id":           GetIdDatasourceSchema(true),
 			"space_id":     GetSpaceIdDatasourceSchema("library variable set", false),
-			"ids":          util.GetQueryIDsDatasourceSchema(),
-			"partial_name": util.GetQueryPartialNameDatasourceSchema(),
-			"skip":         util.GetQuerySkipDatasourceSchema(),
-			"take":         util.GetQueryTakeDatasourceSchema(),
+			"ids":          GetQueryIDsDatasourceSchema(),
+			"partial_name": GetQueryPartialNameDatasourceSchema(),
+			"skip":         GetQuerySkipDatasourceSchema(),
+			"take":         GetQueryTakeDatasourceSchema(),
 			"library_variable_sets": datasourceSchema.ListNestedAttribute{
 				Computed: true,
 				Optional: false,
 				NestedObject: datasourceSchema.NestedAttributeObject{
-					Attributes: GetLibraryVariableSetObjectDatasourceSchema(),
+					Attributes: map[string]datasourceSchema.Attribute{
+						"description": GetReadonlyDescriptionDatasourceSchema("library variable set"),
+						"id":          GetIdDatasourceSchema(true),
+						"name":        GetReadonlyNameDatasourceSchema(),
+						"space_id":    GetSpaceIdDatasourceSchema("library variable set", true),
+						"template_ids": datasourceSchema.MapAttribute{
+							ElementType: types.StringType,
+							Computed:    true,
+						},
+						"template": datasourceSchema.ListAttribute{
+							Computed:    true,
+							ElementType: types.ObjectType{AttrTypes: TemplateObjectType()},
+						},
+						"variable_set_id": datasourceSchema.StringAttribute{
+							Computed: true,
+						},
+					},
 				},
 			},
-		},
-	}
-}
-
-func GetLibraryVariableSetObjectDatasourceSchema() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{
-		"description": GetReadonlyDescriptionDatasourceSchema("library variable set"),
-		"id":          GetIdDatasourceSchema(true),
-		"name":        GetReadonlyNameDatasourceSchema(),
-		"space_id":    GetSpaceIdDatasourceSchema("library variable set", true),
-		"template_ids": datasourceSchema.MapAttribute{
-			ElementType: types.StringType,
-			Computed:    true,
-		},
-		"template": datasourceSchema.ListAttribute{
-			Computed:    true,
-			ElementType: types.ObjectType{AttrTypes: TemplateObjectType()},
-		},
-		"variable_set_id": datasourceSchema.StringAttribute{
-			Computed: true,
 		},
 	}
 }
@@ -80,7 +80,7 @@ func GetLibraryVariableSetObjectType() map[string]attr.Type {
 	}
 }
 
-func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
+func (l LibraryVariableSetSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Attributes: map[string]resourceSchema.Attribute{
 			"description": GetDescriptionResourceSchema("library variable set"),
@@ -100,11 +100,7 @@ func GetLibraryVariableSetResourceSchema() resourceSchema.Schema {
 		},
 		Description: "This resource manages library variable sets in Octopus Deploy.",
 		Blocks: map[string]resourceSchema.Block{
-			"template": resourceSchema.ListNestedBlock{
-				NestedObject: resourceSchema.NestedBlockObject{
-					Attributes: GetActionTemplateParameterSchema(),
-				},
-			},
+			"template": GetActionTemplateParameterSchema(),
 		},
 	}
 }

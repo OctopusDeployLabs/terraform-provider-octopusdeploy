@@ -12,7 +12,11 @@ import (
 const TagSetDataSourceName = "tag_sets"
 const TagSetResourceName = "tag_set"
 
-func GetTagSetResourceSchema() resourceSchema.Schema {
+type TagSetSchema struct{}
+
+var _ EntitySchema = TagSetSchema{}
+
+func (t TagSetSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages tag sets in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
@@ -46,7 +50,7 @@ func GetTagSetResourceSchema() resourceSchema.Schema {
 	}
 }
 
-func GetTagSetDataSourceSchema() datasourceSchema.Schema {
+func (t TagSetSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing tag sets.",
 		Attributes: map[string]datasourceSchema.Attribute{

@@ -45,7 +45,7 @@ func (g *gitCredentialsDataSource) Metadata(_ context.Context, req datasource.Me
 }
 
 func (g *gitCredentialsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schemas.GetGitCredentialDataSourceSchema()
+	resp.Schema = schemas.GitCredentialSchema{}.GetDatasourceSchema()
 }
 
 func (g *gitCredentialsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

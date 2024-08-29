@@ -2,8 +2,10 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const (
@@ -11,7 +13,46 @@ const (
 	TenantProjectVariableResourceName        = "tenant_project_variable"
 )
 
-func GetTenantProjectVariableResourceSchema() schema.Schema {
+type TenantProjectVariableSchema struct{}
+
+var _ EntitySchema = TenantProjectVariableSchema{}
+
+func (t TenantProjectVariableSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	return datasourceSchema.Schema{
+		Description: "Provides information about existing tenants.",
+		Attributes: map[string]datasourceSchema.Attribute{
+			"tenant_ids":      GetQueryIDsDatasourceSchema(),
+			"project_ids":     GetQueryIDsDatasourceSchema(),
+			"environment_ids": GetQueryIDsDatasourceSchema(),
+			"space_id":        GetSpaceIdDatasourceSchema("tenant projects", false),
+			"tenant_projects": datasourceSchema.ListNestedAttribute{
+				Computed:    true,
+				Optional:    false,
+				Description: "A list of related tenants, projects and environments that match the filter(s).",
+				NestedObject: datasourceSchema.NestedAttributeObject{
+					Attributes: map[string]datasourceSchema.Attribute{
+						"id": GetIdDatasourceSchema(true),
+						"tenant_id": datasourceSchema.StringAttribute{
+							Description: "The tenant ID associated with this tenant.",
+							Computed:    true,
+						},
+						"project_id": datasourceSchema.StringAttribute{
+							Description: "The project ID associated with this tenant.",
+							Computed:    true,
+						},
+						"environment_ids": datasourceSchema.ListAttribute{
+							Description: "The environment IDs associated with this tenant.",
+							ElementType: types.StringType,
+							Computed:    true,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func (t TenantProjectVariableSchema) GetResourceSchema() schema.Schema {
 	return schema.Schema{
 		Description: "Manages a tenant project variable in Octopus Deploy.",
 		Attributes: map[string]schema.Attribute{

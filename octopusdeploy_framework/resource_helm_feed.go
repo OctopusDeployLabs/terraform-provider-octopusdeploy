@@ -11,7 +11,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
@@ -33,10 +32,7 @@ func (r *helmFeedTypeResource) Metadata(ctx context.Context, req resource.Metada
 }
 
 func (r *helmFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes:  schemas.GetHelmFeedResourceSchema(),
-		Description: "This resource manages a Helm Feed in Octopus Deploy.",
-	}
+	resp.Schema = schemas.HelmFeedSchema{}.GetResourceSchema()
 }
 
 func (r *helmFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

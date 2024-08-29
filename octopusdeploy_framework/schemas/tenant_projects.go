@@ -3,7 +3,6 @@ package schemas
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -29,7 +28,11 @@ type TenantProjectResourceModel struct {
 	ResourceModel
 }
 
-func GetTenantProjectsDataSourceSchema() datasourceSchema.Schema {
+type TenantProjectsSchema struct{}
+
+var _ EntitySchema = TenantProjectsSchema{}
+
+func (t TenantProjectsSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about existing tenants.",
 		Attributes: map[string]datasourceSchema.Attribute{
@@ -64,10 +67,10 @@ func GetTenantProjectsDataSourceSchema() datasourceSchema.Schema {
 	}
 }
 
-func GetTenantProjectsResourceSchema() resourceSchema.Schema {
+func (t TenantProjectsSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Attributes: map[string]resourceSchema.Attribute{
-			"id": util.GetIdResourceSchema(),
+			"id": GetIdResourceSchema(),
 			"tenant_id": resourceSchema.StringAttribute{
 				Description: "The tenant ID associated with this tenant.",
 				Required:    true,

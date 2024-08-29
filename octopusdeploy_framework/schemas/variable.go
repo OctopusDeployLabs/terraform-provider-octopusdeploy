@@ -91,7 +91,11 @@ var VariableTypes = []string{
 	VariableTypeNames.WorkerPool,
 }
 
-func GetVariableDatasourceSchema() datasourceSchema.Schema {
+type VariableSchema struct{}
+
+var _ EntitySchema = VariableSchema{}
+
+func (v VariableSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: util.GetDataSourceDescription(VariablesDataSourceDescription),
 		Attributes: map[string]datasourceSchema.Attribute{
@@ -104,7 +108,7 @@ func GetVariableDatasourceSchema() datasourceSchema.Schema {
 				Required:    true,
 				Description: "Owner ID for the variable to find.",
 			},
-			SchemaAttributeNames.SpaceID: util.GetQuerySpaceIDDatasourceSchema(),
+			SchemaAttributeNames.SpaceID: GetSpaceIdDatasourceSchema(VariableResourceDescription, false),
 
 			//response
 			SchemaAttributeNames.ID: datasourceSchema.StringAttribute{
@@ -140,7 +144,7 @@ func GetVariableDatasourceSchema() datasourceSchema.Schema {
 	}
 }
 
-func GetVariableResourceSchema() resourceSchema.Schema {
+func (v VariableSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(VariableResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{

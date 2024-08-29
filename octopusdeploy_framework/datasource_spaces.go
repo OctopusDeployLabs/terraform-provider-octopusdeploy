@@ -6,7 +6,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
 )
@@ -33,25 +32,7 @@ func (*spacesDataSource) Metadata(_ context.Context, _ datasource.MetadataReques
 }
 
 func (*spacesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			// request
-			"ids":          schemas.GetQueryIDsDatasourceSchema(),
-			"partial_name": schemas.GetQueryPartialNameDatasourceSchema(),
-			"skip":         schemas.GetQuerySkipDatasourceSchema(),
-			"take":         schemas.GetQueryTakeDatasourceSchema(),
-
-			// response
-			"id": schemas.GetIdDatasourceSchema(true),
-			"spaces": schema.ListNestedAttribute{
-				Computed: true,
-				Optional: false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: schemas.GetSpacesDatasourceSchema(),
-				},
-			},
-		},
-	}
+	resp.Schema = schemas.SpacesSchema{}.GetDatasourceSchema()
 }
 
 func (b *spacesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -67,7 +48,7 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	query := spaces.SpacesQuery{
-		IDs:         schemas.GetIds(data.IDs),
+		IDs:         util.GetIds(data.IDs),
 		PartialName: data.PartialName.ValueString(),
 		Skip:        schemas.GetNumber(data.Skip),
 		Take:        schemas.GetNumber(data.Take),

@@ -12,7 +12,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -32,10 +31,7 @@ func (r *dockerContainerRegistryFeedTypeResource) Metadata(ctx context.Context, 
 }
 
 func (r *dockerContainerRegistryFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes:  schemas.GetDockerContainerRegistryFeedResourceSchema(),
-		Description: "This resource manages a Docker Container Registry in Octopus Deploy.",
-	}
+	resp.Schema = schemas.DockerContainerRegistryFeedSchema{}.GetResourceSchema()
 }
 
 func (r *dockerContainerRegistryFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

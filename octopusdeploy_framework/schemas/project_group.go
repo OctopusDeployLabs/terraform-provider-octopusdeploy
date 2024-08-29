@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -9,21 +8,47 @@ import (
 
 const projectGroupDescription = "project group"
 
-func GetProjectGroupDatasourceSchema() map[string]datasourceSchema.Attribute {
-	return map[string]datasourceSchema.Attribute{
-		"id":          GetIdDatasourceSchema(true),
-		"space_id":    GetSpaceIdDatasourceSchema(projectGroupDescription, true),
-		"name":        GetReadonlyNameDatasourceSchema(),
-		"description": GetReadonlyDescriptionDatasourceSchema(projectGroupDescription),
+type ProjectGroupSchema struct{}
+
+var _ EntitySchema = ProjectGroupSchema{}
+
+func (p ProjectGroupSchema) GetDatasourceSchema() datasourceSchema.Schema {
+	description := "project group"
+	return datasourceSchema.Schema{
+		Attributes: map[string]datasourceSchema.Attribute{
+			// request
+			"space_id":     GetSpaceIdDatasourceSchema(description, false),
+			"ids":          GetQueryIDsDatasourceSchema(),
+			"partial_name": GetQueryPartialNameDatasourceSchema(),
+			"skip":         GetQuerySkipDatasourceSchema(),
+			"take":         GetQueryTakeDatasourceSchema(),
+
+			// response
+			"id": GetIdDatasourceSchema(true),
+			"project_groups": datasourceSchema.ListNestedAttribute{
+				Computed:    true,
+				Description: "A list of project groups that match the filter(s).",
+				NestedObject: datasourceSchema.NestedAttributeObject{
+					Attributes: map[string]datasourceSchema.Attribute{
+						"id":          GetIdDatasourceSchema(true),
+						"space_id":    GetSpaceIdDatasourceSchema(description, true),
+						"name":        GetReadonlyNameDatasourceSchema(),
+						"description": GetDescriptionDatasourceSchema(projectGroupDescription),
+					},
+				},
+			},
+		},
 	}
 }
 
-func GetProjectGroupResourceSchema() map[string]resourceSchema.Attribute {
-	return map[string]resourceSchema.Attribute{
-		"id":          util.GetIdResourceSchema(),
-		"space_id":    util.GetSpaceIdResourceSchema(projectGroupDescription),
-		"name":        util.GetNameResourceSchema(true),
-		"description": util.GetDescriptionResourceSchema(projectGroupDescription),
+func (p ProjectGroupSchema) GetResourceSchema() resourceSchema.Schema {
+	return resourceSchema.Schema{
+		Attributes: map[string]resourceSchema.Attribute{
+			"id":          GetIdResourceSchema(),
+			"space_id":    GetSpaceIdResourceSchema(projectGroupDescription),
+			"name":        GetNameResourceSchema(true),
+			"description": GetDescriptionResourceSchema(projectGroupDescription),
+		},
 	}
 }
 
