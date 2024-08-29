@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+const artifactoryGenericFeedDescription = "artifactory generic feed"
+
 type ArtifactoryGenericFeedSchema struct{}
 
 var _ EntitySchema = ArtifactoryGenericFeedSchema{}
@@ -21,7 +23,7 @@ func (a ArtifactoryGenericFeedSchema) GetResourceSchema() resourceSchema.Schema 
 			"name":                                 GetNameResourceSchema(true),
 			"package_acquisition_location_options": GetPackageAcquisitionLocationOptionsResourceSchema(),
 			"password":                             GetPasswordResourceSchema(false),
-			"space_id":                             GetSpaceIdResourceSchema(helmFeedDescription),
+			"space_id":                             GetSpaceIdResourceSchema(artifactoryGenericFeedDescription),
 			"username":                             GetUsernameResourceSchema(false),
 			"repository": resourceSchema.StringAttribute{
 				Computed: false,
