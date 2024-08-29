@@ -23,7 +23,6 @@ type lifecycleTypeResource struct {
 
 var _ resource.Resource = &lifecycleTypeResource{}
 var _ resource.ResourceWithImportState = &lifecycleTypeResource{}
-var lifecycleSchema = schemas.LifecycleSchema{}
 
 type lifecycleTypeResourceModel struct {
 	SpaceID                 types.String `tfsdk:"space_id"`
@@ -52,7 +51,7 @@ func (r *lifecycleTypeResource) Metadata(_ context.Context, req resource.Metadat
 }
 
 func (r *lifecycleTypeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = lifecycleSchema.GetResourceSchema()
+	resp.Schema = schemas.LifecycleSchema{}.GetResourceSchema()
 }
 
 func (r *lifecycleTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

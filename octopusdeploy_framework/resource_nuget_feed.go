@@ -25,14 +25,13 @@ func NewNugetFeedResource() resource.Resource {
 }
 
 var _ resource.ResourceWithImportState = &nugetFeedTypeResource{}
-var nugetFeedSchema = schemas.NugetFeedSchema{}
 
 func (r *nugetFeedTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("nuget_feed")
 }
 
 func (r *nugetFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = nugetFeedSchema.GetResourceSchema()
+	resp.Schema = schemas.NugetFeedSchema{}.GetResourceSchema()
 }
 
 func (r *nugetFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
