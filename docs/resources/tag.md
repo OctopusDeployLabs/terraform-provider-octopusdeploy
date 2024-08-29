@@ -30,6 +30,6 @@ This resource manages tags in Octopus Deploy.
 ### Read-Only
 
 - `canonical_tag_name` (String) The canonical name of the tag.
-- `id` (String) The ID of this resource.
+- `id` (String) The unique ID for this resource.
 
 

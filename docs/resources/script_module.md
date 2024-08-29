@@ -34,10 +34,13 @@ resource "octopusdeploy_script_module" "example" {
 ### Optional
 
 - `description` (String) The description of this script module.
-- `id` (String) The unique ID for this resource.
 - `script` (Block List) The script associated with this script module. (see [below for nested schema](#nestedblock--script))
 - `space_id` (String) The space ID associated with this Script Module.
 - `variable_set_id` (String) The variable set ID for this script module.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 <a id="nestedblock--script"></a>
 ### Nested Schema for `script`

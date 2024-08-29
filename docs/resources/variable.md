@@ -115,7 +115,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 ### Read-Only
 
 - `encrypted_value` (String)
-- `id` (String) The ID of this resource.
+- `id` (String) The unique ID for this resource.
 - `key_fingerprint` (String)
 
 <a id="nestedblock--prompt"></a>

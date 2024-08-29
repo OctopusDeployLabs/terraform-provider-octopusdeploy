@@ -22,12 +22,12 @@ This resource manages library variable sets in Octopus Deploy.
 ### Optional
 
 - `description` (String) The description of this library variable set.
-- `id` (String) The unique ID for this resource.
 - `space_id` (String) The space ID associated with this library variable set.
 - `template` (Block List) (see [below for nested schema](#nestedblock--template))
 
 ### Read-Only
 
+- `id` (String) The unique ID for this resource.
 - `template_ids` (Map of String)
 - `variable_set_id` (String)
 
@@ -43,7 +43,10 @@ Optional:
 - `default_value` (String) A default value for the parameter, if applicable. This can be a hard-coded value or a variable reference.
 - `display_settings` (Map of String) The display settings for the parameter.
 - `help_text` (String) The help presented alongside the parameter input.
-- `id` (String) The unique ID for this resource.
 - `label` (String) The label shown beside the parameter when presented in the deployment process. Example: `Server name`.
+
+Read-Only:
+
+- `id` (String) The unique ID for this resource.
 
 

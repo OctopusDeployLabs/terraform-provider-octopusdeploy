@@ -29,8 +29,11 @@ resource "octopusdeploy_project_group" "example" {
 ### Optional
 
 - `description` (String) The description of this project group.
-- `id` (String) The unique ID for this resource.
 - `space_id` (String) The space ID associated with this project group.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ## Import
 

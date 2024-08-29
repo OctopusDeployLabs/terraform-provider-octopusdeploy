@@ -24,8 +24,11 @@ Manages a Git credential in Octopus Deploy.
 ### Optional
 
 - `description` (String) The description of this Git Credential.
-- `id` (String) The unique ID for this resource.
 - `space_id` (String) The space ID associated with this Git Credential.
 - `type` (String) The Git credential authentication type.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 

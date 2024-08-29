@@ -56,11 +56,7 @@ func (t TenantProjectVariableSchema) GetResourceSchema() schema.Schema {
 	return schema.Schema{
 		Description: "Manages a tenant project variable in Octopus Deploy.",
 		Attributes: map[string]schema.Attribute{
-			"id": util.ResourceString().
-				Computed().
-				Description("The unique ID for this resource.").
-				PlanModifiers(stringplanmodifier.UseStateForUnknown()).
-				Build(),
+			"id": GetIdResourceSchema(),
 			"space_id": util.ResourceString().
 				Optional().
 				Computed().

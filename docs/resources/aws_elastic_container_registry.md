@@ -31,9 +31,12 @@ resource "octopusdeploy_aws_elastic_container_registry" "example" {
 
 ### Optional
 
-- `id` (String) The unique ID for this resource.
 - `package_acquisition_location_options` (List of String)
 - `space_id` (String) The space ID associated with this aws elastic container registry.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ## Import
 

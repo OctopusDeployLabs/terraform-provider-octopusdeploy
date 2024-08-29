@@ -30,12 +30,15 @@ resource "octopusdeploy_username_password_account" "example" {
 
 - `description` (String) The description of this username/password account.
 - `environments` (List of String) A list of environment IDs associated with this resource.
-- `id` (String) The unique ID for this resource.
 - `password` (String, Sensitive) The password associated with this resource.
 - `space_id` (String) The space ID associated with this resource.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ## Import
 

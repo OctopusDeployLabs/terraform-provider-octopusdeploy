@@ -33,11 +33,14 @@ resource "octopusdeploy_maven_feed" "example" {
 
 - `download_attempts` (Number) The number of times a deployment should attempt to download a package from this feed before failing.
 - `download_retry_backoff_seconds` (Number) The number of seconds to apply as a linear back off between download attempts.
-- `id` (String) The unique ID for this resource.
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
 - `space_id` (String) The space ID associated with this maven feed.
 - `username` (String, Sensitive) The username associated with this resource.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ## Import
 

@@ -63,11 +63,14 @@ resource "octopusdeploy_lifecycle" "example" {
 ### Optional
 
 - `description` (String) The description of this lifecycle.
-- `id` (String) The unique ID for this resource.
 - `phase` (Block List) Defines a phase in the lifecycle. (see [below for nested schema](#nestedblock--phase))
 - `release_retention_policy` (Block List) Defines the retention policy for releases or tentacles. (see [below for nested schema](#nestedblock--release_retention_policy))
 - `space_id` (String) The space ID associated with this resource.
 - `tentacle_retention_policy` (Block List) Defines the retention policy for releases or tentacles. (see [below for nested schema](#nestedblock--tentacle_retention_policy))
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 <a id="nestedblock--phase"></a>
 ### Nested Schema for `phase`

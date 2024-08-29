@@ -34,12 +34,15 @@ resource "octopusdeploy_artifactory_generic_feed" "example" {
 
 ### Optional
 
-- `id` (String) The unique ID for this resource.
 - `layout_regex` (String)
 - `package_acquisition_location_options` (List of String)
 - `password` (String, Sensitive) The password associated with this resource.
 - `space_id` (String) The space ID associated with this artifactory generic feed.
 - `username` (String, Sensitive) The username associated with this resource.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ## Import
 

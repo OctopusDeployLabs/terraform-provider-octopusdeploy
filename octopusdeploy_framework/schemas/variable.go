@@ -148,10 +148,7 @@ func (v VariableSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(VariableResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			SchemaAttributeNames.ID: resourceSchema.StringAttribute{
-				Description: "The ID of this resource.",
-				Computed:    true,
-			},
+			SchemaAttributeNames.ID:          GetIdResourceSchema(),
 			SchemaAttributeNames.Name:        GetNameResourceSchema(true),
 			SchemaAttributeNames.Description: GetDescriptionResourceSchema(VariableResourceDescription),
 			SchemaAttributeNames.SpaceID:     GetSpaceIdResourceSchema(VariableResourceDescription),

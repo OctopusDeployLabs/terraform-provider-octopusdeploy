@@ -20,8 +20,11 @@ This resource manages tenants in Octopus Deploy.
 
 - `cloned_from_tenant_id` (String) The ID of the tenant from which this tenant was cloned.
 - `description` (String) The description of this tenant.
-- `id` (String) The unique ID for this resource.
 - `space_id` (String) The space ID associated with this tenant.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ~> **NOTE property `project_environment` deprecated:** The `project_environment` property has been replaced by the `octopusdeploy_tenant_project` resource to allow more advanced provisioning scenarioes. 

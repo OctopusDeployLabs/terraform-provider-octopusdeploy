@@ -85,7 +85,6 @@ resource "octopusdeploy_project" "example" {
 - `git_anonymous_persistence_settings` (Block List) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_anonymous_persistence_settings))
 - `git_library_persistence_settings` (Block List) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_library_persistence_settings))
 - `git_username_password_persistence_settings` (Block List) Provides Git-related persistence settings for a version-controlled project. (see [below for nested schema](#nestedblock--git_username_password_persistence_settings))
-- `id` (String) The unique ID for this resource.
 - `included_library_variable_sets` (List of String) The list of included library variable set IDs.
 - `is_disabled` (Boolean)
 - `is_discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
@@ -103,6 +102,7 @@ resource "octopusdeploy_project" "example" {
 ### Read-Only
 
 - `deployment_process_id` (String)
+- `id` (String) The unique ID for this resource.
 - `variable_set_id` (String)
 
 <a id="nestedblock--auto_deploy_release_overrides"></a>
