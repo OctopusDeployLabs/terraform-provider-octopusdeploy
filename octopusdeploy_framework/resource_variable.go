@@ -90,7 +90,7 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 
 	tflog.Info(ctx, fmt.Sprintf("creating variable: %#v", newVariable))
 
-	variableSet, err := variables.AddSingle(r.Config.Client, r.Config.SpaceID, variableOwnerId.ValueString(), newVariable)
+	variableSet, err := variables.AddSingle(r.Config.Client, data.SpaceID.ValueString(), variableOwnerId.ValueString(), newVariable)
 	if err != nil {
 		resp.Diagnostics.AddError("create variable failed", err.Error())
 		return
