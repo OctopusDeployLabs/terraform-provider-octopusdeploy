@@ -161,7 +161,10 @@ func (b *blahResource) Create(ctx context.Context, request resource.CreateReques
     newResource := ...
 
     // call client for create
-    blah := blahResources.Add(b.Client, util.GetSpace(), newResource)
+	// the space id here should come from the plan. 
+	// If the user doesn't provide a space_id on the plan, this will return an empty string, which the client will replace with the 
+	// space_id configured on the provider, otherwise the API will assume the default space.
+    blah := blahResources.Add(b.Client, plan.SpaceID.ValueString(), newResource)
 
     // map result to state
     plan.Name := types.StringValue(blah.Name)
