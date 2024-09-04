@@ -141,41 +141,41 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
 
-	var data, state schemas.VariableTypeResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	var plan, state schemas.VariableTypeResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("updating variable (%s)", data.ID))
+	tflog.Info(ctx, fmt.Sprintf("updating variable (%s)", plan.ID))
 
-	variableOwnerId, err := getVariableOwnerID(&data)
+	variableOwnerId, err := getVariableOwnerID(&plan)
 	if err != nil {
 		resp.Diagnostics.AddError("invalid resource configuration", err.Error())
 		return
 	}
 
-	name := data.Name.ValueString()
+	name := plan.Name.ValueString()
 	updatedVariable := variables.NewVariable(name)
-	updatedVariable.Description = data.Description.ValueString()
-	updatedVariable.IsEditable = data.IsEditable.ValueBool()
-	updatedVariable.IsSensitive = data.IsSensitive.ValueBool()
-	updatedVariable.Type = data.Type.ValueString()
-	updatedVariable.Scope = schemas.MapToVariableScope(data.Scope)
-	updatedVariable.Prompt = schemas.MapToVariablePromptOptions(data.Prompt)
-	updatedVariable.SpaceID = state.SpaceID.ValueString()
+	updatedVariable.Description = plan.Description.ValueString()
+	updatedVariable.IsEditable = plan.IsEditable.ValueBool()
+	updatedVariable.IsSensitive = plan.IsSensitive.ValueBool()
+	updatedVariable.Type = plan.Type.ValueString()
+	updatedVariable.Scope = schemas.MapToVariableScope(plan.Scope)
+	updatedVariable.Prompt = schemas.MapToVariablePromptOptions(plan.Prompt)
+	updatedVariable.SpaceID = plan.SpaceID.ValueString()
 
 	if updatedVariable.IsSensitive {
 		updatedVariable.Type = schemas.VariableTypeNames.Sensitive
-		updatedVariable.Value = data.SensitiveValue.ValueString()
+		updatedVariable.Value = plan.SensitiveValue.ValueString()
 	} else {
-		updatedVariable.Value = data.Value.ValueString()
+		updatedVariable.Value = plan.Value.ValueString()
 	}
 
 	updatedVariable.ID = state.ID.ValueString()
 
-	variableSet, err := variables.UpdateSingle(r.Config.Client, state.SpaceID.ValueString(), variableOwnerId.ValueString(), updatedVariable)
+	variableSet, err := variables.UpdateSingle(r.Config.Client, plan.SpaceID.ValueString(), variableOwnerId.ValueString(), updatedVariable)
 	if err != nil {
 		resp.Diagnostics.AddError("update variable failed", err.Error())
 		return
@@ -187,10 +187,10 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("variable updated (%s)", data.ID))
+	tflog.Info(ctx, fmt.Sprintf("variable updated (%s)", plan.ID))
 
-	mapVariableToState(&data, updatedVariable)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	mapVariableToState(&plan, updatedVariable)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *variableTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -296,15 +296,14 @@ func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *varia
 		)
 	}
 
-	if !data.Scope.IsNull() {
+	if variable.Scope.IsEmpty() {
+		data.Scope = types.ListNull(types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()})
+	} else {
 		data.Scope = types.ListValueMust(
 			types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()},
 			[]attr.Value{schemas.MapFromVariableScope(variable.Scope)},
 		)
 	}
-
-	data.EncryptedValue = types.StringNull()
-	data.KeyFingerprint = types.StringNull()
 
 	data.ID = types.StringValue(variable.GetID())
 }
