@@ -9,8 +9,6 @@ import (
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -36,9 +34,6 @@ var VariableSchemaAttributeNames = struct {
 	DisplayName     string
 	IsRequired      string
 	Label           string
-	EncryptedValue  string
-	KeyFingerprint  string
-	PgpKey          string
 }{
 	Prompt:          "prompt",
 	OwnerID:         "owner_id",
@@ -55,9 +50,6 @@ var VariableSchemaAttributeNames = struct {
 	DisplayName:     "display_name",
 	IsRequired:      "is_required",
 	Label:           "label",
-	EncryptedValue:  "encrypted_value",
-	KeyFingerprint:  "key_fingerprint",
-	PgpKey:          "pgp_key",
 }
 
 var VariableTypeNames = struct {
@@ -173,19 +165,6 @@ func (v VariableSchema) GetResourceSchema() resourceSchema.Schema {
 				"Indicates whether or not this resource is considered sensitive and should be kept secret.",
 				false,
 				true),
-			VariableSchemaAttributeNames.KeyFingerprint: resourceSchema.StringAttribute{
-				Computed: true,
-			},
-			VariableSchemaAttributeNames.PgpKey: resourceSchema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			VariableSchemaAttributeNames.EncryptedValue: resourceSchema.StringAttribute{
-				Computed: true,
-			},
 			VariableSchemaAttributeNames.SensitiveValue: resourceSchema.StringAttribute{
 				Optional:  true,
 				Sensitive: true,
@@ -226,9 +205,6 @@ type VariableTypeResourceModel struct {
 	Type           types.String `tfsdk:"type"`
 	SensitiveValue types.String `tfsdk:"sensitive_value"`
 	Value          types.String `tfsdk:"value"`
-	PgpKey         types.String `tfsdk:"pgp_key"`
-	KeyFingerprint types.String `tfsdk:"key_fingerprint"`
-	EncryptedValue types.String `tfsdk:"encrypted_value"`
 	Prompt         types.List   `tfsdk:"prompt"`
 	Scope          types.List   `tfsdk:"scope"`
 	SpaceID        types.String `tfsdk:"space_id"`
