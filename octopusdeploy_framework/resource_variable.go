@@ -270,6 +270,7 @@ func validateVariable(variableSet *variables.VariableSet, newVariable *variables
 }
 
 func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *variables.Variable) {
+	data.SpaceID = types.StringValue(variable.SpaceID)
 	data.Name = types.StringValue(variable.Name)
 	data.Description = types.StringValue(variable.Description)
 	if !data.IsEditable.IsNull() {
@@ -295,7 +296,9 @@ func mapVariableToState(data *schemas.VariableTypeResourceModel, variable *varia
 		)
 	}
 
-	if !data.Scope.IsNull() {
+	if variable.Scope.IsEmpty() {
+		data.Scope = types.ListNull(types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()})
+	} else {
 		data.Scope = types.ListValueMust(
 			types.ObjectType{AttrTypes: schemas.VariableScopeObjectType()},
 			[]attr.Value{schemas.MapFromVariableScope(variable.Scope)},
