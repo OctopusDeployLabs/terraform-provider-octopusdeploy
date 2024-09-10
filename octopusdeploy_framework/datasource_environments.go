@@ -69,7 +69,7 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	var mappedEnvironments []schemas.EnvironmentTypeResourceModel
+	mappedEnvironments := []schemas.EnvironmentTypeResourceModel{}
 	if data.Name.IsNull() {
 		tflog.Debug(ctx, fmt.Sprintf("environments returned from API: %#v", existingEnvironments))
 		for _, environment := range existingEnvironments.Items {
