@@ -60,15 +60,16 @@ func (t *tagSetsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	util.DatasourceResultCount(ctx, "tag sets", len(existingTagSets.Items))
 
-	data.TagSets = flattenTagSets(existingTagSets.Items)
+	data.TagSets = flattenTagSets(ctx, existingTagSets.Items)
 	data.ID = types.StringValue(fmt.Sprintf("TagSets-%s", time.Now().UTC().String()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func flattenTagSets(tagSets []*tagsets.TagSet) types.List {
+func flattenTagSets(ctx context.Context, tagSets []*tagsets.TagSet) types.List {
 	if len(tagSets) == 0 {
-		return types.ListNull(types.ObjectType{AttrTypes: schemas.GetTagSetAttrTypes()})
+		emptyList, _ := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.GetTagSetAttrTypes()}, tagSets)
+		return emptyList
 	}
 
 	tfList := make([]attr.Value, len(tagSets))

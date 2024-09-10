@@ -90,7 +90,7 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	var newGroups []schemas.ProjectGroupTypeResourceModel
+	newGroups := []schemas.ProjectGroupTypeResourceModel{}
 	for _, projectGroup := range existingProjectGroups.Items {
 		tflog.Debug(ctx, "loaded group "+projectGroup.Name)
 		var g schemas.ProjectGroupTypeResourceModel

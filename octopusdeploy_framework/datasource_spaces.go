@@ -62,7 +62,7 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	var mappedSpaces []schemas.SpaceModel
+	mappedSpaces := []schemas.SpaceModel{}
 	for _, space := range existingSpaces.Items {
 		var s schemas.SpaceModel
 		mapSpaceToState(ctx, &s, space)
