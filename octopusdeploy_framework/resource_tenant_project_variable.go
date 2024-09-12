@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -51,6 +52,8 @@ func (t *tenantProjectVariableResource) Configure(_ context.Context, req resourc
 }
 
 func (t *tenantProjectVariableResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
 	var plan tenantProjectVariableResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
@@ -101,6 +104,9 @@ func (t *tenantProjectVariableResource) Create(ctx context.Context, req resource
 }
 
 func (t *tenantProjectVariableResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
+
 	var state tenantProjectVariableResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
@@ -141,6 +147,9 @@ func (t *tenantProjectVariableResource) Read(ctx context.Context, req resource.R
 }
 
 func (t *tenantProjectVariableResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
+
 	var plan tenantProjectVariableResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
@@ -180,6 +189,9 @@ func (t *tenantProjectVariableResource) Update(ctx context.Context, req resource
 }
 
 func (t *tenantProjectVariableResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
+
 	var state tenantProjectVariableResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
