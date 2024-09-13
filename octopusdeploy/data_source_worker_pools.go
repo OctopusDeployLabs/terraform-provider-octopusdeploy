@@ -40,10 +40,12 @@ func dataSourceWorkerPoolsRead(ctx context.Context, d *schema.ResourceData, m in
 			return diag.FromErr(err)
 		}
 
-		// Octopus currently doesn't support filtering by name, so we have to do it ourselves
-		if name != "" && workerPoolResource.Name == name {
-			flattenedWorkerPools = append(flattenedWorkerPools, flattenWorkerPool(workerPoolResource))
+		// There is no name filter on the WorkerPools endpoint in the Octopus API,
+		// so filter in-memory if the name field is specified
+		if name != "" && workerPoolResource.Name != name {
+			continue
 		}
+		flattenedWorkerPools = append(flattenedWorkerPools, flattenWorkerPool(workerPoolResource))
 	}
 
 	d.Set("worker_pools", flattenedWorkerPools)
