@@ -126,14 +126,20 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 
 	variable, err := variables.GetByID(r.Config.Client, data.SpaceID.ValueString(), variableOwnerID.ValueString(), data.ID.ValueString())
 
-	// API don't return SpaceID with the variable, so we need to manually set it here from the state
-	variable.SpaceID = data.SpaceID.ValueString()
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, schemas.VariableResourceDescription); err != nil {
-			resp.Diagnostics.AddError("unable to load variable", err.Error())
+		apiError := errors.ProcessApiErrorV2(ctx, resp, data, err, schemas.VariableResourceDescription)
+		if apiError != nil {
+			resp.Diagnostics.AddError("unable to load variable", apiError.Error())
+		} else {
+			// If this is a non-API error
+			resp.Diagnostics.AddError(fmt.Sprintf("Error loading %s", schemas.VariableResourceDescription), err.Error())
 		}
 		return
 	}
+
+	// API don't return SpaceID with the variable, so we need to manually set it here from the state
+	variable.SpaceID = data.SpaceID.ValueString()
+
 	tflog.Info(ctx, fmt.Sprintf("Read variable: %+v", variable))
 	mapVariableToState(&data, variable)
 
