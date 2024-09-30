@@ -120,11 +120,11 @@ func (r *stepTemplateTypeResource) Create(ctx context.Context, req resource.Crea
 
 	actionTemplate, err := actiontemplates.Add(r.Config.Client, newActionTemplate)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create environment", err.Error())
+		resp.Diagnostics.AddError("unable to create step template", err.Error())
 		return
 	}
 
-	updateStepTemplate(ctx, &data, actionTemplate)
+	resp.Diagnostics.Append(updateStepTemplate(&data, actionTemplate)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -143,7 +143,7 @@ func (r *stepTemplateTypeResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	updateStepTemplate(ctx, &data, actionTemplate)
+	resp.Diagnostics.Append(updateStepTemplate(&data, actionTemplate)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -245,7 +245,10 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	updateStepTemplate(ctx, &data, updatedActionTemplate)
+	resp.Diagnostics.Append(updateStepTemplate(&data, updatedActionTemplate)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -263,7 +266,7 @@ func (r *stepTemplateTypeResource) Delete(ctx context.Context, req resource.Dele
 	}
 }
 
-func updateStepTemplate(ctx context.Context, data *schemas.StepTemplateTypeResourceModel, at *actiontemplates.ActionTemplate) diag.Diagnostics {
+func updateStepTemplate(data *schemas.StepTemplateTypeResourceModel, at *actiontemplates.ActionTemplate) diag.Diagnostics {
 	resp := diag.Diagnostics{}
 
 	data.ID = types.StringValue(at.ID)
@@ -281,7 +284,11 @@ func updateStepTemplate(ctx context.Context, data *schemas.StepTemplateTypeResou
 	}
 	data.Parameters = sParams
 
-	props, dg := types.MapValueFrom(ctx, types.StringType, at.Properties)
+	stringProps := make(map[string]attr.Value, len(at.Properties))
+	for keys, value := range at.Properties {
+		stringProps[keys] = types.StringValue(value.Value)
+	}
+	props, dg := types.MapValue(types.StringType, stringProps)
 	resp.Append(dg...)
 	if resp.HasError() {
 		return resp
@@ -328,7 +335,7 @@ func convertStepTemplateToParameterAttributes(atParams []actiontemplates.ActionT
 		}
 		params[i] = objVal
 	}
-	sParams, dg := types.ListValue(types.ObjectType{AttrTypes: schemas.GetStepTemplatePackagePropertiesTypeAttributes()}, params)
+	sParams, dg := types.ListValue(types.ObjectType{AttrTypes: schemas.GetStepTemplateParameterTypeAttributes()}, params)
 	resp.Append(dg...)
 	if resp.HasError() {
 		return types.ListNull(types.ObjectType{AttrTypes: schemas.GetStepTemplateParameterTypeAttributes()}), resp
@@ -337,13 +344,17 @@ func convertStepTemplateToParameterAttributes(atParams []actiontemplates.ActionT
 }
 
 func convertStepTemplateParameterAttribute(atp actiontemplates.ActionTemplateParameter) (types.Object, diag.Diagnostics) {
+	displaySettings, dg := types.MapValue(types.StringType, util.ConvertStringMapToAttrStringMap(atp.DisplaySettings))
+	if dg.HasError() {
+		return types.ObjectNull(schemas.GetStepTemplateParameterTypeAttributes()), dg
+	}
 	return types.ObjectValue(schemas.GetStepTemplateParameterTypeAttributes(), map[string]attr.Value{
 		"id":               types.StringValue(atp.ID),
 		"name":             types.StringValue(atp.Name),
 		"label":            types.StringValue(atp.Label),
 		"help_text":        types.StringValue(atp.HelpText),
-		"display_settings": types.StringValue(atp.HelpText),
 		"default_value":    types.StringValue(atp.DefaultValue.Value),
+		"display_settings": displaySettings,
 	})
 }
 

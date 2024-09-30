@@ -45,6 +45,8 @@ func (s StepTemplateSchema) GetResourceSchema() rs.Schema {
 			},
 			"community_action_template_id": rs.StringAttribute{
 				Optional: true,
+				Computed: true,
+				Default:  stringdefault.StaticString(""),
 			},
 			"packages": GetStepTemplatePackageSchema(),
 			"properties": rs.MapAttribute{
@@ -56,7 +58,6 @@ func (s StepTemplateSchema) GetResourceSchema() rs.Schema {
 	}
 }
 
-// Re-defined as Attributes over blocks
 func GetStepTemplateParameterSchema() rs.ListNestedAttribute {
 	return rs.ListNestedAttribute{
 		Required: true,
@@ -178,6 +179,7 @@ func GetStepTemplatePackageTypeAttributes() map[string]attr.Type {
 		"acquisition_location": types.StringType,
 		"name":                 types.StringType,
 		"feed_id":              types.StringType,
+		"package_id":           types.StringType,
 		"properties":           types.ObjectType{AttrTypes: GetStepTemplatePackagePropertiesTypeAttributes()},
 	}
 }
