@@ -131,8 +131,8 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 		if apiError != nil {
 			resp.Diagnostics.AddError("unable to load variable", apiError.Error())
 		} else {
-			// If this is a non-API error
-			resp.Diagnostics.AddError(fmt.Sprintf("Error loading %s", schemas.VariableResourceDescription), err.Error())
+			// If this is a non-API error just log warning and return early
+			resp.Diagnostics.AddWarning(fmt.Sprintf("Error loading %s, with variable Id [%s]", schemas.VariableResourceDescription, data.ID.ValueString()), err.Error())
 		}
 		return
 	}
