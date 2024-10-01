@@ -86,7 +86,14 @@ func GetStepTemplateParameterSchema() rs.ListNestedAttribute {
 						stringplanmodifier.UseStateForUnknown(),
 					},
 				},
-				"id": GetIdResourceSchema(),
+				"id": rs.StringAttribute{
+					Description: "The id for the attribute.",
+					Computed:    true,
+					Default:     stringdefault.StaticString(""),
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
+				},
 				"label": rs.StringAttribute{
 					Description: "The label shown beside the parameter when presented in the deployment process. Example: `Server name`.",
 					Optional:    true,

@@ -2,10 +2,10 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
@@ -81,24 +81,31 @@ func (r *stepTemplateTypeResource) Create(ctx context.Context, req resource.Crea
 		}
 		newActionTemplate.Properties = templateProps
 	} else {
-		newActionTemplate.Properties = make(map[string]core.PropertyValue, 0)
+		newActionTemplate.Properties = make(map[string]core.PropertyValue)
 	}
 
 	newActionTemplate.Packages = make([]packages.PackageReference, len(pkgs))
 	if len(pkgs) > 0 {
 		for i, val := range pkgs {
-			//		pkgProps := make(map[string]types.String, len(val.Properties.Attributes()))
-			// TODO: fix
-			// resp.Diagnostics.Append(val.Properties.(ctx, &pkgProps, false)...)
+			pkgProps := make(map[string]string, len(val.Properties.Attributes()))
+			for key, prop := range val.Properties.Attributes() {
+				if prop.Type(ctx) == types.StringType {
+					pkgProps[key] = prop.(types.String).ValueString()
+				} else {
+					// We should not get this error unless we add a field to package properties in the schema that is not a string
+					resp.Diagnostics.AddError("Unexpected value type in package properties.",
+						fmt.Sprintf("Expected [%s] to have value of string but got [%s].", key, prop.String()))
+				}
+			}
 			if resp.Diagnostics.HasError() {
 				return
 			}
 			pkgRef := packages.PackageReference{
 				AcquisitionLocation: val.AcquisitionLocation.ValueString(),
 				FeedID:              val.FeedID.ValueString(),
-				// 				Properties:          util.ConvertAttrStringMapToStringMap(pkgProps),
-				Name:      val.Name.ValueString(),
-				PackageID: val.PackageID.ValueString(),
+				Properties:          pkgProps,
+				Name:                val.Name.ValueString(),
+				PackageID:           val.PackageID.ValueString(),
 			}
 			newActionTemplate.Packages[i] = pkgRef
 		}
@@ -169,7 +176,7 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	params := make([]schemas.StepTemplateParameterType, 0, len(data.Parameters.Elements()))
-	resp.Diagnostics.Append(data.Parameters.ElementsAs(ctx, &props, false)...)
+	resp.Diagnostics.Append(data.Parameters.ElementsAs(ctx, &params, false)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -203,18 +210,28 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 	actionTemplateUpdate.Packages = make([]packages.PackageReference, 0, len(pkgs))
 	if len(pkgs) > 0 {
 		for i, val := range pkgs {
-			// 			pkgProps := make(map[string]types.String, len(val.Properties.Attributes()))
-			// resp.Diagnostics.Append(val.Properties.ElementsAs(ctx, &pkgProps, false)...)
-			// TODO: fix
+			pkgProps := make(map[string]string, len(val.Properties.Attributes()))
+			for key, prop := range val.Properties.Attributes() {
+				if prop.Type(ctx) == types.StringType {
+					pkgProps[key] = prop.(types.String).ValueString()
+				} else {
+					// We should not get this error unless we add a field to package properties in the schema that is not a string
+					resp.Diagnostics.AddError("Unexpected value type in package properties.",
+						fmt.Sprintf("Expected [%s] to have value of string but got [%s].", key, prop.String()))
+				}
+			}
+			if resp.Diagnostics.HasError() {
+				return
+			}
 			if resp.Diagnostics.HasError() {
 				return
 			}
 			pkgRef := packages.PackageReference{
 				AcquisitionLocation: val.AcquisitionLocation.ValueString(),
 				FeedID:              val.FeedID.ValueString(),
-				// 				Properties:          util.ConvertAttrStringMapToStringMap(pkgProps),
-				Name:      val.Name.ValueString(),
-				PackageID: val.PackageID.ValueString(),
+				Properties:          pkgProps,
+				Name:                val.Name.ValueString(),
+				PackageID:           val.PackageID.ValueString(),
 			}
 			actionTemplateUpdate.Packages[i] = pkgRef
 		}
@@ -224,24 +241,20 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 	if len(params) > 0 {
 		for i, val := range params {
 			defaultValue := core.NewPropertyValue(val.DefaultValue.ValueString(), false)
-			//			displaySetting := make(map[string]types.String, len(val.DisplaySettings.Elements()))
-			resp.Diagnostics.Append(val.DisplaySettings.ElementsAs(ctx, &val.DisplaySettings, false)...)
-			if resp.Diagnostics.HasError() {
-				return
-			}
 			actionTemplateUpdate.Parameters[i] = actiontemplates.ActionTemplateParameter{
-				DefaultValue: &defaultValue,
-				Name:         val.Name.ValueString(),
-				Label:        val.Label.ValueString(),
-				HelpText:     val.HelpText.ValueString(),
-				//				DisplaySettings: util.ConvertAttrStringMapToStringMap(displaySetting),
+				DefaultValue:    &defaultValue,
+				Name:            val.Name.ValueString(),
+				Label:           val.Label.ValueString(),
+				HelpText:        val.HelpText.ValueString(),
+				DisplaySettings: util.ConvertAttrStringMapToStringMap(val.DisplaySettings.Elements()),
 			}
+			actionTemplateUpdate.Parameters[i].ID = val.ID.ValueString()
 		}
 	}
 
 	updatedActionTemplate, err := actiontemplates.Update(r.Config.Client, actionTemplateUpdate)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update environment", err.Error())
+		resp.Diagnostics.AddError("unable to update step template", err.Error())
 		return
 	}
 
@@ -253,15 +266,15 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 }
 
 func (r *stepTemplateTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data schemas.EnvironmentTypeResourceModel
+	var data schemas.StepTemplateTypeResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if err := environments.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete environment", err.Error())
+	if err := actiontemplates.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("unable to delete step template", err.Error())
 		return
 	}
 }
