@@ -120,6 +120,7 @@ func GetStepTemplatePackageSchema() rs.ListNestedAttribute {
 			Attributes: map[string]rs.Attribute{
 				"acquisition_location": rs.StringAttribute{
 					Default:  stringdefault.StaticString("Server"),
+					Optional: true,
 					Computed: true,
 				},
 				"feed_id": rs.StringAttribute{
@@ -137,6 +138,7 @@ func GetStepTemplatePackageSchema() rs.ListNestedAttribute {
 					Attributes: map[string]rs.Attribute{
 						"extract": rs.StringAttribute{
 							Default:  stringdefault.StaticString("True"),
+							Optional: true,
 							Computed: true,
 						},
 						"package_parameter_name": rs.StringAttribute{
@@ -144,6 +146,8 @@ func GetStepTemplatePackageSchema() rs.ListNestedAttribute {
 						},
 						"purpose": rs.StringAttribute{
 							Default:  stringdefault.StaticString(""),
+							Optional: true,
+							Required: false,
 							Computed: true,
 						},
 						"selection_mode": rs.StringAttribute{
@@ -177,7 +181,7 @@ type StepTemplatePackageType struct {
 	Name                types.String `tfsdk:"name"`
 	FeedID              types.String `tfsdk:"feed_id"`
 	PackageID           types.String `tfsdk:"package_id"`
-	Properties          types.Object `tfsdk:"Properties"`
+	Properties          types.Object `tfsdk:"properties"`
 }
 
 func GetStepTemplatePackageTypeAttributes() map[string]attr.Type {

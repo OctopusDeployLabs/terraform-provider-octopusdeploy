@@ -204,10 +204,10 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 		}
 		actionTemplateUpdate.Properties = templateProps
 	} else {
-		actionTemplateUpdate.Properties = make(map[string]core.PropertyValue, 0)
+		actionTemplateUpdate.Properties = make(map[string]core.PropertyValue)
 	}
 
-	actionTemplateUpdate.Packages = make([]packages.PackageReference, 0, len(pkgs))
+	actionTemplateUpdate.Packages = make([]packages.PackageReference, len(pkgs))
 	if len(pkgs) > 0 {
 		for i, val := range pkgs {
 			pkgProps := make(map[string]string, len(val.Properties.Attributes()))
@@ -223,9 +223,6 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 			if resp.Diagnostics.HasError() {
 				return
 			}
-			if resp.Diagnostics.HasError() {
-				return
-			}
 			pkgRef := packages.PackageReference{
 				AcquisitionLocation: val.AcquisitionLocation.ValueString(),
 				FeedID:              val.FeedID.ValueString(),
@@ -233,6 +230,7 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 				Name:                val.Name.ValueString(),
 				PackageID:           val.PackageID.ValueString(),
 			}
+			pkgRef.ID = val.ID.ValueString()
 			actionTemplateUpdate.Packages[i] = pkgRef
 		}
 	}
@@ -290,6 +288,7 @@ func updateStepTemplate(data *schemas.StepTemplateTypeResourceModel, at *actiont
 	data.CommunityActionTemplateId = types.StringValue(at.CommunityActionTemplateID)
 	data.ActionType = types.StringValue(at.ActionType)
 
+	// Parameters
 	sParams, dg := convertStepTemplateToParameterAttributes(at.Parameters)
 	resp.Append(dg...)
 	if resp.HasError() {
@@ -297,6 +296,7 @@ func updateStepTemplate(data *schemas.StepTemplateTypeResourceModel, at *actiont
 	}
 	data.Parameters = sParams
 
+	// Properties
 	stringProps := make(map[string]attr.Value, len(at.Properties))
 	for keys, value := range at.Properties {
 		stringProps[keys] = types.StringValue(value.Value)
@@ -308,6 +308,7 @@ func updateStepTemplate(data *schemas.StepTemplateTypeResourceModel, at *actiont
 	}
 	data.Properties = props
 
+	// Packages
 	pkgs, dg := convertStepTemplateToPackageAttributes(at.Packages)
 	resp.Append(dg...)
 	if resp.HasError() {
@@ -390,32 +391,33 @@ func convertStepTemplatePackagePropertyAttribute(atpp map[string]string) (types.
 	prop := make(map[string]attr.Value)
 	diags := diag.Diagnostics{}
 
-	if extract, ok := atpp["Extract"]; ok {
+	// We need to manually convert the string map to ensure all fields are set.
+	if extract, ok := atpp["extract"]; ok {
 		prop["extract"] = types.StringValue(extract)
 	} else {
-		diags.AddWarning("Package property missing value.", "Extract value missing from package property")
+		diags.AddWarning("Package property missing value.", "extract value missing from package property")
 		prop["extract"] = types.StringNull()
 	}
 
-	if purpose, ok := atpp["Purpose"]; ok {
+	if purpose, ok := atpp["purpose"]; ok {
 		prop["purpose"] = types.StringValue(purpose)
 	} else {
-		diags.AddWarning("Package property missing value.", "Purpose value missing from package property")
+		diags.AddWarning("Package property missing value.", "purpose value missing from package property")
 		prop["purpose"] = types.StringNull()
 	}
 
-	if purpose, ok := atpp["PackageParameterName"]; ok {
+	if purpose, ok := atpp["package_parameter_name"]; ok {
 		prop["package_parameter_name"] = types.StringValue(purpose)
 	} else {
-		diags.AddWarning("Package property missing value.", "PackageParameterName value missing from package property")
+		diags.AddWarning("Package property missing value.", "package_parameter_name value missing from package property")
 		prop["package_parameter_name"] = types.StringNull()
 	}
 
-	if selectionMode, ok := atpp["SelectionMode"]; ok {
+	if selectionMode, ok := atpp["selection_mode"]; ok {
 		prop["selection_mode"] = types.StringValue(selectionMode)
 	} else {
-		diags.AddWarning("Package property missing value.", "SelectionMode value missing from package property")
-		prop["package_parameter_name"] = types.StringNull()
+		diags.AddWarning("Package property missing value.", "selection_mode value missing from package property")
+		prop["selection_mode"] = types.StringNull()
 	}
 
 	propMap, dg := types.ObjectValue(schemas.GetStepTemplatePackagePropertiesTypeAttributes(), prop)
