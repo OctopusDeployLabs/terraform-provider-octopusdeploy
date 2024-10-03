@@ -1,7 +1,9 @@
 package schemas
 
 import (
+	"fmt"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	ds "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -11,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"regexp"
 )
 
 const (
@@ -34,22 +37,27 @@ func (s StepTemplateSchema) GetResourceSchema() rs.Schema {
 			"description": GetDescriptionResourceSchema(EnvironmentResourceDescription),
 			"space_id":    GetSpaceIdResourceSchema(EnvironmentResourceDescription),
 			"version": rs.Int32Attribute{
-				Optional: false,
-				Computed: true,
+				Description: "The version of the step template",
+				Optional:    false,
+				Computed:    true,
 			},
 			"step_package_id": rs.StringAttribute{
-				Required: true,
+				Description: "The ID of the step package",
+				Required:    true,
 			},
 			"action_type": rs.StringAttribute{
-				Required: true,
+				Description: "The action type of the step template",
+				Required:    true,
 			},
 			"community_action_template_id": rs.StringAttribute{
-				Optional: true,
-				Computed: true,
-				Default:  stringdefault.StaticString(""),
+				Description: "The ID of the community action template",
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(""),
 			},
 			"packages": GetStepTemplatePackageSchema(),
 			"properties": rs.MapAttribute{
+				Description: "Properties for the step template",
 				Required:    true,
 				ElementType: types.StringType,
 			},
@@ -60,7 +68,8 @@ func (s StepTemplateSchema) GetResourceSchema() rs.Schema {
 
 func GetStepTemplateParameterSchema() rs.ListNestedAttribute {
 	return rs.ListNestedAttribute{
-		Required: true,
+		Description: "List of parameters that can be used in Step Template.",
+		Required:    true,
 		NestedObject: rs.NestedAttributeObject{
 			Attributes: map[string]rs.Attribute{
 				"default_value": rs.StringAttribute{
@@ -87,11 +96,10 @@ func GetStepTemplateParameterSchema() rs.ListNestedAttribute {
 					},
 				},
 				"id": rs.StringAttribute{
-					Description: "The id for the attribute.",
-					Computed:    true,
-					Default:     stringdefault.StaticString(""),
-					PlanModifiers: []planmodifier.String{
-						stringplanmodifier.UseStateForUnknown(),
+					Description: "The id for the property.",
+					Required:    true,
+					Validators: []validator.String{
+						stringvalidator.RegexMatches(regexp.MustCompile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"), fmt.Sprintf("must be a valid UUID, unique within this list. Here is one you could use: %s.\nExpect uuid", uuid.New())),
 					},
 				},
 				"label": rs.StringAttribute{
@@ -115,43 +123,57 @@ func GetStepTemplateParameterSchema() rs.ListNestedAttribute {
 
 func GetStepTemplatePackageSchema() rs.ListNestedAttribute {
 	return rs.ListNestedAttribute{
-		Required: true,
+		Description: "Package information for the step template",
+		Required:    true,
 		NestedObject: rs.NestedAttributeObject{
 			Attributes: map[string]rs.Attribute{
 				"acquisition_location": rs.StringAttribute{
-					Default:  stringdefault.StaticString("Server"),
-					Optional: true,
-					Computed: true,
+					Description: "Acquisition location for the package.",
+					Default:     stringdefault.StaticString("Server"),
+					Optional:    true,
+					Computed:    true,
 				},
 				"feed_id": rs.StringAttribute{
-					Required: true,
+					Description: "ID of the feed.",
+					Required:    true,
 				},
 				"id":   GetIdResourceSchema(),
 				"name": GetNameResourceSchema(true),
 				"package_id": rs.StringAttribute{
-					Optional: true,
-					Required: false,
-					Computed: true,
+					Description: "The ID of the package to use.",
+					Optional:    true,
+					Required:    false,
+					Computed:    true,
 				},
 				"properties": rs.SingleNestedAttribute{
-					Required: true,
+					Description: "Properties for the package.",
+					Required:    true,
 					Attributes: map[string]rs.Attribute{
 						"extract": rs.StringAttribute{
-							Default:  stringdefault.StaticString("True"),
-							Optional: true,
-							Computed: true,
+							Description: "If the package should extract.",
+							Default:     stringdefault.StaticString("True"),
+							Optional:    true,
+							Computed:    true,
+							Validators: []validator.String{
+								stringvalidator.RegexMatches(regexp.MustCompile("^(True|Fasle)$"), "Extract must be True or False"),
+							},
 						},
 						"package_parameter_name": rs.StringAttribute{
-							Required: true,
+							Description: "The name of the package parameter",
+							Default:     stringdefault.StaticString(""),
+							Optional:    true,
+							Computed:    true,
 						},
 						"purpose": rs.StringAttribute{
-							Default:  stringdefault.StaticString(""),
-							Optional: true,
-							Required: false,
-							Computed: true,
+							Description: "The purpose of this property.",
+							Default:     stringdefault.StaticString(""),
+							Optional:    true,
+							Required:    false,
+							Computed:    true,
 						},
 						"selection_mode": rs.StringAttribute{
-							Required: true,
+							Description: "The selection mode.",
+							Required:    true,
 						},
 					},
 				},

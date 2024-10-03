@@ -49,80 +49,16 @@ func (r *stepTemplateTypeResource) Create(ctx context.Context, req resource.Crea
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	pkgs := make([]schemas.StepTemplatePackageType, 0, len(data.Packages.Elements()))
-	resp.Diagnostics.Append(data.Packages.ElementsAs(ctx, &pkgs, false)...)
+
+	newActionTemplate, dg := mapSchemaDataToActionTemplate(ctx, data)
+	resp.Diagnostics.Append(dg...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	props := make(map[string]types.String, len(data.Properties.Elements()))
-	resp.Diagnostics.Append(data.Properties.ElementsAs(ctx, &props, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	params := make([]schemas.StepTemplateParameterType, 0, len(data.Parameters.Elements()))
-	resp.Diagnostics.Append(data.Parameters.ElementsAs(ctx, &params, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	newActionTemplate := actiontemplates.NewActionTemplate(data.Name.ValueString(), data.ActionType.ValueString())
 	newActionTemplate.SpaceID = data.SpaceID.ValueString()
 	newActionTemplate.Description = data.Description.ValueString()
 	if !data.CommunityActionTemplateId.IsNull() {
 		newActionTemplate.CommunityActionTemplateID = data.CommunityActionTemplateId.ValueString()
-	}
-
-	if len(props) > 0 {
-		templateProps := make(map[string]core.PropertyValue, len(props))
-		for key, val := range props {
-			templateProps[key] = core.NewPropertyValue(val.ValueString(), false)
-		}
-		newActionTemplate.Properties = templateProps
-	} else {
-		newActionTemplate.Properties = make(map[string]core.PropertyValue)
-	}
-
-	newActionTemplate.Packages = make([]packages.PackageReference, len(pkgs))
-	if len(pkgs) > 0 {
-		for i, val := range pkgs {
-			pkgProps := make(map[string]string, len(val.Properties.Attributes()))
-			for key, prop := range val.Properties.Attributes() {
-				if prop.Type(ctx) == types.StringType {
-					pkgProps[key] = prop.(types.String).ValueString()
-				} else {
-					// We should not get this error unless we add a field to package properties in the schema that is not a string
-					resp.Diagnostics.AddError("Unexpected value type in package properties.",
-						fmt.Sprintf("Expected [%s] to have value of string but got [%s].", key, prop.String()))
-				}
-			}
-			if resp.Diagnostics.HasError() {
-				return
-			}
-			pkgRef := packages.PackageReference{
-				AcquisitionLocation: val.AcquisitionLocation.ValueString(),
-				FeedID:              val.FeedID.ValueString(),
-				Properties:          pkgProps,
-				Name:                val.Name.ValueString(),
-				PackageID:           val.PackageID.ValueString(),
-			}
-			newActionTemplate.Packages[i] = pkgRef
-		}
-	}
-
-	newActionTemplate.Parameters = make([]actiontemplates.ActionTemplateParameter, len(params))
-	if len(params) > 0 {
-		for i, val := range params {
-			defaultValue := core.NewPropertyValue(val.DefaultValue.ValueString(), false)
-			newActionTemplate.Parameters[i] = actiontemplates.ActionTemplateParameter{
-				DefaultValue:    &defaultValue,
-				Name:            val.Name.ValueString(),
-				Label:           val.Label.ValueString(),
-				HelpText:        val.HelpText.ValueString(),
-				DisplaySettings: util.ConvertAttrStringMapToStringMap(val.DisplaySettings.Elements()),
-			}
-		}
 	}
 
 	actionTemplate, err := actiontemplates.Add(r.Config.Client, newActionTemplate)
@@ -163,92 +99,20 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	pkgs := make([]schemas.StepTemplatePackageType, 0, len(data.Packages.Elements()))
-	resp.Diagnostics.Append(data.Packages.ElementsAs(ctx, &pkgs, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	props := make(map[string]types.String, len(data.Properties.Elements()))
-	resp.Diagnostics.Append(data.Properties.ElementsAs(ctx, &props, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	params := make([]schemas.StepTemplateParameterType, 0, len(data.Parameters.Elements()))
-	resp.Diagnostics.Append(data.Parameters.ElementsAs(ctx, &params, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	at, err := actiontemplates.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load step template", err.Error())
 		return
 	}
 
-	actionTemplateUpdate := actiontemplates.NewActionTemplate(data.Name.ValueString(), data.ActionType.ValueString())
+	actionTemplateUpdate, dg := mapSchemaDataToActionTemplate(ctx, data)
+	resp.Diagnostics.Append(dg...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	actionTemplateUpdate.ID = at.ID
 	actionTemplateUpdate.SpaceID = at.SpaceID
 	actionTemplateUpdate.Version = at.Version
-
-	actionTemplateUpdate.Description = data.Description.ValueString()
-	if !data.CommunityActionTemplateId.IsNull() {
-		actionTemplateUpdate.CommunityActionTemplateID = data.CommunityActionTemplateId.ValueString()
-	}
-
-	if len(props) > 0 {
-		templateProps := make(map[string]core.PropertyValue, len(props))
-		for key, val := range props {
-			templateProps[key] = core.NewPropertyValue(val.ValueString(), false)
-		}
-		actionTemplateUpdate.Properties = templateProps
-	} else {
-		actionTemplateUpdate.Properties = make(map[string]core.PropertyValue)
-	}
-
-	actionTemplateUpdate.Packages = make([]packages.PackageReference, len(pkgs))
-	if len(pkgs) > 0 {
-		for i, val := range pkgs {
-			pkgProps := make(map[string]string, len(val.Properties.Attributes()))
-			for key, prop := range val.Properties.Attributes() {
-				if prop.Type(ctx) == types.StringType {
-					pkgProps[key] = prop.(types.String).ValueString()
-				} else {
-					// We should not get this error unless we add a field to package properties in the schema that is not a string
-					resp.Diagnostics.AddError("Unexpected value type in package properties.",
-						fmt.Sprintf("Expected [%s] to have value of string but got [%s].", key, prop.String()))
-				}
-			}
-			if resp.Diagnostics.HasError() {
-				return
-			}
-			pkgRef := packages.PackageReference{
-				AcquisitionLocation: val.AcquisitionLocation.ValueString(),
-				FeedID:              val.FeedID.ValueString(),
-				Properties:          pkgProps,
-				Name:                val.Name.ValueString(),
-				PackageID:           val.PackageID.ValueString(),
-			}
-			pkgRef.ID = val.ID.ValueString()
-			actionTemplateUpdate.Packages[i] = pkgRef
-		}
-	}
-
-	actionTemplateUpdate.Parameters = make([]actiontemplates.ActionTemplateParameter, len(params))
-	if len(params) > 0 {
-		for i, val := range params {
-			defaultValue := core.NewPropertyValue(val.DefaultValue.ValueString(), false)
-			actionTemplateUpdate.Parameters[i] = actiontemplates.ActionTemplateParameter{
-				DefaultValue:    &defaultValue,
-				Name:            val.Name.ValueString(),
-				Label:           val.Label.ValueString(),
-				HelpText:        val.HelpText.ValueString(),
-				DisplaySettings: util.ConvertAttrStringMapToStringMap(val.DisplaySettings.Elements()),
-			}
-			actionTemplateUpdate.Parameters[i].ID = val.ID.ValueString()
-		}
-	}
 
 	updatedActionTemplate, err := actiontemplates.Update(r.Config.Client, actionTemplateUpdate)
 	if err != nil {
@@ -317,6 +181,98 @@ func updateStepTemplate(data *schemas.StepTemplateTypeResourceModel, at *actiont
 	data.Packages = pkgs
 
 	return resp
+}
+
+func mapSchemaDataToActionTemplate(ctx context.Context, data schemas.StepTemplateTypeResourceModel) (*actiontemplates.ActionTemplate, diag.Diagnostics) {
+	resp := diag.Diagnostics{}
+	at := actiontemplates.NewActionTemplate(data.Name.ValueString(), data.ActionType.ValueString())
+
+	at.Description = data.Description.ValueString()
+	if !data.CommunityActionTemplateId.IsNull() {
+		at.CommunityActionTemplateID = data.CommunityActionTemplateId.ValueString()
+	}
+
+	pkgs := make([]schemas.StepTemplatePackageType, 0, len(data.Packages.Elements()))
+	resp.Append(data.Packages.ElementsAs(ctx, &pkgs, false)...)
+	if resp.HasError() {
+		return at, resp
+	}
+
+	props := make(map[string]types.String, len(data.Properties.Elements()))
+	resp.Append(data.Properties.ElementsAs(ctx, &props, false)...)
+	if resp.HasError() {
+		return at, resp
+	}
+
+	params := make([]schemas.StepTemplateParameterType, 0, len(data.Parameters.Elements()))
+	resp.Append(data.Parameters.ElementsAs(ctx, &params, false)...)
+	if resp.HasError() {
+		return at, resp
+	}
+
+	if len(props) > 0 {
+		templateProps := make(map[string]core.PropertyValue, len(props))
+		for key, val := range props {
+			templateProps[key] = core.NewPropertyValue(val.ValueString(), false)
+		}
+		at.Properties = templateProps
+	} else {
+		at.Properties = make(map[string]core.PropertyValue)
+	}
+
+	at.Packages = make([]packages.PackageReference, len(pkgs))
+	if len(pkgs) > 0 {
+		for i, val := range pkgs {
+			pkgProps := make(map[string]string, len(val.Properties.Attributes()))
+			for key, prop := range val.Properties.Attributes() {
+				if prop.Type(ctx) == types.StringType {
+					pkgProps[key] = prop.(types.String).ValueString()
+				} else {
+					// We should not get this error unless we add a field to package properties in the schema that is not a string
+					resp.AddError("Unexpected value type in package properties.",
+						fmt.Sprintf("Expected [%s] to have value of string but got [%s].", key, prop.String()))
+				}
+			}
+			if resp.HasError() {
+				return at, resp
+			}
+			pkgRef := packages.PackageReference{
+				AcquisitionLocation: val.AcquisitionLocation.ValueString(),
+				FeedID:              val.FeedID.ValueString(),
+				Properties:          pkgProps,
+				Name:                val.Name.ValueString(),
+				PackageID:           val.PackageID.ValueString(),
+			}
+			pkgRef.ID = val.ID.ValueString()
+			at.Packages[i] = pkgRef
+		}
+	}
+
+	at.Parameters = make([]actiontemplates.ActionTemplateParameter, len(params))
+	if len(params) > 0 {
+		paramIDMap := make(map[string]bool, len(params))
+		for i, val := range params {
+			defaultValue := core.NewPropertyValue(val.DefaultValue.ValueString(), false)
+			at.Parameters[i] = actiontemplates.ActionTemplateParameter{
+				DefaultValue:    &defaultValue,
+				Name:            val.Name.ValueString(),
+				Label:           val.Label.ValueString(),
+				HelpText:        val.HelpText.ValueString(),
+				DisplaySettings: util.ConvertAttrStringMapToStringMap(val.DisplaySettings.Elements()),
+			}
+			id := val.ID.ValueString()
+			if _, ok := paramIDMap[id]; ok {
+				resp.AddError("ID conflict", fmt.Sprintf("conflicting UUID's within parameters list: %s", id))
+			}
+			paramIDMap[val.ID.ValueString()] = true
+			at.Parameters[i].ID = id
+			at.Parameters[i].ID = val.ID.ValueString()
+		}
+	}
+	if resp.HasError() {
+		return at, resp
+	}
+	return at, resp
 }
 
 func convertStepTemplateToPackageAttributes(atPackage []packages.PackageReference) (types.List, diag.Diagnostics) {
