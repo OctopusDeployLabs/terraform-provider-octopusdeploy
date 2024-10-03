@@ -17,15 +17,73 @@ import (
 )
 
 const (
-	StepTemplateResourceDescription = "step_template"
+	StepTemplateResourceDescription   = "step_template"
+	StepTemplateDatasourceDescription = "step_template"
 )
+
+type StepTemplateTypeDataSourceModel struct {
+	ID           types.String `tfsdk:"id"`
+	SpaceID      types.String `tfsdk:"space_id"`
+	StepTemplate types.Object `tfsdk:"step_template"`
+}
+
+type StepTemplateTypeResourceModel struct {
+	ActionType                types.String `tfsdk:"action_type"`
+	SpaceID                   types.String `tfsdk:"space_id"`
+	CommunityActionTemplateId types.String `tfsdk:"community_action_template_id"`
+	Name                      types.String `tfsdk:"name"`
+	Description               types.String `tfsdk:"description"`
+	Packages                  types.List   `tfsdk:"packages"`
+	Parameters                types.List   `tfsdk:"parameters"`
+	Properties                types.Map    `tfsdk:"properties"`
+	StepPackageId             types.String `tfsdk:"step_package_id"`
+	Version                   types.Int32  `tfsdk:"version"`
+
+	ResourceModel
+}
+
+type StepTemplatePackageType struct {
+	ID                  types.String `tfsdk:"id"`
+	AcquisitionLocation types.String `tfsdk:"acquisition_location"`
+	Name                types.String `tfsdk:"name"`
+	FeedID              types.String `tfsdk:"feed_id"`
+	PackageID           types.String `tfsdk:"package_id"`
+	Properties          types.Object `tfsdk:"properties"`
+}
+
+type StepTemplateParameterType struct {
+	ID              types.String `tfsdk:"id"`
+	Name            types.String `tfsdk:"name"`
+	Label           types.String `tfsdk:"label"`
+	HelpText        types.String `tfsdk:"help_text"`
+	DisplaySettings types.Map    `tfsdk:"display_settings"`
+	DefaultValue    types.String `tfsdk:"default_value"`
+}
 
 type StepTemplateSchema struct{}
 
 var _ EntitySchema = StepTemplateSchema{}
 
 func (s StepTemplateSchema) GetDatasourceSchema() ds.Schema {
-	return ds.Schema{}
+	return ds.Schema{
+		Description: util.GetDataSourceDescription(StepTemplateDatasourceDescription),
+		Attributes: map[string]ds.Attribute{
+			"id": ds.StringAttribute{
+				Description: "Unique identifier of the step template",
+				Required:    true,
+			},
+			"space_id": ds.StringAttribute{
+				Description: "SpaceID of the Step Template",
+				Optional:    true,
+				Computed:    true,
+			},
+			"step_template": ds.ObjectAttribute{
+				Computed:       true,
+				Optional:       false,
+				AttributeTypes: GetStepTemplateAttributes(),
+			},
+		},
+	}
 }
 
 func (s StepTemplateSchema) GetResourceSchema() rs.Schema {
@@ -34,8 +92,8 @@ func (s StepTemplateSchema) GetResourceSchema() rs.Schema {
 		Attributes: map[string]rs.Attribute{
 			"id":          GetIdResourceSchema(),
 			"name":        GetNameResourceSchema(true),
-			"description": GetDescriptionResourceSchema(EnvironmentResourceDescription),
-			"space_id":    GetSpaceIdResourceSchema(EnvironmentResourceDescription),
+			"description": GetDescriptionResourceSchema(StepTemplateResourceDescription),
+			"space_id":    GetSpaceIdResourceSchema(StepTemplateResourceDescription),
 			"version": rs.Int32Attribute{
 				Description: "The version of the step template",
 				Optional:    false,
@@ -55,18 +113,18 @@ func (s StepTemplateSchema) GetResourceSchema() rs.Schema {
 				Computed:    true,
 				Default:     stringdefault.StaticString(""),
 			},
-			"packages": GetStepTemplatePackageSchema(),
+			"packages":   GetStepTemplatePackageResourceSchema(),
+			"parameters": GetStepTemplateParameterResourceSchema(),
 			"properties": rs.MapAttribute{
 				Description: "Properties for the step template",
 				Required:    true,
 				ElementType: types.StringType,
 			},
-			"parameters": GetStepTemplateParameterSchema(),
 		},
 	}
 }
 
-func GetStepTemplateParameterSchema() rs.ListNestedAttribute {
+func GetStepTemplateParameterResourceSchema() rs.ListNestedAttribute {
 	return rs.ListNestedAttribute{
 		Description: "List of parameters that can be used in Step Template.",
 		Required:    true,
@@ -121,7 +179,7 @@ func GetStepTemplateParameterSchema() rs.ListNestedAttribute {
 	}
 }
 
-func GetStepTemplatePackageSchema() rs.ListNestedAttribute {
+func GetStepTemplatePackageResourceSchema() rs.ListNestedAttribute {
 	return rs.ListNestedAttribute{
 		Description: "Package information for the step template",
 		Required:    true,
@@ -182,28 +240,20 @@ func GetStepTemplatePackageSchema() rs.ListNestedAttribute {
 	}
 }
 
-type StepTemplateTypeResourceModel struct {
-	ActionType                types.String `tfsdk:"action_type"`
-	SpaceID                   types.String `tfsdk:"space_id"`
-	CommunityActionTemplateId types.String `tfsdk:"community_action_template_id"`
-	Name                      types.String `tfsdk:"name"`
-	Description               types.String `tfsdk:"description"`
-	Packages                  types.List   `tfsdk:"packages"`
-	Parameters                types.List   `tfsdk:"parameters"`
-	Properties                types.Map    `tfsdk:"properties"`
-	StepPackageId             types.String `tfsdk:"step_package_id"`
-	Version                   types.Int32  `tfsdk:"version"`
-
-	ResourceModel
-}
-
-type StepTemplatePackageType struct {
-	ID                  types.String `tfsdk:"id"`
-	AcquisitionLocation types.String `tfsdk:"acquisition_location"`
-	Name                types.String `tfsdk:"name"`
-	FeedID              types.String `tfsdk:"feed_id"`
-	PackageID           types.String `tfsdk:"package_id"`
-	Properties          types.Object `tfsdk:"properties"`
+func GetStepTemplateAttributes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"id":                           types.StringType,
+		"name":                         types.StringType,
+		"description":                  types.StringType,
+		"space_id":                     types.StringType,
+		"version":                      types.Int32Type,
+		"step_package_id":              types.StringType,
+		"action_type":                  types.StringType,
+		"community_action_template_id": types.StringType,
+		"packages":                     types.ListType{ElemType: types.ObjectType{AttrTypes: GetStepTemplatePackageTypeAttributes()}},
+		"parameters":                   types.ListType{ElemType: types.ObjectType{AttrTypes: GetStepTemplateParameterTypeAttributes()}},
+		"properties":                   types.MapType{ElemType: types.StringType},
+	}
 }
 
 func GetStepTemplatePackageTypeAttributes() map[string]attr.Type {
@@ -224,15 +274,6 @@ func GetStepTemplatePackagePropertiesTypeAttributes() map[string]attr.Type {
 		"purpose":                types.StringType,
 		"selection_mode":         types.StringType,
 	}
-}
-
-type StepTemplateParameterType struct {
-	ID              types.String `tfsdk:"id"`
-	Name            types.String `tfsdk:"name"`
-	Label           types.String `tfsdk:"label"`
-	HelpText        types.String `tfsdk:"help_text"`
-	DisplaySettings types.Map    `tfsdk:"display_settings"`
-	DefaultValue    types.String `tfsdk:"default_value"`
 }
 
 func GetStepTemplateParameterTypeAttributes() map[string]attr.Type {

@@ -27,11 +27,11 @@ func NewStepTemplateResource() resource.Resource {
 	return &stepTemplateTypeResource{}
 }
 
-func (r *stepTemplateTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *stepTemplateTypeResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("step_template")
 }
 
-func (r *stepTemplateTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *stepTemplateTypeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schemas.StepTemplateSchema{}.GetResourceSchema()
 }
 
@@ -50,15 +50,10 @@ func (r *stepTemplateTypeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	newActionTemplate, dg := mapSchemaDataToActionTemplate(ctx, data)
+	newActionTemplate, dg := mapStepTemplateResourceModelToActionTemplate(ctx, data)
 	resp.Diagnostics.Append(dg...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-	newActionTemplate.SpaceID = data.SpaceID.ValueString()
-	newActionTemplate.Description = data.Description.ValueString()
-	if !data.CommunityActionTemplateId.IsNull() {
-		newActionTemplate.CommunityActionTemplateID = data.CommunityActionTemplateId.ValueString()
 	}
 
 	actionTemplate, err := actiontemplates.Add(r.Config.Client, newActionTemplate)
@@ -67,7 +62,7 @@ func (r *stepTemplateTypeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	resp.Diagnostics.Append(updateStepTemplate(&data, actionTemplate)...)
+	resp.Diagnostics.Append(mapStepTemplateToResourceModel(&data, actionTemplate)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -86,7 +81,7 @@ func (r *stepTemplateTypeResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	resp.Diagnostics.Append(updateStepTemplate(&data, actionTemplate)...)
+	resp.Diagnostics.Append(mapStepTemplateToResourceModel(&data, actionTemplate)...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -105,7 +100,7 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	actionTemplateUpdate, dg := mapSchemaDataToActionTemplate(ctx, data)
+	actionTemplateUpdate, dg := mapStepTemplateResourceModelToActionTemplate(ctx, data)
 	resp.Diagnostics.Append(dg...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -120,7 +115,7 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	resp.Diagnostics.Append(updateStepTemplate(&data, updatedActionTemplate)...)
+	resp.Diagnostics.Append(mapStepTemplateToResourceModel(&data, updatedActionTemplate)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -141,7 +136,7 @@ func (r *stepTemplateTypeResource) Delete(ctx context.Context, req resource.Dele
 	}
 }
 
-func updateStepTemplate(data *schemas.StepTemplateTypeResourceModel, at *actiontemplates.ActionTemplate) diag.Diagnostics {
+func mapStepTemplateToResourceModel(data *schemas.StepTemplateTypeResourceModel, at *actiontemplates.ActionTemplate) diag.Diagnostics {
 	resp := diag.Diagnostics{}
 
 	data.ID = types.StringValue(at.ID)
@@ -155,9 +150,6 @@ func updateStepTemplate(data *schemas.StepTemplateTypeResourceModel, at *actiont
 	// Parameters
 	sParams, dg := convertStepTemplateToParameterAttributes(at.Parameters)
 	resp.Append(dg...)
-	if resp.HasError() {
-		return resp
-	}
 	data.Parameters = sParams
 
 	// Properties
@@ -167,26 +159,21 @@ func updateStepTemplate(data *schemas.StepTemplateTypeResourceModel, at *actiont
 	}
 	props, dg := types.MapValue(types.StringType, stringProps)
 	resp.Append(dg...)
-	if resp.HasError() {
-		return resp
-	}
 	data.Properties = props
 
 	// Packages
 	pkgs, dg := convertStepTemplateToPackageAttributes(at.Packages)
 	resp.Append(dg...)
-	if resp.HasError() {
-		return resp
-	}
 	data.Packages = pkgs
 
 	return resp
 }
 
-func mapSchemaDataToActionTemplate(ctx context.Context, data schemas.StepTemplateTypeResourceModel) (*actiontemplates.ActionTemplate, diag.Diagnostics) {
+func mapStepTemplateResourceModelToActionTemplate(ctx context.Context, data schemas.StepTemplateTypeResourceModel) (*actiontemplates.ActionTemplate, diag.Diagnostics) {
 	resp := diag.Diagnostics{}
 	at := actiontemplates.NewActionTemplate(data.Name.ValueString(), data.ActionType.ValueString())
 
+	at.SpaceID = data.SpaceID.ValueString()
 	at.Description = data.Description.ValueString()
 	if !data.CommunityActionTemplateId.IsNull() {
 		at.CommunityActionTemplateID = data.CommunityActionTemplateId.ValueString()
