@@ -145,7 +145,8 @@ func (v VariableSchema) GetResourceSchema() resourceSchema.Schema {
 			SchemaAttributeNames.Description: GetDescriptionResourceSchema(VariableResourceDescription),
 			SchemaAttributeNames.SpaceID:     GetSpaceIdResourceSchema(VariableResourceDescription),
 			VariableSchemaAttributeNames.OwnerID: resourceSchema.StringAttribute{
-				Optional: true,
+				Description: "Owner ID for the variable(e.g., project ID or library variable set ID)",
+				Optional:    true,
 				Validators: []validator.String{
 					stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName(VariableSchemaAttributeNames.ProjectID)),
 				},
