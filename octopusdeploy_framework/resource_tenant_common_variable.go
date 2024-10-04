@@ -252,7 +252,7 @@ func checkIfCommonVariableIsSensitive(tenantVariables *variables.TenantVariables
 }
 
 func checkIfCandidateVariableRequiredForTenant(tenant *tenants.Tenant, tenantVariables *variables.TenantVariables, plan tenantCommonVariableResourceModel) error {
-	if tenant.ProjectEnvironments == nil || len(tenant.ProjectEnvironments) == 0 {
+	if len(tenant.ProjectEnvironments) == 0 {
 		return fmt.Errorf("tenant not connected to any projects")
 	}
 
