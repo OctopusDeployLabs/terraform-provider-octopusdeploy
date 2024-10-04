@@ -72,6 +72,12 @@ func (t *tenantCommonVariableResource) Create(ctx context.Context, req resource.
 		return
 	}
 
+	err = checkIfCandidateVariableRequiredForTenant(tenant, tenantVariables, plan)
+	if err != nil {
+		resp.Diagnostics.AddError("Tenant doesn't need a value for this Common Variable", "Tenants must be connected to a Project with an included Library Variable Set that defines Common Variable templates, before common variable values can be provided ("+err.Error()+")")
+		return
+	}
+
 	isSensitive, err := checkIfCommonVariableIsSensitive(tenantVariables, plan)
 	if err != nil {
 		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
@@ -243,6 +249,24 @@ func checkIfCommonVariableIsSensitive(tenantVariables *variables.TenantVariables
 		}
 	}
 	return false, fmt.Errorf("unable to find template for tenant variable")
+}
+
+func checkIfCandidateVariableRequiredForTenant(tenant *tenants.Tenant, tenantVariables *variables.TenantVariables, plan tenantCommonVariableResourceModel) error {
+	if len(tenant.ProjectEnvironments) == 0 {
+		return fmt.Errorf("tenant not connected to any projects")
+	}
+
+	if libraryVariable, ok := tenantVariables.LibraryVariables[plan.LibraryVariableSetID.ValueString()]; ok {
+		for _, template := range libraryVariable.Templates {
+			if template.GetID() == plan.TemplateID.ValueString() {
+				return nil
+			}
+		}
+	} else {
+		return fmt.Errorf("tenant not connected to a project that includes variable set %s", plan.LibraryVariableSetID)
+	}
+
+	return fmt.Errorf("common template %s not found in variable set %s", plan.TemplateID, plan.LibraryVariableSetID)
 }
 
 func updateTenantCommonVariable(tenantVariables *variables.TenantVariables, plan tenantCommonVariableResourceModel, isSensitive bool) error {
