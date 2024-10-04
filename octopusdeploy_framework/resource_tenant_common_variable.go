@@ -263,10 +263,10 @@ func checkIfCandidateVariableRequiredForTenant(tenant *tenants.Tenant, tenantVar
 			}
 		}
 	} else {
-		return fmt.Errorf("tenant not connected to a project that includes variable set " + plan.LibraryVariableSetID.ValueString())
+		return fmt.Errorf("tenant not connected to a project that includes variable set %s", plan.LibraryVariableSetID)
 	}
 
-	return fmt.Errorf("common template " + plan.TemplateID.ValueString() + " not found in variable set " + plan.LibraryVariableSetID.ValueString())
+	return fmt.Errorf("common template %s not found in variable set %s", plan.TemplateID, plan.LibraryVariableSetID)
 }
 
 func updateTenantCommonVariable(tenantVariables *variables.TenantVariables, plan tenantCommonVariableResourceModel, isSensitive bool) error {
