@@ -68,7 +68,7 @@ func (u *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	mappedUsers := []schemas.UserTypeResourceModel{}
 	tflog.Debug(ctx, fmt.Sprintf("users returned from API: %#v", existingUsers))
 	for _, user := range existingUsers.Items {
-		mappedUsers = append(mappedUsers, schemas.MapFromUser(ctx, user))
+		mappedUsers = append(mappedUsers, schemas.MapFromUser(user))
 	}
 
 	util.DatasourceResultCount(ctx, "users", len(mappedUsers))

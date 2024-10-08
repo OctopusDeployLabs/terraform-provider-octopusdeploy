@@ -1,7 +1,6 @@
 package schemas
 
 import (
-	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -19,14 +18,15 @@ var _ EntitySchema = UserSchema{}
 
 func UserObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
-		"id":            types.StringType,
-		"username":      types.StringType,
-		"password":      types.StringType,
-		"display_name":  types.StringType,
-		"email_address": types.StringType,
-		"is_active":     types.BoolType,
-		"is_requestor":  types.BoolType,
-		"is_service":    types.BoolType,
+		"id":                     types.StringType,
+		"username":               types.StringType,
+		"password":               types.StringType,
+		"can_password_be_edited": types.BoolType,
+		"display_name":           types.StringType,
+		"email_address":          types.StringType,
+		"is_active":              types.BoolType,
+		"is_requestor":           types.BoolType,
+		"is_service":             types.BoolType,
 		"identity": types.SetType{
 			ElemType: types.ObjectType{AttrTypes: IdentityObjectType()},
 		},
@@ -75,9 +75,11 @@ func (u UserSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.
 				Attributes: map[string]datasourceSchema.Attribute{
 					"provider": datasourceSchema.StringAttribute{
 						Description: "The identity provider.",
+						Computed:    true,
 					},
 					"claim": datasourceSchema.SetNestedAttribute{
 						Description: "The claim. // todo what is this",
+						Computed:    true,
 						NestedObject: datasourceSchema.NestedAttributeObject{
 							Attributes: map[string]datasourceSchema.Attribute{
 								"name":                 GetNameDatasourceSchema(true),
@@ -102,7 +104,7 @@ func GetFilterDatasourceSchema() datasourceSchema.Attribute {
 func IdentityObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"provider": types.StringType,
-		"claim":    types.SetType{ElemType: types.ObjectType{AttrTypes: IdentityObjectType()}},
+		"claim":    types.SetType{ElemType: types.ObjectType{AttrTypes: IdentityClaimObjectType()}},
 	}
 }
 
@@ -143,29 +145,32 @@ func MapIdentities(identities []users.Identity) []attr.Value {
 	return identitiesList
 }
 
-func MapFromUser(ctx context.Context, u *users.User) UserTypeResourceModel {
+func MapFromUser(u *users.User) UserTypeResourceModel {
 	var user UserTypeResourceModel
 	user.ID = types.StringValue(u.ID)
 	user.Username = types.StringValue(u.Username)
-	user.Password = types.StringValue(u.Password)
+	//user.Password = types.StringValue(u.Password)
+	user.CanPasswordBeEdited = types.BoolValue(u.CanPasswordBeEdited)
 	user.DisplayName = types.StringValue(u.DisplayName)
 	user.EmailAddress = types.StringValue(u.EmailAddress)
 	user.IsActive = types.BoolValue(u.IsActive)
 	user.IsRequestor = types.BoolValue(u.IsRequestor)
 	user.IsService = types.BoolValue(u.IsService)
 	user.Identity = types.SetValueMust(types.ObjectType{AttrTypes: IdentityObjectType()}, MapIdentities(u.Identities))
+
+	return user
 }
 
 type UserTypeResourceModel struct {
-	ID           types.String `tfsdk:"id"`
-	Username     types.String `tfsdk:"username"`
-	Password     types.String `tfsdk:"password"`
-	DisplayName  types.String `tfsdk:"display_name"`
-	EmailAddress types.String `tfsdk:"email_address"`
-	IsActive     types.Bool   `tfsdk:"is_active"`
-	IsRequestor  types.Bool   `tfsdk:"is_requestor"`
-	IsService    types.Bool   `tfsdk:"is_service"`
-	Identity     types.Set    `tfsdk:"identity"`
+	Username            types.String `tfsdk:"username"`
+	Password            types.String `tfsdk:"password"`
+	CanPasswordBeEdited types.Bool   `tfsdk:"can_password_be_edited"`
+	DisplayName         types.String `tfsdk:"display_name"`
+	EmailAddress        types.String `tfsdk:"email_address"`
+	IsActive            types.Bool   `tfsdk:"is_active"`
+	IsRequestor         types.Bool   `tfsdk:"is_requestor"`
+	IsService           types.Bool   `tfsdk:"is_service"`
+	Identity            types.Set    `tfsdk:"identity"`
 
 	ResourceModel
 }
