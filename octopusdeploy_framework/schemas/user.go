@@ -20,7 +20,6 @@ func UserObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"id":                     types.StringType,
 		"username":               types.StringType,
-		"password":               types.StringType,
 		"can_password_be_edited": types.BoolType,
 		"display_name":           types.StringType,
 		"email_address":          types.StringType,
@@ -61,7 +60,6 @@ func (u UserSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.
 	return map[string]datasourceSchema.Attribute{
 		"id":                     GetIdDatasourceSchema(true),
 		"username":               GetUsernameDatasourceSchema(true),
-		"password":               GetPasswordDatasourceSchema(false),
 		"can_password_be_edited": GetBooleanDatasourceAttribute("Specifies whether or not the password can be edited.", true),
 		"display_name":           GetDisplayNameDatasourceSchema(true),
 		"email_address":          GetEmailAddressDatasourceSchema(false),
@@ -149,7 +147,6 @@ func MapFromUser(u *users.User) UserTypeResourceModel {
 	var user UserTypeResourceModel
 	user.ID = types.StringValue(u.ID)
 	user.Username = types.StringValue(u.Username)
-	//user.Password = types.StringValue(u.Password)
 	user.CanPasswordBeEdited = types.BoolValue(u.CanPasswordBeEdited)
 	user.DisplayName = types.StringValue(u.DisplayName)
 	user.EmailAddress = types.StringValue(u.EmailAddress)
@@ -163,7 +160,6 @@ func MapFromUser(u *users.User) UserTypeResourceModel {
 
 type UserTypeResourceModel struct {
 	Username            types.String `tfsdk:"username"`
-	Password            types.String `tfsdk:"password"`
 	CanPasswordBeEdited types.Bool   `tfsdk:"can_password_be_edited"`
 	DisplayName         types.String `tfsdk:"display_name"`
 	EmailAddress        types.String `tfsdk:"email_address"`

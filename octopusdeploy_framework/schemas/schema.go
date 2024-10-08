@@ -129,25 +129,6 @@ func GetReadonlyDescriptionDatasourceSchema(resourceDescription string) datasour
 func GetUsernameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
 	s := datasourceSchema.StringAttribute{
 		Description: "The username associated with this resource.",
-		//Sensitive:   true,
-		Validators: []validator.String{
-			stringvalidator.LengthAtLeast(1),
-		},
-	}
-
-	if isRequired {
-		s.Required = true
-	} else {
-		s.Optional = true
-	}
-
-	return s
-}
-
-func GetPasswordDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
-	s := datasourceSchema.StringAttribute{
-		Description: "The password associated with this resource.",
-		//Sensitive:   true,
 		Validators: []validator.String{
 			stringvalidator.LengthAtLeast(1),
 		},
