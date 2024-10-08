@@ -28,9 +28,8 @@ func Provider() *schema.Provider {
 			"octopusdeploy_polling_tentacle_deployment_targets":             dataSourcePollingTentacleDeploymentTargets(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
 			"octopusdeploy_teams":                                           dataSourceTeams(),
-			//"octopusdeploy_users":                                           dataSourceUsers(),
-			"octopusdeploy_user_roles":   dataSourceUserRoles(),
-			"octopusdeploy_worker_pools": dataSourceWorkerPools(),
+			"octopusdeploy_user_roles":                                      dataSourceUserRoles(),
+			"octopusdeploy_worker_pools":                                    dataSourceWorkerPools(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_aws_account":                                    resourceAmazonWebServicesAccount(),
