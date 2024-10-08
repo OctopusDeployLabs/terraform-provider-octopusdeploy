@@ -2,9 +2,11 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -61,8 +63,8 @@ func (u UserSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.
 		"id":                     GetIdDatasourceSchema(true),
 		"username":               GetUsernameDatasourceSchema(true),
 		"can_password_be_edited": GetBooleanDatasourceAttribute("Specifies whether or not the password can be edited.", true),
-		"display_name":           GetDisplayNameDatasourceSchema(true),
-		"email_address":          GetEmailAddressDatasourceSchema(false),
+		"display_name":           GetDisplayNameDatasourceSchema(),
+		"email_address":          GetEmailAddressDatasourceSchema(),
 		"is_active":              GetBooleanDatasourceAttribute("Specifies whether or not the user is active.", true),
 		"is_requestor":           GetBooleanDatasourceAttribute("Specifies whether or not the user is the requestor.", true),
 		"is_service":             GetBooleanDatasourceAttribute("Specifies whether or not the user is a service account.", true),
@@ -76,7 +78,7 @@ func (u UserSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.
 						Computed:    true,
 					},
 					"claim": datasourceSchema.SetNestedAttribute{
-						Description: "The claim. // todo what is this",
+						Description: "The claim associated with the identity.",
 						Computed:    true,
 						NestedObject: datasourceSchema.NestedAttributeObject{
 							Attributes: map[string]datasourceSchema.Attribute{
@@ -97,6 +99,30 @@ func GetFilterDatasourceSchema() datasourceSchema.Attribute {
 		Description: "A filter search by username, display name or email",
 		Optional:    true,
 	}
+}
+
+func GetDisplayNameDatasourceSchema() datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The display name of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+		Required: true,
+	}
+
+	return s
+}
+
+func GetEmailAddressDatasourceSchema() datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The email address of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+		Optional: true,
+	}
+
+	return s
 }
 
 func IdentityObjectType() map[string]attr.Type {

@@ -143,40 +143,6 @@ func GetUsernameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
 	return s
 }
 
-func GetDisplayNameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
-	s := datasourceSchema.StringAttribute{
-		Description: "The display name of this resource.",
-		Validators: []validator.String{
-			stringvalidator.LengthAtLeast(1),
-		},
-	}
-
-	if isRequired {
-		s.Required = true
-	} else {
-		s.Optional = true
-	}
-
-	return s
-}
-
-func GetEmailAddressDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
-	s := datasourceSchema.StringAttribute{
-		Description: "The email address of this resource.",
-		Validators: []validator.String{
-			stringvalidator.LengthAtLeast(1),
-		},
-	}
-
-	if isRequired {
-		s.Required = true
-	} else {
-		s.Optional = true
-	}
-
-	return s
-}
-
 func GetValueDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
 	s := datasourceSchema.StringAttribute{
 		Description: "The value of this resource.",
