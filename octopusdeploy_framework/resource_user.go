@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -63,13 +64,48 @@ func (r *userTypeResource) Create(ctx context.Context, req resource.CreateReques
 }
 
 func (r *userTypeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	//TODO implement me
-	panic("implement me")
+	var data schemas.UserTypeResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	user, err := users.GetByID(r.Config.Client, data.ID.ValueString())
+	if err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "user"); err != nil {
+			resp.Diagnostics.AddError("unable to load user", err.Error())
+		}
+		return
+	}
+
+	updateUser(&data, user)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *userTypeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//TODO implement me
-	panic("implement me")
+	var data, state schemas.UserTypeResourceModel
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	user, err := users.GetByID(r.Config.Client, data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("unable to load user", err.Error())
+		return
+	}
+
+	updatedUser := users.NewUser(data.Username.ValueString(), data.DisplayName.ValueString())
+	updatedUser.ID = user.ID
+	updatedUser.Password = data.Password.ValueString()
+	updatedUser.CanPasswordBeEdited = data.CanPasswordBeEdited.ValueBool()
+	updatedUser.EmailAddress = data.EmailAddress.ValueString()
+	updatedUser.IsActive = data.IsActive.ValueBool()
+	updatedUser.IsRequestor = data.IsRequestor.ValueBool()
+	updatedUser.IsService = data.IsService.ValueBool()
+
 }
 
 func (r *userTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
