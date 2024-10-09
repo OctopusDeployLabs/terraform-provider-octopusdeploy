@@ -149,7 +149,67 @@ func IdentityClaimObjectType() map[string]attr.Type {
 }
 
 func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
-	return resourceSchema.Schema{}
+	return resourceSchema.Schema{
+		Description: "A user //todo",
+		Attributes: map[string]resourceSchema.Attribute{
+			"id":                     GetIdResourceSchema(),
+			"username":               GetUsernameResourceSchema(true),
+			"password":               GetPasswordResourceSchema(false),
+			"display_name":           GetDisplayNameResourceSchema(),
+			"can_password_be_edited": GetBooleanResourceAttribute("Specifies whether or not the password can be edited.", false, true),
+			"email_address":          GetEmailAddressResourceSchema(),
+			"is_active":              GetBooleanResourceAttribute("Specifies whether or not the user is active.", true, true),
+			"is_requestor":           GetBooleanResourceAttribute("Specifies whether or not the user is the requestor.", false, true),
+			"is_service":             GetBooleanResourceAttribute("Specifies whether or not the user is a service account.", false, true),
+			"identity": resourceSchema.SetNestedAttribute{
+				Description: "The identities associated with the user.",
+				Optional:    true,
+				NestedObject: resourceSchema.NestedAttributeObject{
+					Attributes: map[string]resourceSchema.Attribute{
+						"provider": resourceSchema.StringAttribute{
+							Description: "The identity provider.",
+							Computed:    true,
+						},
+						"claim": resourceSchema.SetNestedAttribute{
+							Description: "The claim associated with the identity.",
+							Computed:    true,
+							NestedObject: resourceSchema.NestedAttributeObject{
+								Attributes: map[string]resourceSchema.Attribute{
+									"name":                 GetNameResourceSchema(true),
+									"is_identifying_claim": GetBooleanResourceAttribute("Specifies whether or not the claim is an identifying claim.", false, true),
+									"value":                GetValueResourceSchema(true),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func GetDisplayNameResourceSchema() resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The display name of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+		Required: true,
+	}
+
+	return s
+}
+
+func GetEmailAddressResourceSchema() datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The email address of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+		Optional: true,
+	}
+
+	return s
 }
 
 func MapIdentityClaims(claims map[string]users.IdentityClaim) []attr.Value {
@@ -192,6 +252,22 @@ func MapToUserDatasourceModel(u *users.User) UserTypeDatasourceModel {
 	return user
 }
 
+func MapToUserResourceModel(u *users.User) UserTypeResourceModel {
+	var user UserTypeResourceModel
+	user.ID = types.StringValue(u.ID)
+	user.Username = types.StringValue(u.Username)
+	user.Password = types.StringValue(u.Password)
+	user.CanPasswordBeEdited = types.BoolValue(u.CanPasswordBeEdited)
+	user.DisplayName = types.StringValue(u.DisplayName)
+	user.EmailAddress = types.StringValue(u.EmailAddress)
+	user.IsActive = types.BoolValue(u.IsActive)
+	user.IsRequestor = types.BoolValue(u.IsRequestor)
+	user.IsService = types.BoolValue(u.IsService)
+	user.Identity = types.SetValueMust(types.ObjectType{AttrTypes: IdentityObjectType()}, MapIdentities(u.Identities))
+
+	return user
+}
+
 type UserTypeDatasourceModel struct {
 	Username            types.String `tfsdk:"username"`
 	CanPasswordBeEdited types.Bool   `tfsdk:"can_password_be_edited"`
@@ -206,7 +282,7 @@ type UserTypeDatasourceModel struct {
 }
 
 type UserTypeResourceModel struct {
-	Password string `tfsdk:"password"`
+	Password types.String `tfsdk:"password"`
 
 	UserTypeDatasourceModel
 }

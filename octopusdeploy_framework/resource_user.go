@@ -42,6 +42,7 @@ func (r *userTypeResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	newUser := users.NewUser(data.Username.ValueString(), data.DisplayName.ValueString())
+	newUser.Password = data.Password.ValueString()
 	newUser.CanPasswordBeEdited = data.CanPasswordBeEdited.ValueBool()
 	newUser.EmailAddress = data.EmailAddress.ValueString()
 	newUser.IsActive = data.IsActive.ValueBool()
@@ -57,6 +58,8 @@ func (r *userTypeResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	updateUser(&data, user)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *userTypeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -74,16 +77,17 @@ func (r *userTypeResource) Delete(ctx context.Context, req resource.DeleteReques
 	panic("implement me")
 }
 
-func updateUser(ctx context.Context, data *schemas.UserTypeResourceModel, user *users.User) {
+func updateUser(data *schemas.UserTypeResourceModel, user *users.User) {
 	data.ID = types.StringValue(user.ID)
 	data.Username = types.StringValue(user.Username)
+	data.Password = types.StringValue(user.Password)
 	data.CanPasswordBeEdited = types.BoolValue(user.CanPasswordBeEdited)
 	data.DisplayName = types.StringValue(user.DisplayName)
 	data.EmailAddress = types.StringValue(user.EmailAddress)
 	data.IsActive = types.BoolValue(user.IsActive)
 	data.IsRequestor = types.BoolValue(user.IsRequestor)
 	data.IsService = types.BoolValue(user.IsService)
-	data.Identity, _ = types.SetValueFrom(ctx, types.ObjectType{AttrTypes: schemas.IdentityObjectType()}, schemas.MapIdentities(user.Identities))
+	data.Identity = types.SetValueMust(types.ObjectType{AttrTypes: schemas.IdentityObjectType()}, schemas.MapIdentities(user.Identities))
 }
 
 func mapIdentities(identities types.Set) []users.Identity {
