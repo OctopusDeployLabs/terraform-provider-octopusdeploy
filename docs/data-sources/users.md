@@ -25,48 +25,56 @@ data "octopusdeploy_users" "example" {
 
 ### Optional
 
-- `filter` (String) A filter with which to search.
+- `filter` (String) A filter search by username, display name or email
 - `ids` (List of String) A filter to search by a list of IDs.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) A Space ID to filter by. Will revert what is specified on the provider if not set.
+- `space_id` (String, Deprecated) The space ID associated with this user.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only
 
-- `id` (String) An auto-generated identifier that includes the timestamp when this data source was last modified.
-- `users` (List of Object) A list of users that match the filter(s). (see [below for nested schema](#nestedatt--users))
+- `id` (String) The unique ID for this resource.
+- `users` (Attributes List) (see [below for nested schema](#nestedatt--users))
 
 <a id="nestedatt--users"></a>
 ### Nested Schema for `users`
 
+Required:
+
+- `display_name` (String) The display name of this resource.
+- `username` (String) The username associated with this resource.
+
+Optional:
+
+- `can_password_be_edited` (Boolean) Specifies whether or not the password can be edited.
+- `email_address` (String) The email address of this resource.
+- `identity` (Attributes Set) The identities associated with the user. (see [below for nested schema](#nestedatt--users--identity))
+- `is_active` (Boolean) Specifies whether or not the user is active.
+- `is_requestor` (Boolean) Specifies whether or not the user is the requestor.
+- `is_service` (Boolean) Specifies whether or not the user is a service account.
+
 Read-Only:
 
-- `can_password_be_edited` (Boolean)
-- `display_name` (String)
-- `email_address` (String)
-- `id` (String)
-- `identity` (Set of Object) (see [below for nested schema](#nestedobjatt--users--identity))
-- `is_active` (Boolean)
-- `is_requestor` (Boolean)
-- `is_service` (Boolean)
-- `password` (String)
-- `username` (String)
+- `id` (String) The unique ID for this resource.
 
-<a id="nestedobjatt--users--identity"></a>
+<a id="nestedatt--users--identity"></a>
 ### Nested Schema for `users.identity`
 
 Read-Only:
 
-- `claim` (Set of Object) (see [below for nested schema](#nestedobjatt--users--identity--claim))
-- `provider` (String)
+- `claim` (Attributes Set) The claim associated with the identity. (see [below for nested schema](#nestedatt--users--identity--claim))
+- `provider` (String) The identity provider.
 
-<a id="nestedobjatt--users--identity--claim"></a>
+<a id="nestedatt--users--identity--claim"></a>
 ### Nested Schema for `users.identity.claim`
 
-Read-Only:
+Required:
 
-- `is_identifying_claim` (Boolean)
-- `name` (String)
-- `value` (String)
+- `name` (String) The name of this resource.
+- `value` (String) The value of this resource.
+
+Optional:
+
+- `is_identifying_claim` (Boolean) Specifies whether or not the claim is an identifying claim.
 
 

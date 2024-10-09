@@ -1,29 +1,28 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataSourceUsers(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	name := fmt.Sprintf("data.octopusdeploy_users.%s", localName)
 	username := "d"
-
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceUsersConfig(localName, username),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUsersDataSourceID(name),
 					resource.TestCheckResourceAttrSet(name, "users.#"),
-				)},
+				),
+				Config: testAccDataSourceUsersConfig(localName, username),
+			},
 		},
 	})
 }

@@ -126,6 +126,40 @@ func GetReadonlyDescriptionDatasourceSchema(resourceDescription string) datasour
 	}
 }
 
+func GetUsernameDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The username associated with this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
+func GetValueDatasourceSchema(isRequired bool) datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The value of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
 func GetIdResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Description: "The unique ID for this resource.",
