@@ -105,12 +105,31 @@ func (r *userTypeResource) Update(ctx context.Context, req resource.UpdateReques
 	updatedUser.IsActive = data.IsActive.ValueBool()
 	updatedUser.IsRequestor = data.IsRequestor.ValueBool()
 	updatedUser.IsService = data.IsService.ValueBool()
+	if len(data.Identity.Elements()) > 0 {
+		updatedUser.Identities = mapIdentities(data.Identity)
+	}
 
+	updatedUser, err = users.Update(r.Config.Client, updatedUser)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to update user", err.Error())
+		return
+	}
+
+	updateUser(&data, updatedUser)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *userTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	//TODO implement me
-	panic("implement me")
+	var data schemas.UserTypeResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if err := users.DeleteByID(r.Config.Client, data.ID.ValueString()); err != nil {
+		resp.Diagnostics.AddError("unable to delete user", err.Error())
+		return
+	}
 }
 
 func updateUser(data *schemas.UserTypeResourceModel, user *users.User) {
