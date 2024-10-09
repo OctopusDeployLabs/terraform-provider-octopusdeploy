@@ -28,7 +28,7 @@ data "octopusdeploy_users" "example" {
 - `filter` (String) A filter search by username, display name or email
 - `ids` (List of String) A filter to search by a list of IDs.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
-- `space_id` (String) The space ID associated with this user.
+- `space_id` (String, Deprecated) The space ID associated with this user.
 - `take` (Number) A filter to specify the number of items to take (or return) in the response.
 
 ### Read-Only

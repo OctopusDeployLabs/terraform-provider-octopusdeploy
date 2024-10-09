@@ -40,7 +40,7 @@ func (u UserSchema) GetDatasourceSchema() datasourceSchema.Schema {
 		Attributes: map[string]datasourceSchema.Attribute{
 			//request
 			"ids":      GetQueryIDsDatasourceSchema(),
-			"space_id": GetSpaceIdDatasourceSchema(UserResourceDescription, false),
+			"space_id": GetUserSpaceIdDatasourceSchema(),
 			"filter":   GetFilterDatasourceSchema(),
 			"skip":     GetQuerySkipDatasourceSchema(),
 			"take":     GetQueryTakeDatasourceSchema(),
@@ -91,6 +91,14 @@ func (u UserSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.
 				},
 			},
 		},
+	}
+}
+
+func GetUserSpaceIdDatasourceSchema() datasourceSchema.Attribute {
+	return datasourceSchema.StringAttribute{
+		Description:        "The space ID associated with this user.",
+		Optional:           true,
+		DeprecationMessage: "This attribute is deprecated and will be removed in a future release. Users are not scoped to spaces, meaning providing a space ID will not affect the result.",
 	}
 }
 
