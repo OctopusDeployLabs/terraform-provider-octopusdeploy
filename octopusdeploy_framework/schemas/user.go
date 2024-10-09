@@ -177,8 +177,8 @@ func MapIdentities(identities []users.Identity) []attr.Value {
 	return identitiesList
 }
 
-func MapFromUser(u *users.User) UserTypeResourceModel {
-	var user UserTypeResourceModel
+func MapToUserDatasourceModel(u *users.User) UserTypeDatasourceModel {
+	var user UserTypeDatasourceModel
 	user.ID = types.StringValue(u.ID)
 	user.Username = types.StringValue(u.Username)
 	user.CanPasswordBeEdited = types.BoolValue(u.CanPasswordBeEdited)
@@ -192,7 +192,7 @@ func MapFromUser(u *users.User) UserTypeResourceModel {
 	return user
 }
 
-type UserTypeResourceModel struct {
+type UserTypeDatasourceModel struct {
 	Username            types.String `tfsdk:"username"`
 	CanPasswordBeEdited types.Bool   `tfsdk:"can_password_be_edited"`
 	DisplayName         types.String `tfsdk:"display_name"`
@@ -203,4 +203,10 @@ type UserTypeResourceModel struct {
 	Identity            types.Set    `tfsdk:"identity"`
 
 	ResourceModel
+}
+
+type UserTypeResourceModel struct {
+	Password string `tfsdk:"password"`
+
+	UserTypeDatasourceModel
 }
