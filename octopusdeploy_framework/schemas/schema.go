@@ -359,6 +359,13 @@ func GetBooleanResourceAttribute(description string, defaultValue bool, isOption
 	}
 }
 
+func GetComputedBooleanResourceAttribute(description string) resourceSchema.Attribute {
+	return resourceSchema.BoolAttribute{
+		Description: description,
+		Computed:    true,
+	}
+}
+
 func GetRequiredStringResourceSchema(description string) resourceSchema.StringAttribute {
 	return resourceSchema.StringAttribute{
 		Required:    true,

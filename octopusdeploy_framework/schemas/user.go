@@ -159,18 +159,15 @@ func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(UserResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":           GetIdResourceSchema(),
-			"username":     GetUsernameResourceSchema(true),
-			"password":     GetPasswordResourceSchema(false),
-			"display_name": GetDisplayNameResourceSchema(),
-			"can_password_be_edited": resourceSchema.BoolAttribute{ // todo
-				Description: "Specifies whether or not the password can be edited.",
-				Computed:    true,
-			},
-			"email_address": GetEmailAddressResourceSchema(),
-			"is_active":     GetBooleanResourceAttribute("Specifies whether or not the user is active.", true, true),
-			"is_requestor":  GetBooleanResourceAttribute("Specifies whether or not the user is the requestor.", false, true),
-			"is_service":    GetBooleanResourceAttribute("Specifies whether or not the user is a service account.", false, true),
+			"id":                     GetIdResourceSchema(),
+			"username":               GetUsernameResourceSchema(true),
+			"password":               GetPasswordResourceSchema(false),
+			"display_name":           GetDisplayNameResourceSchema(),
+			"can_password_be_edited": GetComputedBooleanResourceAttribute("Specifies whether or not the password can be edited."),
+			"email_address":          GetEmailAddressResourceSchema(),
+			"is_active":              GetBooleanResourceAttribute("Specifies whether or not the user is active.", true, true),
+			"is_requestor":           GetComputedBooleanResourceAttribute("Specifies whether or not the user is the requestor."),
+			"is_service":             GetBooleanResourceAttribute("Specifies whether or not the user is a service account.", false, true),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			"identity": resourceSchema.SetNestedBlock{
@@ -186,7 +183,7 @@ func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
 								Attributes: map[string]resourceSchema.Attribute{
 									"name":                 GetNameResourceSchema(true),
 									"is_identifying_claim": GetBooleanResourceAttribute("Specifies whether or not the claim is an identifying claim.", false, true),
-									"value":                GetValueResourceSchema(true),
+									"value":                GetValueResourceSchema(false),
 								},
 							},
 						},

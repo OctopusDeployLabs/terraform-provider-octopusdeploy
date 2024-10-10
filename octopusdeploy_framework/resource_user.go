@@ -44,7 +44,6 @@ func (r *userTypeResource) Create(ctx context.Context, req resource.CreateReques
 
 	newUser := users.NewUser(data.Username.ValueString(), data.DisplayName.ValueString())
 	newUser.Password = data.Password.ValueString()
-	newUser.CanPasswordBeEdited = data.CanPasswordBeEdited.ValueBool()
 	newUser.EmailAddress = data.EmailAddress.ValueString()
 	newUser.IsActive = data.IsActive.ValueBool()
 	newUser.IsRequestor = data.IsRequestor.ValueBool()
@@ -100,7 +99,6 @@ func (r *userTypeResource) Update(ctx context.Context, req resource.UpdateReques
 	updatedUser := users.NewUser(data.Username.ValueString(), data.DisplayName.ValueString())
 	updatedUser.ID = user.ID
 	updatedUser.Password = data.Password.ValueString()
-	updatedUser.CanPasswordBeEdited = data.CanPasswordBeEdited.ValueBool()
 	updatedUser.EmailAddress = data.EmailAddress.ValueString()
 	updatedUser.IsActive = data.IsActive.ValueBool()
 	updatedUser.IsRequestor = data.IsRequestor.ValueBool()
@@ -137,9 +135,11 @@ func updateUser(data *schemas.UserTypeResourceModel, user *users.User) {
 	data.Username = types.StringValue(user.Username)
 	data.CanPasswordBeEdited = types.BoolValue(user.CanPasswordBeEdited)
 	data.DisplayName = types.StringValue(user.DisplayName)
-	data.EmailAddress = types.StringValue(user.EmailAddress)
-	data.IsActive = types.BoolValue(user.IsActive)
+	if !data.EmailAddress.IsNull() {
+		data.EmailAddress = types.StringValue(user.EmailAddress)
+	}
 	data.IsRequestor = types.BoolValue(user.IsRequestor)
+	data.IsActive = types.BoolValue(user.IsActive)
 	data.IsService = types.BoolValue(user.IsService)
 	data.Identity = types.SetValueMust(types.ObjectType{AttrTypes: schemas.IdentityObjectType()}, schemas.MapIdentities(user.Identities))
 }
@@ -172,7 +172,6 @@ func mapIdentityClaims(identityClaims types.Set) map[string]users.IdentityClaim 
 
 		identityClaim := users.IdentityClaim{}
 		var name string
-		// TODO: Handle error if name isn't found?
 		if v, ok := identityClaimAttrs["name"].(types.String); ok && !v.IsNull() {
 			name = v.ValueString()
 		}
