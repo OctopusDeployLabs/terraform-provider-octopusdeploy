@@ -17,7 +17,7 @@ type userTypeResource struct {
 	*Config
 }
 
-func NewUserResource() resource.Resource { return &environmentTypeResource{} }
+func NewUserResource() resource.Resource { return &userTypeResource{} }
 
 func (r *userTypeResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("user")
@@ -156,15 +156,16 @@ func mapIdentities(identities types.Set) []users.Identity {
 			identity.IdentityProviderName = v.ValueString()
 		}
 
-		if v, ok := identityAttrs["claim"].(types.List); ok && !v.IsNull() {
+		if v, ok := identityAttrs["claim"].(types.Set); ok && !v.IsNull() {
 			identity.Claims = mapIdentityClaims(v)
 		}
+		result = append(result, identity)
 	}
 
 	return result
 }
 
-func mapIdentityClaims(identityClaims types.List) map[string]users.IdentityClaim {
+func mapIdentityClaims(identityClaims types.Set) map[string]users.IdentityClaim {
 	result := map[string]users.IdentityClaim{}
 	for _, identityClaimElem := range identityClaims.Elements() {
 		identityClaimObj := identityClaimElem.(types.Object)

@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -73,10 +74,7 @@ func (u UserSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.
 			Optional:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
-					"provider": datasourceSchema.StringAttribute{
-						Description: "The identity provider.",
-						Computed:    true,
-					},
+					"provider": GetProviderDatasourceSchema(),
 					"claim": datasourceSchema.SetNestedAttribute{
 						Description: "The claim associated with the identity.",
 						Computed:    true,
@@ -133,6 +131,15 @@ func GetEmailAddressDatasourceSchema() datasourceSchema.Attribute {
 	return s
 }
 
+func GetProviderDatasourceSchema() datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The identity provider.",
+		Computed:    true,
+	}
+
+	return s
+}
+
 func IdentityObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"provider": types.StringType,
@@ -150,30 +157,32 @@ func IdentityClaimObjectType() map[string]attr.Type {
 
 func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "A user //todo",
+		Description: util.GetResourceSchemaDescription(UserResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":                     GetIdResourceSchema(),
-			"username":               GetUsernameResourceSchema(true),
-			"password":               GetPasswordResourceSchema(false),
-			"display_name":           GetDisplayNameResourceSchema(),
-			"can_password_be_edited": GetBooleanResourceAttribute("Specifies whether or not the password can be edited.", false, true),
-			"email_address":          GetEmailAddressResourceSchema(),
-			"is_active":              GetBooleanResourceAttribute("Specifies whether or not the user is active.", true, true),
-			"is_requestor":           GetBooleanResourceAttribute("Specifies whether or not the user is the requestor.", false, true),
-			"is_service":             GetBooleanResourceAttribute("Specifies whether or not the user is a service account.", false, true),
-			"identity": resourceSchema.SetNestedAttribute{
+			"id":           GetIdResourceSchema(),
+			"username":     GetUsernameResourceSchema(true),
+			"password":     GetPasswordResourceSchema(false),
+			"display_name": GetDisplayNameResourceSchema(),
+			"can_password_be_edited": resourceSchema.BoolAttribute{ // todo
+				Description: "Specifies whether or not the password can be edited.",
+				Computed:    true,
+			},
+			"email_address": GetEmailAddressResourceSchema(),
+			"is_active":     GetBooleanResourceAttribute("Specifies whether or not the user is active.", true, true),
+			"is_requestor":  GetBooleanResourceAttribute("Specifies whether or not the user is the requestor.", false, true),
+			"is_service":    GetBooleanResourceAttribute("Specifies whether or not the user is a service account.", false, true),
+		},
+		Blocks: map[string]resourceSchema.Block{
+			"identity": resourceSchema.SetNestedBlock{
 				Description: "The identities associated with the user.",
-				Optional:    true,
-				NestedObject: resourceSchema.NestedAttributeObject{
+				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"provider": resourceSchema.StringAttribute{
-							Description: "The identity provider.",
-							Computed:    true,
-						},
-						"claim": resourceSchema.SetNestedAttribute{
+						"provider": GetProviderResourceSchema(),
+					},
+					Blocks: map[string]resourceSchema.Block{
+						"claim": resourceSchema.SetNestedBlock{
 							Description: "The claim associated with the identity.",
-							Computed:    true,
-							NestedObject: resourceSchema.NestedAttributeObject{
+							NestedObject: resourceSchema.NestedBlockObject{
 								Attributes: map[string]resourceSchema.Attribute{
 									"name":                 GetNameResourceSchema(true),
 									"is_identifying_claim": GetBooleanResourceAttribute("Specifies whether or not the claim is an identifying claim.", false, true),
@@ -212,6 +221,18 @@ func GetEmailAddressResourceSchema() datasourceSchema.Attribute {
 	return s
 }
 
+func GetProviderResourceSchema() resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The identity provider.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+		Required: true,
+	}
+
+	return s
+}
+
 func MapIdentityClaims(claims map[string]users.IdentityClaim) []attr.Value {
 	claimsList := make([]attr.Value, 0, len(claims))
 	for key, claim := range claims {
@@ -241,22 +262,6 @@ func MapToUserDatasourceModel(u *users.User) UserTypeDatasourceModel {
 	var user UserTypeDatasourceModel
 	user.ID = types.StringValue(u.ID)
 	user.Username = types.StringValue(u.Username)
-	user.CanPasswordBeEdited = types.BoolValue(u.CanPasswordBeEdited)
-	user.DisplayName = types.StringValue(u.DisplayName)
-	user.EmailAddress = types.StringValue(u.EmailAddress)
-	user.IsActive = types.BoolValue(u.IsActive)
-	user.IsRequestor = types.BoolValue(u.IsRequestor)
-	user.IsService = types.BoolValue(u.IsService)
-	user.Identity = types.SetValueMust(types.ObjectType{AttrTypes: IdentityObjectType()}, MapIdentities(u.Identities))
-
-	return user
-}
-
-func MapToUserResourceModel(u *users.User) UserTypeResourceModel {
-	var user UserTypeResourceModel
-	user.ID = types.StringValue(u.ID)
-	user.Username = types.StringValue(u.Username)
-	user.Password = types.StringValue(u.Password)
 	user.CanPasswordBeEdited = types.BoolValue(u.CanPasswordBeEdited)
 	user.DisplayName = types.StringValue(u.DisplayName)
 	user.EmailAddress = types.StringValue(u.EmailAddress)
