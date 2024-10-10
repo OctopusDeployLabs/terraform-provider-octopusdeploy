@@ -135,7 +135,6 @@ func (r *userTypeResource) Delete(ctx context.Context, req resource.DeleteReques
 func updateUser(data *schemas.UserTypeResourceModel, user *users.User) {
 	data.ID = types.StringValue(user.ID)
 	data.Username = types.StringValue(user.Username)
-	data.Password = types.StringValue(user.Password)
 	data.CanPasswordBeEdited = types.BoolValue(user.CanPasswordBeEdited)
 	data.DisplayName = types.StringValue(user.DisplayName)
 	data.EmailAddress = types.StringValue(user.EmailAddress)
