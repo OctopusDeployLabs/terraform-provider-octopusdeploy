@@ -165,7 +165,7 @@ func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
 			"display_name":           GetDisplayNameResourceSchema(),
 			"can_password_be_edited": GetReadonlyBooleanResourceAttribute("Specifies whether or not the password can be edited."),
 			"email_address":          GetEmailAddressResourceSchema(),
-			"is_active":              GetOptionalBooleanResourceAttribute("Specifies whether or not the user is active.", true),
+			"is_active":              GetReadonlyBooleanResourceAttribute("Specifies whether or not the user is active."),
 			"is_requestor":           GetReadonlyBooleanResourceAttribute("Specifies whether or not the user is the requestor."),
 			"is_service":             GetOptionalBooleanResourceAttribute("Specifies whether or not the user is a service account.", false),
 		},
