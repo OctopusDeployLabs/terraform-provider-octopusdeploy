@@ -89,7 +89,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
   }
 }
 
-# create a String variable to a library variable set
+# create a String variable for a library variable set
 resource "octopusdeploy_variable" "string_variable" {
   owner_id  = "LibraryVariableSets-123"
   type      = "String"
