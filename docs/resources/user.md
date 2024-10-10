@@ -62,13 +62,10 @@ resource "octopusdeploy_user" "example" {
 <a id="nestedblock--identity"></a>
 ### Nested Schema for `identity`
 
-Required:
-
-- `provider` (String) The identity provider.
-
 Optional:
 
 - `claim` (Block Set) The claim associated with the identity. (see [below for nested schema](#nestedblock--identity--claim))
+- `provider` (String) The identity provider.
 
 <a id="nestedblock--identity--claim"></a>
 ### Nested Schema for `identity.claim`
@@ -76,11 +73,11 @@ Optional:
 Required:
 
 - `name` (String) The name of this resource.
+- `value` (String) The value of this resource.
 
-Optional:
+Read-Only:
 
 - `is_identifying_claim` (Boolean) Specifies whether or not the claim is an identifying claim.
-- `value` (String) The value of this resource.
 
 ## Import
 

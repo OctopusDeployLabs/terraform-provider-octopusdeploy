@@ -182,8 +182,8 @@ func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
 							NestedObject: resourceSchema.NestedBlockObject{
 								Attributes: map[string]resourceSchema.Attribute{
 									"name":                 GetNameResourceSchema(true),
-									"is_identifying_claim": GetBooleanResourceAttribute("Specifies whether or not the claim is an identifying claim.", false, true),
-									"value":                GetValueResourceSchema(false),
+									"is_identifying_claim": GetBooleanResourceAttribute("Specifies whether or not the claim is an identifying claim.", false, false),
+									"value":                GetValueResourceSchema(true),
 								},
 							},
 						},
@@ -224,7 +224,7 @@ func GetProviderResourceSchema() resourceSchema.Attribute {
 		Validators: []validator.String{
 			stringvalidator.LengthAtLeast(1),
 		},
-		Required: true,
+		Optional: true,
 	}
 
 	return s
