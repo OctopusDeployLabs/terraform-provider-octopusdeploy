@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -73,10 +74,7 @@ func (u UserSchema) GetDatasourceSchemaAttributes() map[string]datasourceSchema.
 			Optional:    true,
 			NestedObject: datasourceSchema.NestedAttributeObject{
 				Attributes: map[string]datasourceSchema.Attribute{
-					"provider": datasourceSchema.StringAttribute{
-						Description: "The identity provider.",
-						Computed:    true,
-					},
+					"provider": GetProviderDatasourceSchema(),
 					"claim": datasourceSchema.SetNestedAttribute{
 						Description: "The claim associated with the identity.",
 						Computed:    true,
@@ -133,6 +131,15 @@ func GetEmailAddressDatasourceSchema() datasourceSchema.Attribute {
 	return s
 }
 
+func GetProviderDatasourceSchema() datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The identity provider.",
+		Computed:    true,
+	}
+
+	return s
+}
+
 func IdentityObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"provider": types.StringType,
@@ -149,7 +156,78 @@ func IdentityClaimObjectType() map[string]attr.Type {
 }
 
 func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
-	return resourceSchema.Schema{}
+	return resourceSchema.Schema{
+		Description: util.GetResourceSchemaDescription(UserResourceDescription),
+		Attributes: map[string]resourceSchema.Attribute{
+			"id":                     GetIdResourceSchema(),
+			"username":               GetUsernameResourceSchema(true),
+			"password":               GetPasswordResourceSchema(false),
+			"display_name":           GetDisplayNameResourceSchema(),
+			"can_password_be_edited": GetReadonlyBooleanResourceAttribute("Specifies whether or not the password can be edited."),
+			"email_address":          GetEmailAddressResourceSchema(),
+			"is_active":              GetOptionalBooleanResourceAttribute("Specifies whether or not the user is active.", true),
+			"is_requestor":           GetReadonlyBooleanResourceAttribute("Specifies whether or not the user is the requestor."),
+			"is_service":             GetOptionalBooleanResourceAttribute("Specifies whether or not the user is a service account.", false),
+		},
+		Blocks: map[string]resourceSchema.Block{
+			"identity": resourceSchema.SetNestedBlock{
+				Description: "The identities associated with the user.",
+				NestedObject: resourceSchema.NestedBlockObject{
+					Attributes: map[string]resourceSchema.Attribute{
+						"provider": GetProviderResourceSchema(),
+					},
+					Blocks: map[string]resourceSchema.Block{
+						"claim": resourceSchema.SetNestedBlock{
+							Description: "The claim associated with the identity.",
+							NestedObject: resourceSchema.NestedBlockObject{
+								Attributes: map[string]resourceSchema.Attribute{
+									"name":                 GetNameResourceSchema(true),
+									"is_identifying_claim": GetRequiredBooleanResourceAttribute("Specifies whether or not the claim is an identifying claim."),
+									"value":                GetValueResourceSchema(true),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func GetDisplayNameResourceSchema() resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The display name of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+		Required: true,
+	}
+
+	return s
+}
+
+func GetEmailAddressResourceSchema() datasourceSchema.Attribute {
+	s := datasourceSchema.StringAttribute{
+		Description: "The email address of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+		Optional: true,
+	}
+
+	return s
+}
+
+func GetProviderResourceSchema() resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The identity provider.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+		Optional: true,
+	}
+
+	return s
 }
 
 func MapIdentityClaims(claims map[string]users.IdentityClaim) []attr.Value {
@@ -177,8 +255,8 @@ func MapIdentities(identities []users.Identity) []attr.Value {
 	return identitiesList
 }
 
-func MapFromUser(u *users.User) UserTypeResourceModel {
-	var user UserTypeResourceModel
+func MapToUserDatasourceModel(u *users.User) UserTypeDatasourceModel {
+	var user UserTypeDatasourceModel
 	user.ID = types.StringValue(u.ID)
 	user.Username = types.StringValue(u.Username)
 	user.CanPasswordBeEdited = types.BoolValue(u.CanPasswordBeEdited)
@@ -192,7 +270,7 @@ func MapFromUser(u *users.User) UserTypeResourceModel {
 	return user
 }
 
-type UserTypeResourceModel struct {
+type UserTypeDatasourceModel struct {
 	Username            types.String `tfsdk:"username"`
 	CanPasswordBeEdited types.Bool   `tfsdk:"can_password_be_edited"`
 	DisplayName         types.String `tfsdk:"display_name"`
@@ -203,4 +281,10 @@ type UserTypeResourceModel struct {
 	Identity            types.Set    `tfsdk:"identity"`
 
 	ResourceModel
+}
+
+type UserTypeResourceModel struct {
+	Password types.String `tfsdk:"password"`
+
+	UserTypeDatasourceModel
 }

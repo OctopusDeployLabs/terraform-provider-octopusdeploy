@@ -48,33 +48,33 @@ resource "octopusdeploy_user" "example" {
 ### Optional
 
 - `email_address` (String) The email address of this resource.
-- `id` (String) The unique ID for this resource.
-- `identity` (Block Set) (see [below for nested schema](#nestedblock--identity))
-- `is_active` (Boolean)
-- `is_service` (Boolean)
+- `identity` (Block Set) The identities associated with the user. (see [below for nested schema](#nestedblock--identity))
+- `is_active` (Boolean) Specifies whether or not the user is active.
+- `is_service` (Boolean) Specifies whether or not the user is a service account.
 - `password` (String, Sensitive) The password associated with this resource.
 
 ### Read-Only
 
-- `can_password_be_edited` (Boolean)
-- `is_requestor` (Boolean)
+- `can_password_be_edited` (Boolean) Specifies whether or not the password can be edited.
+- `id` (String) The unique ID for this resource.
+- `is_requestor` (Boolean) Specifies whether or not the user is the requestor.
 
 <a id="nestedblock--identity"></a>
 ### Nested Schema for `identity`
 
 Optional:
 
-- `claim` (Block Set) (see [below for nested schema](#nestedblock--identity--claim))
-- `provider` (String)
+- `claim` (Block Set) The claim associated with the identity. (see [below for nested schema](#nestedblock--identity--claim))
+- `provider` (String) The identity provider.
 
 <a id="nestedblock--identity--claim"></a>
 ### Nested Schema for `identity.claim`
 
 Required:
 
-- `is_identifying_claim` (Boolean)
+- `is_identifying_claim` (Boolean) Specifies whether or not the claim is an identifying claim.
 - `name` (String) The name of this resource.
-- `value` (String)
+- `value` (String) The value of this resource.
 
 ## Import
 
