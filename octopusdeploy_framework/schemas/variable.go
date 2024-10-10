@@ -157,14 +157,8 @@ func (v VariableSchema) GetResourceSchema() resourceSchema.Schema {
 					stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName(VariableSchemaAttributeNames.OwnerID)),
 				},
 			},
-			VariableSchemaAttributeNames.IsEditable: GetBooleanResourceAttribute(
-				"Indicates whether or not this variable is considered editable.",
-				true,
-				true),
-			VariableSchemaAttributeNames.IsSensitive: GetBooleanResourceAttribute(
-				"Indicates whether or not this resource is considered sensitive and should be kept secret.",
-				false,
-				true),
+			VariableSchemaAttributeNames.IsEditable:  GetOptionalBooleanResourceAttribute("Indicates whether or not this variable is considered editable.", true),
+			VariableSchemaAttributeNames.IsSensitive: GetOptionalBooleanResourceAttribute("Indicates whether or not this resource is considered sensitive and should be kept secret.", false),
 			VariableSchemaAttributeNames.SensitiveValue: resourceSchema.StringAttribute{
 				Optional:  true,
 				Sensitive: true,

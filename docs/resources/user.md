@@ -72,12 +72,9 @@ Optional:
 
 Required:
 
+- `is_identifying_claim` (Boolean) Specifies whether or not the claim is an identifying claim.
 - `name` (String) The name of this resource.
 - `value` (String) The value of this resource.
-
-Read-Only:
-
-- `is_identifying_claim` (Boolean) Specifies whether or not the claim is an identifying claim.
 
 ## Import
 

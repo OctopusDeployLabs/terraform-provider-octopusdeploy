@@ -163,11 +163,11 @@ func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
 			"username":               GetUsernameResourceSchema(true),
 			"password":               GetPasswordResourceSchema(false),
 			"display_name":           GetDisplayNameResourceSchema(),
-			"can_password_be_edited": GetComputedBooleanResourceAttribute("Specifies whether or not the password can be edited."),
+			"can_password_be_edited": GetReadonlyBooleanResourceAttribute("Specifies whether or not the password can be edited."),
 			"email_address":          GetEmailAddressResourceSchema(),
-			"is_active":              GetBooleanResourceAttribute("Specifies whether or not the user is active.", true, true),
-			"is_requestor":           GetComputedBooleanResourceAttribute("Specifies whether or not the user is the requestor."),
-			"is_service":             GetBooleanResourceAttribute("Specifies whether or not the user is a service account.", false, true),
+			"is_active":              GetOptionalBooleanResourceAttribute("Specifies whether or not the user is active.", true),
+			"is_requestor":           GetReadonlyBooleanResourceAttribute("Specifies whether or not the user is the requestor."),
+			"is_service":             GetOptionalBooleanResourceAttribute("Specifies whether or not the user is a service account.", false),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			"identity": resourceSchema.SetNestedBlock{
@@ -182,7 +182,7 @@ func (u UserSchema) GetResourceSchema() resourceSchema.Schema {
 							NestedObject: resourceSchema.NestedBlockObject{
 								Attributes: map[string]resourceSchema.Attribute{
 									"name":                 GetNameResourceSchema(true),
-									"is_identifying_claim": GetBooleanResourceAttribute("Specifies whether or not the claim is an identifying claim.", false, false),
+									"is_identifying_claim": GetRequiredBooleanResourceAttribute("Specifies whether or not the claim is an identifying claim."),
 									"value":                GetValueResourceSchema(true),
 								},
 							},

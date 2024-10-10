@@ -350,16 +350,23 @@ func GetValueResourceSchema(isRequired bool) resourceSchema.Attribute {
 	return s
 }
 
-func GetBooleanResourceAttribute(description string, defaultValue bool, isOptional bool) resourceSchema.Attribute {
+func GetOptionalBooleanResourceAttribute(description string, defaultValue bool) resourceSchema.Attribute {
 	return resourceSchema.BoolAttribute{
 		Default:     booldefault.StaticBool(defaultValue),
 		Description: description,
-		Optional:    isOptional,
+		Optional:    true,
 		Computed:    true,
 	}
 }
 
-func GetComputedBooleanResourceAttribute(description string) resourceSchema.Attribute {
+func GetRequiredBooleanResourceAttribute(description string) resourceSchema.Attribute {
+	return resourceSchema.BoolAttribute{
+		Description: description,
+		Required:    true,
+	}
+}
+
+func GetReadonlyBooleanResourceAttribute(description string) resourceSchema.Attribute {
 	return resourceSchema.BoolAttribute{
 		Description: description,
 		Computed:    true,
