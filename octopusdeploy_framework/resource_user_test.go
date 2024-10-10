@@ -111,7 +111,7 @@ func testAccUserBasic(localName string, displayName string, isActive bool, isSer
 func testUserExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		userID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := octoClient.Users.GetByID(userID); err != nil {
+		if _, err := users.GetByID(octoClient, userID); err != nil {
 			return err
 		}
 
@@ -125,7 +125,7 @@ func testAccUserCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := octoClient.Users.GetByID(rs.Primary.ID)
+		_, err := users.GetByID(octoClient, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("user (%s) still exists", rs.Primary.ID)
 		}
@@ -206,7 +206,7 @@ func TestUsersAndTeams(t *testing.T) {
 			Take:   1,
 		}
 
-		resources, err := client.Users.Get(query)
+		resources, err := users.Get(client, "", query)
 		if err != nil {
 			return err
 		}
