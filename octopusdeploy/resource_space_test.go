@@ -78,6 +78,31 @@ func testSpaceDataSource(localName string, name string, slug string) string {
 		}`, localName, name)
 }
 
+func testAccUserBasic(localName string, displayName string, isActive bool, isService bool, password string, username string, emailAddress string) string {
+	return fmt.Sprintf(`resource "octopusdeploy_user" "%s" {
+		display_name  = "%s"
+		email_address = "%s"
+		is_active     = %v
+		is_service    = %v
+		password      = "%s"
+		username      = "%s"
+
+		identity {
+			provider = "Octopus ID"
+			claim {
+				name = "email"
+				is_identifying_claim = true
+				value = "%s"
+			}
+			claim {
+				name = "dn"
+				is_identifying_claim = false
+				value = "%s"
+			}
+		}
+	}`, localName, displayName, emailAddress, isActive, isService, password, username, emailAddress, displayName)
+}
+
 func testSpaceBasic(localName string, name string, slug string) string {
 	userLocalName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	userDisplayName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
