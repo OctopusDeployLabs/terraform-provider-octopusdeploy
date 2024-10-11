@@ -69,14 +69,26 @@ func TestAccUserBasic(t *testing.T) {
 				Config: testAccUserBasic(localName, displayName, isActive, isService, password, username, emailAddress),
 			},
 			{
-				Config:                  testAccUserImport(localName, username),
+				//Config:                  testAccUserImport(localName, username),
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateIdFunc:       testAccUserImportStateIdFunc(resourceName),
 			},
 		},
 	})
+}
+
+func testAccUserImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("Not found: %s", resourceName)
+		}
+
+		return rs.Primary.ID, nil
+	}
 }
 
 func testAccUserImport(localName string, username string) string {
