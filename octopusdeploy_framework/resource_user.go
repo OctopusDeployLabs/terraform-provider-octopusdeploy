@@ -141,7 +141,7 @@ func updateUser(data *schemas.UserTypeResourceModel, user *users.User) {
 	data.Username = types.StringValue(user.Username)
 	data.CanPasswordBeEdited = types.BoolValue(user.CanPasswordBeEdited)
 	data.DisplayName = types.StringValue(user.DisplayName)
-	if !data.EmailAddress.IsNull() {
+	if user.EmailAddress != "" {
 		data.EmailAddress = types.StringValue(user.EmailAddress)
 	}
 	data.IsRequestor = types.BoolValue(user.IsRequestor)

@@ -69,12 +69,11 @@ func TestAccUserBasic(t *testing.T) {
 				Config: testAccUserBasic(localName, displayName, isActive, isService, password, username, emailAddress),
 			},
 			{
-				//Config:                  testAccUserImport(localName, username),
+				Config:                  testAccUserImport(localName, username),
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
-				ImportStateIdFunc:       testAccUserImportStateIdFunc(resourceName),
 			},
 		},
 	})
