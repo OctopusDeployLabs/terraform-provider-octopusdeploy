@@ -58,6 +58,12 @@ func (r *userTypeResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	// Octopus doesn't allow creating inactive users. To mimic creating an inactive user, we need to update the newly created user.
+	if !data.IsActive.ValueBool() {
+		user.IsActive = data.IsActive.ValueBool()
+		user, err = users.Update(r.Config.Client, user)
+	}
+
 	updateUser(&data, user)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
