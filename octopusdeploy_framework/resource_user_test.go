@@ -1,4 +1,4 @@
-package octopusdeploy
+package octopusdeploy_framework
 
 import (
 	"fmt"
@@ -6,13 +6,12 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/users"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"path/filepath"
 	"strconv"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccUserImportBasic(t *testing.T) {
@@ -26,7 +25,7 @@ func TestAccUserImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccUserCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -55,7 +54,7 @@ func TestAccUserBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccUserCheckDestroy,
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
@@ -78,6 +77,17 @@ func TestAccUserBasic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccUserImportStateIdFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("Not found: %s", resourceName)
+		}
+
+		return rs.Primary.ID, nil
+	}
 }
 
 func testAccUserImport(localName string, username string) string {
@@ -112,7 +122,7 @@ func testAccUserBasic(localName string, displayName string, isActive bool, isSer
 func testUserExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		userID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := octoClient.Users.GetByID(userID); err != nil {
+		if _, err := users.GetByID(octoClient, userID); err != nil {
 			return err
 		}
 
@@ -126,7 +136,7 @@ func testAccUserCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := octoClient.Users.GetByID(rs.Primary.ID)
+		_, err := users.GetByID(octoClient, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("user (%s) still exists", rs.Primary.ID)
 		}
@@ -207,7 +217,7 @@ func TestUsersAndTeams(t *testing.T) {
 			Take:   1,
 		}
 
-		resources, err := client.Users.Get(query)
+		resources, err := users.Get(client, "", query)
 		if err != nil {
 			return err
 		}

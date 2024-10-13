@@ -333,11 +333,42 @@ func GetDownloadRetryBackoffSecondsResourceSchema() resourceSchema.Attribute {
 	}
 }
 
-func GetBooleanResourceAttribute(description string, defaultValue bool, isOptional bool) resourceSchema.Attribute {
+func GetValueResourceSchema(isRequired bool) resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: "The value of this resource.",
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
+}
+
+func GetOptionalBooleanResourceAttribute(description string, defaultValue bool) resourceSchema.Attribute {
 	return resourceSchema.BoolAttribute{
 		Default:     booldefault.StaticBool(defaultValue),
 		Description: description,
-		Optional:    isOptional,
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func GetRequiredBooleanResourceAttribute(description string) resourceSchema.Attribute {
+	return resourceSchema.BoolAttribute{
+		Description: description,
+		Required:    true,
+	}
+}
+
+func GetReadonlyBooleanResourceAttribute(description string) resourceSchema.Attribute {
+	return resourceSchema.BoolAttribute{
+		Description: description,
 		Computed:    true,
 	}
 }
