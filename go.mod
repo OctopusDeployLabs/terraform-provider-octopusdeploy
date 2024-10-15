@@ -3,7 +3,7 @@ module github.com/OctopusDeploy/terraform-provider-octopusdeploy
 go 1.21
 
 require (
-	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.50.0
+	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.52.0
 	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20240729041805-46db6fb717b4
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
@@ -17,7 +17,6 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.8.0
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.32.0
-	golang.org/x/exp v0.0.0-20240707233637-46b078467d37
 	golang.org/x/text v0.16.0
 	k8s.io/utils v0.0.0-20230505201702-9f6742963106
 	software.sslmate.com/src/go-pkcs12 v0.4.0
@@ -130,6 +129,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
+	golang.org/x/exp v0.0.0-20240707233637-46b078467d37 // indirect
 	golang.org/x/mod v0.19.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
@@ -142,5 +142,3 @@ require (
 	google.golang.org/protobuf v1.34.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/OctopusDeploy/go-octopusdeploy/v2 => ../go-octopusdeploy/
