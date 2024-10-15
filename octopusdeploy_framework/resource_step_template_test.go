@@ -90,7 +90,7 @@ func TestAccOctopusStepTemplateBasic(t *testing.T) {
 			},
 		},
 		properties: map[string]string{
-			"Octopus.Action.Script.ScriptBody":   "echo \"Hello World\"",
+			"Octopus.Action.Script.ScriptBody":   "echo 'Hello World'",
 			"Octopus.Action.Script.ScriptSource": "Inline",
 			"Octopus.Action.Script.Syntax":       "Bash",
 		},
