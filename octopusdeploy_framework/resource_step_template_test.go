@@ -205,13 +205,16 @@ func testStepTemplateRunScriptUpdate(data stepTemplateTestData) string {
 func testStepTemplateDestroy(s *terraform.State, localName string) error {
 	var actionTemplateID string
 
-	if rs, ok := s.RootModule().Resources[localName]; ok {
+	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "octopusdeploy_step_template" {
-			return fmt.Errorf("resource has unexpected type: %s", rs.Type)
+			continue
 		}
+
 		actionTemplateID = rs.Primary.ID
-	} else {
-		return fmt.Errorf("resource octopusdeploy_template.%s not found in state", localName)
+		break
+	}
+	if actionTemplateID == "" {
+		return fmt.Errorf("no octopusdeploy_step_template resource found")
 	}
 
 	actionTemplate, err := actiontemplates.GetByID(octoClient, octoClient.GetSpaceID(), actionTemplateID)
