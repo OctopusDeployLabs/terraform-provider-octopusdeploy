@@ -77,6 +77,11 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 					Default(booldefault.StaticBool(false)).
 					Description("If false a release must be deployed to this phase before it can be deployed to the next phase.").
 					Build(),
+				"is_priority_phase": util.ResourceBool().
+					Optional().Computed().
+					Default(booldefault.StaticBool(false)).
+					Description("Deployments will be prioritized in this phase").
+					Build(),
 			},
 			Blocks: map[string]resourceSchema.Block{
 				"release_retention_policy":  getResourceRetentionPolicyBlockSchema(),
@@ -144,6 +149,7 @@ func getPhasesAttribute() datasourceSchema.ListNestedAttribute {
 				"optional_deployment_targets":           util.DataSourceList(types.StringType).Computed().Description("The optional deployment targets for this phase.").Build(),
 				"minimum_environments_before_promotion": util.DataSourceInt64().Computed().Description("The minimum number of environments before promotion.").Build(),
 				"is_optional_phase":                     util.DataSourceBool().Computed().Description("Whether this phase is optional.").Build(),
+				"is_priority_phase":                     util.DataSourceBool().Computed().Description("Deployments will be prioritized in this phase").Build(),
 				"release_retention_policy":              getRetentionPolicyAttribute(),
 				"tentacle_retention_policy":             getRetentionPolicyAttribute(),
 			},

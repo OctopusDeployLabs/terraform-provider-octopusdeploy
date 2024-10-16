@@ -227,6 +227,7 @@ func flattenPhases(phases []*lifecycles.Phase) types.List {
 			"optional_deployment_targets":           util.FlattenStringList(phase.OptionalDeploymentTargets),
 			"minimum_environments_before_promotion": types.Int64Value(int64(phase.MinimumEnvironmentsBeforePromotion)),
 			"is_optional_phase":                     types.BoolValue(phase.IsOptionalPhase),
+			"is_priority_phase":                     types.BoolValue(phase.IsPriorityPhase),
 			"release_retention_policy":              util.Ternary(phase.ReleaseRetentionPolicy != nil, flattenRetentionPeriod(phase.ReleaseRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),
 			"tentacle_retention_policy":             util.Ternary(phase.TentacleRetentionPolicy != nil, flattenRetentionPeriod(phase.TentacleRetentionPolicy), types.ListNull(types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()})),
 		}
@@ -310,6 +311,10 @@ func expandPhases(phases types.List) []*lifecycles.Phase {
 			phase.IsOptionalPhase = v.ValueBool()
 		}
 
+		if v, ok := phaseAttrs["is_priority_phase"].(types.Bool); ok && !v.IsNull() {
+			phase.IsPriorityPhase = v.ValueBool()
+		}
+
 		if v, ok := phaseAttrs["release_retention_policy"].(types.List); ok && !v.IsNull() {
 			phase.ReleaseRetentionPolicy = expandRetentionPeriod(v)
 		}
@@ -366,6 +371,7 @@ func getPhaseAttrTypes() map[string]attr.Type {
 		"optional_deployment_targets":           types.ListType{ElemType: types.StringType},
 		"minimum_environments_before_promotion": types.Int64Type,
 		"is_optional_phase":                     types.BoolType,
+		"is_priority_phase":                     types.BoolType,
 		"release_retention_policy":              types.ListType{ElemType: types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()}},
 		"tentacle_retention_policy":             types.ListType{ElemType: types.ObjectType{AttrTypes: getRetentionPeriodAttrTypes()}},
 	}
