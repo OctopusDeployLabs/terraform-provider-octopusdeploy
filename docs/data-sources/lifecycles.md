@@ -58,6 +58,7 @@ Read-Only:
 - `automatic_deployment_targets` (List of String) The automatic deployment targets for this phase.
 - `id` (String) The ID of the phase.
 - `is_optional_phase` (Boolean) Whether this phase is optional.
+- `is_priority_phase` (Boolean) Deployments will be prioritized in this phase
 - `minimum_environments_before_promotion` (Number) The minimum number of environments before promotion.
 - `name` (String) The name of the phase.
 - `optional_deployment_targets` (List of String) The optional deployment targets for this phase.

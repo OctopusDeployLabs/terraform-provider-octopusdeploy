@@ -84,6 +84,7 @@ Optional:
 - `automatic_deployment_targets` (List of String) Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase
 - `id` (String) The unique ID for this resource.
 - `is_optional_phase` (Boolean) If false a release must be deployed to this phase before it can be deployed to the next phase.
+- `is_priority_phase` (Boolean) Deployments will be prioritized in this phase
 - `minimum_environments_before_promotion` (Number) The number of units required before a release can enter the next phase. If 0, all environments are required.
 - `optional_deployment_targets` (List of String) Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to
 - `release_retention_policy` (Block List) Defines the retention policy for releases or tentacles. (see [below for nested schema](#nestedblock--phase--release_retention_policy))
