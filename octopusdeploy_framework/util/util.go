@@ -3,7 +3,6 @@ package util
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -57,6 +56,26 @@ func SetToStringArray(ctx context.Context, set types.Set) ([]string, diag.Diagno
 		convertedSet = append(convertedSet, t.ValueString())
 	}
 	return convertedSet, diags
+}
+
+func ConvertStringMapToAttrStringMap(strMap map[string]string) map[string]attr.Value {
+	attrMap := make(map[string]attr.Value, len(strMap))
+	for key, val := range strMap {
+		attrMap[key] = types.StringValue(val)
+	}
+	return attrMap
+}
+
+func ConvertAttrStringMapToStringMap(attrMap map[string]attr.Value) map[string]string {
+	nativeMap := make(map[string]string, len(attrMap))
+	for key, val := range attrMap {
+		if val.IsNull() {
+			nativeMap[key] = ""
+		} else {
+			nativeMap[key] = val.(types.String).ValueString()
+		}
+	}
+	return nativeMap
 }
 
 func FlattenStringList(list []string) types.List {
