@@ -117,6 +117,7 @@ func phaseObjectType() map[string]attr.Type {
 		"optional_deployment_targets":           types.ListType{ElemType: types.StringType},
 		"minimum_environments_before_promotion": types.Int64Type,
 		"is_optional_phase":                     types.BoolType,
+		"is_priority_phase":                     types.BoolType,
 		"release_retention_policy":              types.ListType{ElemType: types.ObjectType{AttrTypes: retentionPolicyObjectType()}},
 		"tentacle_retention_policy":             types.ListType{ElemType: types.ObjectType{AttrTypes: retentionPolicyObjectType()}},
 	}
