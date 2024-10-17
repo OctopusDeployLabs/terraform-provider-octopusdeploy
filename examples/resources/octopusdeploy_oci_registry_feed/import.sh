@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_oci_registry_feed.<name> <feed-id>
