@@ -45,7 +45,7 @@ func TestAccOctopusDeployOCIRegistryFeed(t *testing.T) {
 
 func testAssertOCIRegistryAttributes(expected ociRegistryFeedTestData, prefix string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttr(prefix, "name", expected.name+"-fix-this"),
+		resource.TestCheckResourceAttr(prefix, "name", expected.name),
 		resource.TestCheckResourceAttr(prefix, "feed_uri", expected.uri),
 		resource.TestCheckResourceAttr(prefix, "username", expected.username),
 		resource.TestCheckResourceAttr(prefix, "password", expected.password),
