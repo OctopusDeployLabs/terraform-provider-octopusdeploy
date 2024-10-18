@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
@@ -74,7 +75,7 @@ func expandRunScriptAction(flattenedAction map[string]interface{}) *deployments.
 
 		if len(action.Properties["Octopus.Action.EnabledFeatures"].Value) == 0 {
 			action.Properties["Octopus.Action.EnabledFeatures"] = core.NewPropertyValue("Octopus.Features.SubstituteInFiles", false)
-		} else {
+		} else if !strings.Contains(action.Properties["Octopus.Action.EnabledFeatures"].Value, "Octopus.Features.SubstituteInFiles") {
 			actionProperty := action.Properties["Octopus.Action.EnabledFeatures"].Value + ",Octopus.Features.SubstituteInFiles"
 			action.Properties["Octopus.Action.EnabledFeatures"] = core.NewPropertyValue(actionProperty, false)
 		}
