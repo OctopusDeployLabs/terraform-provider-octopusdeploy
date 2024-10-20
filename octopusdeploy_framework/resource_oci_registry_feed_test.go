@@ -71,6 +71,9 @@ func testOCIRegistryFeedBasic(data ociRegistryFeedTestData, localName string) st
 
 func testOCIRegistryFeedBasicUpdate(data ociRegistryFeedTestData, localName string) string {
 	data.name = data.name + "-updated"
+	data.uri = "oci://integration-test-registry-updated.docker.io"
+	data.username = data.username + "-changed"
+	data.password = data.password + "-generated"
 
 	return testOCIRegistryFeedBasic(data, localName)
 }

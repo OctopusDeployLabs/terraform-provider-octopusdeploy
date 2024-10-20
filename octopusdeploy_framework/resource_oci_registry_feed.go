@@ -111,7 +111,7 @@ func (r *ociRegistryFeedTypeResource) Update(ctx context.Context, req resource.U
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update maven feed", err.Error())
+		resp.Diagnostics.AddError("unable to update OCI Registry feed", err.Error())
 		return
 	}
 
