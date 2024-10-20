@@ -19,11 +19,17 @@ type ociRegistryFeedTestData struct {
 func TestAccOctopusDeployOCIRegistryFeed(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	prefix := "octopusdeploy_oci_registry_feed." + localName
-	data := ociRegistryFeedTestData{
+	createData := ociRegistryFeedTestData{
 		name:     acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
 		uri:      "oci://integration-test-registry.docker.io",
 		username: acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
 		password: acctest.RandStringFromCharSet(20, acctest.CharSetAlphaNum),
+	}
+	updateData := ociRegistryFeedTestData{
+		name:     createData.name + "-updated",
+		uri:      "oci://integration-test-registry-updated.docker.io",
+		username: createData.username + "-changed",
+		password: createData.password + "-generated",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -32,12 +38,12 @@ func TestAccOctopusDeployOCIRegistryFeed(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testOCIRegistryFeedBasic(data, localName),
-				Check:  testAssertOCIRegistryAttributes(data, prefix),
+				Config: testOCIRegistryFeedBasic(createData, localName),
+				Check:  testAssertOCIRegistryAttributes(createData, prefix),
 			},
 			{
-				Config: testOCIRegistryFeedBasicUpdate(data, localName),
-				Check:  testAssertOCIRegistryAttributes(data, prefix),
+				Config: testOCIRegistryFeedBasic(updateData, localName),
+				Check:  testAssertOCIRegistryAttributes(updateData, prefix),
 			},
 		},
 	})
@@ -67,15 +73,6 @@ func testOCIRegistryFeedBasic(data ociRegistryFeedTestData, localName string) st
 		data.username,
 		data.password,
 	)
-}
-
-func testOCIRegistryFeedBasicUpdate(data ociRegistryFeedTestData, localName string) string {
-	data.name = data.name + "-updated"
-	data.uri = "oci://integration-test-registry-updated.docker.io"
-	data.username = data.username + "-changed"
-	data.password = data.password + "-generated"
-
-	return testOCIRegistryFeedBasic(data, localName)
 }
 
 func testOCIRegistryFeedCheckDestroy(s *terraform.State) error {
