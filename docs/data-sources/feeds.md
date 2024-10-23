@@ -60,4 +60,5 @@ Read-Only:
 - `registry_path` (String)
 - `secret_key` (String, Sensitive)
 - `space_id` (String) The space ID associated with this feeds.
+- `use_machine_credentials` (Boolean) When true will use Amazon Web Services credentials configured on the worker.
 - `username` (String, Sensitive) The username associated with this resource.

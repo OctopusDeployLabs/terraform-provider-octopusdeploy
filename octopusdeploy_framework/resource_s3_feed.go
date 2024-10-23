@@ -153,7 +153,9 @@ func createS3ResourceFromData(data *schemas.S3FeedTypeResourceModel) (*feeds.S3F
 
 func updateDataFromS3Feed(data *schemas.S3FeedTypeResourceModel, spaceId string, feed *feeds.S3Feed) {
 	data.UseMachineCredentials = types.BoolValue(feed.UseMachineCredentials)
-	data.AccessKey = types.StringValue(feed.AccessKey)
+	if feed.AccessKey != "" {
+		data.AccessKey = types.StringValue(feed.AccessKey)
+	}
 	data.Name = types.StringValue(feed.Name)
 	data.SpaceID = types.StringValue(spaceId)
 	if feed.Username != "" {

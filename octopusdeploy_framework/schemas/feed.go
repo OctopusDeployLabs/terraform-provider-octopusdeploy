@@ -24,6 +24,7 @@ func FlattenFeed(feed *feeds.FeedResource) attr.Value {
 		"registry_path":                         types.StringValue(feed.RegistryPath),
 		"space_id":                              types.StringValue(feed.SpaceID),
 		"username":                              types.StringValue(feed.Username),
+		"use_machine_credentials":               types.BoolValue(feed.UseMachineCredentials),
 		// Password and secret key are sensitive values that are not returned from the API.
 		// Here we map empty values to keep the behaviour consistent with the SDK.
 		"password":   types.StringValue(""),
@@ -48,6 +49,7 @@ func FeedObjectType() map[string]attr.Type {
 		"registry_path":                         types.StringType,
 		"space_id":                              types.StringType,
 		"username":                              types.StringType,
+		"use_machine_credentials":               types.BoolType,
 		"password":                              types.StringType,
 		"secret_key":                            types.StringType,
 	}

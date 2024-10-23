@@ -125,6 +125,10 @@ func (f FeedsSchema) GetDatasourceSchema() datasourceSchema.Schema {
 							Description: "The number of seconds to apply as a linear back off between download attempts.",
 							Computed:    true,
 						},
+						"use_machine_credentials": datasourceSchema.BoolAttribute{
+							Description: "When true will use Amazon Web Services credentials configured on the worker.",
+							Computed:    true,
+						},
 					},
 				},
 			},
