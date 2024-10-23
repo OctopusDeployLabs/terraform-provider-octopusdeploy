@@ -52,7 +52,7 @@ func TestAccOctopusDeployS3Feed(t *testing.T) {
 			},
 			{
 				Config: testS3FeedWithoutKeys(withoutKeysData, localName),
-				Check:  testAssertS3FeedAttributes(withoutKeysData, prefix),
+				Check:  testAssertS3FeedWithoutKeysAttributes(withoutKeysData, prefix),
 			},
 		},
 	})
@@ -94,6 +94,15 @@ func testS3FeedWithoutKeys(data s3FeedTestData, localName string) string {
 		localName,
 		data.name,
 		strconv.FormatBool(data.useMachineCredentials),
+	)
+}
+
+func testAssertS3FeedWithoutKeysAttributes(expected s3FeedTestData, prefix string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(prefix, "name", expected.name),
+		resource.TestCheckResourceAttr(prefix, "use_machine_credentials", strconv.FormatBool(expected.useMachineCredentials)),
+		resource.TestCheckNoResourceAttr(prefix, "access_key"),
+		resource.TestCheckNoResourceAttr(prefix, "secret_key"),
 	)
 }
 
