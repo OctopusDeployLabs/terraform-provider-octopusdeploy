@@ -51,7 +51,7 @@ func TestAccOctopusDeployS3Feed(t *testing.T) {
 				Check:  testAssertS3FeedAttributes(updateData, prefix),
 			},
 			{
-				Config: testS3FeedWithoutKeys(localName),
+				Config: testS3FeedWithoutKeys(withoutKeysData, localName),
 				Check:  testAssertS3FeedAttributes(withoutKeysData, prefix),
 			},
 		},
@@ -84,14 +84,16 @@ func testS3FeedBasic(data s3FeedTestData, localName string) string {
 	)
 }
 
-func testS3FeedWithoutKeys(localName string) string {
+func testS3FeedWithoutKeys(data s3FeedTestData, localName string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_s3_feed" "%s" {
-			name		= "Feed Without Keys"
-			use_machine_credentials	= true
+			name		= "%s"
+			use_machine_credentials	= "%s"
 		}
 	`,
 		localName,
+		data.name,
+		strconv.FormatBool(data.useMachineCredentials),
 	)
 }
 
