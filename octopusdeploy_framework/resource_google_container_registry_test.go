@@ -38,7 +38,7 @@ func TestAccOctopusDeployGoogleFeed(t *testing.T) {
 		password:     createData.password + "-updated",
 	}
 	withMinimumData := googleFeedTestData{
-		name: "AWS S3 Without Keys",
+		name: "Google Registry Minimum",
 		uri:  "https://testcloud.artifact.google.minimum",
 	}
 
