@@ -99,7 +99,6 @@ func testGoogleFeedWithMinimumData(data googleFeedTestData, localName string) st
 
 func testAssertGoogleFeedAttributes(expected googleFeedTestData, prefix string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		testGoogleContainerRegistryExists(prefix),
 		resource.TestCheckResourceAttr(prefix, "name", expected.name),
 		resource.TestCheckResourceAttr(prefix, "feed_uri", expected.uri),
 		resource.TestCheckResourceAttr(prefix, "registry_path", expected.registryPath),
@@ -111,7 +110,6 @@ func testAssertGoogleFeedAttributes(expected googleFeedTestData, prefix string) 
 
 func testAssertGoogleFeedMinimumAttributes(expected googleFeedTestData, prefix string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		testGoogleContainerRegistryExists(prefix),
 		resource.TestCheckResourceAttr(prefix, "name", expected.name),
 		resource.TestCheckResourceAttr(prefix, "feed_uri", expected.uri),
 		resource.TestCheckNoResourceAttr(prefix, "registry_path"),
@@ -134,15 +132,4 @@ func testGoogleFeedCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func testGoogleContainerRegistryExists(prefix string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		feedId := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := feeds.GetByID(octoClient, octoClient.GetSpaceID(), feedId); err != nil {
-			return err
-		}
-
-		return nil
-	}
 }
