@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_google_container_registry Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages a Google Container Registry feed in Octopus Deploy (alias for Docker Container Registry feed)
+  This resource manages a Google Container Registry feed in Octopus Deploy (alias of Docker Container Registry feed)
 ---
 
 # octopusdeploy_google_container_registry (Resource)
 
-This resource manages a Google Container Registry feed in Octopus Deploy (alias for Docker Container Registry feed)
+This resource manages a Google Container Registry feed in Octopus Deploy (alias of Docker Container Registry feed)
 
 ## Example Usage
 

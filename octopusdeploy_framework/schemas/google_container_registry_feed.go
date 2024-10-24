@@ -12,7 +12,7 @@ var _ EntitySchema = GoogleContainerRegistryFeedSchema{}
 
 func (d GoogleContainerRegistryFeedSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages a Google Container Registry feed in Octopus Deploy (alias for Docker Container Registry feed)",
+		Description: "This resource manages a Google Container Registry feed in Octopus Deploy (alias of Docker Container Registry feed)",
 		Attributes: map[string]resourceSchema.Attribute{
 			"api_version": resourceSchema.StringAttribute{
 				Optional: true,
