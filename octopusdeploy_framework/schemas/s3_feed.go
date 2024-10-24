@@ -10,7 +10,7 @@ type S3FeedSchema struct{}
 
 func (m S3FeedSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages a OCI Registry feed in Octopus Deploy.",
+		Description: "This resource manages a Amazon S3 Bucket feed in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
 			"use_machine_credentials": GetRequiredBooleanResourceAttribute("When true will use credentials configured on the worker"),
 			"access_key":              GetOptionalStringResourceSchema("The AWS access key to use when authenticating against Amazon Web Services"),
