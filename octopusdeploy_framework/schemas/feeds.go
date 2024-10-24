@@ -21,7 +21,7 @@ func (f FeedsSchema) GetDatasourceSchema() datasourceSchema.Schema {
 		Description: "Provides information about existing feeds.",
 		Attributes: map[string]datasourceSchema.Attribute{
 			"feed_type": datasourceSchema.StringAttribute{
-				Description: "A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, `OciRegistry` or `OctopusProject`.",
+				Description: "A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, `S3`, `OciRegistry` or `OctopusProject`.",
 				Optional:    true,
 				Validators: []validator.String{
 					stringvalidator.OneOf(
@@ -32,6 +32,7 @@ func (f FeedsSchema) GetDatasourceSchema() datasourceSchema.Schema {
 						"Helm",
 						"Maven",
 						"NuGet",
+						"S3",
 						"OciRegistry",
 						"OctopusProject"),
 				},
@@ -51,7 +52,7 @@ func (f FeedsSchema) GetDatasourceSchema() datasourceSchema.Schema {
 				NestedObject: datasourceSchema.NestedAttributeObject{
 					Attributes: map[string]datasourceSchema.Attribute{
 						"feed_type": datasourceSchema.StringAttribute{
-							Description: "A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, `OciRegistry` or `OctopusProject`.",
+							Description: "A filter to search by feed type. Valid feed types are `AwsElasticContainerRegistry`, `BuiltIn`, `Docker`, `GitHub`, `Helm`, `Maven`, `NuGet`, `S3`, `OciRegistry` or `OctopusProject`.",
 							Computed:    true,
 							Validators: []validator.String{
 								stringvalidator.OneOf(
@@ -62,6 +63,7 @@ func (f FeedsSchema) GetDatasourceSchema() datasourceSchema.Schema {
 									"Helm",
 									"Maven",
 									"NuGet",
+									"S3",
 									"OciRegistry",
 									"OctopusProject"),
 							},
@@ -121,6 +123,10 @@ func (f FeedsSchema) GetDatasourceSchema() datasourceSchema.Schema {
 						},
 						"download_retry_backoff_seconds": datasourceSchema.Int64Attribute{
 							Description: "The number of seconds to apply as a linear back off between download attempts.",
+							Computed:    true,
+						},
+						"use_machine_credentials": datasourceSchema.BoolAttribute{
+							Description: "When true will use Amazon Web Services credentials configured on the worker.",
 							Computed:    true,
 						},
 					},

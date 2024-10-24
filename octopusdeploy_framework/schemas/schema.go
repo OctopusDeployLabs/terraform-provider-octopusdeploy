@@ -383,6 +383,16 @@ func GetRequiredStringResourceSchema(description string) resourceSchema.StringAt
 	}
 }
 
+func GetOptionalStringResourceSchema(description string) resourceSchema.StringAttribute {
+	return resourceSchema.StringAttribute{
+		Optional:    true,
+		Description: description,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+}
+
 func GetFeedUriResourceSchema() resourceSchema.Attribute {
 	return resourceSchema.StringAttribute{
 		Required: true,
@@ -396,4 +406,22 @@ func GetNumber(val types.Int64) int {
 	}
 
 	return v
+}
+
+func GetSensitiveResourceSchema(description string, isRequired bool) resourceSchema.Attribute {
+	s := resourceSchema.StringAttribute{
+		Description: description,
+		Sensitive:   true,
+		Validators: []validator.String{
+			stringvalidator.LengthAtLeast(1),
+		},
+	}
+
+	if isRequired {
+		s.Required = true
+	} else {
+		s.Optional = true
+	}
+
+	return s
 }
