@@ -20,7 +20,7 @@ type googleFeedTestData struct {
 
 func TestAccOctopusDeployGoogleFeed(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := "octopusdeploy_google_feed." + localName
+	prefix := "octopusdeploy_google_container_registry." + localName
 	createData := googleFeedTestData{
 		name:         acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
 		uri:          "https://cloud.artifact.google.test",
