@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_s3_feed Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages a OCI Registry feed in Octopus Deploy.
+  This resource manages a Amazon S3 Bucket feed in Octopus Deploy.
 ---
 
 # octopusdeploy_s3_feed (Resource)
 
-This resource manages a OCI Registry feed in Octopus Deploy.
+This resource manages a Amazon S3 Bucket feed in Octopus Deploy.
 
 ## Example Usage
 
