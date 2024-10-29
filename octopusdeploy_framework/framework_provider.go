@@ -87,6 +87,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewOCIRegistryFeedResource,
 		NewS3FeedResource,
 		NewGoogleContainerRegistryFeedResource,
+		NewAzureContainerRegistryFeedResource,
 		NewLifecycleResource,
 		NewEnvironmentResource,
 		NewStepTemplateResource,
