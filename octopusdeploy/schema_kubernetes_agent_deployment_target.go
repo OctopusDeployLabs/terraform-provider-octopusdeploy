@@ -1,11 +1,12 @@
 package octopusdeploy
 
 import (
+	"net/url"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"net/url"
 )
 
 func expandKubernetesAgentDeploymentTarget(kubernetesAgent *schema.ResourceData) *machines.DeploymentTarget {
@@ -29,6 +30,8 @@ func expandKubernetesAgentDeploymentTarget(kubernetesAgent *schema.ResourceData)
 	deploymentTarget.TenantIDs = expandArray(kubernetesAgent.Get("tenants").([]interface{}))
 	deploymentTarget.TenantTags = expandArray(kubernetesAgent.Get("tenant_tags").([]interface{}))
 	deploymentTarget.SpaceID = kubernetesAgent.Get("space_id").(string)
+
+	deploymentTarget.MachinePolicyID = kubernetesAgent.Get("machine_policy_id").(string)
 
 	return deploymentTarget
 }
