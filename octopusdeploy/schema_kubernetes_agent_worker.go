@@ -1,10 +1,11 @@
 package octopusdeploy
 
 import (
+	"net/url"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"net/url"
 )
 
 func expandKubernetesAgentWorker(kubernetesAgent *schema.ResourceData) *machines.Worker {
@@ -23,6 +24,8 @@ func expandKubernetesAgentWorker(kubernetesAgent *schema.ResourceData) *machines
 	Worker.WorkerPoolIDs = getSliceFromTerraformTypeList(kubernetesAgent.Get("worker_pool_ids"))
 
 	Worker.SpaceID = kubernetesAgent.Get("space_id").(string)
+
+	Worker.MachinePolicyID = kubernetesAgent.Get("machine_policy_id").(string)
 
 	return Worker
 }
