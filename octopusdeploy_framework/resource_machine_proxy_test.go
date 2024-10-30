@@ -57,7 +57,7 @@ func testMachineProxyBasic(data *proxies.Proxy) string {
 		data.Name,
 		data.Host,
 		data.Username,
-		&data.Password.NewValue,
+		*data.Password.NewValue,
 		data.Port,
 	)
 }
