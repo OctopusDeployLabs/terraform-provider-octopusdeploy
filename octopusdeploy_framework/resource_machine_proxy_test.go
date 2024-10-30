@@ -47,10 +47,10 @@ func TestAccMachineProxyBasic(t *testing.T) {
 func testMachineProxyBasic(data *proxies.Proxy) string {
 	return fmt.Sprintf(`
 	resource "octopusdeploy_machine_proxy" "test_proxy" {
-		name = %s
-		host = %s
-		username = %s
-		password = %s
+		name = "%s"
+		host = "%s"
+		username = "%s"
+		password = "%s"
 		port = %d
 	}
 `,
