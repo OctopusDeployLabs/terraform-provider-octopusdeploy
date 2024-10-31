@@ -29,13 +29,13 @@ func TestAccMachineProxyBasic(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testMachineProxyBasic(data),
+				Config: testMachineProxyBasic(data, localName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(prefix, "name", data.Name),
 				),
 			},
 			{
-				Config: testMachineProxyUpdate(data),
+				Config: testMachineProxyUpdate(data, localName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(prefix, "name", data.Name+"-updated"),
 				),
@@ -44,9 +44,9 @@ func TestAccMachineProxyBasic(t *testing.T) {
 	})
 }
 
-func testMachineProxyBasic(data *proxies.Proxy) string {
+func testMachineProxyBasic(data *proxies.Proxy, localName string) string {
 	return fmt.Sprintf(`
-	resource "octopusdeploy_machine_proxy" "test_proxy" {
+	resource "octopusdeploy_machine_proxy" "%s" {
 		name = "%s"
 		host = "%s"
 		username = "%s"
@@ -54,6 +54,7 @@ func testMachineProxyBasic(data *proxies.Proxy) string {
 		port = %d
 	}
 `,
+		localName,
 		data.Name,
 		data.Host,
 		data.Username,
@@ -62,10 +63,10 @@ func testMachineProxyBasic(data *proxies.Proxy) string {
 	)
 }
 
-func testMachineProxyUpdate(data *proxies.Proxy) string {
+func testMachineProxyUpdate(data *proxies.Proxy, localName string) string {
 	data.Name = data.Name + "-updated"
 
-	return testMachineProxyBasic(data)
+	return testMachineProxyBasic(data, localName)
 }
 
 func testMachineProxyDestroy(s *terraform.State) error {
