@@ -35,7 +35,7 @@ func TestAccMachineProxyBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testMachineProxyUpdate(data, localName),
+				Config: testMachineProxyUpdate(*data, localName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(prefix, "name", data.Name+"-updated"),
 				),
@@ -63,10 +63,10 @@ func testMachineProxyBasic(data *proxies.Proxy, localName string) string {
 	)
 }
 
-func testMachineProxyUpdate(data *proxies.Proxy, localName string) string {
+func testMachineProxyUpdate(data proxies.Proxy, localName string) string {
 	data.Name = data.Name + "-updated"
 
-	return testMachineProxyBasic(data, localName)
+	return testMachineProxyBasic(&data, localName)
 }
 
 func testMachineProxyDestroy(s *terraform.State) error {
