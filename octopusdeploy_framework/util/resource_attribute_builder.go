@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
@@ -31,6 +32,8 @@ func (b *AttributeBuilder[T]) Optional() *AttributeBuilder[T] {
 		a.Optional = true
 	case *schema.Int64Attribute:
 		a.Optional = true
+	case *schema.Int32Attribute:
+		a.Optional = true
 	case *schema.Float64Attribute:
 		a.Optional = true
 	case *schema.NumberAttribute:
@@ -54,6 +57,8 @@ func (b *AttributeBuilder[T]) Deprecated(deprecationMessage string) *AttributeBu
 	case *schema.BoolAttribute:
 		a.DeprecationMessage = deprecationMessage
 	case *schema.Int64Attribute:
+		a.DeprecationMessage = deprecationMessage
+	case *schema.Int32Attribute:
 		a.DeprecationMessage = deprecationMessage
 	case *schema.Float64Attribute:
 		a.DeprecationMessage = deprecationMessage
@@ -79,6 +84,8 @@ func (b *AttributeBuilder[T]) Computed() *AttributeBuilder[T] {
 		a.Computed = true
 	case *schema.Int64Attribute:
 		a.Computed = true
+	case *schema.Int32Attribute:
+		a.Computed = true
 	case *schema.Float64Attribute:
 		a.Computed = true
 	case *schema.NumberAttribute:
@@ -103,6 +110,8 @@ func (b *AttributeBuilder[T]) Required() *AttributeBuilder[T] {
 		a.Required = true
 	case *schema.Int64Attribute:
 		a.Required = true
+	case *schema.Int32Attribute:
+		a.Required = true
 	case *schema.Float64Attribute:
 		a.Required = true
 	case *schema.NumberAttribute:
@@ -126,6 +135,8 @@ func (b *AttributeBuilder[T]) Description(desc string) *AttributeBuilder[T] {
 	case *schema.BoolAttribute:
 		a.Description = desc
 	case *schema.Int64Attribute:
+		a.Description = desc
+	case *schema.Int32Attribute:
 		a.Description = desc
 	case *schema.Float64Attribute:
 		a.Description = desc
@@ -157,6 +168,10 @@ func (b *AttributeBuilder[T]) Default(defaultValue interface{}) *AttributeBuilde
 		if intDefault, ok := defaultValue.(int64); ok {
 			a.Default = int64default.StaticInt64(intDefault)
 		}
+	case *schema.Int32Attribute:
+		if intDefault, ok := defaultValue.(int32); ok {
+			a.Default = int32default.StaticInt32(intDefault)
+		}
 	case *schema.NumberAttribute:
 	case *schema.Float64Attribute:
 		if floatDefault, ok := defaultValue.(float64); ok {
@@ -179,6 +194,8 @@ func (b *AttributeBuilder[T]) Sensitive() *AttributeBuilder[T] {
 	case *schema.BoolAttribute:
 		a.Sensitive = true
 	case *schema.Int64Attribute:
+		a.Sensitive = true
+	case *schema.Int32Attribute:
 		a.Sensitive = true
 	case *schema.Float64Attribute:
 		a.Sensitive = true
@@ -233,6 +250,10 @@ func (b *AttributeBuilder[T]) PlanModifiers(modifiers ...any) *AttributeBuilder[
 		if int64Modifiers, ok := convertToTypedSlice[planmodifier.Int64](modifiers); ok {
 			a.PlanModifiers = append(a.PlanModifiers, int64Modifiers...)
 		}
+	case *schema.Int32Attribute:
+		if int32Modifiers, ok := convertToTypedSlice[planmodifier.Int32](modifiers); ok {
+			a.PlanModifiers = append(a.PlanModifiers, int32Modifiers...)
+		}
 	case *schema.Float64Attribute:
 		if float64Modifiers, ok := convertToTypedSlice[planmodifier.Float64](modifiers); ok {
 			a.PlanModifiers = append(a.PlanModifiers, float64Modifiers...)
@@ -265,6 +286,10 @@ func (b *AttributeBuilder[T]) Validators(validators ...any) *AttributeBuilder[T]
 	case *schema.Int64Attribute:
 		if int64Validators, ok := convertToTypedSlice[validator.Int64](validators); ok {
 			a.Validators = append(a.Validators, int64Validators...)
+		}
+	case *schema.Int32Attribute:
+		if int32Validators, ok := convertToTypedSlice[validator.Int32](validators); ok {
+			a.Validators = append(a.Validators, int32Validators...)
 		}
 	case *schema.Float64Attribute:
 		if float64Validators, ok := convertToTypedSlice[validator.Float64](validators); ok {
@@ -303,6 +328,10 @@ func ResourceString() *AttributeBuilder[schema.StringAttribute] {
 
 func ResourceBool() *AttributeBuilder[schema.BoolAttribute] {
 	return NewAttributeBuilder[schema.BoolAttribute]()
+}
+
+func ResourceInt32() *AttributeBuilder[schema.Int32Attribute] {
+	return NewAttributeBuilder[schema.Int32Attribute]()
 }
 
 func ResourceInt64() *AttributeBuilder[schema.Int64Attribute] {
