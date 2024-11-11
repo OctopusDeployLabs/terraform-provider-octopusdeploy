@@ -12,20 +12,17 @@ import (
 )
 
 type Config struct {
-	Address string
-	ApiKey  string
-	SpaceID string
-	Client  *client.Client
+	Address     string
+	ApiKey      string
+	AccessToken string
+	SpaceID     string
+	Client      *client.Client
 }
 
 func (c *Config) GetClient(ctx context.Context) error {
 	tflog.Debug(ctx, "GetClient")
-	apiURL, err := url.Parse(c.Address)
-	if err != nil {
-		return err
-	}
 
-	octopus, err := client.NewClient(nil, apiURL, c.ApiKey, "")
+	octopus, err := getClientForDefaultSpace(c, ctx)
 	if err != nil {
 		return err
 	}
@@ -36,7 +33,7 @@ func (c *Config) GetClient(ctx context.Context) error {
 			return err
 		}
 
-		octopus, err = client.NewClient(nil, apiURL, c.ApiKey, space.GetID())
+		octopus, err = getClientForSpace(c, ctx, space.GetID())
 		if err != nil {
 			return err
 		}
@@ -47,6 +44,54 @@ func (c *Config) GetClient(ctx context.Context) error {
 	createdClient := octopus != nil
 	tflog.Debug(ctx, fmt.Sprintf("GetClient completed: %t", createdClient))
 	return nil
+}
+
+func getClientForDefaultSpace(c *Config, ctx context.Context) (*client.Client, error) {
+	return getClientForSpace(c, ctx, "")
+}
+
+func getClientForSpace(c *Config, ctx context.Context, spaceID string) (*client.Client, error) {
+	apiURL, err := url.Parse(c.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	credential, err := getApiCredential(c, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.NewClientWithCredentials(nil, apiURL, credential, spaceID, "TerraformProvider")
+}
+
+func getApiCredential(c *Config, ctx context.Context) (client.ICredential, error) {
+	tflog.Debug(ctx, "GetClient: Trying the following auth methods in order of priority - APIKey, AccessToken")
+
+	if c.ApiKey != "" {
+		tflog.Debug(ctx, "GetClient: Attempting to authenticate with API Key")
+		credential, err := client.NewApiKey(c.ApiKey)
+		if err != nil {
+			return nil, err
+		}
+
+		return credential, nil
+	} else {
+		tflog.Debug(ctx, "GetClient: No API Key found")
+	}
+
+	if c.AccessToken != "" {
+		tflog.Debug(ctx, "GetClient: Attempting to authenticate with Access Token")
+		credential, err := client.NewAccessToken(c.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+
+		return credential, nil
+	} else {
+		tflog.Debug(ctx, "GetClient: No Access Token found")
+	}
+
+	return nil, fmt.Errorf("either an APIKey or an AccessToken is required to connect to the Octopus Server instance")
 }
 
 func DataSourceConfiguration(req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) *Config {

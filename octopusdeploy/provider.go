@@ -74,8 +74,14 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 			},
 			"api_key": {
-				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_APIKEY", nil),
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{"OCTOPUS_APIKEY", "OCTOPUS_API_KEY"}, nil),
 				Description: "The API key to use with the Octopus REST API",
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			"access_token": {
+				DefaultFunc: schema.EnvDefaultFunc("OCTOPUS_ACCESS_TOKEN", nil),
+				Description: "The OIDC Access Token to use with the Octopus REST API",
 				Optional:    true,
 				Type:        schema.TypeString,
 			},
@@ -92,8 +98,9 @@ func Provider() *schema.Provider {
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := Config{
-		Address: d.Get("address").(string),
-		APIKey:  d.Get("api_key").(string),
+		AccessToken: d.Get("access_token").(string),
+		Address:     d.Get("address").(string),
+		APIKey:      d.Get("api_key").(string),
 	}
 	if spaceID, ok := d.GetOk("space_id"); ok {
 		config.SpaceID = spaceID.(string)
