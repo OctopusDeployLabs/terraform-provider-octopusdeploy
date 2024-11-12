@@ -64,7 +64,7 @@ func testListeningTentacleWorkerMandatory(data listeningTentacleWorkerTestData, 
 		resource "octopusdeploy_listening_tentacle_worker" "%s" {
 			name				= "%s"
 			machine_policy_id	= "%s"
-			worker_pool_ids		= "%s"
+			worker_pool_ids		= %s
 			uri					= "%s"
 			thumbprint			= "%s"
 		}
@@ -83,7 +83,7 @@ func testListeningTentacleWorkerAll(data listeningTentacleWorkerTestData, localN
 		resource "octopusdeploy_listening_tentacle_worker" "%s" {
 			name				= "%s"
 			machine_policy_id	= "%s"
-			worker_pool_ids		= "%s"
+			worker_pool_ids		= %s
 			uri					= "%s"
 			thumbprint			= "%s"
 			proxy_id			= "%s"
