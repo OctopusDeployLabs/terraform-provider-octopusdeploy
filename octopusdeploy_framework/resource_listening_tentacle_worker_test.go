@@ -31,12 +31,12 @@ func TestAccOctopusDeployListeningTentacleWorker(t *testing.T) {
 	prefix := "octopusdeploy_listening_tentacle_worker." + localName
 	createData := listeningTentacleWorkerTestData{
 		name:       acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
-		uri:        "https://listening.test",
+		uri:        "https://listening.test/",
 		thumbprint: strconv.FormatInt(int64(acctest.RandIntRange(0, 1024)), 16),
 	}
 	updateData := listeningTentacleWorkerTestData{
 		name:       createData.name + "-updated",
-		uri:        "https://listening.test.updated",
+		uri:        "https://listening.test.updated/",
 		thumbprint: strconv.FormatInt(int64(acctest.RandIntRange(0, 1024)), 16),
 		isDisabled: true,
 	}
