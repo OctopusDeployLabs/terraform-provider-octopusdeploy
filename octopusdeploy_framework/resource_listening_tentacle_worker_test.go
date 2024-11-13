@@ -84,7 +84,7 @@ func testAssertListeningTentacleWorkerCreate(expected listeningTentacleWorkerTes
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(prefix, "name", expected.name),
 		resource.TestCheckResourceAttrSet(prefix, "machine_policy_id"),
-		resource.TestCheckResourceAttrSet(prefix, "worker_pool_ids"),
+		resource.TestCheckResourceAttr(prefix, "worker_pool_ids.#", "1"),
 		resource.TestCheckResourceAttr(prefix, "uri", expected.uri),
 		resource.TestCheckResourceAttr(prefix, "thumbprint", expected.thumbprint),
 		resource.TestCheckNoResourceAttr(prefix, "proxy_id"),
@@ -124,7 +124,7 @@ func testAssertListeningTentacleWorkerUpdate(expected listeningTentacleWorkerTes
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(prefix, "name", expected.name),
 		resource.TestCheckResourceAttrSet(prefix, "machine_policy_id"),
-		resource.TestCheckResourceAttrSet(prefix, "worker_pool_ids"),
+		resource.TestCheckResourceAttr(prefix, "worker_pool_ids.#", "2"),
 		resource.TestCheckResourceAttr(prefix, "uri", expected.uri),
 		resource.TestCheckResourceAttr(prefix, "thumbprint", expected.thumbprint),
 		resource.TestCheckResourceAttrSet(prefix, "proxy_id"),
