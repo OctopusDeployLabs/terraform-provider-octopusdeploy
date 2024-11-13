@@ -41,7 +41,7 @@ resource "octopusdeploy_listening_tentacle_worker" "optionals" {
 - `name` (String) The name of this resource.
 - `thumbprint` (String) The X509 certificate thumbprint that securely identifies the Tentacle
 - `uri` (String) The network address at which the Tentacle can be reached
-- `worker_pool_ids` (List of String) Select at least one worker pool for the worker
+- `worker_pool_ids` (Set of String) Select at least one worker pool for the worker
 
 ### Optional
 
