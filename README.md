@@ -2,8 +2,7 @@
 
 ## :warning: Warning
 
-The Terraform Provider for Octopus Deploy is under active development and in the process of migrating from Terraform SDK to Terraform Plugin Framework. Its functionalty can and will change; it is a v0.\* product until its robustness can be assured. Please be aware that types like resources can and will be modified over time. It is strongly recommended to `validate` and `plan` configuration prior to committing changes via `apply`.
-
+The Terraform Provider for Octopus Deploy is under active development and undergoing migration from Terraform SDK to Terraform Plugin Framework. Its functionality can and will change; it is a v0.\* product until its robustness can be assured. Please be aware that types like resources can and will be modified over time. It is strongly recommended to `validate` and `plan` configuration prior to committing changes via `apply`.
 
 ## About
 
