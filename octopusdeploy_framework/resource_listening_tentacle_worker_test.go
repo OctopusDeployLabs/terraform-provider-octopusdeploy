@@ -88,7 +88,7 @@ func testAssertListeningTentacleWorkerCreate(expected listeningTentacleWorkerTes
 		resource.TestCheckResourceAttr(prefix, "uri", expected.uri),
 		resource.TestCheckResourceAttr(prefix, "thumbprint", expected.thumbprint),
 		resource.TestCheckNoResourceAttr(prefix, "proxy_id"),
-		resource.TestCheckNoResourceAttr(prefix, "is_disabled"),
+		resource.TestCheckResourceAttr(prefix, "is_disabled", "false"),
 	)
 }
 
