@@ -8,14 +8,6 @@ This guide provides an overview of the contribution workflow from opening an iss
 
 This project is built, tested, and released by workflows defined in GitHub Actions (see [Actions](/actions/) for more information). Release management is controlled through [Release-Please](https://github.com/googleapis/release-please). Please use conventional commits.
 
-### Create a New Resource
-
-The provider is currently undergoing migration from Terraform SDK to Terraform Plugin Framework. Ensure all **new** resources are created under the `octopusdeploy-framework` directory using existing resources within the `octopusdeploy-framework` directory as a guideline.
-
-All new resources need an acceptance test that will ensure the lifecycle of the resource works correctly this includes Create, Read, Update and Delete.
-
-Please avoid using blocks in favour of nested attribute types. Blocks are mainly used for resources migrated from SDK to maintain backwards compatability. 
-
 ### Issues
 
 We :heart: feedback! Submitting an issue (i.e. feature, bug) is the best way to document things your experience with this project. For example, if there's a feature missing or there's behavior that doesn't match your expectations then we strongly encourage you to submit an issue. That way, contributors can track them and have interested folks (like you) by notified if/when they're resolved.

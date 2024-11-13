@@ -79,6 +79,14 @@ Terraform will scan the local plugins folder directory structure (first) to qual
 
 :warning: The `version` number specified in your Terraform configuration MUST match the version number specified in the Makefile. Futhermore, this version MUST either be incremented for each local re-build; otherwise, Terraform will use the cached version of the provider in the `.terraform` folder. Alternatively, you can simply delete the folder and re-run the `terraform init` command.
 
+## Create a New Resource
+
+The provider is currently undergoing migration from Terraform SDK to Terraform Plugin Framework. Ensure all **new** resources are created under the `octopusdeploy-framework` directory using existing resources within the `octopusdeploy-framework` directory as a guideline.
+
+All new resources need an acceptance test that will ensure the lifecycle of the resource works correctly this includes Create, Read, Update and Delete.
+
+Please avoid using blocks in favour of nested attribute types. Blocks are mainly used for resources migrated from SDK to maintain backwards compatability.
+
 ## Debugging 
 If you want to debug the provider follow these steps!
 
