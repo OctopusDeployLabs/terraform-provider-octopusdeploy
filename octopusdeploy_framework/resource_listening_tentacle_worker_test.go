@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"strconv"
-	"strings"
 	"testing"
 )
 
@@ -84,18 +83,8 @@ func testListeningTentacleWorkerCreate(data listeningTentacleWorkerTestData, loc
 func testAssertListeningTentacleWorkerCreate(expected listeningTentacleWorkerTestData, prefix string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(prefix, "name", expected.name),
-		resource.TestCheckResourceAttrWith(prefix, "machine_policy_id", func(value string) error {
-			if len(value) > 0 {
-				return nil
-			}
-			return fmt.Errorf("machine policy should be set")
-		}),
-		resource.TestCheckResourceAttrWith(prefix, "worker_pool_ids", func(value string) error {
-			if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
-				return nil
-			}
-			return fmt.Errorf("worker pools should be set")
-		}),
+		resource.TestCheckResourceAttrSet(prefix, "machine_policy_id"),
+		resource.TestCheckResourceAttrSet(prefix, "worker_pool_ids"),
 		resource.TestCheckResourceAttr(prefix, "uri", expected.uri),
 		resource.TestCheckResourceAttr(prefix, "thumbprint", expected.thumbprint),
 		resource.TestCheckNoResourceAttr(prefix, "proxy_id"),
@@ -134,26 +123,11 @@ func testListeningTentacleWorkerUpdate(data listeningTentacleWorkerTestData, loc
 func testAssertListeningTentacleWorkerUpdate(expected listeningTentacleWorkerTestData, prefix string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(prefix, "name", expected.name),
-		resource.TestCheckResourceAttrWith(prefix, "machine_policy_id", func(value string) error {
-			if len(value) > 0 {
-				return nil
-			}
-			return fmt.Errorf("machine policy should be set")
-		}),
-		resource.TestCheckResourceAttrWith(prefix, "worker_pool_ids", func(value string) error {
-			if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
-				return nil
-			}
-			return fmt.Errorf("worker pools should be set")
-		}),
+		resource.TestCheckResourceAttrSet(prefix, "machine_policy_id"),
+		resource.TestCheckResourceAttrSet(prefix, "worker_pool_ids"),
 		resource.TestCheckResourceAttr(prefix, "uri", expected.uri),
 		resource.TestCheckResourceAttr(prefix, "thumbprint", expected.thumbprint),
-		resource.TestCheckResourceAttrWith(prefix, "proxy_id", func(value string) error {
-			if len(value) > 0 {
-				return nil
-			}
-			return fmt.Errorf("machine proxy should be set")
-		}),
+		resource.TestCheckResourceAttrSet(prefix, "proxy_id"),
 		resource.TestCheckResourceAttr(prefix, "is_disabled", strconv.FormatBool(expected.isDisabled)),
 	)
 }
