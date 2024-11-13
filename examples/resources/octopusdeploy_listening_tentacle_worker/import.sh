@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_listening_tentacle_worker.<name> <machine-id>
