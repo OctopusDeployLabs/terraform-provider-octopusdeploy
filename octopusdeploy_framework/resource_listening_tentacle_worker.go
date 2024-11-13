@@ -159,7 +159,7 @@ func updateDataFromListeningTentacleWorker(ctx context.Context, data *schemas.Li
 	data.Name = types.StringValue(worker.Name)
 	data.IsDisabled = types.BoolValue(worker.IsDisabled)
 	data.MachinePolicyID = types.StringValue(worker.MachinePolicyID)
-	data.WorkerPoolIDs, _ = types.ListValueFrom(ctx, types.StringType, worker.WorkerPoolIDs)
+	data.WorkerPoolIDs, _ = types.SetValueFrom(ctx, types.StringType, worker.WorkerPoolIDs)
 
 	endpoint := worker.Endpoint.(*machines.ListeningTentacleEndpoint)
 	data.Uri = types.StringValue(endpoint.URI.String())
