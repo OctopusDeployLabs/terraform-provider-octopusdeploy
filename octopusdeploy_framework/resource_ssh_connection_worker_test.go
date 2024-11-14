@@ -146,7 +146,7 @@ func testAssertSSHConnectionWorkerUpdate(expected sshConnectionWorkerTestData, p
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(prefix, "name", expected.name),
 		resource.TestCheckResourceAttrSet(prefix, "machine_policy_id"),
-		resource.TestCheckResourceAttr(prefix, "worker_pool_ids.#", "1"),
+		resource.TestCheckResourceAttr(prefix, "worker_pool_ids.#", "2"),
 		resource.TestCheckResourceAttrSet(prefix, "account_id"),
 		resource.TestCheckResourceAttr(prefix, "host", expected.host),
 		resource.TestCheckResourceAttr(prefix, "port", strconv.FormatInt(expected.port, 10)),
