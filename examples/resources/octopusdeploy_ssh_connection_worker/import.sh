@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_ssh_connection_worker.<name> <machine-id>
