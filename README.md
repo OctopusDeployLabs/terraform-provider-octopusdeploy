@@ -2,7 +2,7 @@
 
 ## :warning: Warning
 
-The Terraform Provider for Octopus Deploy is under active development. Its functionalty can and will change; it is a v0.\* product until its robustness can be assured. Please be aware that types like resources can and will be modified over time. It is strongly recommended to `validate` and `plan` configuration prior to committing changes via `apply`.
+The Terraform Provider for Octopus Deploy is under active development and undergoing migration from Terraform SDK to Terraform Plugin Framework. Its functionality can and will change; it is a v0.\* product until its robustness can be assured. Please be aware that types like resources can and will be modified over time. It is strongly recommended to `validate` and `plan` configuration prior to committing changes via `apply`.
 
 ## About
 
@@ -78,6 +78,14 @@ $ terraform init
 Terraform will scan the local plugins folder directory structure (first) to qualify the source name provided in your Terraform configuration. If it can resolve this name then the local copy will be initialized for use with Terraform. Otherwise, it will scan the Terraform Registry.
 
 :warning: The `version` number specified in your Terraform configuration MUST match the version number specified in the Makefile. Futhermore, this version MUST either be incremented for each local re-build; otherwise, Terraform will use the cached version of the provider in the `.terraform` folder. Alternatively, you can simply delete the folder and re-run the `terraform init` command.
+
+## Create a New Resource
+
+The provider is currently undergoing migration from Terraform SDK to Terraform Plugin Framework. Ensure all **new** resources are created under the `octopusdeploy-framework` directory using existing resources within the `octopusdeploy-framework` directory as a guideline.
+
+All new resources need an acceptance test that will ensure the lifecycle of the resource works correctly this includes Create, Read, Update and Delete.
+
+Please avoid using blocks in favour of nested attribute types. Blocks are mainly used for resources migrated from SDK to maintain backwards compatability.
 
 ## Debugging 
 If you want to debug the provider follow these steps!

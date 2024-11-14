@@ -6,7 +6,9 @@ This guide provides an overview of the contribution workflow from opening an iss
 
 ## Getting Started
 
-This project is built, tested, and released by workflows defined in GitHub Actions (see [Actions](/actions/) for more information). Release management is controlled through [Release-Please](https://github.com/googleapis/release-please).
+This project is built, tested, and released by workflows defined in GitHub Actions (see [Actions](/actions/) for more information). Release management is controlled through [Release-Please](https://github.com/googleapis/release-please). 
+
+Please use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/#summary), and choose the "Squash and Merge" option to merge your PR (so we get a nice, clear Git history that makes it obvious what's changed)
 
 ### Issues
 
