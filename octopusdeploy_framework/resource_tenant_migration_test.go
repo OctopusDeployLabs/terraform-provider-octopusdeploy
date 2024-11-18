@@ -2,14 +2,15 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"os"
+	"sort"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"sort"
-	"testing"
 )
 
 func TestTenantResource_UpgradeFromSDK_ToPluginFramework(t *testing.T) {
