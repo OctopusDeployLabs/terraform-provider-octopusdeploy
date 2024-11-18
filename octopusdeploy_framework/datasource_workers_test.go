@@ -13,32 +13,27 @@ import (
 func TestAccDataSourceWorkers(t *testing.T) {
 	localName := acctest.RandStringFromCharSet(50, acctest.CharSetAlpha)
 	prefix := fmt.Sprintf("data.octopusdeploy_workers.%s", localName)
+	sshFilter := `communication_styles = ["Ssh"]`
+	listeningFilter := `communication_styles = ["TentaclePassive"]`
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: createTestAccDataSourceWorkerResources(),
-			},
-			{
-				Config: createTestAccDataSourceWorkersEmpty(localName),
+				Config: createTestAccDataSourceWorkerResources(localName, ""),
 				Check:  testAssertDataSourceWorkersEmpty(prefix),
 			},
 			{
-				Config: createTestAccDataSourceSSHWorkers(localName),
+				Config: createTestAccDataSourceWorkerResources(localName, sshFilter),
 				Check:  testAssertDataSourceSSHWorkers(prefix),
 			},
 			{
-				Config: createTestAccDataSourceListeningWorkers(localName),
+				Config: createTestAccDataSourceWorkerResources(localName, listeningFilter),
 				Check:  testAssertDataSourceListeningWorkers(prefix),
 			},
 		},
 	})
-}
-
-func createTestAccDataSourceWorkersEmpty(localName string) string {
-	return fmt.Sprintf(`data "octopusdeploy_workers" "%s" {}`, localName)
 }
 
 func testAssertDataSourceWorkersEmpty(prefix string) resource.TestCheckFunc {
@@ -46,12 +41,6 @@ func testAssertDataSourceWorkersEmpty(prefix string) resource.TestCheckFunc {
 		testAssertWorkersDataSourceID(prefix),
 		resource.TestCheckResourceAttr(prefix, "workers.#", "2"),
 	)
-}
-
-func createTestAccDataSourceSSHWorkers(localName string) string {
-	return fmt.Sprintf(`data "octopusdeploy_workers" "%s" {
-		communication_styles = ["Ssh"]
-	}`, localName)
 }
 
 func testAssertDataSourceSSHWorkers(prefix string) resource.TestCheckFunc {
@@ -64,12 +53,6 @@ func testAssertDataSourceSSHWorkers(prefix string) resource.TestCheckFunc {
 		resource.TestCheckResourceAttr(prefix, "workers[0].fingerprint", "SHA256: 1234abcdef56789"),
 		resource.TestCheckResourceAttr(prefix, "workers[0].dotnet_platform", "linux-x64"),
 	)
-}
-
-func createTestAccDataSourceListeningWorkers(localName string) string {
-	return fmt.Sprintf(`data "octopusdeploy_workers" "%s" {
-		communication_styles = ["TentaclePassive"]
-	}`, localName)
 }
 
 func testAssertDataSourceListeningWorkers(prefix string) resource.TestCheckFunc {
@@ -97,8 +80,9 @@ func testAssertWorkersDataSourceID(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func createTestAccDataSourceWorkerResources() string {
-	return `resource "octopusdeploy_machine_policy" "policy_1" {
+func createTestAccDataSourceWorkerResources(localName string, dataSourceFilter string) string {
+	return fmt.Sprintf(`
+		resource "octopusdeploy_machine_policy" "policy_1" {
 		  	name = "Machine Policy One"
 		}
 
@@ -132,5 +116,12 @@ func createTestAccDataSourceWorkerResources() string {
 			uri					= "https://domain.test/"
 			thumbprint			= "abcdef"
 		}
-`
+
+		data "octopusdeploy_workers" "%s" {
+			%s
+		}
+		`,
+		localName,
+		dataSourceFilter,
+	)
 }
