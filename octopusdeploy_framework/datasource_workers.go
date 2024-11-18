@@ -47,9 +47,7 @@ func (e *workersDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		Take:                util.GetNumber(data.Take),
 		CommunicationStyles: util.ExpandStringList(data.CommunicationStyle),
 		HealthStatuses:      util.ExpandStringList(data.HealthStatuses),
-		WorkerPoolIDs:       util.ExpandStringList(data.WorkerPoolIDs),
 		IsDisabled:          data.IsDisabled.ValueBool(),
-		Thumbprint:          data.Thumbprint.ValueString(),
 	}
 
 	util.DatasourceReading(ctx, "workers", query)
@@ -62,12 +60,12 @@ func (e *workersDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	util.DatasourceResultCount(ctx, "workers", len(existingWorkers.Items))
 
-	workers := []interface{}{}
+	resources := []interface{}{}
 	for _, worker := range existingWorkers.Items {
-		workers = append(workers, schemas.FlattenWorker(worker))
+		resources = append(resources, schemas.FlattenWorker(worker))
 	}
 
-	data.Workers, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.WorkerObjectType()}, workers)
+	data.Workers, _ = types.ListValueFrom(ctx, types.ObjectType{AttrTypes: schemas.WorkerObjectType()}, resources)
 	data.ID = types.StringValue("Workers " + time.Now().UTC().String())
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
