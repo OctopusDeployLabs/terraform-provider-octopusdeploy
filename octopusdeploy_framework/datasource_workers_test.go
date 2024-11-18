@@ -129,7 +129,7 @@ func createTestAccDataSourceWorkerResources() string {
 			name				= "Second listening worker"
 			machine_policy_id	= octopusdeploy_machine_policy.policy_1.id
 			worker_pool_ids		= [octopusdeploy_static_worker_pool.pool_1.id]
-			uri					= "https://domain.test"
+			uri					= "https://domain.test/"
 			thumbprint			= "abcdef"
 		}
 `
