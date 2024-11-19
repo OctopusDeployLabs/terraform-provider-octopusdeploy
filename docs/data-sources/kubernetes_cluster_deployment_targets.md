@@ -110,6 +110,7 @@ Read-Only:
 Read-Only:
 
 - `account_id` (String)
+- `admin_login` (String)
 - `cluster_name` (String)
 - `cluster_resource_group` (String)
 
