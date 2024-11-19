@@ -50,11 +50,11 @@ func testAssertDataSourceSSHWorkers(prefix string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		testAssertWorkersDataSourceID(prefix),
 		resource.TestCheckResourceAttr(prefix, "workers.#", "1"),
-		resource.TestCheckResourceAttr(prefix, "workers[0].name", "First SSH worker"),
-		resource.TestCheckResourceAttr(prefix, "workers[0].host", "test.domain"),
-		resource.TestCheckResourceAttr(prefix, "workers[0].port", "4201"),
-		resource.TestCheckResourceAttr(prefix, "workers[0].fingerprint", "SHA256: 1234abcdef56789"),
-		resource.TestCheckResourceAttr(prefix, "workers[0].dotnet_platform", "linux-x64"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.name", "First SSH worker"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.host", "test.domain"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.port", "4201"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.fingerprint", "SHA256: 1234abcdef56789"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.dotnet_platform", "linux-x64"),
 	)
 }
 
@@ -62,9 +62,9 @@ func testAssertDataSourceListeningWorkers(prefix string) resource.TestCheckFunc 
 	return resource.ComposeTestCheckFunc(
 		testAssertWorkersDataSourceID(prefix),
 		resource.TestCheckResourceAttr(prefix, "workers.#", "1"),
-		resource.TestCheckResourceAttr(prefix, "workers[0].name", "First SSH worker"),
-		resource.TestCheckResourceAttr(prefix, "workers[0].uri", "https://domain.test/"),
-		resource.TestCheckResourceAttr(prefix, "workers[0].thumbprint", "absdef"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.name", "First SSH worker"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.uri", "https://domain.test/"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.thumbprint", "absdef"),
 	)
 }
 
