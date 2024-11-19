@@ -62,7 +62,7 @@ func testAssertDataSourceListeningWorkers(prefix string) resource.TestCheckFunc 
 	return resource.ComposeTestCheckFunc(
 		testAssertWorkersDataSourceID(prefix),
 		resource.TestCheckResourceAttr(prefix, "workers.#", "1"),
-		resource.TestCheckResourceAttr(prefix, "workers.0.name", "First SSH worker"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.name", "Second listening worker"),
 		resource.TestCheckResourceAttr(prefix, "workers.0.uri", "https://domain.test/"),
 		resource.TestCheckResourceAttr(prefix, "workers.0.thumbprint", "absdef"),
 	)
