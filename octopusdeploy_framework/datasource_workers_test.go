@@ -21,15 +21,18 @@ func TestAccDataSourceWorkers(t *testing.T) {
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: createTestAccDataSourceWorkerResources(localName, ""),
+				Config: configTestAccDataSourceWorkerResources(localName, ""),
+			},
+			{
+				Config: configTestAccDataSourceWorkerResources(localName, ""),
 				Check:  testAssertDataSourceWorkersEmpty(prefix),
 			},
 			{
-				Config: createTestAccDataSourceWorkerResources(localName, sshFilter),
+				Config: configTestAccDataSourceWorkerResources(localName, sshFilter),
 				Check:  testAssertDataSourceSSHWorkers(prefix),
 			},
 			{
-				Config: createTestAccDataSourceWorkerResources(localName, listeningFilter),
+				Config: configTestAccDataSourceWorkerResources(localName, listeningFilter),
 				Check:  testAssertDataSourceListeningWorkers(prefix),
 			},
 		},
@@ -80,7 +83,7 @@ func testAssertWorkersDataSourceID(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func createTestAccDataSourceWorkerResources(localName string, dataSourceFilter string) string {
+func configTestAccDataSourceWorkerResources(localName string, dataSourceFilter string) string {
 	return fmt.Sprintf(`
 		resource "octopusdeploy_machine_policy" "policy_1" {
 		  	name = "Machine Policy One"
