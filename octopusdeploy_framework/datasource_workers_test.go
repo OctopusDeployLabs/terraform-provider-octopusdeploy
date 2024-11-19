@@ -64,7 +64,7 @@ func testAssertDataSourceListeningWorkers(prefix string) resource.TestCheckFunc 
 		resource.TestCheckResourceAttr(prefix, "workers.#", "1"),
 		resource.TestCheckResourceAttr(prefix, "workers.0.name", "Second listening worker"),
 		resource.TestCheckResourceAttr(prefix, "workers.0.uri", "https://domain.test/"),
-		resource.TestCheckResourceAttr(prefix, "workers.0.thumbprint", "absdef"),
+		resource.TestCheckResourceAttr(prefix, "workers.0.thumbprint", "abcdef"),
 	)
 }
 
