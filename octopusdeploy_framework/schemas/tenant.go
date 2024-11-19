@@ -5,8 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -16,7 +16,7 @@ type TenantModel struct {
 	Description        types.String `tfsdk:"description"`
 	Name               types.String `tfsdk:"name"`
 	SpaceID            types.String `tfsdk:"space_id"`
-	TenantTags         types.List   `tfsdk:"tenant_tags"`
+	TenantTags         types.Set    `tfsdk:"tenant_tags"`
 
 	ResourceModel
 }
@@ -47,7 +47,7 @@ func TenantObjectType() map[string]attr.Type {
 		"id":                    types.StringType,
 		"name":                  types.StringType,
 		"space_id":              types.StringType,
-		"tenant_tags":           types.ListType{ElemType: types.StringType},
+		"tenant_tags":           types.SetType{ElemType: types.StringType},
 	}
 }
 
@@ -56,7 +56,7 @@ func FlattenTenant(tenant *tenants.Tenant) attr.Value {
 	for i, value := range tenant.TenantTags {
 		tenantTags[i] = types.StringValue(value)
 	}
-	var tenantTagsList, _ = types.ListValue(types.StringType, tenantTags)
+	var tenantTagsSet, _ = types.SetValue(types.StringType, tenantTags)
 
 	return types.ObjectValueMust(TenantObjectType(), map[string]attr.Value{
 		"cloned_from_tenant_id": types.StringValue(tenant.ClonedFromTenantID),
@@ -64,7 +64,7 @@ func FlattenTenant(tenant *tenants.Tenant) attr.Value {
 		"id":                    types.StringValue(tenant.GetID()),
 		"name":                  types.StringValue(tenant.Name),
 		"space_id":              types.StringValue(tenant.SpaceID),
-		"tenant_tags":           tenantTagsList,
+		"tenant_tags":           tenantTagsSet,
 	})
 }
 
@@ -108,7 +108,7 @@ func (t TenantSchema) GetDatasourceSchema() datasourceSchema.Schema {
 						"id":          GetIdDatasourceSchema(true),
 						"name":        GetReadonlyNameDatasourceSchema(),
 						"space_id":    GetSpaceIdDatasourceSchema("tenant", true),
-						"tenant_tags": datasourceSchema.ListAttribute{
+						"tenant_tags": datasourceSchema.SetAttribute{
 							Computed:    true,
 							Description: "A list of tenant tags associated with this resource.",
 							ElementType: types.StringType,
@@ -134,13 +134,13 @@ func (t TenantSchema) GetResourceSchema() resourceSchema.Schema {
 			"id":          GetIdResourceSchema(),
 			"name":        GetNameResourceSchema(true),
 			"space_id":    GetSpaceIdResourceSchema("tenant"),
-			"tenant_tags": resourceSchema.ListAttribute{
+			"tenant_tags": resourceSchema.SetAttribute{
 				Description: "A list of tenant tags associated with this resource.",
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},
