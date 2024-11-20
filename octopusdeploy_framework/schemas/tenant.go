@@ -144,7 +144,7 @@ func (t TenantSchema) GetResourceSchema() resourceSchema.Schema {
 			},
 			"description": GetDescriptionResourceSchema("tenant"),
 			"id":          GetIdResourceSchema(),
-			"is_disabled": datasourceSchema.BoolAttribute{
+			"is_disabled": resourceSchema.BoolAttribute{
 				Description: "The disabled status of this tenant.",
 				Optional:    true,
 				Computed:    true,
