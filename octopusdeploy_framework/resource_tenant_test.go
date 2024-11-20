@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
@@ -41,22 +42,24 @@ func TestAccTenantBasic(t *testing.T) {
 					testTenantExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", description),
+					resource.TestCheckResourceAttr(resourceName, "is_disabled", strconv.FormatBool(false)),
 				),
-				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, description),
+				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, description, false),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testTenantExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", newDescription),
+					resource.TestCheckResourceAttr(resourceName, "is_disabled", strconv.FormatBool(true)),
 				),
-				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, newDescription),
+				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, newDescription, true),
 			},
 		},
 	})
 }
 
-func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, localName string, name string, description string) string {
+func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, projectGroupLocalName string, projectGroupName string, projectLocalName string, projectName string, projectDescription string, environmentLocalName string, environmentName string, localName string, name string, description string, isDisabled bool) string {
 	allowDynamicInfrastructure := false
 	environmentDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	sortOrder := acctest.RandIntRange(0, 10)
@@ -67,13 +70,14 @@ func testAccTenantBasic(lifecycleLocalName string, lifecycleName string, project
 	resource "octopusdeploy_tenant" "%s" {
 		description = "%s"
 		name        = "%s"
+		is_disabled = %v
 	}
 
 	resource "octopusdeploy_tenant_project" "project_environment" {
 		tenant_id = octopusdeploy_tenant.%s.id
 		project_id   = "${octopusdeploy_project.%s.id}"
 		environment_ids = ["${octopusdeploy_environment.%s.id}"]
-	}`, localName, description, name, localName, projectLocalName, environmentLocalName)
+	}`, localName, description, name, isDisabled, localName, projectLocalName, environmentLocalName)
 }
 
 func testTenantExists(prefix string) resource.TestCheckFunc {
