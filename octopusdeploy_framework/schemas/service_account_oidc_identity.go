@@ -9,6 +9,7 @@ import (
 )
 
 const ServiceAccountOIDCIdentityResourceName = "service_account_oidc_identity"
+const ServiceAccountOIDCIdentityDatasourceName = "service_account_oidc_identity"
 
 type ServiceAccountOIDCIdentitySchema struct{}
 
@@ -38,7 +39,28 @@ func (d ServiceAccountOIDCIdentitySchema) GetResourceSchema() resourceSchema.Sch
 }
 
 func (d ServiceAccountOIDCIdentitySchema) GetDatasourceSchema() datasourceSchema.Schema {
-	return datasourceSchema.Schema{}
+	return datasourceSchema.Schema{
+		Attributes: map[string]datasourceSchema.Attribute{
+			"id": GetIdDatasourceSchema(false),
+			"service_account_id": util.DataSourceString().
+				Description("ID of the user associated to this identity").
+				Required().
+				Build(),
+			// Response
+			"name": util.DataSourceString().
+				Description("Name of the user associated to this identity").
+				Computed().
+				Build(),
+			"issuer": util.DataSourceString().
+				Description("OIDC issuer url").
+				Computed().
+				Build(),
+			"subject": util.DataSourceString().
+				Description("OIDC subject claims").
+				Computed().
+				Build(),
+		},
+	}
 }
 
 type OIDCServiceAccountSchemaModel struct {
@@ -48,4 +70,12 @@ type OIDCServiceAccountSchemaModel struct {
 	Subject          types.String `tfsdk:"subject"`
 
 	ResourceModel
+}
+
+type OIDCServiceAccountDatasourceSchemaModel struct {
+	ID               types.String `tfsdk:"id"`
+	ServiceAccountID types.String `tfsdk:"service_account_id"`
+	Name             types.String `tfsdk:"name"`
+	Issuer           types.String `tfsdk:"issuer"`
+	Subject          types.String `tfsdk:"subject"`
 }

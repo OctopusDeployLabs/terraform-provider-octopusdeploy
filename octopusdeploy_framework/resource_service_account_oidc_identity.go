@@ -41,10 +41,12 @@ func (s *ServiceAccountOIDCIdentity) Create(ctx context.Context, req resource.Cr
 	identityCreateResponse, err := serviceaccounts.AddOIDCIdentity(s.Client, identityRequest)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating OIDC identity", err.Error())
+		return
 	}
 	identityResponse, err := serviceaccounts.GetOIDCIdentityByID(s.Client, identityRequest.ServiceAccountID, identityCreateResponse.ID)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating OIDC identity", err.Error())
+		return
 	}
 
 	updateServiceAccountOIDCModel(identityResponse, &plan)
@@ -87,6 +89,7 @@ func (s *ServiceAccountOIDCIdentity) Update(ctx context.Context, req resource.Up
 	identityResponse, err := serviceaccounts.GetOIDCIdentityByID(s.Client, identityRequest.ServiceAccountID, identityRequest.ID)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating OIDC identity", err.Error())
+		return
 	}
 
 	updateServiceAccountOIDCModel(identityResponse, &plan)
