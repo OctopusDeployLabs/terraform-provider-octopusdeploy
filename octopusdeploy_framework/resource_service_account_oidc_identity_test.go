@@ -79,6 +79,7 @@ func testServiceAccountIdentityConfig(localName string, localUserName string, da
 		userData.Username,
 		localName,
 		data.Name,
+		data.ServiceAccountID,
 		data.Issuer,
 		data.Subject)
 }
