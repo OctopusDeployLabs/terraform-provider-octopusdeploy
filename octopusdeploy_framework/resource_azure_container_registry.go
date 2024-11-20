@@ -30,7 +30,7 @@ func (r *azureContainerRegistryFeedTypeResource) Metadata(ctx context.Context, r
 }
 
 func (r *azureContainerRegistryFeedTypeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.GoogleContainerRegistryFeedSchema{}.GetResourceSchema()
+	resp.Schema = schemas.AzureContainerRegistryFeedSchema{}.GetResourceSchema()
 }
 
 func (r *azureContainerRegistryFeedTypeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -117,7 +117,7 @@ func (r *azureContainerRegistryFeedTypeResource) Update(ctx context.Context, req
 
 	updateAzureDataFromDockerContainerRegistryFeed(data, state.SpaceID.ValueString(), updatedFeed.(*feeds.DockerContainerRegistry))
 
-	tflog.Info(ctx, fmt.Sprintf("Google Container Registry feed updated (%s)", data.ID))
+	tflog.Info(ctx, fmt.Sprintf("Azure Container Registry feed updated (%s)", data.ID))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

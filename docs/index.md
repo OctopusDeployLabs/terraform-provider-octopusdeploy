@@ -17,6 +17,13 @@ This provider is used to configure resources in Octopus Deploy. The provider mus
 
 ## Configuration
 
+### Authentication Methods
+The provider supports authenticating to an Octopus Server instance via either:
+* API Key
+* OIDC Access Token
+
+These are mutually exclusive options - use either, not both. For backward compatibility, API Key will always be preferred over OIDC, when an API Key is present.
+
 ### Default Space
 
 Octopus Deploy supports the concept of a Default Space. This is the first space that is automatically created on server setup. If you do not specify a Space when configuring the Octopus Deploy Terraform provider it will use the Default Space.
@@ -81,6 +88,7 @@ resource "octopusdeploy_environment" "Env3" {
 
 ### Optional
 
+- `access_token` (String) The OIDC Access Token to use with the Octopus REST API
 - `address` (String) The endpoint of the Octopus REST API
 - `api_key` (String) The API key to use with the Octopus REST API
 - `space_id` (String) The space ID to target

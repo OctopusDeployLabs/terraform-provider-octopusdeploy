@@ -3,12 +3,12 @@
 page_title: "octopusdeploy_azure_container_registry Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages a Google Container Registry feed in Octopus Deploy (alias of Docker Container Registry feed)
+  This resource manages Azure Container Registry feed in Octopus Deploy (alias of Docker Container Registry feed)
 ---
 
 # octopusdeploy_azure_container_registry (Resource)
 
-This resource manages a Google Container Registry feed in Octopus Deploy (alias of Docker Container Registry feed)
+This resource manages Azure Container Registry feed in Octopus Deploy (alias of Docker Container Registry feed)
 
 ## Example Usage
 
@@ -34,7 +34,7 @@ resource "octopusdeploy_azure_container_registry" "example" {
 - `api_version` (String)
 - `password` (String, Sensitive) The password associated with this resource.
 - `registry_path` (String)
-- `space_id` (String) The space ID associated with this Google container registry feed.
+- `space_id` (String) The space ID associated with this Azure container registry feed.
 - `username` (String, Sensitive) The username associated with this resource.
 
 ### Read-Only

@@ -14,6 +14,8 @@ func expandKubernetesAzureAuthentication(values interface{}) *machines.Kubernete
 	authentication.AuthenticationType = "KubernetesAzure"
 	authentication.ClusterName = flattenedAuthentication["cluster_name"].(string)
 	authentication.ClusterResourceGroup = flattenedAuthentication["cluster_resource_group"].(string)
+	authentication.AdminLogin = flattenedAuthentication["admin_login"].(string)
+
 	return authentication
 }
 
@@ -26,6 +28,7 @@ func flattenKubernetesAzureAuthentication(kubernetesAzureAuthentication *machine
 		"account_id":             kubernetesAzureAuthentication.AccountID,
 		"cluster_name":           kubernetesAzureAuthentication.ClusterName,
 		"cluster_resource_group": kubernetesAzureAuthentication.ClusterResourceGroup,
+		"admin_login":            kubernetesAzureAuthentication.AdminLogin,
 	}}
 }
 
@@ -41,6 +44,10 @@ func getKubernetesAzureAuthenticationSchema() map[string]*schema.Schema {
 		},
 		"cluster_resource_group": {
 			Required: true,
+			Type:     schema.TypeString,
+		},
+		"admin_login": {
+			Optional: true,
 			Type:     schema.TypeString,
 		},
 	}

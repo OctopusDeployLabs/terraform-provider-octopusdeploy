@@ -13,9 +13,10 @@ import (
 )
 
 type octopusDeployFrameworkProvider struct {
-	Address types.String `tfsdk:"address"`
-	ApiKey  types.String `tfsdk:"api_key"`
-	SpaceID types.String `tfsdk:"space_id"`
+	Address     types.String `tfsdk:"address"`
+	ApiKey      types.String `tfsdk:"api_key"`
+	AccessToken types.String `tfsdk:"access_token"`
+	SpaceID     types.String `tfsdk:"space_id"`
 }
 
 var _ provider.Provider = (*octopusDeployFrameworkProvider)(nil)
@@ -44,6 +45,12 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 	config.ApiKey = providerData.ApiKey.ValueString()
 	if config.ApiKey == "" {
 		config.ApiKey = os.Getenv("OCTOPUS_APIKEY")
+	}
+	if config.ApiKey == "" {
+		config.ApiKey = os.Getenv("OCTOPUS_API_KEY")
+	}
+	if config.AccessToken == "" {
+		config.AccessToken = os.Getenv("OCTOPUS_ACCESS_TOKEN")
 	}
 	config.Address = providerData.Address.ValueString()
 	if config.Address == "" {
@@ -78,6 +85,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewTenantProjectDataSource,
 		NewUsersDataSource,
 		NewServiceAccountOIDCIdentityDataSource,
+		NewWorkersDataSource,
 	}
 }
 
@@ -113,6 +121,8 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewRunbookResource,
 		NewTenantResource,
 		NewTentacleCertificateResource,
+		NewListeningTentacleWorkerResource,
+		NewSSHConnectionWorkerResource,
 		NewScriptModuleResource,
 		NewUserResource,
 		NewServiceAccountOIDCIdentity,
@@ -129,6 +139,10 @@ func (p *octopusDeployFrameworkProvider) Schema(_ context.Context, req provider.
 			"api_key": schema.StringAttribute{
 				Optional:    true,
 				Description: "The API key to use with the Octopus REST API",
+			},
+			"access_token": schema.StringAttribute{
+				Optional:    true,
+				Description: "The OIDC Access Token to use with the Octopus REST API",
 			},
 			"space_id": schema.StringAttribute{
 				Optional:    true,

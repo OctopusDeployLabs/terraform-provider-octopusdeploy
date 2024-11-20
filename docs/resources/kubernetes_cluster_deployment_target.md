@@ -109,6 +109,10 @@ Required:
 - `cluster_name` (String)
 - `cluster_resource_group` (String)
 
+Optional:
+
+- `admin_login` (String)
+
 
 <a id="nestedblock--certificate_authentication"></a>
 ### Nested Schema for `certificate_authentication`

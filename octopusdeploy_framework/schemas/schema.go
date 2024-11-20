@@ -333,6 +333,13 @@ func GetDownloadRetryBackoffSecondsResourceSchema() resourceSchema.Attribute {
 	}
 }
 
+func GetPortNumberResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.Int64Attribute{
+		Description: "The port number of the host to connect to (usually 22)",
+		Required:    true,
+	}
+}
+
 func GetValueResourceSchema(isRequired bool) resourceSchema.Attribute {
 	s := resourceSchema.StringAttribute{
 		Description: "The value of this resource.",
