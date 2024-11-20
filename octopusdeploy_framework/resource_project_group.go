@@ -65,7 +65,7 @@ func (r *projectGroupTypeResource) Read(ctx context.Context, req resource.ReadRe
 
 	group, err := projectgroups.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "project group"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "project group"); err != nil {
 			resp.Diagnostics.AddError("unable to load project group", err.Error())
 		}
 		return

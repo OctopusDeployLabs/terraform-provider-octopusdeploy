@@ -77,7 +77,7 @@ func (r *dockerContainerRegistryFeedTypeResource) Read(ctx context.Context, req 
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "docker container registry feed"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "docker container registry feed"); err != nil {
 			resp.Diagnostics.AddError("unable to load docker container registry feed", err.Error())
 		}
 		return

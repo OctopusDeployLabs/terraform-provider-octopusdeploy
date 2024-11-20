@@ -78,7 +78,7 @@ func (r *artifactoryGenericFeedTypeResource) Read(ctx context.Context, req resou
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "artifactory generic feed"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "artifactory generic feed"); err != nil {
 			resp.Diagnostics.AddError("unable to load artifactoryGeneric feed", err.Error())
 		}
 		return

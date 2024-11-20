@@ -79,7 +79,7 @@ func (r *githubRepositoryFeedTypeResource) Read(ctx context.Context, req resourc
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "github repository feed"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "github repository feed"); err != nil {
 			resp.Diagnostics.AddError("unable to load github repository feed", err.Error())
 		}
 		return

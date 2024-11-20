@@ -76,7 +76,7 @@ func (r *googleContainerRegistryFeedTypeResource) Read(ctx context.Context, req 
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "google container registry feed"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "google container registry feed"); err != nil {
 			resp.Diagnostics.AddError("unable to load Google Container Registry feed", err.Error())
 		}
 		return

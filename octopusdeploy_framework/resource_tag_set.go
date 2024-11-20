@@ -61,7 +61,7 @@ func (r *tagSetResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	tagSet, err := tagsets.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "tagSetResource"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, "tagSetResource"); err != nil {
 			resp.Diagnostics.AddError("unable to load tag set", err.Error())
 		}
 		return

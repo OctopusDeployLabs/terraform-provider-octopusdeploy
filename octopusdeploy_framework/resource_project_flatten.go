@@ -260,7 +260,7 @@ func flattenTemplates(templates []actiontemplates.ActionTemplateParameter) types
 			"default_value": util.StringOrNull(template.DefaultValue.Value),
 			"display_settings": types.MapValueMust(
 				types.StringType,
-				convertMapStringToMapAttrValue(template.DisplaySettings),
+				util.ConvertMapStringToMapAttrValue(template.DisplaySettings),
 			),
 		})
 
@@ -308,14 +308,6 @@ func flattenReleaseCreationStrategy(strategy *projects.ReleaseCreationStrategy) 
 	})
 
 	return types.ListValueMust(types.ObjectType{AttrTypes: getReleaseCreationStrategyAttrTypes()}, []attr.Value{obj})
-}
-
-func convertMapStringToMapAttrValue(m map[string]string) map[string]attr.Value {
-	result := make(map[string]attr.Value, len(m))
-	for k, v := range m {
-		result[k] = types.StringValue(v)
-	}
-	return result
 }
 
 func flattenDeploymentActionPackage(pkg *packages.DeploymentActionPackage) types.List {

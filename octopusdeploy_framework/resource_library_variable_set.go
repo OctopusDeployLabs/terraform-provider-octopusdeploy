@@ -66,7 +66,7 @@ func (r *libraryVariableSetFeedTypeResource) Read(ctx context.Context, req resou
 
 	libraryVariableSet, err := libraryvariablesets.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "library variable set"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "library variable set"); err != nil {
 			resp.Diagnostics.AddError("unable to load library variable set", err.Error())
 		}
 		return

@@ -79,7 +79,7 @@ func (r *nugetFeedTypeResource) Read(ctx context.Context, req resource.ReadReque
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "nuget feed"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "nuget feed"); err != nil {
 			resp.Diagnostics.AddError("unable to load nuget feed", err.Error())
 		}
 		return

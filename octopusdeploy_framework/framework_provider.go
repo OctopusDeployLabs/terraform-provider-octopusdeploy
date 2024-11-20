@@ -123,6 +123,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewSSHConnectionWorkerResource,
 		NewScriptModuleResource,
 		NewUserResource,
+		NewDeploymentFreezeResource,
 	}
 }
 

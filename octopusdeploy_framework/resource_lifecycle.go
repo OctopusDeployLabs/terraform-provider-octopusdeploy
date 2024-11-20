@@ -91,7 +91,7 @@ func (r *lifecycleTypeResource) Read(ctx context.Context, req resource.ReadReque
 
 	lifecycle, err := lifecycles.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "lifecycle"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "lifecycle"); err != nil {
 			resp.Diagnostics.AddError("unable to load lifecycle", err.Error())
 		}
 		return

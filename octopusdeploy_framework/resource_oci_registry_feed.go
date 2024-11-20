@@ -76,7 +76,7 @@ func (r *ociRegistryFeedTypeResource) Read(ctx context.Context, req resource.Rea
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "OCI Registry feed"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "OCI Registry feed"); err != nil {
 			resp.Diagnostics.AddError("unable to load OCI Registry feed", err.Error())
 		}
 		return

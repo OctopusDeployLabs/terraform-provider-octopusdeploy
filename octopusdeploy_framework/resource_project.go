@@ -94,7 +94,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	project, err := projects.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "project"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, "project"); err != nil {
 			resp.Diagnostics.AddError("Error reading project", err.Error())
 		}
 		return
