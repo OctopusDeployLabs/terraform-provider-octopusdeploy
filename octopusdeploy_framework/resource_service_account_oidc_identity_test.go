@@ -83,5 +83,5 @@ func testServiceAccountIdentityConfig(localName string, localUserName string, da
 
 func testServiceAccountIdentityUpdate(localName string, localUserName string, data serviceaccounts.OIDCIdentity, userData users.User) string {
 	data.Name = data.Name + "-updated"
-	return testServiceAccountIdentityUpdate(localName, localUserName, data, userData)
+	return testServiceAccountIdentityConfig(localName, localUserName, data, userData)
 }
