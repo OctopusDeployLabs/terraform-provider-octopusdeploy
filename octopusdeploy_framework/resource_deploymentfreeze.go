@@ -58,7 +58,7 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	diags := mapToState(ctx, state, deploymentFreeze)
+	diags := mapToState(ctx, state, deploymentFreeze, true)
 	if diags.HasError() {
 		resp.Diagnostics = diags
 		return
@@ -88,7 +88,7 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	diags = mapToState(ctx, plan, createdFreeze)
+	diags = mapToState(ctx, plan, createdFreeze, false)
 	if diags.HasError() {
 		return
 	}
@@ -125,7 +125,7 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 		resp.Diagnostics.AddError("error while updating deployment freeze", err.Error())
 	}
 
-	diags := mapToState(ctx, plan, updatedFreeze)
+	diags := mapToState(ctx, plan, updatedFreeze, false)
 	if diags.HasError() {
 		return
 	}
@@ -157,11 +157,14 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 	resp.State.RemoveResource(ctx)
 }
 
-func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze) diag.Diagnostics {
+func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze, useSourceForDates bool) diag.Diagnostics {
 	state.ID = types.StringValue(deploymentFreeze.ID)
 	state.Name = types.StringValue(deploymentFreeze.Name)
-	state.Start = types.StringValue(deploymentFreeze.Start.Format(time.RFC3339))
-	state.End = types.StringValue(deploymentFreeze.End.Format(time.RFC3339))
+	if useSourceForDates {
+		state.Start = types.StringValue(deploymentFreeze.Start.Format(time.RFC3339))
+		state.End = types.StringValue(deploymentFreeze.End.Format(time.RFC3339))
+	}
+
 	if len(deploymentFreeze.ProjectEnvironmentScope) > 0 {
 		value, diags := util.ConvertMapStringArrayToMapAttrValue(ctx, deploymentFreeze.ProjectEnvironmentScope)
 		if diags.HasError() {
@@ -182,6 +185,9 @@ func mapFromState(ctx context.Context, state *deploymentFreezeModel) (*deploymen
 	if err != nil {
 		return nil, err
 	}
+
+	start = start.UTC()
+	end = end.UTC()
 
 	freeze := deploymentfreezes.DeploymentFreeze{
 		Name:  state.Name.ValueString(),
