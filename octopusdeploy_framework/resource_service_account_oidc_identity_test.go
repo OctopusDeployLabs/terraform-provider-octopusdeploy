@@ -44,7 +44,7 @@ func TestAccOctopusDeployServiceAccountOIDCIdentity(t *testing.T) {
 				),
 			},
 			{
-				Config: testServiceAccountIdentityConfig(localName, localUserName, data, userData),
+				Config: testServiceAccountIdentityUpdate(localName, localUserName, data, userData),
 				Check: resource.ComposeTestCheckFunc(
 					testScriptModuleExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", data.Name+"-updated"),
