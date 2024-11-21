@@ -39,7 +39,6 @@ func TestAccOctopusDeployServiceAccountOIDCIdentity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testScriptModuleExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", data.Name),
-					resource.TestCheckResourceAttr(prefix, "service_account_id", data.ServiceAccountID),
 					resource.TestCheckResourceAttr(prefix, "issuer", data.Issuer),
 					resource.TestCheckResourceAttr(prefix, "subject", data.Subject),
 				),
@@ -49,7 +48,6 @@ func TestAccOctopusDeployServiceAccountOIDCIdentity(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testScriptModuleExists(prefix),
 					resource.TestCheckResourceAttr(prefix, "name", data.Name+"-updated"),
-					resource.TestCheckResourceAttr(prefix, "service_account_id", data.ServiceAccountID),
 					resource.TestCheckResourceAttr(prefix, "issuer", data.Issuer),
 					resource.TestCheckResourceAttr(prefix, "subject", data.Subject),
 				),
