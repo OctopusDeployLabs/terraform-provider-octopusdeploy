@@ -9,16 +9,15 @@ import (
 type DeploymentFreezeSchema struct{}
 
 const DeploymentFreezeResourceName = "deployment_freeze"
-const DeploymentFreezeDatasourceName = "deployment_freezes"
 
 func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":    GetIdResourceSchema(),
 			"name":  GetNameResourceSchema(true),
-			"start": GetDateTimeResourceSchema("start"),
-			"end":   GetDateTimeResourceSchema("end"),
-			"ProjectEnvironmentScope": resourceSchema.MapAttribute{
+			"start": GetDateTimeResourceSchema("start", true),
+			"end":   GetDateTimeResourceSchema("end", true),
+			"project_environment_scope": resourceSchema.MapAttribute{
 				Description: "projects with environment scopes",
 				Required:    true,
 				ElementType: types.SetType{ElemType: types.StringType},
@@ -28,8 +27,7 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 }
 
 func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
-	//TODO implement me
-	panic("implement me")
+	return datasourceSchema.Schema{}
 }
 
 var _ EntitySchema = &DeploymentFreezeSchema{}
