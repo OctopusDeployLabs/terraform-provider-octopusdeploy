@@ -84,6 +84,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewScriptModuleDataSource,
 		NewTenantProjectDataSource,
 		NewUsersDataSource,
+		NewServiceAccountOIDCIdentityDataSource,
 		NewWorkersDataSource,
 	}
 }
@@ -124,6 +125,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewSSHConnectionWorkerResource,
 		NewScriptModuleResource,
 		NewUserResource,
+		NewServiceAccountOIDCIdentity,
 	}
 }
 
