@@ -77,7 +77,7 @@ func (r *userTypeResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	user, err := users.GetByID(r.Config.Client, data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "user"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "user"); err != nil {
 			resp.Diagnostics.AddError("unable to load user", err.Error())
 		}
 		return

@@ -79,7 +79,7 @@ func (r *tenantTypeResource) Read(ctx context.Context, req resource.ReadRequest,
 	client := r.Config.Client
 	tenant, err := tenants.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "tenant"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "tenant"); err != nil {
 			resp.Diagnostics.AddError("unable to load tenant", err.Error())
 		}
 		return

@@ -67,7 +67,7 @@ func (r *usernamePasswordAccountResource) Read(ctx context.Context, req resource
 
 	account, err := accounts.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "usernamePasswordAccountResource"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, "usernamePasswordAccountResource"); err != nil {
 			resp.Diagnostics.AddError("unable to load username password account", err.Error())
 		}
 		return

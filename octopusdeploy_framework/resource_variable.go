@@ -127,7 +127,7 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 	variable, err := variables.GetByID(r.Config.Client, data.SpaceID.ValueString(), variableOwnerID.ValueString(), data.ID.ValueString())
 
 	if err != nil {
-		apiError := errors.ProcessApiErrorV2(ctx, resp, data, err, schemas.VariableResourceDescription)
+		apiError := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, schemas.VariableResourceDescription)
 		if apiError != nil {
 			resp.Diagnostics.AddError("unable to load variable", apiError.Error())
 		} else {

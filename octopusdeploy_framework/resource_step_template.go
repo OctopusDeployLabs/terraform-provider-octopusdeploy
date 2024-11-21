@@ -75,7 +75,7 @@ func (r *stepTemplateTypeResource) Read(ctx context.Context, req resource.ReadRe
 
 	actionTemplate, err := actiontemplates.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "action template"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "action template"); err != nil {
 			resp.Diagnostics.AddError("unable to load environment", err.Error())
 		}
 		return
