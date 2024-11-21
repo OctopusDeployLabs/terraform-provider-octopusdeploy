@@ -434,12 +434,13 @@ func GetSensitiveResourceSchema(description string, isRequired bool) resourceSch
 	return s
 }
 
-func GetDateTimeResourceSchema(description string) resourceSchema.Attribute {
-	regex := "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d\\d\\d\\+\\d\\d:\\d\\d"
+func GetDateTimeResourceSchema(description string, isRequired bool) resourceSchema.Attribute {
+	regex := "^((?:(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?))(?:Z|[\\+-]\\d{2}:\\d{2})?)"
 	return resourceSchema.StringAttribute{
 		Description: description,
+		Required:    isRequired,
 		Validators: []validator.String{
-			stringvalidator.RegexMatches(regexp.MustCompile(regex), fmt.Sprintf("must match %s", regex)),
+			stringvalidator.RegexMatches(regexp.MustCompile(regex), fmt.Sprintf("must match RFC3339 format, %s", regex)),
 		},
 	}
 }
