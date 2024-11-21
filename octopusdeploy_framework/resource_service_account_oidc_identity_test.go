@@ -30,7 +30,6 @@ func TestAccOctopusDeployServiceAccountOIDCIdentity(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy:             testScriptModuleCheckDestroy,
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
