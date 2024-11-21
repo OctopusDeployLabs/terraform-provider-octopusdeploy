@@ -69,7 +69,7 @@ func testServiceAccountIdentityConfig(localName string, localUserName string, da
 	}
 	resource "octopusdeploy_service_account_oidc_identity" "%s" {
 		name        = "%s"
-		service_account_id = "%s"
+		service_account_id = %s
 		issuer = "%s"
 		subject = "%s"
 	}`,
