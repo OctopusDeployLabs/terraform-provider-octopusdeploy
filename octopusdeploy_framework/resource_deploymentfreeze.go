@@ -2,7 +2,6 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deploymentfreezes"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
@@ -77,7 +76,7 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	var deploymentFreeze *deploymentfreezes.DeploymentFreeze
-	deploymentFreeze, err := mapFromState(plan)
+	deploymentFreeze, err := mapFromState(ctx, plan)
 	if err != nil {
 		resp.Diagnostics.AddError("error while creating deployment freeze", err.Error())
 		return
@@ -105,7 +104,7 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	existingFreeze, err := deploymentfreezes.GetById(f.Config.Client, plan.GetID())
+	existingFreeze, err := deploymentfreezes.GetById(f.Config.Client, plan.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, &resp.State, plan, err, "deployment freeze"); err != nil {
 			resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
@@ -113,7 +112,7 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	updatedFreeze, err := mapFromState(plan)
+	updatedFreeze, err := mapFromState(ctx, plan)
 	if err != nil {
 		resp.Diagnostics.AddError("error while mapping deployment freeze", err.Error())
 	}
@@ -161,20 +160,20 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze) diag.Diagnostics {
 	state.ID = types.StringValue(deploymentFreeze.ID)
 	state.Name = types.StringValue(deploymentFreeze.Name)
-	state.Start = types.StringValue(deploymentFreeze.Start.String())
-	state.End = types.StringValue(deploymentFreeze.End.String())
+	state.Start = types.StringValue(deploymentFreeze.Start.Format(time.RFC3339))
+	state.End = types.StringValue(deploymentFreeze.End.Format(time.RFC3339))
 	if len(deploymentFreeze.ProjectEnvironmentScope) > 0 {
 		value, diags := util.ConvertMapStringArrayToMapAttrValue(ctx, deploymentFreeze.ProjectEnvironmentScope)
 		if diags.HasError() {
 			return diags
 		}
-		state.ProjectEnvironmentScope, diags = types.MapValueFrom(ctx, types.StringType, value)
+		state.ProjectEnvironmentScope, diags = types.MapValueFrom(ctx, types.SetType{ElemType: types.StringType}, value)
 	}
 
 	return nil
 }
 
-func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, error) {
+func mapFromState(ctx context.Context, state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, error) {
 	start, err := time.Parse(time.RFC3339, state.Start.ValueString())
 	if err != nil {
 		return nil, err
@@ -192,11 +191,16 @@ func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFr
 
 	freeze.ID = state.ID.String()
 	if !state.ProjectEnvironmentScope.IsNull() {
+		scopeMap := make(map[string][]string)
 		for k, v := range state.ProjectEnvironmentScope.Elements() {
-			scope := v.(types.Object)
-			fmt.Println("%s", k)
-			fmt.Println("%s", scope)
+			var scopes []string
+			for _, s := range v.(types.Set).Elements() {
+				scopes = append(scopes, s.(types.String).ValueString())
+			}
+
+			scopeMap[k] = scopes
 		}
+		freeze.ProjectEnvironmentScope = scopeMap
 	}
 
 	return &freeze, nil
