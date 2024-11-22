@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -14,6 +15,7 @@ import (
 type TenantModel struct {
 	ClonedFromTenantId types.String `tfsdk:"cloned_from_tenant_id"`
 	Description        types.String `tfsdk:"description"`
+	IsDisabled         types.Bool   `tfsdk:"is_disabled"`
 	Name               types.String `tfsdk:"name"`
 	SpaceID            types.String `tfsdk:"space_id"`
 	TenantTags         types.Set    `tfsdk:"tenant_tags"`
@@ -26,6 +28,7 @@ type TenantsModel struct {
 	ID                 types.String `tfsdk:"id"`
 	IDs                types.List   `tfsdk:"ids"`
 	IsClone            types.Bool   `tfsdk:"is_clone"`
+	IsDisabled         types.Bool   `tfsdk:"is_disabled"`
 	Name               types.String `tfsdk:"name"`
 	PartialName        types.String `tfsdk:"partial_name"`
 	ProjectId          types.String `tfsdk:"project_id"`
@@ -45,6 +48,7 @@ func TenantObjectType() map[string]attr.Type {
 		"cloned_from_tenant_id": types.StringType,
 		"description":           types.StringType,
 		"id":                    types.StringType,
+		"is_disabled":           types.BoolType,
 		"name":                  types.StringType,
 		"space_id":              types.StringType,
 		"tenant_tags":           types.SetType{ElemType: types.StringType},
@@ -62,6 +66,7 @@ func FlattenTenant(tenant *tenants.Tenant) attr.Value {
 		"cloned_from_tenant_id": types.StringValue(tenant.ClonedFromTenantID),
 		"description":           types.StringValue(tenant.Description),
 		"id":                    types.StringValue(tenant.GetID()),
+		"is_disabled":           types.BoolValue(tenant.IsDisabled),
 		"name":                  types.StringValue(tenant.Name),
 		"space_id":              types.StringValue(tenant.SpaceID),
 		"tenant_tags":           tenantTagsSet,
@@ -80,6 +85,10 @@ func (t TenantSchema) GetDatasourceSchema() datasourceSchema.Schema {
 			"ids": GetQueryIDsDatasourceSchema(),
 			"is_clone": datasourceSchema.BoolAttribute{
 				Description: "A filter to search for cloned resources.",
+				Optional:    true,
+			},
+			"is_disabled": datasourceSchema.BoolAttribute{
+				Description: "A filter to search by the disabled status of a resource.",
 				Optional:    true,
 			},
 			"name": datasourceSchema.StringAttribute{
@@ -106,8 +115,12 @@ func (t TenantSchema) GetDatasourceSchema() datasourceSchema.Schema {
 						},
 						"description": GetDescriptionDatasourceSchema("tenants"),
 						"id":          GetIdDatasourceSchema(true),
-						"name":        GetReadonlyNameDatasourceSchema(),
-						"space_id":    GetSpaceIdDatasourceSchema("tenant", true),
+						"is_disabled": datasourceSchema.BoolAttribute{
+							Description: "The disabled status of this tenant.",
+							Computed:    true,
+						},
+						"name":     GetReadonlyNameDatasourceSchema(),
+						"space_id": GetSpaceIdDatasourceSchema("tenant", true),
 						"tenant_tags": datasourceSchema.SetAttribute{
 							Computed:    true,
 							Description: "A list of tenant tags associated with this resource.",
@@ -132,8 +145,16 @@ func (t TenantSchema) GetResourceSchema() resourceSchema.Schema {
 			},
 			"description": GetDescriptionResourceSchema("tenant"),
 			"id":          GetIdResourceSchema(),
-			"name":        GetNameResourceSchema(true),
-			"space_id":    GetSpaceIdResourceSchema("tenant"),
+			"is_disabled": resourceSchema.BoolAttribute{
+				Description: "The disabled status of this tenant.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"name":     GetNameResourceSchema(true),
+			"space_id": GetSpaceIdResourceSchema("tenant"),
 			"tenant_tags": resourceSchema.SetAttribute{
 				Description: "A list of tenant tags associated with this resource.",
 				ElementType: types.StringType,

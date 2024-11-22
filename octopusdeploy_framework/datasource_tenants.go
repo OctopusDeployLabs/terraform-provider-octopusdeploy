@@ -42,6 +42,7 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		ClonedFromTenantID: data.ClonedFromTenantId.ValueString(),
 		IDs:                util.ExpandStringList(data.IDs),
 		IsClone:            data.IsClone.ValueBool(),
+		IsDisabled:         data.IsDisabled.ValueBool(),
 		Name:               data.Name.ValueString(),
 		PartialName:        data.PartialName.ValueString(),
 		ProjectID:          data.ProjectId.ValueString(),

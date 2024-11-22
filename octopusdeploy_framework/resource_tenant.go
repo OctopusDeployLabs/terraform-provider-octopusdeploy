@@ -151,6 +151,7 @@ func mapStateToTenant(ctx context.Context, data *schemas.TenantModel) (*tenants.
 	tenant.ID = data.ID.ValueString()
 	tenant.ClonedFromTenantID = data.ClonedFromTenantId.ValueString()
 	tenant.Description = data.Description.ValueString()
+	tenant.IsDisabled = data.IsDisabled.ValueBool()
 	tenant.SpaceID = data.SpaceID.ValueString()
 
 	convertedTenantTags, diags := util.SetToStringArray(ctx, data.TenantTags)
@@ -167,6 +168,7 @@ func mapTenantToState(ctx context.Context, data *schemas.TenantModel, tenant *te
 	data.ID = types.StringValue(tenant.ID)
 	data.ClonedFromTenantId = types.StringValue(tenant.ClonedFromTenantID)
 	data.Description = types.StringValue(tenant.Description)
+	data.IsDisabled = types.BoolValue(tenant.IsDisabled)
 	data.SpaceID = types.StringValue(tenant.SpaceID)
 	data.Name = types.StringValue(tenant.Name)
 
