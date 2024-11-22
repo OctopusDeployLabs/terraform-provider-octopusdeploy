@@ -126,7 +126,7 @@ func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	spaceResult, err := spaces.GetByID(s.Client, data.ID.ValueString())
 
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "space"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "space"); err != nil {
 			resp.Diagnostics.AddError("unable to query spaces", err.Error())
 		}
 		return

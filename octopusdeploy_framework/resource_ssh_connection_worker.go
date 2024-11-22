@@ -72,7 +72,7 @@ func (r *sshConnectionWorkerResource) Read(ctx context.Context, req resource.Rea
 	client := r.Config.Client
 	worker, err := workers.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "SSH connection worker"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "SSH connection worker"); err != nil {
 			resp.Diagnostics.AddError("unable to load SSH connection worker", err.Error())
 		}
 		return

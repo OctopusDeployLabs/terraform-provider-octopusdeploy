@@ -78,7 +78,7 @@ func (r *helmFeedTypeResource) Read(ctx context.Context, req resource.ReadReques
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "helm feed"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "helm feed"); err != nil {
 			resp.Diagnostics.AddError("unable to load helm feed", err.Error())
 		}
 		return

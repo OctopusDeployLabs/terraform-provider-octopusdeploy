@@ -90,7 +90,7 @@ func (r *environmentTypeResource) Read(ctx context.Context, req resource.ReadReq
 
 	environment, err := environments.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "environment"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "environment"); err != nil {
 			resp.Diagnostics.AddError("unable to load environment", err.Error())
 		}
 		return

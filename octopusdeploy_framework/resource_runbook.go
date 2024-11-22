@@ -93,7 +93,7 @@ func (r *runbookTypeResource) Read(ctx context.Context, req resource.ReadRequest
 
 	runbook, err := runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, schemas.RunbookResourceDescription); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, schemas.RunbookResourceDescription); err != nil {
 			resp.Diagnostics.AddError("failed to load runbook", err.Error())
 		}
 		return

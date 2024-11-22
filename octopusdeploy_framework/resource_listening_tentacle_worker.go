@@ -74,7 +74,7 @@ func (r *listeningTentacleWorkerResource) Read(ctx context.Context, req resource
 	client := r.Config.Client
 	worker, err := workers.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "listening tentacle worker"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "listening tentacle worker"); err != nil {
 			resp.Diagnostics.AddError("unable to load listening tentacle worker", err.Error())
 		}
 		return

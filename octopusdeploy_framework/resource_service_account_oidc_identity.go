@@ -62,7 +62,7 @@ func (s *ServiceAccountOIDCIdentity) Read(ctx context.Context, req resource.Read
 
 	identityResponse, err := serviceaccounts.GetOIDCIdentityByID(s.Client, state.ServiceAccountID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, "service account OIDC identity"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "service account OIDC identity"); err != nil {
 			resp.Diagnostics.AddError("Error reading service account OIDC identity", err.Error())
 		}
 		return

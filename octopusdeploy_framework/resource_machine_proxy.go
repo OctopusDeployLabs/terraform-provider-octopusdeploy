@@ -63,7 +63,7 @@ func (r *machineProxyResource) Read(ctx context.Context, req resource.ReadReques
 
 	machineProxy, err := proxies.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, "machine proxy"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "machine proxy"); err != nil {
 			resp.Diagnostics.AddError("Error reading machine proxy", err.Error())
 		}
 		return

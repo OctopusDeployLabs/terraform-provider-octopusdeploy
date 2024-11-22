@@ -2,7 +2,7 @@ package errors
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"log"
 	"net/http"
 
@@ -32,20 +32,20 @@ func ProcessApiError(ctx context.Context, d *schema.ResourceData, err error, res
 	return diag.FromErr(err)
 }
 
-func DeleteFromStateV2(ctx context.Context, state *tfsdk.State, resource schemas.IResourceModel, resourceDescription string) error {
+func DeleteFromStateV2(ctx context.Context, resp *resource.ReadResponse, resource schemas.IResourceModel, resourceDescription string) error {
 	log.Printf("[INFO] %s (%s) not found; deleting from state", resourceDescription, resource.GetID())
-	state.RemoveResource(ctx)
+	resp.State.RemoveResource(ctx)
 	return nil
 }
 
-func ProcessApiErrorV2(ctx context.Context, state *tfsdk.State, resource schemas.IResourceModel, err error, resourceDescription string) error {
+func ProcessApiErrorV2(ctx context.Context, resp *resource.ReadResponse, resource schemas.IResourceModel, err error, resourceDescription string) error {
 	if err == nil {
 		return nil
 	}
 
 	if apiError, ok := err.(*core.APIError); ok {
 		if apiError.StatusCode == http.StatusNotFound {
-			return DeleteFromStateV2(ctx, state, resource, resourceDescription)
+			return DeleteFromStateV2(ctx, resp, resource, resourceDescription)
 		}
 	}
 

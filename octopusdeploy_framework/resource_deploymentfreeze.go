@@ -52,7 +52,7 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 
 	deploymentFreeze, err := deploymentfreezes.GetById(f.Config.Client, state.GetID())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, "deployment freeze"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "deployment freeze"); err != nil {
 			resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
 		}
 		return
@@ -76,7 +76,7 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	var deploymentFreeze *deploymentfreezes.DeploymentFreeze
-	deploymentFreeze, err := mapFromState(ctx, plan)
+	deploymentFreeze, err := mapFromState(plan)
 	if err != nil {
 		resp.Diagnostics.AddError("error while creating deployment freeze", err.Error())
 		return
@@ -106,13 +106,11 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 
 	existingFreeze, err := deploymentfreezes.GetById(f.Config.Client, plan.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, plan, err, "deployment freeze"); err != nil {
-			resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
-		}
+		resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
 		return
 	}
 
-	updatedFreeze, err := mapFromState(ctx, plan)
+	updatedFreeze, err := mapFromState(plan)
 	if err != nil {
 		resp.Diagnostics.AddError("error while mapping deployment freeze", err.Error())
 	}
@@ -143,9 +141,7 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 
 	freeze, err := deploymentfreezes.GetById(f.Config.Client, state.GetID())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, "deployment freeze"); err != nil {
-			resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
-		}
+		resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
 		return
 	}
 
@@ -176,7 +172,7 @@ func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFre
 	return nil
 }
 
-func mapFromState(ctx context.Context, state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, error) {
+func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, error) {
 	start, err := time.Parse(time.RFC3339, state.Start.ValueString())
 	if err != nil {
 		return nil, err

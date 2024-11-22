@@ -95,7 +95,7 @@ func (g *gitCredentialResource) Read(ctx context.Context, req resource.ReadReque
 
 	gitCredential, err := credentials.GetByID(g.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, state, err, "git credential"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "git credential"); err != nil {
 			resp.Diagnostics.AddError("Error reading Git credential", err.Error())
 		}
 		return

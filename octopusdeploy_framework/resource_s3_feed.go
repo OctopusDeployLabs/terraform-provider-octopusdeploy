@@ -76,7 +76,7 @@ func (r *s3FeedTypeResource) Read(ctx context.Context, req resource.ReadRequest,
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "S3 feed"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "S3 feed"); err != nil {
 			resp.Diagnostics.AddError("unable to load S3 feed", err.Error())
 		}
 		return

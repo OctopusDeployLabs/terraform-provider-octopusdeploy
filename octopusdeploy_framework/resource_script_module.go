@@ -73,7 +73,7 @@ func (r *scriptModuleTypeResource) Read(ctx context.Context, req resource.ReadRe
 	client := r.Config.Client
 	scriptModule, err := scriptmodules.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, &resp.State, data, err, "Script Module"); err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "Script Module"); err != nil {
 			resp.Diagnostics.AddError("unable to load script module", err.Error())
 		}
 		return
