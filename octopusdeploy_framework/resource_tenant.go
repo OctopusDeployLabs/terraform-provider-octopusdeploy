@@ -3,17 +3,17 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"sort"
 )
 
 type tenantTypeResource struct {
@@ -48,7 +48,7 @@ func (r *tenantTypeResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	tenant, err := mapStateToTenant(data)
+	tenant, err := mapStateToTenant(ctx, data)
 	if err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func (r *tenantTypeResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	mapTenantToState(data, createdTenant)
+	mapTenantToState(ctx, data, createdTenant)
 
 	tflog.Info(ctx, fmt.Sprintf("Tenant created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -85,7 +85,7 @@ func (r *tenantTypeResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	mapTenantToState(data, tenant)
+	mapTenantToState(ctx, data, tenant)
 
 	tflog.Info(ctx, fmt.Sprintf("Tenant read (%s)", tenant.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -106,7 +106,7 @@ func (r *tenantTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	tenantFromApi, err := tenants.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 
-	tenant, err := mapStateToTenant(data)
+	tenant, err := mapStateToTenant(ctx, data)
 	tenant.ID = state.ID.ValueString()
 	if err != nil {
 		resp.Diagnostics.AddError("unable to map to tenant", err.Error())
@@ -122,7 +122,7 @@ func (r *tenantTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	mapTenantToState(data, updatedTenant)
+	mapTenantToState(ctx, data, updatedTenant)
 
 	tflog.Info(ctx, fmt.Sprintf("Tenant updated (%s)", data.ID))
 
@@ -146,30 +146,36 @@ func (r *tenantTypeResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 }
 
-func mapStateToTenant(data *schemas.TenantModel) (*tenants.Tenant, error) {
+func mapStateToTenant(ctx context.Context, data *schemas.TenantModel) (*tenants.Tenant, error) {
 	tenant := tenants.NewTenant(data.Name.ValueString())
 	tenant.ID = data.ID.ValueString()
 	tenant.ClonedFromTenantID = data.ClonedFromTenantId.ValueString()
 	tenant.Description = data.Description.ValueString()
 	tenant.SpaceID = data.SpaceID.ValueString()
-	if len(data.TenantTags.Elements()) > 0 {
-		tenant.TenantTags = util.ExpandStringList(data.TenantTags)
-	} else {
-		tenant.TenantTags = []string{}
+
+	convertedTenantTags, diags := util.SetToStringArray(ctx, data.TenantTags)
+	if diags.HasError() {
+		tflog.Error(ctx, fmt.Sprintf("Error converting tenant tags: %v\n", diags))
 	}
-	sort.Strings(tenant.TenantTags)
+
+	tenant.TenantTags = convertedTenantTags
 
 	return tenant, nil
 }
 
-func mapTenantToState(data *schemas.TenantModel, tenant *tenants.Tenant) {
+func mapTenantToState(ctx context.Context, data *schemas.TenantModel, tenant *tenants.Tenant) {
 	data.ID = types.StringValue(tenant.ID)
 	data.ClonedFromTenantId = types.StringValue(tenant.ClonedFromTenantID)
 	data.Description = types.StringValue(tenant.Description)
 	data.SpaceID = types.StringValue(tenant.SpaceID)
 	data.Name = types.StringValue(tenant.Name)
-	sort.Strings(tenant.TenantTags)
-	data.TenantTags = util.Ternary(tenant.TenantTags != nil && len(tenant.TenantTags) > 0, util.FlattenStringList(tenant.TenantTags), types.ListValueMust(types.StringType, make([]attr.Value, 0)))
+
+	convertedTenantTags, diags := util.SetToStringArray(ctx, data.TenantTags)
+	if diags.HasError() {
+		tflog.Error(ctx, fmt.Sprintf("Error converting tenant tags: %v\n", diags))
+	}
+
+	data.TenantTags = basetypes.SetValue(util.FlattenStringList(convertedTenantTags))
 }
 
 func (*tenantTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
