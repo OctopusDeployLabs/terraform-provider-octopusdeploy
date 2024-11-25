@@ -54,5 +54,3 @@ Read-Only:
 - `upgrade_locked` (Boolean)
 - `uri` (String)
 - `worker_pool_ids` (List of String)
-
-

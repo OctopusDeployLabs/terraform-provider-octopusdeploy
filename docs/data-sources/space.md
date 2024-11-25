@@ -28,5 +28,3 @@ Provides information about an existing space.
 - `slug` (String) The unique slug of this space
 - `space_managers_team_members` (Set of String) A list of user IDs designated to be managers of this space.
 - `space_managers_teams` (Set of String) A list of team IDs designated to be managers of this space.
-
-

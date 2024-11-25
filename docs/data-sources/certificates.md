@@ -77,5 +77,3 @@ Read-Only:
 - `tenants` (List of String)
 - `thumbprint` (String)
 - `version` (Number)
-
-

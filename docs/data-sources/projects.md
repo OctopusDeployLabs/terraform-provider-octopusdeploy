@@ -207,5 +207,3 @@ Read-Only:
 
 - `deployment_action` (String) The deployment action for the donor package.
 - `package_reference` (String) The package reference for the donor package.
-
-

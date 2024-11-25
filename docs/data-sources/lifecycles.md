@@ -104,5 +104,3 @@ Read-Only:
 - `quantity_to_keep` (Number) The quantity of releases to keep.
 - `should_keep_forever` (Boolean) Whether releases should be kept forever.
 - `unit` (String) The unit of time for the retention policy.
-
-

@@ -48,5 +48,3 @@ Optional:
 Read-Only:
 
 - `id` (String) The unique ID for this resource.
-
-

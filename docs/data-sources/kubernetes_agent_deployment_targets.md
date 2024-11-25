@@ -82,5 +82,3 @@ Read-Only:
 - `thumbprint` (String)
 - `upgrade_locked` (Boolean)
 - `uri` (String)
-
-

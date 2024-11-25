@@ -56,5 +56,3 @@ Optional:
 
 - `quantity_to_keep` (Number) How many runs to keep per environment.
 - `should_keep_forever` (Boolean) Indicates if items should never be deleted. The default value is `false`.
-
-
