@@ -27,7 +27,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_offline_package_drop_deployment_targets":         dataSourceOfflinePackageDropDeploymentTargets(),
 			"octopusdeploy_polling_tentacle_deployment_targets":             dataSourcePollingTentacleDeploymentTargets(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
-			
+
 			"octopusdeploy_user_roles":   dataSourceUserRoles(),
 			"octopusdeploy_worker_pools": dataSourceWorkerPools(),
 		},
@@ -62,9 +62,9 @@ func Provider() *schema.Provider {
 			"octopusdeploy_ssh_connection_deployment_target":               resourceSSHConnectionDeploymentTarget(),
 			"octopusdeploy_ssh_key_account":                                resourceSSHKeyAccount(),
 			"octopusdeploy_static_worker_pool":                             resourceStaticWorkerPool(),
-			"octopusdeploy_team":                                           resourceTeam(),
-			"octopusdeploy_token_account":                                  resourceTokenAccount(),
-			"octopusdeploy_user_role":                                      resourceUserRole(),
+			//"octopusdeploy_team":                                           resourceTeam(),
+			"octopusdeploy_token_account": resourceTokenAccount(),
+			"octopusdeploy_user_role":     resourceUserRole(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {

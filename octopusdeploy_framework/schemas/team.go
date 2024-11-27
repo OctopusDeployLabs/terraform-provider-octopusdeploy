@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -20,15 +19,34 @@ func (l TeamSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages lifecycles in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":          GetIdResourceSchema(),
-			"space_id":    util.ResourceString().Optional().Computed().Description("The space ID associated with this resource.").PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
-			"name":        util.ResourceString().Required().Description("The name of this resource.").Build(),
-			"description": util.ResourceString().Optional().Computed().Default("").Description("The description of this lifecycle.").Build(),
+			"can_be_deleted":          util.ResourceBool().Computed().Optional().Build(),
+			"can_be_renamed":          util.ResourceBool().Computed().Optional().Build(),
+			"can_change_members":      util.ResourceBool().Computed().Optional().Build(),
+			"can_change_roles":        util.ResourceBool().Computed().Optional().Build(),
+			"description":             util.ResourceString().Optional().Description("The user-friendly description of this team.").Build(),
+			"external_security_group": getExternalSecurityGroupsAttributeResourceSchema(),
+			"id":                      util.ResourceString().Computed().Optional().Description("The unique ID for this resource.").Build(),
+			"name":                    util.ResourceString().Required().Description("The name of this team.").Build(),
+			"space_id":                util.ResourceString().Computed().Optional().Description("The space associated with this team.").Build(),
+			"users":                   util.ResourceSet(types.StringType).Computed().Optional().Description("A list of user IDs designated to be members of this team.").Build(),
+			//"user_role":               getUserRoleAttribute(),
 		},
 		Blocks: map[string]resourceSchema.Block{
-			"phase":                     getResourcePhaseBlockSchema(),
-			"release_retention_policy":  getResourceRetentionPolicyBlockSchema(),
-			"tentacle_retention_policy": getResourceRetentionPolicyBlockSchema(),
+			"user_role": resourceSchema.SetNestedBlock{
+				Description: "The identities associated with the user.",
+				NestedObject: resourceSchema.NestedBlockObject{
+					Attributes: map[string]resourceSchema.Attribute{
+						"environment_ids":   util.ResourceSet(types.StringType).Optional().Build(),
+						"id":                util.ResourceString().Computed().Build(),
+						"project_group_ids": util.ResourceSet(types.StringType).Optional().Build(),
+						"project_ids":       util.ResourceSet(types.StringType).Optional().Build(),
+						"space_id":          util.ResourceString().Required().Build(),
+						"team_id":           util.ResourceString().Computed().Build(),
+						"tenant_ids":        util.ResourceSet(types.StringType).Optional().Build(),
+						"user_role_id":      util.ResourceString().Required().Build(),
+					},
+				},
+			},
 		},
 	}
 }
@@ -71,6 +89,20 @@ func getTeamsAttribute() datasourceSchema.ListNestedAttribute {
 	}
 }
 
+func getExternalSecurityGroupsAttributeResourceSchema() resourceSchema.ListNestedAttribute {
+	return resourceSchema.ListNestedAttribute{
+		Computed: false,
+		Optional: true,
+		NestedObject: resourceSchema.NestedAttributeObject{
+			Attributes: map[string]resourceSchema.Attribute{
+				"display_id_and_name": util.ResourceBool().Computed().Optional().Build(),
+				"display_name":        util.ResourceString().Computed().Optional().Build(),
+				"id":                  util.ResourceString().Computed().Optional().Description("The unique ID for this resource.").Build(),
+			},
+		},
+	}
+}
+
 func getExternalSecurityGroupsAttribute() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
 		Computed: false,
@@ -101,7 +133,44 @@ func MapToTeamsDatasourceModel(t *teams.Team) TeamTypeDatasourceModel {
 	return team
 }
 
+func MapToTeamsResourceModel(t *teams.Team) TeamTypeResourceModel {
+	var team TeamTypeResourceModel
+	team.CanBeDeleted = types.BoolValue(t.CanBeDeleted)
+	team.CanBeRenamed = types.BoolValue(t.CanBeRenamed)
+	team.CanChangeMembers = types.BoolValue(t.CanChangeMembers)
+	team.CanChangeRoles = types.BoolValue(t.CanChangeRoles)
+	//team.Description = types.StringValue(t.Description)
+	team.ExternalSecurityGroups = MapToExternalSecurityGroupsDatasourceModel(t.ExternalSecurityGroups)
+	team.Name = types.StringValue(t.Name)
+	team.SpaceId = types.StringValue(t.SpaceID)
+	team.Users = basetypes.SetValue(util.FlattenStringList(t.MemberUserIDs))
+	//emptySet, _ := types.SetValue(types.ObjectType{AttrTypes: getUserRoleAttrTypes()}, []attr.Value{})
+	//team.UserRole = emptySet
+	//team.UserRole = MapToUserRoles(t.ExternalSecurityGroups)
+	team.ID = types.StringValue(t.ID)
+	return team
+}
+
+func getUserRoleAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"environment_ids":   types.SetType{ElemType: types.StringType},
+		"id":                types.StringType,
+		"project_group_ids": types.SetType{ElemType: types.StringType},
+		"project_ids":       types.SetType{ElemType: types.StringType},
+		"space_id":          types.StringType,
+		"team_id":           types.StringType,
+		"tenant_ids":        types.SetType{ElemType: types.StringType},
+		"user_role_id":      types.StringType,
+	}
+}
+
 func MapToExternalSecurityGroupsDatasourceModel(es []core.NamedReferenceItem) types.List {
+	if es == nil || len(es) == 0 {
+		return types.ListNull(types.ObjectType{
+			AttrTypes: getExternalSecurityGroupsAttrTypes(),
+		})
+	}
+
 	groups := make([]attr.Value, 0, len(es))
 	for _, g := range es {
 		group := map[string]attr.Value{
@@ -141,4 +210,10 @@ type TeamExternalSecurityGroupTypeDatasourceModel struct {
 	DisplayName      types.String `tfsdk:"display_name"`
 
 	ResourceModel
+}
+
+type TeamTypeResourceModel struct {
+	UserRole types.Set `tfsdk:"user_role"`
+
+	TeamTypeDatasourceModel
 }

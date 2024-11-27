@@ -127,6 +127,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewScriptModuleResource,
 		NewUserResource,
 		NewServiceAccountOIDCIdentity,
+		NewTeamResource,
 	}
 }
 
