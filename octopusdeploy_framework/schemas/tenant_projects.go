@@ -1,8 +1,8 @@
 package schemas
 
 import (
-	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -94,10 +94,6 @@ func (t TenantProjectsSchema) GetResourceSchema() resourceSchema.Schema {
 		}}
 }
 
-func BuildTenantProjectID(spaceID string, tenantID string, projectID string) string {
-	return fmt.Sprintf("%s:%s:%s", spaceID, tenantID, projectID)
-}
-
 func TenantProjectType() map[string]attr.Type {
 	return map[string]attr.Type{
 		"id":              types.StringType,
@@ -116,7 +112,7 @@ func MapTenantToTenantProject(tenant *tenants.Tenant, projectID string) attr.Val
 	environmentIdList, _ := types.ListValue(types.StringType, environmentIDs)
 
 	return types.ObjectValueMust(TenantProjectType(), map[string]attr.Value{
-		"id":              types.StringValue(BuildTenantProjectID(tenant.SpaceID, tenant.ID, projectID)),
+		"id":              types.StringValue(util.BuildCompositeId([]string{tenant.SpaceID, tenant.ID, projectID})),
 		"tenant_id":       types.StringValue(tenant.ID),
 		"project_id":      types.StringValue(projectID),
 		"environment_ids": environmentIdList,

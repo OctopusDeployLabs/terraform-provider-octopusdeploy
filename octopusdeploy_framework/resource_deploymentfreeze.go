@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deploymentfreezes"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -13,10 +14,9 @@ import (
 )
 
 type deploymentFreezeModel struct {
-	Name                    types.String `tfsdk:"name"`
-	Start                   types.String `tfsdk:"start"`
-	End                     types.String `tfsdk:"end"`
-	ProjectEnvironmentScope types.Map    `tfsdk:"project_environment_scope"`
+	Name  types.String `tfsdk:"name"`
+	Start types.String `tfsdk:"start"`
+	End   types.String `tfsdk:"end"`
 
 	schemas.ResourceModel
 }
@@ -44,6 +44,9 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
 }
 
 func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
+
 	var state *deploymentFreezeModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
@@ -68,6 +71,9 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 }
 
 func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
+
 	var plan *deploymentFreezeModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
@@ -98,6 +104,9 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 }
 
 func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
+
 	var plan *deploymentFreezeModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
@@ -114,6 +123,9 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 	if err != nil {
 		resp.Diagnostics.AddError("error while mapping deployment freeze", err.Error())
 	}
+
+	// this resource doesn't include scopes, need to copy it from the fetched resource
+	updatedFreeze.ProjectEnvironmentScope = existingFreeze.ProjectEnvironmentScope
 
 	updatedFreeze.SetID(existingFreeze.GetID())
 	updatedFreeze.Links = existingFreeze.Links
@@ -132,6 +144,9 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 }
 
 func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	internal.Mutex.Lock()
+	defer internal.Mutex.Unlock()
+
 	var state *deploymentFreezeModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -161,14 +176,6 @@ func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFre
 		state.End = types.StringValue(deploymentFreeze.End.Format(time.RFC3339))
 	}
 
-	if len(deploymentFreeze.ProjectEnvironmentScope) > 0 {
-		value, diags := util.ConvertMapStringArrayToMapAttrValue(ctx, deploymentFreeze.ProjectEnvironmentScope)
-		if diags.HasError() {
-			return diags
-		}
-		state.ProjectEnvironmentScope, diags = types.MapValueFrom(ctx, types.SetType{ElemType: types.StringType}, value)
-	}
-
 	return nil
 }
 
@@ -192,18 +199,5 @@ func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFr
 	}
 
 	freeze.ID = state.ID.String()
-	if !state.ProjectEnvironmentScope.IsNull() {
-		scopeMap := make(map[string][]string)
-		for k, v := range state.ProjectEnvironmentScope.Elements() {
-			var scopes []string
-			for _, s := range v.(types.Set).Elements() {
-				scopes = append(scopes, s.(types.String).ValueString())
-			}
-
-			scopeMap[k] = scopes
-		}
-		freeze.ProjectEnvironmentScope = scopeMap
-	}
-
 	return &freeze, nil
 }

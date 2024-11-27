@@ -59,6 +59,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 
 func testDeploymentFreezeBasic(localName string, freezeName string, start string, end string, spaceName string, environments []string, projectName string, projectGroupName string, lifecycleName string) string {
 	spaceLocalName := fmt.Sprintf("space_%s", localName)
+	projectScopeLocalName := fmt.Sprintf("project_scope_%s", localName)
 	projectLocalName := fmt.Sprintf("project_%s", localName)
 	lifecycleLocalName := fmt.Sprintf("lifecycle_%s", localName)
 	projectGroupLocalName := fmt.Sprintf("project_group_%s", localName)
@@ -70,9 +71,11 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 		environmentScopes = append(environmentScopes, fmt.Sprintf("resource.octopusdeploy_environment.%s.id", environmentLocalName))
 	}
 
-	projectScopes := fmt.Sprintf(`{
-		"${resource.octopusdeploy_project.%s.id}" = [ %s ]
-	}`, projectLocalName, strings.Join(environmentScopes, ","))
+	projectScopes := fmt.Sprintf(`resource "octopusdeploy_deployment_freeze_project" "%s" {
+		deploymentfreeze_id = octopusdeploy_deployment_freeze.%s.id
+		project_id = octopusdeploy_project.%s.id
+		environment_ids = [ %s ]
+	}`, projectScopeLocalName, localName, projectLocalName, strings.Join(environmentScopes, ","))
 
 	return fmt.Sprintf(`
 	%s
@@ -89,9 +92,9 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 		name = "%s"
 		start = "%s"
 		end = "%s"
-		project_environment_scope = {
-			%s
-		}`,
+	}
+
+	%s`,
 		createSpace(spaceLocalName, spaceName),
 		environmentResources,
 		createLifecycle(spaceLocalName, lifecycleLocalName, lifecycleName),
