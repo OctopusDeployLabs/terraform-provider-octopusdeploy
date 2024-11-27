@@ -9,6 +9,7 @@ import (
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ EntitySchema = TeamSchema{}
@@ -64,7 +65,7 @@ func getTeamsAttribute() datasourceSchema.ListNestedAttribute {
 				"id":                      util.DataSourceString().Computed().Optional().Description("The unique ID for this resource.").Build(),
 				"name":                    util.DataSourceString().Required().Description("The name of this team.").Build(),
 				"space_id":                util.DataSourceString().Computed().Optional().Description("The space associated with this team.").Build(),
-				"users":                   util.DataSourceList(types.StringType).Computed().Optional().Description("A list of user IDs designated to be members of this team.").Build(),
+				"users":                   util.DataSourceSet(types.StringType).Computed().Optional().Description("A list of user IDs designated to be members of this team.").Build(),
 			},
 		},
 	}
@@ -94,7 +95,7 @@ func MapToTeamsDatasourceModel(t *teams.Team) TeamTypeDatasourceModel {
 	team.ExternalSecurityGroups = MapToExternalSecurityGroupsDatasourceModel(t.ExternalSecurityGroups)
 	team.Name = types.StringValue(t.Name)
 	team.SpaceId = types.StringValue(t.SpaceID)
-	team.Users = util.FlattenStringList(t.MemberUserIDs)
+	team.Users = basetypes.SetValue(util.FlattenStringList(t.MemberUserIDs))
 
 	team.ID = types.StringValue(t.ID)
 	return team
@@ -131,7 +132,7 @@ type TeamTypeDatasourceModel struct {
 	ExternalSecurityGroups types.List   `tfsdk:"external_security_group"`
 	Name                   types.String `tfsdk:"name"`
 	SpaceId                types.String `tfsdk:"space_id"`
-	Users                  types.List   `tfsdk:"users"`
+	Users                  types.Set    `tfsdk:"users"`
 	ResourceModel
 }
 
