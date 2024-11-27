@@ -36,7 +36,7 @@ func (r *environmentTypeResource) Configure(_ context.Context, req resource.Conf
 }
 
 func (*environmentTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp) // dd
 }
 
 func (r *environmentTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
