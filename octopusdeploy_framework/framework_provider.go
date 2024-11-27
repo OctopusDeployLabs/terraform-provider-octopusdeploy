@@ -86,6 +86,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewUsersDataSource,
 		NewServiceAccountOIDCIdentityDataSource,
 		NewWorkersDataSource,
+		NewTeamsDataSource,
 	}
 }
 

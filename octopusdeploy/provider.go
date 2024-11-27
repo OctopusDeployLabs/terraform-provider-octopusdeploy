@@ -27,9 +27,9 @@ func Provider() *schema.Provider {
 			"octopusdeploy_offline_package_drop_deployment_targets":         dataSourceOfflinePackageDropDeploymentTargets(),
 			"octopusdeploy_polling_tentacle_deployment_targets":             dataSourcePollingTentacleDeploymentTargets(),
 			"octopusdeploy_ssh_connection_deployment_targets":               dataSourceSSHConnectionDeploymentTargets(),
-			"octopusdeploy_teams":                                           dataSourceTeams(),
-			"octopusdeploy_user_roles":                                      dataSourceUserRoles(),
-			"octopusdeploy_worker_pools":                                    dataSourceWorkerPools(),
+			
+			"octopusdeploy_user_roles":   dataSourceUserRoles(),
+			"octopusdeploy_worker_pools": dataSourceWorkerPools(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"octopusdeploy_aws_account":                                    resourceAmazonWebServicesAccount(),
