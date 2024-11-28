@@ -2,7 +2,9 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	internalErrors "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"net/http"
 	"strings"
 
@@ -90,11 +92,10 @@ func (t *tenantProjectResource) Read(ctx context.Context, req resource.ReadReque
 
 	tenant, err := tenants.GetByID(t.Client, spaceID, tenantID)
 	if err != nil {
-		apiError := err.(*core.APIError)
-		if apiError.StatusCode != http.StatusNotFound {
+		if err := internalErrors.ProcessApiErrorV2(ctx, resp, data, err, "tenant"); err != nil {
 			resp.Diagnostics.AddError("unable to load tenant", err.Error())
-			return
 		}
+		return
 	}
 
 	data.EnvironmentIDs = util.FlattenStringList(tenant.ProjectEnvironments[projectID])
@@ -162,10 +163,12 @@ func (t *tenantProjectResource) Delete(ctx context.Context, req resource.DeleteR
 
 	tenant, err := tenants.GetByID(t.Client, spaceId, data.TenantID.ValueString())
 	if err != nil {
-		apiError := err.(*core.APIError)
-		if apiError.StatusCode == http.StatusNotFound {
-			tflog.Info(ctx, fmt.Sprintf("tenant (%s) no longer exists", data.TenantID.ValueString()))
-			return
+		var apiError *core.APIError
+		if errors.As(err, &apiError) {
+			if apiError.StatusCode == http.StatusNotFound {
+				tflog.Info(ctx, fmt.Sprintf("tenant (%s) no longer exists", data.TenantID.ValueString()))
+				return
+			}
 		} else {
 			resp.Diagnostics.AddError("cannot load tenant", err.Error())
 			return
