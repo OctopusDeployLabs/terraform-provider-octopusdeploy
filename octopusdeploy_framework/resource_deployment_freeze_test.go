@@ -17,6 +17,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	start := fmt.Sprintf("%d-11-21T06:30:00+10:00", time.Now().Year()+1)
 	end := fmt.Sprintf("%d-11-21T08:30:00+10:00", time.Now().Year()+1)
+	updatedEnd := fmt.Sprintf("%d-11-21T08:30:00+10:00", time.Now().Year()+2)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentName1 := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	environmentName2 := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -37,21 +38,13 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "end", end)),
 				Config: testDeploymentFreezeBasic(localName, name, start, end, spaceName, []string{environmentName1}, projectName, projectGroupName, lifecycleName),
 			},
-		},
-	})
-
-	resource.Test(t, resource.TestCase{
-		CheckDestroy:             testDeploymentFreezeCheckDestroy,
-		PreCheck:                 func() { TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-		Steps: []resource.TestStep{
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testDeploymentFreezeExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttr(resourceName, "name", name+"1"),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
-					resource.TestCheckResourceAttr(resourceName, "end", end)),
-				Config: testDeploymentFreezeBasic(localName, name, start, end, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName),
+					resource.TestCheckResourceAttr(resourceName, "end", updatedEnd)),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName),
 			},
 		},
 	})
