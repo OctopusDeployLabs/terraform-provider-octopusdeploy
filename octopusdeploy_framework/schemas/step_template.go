@@ -163,6 +163,7 @@ func GetStepTemplateParameterResourceSchema() rs.ListNestedAttribute {
 				"label": rs.StringAttribute{
 					Description: "The label shown beside the parameter when presented in the deployment process. Example: `Server name`.",
 					Optional:    true,
+					Computed:    true,
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
@@ -213,7 +214,7 @@ func GetStepTemplatePackageResourceSchema() rs.ListNestedAttribute {
 							Optional:    true,
 							Computed:    true,
 							Validators: []validator.String{
-								stringvalidator.RegexMatches(regexp.MustCompile("^(True|Fasle)$"), "Extract must be True or False"),
+								stringvalidator.RegexMatches(regexp.MustCompile("^(True|False)$"), "Extract must be True or False"),
 							},
 						},
 						"package_parameter_name": rs.StringAttribute{
