@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/teams"
@@ -13,8 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ resource.ResourceWithImportState = &teamTypeResource{}
@@ -42,182 +42,108 @@ func (r *teamTypeResource) ImportState(ctx context.Context, req resource.ImportS
 }
 
 func (r *teamTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data schemas.TeamTypeResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	var plan schemas.TeamTypeResourceModel
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	newTeam := teams.NewTeam(data.Name.ValueString())
-	newTeam.CanBeDeleted = data.CanBeDeleted.ValueBool()
-	newTeam.CanBeRenamed = data.CanBeRenamed.ValueBool()
-	newTeam.CanChangeMembers = data.CanChangeMembers.ValueBool()
-	newTeam.CanChangeRoles = data.CanChangeRoles.ValueBool()
-	newTeam.Description = data.Description.ValueString()
-	newTeam.SpaceID = data.SpaceId.ValueString()
-	newTeam.Description = data.Description.ValueString()
+	team := teams.NewTeam(plan.Name.ValueString())
+	team.CanBeDeleted = plan.CanBeDeleted.ValueBool()
+	team.CanBeRenamed = plan.CanBeRenamed.ValueBool()
+	team.CanChangeMembers = plan.CanChangeMembers.ValueBool()
+	team.CanChangeRoles = plan.CanChangeRoles.ValueBool()
+	team.Description = plan.Description.ValueString()
+	team.SpaceID = plan.SpaceId.ValueString()
+	team.Description = plan.Description.ValueString()
 
 	var userIds []string
-	data.Users.ElementsAs(ctx, &userIds, false)
+	plan.Users.ElementsAs(ctx, &userIds, false)
 
-	newTeam.MemberUserIDs = userIds                                                        // TODO: Verify this is correct
-	newTeam.ExternalSecurityGroups = mapExternalSecurityGroup(data.ExternalSecurityGroups) // TODO: Verify this is correct
+	team.MemberUserIDs = userIds                                                        // TODO: Verify this is correct
+	team.ExternalSecurityGroups = mapExternalSecurityGroup(plan.ExternalSecurityGroups) // TODO: Verify this is correct
 
-	team, err := r.Config.Client.Teams.Add(newTeam)
+	newTeam, err := r.Config.Client.Teams.Add(team)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create team", err.Error())
 		return
 	}
 
-	// Octopus doesn't allow creating inactive users. To mimic creating an inactive user, we need to update the newly created user.
-	//if !data.IsActive.ValueBool() {
-	//	user.IsActive = data.IsActive.ValueBool()
-	//	user, err = users.Update(r.Config.Client, user)
-	//}
-
-	err = resourceTeamUpdateUserRoles(r.Client, ctx, data, team)
+	scopedUserRoles, err := createScopedUserRoles(ctx, r.Client, &plan, newTeam)
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to create roles", err.Error())
 		return
 	}
 
-	roles := data.UserRole
-	data = schemas.MapToTeamsResourceModel(team)
+	updatePlan(newTeam, scopedUserRoles, &plan)
 
-	data.UserRole = roles
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
-func resourceTeamUpdateUserRoles(client *client.Client, ctx context.Context, d schemas.TeamTypeResourceModel, team *teams.Team) error {
-	log.Printf("[INFO] updating team user roles (%s)", d.ID)
-	//if d.UserRole.Equal(team.UserRoles) {
-	//	log.Printf("[INFO] user role has changes (%s)", d.ID)
-	//	o, n := d.GetChange("user_role")
-	//	if o == nil {
-	//		o = new(schema.Set)
-	//	}
-	//	if n == nil {
-	//		n = new(schema.Set)
-	//	}
-	//
-	//	os := o.(*schema.Set)
-	//	ns := n.(*schema.Set)
-	//	remove := expandUserRoles(team, os.Difference(ns).List())
-	//	add := expandUserRoles(team, ns.Difference(os).List())
-	//
-	//	if len(remove) > 0 || len(add) > 0 {
-	//		log.Printf("[INFO] user role found diff (%s)", d.ID)
-	//		//client := m.(*client.Client)
-	//		if len(remove) > 0 {
-	//			log.Printf("[INFO] removing user roles from team (%s)", d.ID)
-	//			for _, userRole := range remove {
-	//				if userRole.ID != "" {
-	//					err := client.ScopedUserRoles.DeleteByID(userRole.ID)
-	//					if err != nil {
-	//						apiError := err.(*core.APIError)
-	//						if apiError.StatusCode != 404 {
-	//							// It's already been deleted, maybe mixing with the independent resource?
-	//							return fmt.Errorf("error removing user role %s from team %s: %s", userRole.ID, team.ID, err)
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//		if len(add) > 0 {
-	//			log.Printf("[INFO] adding new user roles to team (%s)", d.ID)
-	//			for _, userRole := range add {
-	//				_, err := client.ScopedUserRoles.Add(userRole)
-	//				if err != nil {
-	//					return fmt.Errorf("error creating user role for team %s: %s", team.ID, err)
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
-	return nil
+func updatePlan(newTeam *teams.Team, scopedUserRoles []*userroles.ScopedUserRole, plan *schemas.TeamTypeResourceModel) {
+	plan.ID = types.StringValue(newTeam.ID)
+	plan.Name = types.StringValue(newTeam.Name)
+	plan.SpaceId = types.StringValue(newTeam.SpaceID)
+	plan.CanBeDeleted = types.BoolValue(newTeam.CanBeDeleted)
+	plan.CanBeRenamed = types.BoolValue(newTeam.CanBeRenamed)
+	plan.CanChangeMembers = types.BoolValue(newTeam.CanChangeMembers)
+	plan.CanChangeRoles = types.BoolValue(newTeam.CanChangeRoles)
+	plan.ExternalSecurityGroups = schemas.MapToExternalSecurityGroupsDatasourceModel(newTeam.ExternalSecurityGroups)
+	plan.Users = basetypes.SetValue(util.FlattenStringList(newTeam.MemberUserIDs))
+	plan.UserRole = MapToScopedUserRoleResourceModel(scopedUserRoles)
 }
 
-func expandUserRoles(team *teams.Team, userRoles []interface{}) []*userroles.ScopedUserRole {
-	values := make([]*userroles.ScopedUserRole, 0, len(userRoles))
-	for _, rawUserRole := range userRoles {
-		userRole := rawUserRole.(map[string]interface{})
-		scopedUserRole := userroles.NewScopedUserRole(userRole["user_role_id"].(string))
+func createScopedUserRoles(ctx context.Context, client *client.Client, plan *schemas.TeamTypeResourceModel, team *teams.Team) ([]*userroles.ScopedUserRole, error) {
+	newScopedUserRoles := make([]*userroles.ScopedUserRole, 0, len(plan.UserRole))
+	for _, planUserRole := range plan.UserRole {
+		scopedUserRole := userroles.NewScopedUserRole(planUserRole.UserRoleID.ValueString())
 		scopedUserRole.TeamID = team.ID
-		scopedUserRole.SpaceID = userRole["space_id"].(string)
+		scopedUserRole.SpaceID = planUserRole.SpaceID.ValueString()
 
-		if v, ok := userRole["id"]; ok {
-			scopedUserRole.ID = v.(string)
-		} else {
-			scopedUserRole.ID = ""
-		}
+		// Verify this is correct
+		scopedUserRole.ID = planUserRole.ID.ValueString()
+		scopedUserRole.EnvironmentIDs, _ = util.SetToStringArray(ctx, planUserRole.EnvironmentIDs) // TODO: Handle diagnostics
+		scopedUserRole.ProjectGroupIDs, _ = util.SetToStringArray(ctx, planUserRole.ProjectGroupIDs)
+		scopedUserRole.ProjectIDs, _ = util.SetToStringArray(ctx, planUserRole.ProjectIDs)
+		scopedUserRole.TenantIDs, _ = util.SetToStringArray(ctx, planUserRole.TenantIDs)
 
-		if v, ok := userRole["environment_ids"]; ok {
-			scopedUserRole.EnvironmentIDs = getSliceFromTerraformTypeList(v)
-		}
-
-		if v, ok := userRole["project_group_ids"]; ok {
-			scopedUserRole.ProjectGroupIDs = getSliceFromTerraformTypeList(v)
-		}
-
-		if v, ok := userRole["project_ids"]; ok {
-			scopedUserRole.ProjectIDs = getSliceFromTerraformTypeList(v)
-		}
-
-		if v, ok := userRole["tenant_ids"]; ok {
-			scopedUserRole.TenantIDs = getSliceFromTerraformTypeList(v)
-		}
-		values = append(values, scopedUserRole)
+		newScopedUserRoles = append(newScopedUserRoles, scopedUserRole)
 	}
-	return values
+
+	scopedUserRoles := make([]*userroles.ScopedUserRole, 0, len(newScopedUserRoles))
+	for _, userRole := range newScopedUserRoles {
+		createdScopedUserRole, err := client.ScopedUserRoles.Add(userRole)
+		if err != nil {
+			return []*userroles.ScopedUserRole{}, fmt.Errorf("error creating user role for team %s: %s", team.ID, err)
+		}
+
+		scopedUserRole, err := client.ScopedUserRoles.GetByID(createdScopedUserRole.ID)
+		if err != nil {
+			return []*userroles.ScopedUserRole{}, fmt.Errorf("error getting user role for team %s: %s", team.ID, err)
+		}
+		scopedUserRoles = append(scopedUserRoles, scopedUserRole)
+	}
+
+	return scopedUserRoles, nil
 }
 
-func getSliceFromTerraformTypeList(list interface{}) []string {
-	if list == nil {
-		return nil
+func MapToScopedUserRoleResourceModel(scopedUserRoles []*userroles.ScopedUserRole) []schemas.ScopedUserRoleResourceModel {
+	models := make([]schemas.ScopedUserRoleResourceModel, len(scopedUserRoles))
+
+	for i, scopedUserRole := range scopedUserRoles {
+		models[i].UserRoleID = types.StringValue(scopedUserRole.UserRoleID)
+		models[i].EnvironmentIDs = types.SetValueMust(types.StringType, util.ToValueSlice(scopedUserRole.EnvironmentIDs))
+		models[i].ID = types.StringValue(scopedUserRole.ID)
+		models[i].ProjectGroupIDs = types.SetValueMust(types.StringType, util.ToValueSlice(scopedUserRole.ProjectGroupIDs))
+		models[i].ProjectIDs = types.SetValueMust(types.StringType, util.ToValueSlice(scopedUserRole.ProjectIDs))
+		models[i].TenantIDs = types.SetValueMust(types.StringType, util.ToValueSlice(scopedUserRole.TenantIDs))
+		models[i].SpaceID = types.StringValue(scopedUserRole.SpaceID)
+		models[i].TeamID = types.StringValue(scopedUserRole.TeamID)
 	}
 
-	if v, ok := list.([]string); ok {
-		return v
-	}
-
-	terraformList, ok := list.([]interface{})
-	if !ok {
-		terraformSet, ok := list.(*schema.Set)
-		if ok {
-			terraformList = terraformSet.List()
-		} else {
-			// It's not a list or set type
-			return nil
-		}
-	}
-	var newSlice []string
-	for _, v := range terraformList {
-		if v != nil {
-			newSlice = append(newSlice, v.(string))
-		}
-	}
-	return newSlice
+	return models
 }
-
-//func mapIdentities(identities types.Set) []users.Identity {
-//	result := make([]users.Identity, 0, len(identities.Elements()))
-//	for _, identityElem := range identities.Elements() {
-//		identityObj := identityElem.(types.Object)
-//		identityAttrs := identityObj.Attributes()
-//
-//		identity := users.Identity{}
-//		if v, ok := identityAttrs["provider"].(types.String); ok && !v.IsNull() {
-//			identity.IdentityProviderName = v.ValueString()
-//		}
-//
-//		if v, ok := identityAttrs["claim"].(types.Set); ok && !v.IsNull() {
-//			identity.Claims = mapIdentityClaims(v)
-//		}
-//		result = append(result, identity)
-//	}
-//
-//	return result
-//}
 
 func mapExternalSecurityGroup(externalSecurityGroups types.List) []core.NamedReferenceItem {
 	expandedExternalSecurityGroups := make([]core.NamedReferenceItem, 0, len(externalSecurityGroups.Elements()))
@@ -259,7 +185,7 @@ func (r *teamTypeResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	updateTeam(&data, team)
+	updateTeam(&data, team) // Move userrole mapping to mapToTeamResourceModel
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 

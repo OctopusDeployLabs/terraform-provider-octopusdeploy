@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -29,20 +30,20 @@ func (l TeamSchema) GetResourceSchema() resourceSchema.Schema {
 			"name":                    util.ResourceString().Required().Description("The name of this team.").Build(),
 			"space_id":                util.ResourceString().Computed().Optional().Description("The space associated with this team.").Build(),
 			"users":                   util.ResourceSet(types.StringType).Computed().Optional().Description("A list of user IDs designated to be members of this team.").Build(),
-			//"user_role":               getUserRoleAttribute(),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			"user_role": resourceSchema.SetNestedBlock{
-				Description: "The identities associated with the user.",
+				Description: "The user roles associated with the team.",
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"environment_ids":   util.ResourceSet(types.StringType).Optional().Build(),
-						"id":                util.ResourceString().Computed().Build(),
-						"project_group_ids": util.ResourceSet(types.StringType).Optional().Build(),
-						"project_ids":       util.ResourceSet(types.StringType).Optional().Build(),
+						"id": util.ResourceString().Computed().Build(),
+						//"id":                util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The ID of the template parameter.").Build(),
+						"environment_ids":   util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
+						"project_group_ids": util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
+						"project_ids":       util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
 						"space_id":          util.ResourceString().Required().Build(),
 						"team_id":           util.ResourceString().Computed().Build(),
-						"tenant_ids":        util.ResourceSet(types.StringType).Optional().Build(),
+						"tenant_ids":        util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
 						"user_role_id":      util.ResourceString().Required().Build(),
 					},
 				},
@@ -133,37 +134,6 @@ func MapToTeamsDatasourceModel(t *teams.Team) TeamTypeDatasourceModel {
 	return team
 }
 
-func MapToTeamsResourceModel(t *teams.Team) TeamTypeResourceModel {
-	var team TeamTypeResourceModel
-	team.CanBeDeleted = types.BoolValue(t.CanBeDeleted)
-	team.CanBeRenamed = types.BoolValue(t.CanBeRenamed)
-	team.CanChangeMembers = types.BoolValue(t.CanChangeMembers)
-	team.CanChangeRoles = types.BoolValue(t.CanChangeRoles)
-	//team.Description = types.StringValue(t.Description)
-	team.ExternalSecurityGroups = MapToExternalSecurityGroupsDatasourceModel(t.ExternalSecurityGroups)
-	team.Name = types.StringValue(t.Name)
-	team.SpaceId = types.StringValue(t.SpaceID)
-	team.Users = basetypes.SetValue(util.FlattenStringList(t.MemberUserIDs))
-	//emptySet, _ := types.SetValue(types.ObjectType{AttrTypes: getUserRoleAttrTypes()}, []attr.Value{})
-	//team.UserRole = emptySet
-	//team.UserRole = MapToUserRoles(t.ExternalSecurityGroups)
-	team.ID = types.StringValue(t.ID)
-	return team
-}
-
-func getUserRoleAttrTypes() map[string]attr.Type {
-	return map[string]attr.Type{
-		"environment_ids":   types.SetType{ElemType: types.StringType},
-		"id":                types.StringType,
-		"project_group_ids": types.SetType{ElemType: types.StringType},
-		"project_ids":       types.SetType{ElemType: types.StringType},
-		"space_id":          types.StringType,
-		"team_id":           types.StringType,
-		"tenant_ids":        types.SetType{ElemType: types.StringType},
-		"user_role_id":      types.StringType,
-	}
-}
-
 func MapToExternalSecurityGroupsDatasourceModel(es []core.NamedReferenceItem) types.List {
 	if es == nil || len(es) == 0 {
 		return types.ListNull(types.ObjectType{
@@ -213,7 +183,18 @@ type TeamExternalSecurityGroupTypeDatasourceModel struct {
 }
 
 type TeamTypeResourceModel struct {
-	UserRole types.Set `tfsdk:"user_role"`
+	UserRole []ScopedUserRoleResourceModel `tfsdk:"user_role"`
 
 	TeamTypeDatasourceModel
+}
+
+type ScopedUserRoleResourceModel struct {
+	EnvironmentIDs  types.Set    `tfsdk:"environment_ids"`
+	ID              types.String `tfsdk:"id"`
+	ProjectGroupIDs types.Set    `tfsdk:"project_group_ids"`
+	ProjectIDs      types.Set    `tfsdk:"project_ids"`
+	SpaceID         types.String `tfsdk:"space_id"`
+	TeamID          types.String `tfsdk:"team_id"`
+	TenantIDs       types.Set    `tfsdk:"tenant_ids"`
+	UserRoleID      types.String `tfsdk:"user_role_id"`
 }

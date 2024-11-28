@@ -180,7 +180,7 @@ func (b *AttributeBuilder[T]) Default(defaultValue interface{}) *AttributeBuilde
 	case *schema.ListAttribute:
 		a.Default = listdefault.StaticValue(types.List{})
 	case *schema.SetAttribute:
-		a.Default = setdefault.StaticValue(types.Set{})
+		a.Default = setdefault.StaticValue(defaultValue.(types.Set))
 	case *schema.MapAttribute:
 		a.Default = mapdefault.StaticValue(types.Map{})
 	}
