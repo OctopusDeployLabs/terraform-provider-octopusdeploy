@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+const deploymentFreezeResourceName = "deployment_freeze"
+
 type deploymentFreezeModel struct {
 	Name  types.String `tfsdk:"name"`
 	Start types.String `tfsdk:"start"`
@@ -32,7 +34,7 @@ func NewDeploymentFreezeResource() resource.Resource {
 }
 
 func (f *deploymentFreezeResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = util.GetTypeName(schemas.DeploymentFreezeResourceName)
+	resp.TypeName = util.GetTypeName(deploymentFreezeResourceName)
 }
 
 func (f *deploymentFreezeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
