@@ -7,7 +7,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
@@ -63,11 +62,7 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	diags := mapToState(ctx, state, deploymentFreeze, true)
-	if diags.HasError() {
-		resp.Diagnostics = diags
-		return
-	}
+	mapToState(state, deploymentFreeze, true)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -96,11 +91,7 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	diags = mapToState(ctx, plan, createdFreeze, false)
-	if diags.HasError() {
-		return
-	}
-
+	mapToState(plan, createdFreeze, false)
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 }
@@ -124,6 +115,7 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 	updatedFreeze, err := mapFromState(plan)
 	if err != nil {
 		resp.Diagnostics.AddError("error while mapping deployment freeze", err.Error())
+		return
 	}
 
 	// this resource doesn't include scopes, need to copy it from the fetched resource
@@ -135,12 +127,10 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 	updatedFreeze, err = deploymentfreezes.Update(f.Config.Client, updatedFreeze)
 	if err != nil {
 		resp.Diagnostics.AddError("error while updating deployment freeze", err.Error())
-	}
-
-	diags := mapToState(ctx, plan, updatedFreeze, false)
-	if diags.HasError() {
 		return
 	}
+
+	mapToState(plan, updatedFreeze, false)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
@@ -170,15 +160,13 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 	resp.State.RemoveResource(ctx)
 }
 
-func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze, useSourceForDates bool) diag.Diagnostics {
+func mapToState(state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze, useSourceForDates bool) {
 	state.ID = types.StringValue(deploymentFreeze.ID)
 	state.Name = types.StringValue(deploymentFreeze.Name)
 	if useSourceForDates {
 		state.Start = types.StringValue(deploymentFreeze.Start.Format(time.RFC3339))
 		state.End = types.StringValue(deploymentFreeze.End.Format(time.RFC3339))
 	}
-
-	return nil
 }
 
 func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, error) {
