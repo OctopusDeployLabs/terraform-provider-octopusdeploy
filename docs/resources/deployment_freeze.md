@@ -13,26 +13,24 @@ description: |-
 ## Example Usage
 
 ```terraform
-# basic freeze with single environment
+# basic freeze with no project scopes
 resource "octopusdeploy_deployment_freeze" "freeze" {
   name = "Xmas"
   start = "2024-12-25T00:00:00+10:00"
   end = "2024-12-27T00:00:00+08:00"
-
-  project_environment_scope = {
-    "Projects-123" = [ "Environments-123" ]
-  }
 }
 
-# Freeze with different timezones
+# Freeze with different timezones and single project/environment scope
 resource "octopusdeploy_deployment_freeze" "freeze" {
   name = "Xmas"
   start = "2024-12-25T00:00:00+10:00"
   end = "2024-12-27T00:00:00+08:00"
+}
 
-  project_environment_scope = {
-    "Projects-123" = [ "Environments-123", "Environments-456" ]
-  }
+resource "octopusdeploy_deployment_freeze_project" "project_freeze" {
+  deploymentfreeze_id= octopusdeploy_deployment_freeze.freeze.id
+  project_id = "Projects-123"
+  environment_ids = [ "Environments-123", "Environments-456" ]
 }
 
 # Freeze with ids sourced from resources and datasources. Projects can be sourced from different spaces, a single scope can only reference projects and environments from the same space.
@@ -40,11 +38,18 @@ resource "octopusdeploy_deployment_freeze" "freeze" {
   name = "End of financial year shutdown"
   start = "2025-06-30T00:00:00+10:00"
   end = "2025-07-02T00:00:00+10:00"
+}
 
-  project_environment_scope = {
-    "${resource.octopusdeploy_project.project1.id}" = [ resource.octopusdeploy_environment.production.id ]
-    "${data.octopusdeploy_projects.second_project.projects[0].id}" = [ data.octopusdeploy_environments.default_environment.environments[0].id ]
-  }
+resource "octopusdeploy_deployment_freeze_project" "project_freeze" {
+  deploymentfreeze_id = octopusdeploy_deployment_freeze.freeze.id
+  project_id          = resource.octopusdeploy_project.project1.id
+  environment_ids = [resource.octopusdeploy_environment.production.id]
+}
+
+resource "octopusdeploy_deployment_freeze_project" "project_freeze" {
+  deploymentfreeze_id = octopusdeploy_deployment_freeze.freeze.id
+  project_id          = data.octopusdeploy_projects.second_project.projects[0].id
+  environment_ids = [ data.octopusdeploy_environments.default_environment.environments[0].id ]
 }
 ```
 
@@ -55,7 +60,6 @@ resource "octopusdeploy_deployment_freeze" "freeze" {
 
 - `end` (String) The end time of the freeze, must be RFC3339 format
 - `name` (String) The name of this resource.
-- `project_environment_scope` (Map of Set of String) Map of project IDs with an array of environment IDs
 - `start` (String) The start time of the freeze, must be RFC3339 format
 
 ### Read-Only
