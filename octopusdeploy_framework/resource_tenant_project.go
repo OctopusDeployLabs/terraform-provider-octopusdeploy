@@ -67,7 +67,7 @@ func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	plan.ID = types.StringValue(util.BuildCompositeId([]string{spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()}))
+	plan.ID = types.StringValue(util.BuildCompositeId(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
 	plan.SpaceID = types.StringValue(spaceId)
 	plan.EnvironmentIDs = util.FlattenStringList(tenant.ProjectEnvironments[plan.ProjectID.ValueString()])
 
@@ -131,7 +131,7 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.AddError("cannot update tenant environment", err.Error())
 	}
 
-	plan.ID = types.StringValue(util.BuildCompositeId([]string{spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()}))
+	plan.ID = types.StringValue(util.BuildCompositeId(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
 	plan.SpaceID = types.StringValue(spaceId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)

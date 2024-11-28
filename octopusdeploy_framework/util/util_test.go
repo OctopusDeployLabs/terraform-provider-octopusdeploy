@@ -6,7 +6,7 @@ import (
 )
 
 func TestBuildCompositeId(t *testing.T) {
-	require.Equal(t, "first:second:third", BuildCompositeId([]string{"first", "second", "third"}))
+	require.Equal(t, "first:second:third", BuildCompositeId("first", "second", "third"))
 }
 
 func TestSplitCompositeId(t *testing.T) {

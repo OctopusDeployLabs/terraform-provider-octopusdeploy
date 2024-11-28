@@ -167,7 +167,7 @@ func ConvertMapStringArrayToMapAttrValue(ctx context.Context, m map[string][]str
 
 const sep = ":"
 
-func BuildCompositeId(keys []string) string {
+func BuildCompositeId(keys ...string) string {
 	return strings.Join(keys, sep)
 }
 func SplitCompositeId(id string) []string {

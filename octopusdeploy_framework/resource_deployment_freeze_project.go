@@ -64,7 +64,7 @@ func (d *deploymentFreezeProjectResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	plan.ID = types.StringValue(util.BuildCompositeId([]string{plan.DeploymentFreezeID.ValueString(), plan.ProjectID.ValueString()}))
+	plan.ID = types.StringValue(util.BuildCompositeId(plan.DeploymentFreezeID.ValueString(), plan.ProjectID.ValueString()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	tflog.Debug(ctx, fmt.Sprintf("scope for project (%s) added to deployment freeze", plan.ProjectID, plan.DeploymentFreezeID))
 	util.Created(ctx, description)
@@ -130,7 +130,7 @@ func (d *deploymentFreezeProjectResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	plan.ID = types.StringValue(util.BuildCompositeId([]string{plan.DeploymentFreezeID.ValueString(), plan.ProjectID.ValueString()}))
+	plan.ID = types.StringValue(util.BuildCompositeId(plan.DeploymentFreezeID.ValueString(), plan.ProjectID.ValueString()))
 	plan.EnvironmentIDs = util.FlattenStringList(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()])
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
