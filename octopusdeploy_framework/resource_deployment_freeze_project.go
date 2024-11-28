@@ -55,6 +55,7 @@ func (d *deploymentFreezeProjectResource) Create(ctx context.Context, req resour
 	freeze, err := deploymentfreezes.GetById(d.Client, plan.DeploymentFreezeID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("cannot load deployment freeze", err.Error())
+		return
 	}
 	freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()] = util.ExpandStringList(plan.EnvironmentIDs)
 
