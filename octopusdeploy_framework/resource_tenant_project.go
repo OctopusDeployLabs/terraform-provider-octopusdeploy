@@ -6,7 +6,6 @@ import (
 	"fmt"
 	internalErrors "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"net/http"
-	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
@@ -17,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"net/http"
 )
 
 type tenantProjectResource struct {
