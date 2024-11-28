@@ -20,6 +20,7 @@ Provides information about existing tenants.
 - `cloned_from_tenant_id` (String) A filter to search for a cloned tenant by its ID.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `is_clone` (Boolean) A filter to search for cloned resources.
+- `is_disabled` (Boolean) A filter to search by the disabled status of a resource.
 - `name` (String) A filter to search by name.
 - `partial_name` (String) A filter to search by a partial name.
 - `project_id` (String) A filter to search by a project ID.
@@ -41,6 +42,7 @@ Read-Only:
 - `cloned_from_tenant_id` (String) The ID of the tenant from which this tenant was cloned.
 - `description` (String) The description of this tenants.
 - `id` (String) The unique ID for this resource.
+- `is_disabled` (Boolean) The disabled status of this tenant.
 - `name` (String) The name of this resource.
 - `space_id` (String) The space ID associated with this tenant.
 - `tenant_tags` (Set of String) A list of tenant tags associated with this resource.
