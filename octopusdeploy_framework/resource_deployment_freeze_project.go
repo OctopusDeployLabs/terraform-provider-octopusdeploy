@@ -67,7 +67,7 @@ func (d *deploymentFreezeProjectResource) Create(ctx context.Context, req resour
 
 	plan.ID = types.StringValue(util.BuildCompositeId(plan.DeploymentFreezeID.ValueString(), plan.ProjectID.ValueString()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
-	tflog.Debug(ctx, fmt.Sprintf("scope for project (%s) added to deployment freeze", plan.ProjectID, plan.DeploymentFreezeID))
+	tflog.Debug(ctx, fmt.Sprintf("scope for project (%s) added to deployment freeze (%s)", plan.ProjectID, plan.DeploymentFreezeID))
 	util.Created(ctx, description)
 }
 
