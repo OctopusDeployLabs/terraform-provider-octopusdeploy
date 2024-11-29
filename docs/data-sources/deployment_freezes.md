@@ -41,3 +41,5 @@ Read-Only:
 - `name` (String) The name of this resource.
 - `project_environment_scope` (Map of List of String) The project environment scope of the deployment freeze
 - `start` (String) The start time of the freeze
+
+

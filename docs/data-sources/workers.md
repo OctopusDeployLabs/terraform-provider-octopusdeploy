@@ -66,3 +66,5 @@ Read-Only:
 - `thumbprint` (String)
 - `uri` (String)
 - `worker_pool_ids` (List of String)
+
+
