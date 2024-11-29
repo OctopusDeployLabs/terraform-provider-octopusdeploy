@@ -42,3 +42,5 @@ resource "octopusdeploy_kubernetes_agent_deployment_target" "agent" {
 
 - `id` (String) The generated polling subscription ID.
 - `polling_uri` (String) The URI of the polling subscription ID.
+
+

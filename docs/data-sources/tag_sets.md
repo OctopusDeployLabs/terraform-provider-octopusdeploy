@@ -38,3 +38,5 @@ Read-Only:
 - `name` (String) The name of this resource.
 - `sort_order` (Number) The sort order associated with this resource.
 - `space_id` (String) The space ID associated with this resource.
+
+

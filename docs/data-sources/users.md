@@ -76,3 +76,5 @@ Required:
 Optional:
 
 - `is_identifying_claim` (Boolean) Specifies whether or not the claim is an identifying claim.
+
+

@@ -39,3 +39,5 @@ Read-Only:
 - `port` (Number) The port number for the proxy server.
 - `space_id` (String) The space ID associated with this machine proxy.
 - `username` (String) Username for the proxy server
+
+
