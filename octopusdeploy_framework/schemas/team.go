@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -18,18 +17,9 @@ type TeamSchema struct{}
 
 func (l TeamSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages lifecycles in Octopus Deploy.",
-		Attributes: map[string]resourceSchema.Attribute{
-			"id":          GetIdResourceSchema(),
-			"space_id":    util.ResourceString().Optional().Computed().Description("The space ID associated with this resource.").PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
-			"name":        util.ResourceString().Required().Description("The name of this resource.").Build(),
-			"description": util.ResourceString().Optional().Computed().Default("").Description("The description of this lifecycle.").Build(),
-		},
-		Blocks: map[string]resourceSchema.Block{
-			"phase":                     getResourcePhaseBlockSchema(),
-			"release_retention_policy":  getResourceRetentionPolicyBlockSchema(),
-			"tentacle_retention_policy": getResourceRetentionPolicyBlockSchema(),
-		},
+		Description: "This resource manages teams in Octopus Deploy.",
+		Attributes:  map[string]resourceSchema.Attribute{},
+		Blocks:      map[string]resourceSchema.Block{},
 	}
 }
 
@@ -44,12 +34,12 @@ func (l TeamSchema) GetDatasourceSchema() datasourceSchema.Schema {
 			"spaces":         util.DataSourceList(types.StringType).Optional().Description("A filter to search by a list of space IDs.").Build(),
 			"skip":           util.DataSourceInt64().Optional().Description("A filter to specify the number of items to skip in the response.").Build(),
 			"take":           util.DataSourceInt64().Optional().Description("A filter to specify the number of items to take (or return) in the response.").Build(),
-			"teams":          getTeamsAttribute(),
+			"teams":          getDatasourceTeamsAttributes(),
 		},
 	}
 }
 
-func getTeamsAttribute() datasourceSchema.ListNestedAttribute {
+func getDatasourceTeamsAttributes() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
 		Computed:    true,
 		Description: "A list of teams that match the filter(s).",
@@ -61,7 +51,7 @@ func getTeamsAttribute() datasourceSchema.ListNestedAttribute {
 				"can_change_members":      util.DataSourceBool().Computed().Optional().Build(),
 				"can_change_roles":        util.DataSourceBool().Computed().Optional().Build(),
 				"description":             util.DataSourceString().Optional().Description("The user-friendly description of this team.").Build(),
-				"external_security_group": getExternalSecurityGroupsAttribute(),
+				"external_security_group": getDatasrouceExternalSecurityGroupsAttributes(),
 				"id":                      util.DataSourceString().Computed().Optional().Description("The unique ID for this resource.").Build(),
 				"name":                    util.DataSourceString().Required().Description("The name of this team.").Build(),
 				"space_id":                util.DataSourceString().Computed().Optional().Description("The space associated with this team.").Build(),
@@ -71,7 +61,7 @@ func getTeamsAttribute() datasourceSchema.ListNestedAttribute {
 	}
 }
 
-func getExternalSecurityGroupsAttribute() datasourceSchema.ListNestedAttribute {
+func getDatasrouceExternalSecurityGroupsAttributes() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
 		Computed: false,
 		Optional: true,
