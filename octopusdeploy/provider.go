@@ -62,9 +62,8 @@ func Provider() *schema.Provider {
 			"octopusdeploy_ssh_connection_deployment_target":               resourceSSHConnectionDeploymentTarget(),
 			"octopusdeploy_ssh_key_account":                                resourceSSHKeyAccount(),
 			"octopusdeploy_static_worker_pool":                             resourceStaticWorkerPool(),
-			//"octopusdeploy_team":                                           resourceTeam(),
-			"octopusdeploy_token_account": resourceTokenAccount(),
-			"octopusdeploy_user_role":     resourceUserRole(),
+			"octopusdeploy_token_account":                                  resourceTokenAccount(),
+			"octopusdeploy_user_role":                                      resourceUserRole(),
 		},
 		Schema: map[string]*schema.Schema{
 			"address": {

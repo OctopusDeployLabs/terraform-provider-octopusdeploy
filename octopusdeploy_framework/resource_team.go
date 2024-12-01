@@ -76,22 +76,22 @@ func (r *teamTypeResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	updatePlan(newTeam, scopedUserRoles, &plan)
+	updateTeam(newTeam, scopedUserRoles, &plan)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
-func updatePlan(newTeam *teams.Team, scopedUserRoles []*userroles.ScopedUserRole, plan *schemas.TeamTypeResourceModel) {
-	plan.ID = types.StringValue(newTeam.ID)
-	plan.Name = types.StringValue(newTeam.Name)
-	plan.SpaceId = types.StringValue(newTeam.SpaceID)
-	plan.CanBeDeleted = types.BoolValue(newTeam.CanBeDeleted)
-	plan.CanBeRenamed = types.BoolValue(newTeam.CanBeRenamed)
-	plan.CanChangeMembers = types.BoolValue(newTeam.CanChangeMembers)
-	plan.CanChangeRoles = types.BoolValue(newTeam.CanChangeRoles)
-	plan.ExternalSecurityGroups = schemas.MapToExternalSecurityGroupsDatasourceModel(newTeam.ExternalSecurityGroups)
-	plan.Users = basetypes.SetValue(util.FlattenStringList(newTeam.MemberUserIDs))
-	plan.UserRole = MapToScopedUserRoleResourceModel(scopedUserRoles)
+func updateTeam(newTeam *teams.Team, scopedUserRoles []*userroles.ScopedUserRole, teamToUpdate *schemas.TeamTypeResourceModel) {
+	teamToUpdate.ID = types.StringValue(newTeam.ID)
+	teamToUpdate.Name = types.StringValue(newTeam.Name)
+	teamToUpdate.SpaceId = types.StringValue(newTeam.SpaceID)
+	teamToUpdate.CanBeDeleted = types.BoolValue(newTeam.CanBeDeleted)
+	teamToUpdate.CanBeRenamed = types.BoolValue(newTeam.CanBeRenamed)
+	teamToUpdate.CanChangeMembers = types.BoolValue(newTeam.CanChangeMembers)
+	teamToUpdate.CanChangeRoles = types.BoolValue(newTeam.CanChangeRoles)
+	teamToUpdate.ExternalSecurityGroups = schemas.MapToExternalSecurityGroupsDatasourceModel(newTeam.ExternalSecurityGroups)
+	teamToUpdate.Users = basetypes.SetValue(util.FlattenStringList(newTeam.MemberUserIDs))
+	teamToUpdate.UserRole = MapToScopedUserRoleResourceModel(scopedUserRoles)
 }
 
 func createScopedUserRoles(ctx context.Context, client *client.Client, plan *schemas.TeamTypeResourceModel, team *teams.Team) ([]*userroles.ScopedUserRole, error) {
@@ -185,12 +185,16 @@ func (r *teamTypeResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	updateTeam(&data, team) // Move userrole mapping to mapToTeamResourceModel
+	userRoles, err := r.Client.Teams.GetScopedUserRoles(*team, core.SkipTakeQuery{})
+	if err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "team"); err != nil {
+			resp.Diagnostics.AddError("unable to load team", err.Error())
+		}
+		return
+	}
+	
+	updateTeam(team, userRoles.Items, &data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-}
-
-func updateTeam(s *schemas.TeamTypeResourceModel, team *teams.Team) {
-
 }
 
 func (r *teamTypeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

@@ -7,7 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -20,30 +23,32 @@ func (l TeamSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages lifecycles in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"can_be_deleted":          util.ResourceBool().Computed().Optional().Build(),
-			"can_be_renamed":          util.ResourceBool().Computed().Optional().Build(),
-			"can_change_members":      util.ResourceBool().Computed().Optional().Build(),
-			"can_change_roles":        util.ResourceBool().Computed().Optional().Build(),
+			"can_be_deleted":          util.ResourceBool().Computed().Optional().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
+			"can_be_renamed":          util.ResourceBool().Computed().Optional().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
+			"can_change_members":      util.ResourceBool().Computed().Optional().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
+			"can_change_roles":        util.ResourceBool().Computed().Optional().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
 			"description":             util.ResourceString().Optional().Description("The user-friendly description of this team.").Build(),
 			"external_security_group": getExternalSecurityGroupsAttributeResourceSchema(),
-			"id":                      util.ResourceString().Computed().Optional().Description("The unique ID for this resource.").Build(),
+			"id":                      util.ResourceString().Computed().Optional().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The unique ID for this resource.").Build(),
 			"name":                    util.ResourceString().Required().Description("The name of this team.").Build(),
-			"space_id":                util.ResourceString().Computed().Optional().Description("The space associated with this team.").Build(),
-			"users":                   util.ResourceSet(types.StringType).Computed().Optional().Description("A list of user IDs designated to be members of this team.").Build(),
+			"space_id":                util.ResourceString().Computed().Optional().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The space associated with this team.").Build(),
+			"users":                   util.ResourceSet(types.StringType).Computed().Optional().PlanModifiers(setplanmodifier.UseStateForUnknown()).Description("A list of user IDs designated to be members of this team.").Build(),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			"user_role": resourceSchema.SetNestedBlock{
 				Description: "The user roles associated with the team.",
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
-						"id": util.ResourceString().Computed().Build(),
-						//"id":                util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Description("The ID of the template parameter.").Build(),
+						"id":                util.ResourceString().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
 						"environment_ids":   util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
-						"project_group_ids": util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
-						"project_ids":       util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
+						"project_group_ids": util.ResourceSet(types.StringType).Optional().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
+						"project_ids":       util.ResourceSet(types.StringType).Optional().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
 						"space_id":          util.ResourceString().Required().Build(),
-						"team_id":           util.ResourceString().Computed().Build(),
-						"tenant_ids":        util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
+						"team_id":           util.ResourceString().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
+						"tenant_ids":        util.ResourceSet(types.StringType).Optional().PlanModifiers(setplanmodifier.UseStateForUnknown()).Build(),
 						"user_role_id":      util.ResourceString().Required().Build(),
 					},
 				},
