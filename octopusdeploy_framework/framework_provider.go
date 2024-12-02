@@ -132,6 +132,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewServiceAccountOIDCIdentity,
 		NewGenericOidcResource,
 		NewDeploymentFreezeTenantResource,
+		NewGitTriggerResource,
 	}
 }
 
