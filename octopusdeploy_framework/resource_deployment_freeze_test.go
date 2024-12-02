@@ -50,25 +50,19 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 	})
 }
 
-func testDeploymentFreezeBasic(localName string, freezeName string, start string, end string, spaceName string, environments []string, projectName string, projectGroupName string, lifecycleName string) string {
+func testDeploymentFreezeBasic(localName string, freezeName string, start string, end string, spaceName string, environmentName string, projectName string, projectGroupName string, lifecycleName string) string {
 	spaceLocalName := fmt.Sprintf("space_%s", localName)
 	projectScopeLocalName := fmt.Sprintf("project_scope_%s", localName)
 	projectLocalName := fmt.Sprintf("project_%s", localName)
 	lifecycleLocalName := fmt.Sprintf("lifecycle_%s", localName)
 	projectGroupLocalName := fmt.Sprintf("project_group_%s", localName)
-	environmentScopes := make([]string, 0, len(environments))
-	environmentResources := ""
-	for i, environmentName := range environments {
-		environmentLocalName := fmt.Sprintf("environment_%d_%s", i, localName)
-		environmentResources += fmt.Sprintln(createEnvironment(spaceLocalName, environmentLocalName, environmentName))
-		environmentScopes = append(environmentScopes, fmt.Sprintf("resource.octopusdeploy_environment.%s.id", environmentLocalName))
-	}
+	environmentLocalName := fmt.Sprintf("environment_%s", localName)
 
 	projectScopes := fmt.Sprintf(`resource "octopusdeploy_deployment_freeze_project" "%s" {
 		deploymentfreeze_id = octopusdeploy_deployment_freeze.%s.id
 		project_id = octopusdeploy_project.%s.id
 		environment_ids = [ %s ]
-	}`, projectScopeLocalName, localName, projectLocalName, strings.Join(environmentScopes, ","))
+	}`, projectScopeLocalName, localName, projectLocalName, fmt.Sprintf("octopusdeploy_environment.%s.id", environmentLocalName))
 
 	return fmt.Sprintf(`
 	%s
@@ -89,12 +83,58 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 
 	%s`,
 		createSpace(spaceLocalName, spaceName),
-		environmentResources,
+		createEnvironment(spaceLocalName, environmentLocalName, environmentName),
 		createLifecycle(spaceLocalName, lifecycleLocalName, lifecycleName),
 		createProjectGroup(spaceLocalName, projectGroupLocalName, projectGroupName),
 		createProject(spaceLocalName, projectLocalName, projectName, lifecycleLocalName, projectGroupLocalName),
 		localName, freezeName, start, end, projectScopes)
 }
+
+//func testDeploymentFreezeBasic(localName string, freezeName string, start string, end string, spaceName string, environments []string, projectName string, projectGroupName string, lifecycleName string) string {
+//	spaceLocalName := fmt.Sprintf("space_%s", localName)
+//	projectScopeLocalName := fmt.Sprintf("project_scope_%s", localName)
+//	projectLocalName := fmt.Sprintf("project_%s", localName)
+//	lifecycleLocalName := fmt.Sprintf("lifecycle_%s", localName)
+//	projectGroupLocalName := fmt.Sprintf("project_group_%s", localName)
+//	environmentScopes := make([]string, 0, len(environments))
+//	environmentResources := ""
+//	for i, environmentName := range environments {
+//		environmentLocalName := fmt.Sprintf("environment_%d_%s", i, localName)
+//		environmentResources += fmt.Sprintln(createEnvironment(spaceLocalName, environmentLocalName, environmentName))
+//		environmentScopes = append(environmentScopes, fmt.Sprintf("resource.octopusdeploy_environment.%s.id", environmentLocalName))
+//	}
+//
+//	projectScopes := fmt.Sprintf(`resource "octopusdeploy_deployment_freeze_project" "%s" {
+//		deploymentfreeze_id = octopusdeploy_deployment_freeze.%s.id
+//		project_id = octopusdeploy_project.%s.id
+//		environment_ids = [ %s ]
+//	}`, projectScopeLocalName, localName, projectLocalName, strings.Join(environmentScopes, ","))
+//
+//	return fmt.Sprintf(`
+//	%s
+//
+//	%s
+//
+//	%s
+//
+//	%s
+//
+//	%s
+//
+//	resource "octopusdeploy_deployment_freeze" "%s" {
+//		name = "%s"
+//		start = "%s"
+//		end = "%s"
+//	}
+//
+//	%s`,
+//		createSpace(spaceLocalName, spaceName),
+//		environmentResources,
+//		createLifecycle(spaceLocalName, lifecycleLocalName, lifecycleName),
+//		createProjectGroup(spaceLocalName, projectGroupLocalName, projectGroupName),
+//		createProject(spaceLocalName, projectLocalName, projectName, lifecycleLocalName, projectGroupLocalName),
+//		localName, freezeName, start, end, projectScopes)
+//}
 
 func testDeploymentFreezeExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
