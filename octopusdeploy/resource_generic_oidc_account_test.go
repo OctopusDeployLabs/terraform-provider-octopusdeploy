@@ -20,8 +20,6 @@ func TestAccOctopusDeployGenericOpenIDConnectAccountBasic(t *testing.T) {
 	tenantedDeploymentMode := core.TenantedDeploymentModeTenantedOrUntenanted
 
 	executionKeys := []string{"space"}
-	healthKeys := []string{"target"}
-	accountKeys := []string{"type"}
 	audience := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	newDescription := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -38,11 +36,9 @@ func TestAccOctopusDeployGenericOpenIDConnectAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
 					resource.TestCheckResourceAttr(prefix, "execution_subject_keys.0", executionKeys[0]),
-					resource.TestCheckResourceAttr(prefix, "health_subject_keys.0", healthKeys[0]),
-					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys.0", accountKeys[0]),
 					resource.TestCheckResourceAttr(prefix, "audience", audience),
 				),
-				Config: testGenericOpenIDConnectAccountBasic(localName, name, description, tenantedDeploymentMode, executionKeys, healthKeys, accountKeys, audience),
+				Config: testGenericOpenIDConnectAccountBasic(localName, name, description, tenantedDeploymentMode, executionKeys, audience),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -51,17 +47,15 @@ func TestAccOctopusDeployGenericOpenIDConnectAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(prefix, "name", name),
 					resource.TestCheckResourceAttr(prefix, "tenanted_deployment_participation", string(tenantedDeploymentMode)),
 					resource.TestCheckResourceAttr(prefix, "execution_subject_keys.0", executionKeys[0]),
-					resource.TestCheckResourceAttr(prefix, "health_subject_keys.0", healthKeys[0]),
-					resource.TestCheckResourceAttr(prefix, "account_test_subject_keys.0", accountKeys[0]),
 					resource.TestCheckResourceAttr(prefix, "audience", audience),
 				),
-				Config: testGenericOpenIDConnectAccountBasic(localName, name, newDescription, tenantedDeploymentMode, executionKeys, healthKeys, accountKeys, audience),
+				Config: testGenericOpenIDConnectAccountBasic(localName, name, newDescription, tenantedDeploymentMode, executionKeys, audience),
 			},
 		},
 	})
 }
 
-func testGenericOpenIDConnectAccountBasic(localName string, name string, description string, tenantedDeploymentParticipation core.TenantedDeploymentMode, execution_subject_keys []string, health_subject_keys []string, account_test_subject_keys []string, audience string) string {
+func testGenericOpenIDConnectAccountBasic(localName string, name string, description string, tenantedDeploymentParticipation core.TenantedDeploymentMode, execution_subject_keys []string, audience string) string {
 	return fmt.Sprintf(`resource "octopusdeploy_generic_openid_connect_account" "%s" {
 		description = "%s"
 		name = "%s"
@@ -74,5 +68,5 @@ func testGenericOpenIDConnectAccountBasic(localName string, name string, descrip
 	
 	data "octopusdeploy_accounts" "test" {
 		ids = [octopusdeploy_generic_openid_connect_account.%s.id]
-	}`, localName, description, name, tenantedDeploymentParticipation, StringArrayToTerraformArrayFormat(execution_subject_keys), StringArrayToTerraformArrayFormat(health_subject_keys), StringArrayToTerraformArrayFormat(account_test_subject_keys), audience, localName)
+	}`, localName, description, name, tenantedDeploymentParticipation, StringArrayToTerraformArrayFormat(execution_subject_keys), audience, localName)
 }

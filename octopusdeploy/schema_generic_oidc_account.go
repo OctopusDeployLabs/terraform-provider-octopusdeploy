@@ -42,16 +42,12 @@ func expandGenericOpenIDConnectAccount(d *schema.ResourceData) *accounts.Generic
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
+	if v, ok := d.GetOk("audience"); ok {
+		account.Audience = v.(string)
+	}
+
 	if v, ok := d.GetOk("execution_subject_keys"); ok {
 		account.DeploymentSubjectKeys = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk("health_subject_keys"); ok {
-		account.HealthCheckSubjectKeys = getSliceFromTerraformTypeList(v)
-	}
-
-	if v, ok := d.GetOk("account_test_subject_keys"); ok {
-		account.AccountTestSubjectKeys = getSliceFromTerraformTypeList(v)
 	}
 
 	return account
@@ -68,8 +64,6 @@ func getGenericOpenIdConnectAccountSchema() map[string]*schema.Schema {
 		"tenants":                           getTenantsSchema(),
 		"tenant_tags":                       getTenantTagsSchema(),
 		"execution_subject_keys":            getSubjectKeysSchema(SchemaSubjectKeysDescriptionExecution),
-		"health_subject_keys":               getSubjectKeysSchema(SchemaSubjectKeysDescriptionHealth),
-		"account_test_subject_keys":         getSubjectKeysSchema(SchemaSubjectKeysDescriptionAccountTest),
 		"audience":                          getOidcAudienceSchema(),
 	}
 }
@@ -96,14 +90,6 @@ func setGenericOpenIDConnectAccount(ctx context.Context, d *schema.ResourceData,
 
 	if err := d.Set("execution_subject_keys", account.DeploymentSubjectKeys); err != nil {
 		return fmt.Errorf("error setting execution_subject_keys: %s", err)
-	}
-
-	if err := d.Set("health_subject_keys", account.HealthCheckSubjectKeys); err != nil {
-		return fmt.Errorf("error setting health_subject_keys: %s", err)
-	}
-
-	if err := d.Set("account_test_subject_keys", account.AccountTestSubjectKeys); err != nil {
-		return fmt.Errorf("error setting account_test_subject_keys: %s", err)
 	}
 
 	return nil
