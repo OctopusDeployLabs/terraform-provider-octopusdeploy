@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"strings"
 	"testing"
 	"time"
 )
@@ -19,8 +18,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 	end := fmt.Sprintf("%d-11-21T08:30:00+10:00", time.Now().Year()+1)
 	updatedEnd := fmt.Sprintf("%d-11-21T08:30:00+10:00", time.Now().Year()+2)
 	projectName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentName1 := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	environmentName2 := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	environmentName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	spaceName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	projectGroupName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	lifecycleName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -36,7 +34,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
 					resource.TestCheckResourceAttr(resourceName, "end", end)),
-				Config: testDeploymentFreezeBasic(localName, name, start, end, spaceName, []string{environmentName1}, projectName, projectGroupName, lifecycleName),
+				Config: testDeploymentFreezeBasic(localName, name, start, end, spaceName, environmentName, projectName, projectGroupName, lifecycleName),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -44,7 +42,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name+"1"),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
 					resource.TestCheckResourceAttr(resourceName, "end", updatedEnd)),
-				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, environmentName, projectName, projectGroupName, lifecycleName),
 			},
 		},
 	})
