@@ -30,7 +30,7 @@ resource "octopusdeploy_generic_openid_connect_account" "example" {
 ### Optional
 
 - `audience` (String) Federated credentials audience, this value is used to establish a connection between external workload identities and Microsoft Entra ID.
-- `description` (String) The description of this Azure OpenID Connect account.
+- `description` (String) The description of this Generic OpenID Connect account.
 - `environments` (List of String) A list of environment IDs associated with this resource.
 - `execution_subject_keys` (List of String) Keys to include in a deployment or runbook. Valid options are `space`, `environment`, `project`, `tenant`, `runbook`, `account`, `type`
 - `id` (String) The unique ID for this resource.
