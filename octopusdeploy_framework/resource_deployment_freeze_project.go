@@ -92,7 +92,7 @@ func (d *deploymentFreezeProjectResource) Read(ctx context.Context, req resource
 		}
 	}
 
-	data.EnvironmentIDs = util.FlattenStringList(freeze.ProjectEnvironmentScope[projectId])
+	data.EnvironmentIDs = util.Ternary(len(freeze.ProjectEnvironmentScope[projectId]) > 0, util.FlattenStringList(freeze.ProjectEnvironmentScope[projectId]), types.ListNull(types.StringType))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	util.Read(ctx, description)
 }
@@ -132,7 +132,7 @@ func (d *deploymentFreezeProjectResource) Update(ctx context.Context, req resour
 	}
 
 	plan.ID = types.StringValue(util.BuildCompositeId(plan.DeploymentFreezeID.ValueString(), plan.ProjectID.ValueString()))
-	plan.EnvironmentIDs = util.FlattenStringList(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()])
+	plan.EnvironmentIDs = util.Ternary(len(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()]) > 0, util.FlattenStringList(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()]), types.ListNull(types.StringType))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	tflog.Debug(ctx, fmt.Sprintf("updated project (%s) to deployment freeze (%s)", plan.ProjectID.ValueString(), plan.DeploymentFreezeID.ValueString()))
