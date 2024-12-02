@@ -8,8 +8,10 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/http"
 )
@@ -66,7 +68,7 @@ func (d *deploymentFreezeProjectResource) Create(ctx context.Context, req resour
 	}
 
 	plan.ID = types.StringValue(util.BuildCompositeId(plan.DeploymentFreezeID.ValueString(), plan.ProjectID.ValueString()))
-	plan.EnvironmentIDs = util.Ternary(len(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()]) > 0, util.FlattenStringList(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()]), types.ListNull(types.StringType))
+	plan.EnvironmentIDs = mapEnvironmentIds(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()])
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	tflog.Debug(ctx, fmt.Sprintf("scope for project (%s) added to deployment freeze (%s)", plan.ProjectID, plan.DeploymentFreezeID))
 	util.Created(ctx, description)
@@ -93,7 +95,7 @@ func (d *deploymentFreezeProjectResource) Read(ctx context.Context, req resource
 		}
 	}
 
-	data.EnvironmentIDs = util.Ternary(len(freeze.ProjectEnvironmentScope[projectId]) > 0, util.FlattenStringList(freeze.ProjectEnvironmentScope[projectId]), types.ListNull(types.StringType))
+	data.EnvironmentIDs = mapEnvironmentIds(freeze.ProjectEnvironmentScope[projectId])
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	util.Read(ctx, description)
 }
@@ -133,7 +135,7 @@ func (d *deploymentFreezeProjectResource) Update(ctx context.Context, req resour
 	}
 
 	plan.ID = types.StringValue(util.BuildCompositeId(plan.DeploymentFreezeID.ValueString(), plan.ProjectID.ValueString()))
-	plan.EnvironmentIDs = util.Ternary(len(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()]) > 0, util.FlattenStringList(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()]), types.ListNull(types.StringType))
+	plan.EnvironmentIDs = mapEnvironmentIds(freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()])
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	tflog.Debug(ctx, fmt.Sprintf("updated project (%s) to deployment freeze (%s)", plan.ProjectID.ValueString(), plan.DeploymentFreezeID.ValueString()))
@@ -170,4 +172,14 @@ func (d *deploymentFreezeProjectResource) Delete(ctx context.Context, req resour
 
 	tflog.Debug(ctx, fmt.Sprintf("scope for project (%s) removed from deployment freeze (%s)", data.ProjectID.ValueString(), data.DeploymentFreezeID.ValueString()))
 	util.Deleted(ctx, description)
+}
+
+func mapEnvironmentIds(ids []string) basetypes.ListValue {
+	environmentIDs := make([]attr.Value, len(ids))
+	for i, envID := range ids {
+		environmentIDs[i] = types.StringValue(envID)
+	}
+
+	environmentIdList, _ := types.ListValue(types.StringType, environmentIDs)
+	return environmentIdList
 }
