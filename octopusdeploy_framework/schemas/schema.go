@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -439,6 +440,7 @@ func GetDateTimeResourceSchema(description string, isRequired bool) resourceSche
 	return resourceSchema.StringAttribute{
 		Description: description,
 		Required:    isRequired,
+		CustomType:  timetypes.RFC3339Type{},
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(regexp.MustCompile(regex), fmt.Sprintf("must match RFC3339 format, %s", regex)),
 		},

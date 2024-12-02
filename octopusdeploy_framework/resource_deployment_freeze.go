@@ -7,6 +7,8 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"time"
@@ -15,9 +17,9 @@ import (
 const deploymentFreezeResourceName = "deployment_freeze"
 
 type deploymentFreezeModel struct {
-	Name  types.String `tfsdk:"name"`
-	Start types.String `tfsdk:"start"`
-	End   types.String `tfsdk:"end"`
+	Name  types.String      `tfsdk:"name"`
+	Start timetypes.RFC3339 `tfsdk:"start"`
+	End   timetypes.RFC3339 `tfsdk:"end"`
 
 	schemas.ResourceModel
 }
@@ -62,7 +64,11 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	mapToState(state, deploymentFreeze, true)
+	if deploymentFreeze.Name != state.Name.ValueString() {
+		state.Name = types.StringValue(deploymentFreeze.Name)
+	}
+
+	mapToState(ctx, state, deploymentFreeze)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -78,10 +84,9 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	var deploymentFreeze *deploymentfreezes.DeploymentFreeze
-	deploymentFreeze, err := mapFromState(plan)
-	if err != nil {
-		resp.Diagnostics.AddError("error while creating deployment freeze", err.Error())
+	deploymentFreeze, diags := mapFromState(plan)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -91,9 +96,11 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	mapToState(plan, createdFreeze, false)
-	diags = resp.State.Set(ctx, plan)
-	resp.Diagnostics.Append(diags...)
+	diags.Append(mapToState(ctx, plan, createdFreeze)...)
+	if diags.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
 func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -112,9 +119,9 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	updatedFreeze, err := mapFromState(plan)
-	if err != nil {
-		resp.Diagnostics.AddError("error while mapping deployment freeze", err.Error())
+	updatedFreeze, diags := mapFromState(plan)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -130,7 +137,10 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	mapToState(plan, updatedFreeze, false)
+	diags.Append(mapToState(ctx, plan, updatedFreeze)...)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
@@ -160,26 +170,57 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 	resp.State.RemoveResource(ctx)
 }
 
-func mapToState(state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze, useSourceForDates bool) {
+func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze) diag.Diagnostics {
 	state.ID = types.StringValue(deploymentFreeze.ID)
 	state.Name = types.StringValue(deploymentFreeze.Name)
-	if useSourceForDates {
-		state.Start = types.StringValue(deploymentFreeze.Start.Format(time.RFC3339))
-		state.End = types.StringValue(deploymentFreeze.End.Format(time.RFC3339))
+
+	updatedStart, diags := calculateStateTime(ctx, state.Start, *deploymentFreeze.Start)
+	if diags.HasError() {
+		return diags
 	}
+	state.Start = updatedStart
+
+	updatedEnd, diags := calculateStateTime(ctx, state.End, *deploymentFreeze.End)
+	if diags.HasError() {
+		return diags
+	}
+	state.End = updatedEnd
+
+	return nil
 }
 
-func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, error) {
-	start, err := time.Parse(time.RFC3339, state.Start.ValueString())
-	if err != nil {
-		return nil, err
+func calculateStateTime(ctx context.Context, stateValue timetypes.RFC3339, updatedValue time.Time) (timetypes.RFC3339, diag.Diagnostics) {
+	stateTime, diags := stateValue.ValueRFC3339Time()
+	if diags.HasError() {
+		return timetypes.RFC3339{}, diags
 	}
-	end, err := time.Parse(time.RFC3339, state.End.ValueString())
-	if err != nil {
-		return nil, err
+	stateTimeUTC := timetypes.NewRFC3339TimeValue(stateTime.UTC())
+	updatedValueUTC := updatedValue.UTC()
+	valuesAreEqual, diags := stateTimeUTC.StringSemanticEquals(ctx, timetypes.NewRFC3339TimeValue(updatedValueUTC))
+	if diags.HasError() {
+		return timetypes.NewRFC3339Null(), diags
 	}
 
+	if valuesAreEqual {
+		return stateValue, diags
+	}
+
+	location := stateTime.Location()
+	newValue := timetypes.NewRFC3339TimeValue(updatedValueUTC.In(location))
+	return newValue, diags
+}
+
+func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, diag.Diagnostics) {
+	start, diags := state.Start.ValueRFC3339Time()
+	if diags.HasError() {
+		return nil, diags
+	}
 	start = start.UTC()
+
+	end, diags := state.End.ValueRFC3339Time()
+	if diags.HasError() {
+		return nil, diags
+	}
 	end = end.UTC()
 
 	freeze := deploymentfreezes.DeploymentFreeze{
