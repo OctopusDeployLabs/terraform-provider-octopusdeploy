@@ -26,7 +26,7 @@ data "octopusdeploy_accounts" "example" {
 
 ### Optional
 
-- `account_type` (String) A filter to search by a list of account types.  Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AmazonWebServicesOidcAccount`, `AzureServicePrincipal`, `AzureSubscription`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.
+- `account_type` (String) A filter to search by a list of account types.  Valid account types are `AmazonWebServicesAccount`, `AmazonWebServicesRoleAccount`, `AmazonWebServicesOidcAccount`, `AzureServicePrincipal`, `AzureSubscription`, `GenericOidcAccount`, `None`, `SshKeyPair`, `Token`, or `UsernamePassword`.
 - `ids` (List of String) A filter to search by a list of IDs.
 - `partial_name` (String) A filter to search by the partial match of a name.
 - `skip` (Number) A filter to specify the number of items to skip in the response.
