@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_generic_openid_connect_account.<name> <account-id>
