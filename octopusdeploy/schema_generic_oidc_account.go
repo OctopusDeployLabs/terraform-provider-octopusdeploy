@@ -55,7 +55,7 @@ func expandGenericOpenIDConnectAccount(d *schema.ResourceData) *accounts.Generic
 
 func getGenericOpenIdConnectAccountSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"description":                       getDescriptionSchema("Azure OpenID Connect account"),
+		"description":                       getDescriptionSchema("Generic OpenID Connect account"),
 		"environments":                      getEnvironmentsSchema(),
 		"id":                                getIDSchema(),
 		"name":                              getNameSchema(true),

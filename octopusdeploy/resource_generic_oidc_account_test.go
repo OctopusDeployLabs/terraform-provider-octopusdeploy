@@ -61,8 +61,6 @@ func testGenericOpenIDConnectAccountBasic(localName string, name string, descrip
 		name = "%s"
 		tenanted_deployment_participation = "%s"
 		execution_subject_keys = %s
-		health_subject_keys = %s
-		account_test_subject_keys = %s
 		audience = "%s"
 	}
 	
