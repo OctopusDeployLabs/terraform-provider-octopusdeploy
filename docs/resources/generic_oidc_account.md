@@ -6,7 +6,7 @@ description: |-
   This resource manages a Generic OIDC Account in Octopus Deploy.
 ---
 
-# octopusdeploy_generic_openid_connect_account (Resource)
+# octopusdeploy_generic_oidc_account (Resource)
 
 This resource manages a Generic OIDC Account in Octopus Deploy.
 
@@ -25,7 +25,7 @@ resource "octopusdeploy_generic_oidc_account" "example" {
 
 ### Required
 
-- `name` (String) The name of this resource.
+- `name` (String) The name of the generic oidc account.
 
 ### Optional
 
@@ -39,10 +39,14 @@ resource "octopusdeploy_generic_oidc_account" "example" {
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this resource.
 
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
+
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import [options] octopusdeploy_generic_openid_connect_account.<name> <account-id>
+terraform import [options] octopusdeploy_generic_oidc_account.<name> <account-id>
 ```
