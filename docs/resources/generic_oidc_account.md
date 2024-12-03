@@ -33,7 +33,6 @@ resource "octopusdeploy_generic_oidc_account" "example" {
 - `description` (String) The description of this generic oidc account.
 - `environments` (List of String) A list of environment IDs associated with this resource.
 - `execution_subject_keys` (List of String) Keys to include in a deployment or runbook. Valid options are `space`, `environment`, `project`, `tenant`, `runbook`, `account`, `type`.
-- `id` (String) The unique ID for this resource.
 - `space_id` (String) The space ID associated with this resource.
 - `tenant_tags` (List of String) A list of tenant tags associated with this resource.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
