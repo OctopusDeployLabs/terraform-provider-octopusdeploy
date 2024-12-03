@@ -12,7 +12,6 @@ import (
 )
 
 func TestNewDeploymentFreezeResource(t *testing.T) {
-	t.Skip("this test relies on changes in 2025.1.1728+ and will need to be skipped until that is the latest on the container feed")
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_freeze." + localName
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
