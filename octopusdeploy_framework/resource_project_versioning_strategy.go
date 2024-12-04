@@ -36,13 +36,49 @@ func (r *projectVersioningStrategyResource) Configure(_ context.Context, req res
 }
 
 func (r *projectVersioningStrategyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan projectResourceModel
+	var plan schemas.ProjectVersioningStrategyModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	project, err := projects.GetByID(r.Client, plan.SpaceID.ValueString(), plan.ProjectID.ValueString())
+	if err != nil {
+		if apiError, ok := err.(*core.APIError); ok {
+			if apiError.StatusCode == http.StatusNotFound {
+				log.Printf("[INFO] associated project (%s) not found; deleting version strategy from state", plan.ProjectID.ValueString())
+				resp.State.RemoveResource(ctx)
+			}
+		} else {
+			resp.Diagnostics.AddError("Failed to read associated project", err.Error())
+		}
+		return
+	}
+	versioningStrategy := mapStateToProjectVersioningStrategy(&plan)
+	project.VersioningStrategy = versioningStrategy
+
+	_, err = projects.Update(r.Client, project)
+	if err != nil {
+		resp.Diagnostics.AddError("Error updating associated project", err.Error())
+		return
+	}
+
+	updatedProject, err := projects.GetByID(r.Client, plan.SpaceID.ValueString(), plan.ProjectID.ValueString())
+	if err != nil {
+		if apiError, ok := err.(*core.APIError); ok {
+			if apiError.StatusCode == http.StatusNotFound {
+				log.Printf("[INFO] associated project (%s) not found; deleting version strategy from state", plan.ProjectID.ValueString())
+				resp.State.RemoveResource(ctx)
+			}
+		} else {
+			resp.Diagnostics.AddError("Failed to read associated project", err.Error())
+		}
+		return
+	}
+
+	mapProjectVersioningStrategyToState(updatedProject.VersioningStrategy, &plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
 func (r *projectVersioningStrategyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -87,9 +123,15 @@ func (r *projectVersioningStrategyResource) Update(ctx context.Context, req reso
 	versioningStrategy := mapStateToProjectVersioningStrategy(&plan)
 	existingProject.VersioningStrategy = versioningStrategy
 
-	updatedProject, err := projects.Update(r.Client, existingProject)
+	_, err = projects.Update(r.Client, existingProject)
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating associated project", err.Error())
+		return
+	}
+
+	updatedProject, err := projects.GetByID(r.Client, plan.SpaceID.ValueString(), plan.ProjectID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error retrieving associated project", err.Error())
 		return
 	}
 
