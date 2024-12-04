@@ -112,7 +112,7 @@ func (d *deploymentFreezeProjectResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	resp.Diagnostics.Append(resp.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
