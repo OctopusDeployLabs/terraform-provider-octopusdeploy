@@ -2,10 +2,12 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -431,4 +433,16 @@ func GetSensitiveResourceSchema(description string, isRequired bool) resourceSch
 	}
 
 	return s
+}
+
+func GetDateTimeResourceSchema(description string, isRequired bool) resourceSchema.Attribute {
+	regex := "^((?:(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?))(?:Z|[\\+-]\\d{2}:\\d{2})?)"
+	return resourceSchema.StringAttribute{
+		Description: description,
+		Required:    isRequired,
+		CustomType:  timetypes.RFC3339Type{},
+		Validators: []validator.String{
+			stringvalidator.RegexMatches(regexp.MustCompile(regex), fmt.Sprintf("must match RFC3339 format, %s", regex)),
+		},
+	}
 }

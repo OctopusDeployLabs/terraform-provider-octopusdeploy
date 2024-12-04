@@ -6,7 +6,6 @@ import (
 	"fmt"
 	internalErrors "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"net/http"
-	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/tenants"
@@ -68,9 +67,10 @@ func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateR
 	_, err = tenants.Update(t.Client, tenant)
 	if err != nil {
 		resp.Diagnostics.AddError("cannot update tenant environment", err.Error())
+		return
 	}
 
-	plan.ID = types.StringValue(schemas.BuildTenantProjectID(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
+	plan.ID = types.StringValue(util.BuildCompositeId(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
 	plan.SpaceID = types.StringValue(spaceId)
 	plan.EnvironmentIDs = util.FlattenStringList(tenant.ProjectEnvironments[plan.ProjectID.ValueString()])
 
@@ -85,7 +85,7 @@ func (t *tenantProjectResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	bits := strings.Split(data.ID.ValueString(), ":")
+	bits := util.SplitCompositeId(data.ID.ValueString())
 	spaceID := bits[0]
 	tenantID := bits[1]
 	projectID := bits[2]
@@ -133,7 +133,7 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.AddError("cannot update tenant environment", err.Error())
 	}
 
-	plan.ID = types.StringValue(schemas.BuildTenantProjectID(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
+	plan.ID = types.StringValue(util.BuildCompositeId(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
 	plan.SpaceID = types.StringValue(spaceId)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
