@@ -113,6 +113,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewLibraryVariableSetFeedResource,
 		NewVariableResource,
 		NewProjectResource,
+		NewProjectVersioningStrategyResource,
 		NewMachineProxyResource,
 		NewTagResource,
 		NewDockerContainerRegistryFeedResource,
