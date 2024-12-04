@@ -267,13 +267,14 @@ func validateVariable(variableSet *variables.VariableSet, newVariable *variables
 	for _, v := range variableSet.Variables {
 		if v.Name == newVariable.Name && v.Type == newVariable.Type && (v.IsSensitive || v.Value == newVariable.Value) && v.Description == newVariable.Description && v.IsSensitive == newVariable.IsSensitive {
 			scopeMatches, _, err := variables.MatchesScope(v.Scope, &newVariable.Scope)
-			if err != nil || !scopeMatches {
+			if err != nil {
 				return err
 			}
-			if scopeMatches {
-				newVariable.ID = v.GetID()
-				return nil
+			if !scopeMatches {
+				continue
 			}
+			newVariable.ID = v.GetID()
+			return nil
 		}
 	}
 
