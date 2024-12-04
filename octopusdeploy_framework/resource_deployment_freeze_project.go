@@ -162,7 +162,6 @@ func (d *deploymentFreezeProjectResource) Delete(ctx context.Context, req resour
 			return
 		}
 	}
-	tflog.Debug(ctx, fmt.Sprintf("before delete: %#v", freeze))
 
 	delete(freeze.ProjectEnvironmentScope, data.ProjectID.ValueString())
 	freeze, err = deploymentfreezes.Update(d.Client, freeze)
@@ -179,7 +178,6 @@ func mapEnvironmentIds(ids []string) basetypes.ListValue {
 	for i, envID := range ids {
 		environmentIDs[i] = types.StringValue(envID)
 	}
-
 	environmentIdList, _ := types.ListValue(types.StringType, environmentIDs)
 	return environmentIdList
 }

@@ -70,6 +70,8 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 		environment_ids = [ %s ]
 	}`, projectScopeLocalName, localName, projectLocalName, strings.Join(environmentScopes, ","))
 
+	fmt.Println(projectScopes)
+
 	return fmt.Sprintf(`
 	%s
 

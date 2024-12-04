@@ -1,10 +1,12 @@
 package schemas
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -39,6 +41,9 @@ func (d DeploymentFreezeProjectSchema) GetResourceSchema() resourceSchema.Schema
 				Description: "The environment IDs associated with this project deployment freeze scope.",
 				ElementType: types.StringType,
 				Optional:    true,
+				Validators: []validator.List{
+					listvalidator.SizeAtLeast(1),
+				},
 			},
 		},
 	}
