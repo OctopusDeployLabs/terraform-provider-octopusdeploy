@@ -28,7 +28,7 @@ func (l TeamSchema) GetDatasourceSchema() datasourceSchema.Schema {
 		Description: "Provides information about existing teams.",
 		Attributes: map[string]datasourceSchema.Attribute{
 			"id":             util.DataSourceString().Computed().Description("An auto-generated identifier that includes the timestamp when this data source was last modified.").Build(),
-			"ids":            util.DataSourceList(types.StringType).Optional().Description("A filter to search by a list of IDs..").Build(),
+			"ids":            util.DataSourceList(types.StringType).Optional().Description("A filter to search by a list of IDs.").Build(),
 			"include_system": util.DataSourceBool().Optional().Description("A filter to include system teams.").Build(),
 			"partial_name":   util.DataSourceString().Optional().Description("A filter to search by the partial match of a name.").Build(),
 			"spaces":         util.DataSourceList(types.StringType).Optional().Description("A filter to search by a list of space IDs.").Build(),
@@ -46,30 +46,29 @@ func getDatasourceTeamsAttributes() datasourceSchema.ListNestedAttribute {
 		Optional:    false,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				"can_be_deleted":          util.DataSourceBool().Computed().Optional().Build(),
-				"can_be_renamed":          util.DataSourceBool().Computed().Optional().Build(),
-				"can_change_members":      util.DataSourceBool().Computed().Optional().Build(),
-				"can_change_roles":        util.DataSourceBool().Computed().Optional().Build(),
-				"description":             util.DataSourceString().Optional().Description("The user-friendly description of this team.").Build(),
-				"external_security_group": getDatasrouceExternalSecurityGroupsAttributes(),
-				"id":                      util.DataSourceString().Computed().Optional().Description("The unique ID for this resource.").Build(),
-				"name":                    util.DataSourceString().Required().Description("The name of this team.").Build(),
-				"space_id":                util.DataSourceString().Computed().Optional().Description("The space associated with this team.").Build(),
-				"users":                   util.DataSourceSet(types.StringType).Computed().Optional().Description("A list of user IDs designated to be members of this team.").Build(),
+				"can_be_deleted":          util.DataSourceBool().Computed().Build(),
+				"can_be_renamed":          util.DataSourceBool().Computed().Build(),
+				"can_change_members":      util.DataSourceBool().Computed().Build(),
+				"can_change_roles":        util.DataSourceBool().Computed().Build(),
+				"description":             util.DataSourceString().Computed().Description("The user-friendly description of this team.").Build(),
+				"external_security_group": getDatasourceExternalSecurityGroupsAttributes(),
+				"id":                      util.DataSourceString().Computed().Description("The unique ID for this resource.").Build(),
+				"name":                    util.DataSourceString().Computed().Description("The name of this team.").Build(),
+				"space_id":                util.DataSourceString().Computed().Description("The space associated with this team.").Build(),
+				"users":                   util.DataSourceSet(types.StringType).Computed().Description("A list of user IDs designated to be members of this team.").Build(),
 			},
 		},
 	}
 }
 
-func getDatasrouceExternalSecurityGroupsAttributes() datasourceSchema.ListNestedAttribute {
+func getDatasourceExternalSecurityGroupsAttributes() datasourceSchema.ListNestedAttribute {
 	return datasourceSchema.ListNestedAttribute{
-		Computed: false,
-		Optional: true,
+		Computed: true,
 		NestedObject: datasourceSchema.NestedAttributeObject{
 			Attributes: map[string]datasourceSchema.Attribute{
-				"display_id_and_name": util.DataSourceBool().Computed().Optional().Build(),
-				"display_name":        util.DataSourceString().Computed().Optional().Build(),
-				"id":                  util.DataSourceString().Computed().Optional().Description("The unique ID for this resource.").Build(),
+				"display_id_and_name": util.DataSourceBool().Computed().Build(),
+				"display_name":        util.DataSourceString().Computed().Build(),
+				"id":                  util.DataSourceString().Computed().Description("The unique ID for this resource.").Build(),
 			},
 		},
 	}
