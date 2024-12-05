@@ -19,8 +19,10 @@ func TestAccGenericOidcAccountBasic(t *testing.T) {
 
 	executionKeys := []string{"space"}
 	audience := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	updatedAudience := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 
 	config := testGenericOidcAccountBasic(localName, name, description, tenantedDeploymentParticipation, executionKeys, audience)
+	updateConfig := testGenericOidcAccountBasic(localName, name, description, tenantedDeploymentParticipation, executionKeys, updatedAudience)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { TestAccPreCheck(t) },
@@ -37,6 +39,20 @@ func TestAccGenericOidcAccountBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
 					resource.TestCheckResourceAttr(resourceName, "execution_subject_keys.0", executionKeys[0]),
 					resource.TestCheckResourceAttr(resourceName, "audience", audience),
+				),
+				ResourceName: resourceName,
+			},
+			{
+				Config: updateConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccountExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "description", description),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "name", name),
+					resource.TestCheckResourceAttrSet(resourceName, "space_id"),
+					resource.TestCheckResourceAttr(resourceName, "tenanted_deployment_participation", string(tenantedDeploymentParticipation)),
+					resource.TestCheckResourceAttr(resourceName, "execution_subject_keys.0", executionKeys[0]),
+					resource.TestCheckResourceAttr(resourceName, "audience", updatedAudience),
 				),
 				ResourceName: resourceName,
 			},
