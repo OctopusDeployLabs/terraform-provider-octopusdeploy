@@ -25,6 +25,7 @@ var err error
 func TestMain(m *testing.M) {
 	flag.Parse() // Parse the flags
 	os.Setenv("TF_ACC", "1")
+	os.Setenv("OCTOPUS__FeatureToggles__DeploymentFreezeByTenantFeatureToggle", "true")
 	if *createSharedContainer {
 
 		testFramework := test.OctopusContainerTest{}
