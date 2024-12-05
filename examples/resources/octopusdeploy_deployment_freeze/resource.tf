@@ -36,3 +36,10 @@ resource "octopusdeploy_deployment_freeze_project" "project_freeze" {
   project_id          = data.octopusdeploy_projects.second_project.projects[0].id
   environment_ids = [ data.octopusdeploy_environments.default_environment.environments[0].id ]
 }
+
+resource "octopusdeploy_deployment_freeze_tenant" "tenant_freeze" {
+  deploymentfreeze_id = octopusdeploy_deployment_freeze.freeze.id
+  tenant_id           = "Tenants-1"
+  project_id          = "Projects-1"
+  environment_id      = "Environments-1"
+}
