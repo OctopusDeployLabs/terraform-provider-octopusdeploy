@@ -162,8 +162,13 @@ func (r *gitTriggerResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	client := r.Config.Client
 
-	if err := client.ProjectTriggers.DeleteByID(data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete Git Trigger", err.Error())
+	project := projects.NewProject(data.ProjectId.ValueString(), data.SpaceId.ValueString(), "")
+	projectTrigger := triggers.NewProjectTrigger(data.Name.ValueString(), data.Description.ValueString(), data.IsDisabled.ValueBool(), project, nil, nil)
+	projectTrigger.ID = data.ID.ValueString()
+
+	if err := client.ProjectTriggers.Delete(projectTrigger); err != nil {
+		reason := fmt.Sprintf("unable to delete Git Trigger '%s' with space '%s'", client.GetSpaceID(), data.SpaceId.ValueString())
+		resp.Diagnostics.AddError(reason, err.Error())
 		return
 	}
 }
