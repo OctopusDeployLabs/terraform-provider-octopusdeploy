@@ -440,6 +440,7 @@ func GetDateTimeResourceSchema(description string, isRequired bool) resourceSche
 	return resourceSchema.StringAttribute{
 		Description: description,
 		Required:    isRequired,
+		Optional:    !isRequired,
 		CustomType:  timetypes.RFC3339Type{},
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(regexp.MustCompile(regex), fmt.Sprintf("must match RFC3339 format, %s", regex)),

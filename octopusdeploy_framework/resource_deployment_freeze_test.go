@@ -38,7 +38,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
 					resource.TestCheckResourceAttr(resourceName, "end", end)),
-				Config: testDeploymentFreezeBasic(localName, name, start, end, spaceName, []string{environmentName1}, projectName, projectGroupName, lifecycleName, tenantName, false),
+				Config: testDeploymentFreezeBasic(localName, name, start, end, spaceName, []string{environmentName1}, projectName, projectGroupName, lifecycleName, tenantName, false, false),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -46,19 +46,35 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name+"1"),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
 					resource.TestCheckResourceAttr(resourceName, "end", updatedEnd)),
-				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, false),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, false, false),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testDeploymentFreezeExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", name+"1"),
+					resource.TestCheckResourceAttr(resourceName, "start", start),
+					resource.TestCheckResourceAttr(resourceName, "end", updatedEnd),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.type", "DaysPerWeek"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.unit", "24"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.end_type", "AfterOccurrences"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.end_after_occurrences", "5"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.0", "Monday"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.1", "Wednesday"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.2", "Friday")),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, false, true),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testDeploymentFreezeExists(resourceName),
 					testDeploymentFreezeTenantExists(fmt.Sprintf("octopusdeploy_deployment_freeze_tenant.tenant_%s", localName))),
-				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, true),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, true, true),
 			},
 		},
 	})
 }
 
-func testDeploymentFreezeBasic(localName string, freezeName string, start string, end string, spaceName string, environments []string, projectName string, projectGroupName string, lifecycleName string, tenantName string, includeTenant bool) string {
+func testDeploymentFreezeBasic(localName string, freezeName string, start string, end string, spaceName string, environments []string, projectName string, projectGroupName string, lifecycleName string, tenantName string, includeTenant bool, includeRecurringSchedule bool) string {
 	spaceLocalName := fmt.Sprintf("space_%s", localName)
 	projectScopeLocalName := fmt.Sprintf("project_scope_%s", localName)
 	projectLocalName := fmt.Sprintf("project_%s", localName)
@@ -74,8 +90,27 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 		environmentScopes = append(environmentScopes, fmt.Sprintf("resource.octopusdeploy_environment.%s.id", environmentLocalName))
 	}
 
+	freezeConfig := fmt.Sprintf(`
+        resource "octopusdeploy_deployment_freeze" "%s" {
+            name = "%s"
+            start = "%s"
+            end = "%s"`, localName, freezeName, start, end)
+
+	if includeRecurringSchedule {
+		freezeConfig += `
+            recurring_schedule = {
+                type = "DaysPerWeek"
+                unit = 24
+                end_type = "AfterOccurrences"
+                end_after_occurrences = 5
+                days_of_week = ["Monday", "Wednesday", "Friday"]
+            }`
+	}
+
+	freezeConfig += `
+        }`
+
 	config := fmt.Sprintf(`
-       
         # Space Configuration
         %s
 
@@ -91,11 +126,7 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
         # Project Configuration
         %s
 
-        resource "octopusdeploy_deployment_freeze" "%s" {
-            name = "%s"
-            start = "%s"
-            end = "%s"
-        }
+        %s
 
         resource "octopusdeploy_deployment_freeze_project" "%s" {
             deploymentfreeze_id = octopusdeploy_deployment_freeze.%s.id
@@ -107,7 +138,7 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 		createLifecycle(spaceLocalName, lifecycleLocalName, lifecycleName),
 		createProjectGroup(spaceLocalName, projectGroupLocalName, projectGroupName),
 		createProject(spaceLocalName, projectLocalName, projectName, lifecycleLocalName, projectGroupLocalName),
-		localName, freezeName, start, end,
+		freezeConfig,
 		projectScopeLocalName, localName, projectLocalName,
 		strings.Join(environmentScopes, ","))
 

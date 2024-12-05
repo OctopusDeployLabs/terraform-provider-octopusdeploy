@@ -15,6 +15,49 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 			"name":  GetNameResourceSchema(true),
 			"start": GetDateTimeResourceSchema("The start time of the freeze, must be RFC3339 format", true),
 			"end":   GetDateTimeResourceSchema("The end time of the freeze, must be RFC3339 format", true),
+			"recurring_schedule": resourceSchema.SingleNestedAttribute{
+				Optional: true,
+				Attributes: map[string]resourceSchema.Attribute{
+					"type": resourceSchema.StringAttribute{
+						Description: "Type of recurring schedule (OnceDaily, DaysPerWeek, DaysPerMonth, Annually)",
+						Required:    true,
+					},
+					"unit": resourceSchema.Int64Attribute{
+						Description: "The unit value for the schedule",
+						Required:    true,
+					},
+					"end_type": resourceSchema.StringAttribute{
+						Description: "When the recurring schedule should end (Never, OnDate, AfterOccurrences)",
+						Required:    true,
+					},
+					"end_on_date": GetDateTimeResourceSchema("The date when the recurring schedule should end", false),
+					"end_after_occurrences": resourceSchema.Int64Attribute{
+						Description: "Number of occurrences after which the schedule should end",
+						Optional:    true,
+					},
+					"monthly_schedule_type": resourceSchema.StringAttribute{
+						Description: "Type of monthly schedule (DayOfMonth, DateOfMonth)",
+						Optional:    true,
+					},
+					"date_of_month": resourceSchema.StringAttribute{
+						Description: "The date of the month for monthly schedules",
+						Optional:    true,
+					},
+					"day_number_of_month": resourceSchema.StringAttribute{
+						Description: "The day number of the month for monthly schedules",
+						Optional:    true,
+					},
+					"days_of_week": resourceSchema.ListAttribute{
+						Description: "List of days of the week for weekly schedules",
+						Optional:    true,
+						ElementType: types.StringType,
+					},
+					"day_of_week": resourceSchema.StringAttribute{
+						Description: "The day of the week for monthly schedules",
+						Optional:    true,
+					},
+				},
+			},
 		},
 	}
 }
