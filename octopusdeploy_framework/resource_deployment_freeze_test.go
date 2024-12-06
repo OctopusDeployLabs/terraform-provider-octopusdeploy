@@ -17,7 +17,6 @@ import (
 func TestNewDeploymentFreezeResource(t *testing.T) {
 	if os.Getenv("TF_LOG") == "" {
 		os.Setenv("TF_LOG", "INFO")
-		os.Setenv("OCTOPUS__FeatureToggles__DeploymentFreezeByTenantFeatureToggle", "true")
 	}
 
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
