@@ -210,19 +210,7 @@ func mapStepTemplateResourceModelToActionTemplate(ctx context.Context, data sche
 	at.Packages = make([]packages.PackageReference, len(pkgs))
 	if len(pkgs) > 0 {
 		for i, val := range pkgs {
-			pkgProps := make(map[string]string, len(val.Properties.Attributes()))
-			for key, prop := range val.Properties.Attributes() {
-				if prop.Type(ctx) == types.StringType {
-					pkgProps[key] = prop.(types.String).ValueString()
-				} else {
-					// We should not get this error unless we add a field to package properties in the schema that is not a string
-					resp.AddError("Unexpected value type in package properties.",
-						fmt.Sprintf("Expected [%s] to have value of string but got [%s].", key, prop.String()))
-				}
-			}
-			if resp.HasError() {
-				return at, resp
-			}
+			pkgProps := convertAttributeStepTemplatePackageProperty(val.Properties.Attributes())
 			pkgRef := packages.PackageReference{
 				AcquisitionLocation: val.AcquisitionLocation.ValueString(),
 				FeedID:              val.FeedID.ValueString(),
@@ -335,28 +323,28 @@ func convertStepTemplatePackagePropertyAttribute(atpp map[string]string) (types.
 	diags := diag.Diagnostics{}
 
 	// We need to manually convert the string map to ensure all fields are set.
-	if extract, ok := atpp["extract"]; ok {
+	if extract, ok := atpp["Extract"]; ok {
 		prop["extract"] = types.StringValue(extract)
 	} else {
 		diags.AddWarning("Package property missing value.", "extract value missing from package property")
 		prop["extract"] = types.StringNull()
 	}
 
-	if purpose, ok := atpp["purpose"]; ok {
+	if purpose, ok := atpp["Purpose"]; ok {
 		prop["purpose"] = types.StringValue(purpose)
 	} else {
 		diags.AddWarning("Package property missing value.", "purpose value missing from package property")
 		prop["purpose"] = types.StringNull()
 	}
 
-	if purpose, ok := atpp["package_parameter_name"]; ok {
+	if purpose, ok := atpp["PackageParameterName"]; ok {
 		prop["package_parameter_name"] = types.StringValue(purpose)
 	} else {
 		diags.AddWarning("Package property missing value.", "package_parameter_name value missing from package property")
 		prop["package_parameter_name"] = types.StringNull()
 	}
 
-	if selectionMode, ok := atpp["selection_mode"]; ok {
+	if selectionMode, ok := atpp["SelectionMode"]; ok {
 		prop["selection_mode"] = types.StringValue(selectionMode)
 	} else {
 		diags.AddWarning("Package property missing value.", "selection_mode value missing from package property")
@@ -369,4 +357,25 @@ func convertStepTemplatePackagePropertyAttribute(atpp map[string]string) (types.
 		return types.ObjectNull(schemas.GetStepTemplatePackagePropertiesTypeAttributes()), diags
 	}
 	return propMap, diags
+}
+
+func convertAttributeStepTemplatePackageProperty(prop map[string]attr.Value) map[string]string {
+	atpp := make(map[string]string)
+
+	if extract, ok := prop["extract"]; ok {
+		atpp["Extract"] = extract.(types.String).ValueString()
+	}
+
+	if purpose, ok := prop["purpose"]; ok {
+		atpp["Purpose"] = purpose.(types.String).ValueString()
+	}
+
+	if purpose, ok := prop["package_parameter_name"]; ok {
+		atpp["PackageParameterName"] = purpose.(types.String).ValueString()
+	}
+
+	if selectionMode, ok := prop["selection_mode"]; ok {
+		atpp["SelectionMode"] = selectionMode.(types.String).ValueString()
+	}
+	return atpp
 }

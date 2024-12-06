@@ -125,6 +125,11 @@ func (t *tenantProjectVariableResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
+	if !checkIfTemplateExists(tenantVariables, state) {
+		// The template no longer exists, so the variable can no longer exist either
+		return
+	}
+
 	isSensitive, err := checkIfVariableIsSensitive(tenantVariables, state)
 	if err != nil {
 		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
@@ -249,6 +254,17 @@ func (t *tenantProjectVariableResource) ImportState(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("project_id"), idParts[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("environment_id"), idParts[2])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("template_id"), idParts[3])...)
+}
+
+func checkIfTemplateExists(tenantVariables *variables.TenantVariables, plan tenantProjectVariableResourceModel) bool {
+	if projectVariable, ok := tenantVariables.ProjectVariables[plan.ProjectID.ValueString()]; ok {
+		for _, template := range projectVariable.Templates {
+			if template.GetID() == plan.TemplateID.ValueString() {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func checkIfVariableIsSensitive(tenantVariables *variables.TenantVariables, plan tenantProjectVariableResourceModel) (bool, error) {

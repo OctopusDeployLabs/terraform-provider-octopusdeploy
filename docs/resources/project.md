@@ -97,7 +97,7 @@ resource "octopusdeploy_project" "example" {
 - `space_id` (String) The space ID associated with this project.
 - `template` (Block List) (see [below for nested schema](#nestedblock--template))
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `versioning_strategy` (Block List) (see [below for nested schema](#nestedblock--versioning_strategy))
+- `versioning_strategy` (Block List, Deprecated) (see [below for nested schema](#nestedblock--versioning_strategy))
 
 ### Read-Only
 

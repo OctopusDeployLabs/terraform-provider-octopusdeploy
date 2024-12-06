@@ -86,6 +86,7 @@ func (p *octopusDeployFrameworkProvider) DataSources(ctx context.Context) []func
 		NewUsersDataSource,
 		NewServiceAccountOIDCIdentityDataSource,
 		NewWorkersDataSource,
+		NewDeploymentFreezeDataSource,
 		NewTeamsDataSource,
 	}
 }
@@ -114,6 +115,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewLibraryVariableSetFeedResource,
 		NewVariableResource,
 		NewProjectResource,
+		NewProjectVersioningStrategyResource,
 		NewMachineProxyResource,
 		NewTagResource,
 		NewDockerContainerRegistryFeedResource,
@@ -126,7 +128,10 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewSSHConnectionWorkerResource,
 		NewScriptModuleResource,
 		NewUserResource,
+		NewDeploymentFreezeResource,
+		NewDeploymentFreezeProjectResource,
 		NewServiceAccountOIDCIdentity,
+		NewGenericOidcResource,
 	}
 }
 

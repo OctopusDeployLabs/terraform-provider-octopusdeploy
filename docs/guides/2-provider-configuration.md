@@ -15,7 +15,7 @@ subcategory: "Guides"
 terraform {
     required_providers {
         octopusdeploy = {
-            source = OctopusDeployLabs/octopusdeploy
+            source = "OctopusDeployLabs/octopusdeploy"
         }
     }
 }
@@ -39,7 +39,7 @@ The environment variable fallback values that the Terraform Provider search for 
 terraform {
     required_providers {
         octopusdeploy = {
-            source = OctopusDeployLabs/octopusdeploy
+            source = "OctopusDeployLabs/octopusdeploy"
         }
     }
 }

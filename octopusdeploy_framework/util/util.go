@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"strings"
 )
 
 func GetProviderName() string {
@@ -140,4 +141,35 @@ func GetNumber(val types.Int64) int {
 	}
 
 	return v
+}
+
+func ConvertMapStringToMapAttrValue(m map[string]string) map[string]attr.Value {
+	result := make(map[string]attr.Value, len(m))
+	for k, v := range m {
+		result[k] = types.StringValue(v)
+	}
+	return result
+}
+
+func ConvertMapStringArrayToMapAttrValue(ctx context.Context, m map[string][]string) (map[string]attr.Value, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	result := make(map[string]attr.Value, len(m))
+	for k, v := range m {
+		values := make([]attr.Value, len(v))
+		for i, s := range v {
+			values[i] = types.StringValue(s)
+		}
+		result[k], diags = types.SetValueFrom(ctx, types.StringType, v)
+	}
+
+	return result, diags
+}
+
+const sep = ":"
+
+func BuildCompositeId(keys ...string) string {
+	return strings.Join(keys, sep)
+}
+func SplitCompositeId(id string) []string {
+	return strings.Split(id, sep)
 }

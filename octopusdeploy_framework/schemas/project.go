@@ -147,8 +147,8 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 				},
 			},
 			"versioning_strategy": resourceSchema.ListNestedBlock{
+				DeprecationMessage: "versioning_strategy is deprecated in favor of resource project_versioning strategy",
 				NestedObject: resourceSchema.NestedBlockObject{
-
 					Attributes: map[string]resourceSchema.Attribute{
 						"donor_package_step_id": util.ResourceString().Optional().Build(),
 						"template":              util.ResourceString().Optional().Computed().Build(),
