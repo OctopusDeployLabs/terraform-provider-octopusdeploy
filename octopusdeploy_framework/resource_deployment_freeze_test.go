@@ -8,13 +8,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
 )
 
 func TestNewDeploymentFreezeResource(t *testing.T) {
+	if os.Getenv("TF_LOG") == "" {
+		os.Setenv("TF_LOG", "INFO")
+		os.Setenv("OCTOPUS__FeatureToggles__DeploymentFreezeByTenantFeatureToggle", "true")
+	}
+
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_freeze." + localName
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -54,7 +59,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testDeploymentFreezeExists(resourceName),
-					testDeploymentFreezeTenantExists(fmt.Sprintf("octopusdeploy_deployment_freeze_tenant.tenant_%s", localName))),
+					testDeploymentFreezeTenantExists(fmt.Sprintf("octopusdeploy_deployment_freeze_tenant.tenant_%s", localName), t)),
 				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, true),
 			},
 		},
@@ -156,9 +161,12 @@ func testDeploymentFreezeExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testDeploymentFreezeTenantExists(prefix string) resource.TestCheckFunc {
+func testDeploymentFreezeTenantExists(prefix string, t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[prefix]
+		featureToggle := os.Getenv("OCTOPUS__FeatureToggles__DeploymentFreezeByTenantFeatureToggle")
+		t.Logf("DeploymentFreezeByTenantFeatureToggle value: '%s'", featureToggle)
+
 		if !ok {
 			return fmt.Errorf("Resource not found: %s", prefix)
 		}
@@ -173,49 +181,48 @@ func testDeploymentFreezeTenantExists(prefix string) resource.TestCheckFunc {
 		projectId := bits[2]
 		environmentId := bits[3]
 
-		log.Printf("[DEBUG] Starting tenant scope check for deployment freeze %s", freezeId)
-		log.Printf("[DEBUG] Looking for tenant: %s, project: %s, environment: %s", tenantId, projectId, environmentId)
+		t.Logf("Starting tenant scope check for deployment freeze %s", freezeId)
+		t.Logf("Looking for tenant: %s, project: %s, environment: %s", tenantId, projectId, environmentId)
 
 		retryErr := resource.RetryContext(context.Background(), 2*time.Minute, func() *resource.RetryError {
 			freeze, err := deploymentfreezes.GetById(octoClient, freezeId)
 			if err != nil {
-				log.Printf("[ERROR] Failed to get deployment freeze: %v", err)
+				t.Logf("Failed to get deployment freeze: %v", err)
 				return resource.NonRetryableError(fmt.Errorf("Error getting deployment freeze: %v", err))
 			}
 
 			if freezeJSON, err := json.MarshalIndent(freeze, "", "  "); err == nil {
-				log.Printf("[DEBUG] Deployment freeze as JSON:\n%s", string(freezeJSON))
+				t.Logf("Deployment freeze as JSON:\n%s", string(freezeJSON))
 			} else {
-				log.Printf("[ERROR] Failed to marshal freeze object to JSON: %v", err)
+				t.Logf("Failed to marshal freeze object to JSON: %v", err)
 			}
 
-			log.Printf("[DEBUG] Retrieved deployment freeze with %d tenant scopes", len(freeze.TenantProjectEnvironmentScope))
+			t.Logf("Retrieved deployment freeze with %d tenant scopes", len(freeze.TenantProjectEnvironmentScope))
 
-			// Log all existing scopes for debugging
 			for i, scope := range freeze.TenantProjectEnvironmentScope {
-				log.Printf("[DEBUG] Scope %d - Tenant: %s, Project: %s, Environment: %s",
+				t.Logf("Scope %d - Tenant: %s, Project: %s, Environment: %s",
 					i+1, scope.TenantId, scope.ProjectId, scope.EnvironmentId)
 			}
 
 			for _, scope := range freeze.TenantProjectEnvironmentScope {
 				if scope.TenantId == tenantId && scope.ProjectId == projectId && scope.EnvironmentId == environmentId {
-					log.Printf("[INFO] Found matching tenant scope in deployment freeze")
+					t.Log("Found matching tenant scope in deployment freeze")
 					return nil
 				}
 			}
 
-			log.Printf("[DEBUG] Tenant scope not yet found, will retry...")
+			t.Log("Tenant scope not yet found, will retry...")
 			return resource.RetryableError(fmt.Errorf("Tenant scope not yet found in deployment freeze (freezeId: %s)", freezeId))
 		})
 
 		if retryErr != nil {
 			freeze, err := deploymentfreezes.GetById(octoClient, freezeId)
 			if err != nil {
-				log.Printf("[ERROR] Final attempt to get deployment freeze failed: %v", err)
+				t.Logf("Final attempt to get deployment freeze failed: %v", err)
 			} else {
-				log.Printf("[ERROR] Final state - Deployment freeze has %d tenant scopes", len(freeze.TenantProjectEnvironmentScope))
+				t.Logf("Final state - Deployment freeze has %d tenant scopes", len(freeze.TenantProjectEnvironmentScope))
 				for i, scope := range freeze.TenantProjectEnvironmentScope {
-					log.Printf("[ERROR] Final Scope %d - Tenant: %s, Project: %s, Environment: %s",
+					t.Logf("Final Scope %d - Tenant: %s, Project: %s, Environment: %s",
 						i+1, scope.TenantId, scope.ProjectId, scope.EnvironmentId)
 				}
 			}
@@ -238,5 +245,7 @@ func testDeploymentFreezeCheckDestroy(s *terraform.State) error {
 			return fmt.Errorf("Deployment Freeze (%s) still exists", rs.Primary.ID)
 		}
 	}
+
+	os.Setenv("TF_LOG", "")
 	return nil
 }
