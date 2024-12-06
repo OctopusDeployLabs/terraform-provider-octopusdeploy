@@ -21,13 +21,19 @@ var octoClient *client.Client
 var network testcontainers.Network
 var sqlServerContainer *test.MysqlContainer
 var err error
+var customTestEnvironment = map[string]string{}
 
 func TestMain(m *testing.M) {
 	flag.Parse() // Parse the flags
 	os.Setenv("TF_ACC", "1")
 	if *createSharedContainer {
 
-		testFramework := test.OctopusContainerTest{}
+		testFramework := test.OctopusContainerTest{
+			CustomEnvironment: map[string]string{
+				"OCTOPUS__FeatureToggles__DeploymentFreezeByTenantFeatureToggle": "true",
+			},
+		}
+
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer()
 		if err != nil {
 			log.Printf("Failed to arrange containers: (%s)", err.Error())
@@ -35,7 +41,6 @@ func TestMain(m *testing.M) {
 
 		os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
-
 		code := m.Run()
 		ctx := context.Background()
 
