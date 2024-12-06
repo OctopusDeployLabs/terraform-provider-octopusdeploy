@@ -2,7 +2,6 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deploymentfreezes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -15,10 +14,6 @@ import (
 )
 
 func TestNewDeploymentFreezeResource(t *testing.T) {
-	if os.Getenv("TF_LOG") == "" {
-		os.Setenv("TF_LOG", "INFO")
-	}
-
 	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
 	resourceName := "octopusdeploy_deployment_freeze." + localName
 	name := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
@@ -163,9 +158,6 @@ func testDeploymentFreezeExists(prefix string) resource.TestCheckFunc {
 func testDeploymentFreezeTenantExists(prefix string, t *testing.T) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[prefix]
-		featureToggle := os.Getenv("OCTOPUS__FeatureToggles__DeploymentFreezeByTenantFeatureToggle")
-		t.Logf("DeploymentFreezeByTenantFeatureToggle value: '%s'", featureToggle)
-
 		if !ok {
 			return fmt.Errorf("Resource not found: %s", prefix)
 		}
@@ -180,20 +172,11 @@ func testDeploymentFreezeTenantExists(prefix string, t *testing.T) resource.Test
 		projectId := bits[2]
 		environmentId := bits[3]
 
-		t.Logf("Starting tenant scope check for deployment freeze %s", freezeId)
-		t.Logf("Looking for tenant: %s, project: %s, environment: %s", tenantId, projectId, environmentId)
-
 		retryErr := resource.RetryContext(context.Background(), 2*time.Minute, func() *resource.RetryError {
 			freeze, err := deploymentfreezes.GetById(octoClient, freezeId)
 			if err != nil {
 				t.Logf("Failed to get deployment freeze: %v", err)
 				return resource.NonRetryableError(fmt.Errorf("Error getting deployment freeze: %v", err))
-			}
-
-			if freezeJSON, err := json.MarshalIndent(freeze, "", "  "); err == nil {
-				t.Logf("Deployment freeze as JSON:\n%s", string(freezeJSON))
-			} else {
-				t.Logf("Failed to marshal freeze object to JSON: %v", err)
 			}
 
 			t.Logf("Retrieved deployment freeze with %d tenant scopes", len(freeze.TenantProjectEnvironmentScope))
