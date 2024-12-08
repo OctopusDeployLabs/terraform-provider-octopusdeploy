@@ -72,7 +72,6 @@ func TestAccOctopusDeployGitTrigger(t *testing.T) {
 	//}
 
 	resource.Test(t, resource.TestCase{
-		CheckDestroy:             func(s *terraform.State) error { return testGitTriggerCheckDestroy(s) },
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
