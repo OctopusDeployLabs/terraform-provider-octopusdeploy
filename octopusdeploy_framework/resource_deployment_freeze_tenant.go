@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deploymentfreezes"
@@ -68,10 +69,16 @@ func (d *deploymentFreezeTenantResource) Create(ctx context.Context, req resourc
 	// Add to existing scopes
 	freeze.TenantProjectEnvironmentScope = append(freeze.TenantProjectEnvironmentScope, tenantScope)
 
+	tflog.Info(ctx, fmt.Sprintf("[API Request] Updating deployment freeze with new scope. Total scopes: %d", len(freeze.TenantProjectEnvironmentScope)))
+
 	freeze, err = deploymentfreezes.Update(d.Client, freeze)
 	if err != nil {
 		resp.Diagnostics.AddError("error while updating deployment freeze", err.Error())
 		return
+	}
+
+	if freezeJSON, err := json.MarshalIndent(freeze, "", "  "); err == nil {
+		tflog.Info(ctx, fmt.Sprintf("[API Response] Updated deployment freeze:\n%s", string(freezeJSON)))
 	}
 
 	plan.ID = types.StringValue(util.BuildCompositeId(plan.DeploymentFreezeID.ValueString(), plan.TenantID.ValueString(), plan.ProjectID.ValueString(), plan.EnvironmentID.ValueString()))
