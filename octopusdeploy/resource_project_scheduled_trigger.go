@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
@@ -23,8 +24,9 @@ func resourceProjectScheduledTrigger() *schema.Resource {
 
 func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
+	spaceId := d.Get("space_id").(string)
 
-	scheduledTrigger, err := client.ProjectTriggers.GetByID(d.Id())
+	scheduledTrigger, err := triggers.GetByID(client, spaceId, d.Id())
 
 	if scheduledTrigger == nil {
 		d.SetId("")
@@ -61,7 +63,7 @@ func resourceProjectScheduledTriggerCreate(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	scheduledTrigger, err := client.ProjectTriggers.Add(expandedScheduledTrigger)
+	scheduledTrigger, err := triggers.Add(client, expandedScheduledTrigger)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -97,7 +99,7 @@ func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	scheduledTrigger, err := client.ProjectTriggers.Update(expandedScheduledTrigger)
+	scheduledTrigger, err := triggers.Update(client, expandedScheduledTrigger)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,7 +111,9 @@ func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.Resour
 
 func resourceProjectScheduledTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
-	err := client.ProjectTriggers.DeleteByID(d.Id())
+	spaceId := d.Get("space_id").(string)
+	err := triggers.DeleteById(client, spaceId, d.Id())
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
