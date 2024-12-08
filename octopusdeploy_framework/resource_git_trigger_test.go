@@ -5,7 +5,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -72,6 +71,7 @@ func TestAccOctopusDeployGitTrigger(t *testing.T) {
 	//}
 
 	resource.Test(t, resource.TestCase{
+		CheckDestroy:             func(s *terraform.State) error { return testGitTriggerCheckDestroy(s) },
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
@@ -89,16 +89,14 @@ func TestAccOctopusDeployGitTrigger(t *testing.T) {
 
 func setupTestSpace(t *testing.T) (string, string, string, string) {
 	testFramework := test.OctopusContainerTest{}
-	//newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "45a-projectwithgitdependency", []string{})
-	err := testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "45a-projectwithgitdependency"), "Spaces-1", []string{})
+
+	spaceId := octoClient.GetSpaceID()
+
+	err := testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "45a-projectwithgitdependency"), spaceId, []string{})
 
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-
-	newSpaceId := "Spaces-1"
-
-	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
 
 	query := projects.ProjectsQuery{
 		PartialName: "Test",
@@ -106,7 +104,7 @@ func setupTestSpace(t *testing.T) (string, string, string, string) {
 		Take:        1,
 	}
 
-	projectResources, err := client.Projects.Get(query)
+	projectResources, err := octoClient.Projects.Get(query)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -116,7 +114,7 @@ func setupTestSpace(t *testing.T) (string, string, string, string) {
 	}
 	project := projectResources.Items[0]
 
-	channelResources, err := channels.GetAll(client, newSpaceId)
+	channelResources, err := channels.GetAll(octoClient, spaceId)
 
 	if err != nil {
 		t.Fatal(err.Error())
@@ -139,7 +137,7 @@ func setupTestSpace(t *testing.T) (string, string, string, string) {
 		t.Fatalf("No channel found for project ID: %s", project.ID)
 	}
 
-	deploymentProccessResource, err := deployments.GetDeploymentProcessByID(client, newSpaceId, project.DeploymentProcessID)
+	deploymentProccessResource, err := deployments.GetDeploymentProcessByID(octoClient, spaceId, project.DeploymentProcessID)
 
 	if err != nil {
 		t.Fatal(err.Error())
@@ -147,7 +145,7 @@ func setupTestSpace(t *testing.T) (string, string, string, string) {
 
 	actionSlug := deploymentProccessResource.Steps[0].Actions[0].Slug
 
-	return project.ID, newSpaceId, actionSlug, projectChannel.ID
+	return project.ID, spaceId, actionSlug, projectChannel.ID
 }
 
 func testGitTriggerBasic(data gitTriggerTestData, localName string) string {
