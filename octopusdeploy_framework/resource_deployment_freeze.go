@@ -147,8 +147,9 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	// this resource doesn't include scopes, need to copy it from the fetched resource
+	// Preserve both project and tenant scopes from the existing freeze
 	updatedFreeze.ProjectEnvironmentScope = existingFreeze.ProjectEnvironmentScope
+	updatedFreeze.TenantProjectEnvironmentScope = existingFreeze.TenantProjectEnvironmentScope
 
 	updatedFreeze.SetID(existingFreeze.GetID())
 	updatedFreeze.Links = existingFreeze.Links

@@ -51,6 +51,12 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testDeploymentFreezeExists(resourceName),
+					testDeploymentFreezeTenantExists(fmt.Sprintf("octopusdeploy_deployment_freeze_tenant.tenant_%s", localName))),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, true, true),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testDeploymentFreezeExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"1"),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
 					resource.TestCheckResourceAttr(resourceName, "end", updatedEnd),
@@ -62,12 +68,6 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.0", "Monday"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.1", "Wednesday"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.2", "Friday")),
-				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, false, true),
-			},
-			{
-				Check: resource.ComposeTestCheckFunc(
-					testDeploymentFreezeExists(resourceName),
-					testDeploymentFreezeTenantExists(fmt.Sprintf("octopusdeploy_deployment_freeze_tenant.tenant_%s", localName))),
 				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, true, true),
 			},
 		},

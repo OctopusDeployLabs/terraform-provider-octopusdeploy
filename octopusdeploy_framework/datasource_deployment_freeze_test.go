@@ -150,7 +150,6 @@ resource "octopusdeploy_deployment_freeze_tenant" "test_tenant_scope" {
 
 	datasourceConfig := `
 data "octopusdeploy_deployment_freezes" "test_freeze" {
-    ids          = null
     partial_name = "%s"
     skip         = 0
     take         = 1
