@@ -42,6 +42,7 @@ Read-Only:
 - `project_environment_scope` (Map of List of String) The project environment scope of the deployment freeze
 - `recurring_schedule` (Attributes) (see [below for nested schema](#nestedatt--deployment_freezes--recurring_schedule))
 - `start` (String) The start time of the freeze
+- `tenant_project_environment_scope` (Attributes List) The tenant project environment scope of the deployment freeze (see [below for nested schema](#nestedatt--deployment_freezes--tenant_project_environment_scope))
 
 <a id="nestedatt--deployment_freezes--recurring_schedule"></a>
 ### Nested Schema for `deployment_freezes.recurring_schedule`
@@ -58,5 +59,15 @@ Read-Only:
 - `monthly_schedule_type` (String) Type of monthly schedule (DayOfMonth, DateOfMonth)
 - `type` (String) Type of recurring schedule (OnceDaily, DaysPerWeek, DaysPerMonth, Annually)
 - `unit` (Number) The unit value for the schedule
+
+
+<a id="nestedatt--deployment_freezes--tenant_project_environment_scope"></a>
+### Nested Schema for `deployment_freezes.tenant_project_environment_scope`
+
+Read-Only:
+
+- `environment_id` (String) The environment ID
+- `project_id` (String) The project ID
+- `tenant_id` (String) The tenant ID
 
 

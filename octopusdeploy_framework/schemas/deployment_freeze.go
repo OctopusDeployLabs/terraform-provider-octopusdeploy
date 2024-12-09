@@ -61,6 +61,7 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 		},
 	}
 }
+
 func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about deployment freezes",
@@ -92,23 +93,39 @@ func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
 						"name": GetReadonlyNameDatasourceSchema(),
 						"start": datasourceSchema.StringAttribute{
 							Description: "The start time of the freeze",
-							Optional:    false,
 							Computed:    true,
 						},
 						"end": datasourceSchema.StringAttribute{
 							Description: "The end time of the freeze",
-							Optional:    false,
 							Computed:    true,
 						},
 						"project_environment_scope": datasourceSchema.MapAttribute{
 							ElementType: types.ListType{ElemType: types.StringType},
 							Description: "The project environment scope of the deployment freeze",
-							Optional:    false,
 							Computed:    true,
+						},
+						"tenant_project_environment_scope": datasourceSchema.ListNestedAttribute{
+							Description: "The tenant project environment scope of the deployment freeze",
+							Computed:    true,
+							NestedObject: datasourceSchema.NestedAttributeObject{
+								Attributes: map[string]datasourceSchema.Attribute{
+									"tenant_id": datasourceSchema.StringAttribute{
+										Description: "The tenant ID",
+										Computed:    true,
+									},
+									"project_id": datasourceSchema.StringAttribute{
+										Description: "The project ID",
+										Computed:    true,
+									},
+									"environment_id": datasourceSchema.StringAttribute{
+										Description: "The environment ID",
+										Computed:    true,
+									},
+								},
+							},
 						},
 						"recurring_schedule": datasourceSchema.SingleNestedAttribute{
 							Computed: true,
-							Optional: false,
 							Attributes: map[string]datasourceSchema.Attribute{
 								"type": datasourceSchema.StringAttribute{
 									Description: "Type of recurring schedule (OnceDaily, DaysPerWeek, DaysPerMonth, Annually)",
@@ -155,7 +172,6 @@ func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
 						},
 					},
 				},
-				Optional: false,
 				Computed: true,
 			},
 		},

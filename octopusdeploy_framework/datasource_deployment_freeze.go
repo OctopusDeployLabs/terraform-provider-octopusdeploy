@@ -14,28 +14,6 @@ import (
 
 const deploymentFreezeDatasourceName = "deployment_freezes"
 
-type recurringScheduleDatasourceModel struct {
-	Type                types.String `tfsdk:"type"`
-	Unit                types.Int64  `tfsdk:"unit"`
-	EndType             types.String `tfsdk:"end_type"`
-	EndOnDate           types.String `tfsdk:"end_on_date"`
-	EndAfterOccurrences types.Int64  `tfsdk:"end_after_occurrences"`
-	MonthlyScheduleType types.String `tfsdk:"monthly_schedule_type"`
-	DateOfMonth         types.String `tfsdk:"date_of_month"`
-	DayNumberOfMonth    types.String `tfsdk:"day_number_of_month"`
-	DaysOfWeek          types.List   `tfsdk:"days_of_week"`
-	DayOfWeek           types.String `tfsdk:"day_of_week"`
-}
-
-type deploymentFreezeDatasourceModel struct {
-	ID                      types.String                      `tfsdk:"id"`
-	Name                    types.String                      `tfsdk:"name"`
-	Start                   types.String                      `tfsdk:"start"`
-	End                     types.String                      `tfsdk:"end"`
-	ProjectEnvironmentScope types.Map                         `tfsdk:"project_environment_scope"`
-	RecurringSchedule       *recurringScheduleDatasourceModel `tfsdk:"recurring_schedule"`
-}
-
 type deploymentFreezesDatasourceModel struct {
 	ID                types.String `tfsdk:"id"`
 	IDs               types.List   `tfsdk:"ids"`
@@ -114,27 +92,55 @@ var _ datasource.DataSource = &deploymentFreezeDataSource{}
 var _ datasource.DataSourceWithConfigure = &deploymentFreezeDataSource{}
 
 func mapFreezeToAttribute(ctx context.Context, freeze deploymentfreezes.DeploymentFreeze) (attr.Value, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	projectScopes := make(map[string]attr.Value)
 	for projectId, environmentScopes := range freeze.ProjectEnvironmentScope {
 		projectScopes[projectId] = util.FlattenStringList(environmentScopes)
 	}
 
-	scopeType, diags := types.MapValueFrom(ctx, types.ListType{ElemType: types.StringType}, projectScopes)
-	if diags.HasError() {
+	scopeType, scopeDiags := types.MapValueFrom(ctx, types.ListType{ElemType: types.StringType}, projectScopes)
+	if scopeDiags.HasError() {
+		diags.Append(scopeDiags...)
+		return nil, diags
+	}
+
+	tenantScopes := make([]attr.Value, 0)
+	for _, scope := range freeze.TenantProjectEnvironmentScope {
+		tenantScope, tDiags := types.ObjectValue(tenantScopeObjectType(), map[string]attr.Value{
+			"tenant_id":      types.StringValue(scope.TenantId),
+			"project_id":     types.StringValue(scope.ProjectId),
+			"environment_id": types.StringValue(scope.EnvironmentId),
+		})
+		if tDiags.HasError() {
+			diags.Append(tDiags...)
+			return nil, diags
+		}
+		tenantScopes = append(tenantScopes, tenantScope)
+	}
+
+	tenantScopesList, tsDiags := types.ListValue(
+		types.ObjectType{AttrTypes: tenantScopeObjectType()},
+		tenantScopes,
+	)
+	if tsDiags.HasError() {
+		diags.Append(tsDiags...)
 		return nil, diags
 	}
 
 	attrs := map[string]attr.Value{
-		"id":                        types.StringValue(freeze.ID),
-		"name":                      types.StringValue(freeze.Name),
-		"start":                     types.StringValue(freeze.Start.Format(time.RFC3339)),
-		"end":                       types.StringValue(freeze.End.Format(time.RFC3339)),
-		"project_environment_scope": scopeType,
+		"id":                               types.StringValue(freeze.ID),
+		"name":                             types.StringValue(freeze.Name),
+		"start":                            types.StringValue(freeze.Start.Format(time.RFC3339)),
+		"end":                              types.StringValue(freeze.End.Format(time.RFC3339)),
+		"project_environment_scope":        scopeType,
+		"tenant_project_environment_scope": tenantScopesList,
 	}
 
 	if freeze.RecurringSchedule != nil {
-		daysOfWeek, diags := types.ListValueFrom(ctx, types.StringType, freeze.RecurringSchedule.DaysOfWeek)
-		if diags.HasError() {
+		daysOfWeek, daysDiags := types.ListValueFrom(ctx, types.StringType, freeze.RecurringSchedule.DaysOfWeek)
+		if daysDiags.HasError() {
+			diags.Append(daysDiags...)
 			return nil, diags
 		}
 
@@ -181,8 +187,9 @@ func mapFreezeToAttribute(ctx context.Context, freeze deploymentfreezes.Deployme
 			"day_of_week":           dayOfWeek,
 		}
 
-		recurringSchedule, diags := types.ObjectValue(freezeRecurringScheduleObjectType(), scheduleAttrs)
-		if diags.HasError() {
+		recurringSchedule, rsDiags := types.ObjectValue(freezeRecurringScheduleObjectType(), scheduleAttrs)
+		if rsDiags.HasError() {
+			diags.Append(rsDiags...)
 			return nil, diags
 		}
 
@@ -209,13 +216,22 @@ func freezeRecurringScheduleObjectType() map[string]attr.Type {
 	}
 }
 
+func tenantScopeObjectType() map[string]attr.Type {
+	return map[string]attr.Type{
+		"tenant_id":      types.StringType,
+		"project_id":     types.StringType,
+		"environment_id": types.StringType,
+	}
+}
+
 func freezeObjectType() map[string]attr.Type {
 	return map[string]attr.Type{
-		"id":                        types.StringType,
-		"name":                      types.StringType,
-		"start":                     types.StringType,
-		"end":                       types.StringType,
-		"project_environment_scope": types.MapType{ElemType: types.ListType{ElemType: types.StringType}},
-		"recurring_schedule":        types.ObjectType{AttrTypes: freezeRecurringScheduleObjectType()},
+		"id":                               types.StringType,
+		"name":                             types.StringType,
+		"start":                            types.StringType,
+		"end":                              types.StringType,
+		"project_environment_scope":        types.MapType{ElemType: types.ListType{ElemType: types.StringType}},
+		"tenant_project_environment_scope": types.ListType{ElemType: types.ObjectType{AttrTypes: tenantScopeObjectType()}},
+		"recurring_schedule":               types.ObjectType{AttrTypes: freezeRecurringScheduleObjectType()},
 	}
 }
