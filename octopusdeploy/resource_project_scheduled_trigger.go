@@ -5,6 +5,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/triggers"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
@@ -25,6 +26,7 @@ func resourceProjectScheduledTrigger() *schema.Resource {
 func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 	spaceId := d.Get("space_id").(string)
+	spaceId = util.Ternary(len(spaceId) > 0, spaceId, client.GetSpaceID())
 
 	scheduledTrigger, err := triggers.GetByID(client, spaceId, d.Id())
 
@@ -112,7 +114,7 @@ func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.Resour
 func resourceProjectScheduledTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 	spaceId := d.Get("space_id").(string)
-	err := triggers.DeleteById(client, spaceId, d.Id())
+	err := triggers.DeleteByID(client, spaceId, d.Id())
 
 	if err != nil {
 		return diag.FromErr(err)
