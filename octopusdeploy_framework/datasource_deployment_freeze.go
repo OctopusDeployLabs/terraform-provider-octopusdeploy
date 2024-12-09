@@ -20,6 +20,7 @@ type deploymentFreezesDatasourceModel struct {
 	PartialName       types.String `tfsdk:"partial_name"`
 	ProjectIDs        types.List   `tfsdk:"project_ids"`
 	EnvironmentIDs    types.List   `tfsdk:"environment_ids"`
+	TenantIDs         types.List   `tfsdk:"tenant_ids"`
 	IncludeComplete   types.Bool   `tfsdk:"include_complete"`
 	Status            types.String `tfsdk:"status"`
 	Skip              types.Int64  `tfsdk:"skip"`
@@ -59,6 +60,7 @@ func (d *deploymentFreezeDataSource) Read(ctx context.Context, req datasource.Re
 		PartialName:     data.PartialName.ValueString(),
 		ProjectIds:      util.Ternary(data.ProjectIDs.IsNull(), []string{}, util.ExpandStringList(data.ProjectIDs)),
 		EnvironmentIds:  util.Ternary(data.EnvironmentIDs.IsNull(), []string{}, util.ExpandStringList(data.EnvironmentIDs)),
+		TenantIds:       util.Ternary(data.TenantIDs.IsNull(), []string{}, util.ExpandStringList(data.TenantIDs)),
 		IncludeComplete: data.IncludeComplete.ValueBool(),
 		Status:          data.Status.ValueString(),
 		Skip:            int(data.Skip.ValueInt64()),

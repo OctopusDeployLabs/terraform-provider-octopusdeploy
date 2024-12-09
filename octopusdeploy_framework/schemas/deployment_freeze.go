@@ -76,6 +76,11 @@ func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
 				ElementType: types.StringType,
 				Optional:    true,
 			},
+			"tenant_ids": datasourceSchema.ListAttribute{
+				Description: "A filter to search by a list of tenant IDs",
+				ElementType: types.StringType,
+				Optional:    true,
+			},
 			"environment_ids": datasourceSchema.ListAttribute{
 				Description: "A filter to search by a list of environment IDs",
 				ElementType: types.StringType,
