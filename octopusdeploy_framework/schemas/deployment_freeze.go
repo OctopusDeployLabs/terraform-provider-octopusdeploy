@@ -1,10 +1,78 @@
 package schemas
 
 import (
+	"context"
+	"fmt"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+type daysOfWeekValidator struct{}
+
+func NewDaysOfWeekValidator() daysOfWeekValidator {
+	return daysOfWeekValidator{}
+}
+
+func (v daysOfWeekValidator) Description(ctx context.Context) string {
+	return "validates that days of the week are valid and in correct order (Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)"
+}
+
+func (v daysOfWeekValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v daysOfWeekValidator) ValidateList(ctx context.Context, req validator.ListRequest, resp *validator.ListResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	validDays := map[string]int{
+		"Sunday":    0,
+		"Monday":    1,
+		"Tuesday":   2,
+		"Wednesday": 3,
+		"Thursday":  4,
+		"Friday":    5,
+		"Saturday":  6,
+	}
+
+	var days []string
+	req.ConfigValue.ElementsAs(ctx, &days, false)
+
+	for i := 1; i < len(days); i++ {
+		currentDay := days[i]
+		previousDay := days[i-1]
+
+		currentPos, currentExists := validDays[currentDay]
+		previousPos, previousExists := validDays[previousDay]
+
+		if !currentExists {
+			resp.Diagnostics.AddError(
+				"Invalid day of week",
+				fmt.Sprintf("'%s' is not a valid day of week. Must be one of: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday", currentDay),
+			)
+			return
+		}
+
+		if !previousExists {
+			resp.Diagnostics.AddError(
+				"Invalid day of week",
+				fmt.Sprintf("'%s' is not a valid day of week. Must be one of: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday", previousDay),
+			)
+			return
+		}
+
+		if currentPos <= previousPos {
+			resp.Diagnostics.AddError(
+				"Invalid day order",
+				fmt.Sprintf("Days of the week must be in order (Sunday through Saturday). Found '%s' after '%s'", currentDay, previousDay),
+			)
+			return
+		}
+	}
+}
 
 type DeploymentFreezeSchema struct{}
 
@@ -48,9 +116,12 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 						Optional:    true,
 					},
 					"days_of_week": resourceSchema.ListAttribute{
-						Description: "List of days of the week for weekly schedules",
+						Description: "List of days of the week for weekly schedules. Must follow order: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday",
 						Optional:    true,
 						ElementType: types.StringType,
+						Validators: []validator.List{
+							NewDaysOfWeekValidator(),
+						},
 					},
 					"day_of_week": resourceSchema.StringAttribute{
 						Description: "The day of the week for monthly schedules",
