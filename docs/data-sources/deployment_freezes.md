@@ -40,6 +40,23 @@ Read-Only:
 - `id` (String) The unique ID for this resource.
 - `name` (String) The name of this resource.
 - `project_environment_scope` (Map of List of String) The project environment scope of the deployment freeze
+- `recurring_schedule` (Attributes) (see [below for nested schema](#nestedatt--deployment_freezes--recurring_schedule))
 - `start` (String) The start time of the freeze
+
+<a id="nestedatt--deployment_freezes--recurring_schedule"></a>
+### Nested Schema for `deployment_freezes.recurring_schedule`
+
+Read-Only:
+
+- `date_of_month` (String) The date of the month for monthly schedules
+- `day_number_of_month` (String) The day number of the month for monthly schedules
+- `day_of_week` (String) The day of the week for monthly schedules
+- `days_of_week` (List of String) List of days of the week for weekly schedules
+- `end_after_occurrences` (Number) Number of occurrences after which the schedule should end
+- `end_on_date` (String) The date when the recurring schedule should end
+- `end_type` (String) When the recurring schedule should end (Never, OnDate, AfterOccurrences)
+- `monthly_schedule_type` (String) Type of monthly schedule (DayOfMonth, DateOfMonth)
+- `type` (String) Type of recurring schedule (OnceDaily, DaysPerWeek, DaysPerMonth, Annually)
+- `unit` (Number) The unit value for the schedule
 
 

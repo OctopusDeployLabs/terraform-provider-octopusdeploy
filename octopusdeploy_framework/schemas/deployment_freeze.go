@@ -61,7 +61,6 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 		},
 	}
 }
-
 func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{
 		Description: "Provides information about deployment freezes",
@@ -107,6 +106,53 @@ func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
 							Optional:    false,
 							Computed:    true,
 						},
+						"recurring_schedule": datasourceSchema.SingleNestedAttribute{
+							Computed: true,
+							Optional: false,
+							Attributes: map[string]datasourceSchema.Attribute{
+								"type": datasourceSchema.StringAttribute{
+									Description: "Type of recurring schedule (OnceDaily, DaysPerWeek, DaysPerMonth, Annually)",
+									Computed:    true,
+								},
+								"unit": datasourceSchema.Int64Attribute{
+									Description: "The unit value for the schedule",
+									Computed:    true,
+								},
+								"end_type": datasourceSchema.StringAttribute{
+									Description: "When the recurring schedule should end (Never, OnDate, AfterOccurrences)",
+									Computed:    true,
+								},
+								"end_on_date": datasourceSchema.StringAttribute{
+									Description: "The date when the recurring schedule should end",
+									Computed:    true,
+								},
+								"end_after_occurrences": datasourceSchema.Int64Attribute{
+									Description: "Number of occurrences after which the schedule should end",
+									Computed:    true,
+								},
+								"monthly_schedule_type": datasourceSchema.StringAttribute{
+									Description: "Type of monthly schedule (DayOfMonth, DateOfMonth)",
+									Computed:    true,
+								},
+								"date_of_month": datasourceSchema.StringAttribute{
+									Description: "The date of the month for monthly schedules",
+									Computed:    true,
+								},
+								"day_number_of_month": datasourceSchema.StringAttribute{
+									Description: "The day number of the month for monthly schedules",
+									Computed:    true,
+								},
+								"days_of_week": datasourceSchema.ListAttribute{
+									Description: "List of days of the week for weekly schedules",
+									Computed:    true,
+									ElementType: types.StringType,
+								},
+								"day_of_week": datasourceSchema.StringAttribute{
+									Description: "The day of the week for monthly schedules",
+									Computed:    true,
+								},
+							},
+						},
 					},
 				},
 				Optional: false,
@@ -114,7 +160,6 @@ func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
 			},
 		},
 	}
-
 }
 
 var _ EntitySchema = &DeploymentFreezeSchema{}
