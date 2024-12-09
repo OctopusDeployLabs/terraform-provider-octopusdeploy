@@ -93,19 +93,23 @@ func (d DeploymentFreezeSchema) GetDatasourceSchema() datasourceSchema.Schema {
 						"name": GetReadonlyNameDatasourceSchema(),
 						"start": datasourceSchema.StringAttribute{
 							Description: "The start time of the freeze",
+							Optional:    false,
 							Computed:    true,
 						},
 						"end": datasourceSchema.StringAttribute{
 							Description: "The end time of the freeze",
+							Optional:    false,
 							Computed:    true,
 						},
 						"project_environment_scope": datasourceSchema.MapAttribute{
 							ElementType: types.ListType{ElemType: types.StringType},
 							Description: "The project environment scope of the deployment freeze",
+							Optional:    false,
 							Computed:    true,
 						},
 						"tenant_project_environment_scope": datasourceSchema.ListNestedAttribute{
 							Description: "The tenant project environment scope of the deployment freeze",
+							Optional:    false,
 							Computed:    true,
 							NestedObject: datasourceSchema.NestedAttributeObject{
 								Attributes: map[string]datasourceSchema.Attribute{

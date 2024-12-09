@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"strings"
 	"testing"
 	"time"
 )
@@ -24,30 +25,40 @@ func TestAccDataSourceDeploymentFreezes(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDeploymentFreezesConfig(spaceName, freezeName, startTime, endTime, false, projectName, environmentName, tenantName),
+				Config: testAccDataSourceDeploymentFreezesConfig(spaceName, freezeName, startTime, endTime, false, false, projectName, environmentName, tenantName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(dataSourceName, "id"),
 					resource.TestCheckResourceAttr(dataSourceName, "partial_name", freezeName),
 					resource.TestCheckResourceAttr(dataSourceName, "deployment_freezes.#", "1"),
 					resource.TestCheckResourceAttr(dataSourceName, "deployment_freezes.0.name", freezeName),
 					resource.TestCheckResourceAttr(dataSourceName, "deployment_freezes.0.tenant_project_environment_scope.#", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "deployment_freezes.0.project_environment_scope.%", "0"),
 				),
 			},
 			{
-				Config: testAccDataSourceDeploymentFreezesConfig(spaceName, freezeName, startTime, endTime, true, projectName, environmentName, tenantName),
+				Config: testAccDataSourceDeploymentFreezesConfig(spaceName, freezeName, startTime, endTime, true, false, projectName, environmentName, tenantName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(dataSourceName, "id"),
+					resource.TestCheckResourceAttr(dataSourceName, "deployment_freezes.0.tenant_project_environment_scope.#", "0"),
+					resource.TestCheckResourceAttr(dataSourceName, "deployment_freezes.0.project_environment_scope.%", "1"),
+				),
+			},
+			{
+				Config: testAccDataSourceDeploymentFreezesConfig(spaceName, freezeName, startTime, endTime, true, true, projectName, environmentName, tenantName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(dataSourceName, "id"),
 					resource.TestCheckResourceAttr(dataSourceName, "deployment_freezes.0.tenant_project_environment_scope.#", "1"),
 					resource.TestCheckResourceAttrSet(dataSourceName, "deployment_freezes.0.tenant_project_environment_scope.0.tenant_id"),
 					resource.TestCheckResourceAttrSet(dataSourceName, "deployment_freezes.0.tenant_project_environment_scope.0.project_id"),
 					resource.TestCheckResourceAttrSet(dataSourceName, "deployment_freezes.0.tenant_project_environment_scope.0.environment_id"),
+					resource.TestCheckResourceAttr(dataSourceName, "deployment_freezes.0.project_environment_scope.%", "1"),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceDeploymentFreezesConfig(spaceName, freezeName string, startTime, endTime time.Time, includeTenant bool, projectName, environmentName, tenantName string) string {
+func testAccDataSourceDeploymentFreezesConfig(spaceName, freezeName string, startTime, endTime time.Time, includeProject bool, includeTenant bool, projectName, environmentName, tenantName string) string {
 	baseConfig := fmt.Sprintf(`
 resource "octopusdeploy_space" "test_space" {
     name                  = "%s"
@@ -98,6 +109,17 @@ resource "octopusdeploy_deployment_freeze" "test_freeze" {
 }
 `, spaceName, environmentName, projectName, freezeName, startTime.Format(time.RFC3339), endTime.Format(time.RFC3339))
 
+	if includeProject {
+		projectConfig := fmt.Sprintf(`
+resource "octopusdeploy_deployment_freeze_project" "test_project_scope" {
+    deploymentfreeze_id = octopusdeploy_deployment_freeze.test_freeze.id
+    project_id = octopusdeploy_project.test_project.id
+    environment_ids = [octopusdeploy_environment.test_environment.id]
+}
+`)
+		baseConfig = baseConfig + projectConfig
+	}
+
 	if includeTenant {
 		tenantConfig := fmt.Sprintf(`
 resource "octopusdeploy_tenant" "test_tenant" {
@@ -134,16 +156,15 @@ data "octopusdeploy_deployment_freezes" "test_freeze" {
     take         = 1
     depends_on   = [`
 
-	if includeTenant {
-		datasourceConfig += `
-        octopusdeploy_deployment_freeze.test_freeze,
-        octopusdeploy_deployment_freeze_tenant.test_tenant_scope
-        `
-	} else {
-		datasourceConfig += `
-        octopusdeploy_deployment_freeze.test_freeze
-        `
+	deps := []string{"octopusdeploy_deployment_freeze.test_freeze"}
+	if includeProject {
+		deps = append(deps, "octopusdeploy_deployment_freeze_project.test_project_scope")
 	}
+	if includeTenant {
+		deps = append(deps, "octopusdeploy_deployment_freeze_tenant.test_tenant_scope")
+	}
+
+	datasourceConfig += "\n        " + strings.Join(deps, ",\n        ") + "\n    "
 
 	datasourceConfig += `]
 }
@@ -156,5 +177,6 @@ output "octopus_freeze_id" {
     value = data.octopusdeploy_deployment_freezes.test_freeze.deployment_freezes[0].id
 }
 `
-	return baseConfig + fmt.Sprintf(datasourceConfig, freezeName)
+	var config = baseConfig + fmt.Sprintf(datasourceConfig, freezeName)
+	return config
 }
