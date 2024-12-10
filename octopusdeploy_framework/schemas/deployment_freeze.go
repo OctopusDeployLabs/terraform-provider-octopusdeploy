@@ -1,78 +1,12 @@
 package schemas
 
 import (
-	"context"
-	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
-
-type daysOfWeekValidator struct{}
-
-func NewDaysOfWeekValidator() daysOfWeekValidator {
-	return daysOfWeekValidator{}
-}
-
-func (v daysOfWeekValidator) Description(ctx context.Context) string {
-	return "validates that days of the week are valid and in correct order (Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)"
-}
-
-func (v daysOfWeekValidator) MarkdownDescription(ctx context.Context) string {
-	return v.Description(ctx)
-}
-
-func (v daysOfWeekValidator) ValidateList(ctx context.Context, req validator.ListRequest, resp *validator.ListResponse) {
-	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
-		return
-	}
-
-	validDays := map[string]int{
-		"Sunday":    0,
-		"Monday":    1,
-		"Tuesday":   2,
-		"Wednesday": 3,
-		"Thursday":  4,
-		"Friday":    5,
-		"Saturday":  6,
-	}
-
-	var days []string
-	req.ConfigValue.ElementsAs(ctx, &days, false)
-
-	for i := 1; i < len(days); i++ {
-		currentDay := days[i]
-		previousDay := days[i-1]
-
-		currentPos, currentExists := validDays[currentDay]
-		previousPos, previousExists := validDays[previousDay]
-
-		if !currentExists {
-			resp.Diagnostics.AddError(
-				"Invalid day of week",
-				fmt.Sprintf("'%s' is not a valid day of week. Must be one of: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday", currentDay),
-			)
-			return
-		}
-
-		if !previousExists {
-			resp.Diagnostics.AddError(
-				"Invalid day of week",
-				fmt.Sprintf("'%s' is not a valid day of week. Must be one of: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday", previousDay),
-			)
-			return
-		}
-
-		if currentPos <= previousPos {
-			resp.Diagnostics.AddError(
-				"Invalid day order",
-				fmt.Sprintf("Days of the week must be in order (Sunday through Saturday). Found '%s' after '%s'", currentDay, previousDay),
-			)
-			return
-		}
-	}
-}
 
 type DeploymentFreezeSchema struct{}
 
@@ -85,10 +19,16 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 			"end":   GetDateTimeResourceSchema("The end time of the freeze, must be RFC3339 format", true),
 			"recurring_schedule": resourceSchema.SingleNestedAttribute{
 				Optional: true,
+				Validators: []validator.Object{
+					NewRecurringScheduleValidator(),
+				},
 				Attributes: map[string]resourceSchema.Attribute{
 					"type": resourceSchema.StringAttribute{
 						Description: "Type of recurring schedule (OnceDaily, DaysPerWeek, DaysPerMonth, Annually)",
 						Required:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("OnceDaily", "DaysPerWeek", "DaysPerMonth", "Annually"),
+						},
 					},
 					"unit": resourceSchema.Int64Attribute{
 						Description: "The unit value for the schedule",
@@ -97,6 +37,9 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 					"end_type": resourceSchema.StringAttribute{
 						Description: "When the recurring schedule should end (Never, OnDate, AfterOccurrences)",
 						Required:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("Never", "OnDate", "AfterOccurrences"),
+						},
 					},
 					"end_on_date": GetDateTimeResourceSchema("The date when the recurring schedule should end", false),
 					"end_after_occurrences": resourceSchema.Int64Attribute{
@@ -106,14 +49,20 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 					"monthly_schedule_type": resourceSchema.StringAttribute{
 						Description: "Type of monthly schedule (DayOfMonth, DateOfMonth)",
 						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("DayOfMonth", "DateOfMonth"),
+						},
 					},
 					"date_of_month": resourceSchema.StringAttribute{
 						Description: "The date of the month for monthly schedules",
 						Optional:    true,
 					},
 					"day_number_of_month": resourceSchema.StringAttribute{
-						Description: "The day number of the month for monthly schedules",
+						Description: "Specifies which weekday position in the month. Valid values: 1 (First), 2 (Second), 3 (Third), 4 (Fourth), L (Last). Used with day_of_week",
 						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("1", "2", "3", "4", "L"),
+						},
 					},
 					"days_of_week": resourceSchema.ListAttribute{
 						Description: "List of days of the week for weekly schedules. Must follow order: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday",
@@ -124,8 +73,11 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 						},
 					},
 					"day_of_week": resourceSchema.StringAttribute{
-						Description: "The day of the week for monthly schedules",
+						Description: "The day of the week for monthly schedules when using DayOfMonth type",
 						Optional:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"),
+						},
 					},
 				},
 			},

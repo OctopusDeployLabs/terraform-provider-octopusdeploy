@@ -101,8 +101,8 @@ Required:
 Optional:
 
 - `date_of_month` (String) The date of the month for monthly schedules
-- `day_number_of_month` (String) The day number of the month for monthly schedules
-- `day_of_week` (String) The day of the week for monthly schedules
+- `day_number_of_month` (String) Specifies which weekday position in the month. Valid values: 1 (First), 2 (Second), 3 (Third), 4 (Fourth), L (Last). Used with day_of_week
+- `day_of_week` (String) The day of the week for monthly schedules when using DayOfMonth type
 - `days_of_week` (List of String) List of days of the week for weekly schedules. Must follow order: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 - `end_after_occurrences` (Number) Number of occurrences after which the schedule should end
 - `end_on_date` (String) The date when the recurring schedule should end
