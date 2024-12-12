@@ -81,11 +81,16 @@ Terraform will scan the local plugins folder directory structure (first) to qual
 
 ## Create a New Resource
 
-The provider is currently undergoing migration from Terraform SDK to Terraform Plugin Framework. Ensure all **new** resources are created under the `octopusdeploy-framework` directory using existing resources within the `octopusdeploy-framework` directory as a guideline.
+> [!IMPORTANT]
+> We're currently migrating all resources and data sources from Terraform SDK to Terraform Plugin Framework.
+> 
+> All new resources should be created using Framework, in the `octopusdeploy-framework` directory. [A GitHub action](.github/workflows/prevent-new-sdk-additions.yml) will detect and prevent any new additions to the old `octopusdeploy` SDK directory.
+> 
+> When modifying an existing SDK resource, we strongly recommend migrating it to Framework first - but this might not always be feasible. We'll judge it on a case-by-case basis.
 
 All new resources need an acceptance test that will ensure the lifecycle of the resource works correctly this includes Create, Read, Update and Delete.
 
-Please avoid using blocks in favour of nested attribute types. Blocks are mainly used for resources migrated from SDK to maintain backwards compatability.
+Please avoid using [blocks](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/blocks): these are mainly used for backwards compatability of resources migrated from SDK. Use [nested attributes](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes#nested-attribute-types) instead.
 
 ## Debugging 
 If you want to debug the provider follow these steps!
