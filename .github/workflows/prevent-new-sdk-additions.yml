@@ -18,13 +18,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Compare directories
+      - name: Check for new SDK resources or datasources
         run: |
           git diff --name-status origin/main..${{ vars.GITHUB_REF }} | grep '^A' | grep '^A\s\+octopusdeploy/' > new_files.txt || true
           if [ -s new_files.txt ]; then
-            echo "New files have been added to the 'octopusdeploy/' directory:"
+            echo "New files were found in the 'octopusdeploy/' directory:"
             cat new_files.txt
+            echo "::error::We are no longer creating new Terraform SDK resources or datasources. Anything new should be added using Terraform Framework in the 'octopusdeploy_framework' folder instead."
             exit 1
           else
-            echo "No new files detected in the 'octopusdeploy/' directory."
+            echo "::info::No new files detected in the 'octopusdeploy/' directory."
           fi
