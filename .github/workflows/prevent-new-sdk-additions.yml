@@ -27,5 +27,5 @@ jobs:
             echo "We are no longer creating new Terraform SDK resources or datasources. Anything new should be added using Terraform Framework in the 'octopusdeploy_framework' folder instead."
             exit 1
           else
-            echo ":white_check_mark: No new files detected in the 'octopusdeploy/' directory."
+            echo "::notice:: No new files detected in the 'octopusdeploy/' directory."
           fi
