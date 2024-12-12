@@ -9,7 +9,7 @@ on:
       - '**'
 
 jobs:
-  detect-new-files:
+  detect-new-sdk-files:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,10 +22,10 @@ jobs:
         run: |
           git diff --name-status origin/main..${{ vars.GITHUB_REF }} | grep '^A' | grep '^A\s\+octopusdeploy/' > new_files.txt || true
           if [ -s new_files.txt ]; then
-            echo "New files were found in the 'octopusdeploy/' directory:"
+            echo "::error::New files were found in the 'octopusdeploy/' directory:"
             cat new_files.txt
-            echo "::error::We are no longer creating new Terraform SDK resources or datasources. Anything new should be added using Terraform Framework in the 'octopusdeploy_framework' folder instead."
+            echo "We are no longer creating new Terraform SDK resources or datasources. Anything new should be added using Terraform Framework in the 'octopusdeploy_framework' folder instead."
             exit 1
           else
-            echo "::info::No new files detected in the 'octopusdeploy/' directory."
+            echo ":white_check_mark: No new files detected in the 'octopusdeploy/' directory."
           fi
