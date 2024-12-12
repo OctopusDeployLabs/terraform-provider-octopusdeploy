@@ -20,7 +20,7 @@ jobs:
 
       - name: Compare directories
         run: |
-          git diff --name-status origin/main..$GITHUB_REF | grep '^A' | grep '^A\s\+octopusdeploy/' > new_files.txt
+          git diff --name-status origin/main..${{ vars.GITHUB_REF }} | grep '^A' | grep '^A\s\+octopusdeploy/' > new_files.txt
           if [ -s new_files.txt ]; then
             echo "New files have been added to the 'directory/' directory:"
             cat new_files.txt
