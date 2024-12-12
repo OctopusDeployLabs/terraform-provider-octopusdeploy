@@ -22,10 +22,10 @@ jobs:
         run: |
           git diff --name-status origin/main..${{ vars.GITHUB_REF }} | grep '^A' | grep '^A\s\+octopusdeploy/' > new_files.txt || true
           if [ -s new_files.txt ]; then
-            echo "::error::New files were found in the 'octopusdeploy/' directory:"
+            echo "::error::New files were found in the 'octopusdeploy/' directory."
             cat new_files.txt
             echo "We are no longer creating new Terraform SDK resources or datasources. Anything new should be added using Terraform Framework in the 'octopusdeploy_framework' folder instead."
             exit 1
           else
-            echo "::notice:: No new files detected in the 'octopusdeploy/' directory."
+            echo "::notice::No new files detected in the 'octopusdeploy/' directory."
           fi
