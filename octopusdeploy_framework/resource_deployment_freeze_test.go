@@ -1,13 +1,11 @@
 package octopusdeploy_framework
 
 import (
-	"context"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deploymentfreezes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -40,7 +38,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
 					resource.TestCheckResourceAttr(resourceName, "end", end)),
-				Config: testDeploymentFreezeBasic(localName, name, start, end, spaceName, []string{environmentName1}, projectName, projectGroupName, lifecycleName, tenantName, false),
+				Config: testDeploymentFreezeBasic(localName, name, start, end, spaceName, []string{environmentName1}, projectName, projectGroupName, lifecycleName, tenantName, false, false),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
@@ -48,19 +46,35 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name+"1"),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
 					resource.TestCheckResourceAttr(resourceName, "end", updatedEnd)),
-				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, false),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, false, false),
 			},
 			{
 				Check: resource.ComposeTestCheckFunc(
 					testDeploymentFreezeExists(resourceName),
-					testDeploymentFreezeTenantExists(fmt.Sprintf("octopusdeploy_deployment_freeze_tenant.tenant_%s", localName), t)),
-				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, true),
+					testDeploymentFreezeTenantExists(fmt.Sprintf("octopusdeploy_deployment_freeze_tenant.tenant_%s", localName))),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, true, true),
+			},
+			{
+				Check: resource.ComposeTestCheckFunc(
+					testDeploymentFreezeExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", name+"1"),
+					resource.TestCheckResourceAttr(resourceName, "start", start),
+					resource.TestCheckResourceAttr(resourceName, "end", updatedEnd),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.type", "Weekly"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.unit", "24"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.end_type", "AfterOccurrences"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.end_after_occurrences", "5"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.0", "Monday"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.1", "Wednesday"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.days_of_week.2", "Friday")),
+				Config: testDeploymentFreezeBasic(localName, name+"1", start, updatedEnd, spaceName, []string{environmentName1, environmentName2}, projectName, projectGroupName, lifecycleName, tenantName, true, true),
 			},
 		},
 	})
 }
 
-func testDeploymentFreezeBasic(localName string, freezeName string, start string, end string, spaceName string, environments []string, projectName string, projectGroupName string, lifecycleName string, tenantName string, includeTenant bool) string {
+func testDeploymentFreezeBasic(localName string, freezeName string, start string, end string, spaceName string, environments []string, projectName string, projectGroupName string, lifecycleName string, tenantName string, includeTenant bool, includeRecurringSchedule bool) string {
 	spaceLocalName := fmt.Sprintf("space_%s", localName)
 	projectScopeLocalName := fmt.Sprintf("project_scope_%s", localName)
 	projectLocalName := fmt.Sprintf("project_%s", localName)
@@ -76,8 +90,27 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 		environmentScopes = append(environmentScopes, fmt.Sprintf("resource.octopusdeploy_environment.%s.id", environmentLocalName))
 	}
 
+	freezeConfig := fmt.Sprintf(`
+        resource "octopusdeploy_deployment_freeze" "%s" {
+            name = "%s"
+            start = "%s"
+            end = "%s"`, localName, freezeName, start, end)
+
+	if includeRecurringSchedule {
+		freezeConfig += `
+            recurring_schedule = {
+			  	type = "Weekly"          
+                unit = 24
+                end_type = "AfterOccurrences"
+                end_after_occurrences = 5
+                days_of_week = ["Monday", "Wednesday", "Friday"]
+            }`
+	}
+
+	freezeConfig += `
+        }`
+
 	config := fmt.Sprintf(`
-       
         # Space Configuration
         %s
 
@@ -93,11 +126,7 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
         # Project Configuration
         %s
 
-        resource "octopusdeploy_deployment_freeze" "%s" {
-            name = "%s"
-            start = "%s"
-            end = "%s"
-        }
+        %s
 
         resource "octopusdeploy_deployment_freeze_project" "%s" {
             deploymentfreeze_id = octopusdeploy_deployment_freeze.%s.id
@@ -109,7 +138,7 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 		createLifecycle(spaceLocalName, lifecycleLocalName, lifecycleName),
 		createProjectGroup(spaceLocalName, projectGroupLocalName, projectGroupName),
 		createProject(spaceLocalName, projectLocalName, projectName, lifecycleLocalName, projectGroupLocalName),
-		localName, freezeName, start, end,
+		freezeConfig,
 		projectScopeLocalName, localName, projectLocalName,
 		strings.Join(environmentScopes, ","))
 
@@ -155,11 +184,11 @@ func testDeploymentFreezeExists(prefix string) resource.TestCheckFunc {
 	}
 }
 
-func testDeploymentFreezeTenantExists(prefix string, t *testing.T) resource.TestCheckFunc {
+func testDeploymentFreezeTenantExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[prefix]
 		if !ok {
-			return fmt.Errorf("Resource not found: %s", prefix)
+			return fmt.Errorf("Not found: %s", prefix)
 		}
 
 		bits := strings.Split(rs.Primary.ID, ":")
@@ -172,47 +201,18 @@ func testDeploymentFreezeTenantExists(prefix string, t *testing.T) resource.Test
 		projectId := bits[2]
 		environmentId := bits[3]
 
-		retryErr := resource.RetryContext(context.Background(), 2*time.Minute, func() *resource.RetryError {
-			freeze, err := deploymentfreezes.GetById(octoClient, freezeId)
-			if err != nil {
-				t.Logf("Failed to get deployment freeze: %v", err)
-				return resource.NonRetryableError(fmt.Errorf("Error getting deployment freeze: %v", err))
-			}
-
-			t.Logf("Retrieved deployment freeze with %d tenant scopes", len(freeze.TenantProjectEnvironmentScope))
-
-			for i, scope := range freeze.TenantProjectEnvironmentScope {
-				t.Logf("Scope %d - Tenant: %s, Project: %s, Environment: %s",
-					i+1, scope.TenantId, scope.ProjectId, scope.EnvironmentId)
-			}
-
-			for _, scope := range freeze.TenantProjectEnvironmentScope {
-				if scope.TenantId == tenantId && scope.ProjectId == projectId && scope.EnvironmentId == environmentId {
-					t.Log("Found matching tenant scope in deployment freeze")
-					return nil
-				}
-			}
-
-			t.Log("Tenant scope not yet found, will retry...")
-			return resource.RetryableError(fmt.Errorf("Tenant scope not yet found in deployment freeze (freezeId: %s)", freezeId))
-		})
-
-		if retryErr != nil {
-			freeze, err := deploymentfreezes.GetById(octoClient, freezeId)
-			if err != nil {
-				t.Logf("Final attempt to get deployment freeze failed: %v", err)
-			} else {
-				t.Logf("Final state - Deployment freeze has %d tenant scopes", len(freeze.TenantProjectEnvironmentScope))
-				for i, scope := range freeze.TenantProjectEnvironmentScope {
-					t.Logf("Final Scope %d - Tenant: %s, Project: %s, Environment: %s",
-						i+1, scope.TenantId, scope.ProjectId, scope.EnvironmentId)
-				}
-			}
-
-			return fmt.Errorf("Failed to find tenant scope after retries. Error: %v", retryErr)
+		freeze, err := deploymentfreezes.GetById(octoClient, freezeId)
+		if err != nil {
+			return err
 		}
 
-		return nil
+		for _, scope := range freeze.TenantProjectEnvironmentScope {
+			if scope.TenantId == tenantId && scope.ProjectId == projectId && scope.EnvironmentId == environmentId {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Tenant scope not found in deployment freeze")
 	}
 }
 
@@ -227,7 +227,5 @@ func testDeploymentFreezeCheckDestroy(s *terraform.State) error {
 			return fmt.Errorf("Deployment Freeze (%s) still exists", rs.Primary.ID)
 		}
 	}
-
-	os.Setenv("TF_LOG", "")
 	return nil
 }

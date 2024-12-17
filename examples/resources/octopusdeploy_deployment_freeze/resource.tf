@@ -12,6 +12,18 @@ resource "octopusdeploy_deployment_freeze" "freeze" {
   end = "2024-12-27T00:00:00+08:00"
 }
 
+# Freeze recurring freeze yearly on Xmas
+resource "octopusdeploy_deployment_freeze" "freeze" {
+  name = "Xmas"
+  start = "2024-12-25T00:00:00+10:00"
+  end = "2024-12-27T00:00:00+08:00"
+  recurring_schedule = {
+    type    = "Annually"
+    unit    = 1
+    end_type = "Never"
+  }
+}
+
 resource "octopusdeploy_deployment_freeze_project" "project_freeze" {
   deploymentfreeze_id= octopusdeploy_deployment_freeze.freeze.id
   project_id = "Projects-123"
