@@ -60,7 +60,7 @@ func TestNewDeploymentFreezeResource(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", name+"1"),
 					resource.TestCheckResourceAttr(resourceName, "start", start),
 					resource.TestCheckResourceAttr(resourceName, "end", updatedEnd),
-					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.type", "DaysPerWeek"),
+					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.type", "Weekly"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.unit", "24"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.end_type", "AfterOccurrences"),
 					resource.TestCheckResourceAttr(resourceName, "recurring_schedule.end_after_occurrences", "5"),
@@ -99,7 +99,7 @@ func testDeploymentFreezeBasic(localName string, freezeName string, start string
 	if includeRecurringSchedule {
 		freezeConfig += `
             recurring_schedule = {
-                type = "DaysPerWeek"
+			  	type = "Weekly"          
                 unit = 24
                 end_type = "AfterOccurrences"
                 end_after_occurrences = 5

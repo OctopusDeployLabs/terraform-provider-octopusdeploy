@@ -95,7 +95,7 @@ resource "octopusdeploy_deployment_freeze_tenant" "tenant_freeze" {
 Required:
 
 - `end_type` (String) When the recurring schedule should end (Never, OnDate, AfterOccurrences)
-- `type` (String) Type of recurring schedule (OnceDaily, DaysPerWeek, DaysPerMonth, Annually)
+- `type` (String) Type of recurring schedule (Daily, Weekly, Monthly, Annually)
 - `unit` (Number) The unit value for the schedule
 
 Optional:

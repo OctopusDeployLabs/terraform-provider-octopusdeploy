@@ -115,10 +115,10 @@ func (v recurringScheduleValidator) ValidateObject(ctx context.Context, req vali
 	scheduleType := schedule.Type.ValueString()
 
 	switch scheduleType {
-	case "OnceDaily":
-		// OnceDaily only requires type and unit which are already marked as required
+	case "Daily":
+		// Daily only requires type and unit which are already marked as required
 
-	case "DaysPerWeek":
+	case "Weekly":
 		if schedule.DaysOfWeek.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("days_of_week"),
@@ -127,7 +127,7 @@ func (v recurringScheduleValidator) ValidateObject(ctx context.Context, req vali
 			)
 		}
 
-	case "DaysPerMonth":
+	case "Monthly":
 		if schedule.MonthlyScheduleType.IsNull() {
 			resp.Diagnostics.AddAttributeError(
 				path.Root("monthly_schedule_type"),
@@ -195,7 +195,7 @@ func (v recurringScheduleValidator) ValidateObject(ctx context.Context, req vali
 		resp.Diagnostics.AddAttributeError(
 			path.Root("type"),
 			"Invalid Schedule Type",
-			fmt.Sprintf("type must be one of: OnceDaily, DaysPerWeek, DaysPerMonth, Annually, got: %s", scheduleType),
+			fmt.Sprintf("type must be one of: Daily, Weekly, Monthly, Annually, got: %s", scheduleType),
 		)
 	}
 }

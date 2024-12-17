@@ -98,7 +98,7 @@ resource "octopusdeploy_deployment_freeze" "test_freeze" {
     end   = "%s"
     
     recurring_schedule = {
-        type = "DaysPerWeek"
+        type = "Weekly"
         unit = 24
         end_type = "AfterOccurrences"
         end_after_occurrences = 5

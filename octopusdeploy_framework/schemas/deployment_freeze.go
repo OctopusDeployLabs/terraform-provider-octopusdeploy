@@ -24,10 +24,10 @@ func (d DeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema {
 				},
 				Attributes: map[string]resourceSchema.Attribute{
 					"type": resourceSchema.StringAttribute{
-						Description: "Type of recurring schedule (OnceDaily, DaysPerWeek, DaysPerMonth, Annually)",
+						Description: "Type of recurring schedule (Daily, Weekly, Monthly, Annually)",
 						Required:    true,
 						Validators: []validator.String{
-							stringvalidator.OneOf("OnceDaily", "DaysPerWeek", "DaysPerMonth", "Annually"),
+							stringvalidator.OneOf("Daily", "Weekly", "Monthly", "Annually"),
 						},
 					},
 					"unit": resourceSchema.Int64Attribute{
