@@ -151,30 +151,18 @@ func mapFreezeToAttribute(ctx context.Context, freeze deploymentfreezes.Deployme
 			endOnDate = types.StringValue(freeze.RecurringSchedule.EndOnDate.Format(time.RFC3339))
 		}
 
-		endAfterOccurrences := types.Int64Null()
-		if freeze.RecurringSchedule.EndAfterOccurrences != nil {
-			endAfterOccurrences = types.Int64Value(int64(*freeze.RecurringSchedule.EndAfterOccurrences))
-		}
+		endAfterOccurrences := types.Int64Value(int64(freeze.RecurringSchedule.EndAfterOccurrences))
 
 		monthlyScheduleType := types.StringNull()
 		if freeze.RecurringSchedule.MonthlyScheduleType != "" {
 			monthlyScheduleType = types.StringValue(freeze.RecurringSchedule.MonthlyScheduleType)
 		}
 
-		dateOfMonth := types.StringNull()
-		if freeze.RecurringSchedule.DateOfMonth != nil {
-			dateOfMonth = types.StringValue(*freeze.RecurringSchedule.DateOfMonth)
-		}
+		dateOfMonth := types.StringValue(freeze.RecurringSchedule.DateOfMonth)
 
-		dayNumberOfMonth := types.StringNull()
-		if freeze.RecurringSchedule.DayNumberOfMonth != nil {
-			dayNumberOfMonth = types.StringValue(*freeze.RecurringSchedule.DayNumberOfMonth)
-		}
+		dayNumberOfMonth := types.StringValue(freeze.RecurringSchedule.DayNumberOfMonth)
 
-		dayOfWeek := types.StringNull()
-		if freeze.RecurringSchedule.DayOfWeek != nil {
-			dayOfWeek = types.StringValue(*freeze.RecurringSchedule.DayOfWeek)
-		}
+		dayOfWeek := types.StringValue(freeze.RecurringSchedule.DayOfWeek)
 
 		scheduleAttrs := map[string]attr.Value{
 			"type":                  types.StringValue(string(freeze.RecurringSchedule.Type)),

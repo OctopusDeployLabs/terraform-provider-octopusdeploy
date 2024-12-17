@@ -192,7 +192,6 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 
 	resp.State.RemoveResource(ctx)
 }
-
 func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, diag.Diagnostics) {
 	start, diags := state.Start.ValueRFC3339Time()
 	if diags.HasError() {
@@ -213,23 +212,7 @@ func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFr
 	}
 
 	if state.RecurringSchedule != nil {
-		var endOnDate *time.Time
-		var endAfterOccurrences *int
 		var daysOfWeek []string
-
-		if !state.RecurringSchedule.EndOnDate.IsNull() {
-			date, diagsDate := state.RecurringSchedule.EndOnDate.ValueRFC3339Time()
-			if diagsDate.HasError() {
-				diags.Append(diagsDate...)
-				return nil, diags
-			}
-			endOnDate = &date
-		}
-
-		if !state.RecurringSchedule.EndAfterOccurrences.IsNull() {
-			occurrences := int(state.RecurringSchedule.EndAfterOccurrences.ValueInt64())
-			endAfterOccurrences = &occurrences
-		}
 
 		if !state.RecurringSchedule.DaysOfWeek.IsNull() {
 			diags.Append(state.RecurringSchedule.DaysOfWeek.ElementsAs(context.TODO(), &daysOfWeek, false)...)
@@ -242,20 +225,27 @@ func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFr
 			Type:                deploymentfreezes.RecurringScheduleType(state.RecurringSchedule.Type.ValueString()),
 			Unit:                int(state.RecurringSchedule.Unit.ValueInt64()),
 			EndType:             deploymentfreezes.RecurringScheduleEndType(state.RecurringSchedule.EndType.ValueString()),
-			EndOnDate:           endOnDate,
-			EndAfterOccurrences: endAfterOccurrences,
+			EndAfterOccurrences: getOptionalIntValue(state.RecurringSchedule.EndAfterOccurrences),
 			MonthlyScheduleType: getOptionalString(state.RecurringSchedule.MonthlyScheduleType),
-			DateOfMonth:         getOptionalStringPointer(state.RecurringSchedule.DateOfMonth),
-			DayNumberOfMonth:    getOptionalStringPointer(state.RecurringSchedule.DayNumberOfMonth),
+			DateOfMonth:         getOptionalString(state.RecurringSchedule.DateOfMonth),
+			DayNumberOfMonth:    getOptionalString(state.RecurringSchedule.DayNumberOfMonth),
 			DaysOfWeek:          daysOfWeek,
-			DayOfWeek:           getOptionalStringPointer(state.RecurringSchedule.DayOfWeek),
+			DayOfWeek:           getOptionalString(state.RecurringSchedule.DayOfWeek),
+		}
+
+		if !state.RecurringSchedule.EndOnDate.IsNull() {
+			date, diagsDate := state.RecurringSchedule.EndOnDate.ValueRFC3339Time()
+			if diagsDate.HasError() {
+				diags.Append(diagsDate...)
+				return nil, diags
+			}
+			freeze.RecurringSchedule.EndOnDate = &date
 		}
 	}
 
 	freeze.ID = state.ID.String()
 	return &freeze, nil
 }
-
 func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze) diag.Diagnostics {
 	state.ID = types.StringValue(deploymentFreeze.ID)
 	state.Name = types.StringValue(deploymentFreeze.Name)
@@ -304,15 +294,10 @@ func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFre
 			state.RecurringSchedule.EndOnDate = timetypes.NewRFC3339Null()
 		}
 
-		if deploymentFreeze.RecurringSchedule.EndAfterOccurrences != nil {
-			state.RecurringSchedule.EndAfterOccurrences = types.Int64Value(int64(*deploymentFreeze.RecurringSchedule.EndAfterOccurrences))
-		} else {
-			state.RecurringSchedule.EndAfterOccurrences = types.Int64Null()
-		}
-
-		state.RecurringSchedule.DateOfMonth = mapOptionalStringPointer(deploymentFreeze.RecurringSchedule.DateOfMonth)
-		state.RecurringSchedule.DayNumberOfMonth = mapOptionalStringPointer(deploymentFreeze.RecurringSchedule.DayNumberOfMonth)
-		state.RecurringSchedule.DayOfWeek = mapOptionalStringPointer(deploymentFreeze.RecurringSchedule.DayOfWeek)
+		state.RecurringSchedule.EndAfterOccurrences = mapOptionalIntValue(deploymentFreeze.RecurringSchedule.EndAfterOccurrences)
+		state.RecurringSchedule.DateOfMonth = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DateOfMonth)
+		state.RecurringSchedule.DayNumberOfMonth = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DayNumberOfMonth)
+		state.RecurringSchedule.DayOfWeek = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DayOfWeek)
 	}
 
 	return nil
@@ -352,12 +337,18 @@ func mapOptionalStringValue(value string) types.String {
 	}
 	return types.StringValue(value)
 }
-
-func mapOptionalStringPointer(value *string) types.String {
-	if value == nil {
-		return types.StringNull()
+func getOptionalIntValue(value types.Int64) int {
+	if value.IsNull() {
+		return 0
 	}
-	return types.StringValue(*value)
+	return int(value.ValueInt64())
+}
+
+func mapOptionalIntValue(value int) types.Int64 {
+	if value == 0 {
+		return types.Int64Null()
+	}
+	return types.Int64Value(int64(value))
 }
 
 func getOptionalString(value types.String) string {
