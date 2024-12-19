@@ -28,7 +28,7 @@ func resourceProjectScheduledTriggerRead(ctx context.Context, d *schema.Resource
 	spaceId := d.Get("space_id").(string)
 	spaceId = util.Ternary(len(spaceId) > 0, spaceId, client.GetSpaceID())
 
-	scheduledTrigger, err := triggers.GetByID(client, spaceId, d.Id())
+	scheduledTrigger, err := triggers.GetById(client, spaceId, d.Id())
 
 	if scheduledTrigger == nil {
 		d.SetId("")
@@ -114,7 +114,7 @@ func resourceProjectScheduledTriggerUpdate(ctx context.Context, d *schema.Resour
 func resourceProjectScheduledTriggerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*client.Client)
 	spaceId := d.Get("space_id").(string)
-	err := triggers.DeleteByID(client, spaceId, d.Id())
+	err := triggers.DeleteById(client, spaceId, d.Id())
 
 	if err != nil {
 		return diag.FromErr(err)
