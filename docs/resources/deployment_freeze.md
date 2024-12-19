@@ -27,6 +27,18 @@ resource "octopusdeploy_deployment_freeze" "freeze" {
   end = "2024-12-27T00:00:00+08:00"
 }
 
+# Freeze recurring freeze yearly on Xmas
+resource "octopusdeploy_deployment_freeze" "freeze" {
+  name = "Xmas"
+  start = "2024-12-25T00:00:00+10:00"
+  end = "2024-12-27T00:00:00+08:00"
+  recurring_schedule = {
+    type    = "Annually"
+    unit    = 1
+    end_type = "Never"
+  }
+}
+
 resource "octopusdeploy_deployment_freeze_project" "project_freeze" {
   deploymentfreeze_id= octopusdeploy_deployment_freeze.freeze.id
   project_id = "Projects-123"
@@ -69,8 +81,31 @@ resource "octopusdeploy_deployment_freeze_tenant" "tenant_freeze" {
 - `name` (String) The name of this resource.
 - `start` (String) The start time of the freeze, must be RFC3339 format
 
+### Optional
+
+- `recurring_schedule` (Attributes) (see [below for nested schema](#nestedatt--recurring_schedule))
+
 ### Read-Only
 
 - `id` (String) The unique ID for this resource.
+
+<a id="nestedatt--recurring_schedule"></a>
+### Nested Schema for `recurring_schedule`
+
+Required:
+
+- `end_type` (String) When the recurring schedule should end (Never, OnDate, AfterOccurrences)
+- `type` (String) Type of recurring schedule (Daily, Weekly, Monthly, Annually)
+- `unit` (Number) The unit value for the schedule
+
+Optional:
+
+- `date_of_month` (String) The date of the month for monthly schedules
+- `day_number_of_month` (String) Specifies which weekday position in the month. Valid values: 1 (First), 2 (Second), 3 (Third), 4 (Fourth), L (Last). Used with day_of_week
+- `day_of_week` (String) The day of the week for monthly schedules when using DayOfMonth type
+- `days_of_week` (List of String) List of days of the week for weekly schedules. Must follow order: Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
+- `end_after_occurrences` (Number) Number of occurrences after which the schedule should end
+- `end_on_date` (String) The date when the recurring schedule should end
+- `monthly_schedule_type` (String) Type of monthly schedule (DayOfMonth, DateOfMonth)
 
 

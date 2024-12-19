@@ -8,6 +8,7 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -16,12 +17,33 @@ import (
 
 const deploymentFreezeResourceName = "deployment_freeze"
 
-type deploymentFreezeModel struct {
-	Name  types.String      `tfsdk:"name"`
-	Start timetypes.RFC3339 `tfsdk:"start"`
-	End   timetypes.RFC3339 `tfsdk:"end"`
+type recurringScheduleModel struct {
+	Type                types.String      `tfsdk:"type"`
+	Unit                types.Int64       `tfsdk:"unit"`
+	EndType             types.String      `tfsdk:"end_type"`
+	EndOnDate           timetypes.RFC3339 `tfsdk:"end_on_date"`
+	EndAfterOccurrences types.Int64       `tfsdk:"end_after_occurrences"`
+	MonthlyScheduleType types.String      `tfsdk:"monthly_schedule_type"`
+	DateOfMonth         types.String      `tfsdk:"date_of_month"`
+	DayNumberOfMonth    types.String      `tfsdk:"day_number_of_month"`
+	DaysOfWeek          types.List        `tfsdk:"days_of_week"`
+	DayOfWeek           types.String      `tfsdk:"day_of_week"`
+}
 
+type deploymentFreezeModel struct {
+	Name              types.String            `tfsdk:"name"`
+	Start             timetypes.RFC3339       `tfsdk:"start"`
+	End               timetypes.RFC3339       `tfsdk:"end"`
+	RecurringSchedule *recurringScheduleModel `tfsdk:"recurring_schedule"`
 	schemas.ResourceModel
+}
+
+func getStringPointer(s types.String) *string {
+	if s.IsNull() {
+		return nil
+	}
+	value := s.ValueString()
+	return &value
 }
 
 type deploymentFreezeResource struct {
@@ -125,8 +147,9 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	// this resource doesn't include scopes, need to copy it from the fetched resource
+	// Preserve both project and tenant scopes from the existing freeze
 	updatedFreeze.ProjectEnvironmentScope = existingFreeze.ProjectEnvironmentScope
+	updatedFreeze.TenantProjectEnvironmentScope = existingFreeze.TenantProjectEnvironmentScope
 
 	updatedFreeze.SetID(existingFreeze.GetID())
 	updatedFreeze.Links = existingFreeze.Links
@@ -169,7 +192,60 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 
 	resp.State.RemoveResource(ctx)
 }
+func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, diag.Diagnostics) {
+	start, diags := state.Start.ValueRFC3339Time()
+	if diags.HasError() {
+		return nil, diags
+	}
+	start = start.UTC()
 
+	end, diags := state.End.ValueRFC3339Time()
+	if diags.HasError() {
+		return nil, diags
+	}
+	end = end.UTC()
+
+	freeze := deploymentfreezes.DeploymentFreeze{
+		Name:  state.Name.ValueString(),
+		Start: &start,
+		End:   &end,
+	}
+
+	if state.RecurringSchedule != nil {
+		var daysOfWeek []string
+
+		if !state.RecurringSchedule.DaysOfWeek.IsNull() {
+			diags.Append(state.RecurringSchedule.DaysOfWeek.ElementsAs(context.TODO(), &daysOfWeek, false)...)
+			if diags.HasError() {
+				return nil, diags
+			}
+		}
+
+		freeze.RecurringSchedule = &deploymentfreezes.RecurringSchedule{
+			Type:                deploymentfreezes.RecurringScheduleType(state.RecurringSchedule.Type.ValueString()),
+			Unit:                int(state.RecurringSchedule.Unit.ValueInt64()),
+			EndType:             deploymentfreezes.RecurringScheduleEndType(state.RecurringSchedule.EndType.ValueString()),
+			EndAfterOccurrences: getOptionalIntValue(state.RecurringSchedule.EndAfterOccurrences),
+			MonthlyScheduleType: getOptionalString(state.RecurringSchedule.MonthlyScheduleType),
+			DateOfMonth:         getOptionalString(state.RecurringSchedule.DateOfMonth),
+			DayNumberOfMonth:    getOptionalString(state.RecurringSchedule.DayNumberOfMonth),
+			DaysOfWeek:          daysOfWeek,
+			DayOfWeek:           getOptionalString(state.RecurringSchedule.DayOfWeek),
+		}
+
+		if !state.RecurringSchedule.EndOnDate.IsNull() {
+			date, diagsDate := state.RecurringSchedule.EndOnDate.ValueRFC3339Time()
+			if diagsDate.HasError() {
+				diags.Append(diagsDate...)
+				return nil, diags
+			}
+			freeze.RecurringSchedule.EndOnDate = &date
+		}
+	}
+
+	freeze.ID = state.ID.String()
+	return &freeze, nil
+}
 func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze) diag.Diagnostics {
 	state.ID = types.StringValue(deploymentFreeze.ID)
 	state.Name = types.StringValue(deploymentFreeze.Name)
@@ -185,6 +261,44 @@ func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFre
 		return diags
 	}
 	state.End = updatedEnd
+
+	if deploymentFreeze.RecurringSchedule != nil {
+		var daysOfWeek types.List
+		if len(deploymentFreeze.RecurringSchedule.DaysOfWeek) > 0 {
+			elements := make([]attr.Value, len(deploymentFreeze.RecurringSchedule.DaysOfWeek))
+			for i, day := range deploymentFreeze.RecurringSchedule.DaysOfWeek {
+				elements[i] = types.StringValue(day)
+			}
+
+			var listDiags diag.Diagnostics
+			daysOfWeek, listDiags = types.ListValue(types.StringType, elements)
+			if listDiags.HasError() {
+				diags.Append(listDiags...)
+				return diags
+			}
+		} else {
+			daysOfWeek = types.ListNull(types.StringType)
+		}
+
+		state.RecurringSchedule = &recurringScheduleModel{
+			Type:                types.StringValue(string(deploymentFreeze.RecurringSchedule.Type)),
+			Unit:                types.Int64Value(int64(deploymentFreeze.RecurringSchedule.Unit)),
+			EndType:             types.StringValue(string(deploymentFreeze.RecurringSchedule.EndType)),
+			DaysOfWeek:          daysOfWeek,
+			MonthlyScheduleType: mapOptionalStringValue(deploymentFreeze.RecurringSchedule.MonthlyScheduleType),
+		}
+
+		if deploymentFreeze.RecurringSchedule.EndOnDate != nil {
+			state.RecurringSchedule.EndOnDate = timetypes.NewRFC3339TimeValue(*deploymentFreeze.RecurringSchedule.EndOnDate)
+		} else {
+			state.RecurringSchedule.EndOnDate = timetypes.NewRFC3339Null()
+		}
+
+		state.RecurringSchedule.EndAfterOccurrences = mapOptionalIntValue(deploymentFreeze.RecurringSchedule.EndAfterOccurrences)
+		state.RecurringSchedule.DateOfMonth = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DateOfMonth)
+		state.RecurringSchedule.DayNumberOfMonth = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DayNumberOfMonth)
+		state.RecurringSchedule.DayOfWeek = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DayOfWeek)
+	}
 
 	return nil
 }
@@ -210,25 +324,36 @@ func calculateStateTime(ctx context.Context, stateValue timetypes.RFC3339, updat
 	return newValue, diags
 }
 
-func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, diag.Diagnostics) {
-	start, diags := state.Start.ValueRFC3339Time()
-	if diags.HasError() {
-		return nil, diags
+func getOptionalStringPointer(value types.String) *string {
+	if value.IsNull() {
+		return nil
 	}
-	start = start.UTC()
-
-	end, diags := state.End.ValueRFC3339Time()
-	if diags.HasError() {
-		return nil, diags
+	str := value.ValueString()
+	return &str
+}
+func mapOptionalStringValue(value string) types.String {
+	if value == "" {
+		return types.StringNull()
 	}
-	end = end.UTC()
-
-	freeze := deploymentfreezes.DeploymentFreeze{
-		Name:  state.Name.ValueString(),
-		Start: &start,
-		End:   &end,
+	return types.StringValue(value)
+}
+func getOptionalIntValue(value types.Int64) int {
+	if value.IsNull() {
+		return 0
 	}
+	return int(value.ValueInt64())
+}
 
-	freeze.ID = state.ID.String()
-	return &freeze, nil
+func mapOptionalIntValue(value int) types.Int64 {
+	if value == 0 {
+		return types.Int64Null()
+	}
+	return types.Int64Value(int64(value))
+}
+
+func getOptionalString(value types.String) string {
+	if value.IsNull() {
+		return ""
+	}
+	return value.ValueString()
 }

@@ -52,7 +52,7 @@ func (d *deploymentFreezeTenantResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("adding tenant (%s) to deployment freeze (%s)", plan.TenantID.ValueString(), plan.DeploymentFreezeID.ValueString()))
+	tflog.Debug(ctx, fmt.Sprintf("adding tenant (%s) to deployment freeze (%s)", plan.TenantID.ValueString(), plan.DeploymentFreezeID.ValueString()))
 	freeze, err := deploymentfreezes.GetById(d.Client, plan.DeploymentFreezeID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("cannot load deployment freeze", err.Error())
@@ -86,7 +86,6 @@ func (d *deploymentFreezeTenantResource) Create(ctx context.Context, req resourc
 	tflog.Debug(ctx, fmt.Sprintf("tenant scope (%s) added to deployment freeze (%s)", plan.TenantID.ValueString(), plan.DeploymentFreezeID.ValueString()))
 	util.Created(ctx, tenantDescription)
 }
-
 func (d *deploymentFreezeTenantResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	util.Reading(ctx, tenantDescription)
 
@@ -104,14 +103,21 @@ func (d *deploymentFreezeTenantResource) Read(ctx context.Context, req resource.
 
 	freeze, err := deploymentfreezes.GetById(d.Client, freezeId)
 	if err != nil {
-		apiError := err.(*core.APIError)
-		if apiError.StatusCode != http.StatusNotFound {
+		apiError, ok := err.(*core.APIError)
+		if !ok {
 			resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
 			return
 		}
+
+		if apiError.StatusCode == http.StatusNotFound {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
+		resp.Diagnostics.AddError("unable to load deployment freeze", apiError.Error())
+		return
 	}
 
-	// Verify the tenant scope still exists
 	exists := false
 	for _, scope := range freeze.TenantProjectEnvironmentScope {
 		if scope.TenantId == tenantId && scope.ProjectId == projectId && scope.EnvironmentId == environmentId {
