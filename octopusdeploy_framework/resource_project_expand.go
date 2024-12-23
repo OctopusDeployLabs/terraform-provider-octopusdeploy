@@ -3,6 +3,8 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"net/url"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/credentials"
@@ -11,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"net/url"
 )
 
 func expandProject(ctx context.Context, model projectResourceModel) *projects.Project {
@@ -143,6 +144,10 @@ func expandGitLibraryPersistenceSettings(ctx context.Context, model gitLibraryPe
 	var protectedBranches []string
 	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
 
+	if protectedBranches == nil {
+		protectedBranches = []string{}
+	}
+
 	return projects.NewGitPersistenceSettings(
 		model.BasePath.ValueString(),
 		credentials.NewReference(model.GitCredentialID.ValueString()),
@@ -156,6 +161,10 @@ func expandGitUsernamePasswordPersistenceSettings(ctx context.Context, model git
 	gitUrl, _ := url.Parse(model.URL.ValueString())
 	var protectedBranches []string
 	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
+
+	if protectedBranches == nil {
+		protectedBranches = []string{}
+	}
 
 	return projects.NewGitPersistenceSettings(
 		model.BasePath.ValueString(),
@@ -173,6 +182,10 @@ func expandGitAnonymousPersistenceSettings(ctx context.Context, model gitAnonymo
 	gitUrl, _ := url.Parse(model.URL.ValueString())
 	var protectedBranches []string
 	model.ProtectedBranches.ElementsAs(ctx, &protectedBranches, false)
+
+	if protectedBranches == nil {
+		protectedBranches = []string{}
+	}
 
 	return projects.NewGitPersistenceSettings(
 		model.BasePath.ValueString(),

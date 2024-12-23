@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -79,7 +80,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 						"url":                util.ResourceString().Required().Description("The URL associated with these version control settings.").Build(),
 						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
-						"protected_branches": util.ResourceSet(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
+						"protected_branches": util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Description("A list of protected branch patterns.").Build(),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
@@ -91,7 +92,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 						"url":                util.ResourceString().Required().Description("The URL associated with these version control settings.").Build(),
 						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
-						"protected_branches": util.ResourceSet(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
+						"protected_branches": util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Description("A list of protected branch patterns.").Build(),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
@@ -104,7 +105,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 						"password":           util.ResourceString().Sensitive().Required().Description("The password for the Git credential").Build(), //util.GetPasswordResourceSchema(false),
 						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
-						"protected_branches": util.ResourceSet(types.StringType).Optional().Description("A list of protected branch patterns.").Build(),
+						"protected_branches": util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Description("A list of protected branch patterns.").Build(),
 					},
 				},
 				Description: "Provides Git-related persistence settings for a version-controlled project.",
