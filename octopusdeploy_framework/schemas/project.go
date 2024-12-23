@@ -78,7 +78,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
 						"url":                util.ResourceString().Required().Description("The URL associated with these version control settings.").Build(),
-						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
+						"base_path":          util.ResourceString().Optional().Computed().Default(".octopus").Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
 						"protected_branches": util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Description("A list of protected branch patterns.").Build(),
 					},
@@ -90,7 +90,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 					Attributes: map[string]resourceSchema.Attribute{
 						"git_credential_id":  util.ResourceString().Required().Build(),
 						"url":                util.ResourceString().Required().Description("The URL associated with these version control settings.").Build(),
-						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
+						"base_path":          util.ResourceString().Optional().Computed().Default(".octopus").Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
 						"protected_branches": util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Description("A list of protected branch patterns.").Build(),
 					},
@@ -103,7 +103,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 						"url":                util.ResourceString().Required().Description("The URL associated with these version control settings.").Build(),
 						"username":           util.ResourceString().Required().Description("The username for the Git credential.").Build(),
 						"password":           util.ResourceString().Sensitive().Required().Description("The password for the Git credential").Build(), //util.GetPasswordResourceSchema(false),
-						"base_path":          util.ResourceString().Optional().Description("The base path associated with these version control settings.").Build(),
+						"base_path":          util.ResourceString().Optional().Computed().Default(".octopus").Description("The base path associated with these version control settings.").Build(),
 						"default_branch":     util.ResourceString().Optional().Description("The default branch associated with these version control settings.").Build(),
 						"protected_branches": util.ResourceSet(types.StringType).Optional().Computed().PlanModifiers(setplanmodifier.UseStateForUnknown()).Description("A list of protected branch patterns.").Build(),
 					},
