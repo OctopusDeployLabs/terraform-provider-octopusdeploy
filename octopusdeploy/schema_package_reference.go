@@ -113,6 +113,10 @@ func expandPackageReference(tfPkg map[string]interface{}) *packages.PackageRefer
 		Properties:          map[string]string{},
 	}
 
+	if id, ok := tfPkg["id"]; ok {
+		pkg.ID = id.(string)
+	}
+
 	if v, ok := tfPkg["extract_during_deployment"]; ok {
 		pkg.Properties["Extract"] = cases.Title(language.Und, cases.NoLower).String(strconv.FormatBool(v.(bool)))
 	}
