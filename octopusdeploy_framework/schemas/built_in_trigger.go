@@ -14,6 +14,7 @@ var _ EntitySchema = BuiltInTriggerSchema{}
 
 func (r BuiltInTriggerSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
+		Description: "This resource manages automatic release trigger based on new version of referenced package.",
 		Attributes: map[string]resourceSchema.Attribute{
 			"project_id": util.ResourceString().
 				Description("The ID of the project the trigger will be attached to.").
