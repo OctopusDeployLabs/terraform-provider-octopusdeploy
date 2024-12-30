@@ -149,6 +149,7 @@ func configTestAccBuiltInTrigger(localName string, actionName string, packageRef
 			  is_disabled                        = false
 			  is_required                        = true
 			  name                               = "Action One"
+			  sort_order 						 = 1
 			  script_body                        = <<-EOT
 				  $ExtractedPath = $OctopusParameters["Octopus.Action.Package[console.one].ExtractedPath"]
 				  Write-Host $ExtractedPath
@@ -175,6 +176,7 @@ func configTestAccBuiltInTrigger(localName string, actionName string, packageRef
 			  is_disabled                        = false
 			  is_required                        = true
 			  name                               = "Action Two"
+			  sort_order 						 = 1
 			  script_body                        = <<-EOT
 				  $ExtractedPath = $OctopusParameters["Octopus.Action.Package[console.two].ExtractedPath"]
 				  Write-Host $ExtractedPath
