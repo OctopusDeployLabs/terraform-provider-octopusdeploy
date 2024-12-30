@@ -3,6 +3,7 @@ package octopusdeploy
 import (
 	"hash/crc32"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -118,4 +119,17 @@ func formatBoolForActionProperty(b bool) string {
 		return "True"
 	}
 	return "False"
+}
+
+func formatAsBoolOrBoundedValueForActionProperty(value string) string {
+	if strings.Contains(value, "#{") {
+		return value
+	}
+
+	boolValue, err := strconv.ParseBool(value)
+	if err == nil {
+		return formatBoolForActionProperty(boolValue)
+	}
+
+	return value
 }

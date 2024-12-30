@@ -35,6 +35,7 @@ func testAccManualInterventionAction() string {
 			sort_order = 1
 			instructions = "Approve Me"
 			responsible_teams = "A Team"
+			block_deployments = true
 		}
 	`)
 }
@@ -58,6 +59,10 @@ func testAccCheckManualInterventionAction() resource.TestCheckFunc {
 
 		if action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"].Value != "A Team" {
 			return fmt.Errorf("ResponsibleTeamIds is incorrect: %s", action.Properties["Octopus.Action.Manual.ResponsibleTeamIds"].Value)
+		}
+
+		if action.Properties["Octopus.Action.Manual.BlockConcurrentDeployments"].Value != "True" {
+			return fmt.Errorf("expected BlockConcurrentDeployments to be 'True' but got '%s'", action.Properties["Octopus.Action.Manual.BlockConcurrentDeployments"].Value)
 		}
 
 		return nil

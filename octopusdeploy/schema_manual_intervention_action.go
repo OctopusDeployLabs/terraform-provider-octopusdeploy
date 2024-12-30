@@ -13,6 +13,8 @@ func flattenManualIntervention(actionMap map[string]interface{}, properties map[
 			actionMap["instructions"] = propertyValue.Value
 		case "Octopus.Action.Manual.ResponsibleTeamIds":
 			actionMap["responsible_teams"] = propertyValue.Value
+		case "Octopus.Action.Manual.BlockConcurrentDeployments":
+			actionMap["block_deployments"] = propertyValue.Value
 		}
 	}
 }
@@ -39,6 +41,12 @@ func getManualInterventionActionSchema() *schema.Schema {
 		Optional:    true,
 	}
 
+	element.Schema["block_deployments"] = &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "Should other deployments be blocked while this manual intervention is awaiting action.",
+		Optional:    true,
+	}
+
 	return actionSchema
 }
 
@@ -50,6 +58,11 @@ func expandManualInterventionAction(tfAction map[string]interface{}) *deployment
 	responsibleTeams := tfAction["responsible_teams"]
 	if responsibleTeams != nil {
 		resource.Properties["Octopus.Action.Manual.ResponsibleTeamIds"] = core.NewPropertyValue(responsibleTeams.(string), false)
+	}
+
+	if blockDeployments, ok := tfAction["block_deployments"]; ok {
+		value := formatAsBoolOrBoundedValueForActionProperty(blockDeployments.(string))
+		resource.Properties["Octopus.Action.Manual.BlockConcurrentDeployments"] = core.NewPropertyValue(value, false)
 	}
 
 	return resource
