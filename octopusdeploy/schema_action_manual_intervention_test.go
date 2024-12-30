@@ -35,7 +35,7 @@ func testAccManualInterventionAction() string {
 			sort_order = 1
 			instructions = "Approve Me"
 			responsible_teams = "A Team"
-			block_deployments = true
+			block_deployments = "True"
 		}
 	`)
 }
