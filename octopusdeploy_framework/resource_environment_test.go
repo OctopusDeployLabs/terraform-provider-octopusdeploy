@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -70,6 +71,34 @@ func TestAccOctopusDeployEnvironmentMinimum(t *testing.T) {
 	})
 }
 
+func TestAccOctopusDeployEnvironmentReplacement(t *testing.T) {
+	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	spaceResourceName := "octopusdeploy_space." + localName
+	environmentResourceName := "octopusdeploy_environment." + localName
+	clientSpaceId := octoClient.GetSpaceID()
+
+	resource.Test(t, resource.TestCase{
+		CheckDestroy:             testAccEnvironmentAndSpaceCheckDestroy,
+		PreCheck:                 func() { TestAccPreCheck(t) },
+		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEnvironmentWithSpace(localName, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccEnvironmentExistsInSpace(environmentResourceName, spaceResourceName),
+				),
+			},
+			{
+				Config: testAccEnvironmentWithSpace(localName, clientSpaceId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccEnvironmentExistsInSpace(environmentResourceName, ""),
+					resource.TestCheckResourceAttr(environmentResourceName, "space_id", clientSpaceId),
+				),
+			},
+		},
+	})
+}
+
 func testAccEnvironment(localName string, name string, description string, allowDynamicInfrastructure bool, sortOrder int, useGuidedFailure bool) string {
 	return fmt.Sprintf(`resource "octopusdeploy_environment" "%s" {
 		allow_dynamic_infrastructure = "%v"
@@ -83,7 +112,7 @@ func testAccEnvironment(localName string, name string, description string, allow
 func testAccEnvironmentExists(prefix string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		environmentID := s.RootModule().Resources[prefix].Primary.ID
-		if _, err := octoClient.Environments.GetByID(environmentID); err != nil {
+		if _, err := environments.GetByID(octoClient, octoClient.GetSpaceID(), environmentID); err != nil {
 			return err
 		}
 
@@ -97,8 +126,66 @@ func testAccEnvironmentCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		if environment, err := octoClient.Environments.GetByID(rs.Primary.ID); err == nil {
+		if environment, err := environments.GetByID(octoClient, octoClient.GetSpaceID(), rs.Primary.ID); err == nil {
 			return fmt.Errorf("environment (%s) still exists", environment.GetID())
+		}
+	}
+
+	return nil
+}
+
+func testAccEnvironmentWithSpace(localName string, spaceId string) string {
+	environmentSpaceId := "octopusdeploy_space." + localName + ".id"
+	if spaceId != "" {
+		environmentSpaceId = fmt.Sprintf(`"%s"`, spaceId)
+	}
+
+	return fmt.Sprintf(`
+		resource "octopusdeploy_space" "%[1]s" {
+			name                        = "Replacement Space"
+			description                 = "A space for environment replacement."
+			space_managers_teams        = ["teams-everyone"]
+		}
+
+		resource "octopusdeploy_environment" "%[1]s" {
+			name		= "Replacement"
+			description	= "Replacement environment"
+			space_id	= %s
+		}
+		`,
+		localName,
+		environmentSpaceId,
+	)
+}
+
+func testAccEnvironmentExistsInSpace(environmentResource string, spaceResource string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		spaceId := octoClient.GetSpaceID()
+		if spaceResource != "" {
+			spaceId = s.RootModule().Resources[spaceResource].Primary.ID
+		}
+
+		environmentID := s.RootModule().Resources[environmentResource].Primary.ID
+		if _, err := environments.GetByID(octoClient, spaceId, environmentID); err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func testAccEnvironmentAndSpaceCheckDestroy(s *terraform.State) error {
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type == "octopusdeploy_environment" {
+			if environment, err := environments.GetByID(octoClient, octoClient.GetSpaceID(), rs.Primary.ID); err == nil {
+				return fmt.Errorf("environment (%s) still exists", environment.GetID())
+			}
+		}
+
+		if rs.Type == "octopusdeploy_space" {
+			if space, err := spaces.GetByID(octoClient, rs.Primary.ID); err == nil {
+				return fmt.Errorf("space (%s) still exists", space.GetID())
+			}
 		}
 	}
 
