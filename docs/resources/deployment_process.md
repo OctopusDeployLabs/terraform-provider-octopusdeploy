@@ -801,6 +801,7 @@ Required:
 Optional:
 
 - `action_template` (Block Set, Max: 1) Represents the template that is associated with this action. (see [below for nested schema](#nestedblock--step--manual_intervention_action--action_template))
+- `block_deployments` (String) Should other deployments be blocked while this manual intervention is awaiting action.
 - `can_be_used_for_project_versioning` (Boolean)
 - `channels` (List of String) The channels associated with this deployment action.
 - `condition` (String) The condition associated with this deployment action.
