@@ -3,6 +3,7 @@ package schemas
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/environments"
@@ -173,7 +174,15 @@ func (e EnvironmentSchema) GetResourceSchema() resourceSchema.Schema {
 				Computed: true,
 				Default:  booldefault.StaticBool(false),
 			},
-			"space_id": GetSpaceIdResourceSchema(EnvironmentResourceDescription),
+			"space_id": util.ResourceString().
+				Description("The space ID associated with this "+EnvironmentResourceDescription+".").
+				Computed().
+				Optional().
+				PlanModifiers(
+					stringplanmodifier.UseStateForUnknown(),
+					stringplanmodifier.RequiresReplace(),
+				).
+				Build(),
 		},
 		Blocks: map[string]resourceSchema.Block{
 			EnvironmentJiraExtensionSettings: resourceSchema.ListNestedBlock{
