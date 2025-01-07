@@ -1,12 +1,12 @@
 package octopusdeploy
 
 import (
-	"net/url"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"net/url"
+	"strings"
 )
 
 func expandKubernetesAgentDeploymentTarget(kubernetesAgent *schema.ResourceData) *machines.DeploymentTarget {
@@ -75,7 +75,19 @@ func flattenKubernetesAgentDeploymentTarget(deploymentTarget *machines.Deploymen
 	return flattenedDeploymentTarget
 }
 
-func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
+func getKubernetesAgentDeploymentTargetSchemaForDataSource() map[string]*schema.Schema {
+	return getKubernetesAgentDeploymentTargetSchema(nil)
+}
+
+func getKubernetesAgentDeploymentTargetSchemaForResource() map[string]*schema.Schema {
+	uriDiffSuppress := func(k, old, new string, d *schema.ResourceData) bool {
+		return strings.EqualFold(old, new)
+	}
+
+	return getKubernetesAgentDeploymentTargetSchema(uriDiffSuppress)
+}
+
+func getKubernetesAgentDeploymentTargetSchema(uriDiffSuppress schema.SchemaDiffSuppressFunc) map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"id":       getIDSchema(),
 		"space_id": getSpaceIDSchema(),
@@ -116,9 +128,11 @@ func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 		},
 		"uri": {
-			Description: "The URI of the Kubernetes agent's used by the server to queue messages. This is the same subscription uri that was used when installing the agent.",
-			Required:    true,
-			Type:        schema.TypeString,
+			Description:           "The URI of the Kubernetes agent's used by the server to queue messages. This is the same subscription uri that was used when installing the agent.",
+			Required:              true,
+			Type:                  schema.TypeString,
+			DiffSuppressFunc:      uriDiffSuppress,
+			DiffSuppressOnRefresh: uriDiffSuppress != nil,
 		},
 		"default_namespace": {
 			Description: "Optional default namespace that will be used when using Kubernetes deployment steps, can be overrides within step configurations.",
@@ -168,7 +182,7 @@ func getKubernetesAgentDeploymentTargetSchema() map[string]*schema.Schema {
 }
 
 func getKubernetesAgentDeploymentTargetDataSchema() map[string]*schema.Schema {
-	dataSchema := getKubernetesAgentDeploymentTargetSchema()
+	dataSchema := getKubernetesAgentDeploymentTargetSchemaForDataSource()
 	setDataSchema(&dataSchema)
 
 	deploymentTargetDataSchema := getDeploymentTargetDataSchema()
