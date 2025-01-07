@@ -16,7 +16,7 @@ func resourceKubernetesAgentDeploymentTarget() *schema.Resource {
 		Description:   "This resource manages Kubernetes agent deployment targets in Octopus Deploy.",
 		Importer:      getImporter(),
 		ReadContext:   resourceKubernetesAgentDeploymentTargetRead,
-		Schema:        getKubernetesAgentDeploymentTargetSchema(),
+		Schema:        getKubernetesAgentDeploymentTargetSchemaForResource(),
 		UpdateContext: resourceKubernetesAgentDeploymentTargetUpdate,
 	}
 }
