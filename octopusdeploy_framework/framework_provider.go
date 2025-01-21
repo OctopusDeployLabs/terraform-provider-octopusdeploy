@@ -49,6 +49,7 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 	if config.ApiKey == "" {
 		config.ApiKey = os.Getenv("OCTOPUS_API_KEY")
 	}
+	config.AccessToken = providerData.AccessToken.ValueString()
 	if config.AccessToken == "" {
 		config.AccessToken = os.Getenv("OCTOPUS_ACCESS_TOKEN")
 	}
