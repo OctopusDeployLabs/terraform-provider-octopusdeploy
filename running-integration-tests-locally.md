@@ -45,7 +45,7 @@ GOMAXPROCS=1
 ### From terminal
 Execute from repository's root directory with additional parameter `-createSharedContainer=true`
 ```
-go test -run "^(?:TestAccOctopusDeployNuGetFeedBasic|TestAccResourceBuiltInTrigger)$" -timeout 0 ./... -createSharedContainer=true
+go test -run "^(?:TestAccResourceBuiltInTrigger)$" -timeout 0 ./... -createSharedContainer=true
 ```
 
 ## Testing Environment
