@@ -74,3 +74,11 @@ resource "octopusdeploy_variable" "prompted_variable" {
     label       = "Variable Label"
   }
 }
+
+# create a String variable to a library variable set
+resource "octopusdeploy_variable" "string_variable" {
+  owner_id  = "LibraryVariableSets-123"
+  type      = "String"
+  name      = "My String Value (OK to Delete)"
+  value     = "PlainText"
+}
