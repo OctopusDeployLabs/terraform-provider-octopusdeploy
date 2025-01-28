@@ -1,0 +1,224 @@
+package octopusdeploy_framework
+
+import (
+	"context"
+	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+)
+
+var _ resource.Resource = &processChildStepsOrderResource{}
+
+type processChildStepsOrderResource struct {
+	*Config
+}
+
+func NewProcessChildStepsOrderResource() resource.Resource {
+	return &processChildStepsOrderResource{}
+}
+
+func (r *processChildStepsOrderResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = util.GetTypeName(schemas.ProcessChildStepsOrderResourceName)
+}
+
+func (r *processChildStepsOrderResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schemas.ProcessChildStepsOrderSchema{}.GetResourceSchema()
+}
+
+func (r *processChildStepsOrderResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	r.Config = ResourceConfiguration(req, resp)
+}
+
+func (r *processChildStepsOrderResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *schemas.ProcessChildStepsOrderResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	spaceId := data.SpaceID.ValueString()
+	processId := data.ProcessID.ValueString()
+	parentId := data.ParentID.ValueString()
+
+	tflog.Info(ctx, fmt.Sprintf("creating process child steps order for parent %s", parentId))
+
+	client := r.Config.Client
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
+	if err != nil {
+		resp.Diagnostics.AddError("Error creating process child steps order, unable to find a process", err.Error())
+		return
+	}
+
+	parent, ok := findStepFromProcessByID(process, parentId)
+	if !ok {
+		resp.Diagnostics.AddError("Error creating process child steps order, unable to find a parent step", err.Error())
+		return
+	}
+
+	mapProcessChildStepsOrderFromState(data, parent)
+
+	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to create process step", err.Error())
+		return
+	}
+
+	updatedParent, ok := findStepFromProcessByID(updatedProcess, parentId)
+	if !ok {
+		resp.Diagnostics.AddError("Error creating process child steps order, unable to find a parent step", err.Error())
+		return
+	}
+
+	mapProcessChildStepsOrderToState(updatedParent, updatedProcess, data)
+
+	tflog.Info(ctx, fmt.Sprintf("process child steps order created (%s)", data.ID))
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *processChildStepsOrderResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *schemas.ProcessChildStepsOrderResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	spaceId := data.SpaceID.ValueString()
+	processId := data.ProcessID.ValueString()
+	parentId := data.ID.ValueString()
+
+	tflog.Info(ctx, fmt.Sprintf("reading process child steps order (%s)", parentId))
+
+	client := r.Config.Client
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to find process", err.Error())
+		return
+	}
+
+	parent, ok := findStepFromProcessByID(process, parentId)
+	if !ok {
+		resp.Diagnostics.AddError("Error reading process child steps order, unable to find a parent step", err.Error())
+		return
+	}
+
+	mapProcessChildStepsOrderToState(parent, process, data)
+
+	tflog.Info(ctx, fmt.Sprintf("process child steps order read (%s)", parentId))
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *processChildStepsOrderResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *schemas.ProcessChildStepsOrderResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	spaceId := data.SpaceID.ValueString()
+	processId := data.ProcessID.ValueString()
+	parentId := data.ID.ValueString()
+
+	tflog.Info(ctx, fmt.Sprintf("updating process child steps order (%s)", parentId))
+
+	client := r.Config.Client
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to load process", err.Error())
+		return
+	}
+
+	parent, ok := findStepFromProcessByID(process, parentId)
+	if !ok {
+		resp.Diagnostics.AddError("Error updating process child steps order, unable to find a parent step", err.Error())
+		return
+	}
+
+	mapProcessChildStepsOrderFromState(data, parent)
+
+	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to update process child steps order", err.Error())
+		return
+	}
+
+	updatedParent, ok := findStepFromProcessByID(updatedProcess, parentId)
+	if !ok {
+		resp.Diagnostics.AddError("Error updating process child steps order, unable to find a parent step", err.Error())
+		return
+	}
+
+	mapProcessChildStepsOrderToState(updatedParent, updatedProcess, data)
+
+	tflog.Info(ctx, fmt.Sprintf("process steps order updated (%s)", processId))
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *processChildStepsOrderResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *schemas.ProcessChildStepsOrderResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	spaceId := data.SpaceID.ValueString()
+	processId := data.ProcessID.ValueString()
+	parentId := data.ID.ValueString()
+
+	tflog.Info(ctx, fmt.Sprintf("deleting process steps order (%s)", processId))
+
+	client := r.Config.Client
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to load process", err.Error())
+		return
+	}
+
+	_, ok := findStepFromProcessByID(process, parentId)
+	if !ok {
+		resp.Diagnostics.AddError("Error deleting process child steps order, unable to find a parent step", err.Error())
+		return
+	}
+
+	// Do nothing
+
+	resp.State.RemoveResource(ctx)
+}
+
+func mapProcessChildStepsOrderFromState(state *schemas.ProcessChildStepsOrderResourceModel, step *deployments.DeploymentStep) {
+	// Validate that ordering include all steps defined in the process
+
+	lookup := make(map[string]*deployments.DeploymentAction)
+	for _, action := range step.Actions {
+		lookup[action.GetID()] = action
+	}
+
+	orderedIds := util.GetIds(state.Children)
+
+	// step must have at least one action which we don't want to touch
+	var reorderedActions = []*deployments.DeploymentAction{step.Actions[0]}
+	for _, id := range orderedIds {
+		action, _ := lookup[id]
+		reorderedActions = append(reorderedActions, action)
+	}
+	step.Actions = reorderedActions
+}
+
+func mapProcessChildStepsOrderToState(step *deployments.DeploymentStep, process *deployments.DeploymentProcess, state *schemas.ProcessChildStepsOrderResourceModel) {
+	state.ID = types.StringValue(step.GetID())
+	state.SpaceID = types.StringValue(process.SpaceID)
+	state.ProcessID = types.StringValue(process.GetID())
+	state.ParentID = types.StringValue(step.GetID())
+
+	// parent step's first action is "embedded" into step resource - we want to keep it always first
+	childActions := step.Actions[1:]
+	var children = make([]attr.Value, len(childActions))
+	for i, action := range childActions {
+		children[i] = types.StringValue(action.GetID())
+	}
+	state.Children, _ = types.ListValue(types.StringType, children)
+}
