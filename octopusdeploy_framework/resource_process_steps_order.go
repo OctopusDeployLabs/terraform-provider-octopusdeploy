@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -43,6 +44,9 @@ func (r *processStepsOrderResource) Create(ctx context.Context, req resource.Cre
 
 	spaceId := data.SpaceID.ValueString()
 	processId := data.ProcessID.ValueString()
+
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
 
 	tflog.Info(ctx, fmt.Sprintf("creating process steps order: %s", processId))
 
@@ -98,11 +102,15 @@ func (r *processStepsOrderResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	spaceId := data.SpaceID.ValueString()
+	processId := data.ProcessID.ValueString()
+
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
+
 	tflog.Info(ctx, fmt.Sprintf("updating process steps order (%s)", data.ProcessID))
 
 	client := r.Config.Client
-	spaceId := data.SpaceID.ValueString()
-	processId := data.ProcessID.ValueString()
 	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load process", err.Error())
@@ -133,6 +141,9 @@ func (r *processStepsOrderResource) Delete(ctx context.Context, req resource.Del
 	spaceId := data.SpaceID.ValueString()
 	processId := data.ProcessID.ValueString()
 
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
+
 	tflog.Info(ctx, fmt.Sprintf("deleting process steps order (%s)", processId))
 
 	client := r.Config.Client
@@ -142,7 +153,7 @@ func (r *processStepsOrderResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	// Do nothing
+	// Do nothing or delete all steps
 
 	resp.State.RemoveResource(ctx)
 }
