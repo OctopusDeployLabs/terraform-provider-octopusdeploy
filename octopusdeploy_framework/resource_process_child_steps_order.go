@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -44,6 +45,9 @@ func (r *processChildStepsOrderResource) Create(ctx context.Context, req resourc
 	spaceId := data.SpaceID.ValueString()
 	processId := data.ProcessID.ValueString()
 	parentId := data.ParentID.ValueString()
+
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
 
 	tflog.Info(ctx, fmt.Sprintf("creating process child steps order for parent %s", parentId))
 
@@ -123,6 +127,9 @@ func (r *processChildStepsOrderResource) Update(ctx context.Context, req resourc
 	processId := data.ProcessID.ValueString()
 	parentId := data.ID.ValueString()
 
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
+
 	tflog.Info(ctx, fmt.Sprintf("updating process child steps order (%s)", parentId))
 
 	client := r.Config.Client
@@ -169,6 +176,9 @@ func (r *processChildStepsOrderResource) Delete(ctx context.Context, req resourc
 	processId := data.ProcessID.ValueString()
 	parentId := data.ID.ValueString()
 
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
+
 	tflog.Info(ctx, fmt.Sprintf("deleting process steps order (%s)", processId))
 
 	client := r.Config.Client
@@ -184,7 +194,7 @@ func (r *processChildStepsOrderResource) Delete(ctx context.Context, req resourc
 		return
 	}
 
-	// Do nothing
+	// Do nothing or delete child actions ?
 
 	resp.State.RemoveResource(ctx)
 }

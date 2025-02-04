@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -48,6 +49,9 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 
 	spaceId := data.SpaceID.ValueString()
 	processId := data.ProcessID.ValueString()
+
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
 
 	tflog.Info(ctx, fmt.Sprintf("creating process step: %s", data.Name.ValueString()))
 
@@ -93,19 +97,22 @@ func (r *processStepResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
+	spaceId := data.SpaceID.ValueString()
+	processId := data.ProcessID.ValueString()
+	stepId := data.ID.ValueString()
+
 	tflog.Info(ctx, fmt.Sprintf("reading process step (%s)", data.ID))
 
 	client := r.Config.Client
-	spaceId := data.SpaceID.ValueString()
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, data.ProcessID.ValueString())
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to find process", err.Error())
 		return
 	}
 
-	step, exists := findStepFromProcessByID(process, data.ID.ValueString())
+	step, exists := findStepFromProcessByID(process, stepId)
 	if !exists {
-		resp.Diagnostics.AddError("unable to find process step '%s'", data.ID.ValueString())
+		resp.Diagnostics.AddError("unable to find process step '%s'", stepId)
 		return
 	}
 
@@ -122,19 +129,25 @@ func (r *processStepResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("updating process step (%s)", data.ID))
+	spaceId := data.SpaceID.ValueString()
+	processId := data.ProcessID.ValueString()
+	stepId := data.ID.ValueString()
+
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
+
+	tflog.Info(ctx, fmt.Sprintf("updating process step (%s)", stepId))
 
 	client := r.Config.Client
-	spaceId := data.SpaceID.ValueString()
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, data.ProcessID.ValueString())
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load process", err.Error())
 		return
 	}
 
-	step, exists := findStepFromProcessByID(process, data.ID.ValueString())
+	step, exists := findStepFromProcessByID(process, stepId)
 	if !exists {
-		resp.Diagnostics.AddError("unable to find process step '%s'", data.ID.ValueString())
+		resp.Diagnostics.AddError("unable to find process step '%s'", stepId)
 		return
 	}
 
@@ -150,9 +163,9 @@ func (r *processStepResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	updatedStep, exists := findStepFromProcessByID(updatedProcess, data.ID.ValueString())
+	updatedStep, exists := findStepFromProcessByID(updatedProcess, stepId)
 	if !exists {
-		resp.Diagnostics.AddError("unable to find updated process step '%s'", data.ID.ValueString())
+		resp.Diagnostics.AddError("unable to find updated process step '%s'", stepId)
 		return
 	}
 
@@ -169,11 +182,17 @@ func (r *processStepResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("deleting process step (%s)", data.ID))
+	spaceId := data.SpaceID.ValueString()
+	processId := data.ProcessID.ValueString()
+	stepId := data.ID.ValueString()
+
+	internal.KeyedMutex.Lock(processId)
+	defer internal.KeyedMutex.Unlock(processId)
+
+	tflog.Info(ctx, fmt.Sprintf("deleting process step (%s)", stepId))
 
 	client := r.Config.Client
-	spaceId := data.SpaceID.ValueString()
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, data.ProcessID.ValueString())
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load process", err.Error())
 		return
@@ -181,7 +200,7 @@ func (r *processStepResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	var filteredSteps []*deployments.DeploymentStep
 	for _, step := range process.Steps {
-		if data.ID.ValueString() != step.GetID() {
+		if stepId != step.GetID() {
 			filteredSteps = append(filteredSteps, step)
 		}
 	}
