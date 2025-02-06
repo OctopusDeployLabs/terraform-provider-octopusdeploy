@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var _ resource.Resource = &projectVersioningStrategyResource{}
+var _ resource.ResourceWithConfigValidators = &projectVersioningStrategyResource{}
 
 type projectVersioningStrategyResource struct {
 	*Config
@@ -30,6 +30,10 @@ func (r *projectVersioningStrategyResource) Metadata(_ context.Context, req reso
 
 func (r *projectVersioningStrategyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schemas.ProjectVersioningStrategySchema{}.GetResourceSchema()
+}
+
+func (r *projectVersioningStrategyResource) ConfigValidators(context.Context) []resource.ConfigValidator {
+	return schemas.ProjectVersioningStrategySchema{}.GetResourceConfigValidators()
 }
 
 func (r *projectVersioningStrategyResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -165,20 +169,21 @@ func (r *projectVersioningStrategyResource) Delete(ctx context.Context, req reso
 }
 
 func mapStateToProjectVersioningStrategy(state *schemas.ProjectVersioningStrategyModel) *projects.VersioningStrategy {
-	var donorPackageStepID *string
-	donorPackageStepIDString := state.DonorPackageStepID.ValueString()
-	if donorPackageStepIDString != "" {
-		donorPackageStepID = &donorPackageStepIDString
+	projectVersioningStrategy := &projects.VersioningStrategy{}
+	if !(state.Template.IsNull()) {
+		projectVersioningStrategy.Template = state.Template.ValueString()
 	}
-
-	return &projects.VersioningStrategy{
-		Template:           state.Template.ValueString(),
-		DonorPackageStepID: donorPackageStepID,
-		DonorPackage: &packages.DeploymentActionPackage{
+	if !(state.DonorPackageStepID.IsNull()) {
+		projectVersioningStrategy.DonorPackageStepID = state.DonorPackageStepID.ValueStringPointer()
+	}
+	if !(state.DonorPackage == nil) {
+		projectVersioningStrategy.DonorPackage = &packages.DeploymentActionPackage{
 			DeploymentAction: state.DonorPackage.DeploymentAction.ValueString(),
 			PackageReference: state.DonorPackage.PackageReference.ValueString(),
-		},
+		}
 	}
+
+	return projectVersioningStrategy
 }
 
 func mapProjectVersioningStrategyToState(versioningStrategy *projects.VersioningStrategy, state *schemas.ProjectVersioningStrategyModel) {
