@@ -45,7 +45,21 @@ resource "octopusdeploy_deployment_process" "process" {
   depends_on  = [octopusdeploy_project.tp]
 }
 
-resource "octopusdeploy_project_versioning_strategy" "tp" {
+######
+# NOTE: You can use either template or donor_package, not both
+######
+resource "octopusdeploy_project_versioning_strategy" "using_template" {
+  project_id = octopusdeploy_project.tp.id
+  space_id = octopusdeploy_project.tp.space_id
+  # See https://octopus.com/docs/releases/release-versioning for variable syntax
+  template = "#{Octopus.Version.LastMajor}.#{Octopus.Version.NextMinor}-alpha"
+  depends_on = [
+    octopusdeploy_project_group.tp,
+    octopusdeploy_deployment_process.process
+  ]
+}
+
+resource "octopusdeploy_project_versioning_strategy" "using_donor_package" {
   project_id = octopusdeploy_project.tp.id
   space_id = octopusdeploy_project.tp.space_id
   donor_package_step_id = octopusdeploy_deployment_process.process.step[0].run_script_action[0].id
