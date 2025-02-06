@@ -2,6 +2,9 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"log"
+	"net/http"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
@@ -9,8 +12,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"log"
-	"net/http"
 )
 
 var _ resource.Resource = &projectVersioningStrategyResource{}
@@ -184,7 +185,11 @@ func mapProjectVersioningStrategyToState(versioningStrategy *projects.Versioning
 	if versioningStrategy.DonorPackageStepID != nil {
 		state.DonorPackageStepID = types.StringValue(*versioningStrategy.DonorPackageStepID)
 	}
+	// Template and Donor Package are mutually exclusive options. We won't always have DonorPackage information.
 	state.Template = types.StringValue(versioningStrategy.Template)
-	state.DonorPackage.PackageReference = types.StringValue(versioningStrategy.DonorPackage.PackageReference)
-	state.DonorPackage.DeploymentAction = types.StringValue(versioningStrategy.DonorPackage.DeploymentAction)
+
+	if !(versioningStrategy.DonorPackage == nil) {
+		state.DonorPackage.PackageReference = types.StringValue(versioningStrategy.DonorPackage.PackageReference)
+		state.DonorPackage.DeploymentAction = types.StringValue(versioningStrategy.DonorPackage.DeploymentAction)
+	}
 }
