@@ -2,6 +2,9 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"log"
+	"net/http"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
@@ -9,11 +12,9 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"log"
-	"net/http"
 )
 
-var _ resource.Resource = &projectVersioningStrategyResource{}
+var _ resource.ResourceWithConfigValidators = &projectVersioningStrategyResource{}
 
 type projectVersioningStrategyResource struct {
 	*Config
@@ -29,6 +30,10 @@ func (r *projectVersioningStrategyResource) Metadata(_ context.Context, req reso
 
 func (r *projectVersioningStrategyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schemas.ProjectVersioningStrategySchema{}.GetResourceSchema()
+}
+
+func (r *projectVersioningStrategyResource) ConfigValidators(context.Context) []resource.ConfigValidator {
+	return schemas.ProjectVersioningStrategySchema{}.GetResourceConfigValidators()
 }
 
 func (r *projectVersioningStrategyResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -164,27 +169,32 @@ func (r *projectVersioningStrategyResource) Delete(ctx context.Context, req reso
 }
 
 func mapStateToProjectVersioningStrategy(state *schemas.ProjectVersioningStrategyModel) *projects.VersioningStrategy {
-	var donorPackageStepID *string
-	donorPackageStepIDString := state.DonorPackageStepID.ValueString()
-	if donorPackageStepIDString != "" {
-		donorPackageStepID = &donorPackageStepIDString
+	projectVersioningStrategy := &projects.VersioningStrategy{}
+	if !(state.Template.IsNull()) {
+		projectVersioningStrategy.Template = state.Template.ValueString()
 	}
-
-	return &projects.VersioningStrategy{
-		Template:           state.Template.ValueString(),
-		DonorPackageStepID: donorPackageStepID,
-		DonorPackage: &packages.DeploymentActionPackage{
+	if !(state.DonorPackageStepID.IsNull()) {
+		projectVersioningStrategy.DonorPackageStepID = state.DonorPackageStepID.ValueStringPointer()
+	}
+	if !(state.DonorPackage == nil) {
+		projectVersioningStrategy.DonorPackage = &packages.DeploymentActionPackage{
 			DeploymentAction: state.DonorPackage.DeploymentAction.ValueString(),
 			PackageReference: state.DonorPackage.PackageReference.ValueString(),
-		},
+		}
 	}
+
+	return projectVersioningStrategy
 }
 
 func mapProjectVersioningStrategyToState(versioningStrategy *projects.VersioningStrategy, state *schemas.ProjectVersioningStrategyModel) {
 	if versioningStrategy.DonorPackageStepID != nil {
 		state.DonorPackageStepID = types.StringValue(*versioningStrategy.DonorPackageStepID)
 	}
+	// Template and Donor Package are mutually exclusive options. We won't always have DonorPackage information.
 	state.Template = types.StringValue(versioningStrategy.Template)
-	state.DonorPackage.PackageReference = types.StringValue(versioningStrategy.DonorPackage.PackageReference)
-	state.DonorPackage.DeploymentAction = types.StringValue(versioningStrategy.DonorPackage.DeploymentAction)
+
+	if !(versioningStrategy.DonorPackage == nil) {
+		state.DonorPackage.PackageReference = types.StringValue(versioningStrategy.DonorPackage.PackageReference)
+		state.DonorPackage.DeploymentAction = types.StringValue(versioningStrategy.DonorPackage.DeploymentAction)
+	}
 }
