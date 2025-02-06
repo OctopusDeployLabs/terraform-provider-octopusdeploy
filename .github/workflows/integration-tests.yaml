@@ -99,7 +99,7 @@ jobs:
           OCTOTESTRETRYCOUNT: 1
       - name: Upload test artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: junit-test-summary-${{ matrix.index }}
           path: node-summary.xml
@@ -117,7 +117,7 @@ jobs:
       - uses: actions/setup-node@v3
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Install junit-report-merger
         run: npm install -g junit-report-merger
@@ -142,7 +142,7 @@ jobs:
           "junit-test-summary-14/*.xml"
 
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: junit-test-summary
           path: ./junit-test-summary.xml
