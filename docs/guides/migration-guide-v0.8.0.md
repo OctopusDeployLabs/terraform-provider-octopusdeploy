@@ -1,6 +1,6 @@
 ---
-page_title: "Migration to v0.8.0"
-subcategory: "Migrations"
+page_title: "Migrating to v0.8.0"
+subcategory: "Upgrades & Migrations"
 ---
 
 `v0.8.0` includes a number of breaking changes. This guide provides an outline of these changes along with tips on migration.
