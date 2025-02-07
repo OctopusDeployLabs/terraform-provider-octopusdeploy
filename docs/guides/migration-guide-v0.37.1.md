@@ -17,7 +17,7 @@ This change requires some customers to update their HCL.
 Only customers who were already using the `octopusdeploy_project.versioning_strategy` attribute are impacted by this change.
 
 ### Timeline
-Migration is not yet required, 
+Migration will be required no earlier than 2025-12-04
 
 | Date       | What we'll do                                                            | What you need to do                                                      |
 |------------|--------------------------------------------------------------------------|--------------------------------------------------------------------------|
