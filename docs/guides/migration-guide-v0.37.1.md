@@ -28,6 +28,7 @@ Migration will be required no earlier than 2025-12-04
 This guide assumes that you already have a Project managed by Terraform, which is using the `versioning_strategy` attribute.
 
 -> This migration removes and then re-configures the Versioning Strategy on the Project, but this is non-destructive as long as you complete the migration in one go and don't try to create releases between removing the old attribute approach and applying the new resource approach.
+
 ~> The original `octopusdeploy_project_versioning_strategy` resource had some incorrect schema definitions that didn't match what Octopus Server API expected, which will make following this upgrade guide impossible if you use only a Release Notes `template`, and not a `donor_package`. We fixed this bug in [Release `v0.40.2`](https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/releases/tag/v0.40.2). If your config requires using the `template` attribute, please ugprade directly to v0.40.2 or higher. There were no breaking changes between v0.37.1 and v0.40.2. 
 
 Please ensure you are working from a clean slate and have no pending changes to your Terraform config, by running a `terraform plan`. If you have outstanding changes, please resolve them before proceeding with this guide.
@@ -47,7 +48,7 @@ We expect customers to migrate their configs in the 6 months between Announcemen
 If you're caught out during this period and need a bit more time to migrate, you can use this escape hatch to revert the soft-deletion from the Enactment stage.
 
 | Environment Variable | Required Value |
-| - | - |
+|----------------------|----------------|
 | `TF_OCTOPUS_DEPRECATION_REVERSALS` | `Project-Attribute-Versioning-Strategy-0-37-1` |
 
 This escape hatch will be removed and migration will be required during the [Completion phase](#Timeline)
