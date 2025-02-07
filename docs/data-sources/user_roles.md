@@ -44,7 +44,7 @@ Read-Only:
 
 - `can_be_deleted` (Boolean)
 - `description` (String)
-- `granted_space_permissions` (List of String)
+- `granted_space_permissions` (Set of String)
 - `granted_system_permissions` (List of String)
 - `id` (String)
 - `name` (String)
