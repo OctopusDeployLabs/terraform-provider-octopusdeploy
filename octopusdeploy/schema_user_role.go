@@ -101,7 +101,7 @@ func getUserRoleSchema() map[string]*schema.Schema {
 		"granted_space_permissions": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 			Optional: true,
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 		},
 		"granted_system_permissions": {
 			Elem:     &schema.Schema{Type: schema.TypeString},
