@@ -148,7 +148,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 				},
 			},
 			"versioning_strategy": resourceSchema.ListNestedBlock{
-				DeprecationMessage: "versioning_strategy is deprecated in favor of resource project_versioning strategy",
+				DeprecationMessage: "octopusdeploy_project.versioning_strategy is deprecated in favor of resource octopusdeploy_project_versioning_strategy. See https://oc.to/deprecation-tfp-project-versioning-strategy for more info and migration guidance.",
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
 						"donor_package_step_id": util.ResourceString().Optional().Build(),
