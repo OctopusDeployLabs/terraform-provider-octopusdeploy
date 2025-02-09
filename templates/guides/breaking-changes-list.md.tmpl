@@ -1,6 +1,6 @@
 ---
 page_title: "Breaking Changes List"
-subcategory: "Upgrades & Migrations""
+subcategory: "Upgrades & Migrations"
 ---
 
 # Breaking Changes
