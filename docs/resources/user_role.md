@@ -38,7 +38,7 @@ resource "octopusdeploy_user_role" "example" {
 
 - `can_be_deleted` (Boolean)
 - `description` (String) The description of this user role.
-- `granted_space_permissions` (List of String)
+- `granted_space_permissions` (Set of String)
 - `granted_system_permissions` (List of String)
 - `id` (String) The unique ID for this resource.
 - `space_permission_descriptions` (List of String)
