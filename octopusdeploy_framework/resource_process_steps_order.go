@@ -8,12 +8,13 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ resource.Resource = &processStepsOrderResource{}
+var _ resource.ResourceWithModifyPlan = &processStepsOrderResource{}
 
 type processStepsOrderResource struct {
 	*Config
@@ -33,6 +34,83 @@ func (r *processStepsOrderResource) Schema(_ context.Context, _ resource.SchemaR
 
 func (r *processStepsOrderResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	r.Config = ResourceConfiguration(req, resp)
+}
+
+func (r *processStepsOrderResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		resp.Diagnostics.AddWarning("Deleting steps order", "Applying this resource destruction will not update process steps and their order")
+		return
+	}
+
+	var state *schemas.ProcessStepsOrderResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if state.SpaceID.IsUnknown() {
+		return
+	}
+
+	if state.ProcessID.IsUnknown() {
+		return
+	}
+
+	spaceId := state.SpaceID.ValueString()
+	processId := state.ProcessID.ValueString()
+
+	// Do the validation based on steps stored in Octopus Deploy
+	client := r.Config.Client
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to find process", err.Error())
+		return
+	}
+
+	orderedIds := util.GetIds(state.Steps)
+
+	// Validate that all steps are included in the order resource
+	includedStepsLookup := make(map[string]bool, len(orderedIds))
+	for _, id := range orderedIds {
+		includedStepsLookup[id] = true
+	}
+
+	var missingSteps []string
+	for _, step := range process.Steps {
+		if !includedStepsLookup[step.GetID()] {
+			missingSteps = append(missingSteps, fmt.Sprintf("'%s' (%s)", step.Name, step.GetID()))
+		}
+	}
+
+	if len(missingSteps) > 0 {
+		message := fmt.Sprintf("Following steps were not included in the steps order: %v", missingSteps)
+		resp.Diagnostics.AddWarning(
+			"Some process steps were not included in the order",
+			message,
+		)
+	}
+
+	// Validate that included steps are part of the process
+	lookup := make(map[string]*deployments.DeploymentStep)
+	for _, step := range process.Steps {
+		lookup[step.GetID()] = step
+	}
+
+	var unknownSteps []string
+	for _, id := range orderedIds {
+		_, found := lookup[id]
+		if !found {
+			unknownSteps = append(unknownSteps, id)
+		}
+	}
+
+	if len(unknownSteps) > 0 {
+		message := fmt.Sprintf("Following steps are not part of the process: %v", unknownSteps)
+		resp.Diagnostics.AddWarning(
+			fmt.Sprintf("Some ordered steps are not part of the process '%s'", process.ID),
+			message,
+		)
+	}
 }
 
 func (r *processStepsOrderResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -57,7 +135,11 @@ func (r *processStepsOrderResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	mapProcessStepsOrderFromState(data, process)
+	diags := mapProcessStepsOrderFromState(data, process)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
 	if err != nil {
@@ -117,7 +199,11 @@ func (r *processStepsOrderResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	mapProcessStepsOrderFromState(data, process)
+	diags := mapProcessStepsOrderFromState(data, process)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
 	if err != nil {
@@ -158,8 +244,8 @@ func (r *processStepsOrderResource) Delete(ctx context.Context, req resource.Del
 	resp.State.RemoveResource(ctx)
 }
 
-func mapProcessStepsOrderFromState(state *schemas.ProcessStepsOrderResourceModel, process *deployments.DeploymentProcess) {
-	// Validate that ordering include all steps defined in the process
+func mapProcessStepsOrderFromState(state *schemas.ProcessStepsOrderResourceModel, process *deployments.DeploymentProcess) diag.Diagnostics {
+	diags := diag.Diagnostics{}
 
 	lookup := make(map[string]*deployments.DeploymentStep)
 	for _, step := range process.Steps {
@@ -168,12 +254,40 @@ func mapProcessStepsOrderFromState(state *schemas.ProcessStepsOrderResourceModel
 
 	orderedIds := util.GetIds(state.Steps)
 
-	reorderedSteps := make([]*deployments.DeploymentStep, len(process.Steps))
-	for i, id := range orderedIds {
-		step, _ := lookup[id]
-		reorderedSteps[i] = step
+	var reorderedSteps []*deployments.DeploymentStep
+	for _, id := range orderedIds {
+		step, found := lookup[id]
+		if !found {
+			diags.AddError("Ordered step with id '%s' is not part of the process", id)
+			continue
+		}
+
+		delete(lookup, id)
+		reorderedSteps = append(reorderedSteps, step)
 	}
+
+	// Append unordered steps to the end
+	var missingSteps []string
+	for _, step := range lookup {
+		missingSteps = append(missingSteps, fmt.Sprintf("'%s' (%s)", step.Name, step.GetID()))
+		reorderedSteps = append(reorderedSteps, step)
+	}
+
+	if len(missingSteps) > 0 {
+		message := fmt.Sprintf("The following steps were not included in the steps order and will be added at the end. However, their order at the end is not guaranteed: %v", missingSteps)
+		diags.AddWarning(
+			"Some process steps were not included in the order",
+			message,
+		)
+	}
+
+	if diags.HasError() {
+		return diags
+	}
+
 	process.Steps = reorderedSteps
+
+	return diags
 }
 
 func mapProcessStepsOrderToState(process *deployments.DeploymentProcess, state *schemas.ProcessStepsOrderResourceModel) {
@@ -181,8 +295,9 @@ func mapProcessStepsOrderToState(process *deployments.DeploymentProcess, state *
 	state.SpaceID = types.StringValue(process.SpaceID)
 	state.ProcessID = types.StringValue(process.GetID())
 
-	var steps = make([]attr.Value, len(process.Steps))
-	for i, step := range process.Steps {
+	orderedSteps := len(state.Steps.Elements())
+	var steps = make([]attr.Value, orderedSteps)
+	for i, step := range process.Steps[:orderedSteps] {
 		steps[i] = types.StringValue(step.GetID())
 	}
 	state.Steps, _ = types.ListValue(types.StringType, steps)

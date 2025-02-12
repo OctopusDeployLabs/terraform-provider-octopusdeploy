@@ -66,7 +66,7 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	action := deployments.NewDeploymentAction(data.Name.ValueString(), data.ActionType.ValueString())
-	mapFromStateToProcessChildStepAction(data, action)
+	mapProcessChildStepActionFromState(data, action)
 
 	parent.Actions = append(parent.Actions, action)
 
@@ -88,7 +88,7 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	mapFromProcessChildStepActionToState(createdAction, updatedStep, updatedProcess, data)
+	mapProcessChildStepActionToState(createdAction, updatedStep, updatedProcess, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process child step created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -127,7 +127,7 @@ func (r *processChildStepResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	mapFromProcessChildStepActionToState(action, parent, process, data)
+	mapProcessChildStepActionToState(action, parent, process, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process chidl step read (%s)", actionId))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -169,7 +169,7 @@ func (r *processChildStepResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	mapFromStateToProcessChildStepAction(data, action)
+	mapProcessChildStepActionFromState(data, action)
 
 	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
 	if err != nil {
@@ -189,7 +189,7 @@ func (r *processChildStepResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	mapFromProcessChildStepActionToState(updatedAction, updatedStep, updatedProcess, data)
+	mapProcessChildStepActionToState(updatedAction, updatedStep, updatedProcess, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process child step updated (%s)", actionId))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -242,7 +242,7 @@ func (r *processChildStepResource) Delete(ctx context.Context, req resource.Dele
 	resp.State.RemoveResource(ctx)
 }
 
-func mapFromStateToProcessChildStepAction(state *schemas.ProcessChildStepResourceModel, action *deployments.DeploymentAction) {
+func mapProcessChildStepActionFromState(state *schemas.ProcessChildStepResourceModel, action *deployments.DeploymentAction) {
 	action.Name = state.Name.ValueString()
 	action.ActionType = state.ActionType.ValueString()
 
@@ -254,9 +254,10 @@ func mapFromStateToProcessChildStepAction(state *schemas.ProcessChildStepResourc
 
 	action.Properties["Octopus.Action.Script.Syntax"] = core.NewPropertyValue(state.ScriptSyntax.ValueString(), false)
 	action.Properties["Octopus.Action.Script.ScriptBody"] = core.NewPropertyValue(state.ScriptBody.ValueString(), false)
+	action.Properties["Octopus.Action.MaintainedBy.TerraformProvider"] = core.NewPropertyValue("True", false)
 }
 
-func mapFromProcessChildStepActionToState(action *deployments.DeploymentAction, step *deployments.DeploymentStep, process *deployments.DeploymentProcess, state *schemas.ProcessChildStepResourceModel) {
+func mapProcessChildStepActionToState(action *deployments.DeploymentAction, step *deployments.DeploymentStep, process *deployments.DeploymentProcess, state *schemas.ProcessChildStepResourceModel) {
 	state.ID = types.StringValue(action.GetID())
 	state.SpaceID = types.StringValue(process.SpaceID)
 	state.ProcessID = types.StringValue(process.GetID())
