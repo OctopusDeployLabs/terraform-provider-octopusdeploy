@@ -64,7 +64,7 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 
 	step := deployments.NewDeploymentStep(data.Name.ValueString())
 
-	diagnostics := mapFromStateToProcessStep(ctx, data, step)
+	diagnostics := mapProcessStepFromState(ctx, data, step)
 	if diagnostics.HasError() {
 		resp.Diagnostics.Append(diagnostics...)
 		return
@@ -84,7 +84,7 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	mapFromProcessStepToState(updatedProcess, createdStep, data)
+	mapProcessStepToState(updatedProcess, createdStep, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process step created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -116,7 +116,7 @@ func (r *processStepResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	mapFromProcessStepToState(process, step, data)
+	mapProcessStepToState(process, step, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process step read (%s)", step.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -151,7 +151,7 @@ func (r *processStepResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	diagnostics := mapFromStateToProcessStep(ctx, data, step)
+	diagnostics := mapProcessStepFromState(ctx, data, step)
 	if diagnostics.HasError() {
 		resp.Diagnostics.Append(diagnostics...)
 		return
@@ -169,7 +169,7 @@ func (r *processStepResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	mapFromProcessStepToState(updatedProcess, updatedStep, data)
+	mapProcessStepToState(updatedProcess, updatedStep, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process step updated (%s)", updatedStep.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -215,7 +215,7 @@ func (r *processStepResource) Delete(ctx context.Context, req resource.DeleteReq
 	resp.State.RemoveResource(ctx)
 }
 
-func mapFromStateToProcessStep(ctx context.Context, state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) diag.Diagnostics {
+func mapProcessStepFromState(ctx context.Context, state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) diag.Diagnostics {
 	step.Condition = deployments.DeploymentStepConditionType(state.Condition.ValueString())
 	step.StartTrigger = deployments.DeploymentStepStartTrigger(state.StartTrigger.ValueString())
 
@@ -227,12 +227,12 @@ func mapFromStateToProcessStep(ctx context.Context, state *schemas.ProcessStepRe
 
 	step.Properties["Octopus.Action.MaxParallelism"] = core.NewPropertyValue(state.WindowSize.ValueString(), false)
 
-	mapFromStateToProcessStepFirstAction(state, step)
+	mapProcessStepEmbeddedActionFromState(state, step)
 
 	return nil
 }
 
-func mapFromStateToProcessStepFirstAction(state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) {
+func mapProcessStepEmbeddedActionFromState(state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) {
 	actionType := state.ActionType.ValueString()
 	name := state.Name.ValueString()
 
@@ -245,10 +245,10 @@ func mapFromStateToProcessStepFirstAction(state *schemas.ProcessStepResourceMode
 		step.Actions[0] = deployments.NewDeploymentAction(name, actionType)
 	}
 
-	mapFromStateToProcessStepAction(state, step.Actions[0])
+	mapProcessStepActionFromState(state, step.Actions[0])
 }
 
-func mapFromStateToProcessStepAction(state *schemas.ProcessStepResourceModel, action *deployments.DeploymentAction) {
+func mapProcessStepActionFromState(state *schemas.ProcessStepResourceModel, action *deployments.DeploymentAction) {
 	action.Name = state.Name.ValueString()
 	action.ActionType = state.ActionType.ValueString()
 
@@ -262,7 +262,7 @@ func mapFromStateToProcessStepAction(state *schemas.ProcessStepResourceModel, ac
 	action.Properties["Octopus.Action.Script.ScriptBody"] = core.NewPropertyValue(state.ScriptBody.ValueString(), false)
 }
 
-func mapFromProcessStepToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, state *schemas.ProcessStepResourceModel) {
+func mapProcessStepToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, state *schemas.ProcessStepResourceModel) {
 	state.ID = types.StringValue(step.GetID())
 	state.SpaceID = types.StringValue(process.SpaceID)
 
@@ -278,11 +278,11 @@ func mapFromProcessStepToState(process *deployments.DeploymentProcess, step *dep
 	state.WindowSize = types.StringValue(step.Properties["Octopus.Action.MaxParallelism"].Value)
 
 	if len(step.Actions) > 0 && step.Actions[0] != nil {
-		mapFromProcessStepActionToState(step.Actions[0], state)
+		mapProcessStepActionToState(step.Actions[0], state)
 	}
 }
 
-func mapFromProcessStepActionToState(action *deployments.DeploymentAction, state *schemas.ProcessStepResourceModel) {
+func mapProcessStepActionToState(action *deployments.DeploymentAction, state *schemas.ProcessStepResourceModel) {
 	state.ActionType = types.StringValue(action.ActionType)
 
 	value, _ := strconv.ParseBool(action.Properties["Octopus.Action.RunOnServer"].Value)

@@ -9,16 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"net/url"
-	"sync"
 )
 
 type Config struct {
-	Address             string
-	ApiKey              string
-	AccessToken         string
-	SpaceID             string
-	Client              *client.Client
-	ProcessStepsTracker *ProcessStepsTracker
+	Address     string
+	ApiKey      string
+	AccessToken string
+	SpaceID     string
+	Client      *client.Client
 }
 
 func (c *Config) GetClient(ctx context.Context) error {
@@ -128,28 +126,4 @@ func ResourceConfiguration(req resource.ConfigureRequest, resp *resource.Configu
 	}
 
 	return config
-}
-
-type ProcessStepsTracker struct {
-	mutex  sync.Mutex
-	events map[string][]ProcessStepAction
-}
-
-type ProcessStepAction struct {
-	ID     string `json:"id"`
-	Action string `json:"action"` // added, updated, removed
-}
-
-func (t *ProcessStepsTracker) Append(processId string, stepId string, action string) {
-	t.mutex.Lock()
-	defer t.mutex.Unlock()
-
-	t.events[processId] = append(t.events[processId], ProcessStepAction{stepId, action})
-}
-
-func (t *ProcessStepsTracker) GetEvents(processId string) []ProcessStepAction {
-	t.mutex.Lock()
-	defer t.mutex.Unlock()
-
-	return t.events[processId]
 }

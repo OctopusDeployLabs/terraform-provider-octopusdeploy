@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,6 +25,7 @@ func (p ProcessChildStepsOrderSchema) GetResourceSchema() resourceSchema.Schema 
 			"children": util.ResourceList(types.StringType).
 				Description("Child steps in the order of execution").
 				Required().
+				Validators(listvalidator.UniqueValues()).
 				Build(),
 		},
 	}
