@@ -2,14 +2,15 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"path/filepath"
+	"testing"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"path/filepath"
-	"testing"
 )
 
 func TestAccOctopusDeployScriptModuleBasic(t *testing.T) {
@@ -102,7 +103,7 @@ func TestScriptModuleResource(t *testing.T) {
 		Take:        1,
 	}
 
-	resources, err := client.LibraryVariableSets.Get(query)
+	resources, err := client.ScriptModules.Get(query)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -114,6 +115,14 @@ func TestScriptModuleResource(t *testing.T) {
 
 	if resource.Description != "Test script module" {
 		t.Fatal("The library variable set must be have a description of \"Test script module\" (was \"" + resource.Description + "\")")
+	}
+
+	if resource.Syntax != "PowerShell" {
+		t.Fatal("The script module must have a syntax of \"PowerShell\" (was \"" + resource.Syntax + "\")")
+	}
+
+	if resource.ScriptBody != "echo \"hi\"" {
+		t.Fatal("The script module must have a script body of \"echo \"hi\"\" (was \"" + resource.ScriptBody + "\")")
 	}
 
 	variables, err := client.Variables.GetAll(resource.ID)
