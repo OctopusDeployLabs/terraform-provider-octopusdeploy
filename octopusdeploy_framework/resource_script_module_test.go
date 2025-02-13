@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/scriptmodules"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/variables"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
 	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
@@ -103,7 +104,7 @@ func TestScriptModuleResource(t *testing.T) {
 		Take:        1,
 	}
 
-	resources, err := client.ScriptModules.Get(query)
+	resources, err := scriptmodules.Get(client, newSpaceId, query)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
