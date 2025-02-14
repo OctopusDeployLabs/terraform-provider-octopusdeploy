@@ -195,12 +195,6 @@ func (r *runbookTypeResource) ImportState(ctx context.Context, req resource.Impo
 		return
 	}
 
-	// var state schemas.RunbookTypeResourceModel
-	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
 	// Else we are importing by SpaceID:ProjectID:Slug:Branch
 	if len(idParts) != 4 {
 		resp.Diagnostics.AddError(
@@ -210,22 +204,10 @@ func (r *runbookTypeResource) ImportState(ctx context.Context, req resource.Impo
 		return
 	}
 
-	// runbook, err := runbooks.GetGitRunbookByID(r.Config.Client, spaceID, projectId, slug, branch)
-
-	// if err != nil {
-	// 	resp.Diagnostics.AddError("unable to load runbook", err.Error())
-	// 	return
-	// }
-
-	// resp.Diagnostics.Append(state.RefreshFromApiResponse(ctx, runbook)...)
-	// if resp.Diagnostics.HasError() {
-	// 	return
-	// }
-
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("space_id"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("project_id"), idParts[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), idParts[2])...) // The slug is the id
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("branch"), idParts[3])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("project_id"), idParts[1])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("space_id"), idParts[0])...)
 }
 
 func (r *runbookTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
