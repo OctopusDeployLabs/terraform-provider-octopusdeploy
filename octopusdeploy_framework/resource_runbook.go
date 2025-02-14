@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
@@ -66,7 +67,15 @@ func (r *runbookTypeResource) Create(ctx context.Context, req resource.CreateReq
 
 	util.Create(ctx, schemas.RunbookResourceDescription, plan)
 
-	createdRunbook, err := runbooks.Add(r.Config.Client, runbook)
+	var createdRunbook *runbooks.Runbook
+	var err error
+
+	if !plan.Branch.IsNull() {
+		createdRunbook, err = runbooks.AddGitRunbook(r.Config.Client, runbook, plan.Branch.ValueString())
+	} else {
+		createdRunbook, err = runbooks.Update(r.Config.Client, runbook)
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("failed to create runbook (%s)", runbook.Name), err.Error())
 		return
@@ -91,7 +100,15 @@ func (r *runbookTypeResource) Read(ctx context.Context, req resource.ReadRequest
 
 	util.Reading(ctx, schemas.RunbookResourceDescription, state)
 
-	runbook, err := runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	var runbook *runbooks.Runbook
+	var err error
+
+	if !state.Branch.IsNull() {
+		runbook, err = runbooks.GetGitRunbookByID(r.Config.Client, state.SpaceID.ValueString(), state.ProjectID.ValueString(), state.Branch.ValueString(), state.ID.ValueString())
+	} else {
+		runbook, err = runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	}
+
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, schemas.RunbookResourceDescription); err != nil {
 			resp.Diagnostics.AddError("failed to load runbook", err.Error())
@@ -119,7 +136,15 @@ func (r *runbookTypeResource) Update(ctx context.Context, req resource.UpdateReq
 
 	util.Update(ctx, schemas.RunbookResourceDescription, plan)
 
-	runbook, err := runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	var runbook *runbooks.Runbook
+	var err error
+
+	if !state.Branch.IsNull() {
+		runbook, err = runbooks.GetGitRunbookByID(r.Config.Client, state.SpaceID.ValueString(), state.ProjectID.ValueString(), state.Branch.ValueString(), state.ID.ValueString())
+	} else {
+		runbook, err = runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load runbook", err.Error())
 		return
@@ -141,7 +166,12 @@ func (r *runbookTypeResource) Update(ctx context.Context, req resource.UpdateReq
 	updatedRunbook.RunRetentionPolicy = schemas.MapToRunbookRetentionPeriod(plan.RunRetentionPolicy)
 	updatedRunbook.ForcePackageDownload = plan.ForcePackageDownload.ValueBool()
 
-	updatedRunbook, err = runbooks.Update(r.Config.Client, updatedRunbook)
+	if !state.Branch.IsNull() {
+		updatedRunbook, err = runbooks.UpdateGitRunbook(r.Config.Client, updatedRunbook, state.Branch.ValueString())
+	} else {
+		updatedRunbook, err = runbooks.Update(r.Config.Client, updatedRunbook)
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update runbook", err.Error())
 	}
@@ -156,8 +186,46 @@ func (r *runbookTypeResource) Update(ctx context.Context, req resource.UpdateReq
 	util.Updated(ctx, schemas.RunbookResourceDescription, updatedRunbook)
 }
 
-func (*runbookTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+func (r *runbookTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	idParts := strings.Split(req.ID, ":")
+
+	if len(idParts) == 1 {
+		// Importing directly by ID: Assuming this is a Db runbook
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
+		return
+	}
+
+	// var state schemas.RunbookTypeResourceModel
+	// resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
+
+	// Else we are importing by SpaceID:ProjectID:Slug:Branch
+	if len(idParts) != 4 {
+		resp.Diagnostics.AddError(
+			"Incorrect Import Format",
+			"ID must be in the format: SpaceID:ProjectID:Slug:Branch (e.g. Spaces-1:Projects-2:my-runbook:main)",
+		)
+		return
+	}
+
+	// runbook, err := runbooks.GetGitRunbookByID(r.Config.Client, spaceID, projectId, slug, branch)
+
+	// if err != nil {
+	// 	resp.Diagnostics.AddError("unable to load runbook", err.Error())
+	// 	return
+	// }
+
+	// resp.Diagnostics.Append(state.RefreshFromApiResponse(ctx, runbook)...)
+	// if resp.Diagnostics.HasError() {
+	// 	return
+	// }
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), idParts[2])...) // The slug is the id
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("branch"), idParts[3])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("project_id"), idParts[1])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("space_id"), idParts[0])...)
 }
 
 func (r *runbookTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -169,7 +237,15 @@ func (r *runbookTypeResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	util.Delete(ctx, schemas.RunbookResourceDescription, state)
 
-	if err := runbooks.DeleteByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString()); err != nil {
+	var err error
+
+	if !state.Branch.IsNull() {
+		err = runbooks.DeleteGitRunbook(r.Config.Client, state.SpaceID.ValueString(), state.ProjectID.ValueString(), state.Branch.ValueString(), state.ID.ValueString())
+	} else {
+		err = runbooks.DeleteByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	}
+
+	if err != nil {
 		resp.Diagnostics.AddError("failed to delete runbook", err.Error())
 		return
 	}

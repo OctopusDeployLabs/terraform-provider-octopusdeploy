@@ -3,6 +3,7 @@ package schemas
 import (
 	"context"
 	"fmt"
+
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 
 	//datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -41,6 +42,7 @@ var RunbookSchemaAttributeNames = struct {
 	DefaultGuidedFailureMode   string
 	RetentionPolicy            string
 	ForcePackageDownload       string
+	Branch                     string
 }{
 	ID:                         "id",
 	Name:                       "name",
@@ -56,6 +58,7 @@ var RunbookSchemaAttributeNames = struct {
 	DefaultGuidedFailureMode:   "default_guided_failure_mode",
 	RetentionPolicy:            "retention_policy",
 	ForcePackageDownload:       "force_package_download",
+	Branch:                     "branch",
 }
 
 var tenantedDeploymentModeNames = struct {
@@ -120,6 +123,7 @@ type RunbookTypeResourceModel struct {
 	DefaultGuidedFailureMode   types.String `tfsdk:"default_guided_failure_mode"`
 	RunRetentionPolicy         types.List   `tfsdk:"retention_policy"`
 	ForcePackageDownload       types.Bool   `tfsdk:"force_package_download"`
+	Branch                     types.String `tfsdk:"branch"`
 
 	ResourceModel
 }
@@ -228,6 +232,10 @@ func (r RunbookSchema) GetResourceSchema() resourceSchema.Schema {
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
+			},
+			RunbookSchemaAttributeNames.Branch: resourceSchema.StringAttribute{
+				Description: "The branch of the runbook to manage. Only applies when runbooks are stored in Git for a config-as-code enabled project.",
+				Optional:    true,
 			},
 		},
 		Blocks: map[string]resourceSchema.Block{
