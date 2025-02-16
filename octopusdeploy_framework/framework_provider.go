@@ -70,6 +70,7 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get root resource", err.Error())
+		config.SystemInfo.OctopusVersion = "Unknown"
 	} else {
 		config.SystemInfo.OctopusVersion = rootResource.Version
 	}
