@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/spaces"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -17,6 +18,7 @@ type Config struct {
 	AccessToken string
 	SpaceID     string
 	Client      *client.Client
+	SystemInfo  *util.SystemInfo
 }
 
 func (c *Config) GetClient(ctx context.Context) error {
