@@ -12,11 +12,13 @@ import (
 )
 
 type Config struct {
-	Address     string
-	ApiKey      string
-	AccessToken string
-	SpaceID     string
-	Client      *client.Client
+	Address          string
+	ApiKey           string
+	AccessToken      string
+	SpaceID          string
+	Client           *client.Client
+	TerraformVersion string
+	OctopusVersion   string
 }
 
 func (c *Config) GetClient(ctx context.Context) error {
