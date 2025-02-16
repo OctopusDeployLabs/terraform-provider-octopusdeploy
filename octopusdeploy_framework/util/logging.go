@@ -49,10 +49,10 @@ func Updated(ctx context.Context, resource string, v ...any) {
 
 // AddDiagnosticError is used to wrap calls to Diagnostics.AddError with additional information about the executable and versions
 func AddDiagnosticError(diagnostics *diag.Diagnostics, systemInfo *SystemInfo, message string, err string) {
-	suffix := "\nPlease ensure these details are included in any error report you raise.\n" +
+	suffix := "\n\nPlease ensure these details are included in any error report you raise.\n" +
 		"Executable: " + systemInfo.GetExecutableName() + "\n" +
 		"Terraform Version: " + systemInfo.TerraformVersion + "\n" +
 		"Octopus Version: " + systemInfo.OctopusVersion
 
-	diagnostics.AddError(message+suffix, err)
+	diagnostics.AddError(message, err+suffix)
 }
