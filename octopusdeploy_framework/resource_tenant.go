@@ -57,7 +57,7 @@ func (r *tenantTypeResource) Create(ctx context.Context, req resource.CreateRequ
 
 	createdTenant, err := tenants.Add(r.Config.Client, tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create tenant", err.Error())
 		return
 	}
 
@@ -80,7 +80,7 @@ func (r *tenantTypeResource) Read(ctx context.Context, req resource.ReadRequest,
 	tenant, err := tenants.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "tenant"); err != nil {
-			resp.Diagnostics.AddError("unable to load tenant", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load tenant", err.Error())
 		}
 		return
 	}
@@ -109,7 +109,7 @@ func (r *tenantTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 	tenant, err := mapStateToTenant(ctx, data)
 	tenant.ID = state.ID.ValueString()
 	if err != nil {
-		resp.Diagnostics.AddError("unable to map to tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to map to tenant", err.Error())
 		return
 	}
 
@@ -118,7 +118,7 @@ func (r *tenantTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 	tenant.ProjectEnvironments = tenantFromApi.ProjectEnvironments
 	updatedTenant, err := tenants.Update(r.Config.Client, tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update tenant", err.Error())
 		return
 	}
 
@@ -141,7 +141,7 @@ func (r *tenantTypeResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 
 	if err := tenants.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete tenant", err.Error())
 		return
 	}
 }

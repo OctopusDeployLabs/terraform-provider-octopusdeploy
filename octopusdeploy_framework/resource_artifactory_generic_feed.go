@@ -56,7 +56,7 @@ func (r *artifactoryGenericFeedTypeResource) Create(ctx context.Context, req res
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, artifactoryGenericFeed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create artifactoryGeneric feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create artifactoryGeneric feed", err.Error())
 		return
 	}
 
@@ -79,7 +79,7 @@ func (r *artifactoryGenericFeedTypeResource) Read(ctx context.Context, req resou
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "artifactory generic feed"); err != nil {
-			resp.Diagnostics.AddError("unable to load artifactoryGeneric feed", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load artifactoryGeneric feed", err.Error())
 		}
 		return
 	}
@@ -105,7 +105,7 @@ func (r *artifactoryGenericFeedTypeResource) Update(ctx context.Context, req res
 	feed, err := createArtifactoryGenericResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load artifactoryGeneric feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load artifactoryGeneric feed", err.Error())
 		return
 	}
 
@@ -114,7 +114,7 @@ func (r *artifactoryGenericFeedTypeResource) Update(ctx context.Context, req res
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update artifactoryGeneric feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update artifactoryGeneric feed", err.Error())
 		return
 	}
 
@@ -134,7 +134,7 @@ func (r *artifactoryGenericFeedTypeResource) Delete(ctx context.Context, req res
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete artifactoryGeneric feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete artifactoryGeneric feed", err.Error())
 		return
 	}
 }

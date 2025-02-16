@@ -47,7 +47,7 @@ func (d *stepTemplateDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	actionTemplate, err := actiontemplates.GetByID(d.Config.Client, query.SpaceID, query.ID)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to load step template", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "Unable to load step template", err.Error())
 		return
 	}
 

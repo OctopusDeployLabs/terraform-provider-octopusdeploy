@@ -186,7 +186,7 @@ func (b *blahResource) Read(ctx context.Context, request resource.ReadRequest, r
     blah,err := blahs.GetByID(b.Client, util.GetSpace(), state.ID.ValueString())
     if err != nil {
         if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "blah"); err != nil {
-			resp.Diagnostics.AddError("unable to load blah", err.Error())
+			util.AddDiagnosticError(resp, f.Config, "unable to load blah", err.Error())
 		}
 		return
     }
@@ -235,7 +235,7 @@ func (b *blahResource) Delete(ctx context.Context, request resource.DeleteReques
 	
 	// delete by id 
 	if err := b.Client.Resource.DeleteById(data.ID.ValueString(); err != nil {
-		resp.Diagnostics.AddError("unable to delete resource", err.Error())
+		util.AddDiagnosticError(resp, f.Config, "unable to delete resource", err.Error())
 		return
 	}
 		
@@ -329,7 +329,7 @@ Returning a specific error
 
 ```golang
 if err := b.Client.Resource.DeleteById(data.ID.ValueString(); err != nil {
-    resp.Diagnostics.AddError("unable to delete resource", err.Error())
+    util.AddDiagnosticError(resp, f.Config, "unable to delete resource", err.Error())
     return
 }
 ```

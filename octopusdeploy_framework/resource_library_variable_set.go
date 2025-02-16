@@ -46,7 +46,7 @@ func (r *libraryVariableSetFeedTypeResource) Create(ctx context.Context, req res
 	newLibraryVariableSet := schemas.MapToLibraryVariableSet(data)
 	libraryVariableSet, err := libraryvariablesets.Add(r.Config.Client, newLibraryVariableSet)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create library variable set", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create library variable set", err.Error())
 		return
 	}
 
@@ -67,7 +67,7 @@ func (r *libraryVariableSetFeedTypeResource) Read(ctx context.Context, req resou
 	libraryVariableSet, err := libraryvariablesets.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "library variable set"); err != nil {
-			resp.Diagnostics.AddError("unable to load library variable set", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load library variable set", err.Error())
 		}
 		return
 	}
@@ -92,7 +92,7 @@ func (r *libraryVariableSetFeedTypeResource) Update(ctx context.Context, req res
 
 	updatedLibraryVariableSet, err := libraryvariablesets.Update(r.Config.Client, libraryVariableSet)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update library variable set", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update library variable set", err.Error())
 		return
 	}
 	schemas.MapFromLibraryVariableSet(data, state.SpaceID.ValueString(), updatedLibraryVariableSet)
@@ -108,7 +108,7 @@ func (r *libraryVariableSetFeedTypeResource) Delete(ctx context.Context, req res
 	}
 
 	if err := libraryvariablesets.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete library variable set", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete library variable set", err.Error())
 		return
 	}
 }

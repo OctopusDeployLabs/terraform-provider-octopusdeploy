@@ -55,7 +55,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Create(ctx context.Context
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, awsElasticContainerRegistryFeed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create aws elastic container registry", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create aws elastic container registry", err.Error())
 		return
 	}
 
@@ -80,7 +80,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Read(ctx context.Context, 
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "aws elastic container registry"); err != nil {
-			resp.Diagnostics.AddError("unable to load aws elastic container registry", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load aws elastic container registry", err.Error())
 		}
 		return
 	}
@@ -105,7 +105,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Update(ctx context.Context
 	feed, err := createAwsElasticContainerRegistryResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load aws elastic container registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load aws elastic container registry feed", err.Error())
 		return
 	}
 
@@ -114,7 +114,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Update(ctx context.Context
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update aws elastic container registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update aws elastic container registry feed", err.Error())
 		return
 	}
 
@@ -134,7 +134,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Delete(ctx context.Context
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete aws elastic container registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete aws elastic container registry feed", err.Error())
 		return
 	}
 }

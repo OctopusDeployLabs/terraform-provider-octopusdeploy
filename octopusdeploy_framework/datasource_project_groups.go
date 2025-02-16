@@ -86,7 +86,7 @@ func (p *projectGroupsDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	existingProjectGroups, err := projectgroups.Get(p.Client, spaceID, query)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load project groups", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, p.Config.SystemInfo, "unable to load project groups", err.Error())
 		return
 	}
 

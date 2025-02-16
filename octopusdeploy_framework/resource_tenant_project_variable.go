@@ -66,30 +66,30 @@ func (t *tenantProjectVariableResource) Create(ctx context.Context, req resource
 
 	tenant, err := tenants.GetByID(t.Client, plan.SpaceID.ValueString(), plan.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant", err.Error())
 		return
 	}
 
 	tenantVariables, err := t.Client.Tenants.GetVariables(tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant variables", err.Error())
 		return
 	}
 
 	isSensitive, err := checkIfVariableIsSensitive(tenantVariables, plan)
 	if err != nil {
-		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error checking if variable is sensitive", err.Error())
 		return
 	}
 
 	if err := updateTenantProjectVariable(tenantVariables, plan, isSensitive); err != nil {
-		resp.Diagnostics.AddError("Error updating tenant project variable", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant project variable", err.Error())
 		return
 	}
 
 	_, err = t.Client.Tenants.UpdateVariables(tenant, tenantVariables)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant variables", err.Error())
 		return
 	}
 
@@ -115,13 +115,13 @@ func (t *tenantProjectVariableResource) Read(ctx context.Context, req resource.R
 
 	tenant, err := tenants.GetByID(t.Client, state.SpaceID.ValueString(), state.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant", err.Error())
 		return
 	}
 
 	tenantVariables, err := t.Client.Tenants.GetVariables(tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant variables", err.Error())
 		return
 	}
 
@@ -132,7 +132,7 @@ func (t *tenantProjectVariableResource) Read(ctx context.Context, req resource.R
 
 	isSensitive, err := checkIfVariableIsSensitive(tenantVariables, state)
 	if err != nil {
-		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error checking if variable is sensitive", err.Error())
 		return
 	}
 
@@ -163,30 +163,30 @@ func (t *tenantProjectVariableResource) Update(ctx context.Context, req resource
 
 	tenant, err := tenants.GetByID(t.Client, plan.SpaceID.ValueString(), plan.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant", err.Error())
 		return
 	}
 
 	tenantVariables, err := t.Client.Tenants.GetVariables(tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant variables", err.Error())
 		return
 	}
 
 	isSensitive, err := checkIfVariableIsSensitive(tenantVariables, plan)
 	if err != nil {
-		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error checking if variable is sensitive", err.Error())
 		return
 	}
 
 	if err := updateTenantProjectVariable(tenantVariables, plan, isSensitive); err != nil {
-		resp.Diagnostics.AddError("Error updating tenant project variable", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant project variable", err.Error())
 		return
 	}
 
 	_, err = t.Client.Tenants.UpdateVariables(tenant, tenantVariables)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant variables", err.Error())
 		return
 	}
 
@@ -205,19 +205,19 @@ func (t *tenantProjectVariableResource) Delete(ctx context.Context, req resource
 
 	tenant, err := tenants.GetByID(t.Client, state.SpaceID.ValueString(), state.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant", err.Error())
 		return
 	}
 
 	tenantVariables, err := t.Client.Tenants.GetVariables(tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant variables", err.Error())
 		return
 	}
 
 	isSensitive, err := checkIfVariableIsSensitive(tenantVariables, state)
 	if err != nil {
-		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error checking if variable is sensitive", err.Error())
 		return
 	}
 
@@ -233,7 +233,7 @@ func (t *tenantProjectVariableResource) Delete(ctx context.Context, req resource
 
 	_, err = t.Client.Tenants.UpdateVariables(tenant, tenantVariables)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant variables", err.Error())
 		return
 	}
 }

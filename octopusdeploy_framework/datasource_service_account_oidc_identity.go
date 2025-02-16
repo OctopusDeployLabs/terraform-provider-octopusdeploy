@@ -39,7 +39,7 @@ func (s *serviceAccountOIDCIdentityDataSource) Read(ctx context.Context, req dat
 
 	oidcIdentity, err := serviceaccounts.GetOIDCIdentityByID(s.Client, data.ServiceAccountID.ValueString(), data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load service account OIDC Identity", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "unable to load service account OIDC Identity", err.Error())
 		return
 	}
 

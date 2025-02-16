@@ -52,7 +52,7 @@ func (r *listeningTentacleWorkerResource) Create(ctx context.Context, req resour
 	client := r.Config.Client
 	createdWorker, err := workers.Add(client, worker)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create listening tentacle worker", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create listening tentacle worker", err.Error())
 		return
 	}
 
@@ -75,7 +75,7 @@ func (r *listeningTentacleWorkerResource) Read(ctx context.Context, req resource
 	worker, err := workers.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "listening tentacle worker"); err != nil {
-			resp.Diagnostics.AddError("unable to load listening tentacle worker", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load listening tentacle worker", err.Error())
 		}
 		return
 	}
@@ -109,7 +109,7 @@ func (r *listeningTentacleWorkerResource) Update(ctx context.Context, req resour
 	client := r.Config.Client
 	updatedWorker, err := workers.Update(client, worker)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update listening tentacle worker", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update listening tentacle worker", err.Error())
 		return
 	}
 
@@ -129,7 +129,7 @@ func (r *listeningTentacleWorkerResource) Delete(ctx context.Context, req resour
 	}
 
 	if err := workers.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete listening tentacle worker", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete listening tentacle worker", err.Error())
 		return
 	}
 }

@@ -50,7 +50,7 @@ func (t *tentacleCertificateResource) Create(ctx context.Context, req resource.C
 	certificate, thumbprint, err := generateCertificate("Octopus Tentacle")
 
 	if err != nil {
-		resp.Diagnostics.AddError("cannot generate tentacle", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "cannot generate tentacle", err.Error())
 		return
 	}
 

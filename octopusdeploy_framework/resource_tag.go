@@ -128,13 +128,13 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 				}
 				return
 			}
-			resp.Diagnostics.AddError("Failed to get source tag set", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Failed to get source tag set", err.Error())
 			return
 		}
 
 		destinationTagSet, err := tagsets.GetByID(t.Client, destinationTagSetSpaceID, destinationTagSetID)
 		if err != nil {
-			resp.Diagnostics.AddError("Failed to get destination tag set", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Failed to get destination tag set", err.Error())
 			return
 		}
 
@@ -155,7 +155,7 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 		isUsed, err := isTagUsedByTenants(ctx, t.Client, sourceTagSetSpaceID, tag)
 		if err != nil {
 			data.ID = types.StringValue("")
-			resp.Diagnostics.AddError("Failed to check if tag is used by tenants", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Failed to check if tag is used by tenants", err.Error())
 			return
 		}
 
@@ -172,7 +172,7 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 			if sourceTagSet.Tags[i].ID == state.ID.ValueString() {
 				sourceTagSet.Tags = slices.Delete(sourceTagSet.Tags, i, i+1)
 				if _, err := tagsets.Update(t.Client, sourceTagSet); err != nil {
-					resp.Diagnostics.AddError("Failed to update source tag set", err.Error())
+					util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Failed to update source tag set", err.Error())
 					return
 				}
 				break
@@ -185,7 +185,7 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 
 		updatedTagSet, err := tagsets.Update(t.Client, destinationTagSet)
 		if err != nil {
-			resp.Diagnostics.AddError("Failed to update destination tag set", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Failed to update destination tag set", err.Error())
 			return
 		}
 
@@ -212,7 +212,7 @@ func (t *tagTypeResource) Update(ctx context.Context, req resource.UpdateRequest
 
 			updatedTagSet, err := tagsets.Update(t.Client, tagSet)
 			if err != nil {
-				resp.Diagnostics.AddError("Failed to update tag set", err.Error())
+				util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Failed to update tag set", err.Error())
 				return
 			}
 
@@ -265,7 +265,7 @@ func (r *tagTypeResource) Delete(ctx context.Context, req resource.DeleteRequest
 	isUsed, err := isTagUsedByTenants(ctx, r.Config.Client, tagSetSpaceID, tag)
 	if err != nil {
 		data.ID = types.StringValue("")
-		resp.Diagnostics.AddError("Failed to check if tag is used by tenants", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to check if tag is used by tenants", err.Error())
 	}
 
 	if isUsed {
@@ -280,7 +280,7 @@ func (r *tagTypeResource) Delete(ctx context.Context, req resource.DeleteRequest
 			tagSet.Tags = slices.Delete(tagSet.Tags, i, i+1)
 
 			if _, err := tagsets.Update(r.Config.Client, tagSet); err != nil {
-				resp.Diagnostics.AddError("Failed to update tag", err.Error())
+				util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to update tag", err.Error())
 				return
 			}
 

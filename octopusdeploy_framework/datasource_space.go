@@ -49,7 +49,7 @@ func (b *spaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	spacesResult, err := spaces.Get(b.Client, query)
 
 	if err != nil {
-		resp.Diagnostics.AddError("unable to query spaces", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, b.Config.SystemInfo, "unable to query spaces", err.Error())
 		return
 	}
 

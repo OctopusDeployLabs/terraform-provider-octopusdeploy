@@ -73,7 +73,7 @@ func (r *environmentTypeResource) Create(ctx context.Context, req resource.Creat
 
 	env, err := environments.Add(r.Config.Client, newEnvironment)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create environment", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create environment", err.Error())
 		return
 	}
 
@@ -91,7 +91,7 @@ func (r *environmentTypeResource) Read(ctx context.Context, req resource.ReadReq
 	environment, err := environments.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "environment"); err != nil {
-			resp.Diagnostics.AddError("unable to load environment", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load environment", err.Error())
 		}
 		return
 	}
@@ -111,7 +111,7 @@ func (r *environmentTypeResource) Update(ctx context.Context, req resource.Updat
 
 	env, err := environments.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load environment", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load environment", err.Error())
 		return
 	}
 
@@ -145,7 +145,7 @@ func (r *environmentTypeResource) Update(ctx context.Context, req resource.Updat
 
 	updatedEnvironment, err := environments.Update(r.Config.Client, updatedEnv)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update environment", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update environment", err.Error())
 		return
 	}
 
@@ -162,7 +162,7 @@ func (r *environmentTypeResource) Delete(ctx context.Context, req resource.Delet
 	}
 
 	if err := environments.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete environment", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete environment", err.Error())
 		return
 	}
 }

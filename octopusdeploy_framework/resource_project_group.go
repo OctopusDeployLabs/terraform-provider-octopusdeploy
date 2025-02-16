@@ -48,7 +48,7 @@ func (r *projectGroupTypeResource) Create(ctx context.Context, req resource.Crea
 
 	group, err := projectgroups.Add(r.Config.Client, &newGroup)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create project group", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create project group", err.Error())
 		return
 	}
 
@@ -66,7 +66,7 @@ func (r *projectGroupTypeResource) Read(ctx context.Context, req resource.ReadRe
 	group, err := projectgroups.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "project group"); err != nil {
-			resp.Diagnostics.AddError("unable to load project group", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load project group", err.Error())
 		}
 		return
 	}
@@ -88,7 +88,7 @@ func (r *projectGroupTypeResource) Update(ctx context.Context, req resource.Upda
 
 	group, err := projectgroups.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load project group", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load project group", err.Error())
 		return
 	}
 
@@ -98,7 +98,7 @@ func (r *projectGroupTypeResource) Update(ctx context.Context, req resource.Upda
 
 	updatedProjectGroup, err := projectgroups.Update(r.Config.Client, *group)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update project group", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update project group", err.Error())
 		return
 	}
 
@@ -115,7 +115,7 @@ func (r *projectGroupTypeResource) Delete(ctx context.Context, req resource.Dele
 	}
 
 	if err := projectgroups.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete project group", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete project group", err.Error())
 		return
 	}
 }

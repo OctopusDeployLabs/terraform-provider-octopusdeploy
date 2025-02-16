@@ -44,7 +44,7 @@ func (r *tagSetResource) Create(ctx context.Context, req resource.CreateRequest,
 	tagSet := expandTagSet(plan)
 	createdTagSet, err := tagsets.Add(r.Client, tagSet)
 	if err != nil {
-		resp.Diagnostics.AddError("Error creating tag set", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error creating tag set", err.Error())
 		return
 	}
 
@@ -62,7 +62,7 @@ func (r *tagSetResource) Read(ctx context.Context, req resource.ReadRequest, res
 	tagSet, err := tagsets.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "tagSetResource"); err != nil {
-			resp.Diagnostics.AddError("unable to load tag set", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load tag set", err.Error())
 		}
 		return
 	}
@@ -81,7 +81,7 @@ func (r *tagSetResource) Update(ctx context.Context, req resource.UpdateRequest,
 	tagSet := expandTagSet(plan)
 	updatedTagSet, err := tagsets.Update(r.Client, tagSet)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating tag set", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating tag set", err.Error())
 		return
 	}
 
@@ -98,7 +98,7 @@ func (r *tagSetResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 	err := tagsets.DeleteByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error deleting tag set", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error deleting tag set", err.Error())
 		return
 	}
 }

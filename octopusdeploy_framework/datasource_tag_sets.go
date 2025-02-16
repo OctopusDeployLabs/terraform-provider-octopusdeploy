@@ -54,7 +54,7 @@ func (t *tagSetsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	existingTagSets, err := tagsets.Get(t.Client, spaceID, query)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to query tag sets", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Unable to query tag sets", err.Error())
 		return
 	}
 

@@ -54,7 +54,7 @@ func (r *ociRegistryFeedTypeResource) Create(ctx context.Context, req resource.C
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, feed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create OCI Registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create OCI Registry feed", err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (r *ociRegistryFeedTypeResource) Read(ctx context.Context, req resource.Rea
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "OCI Registry feed"); err != nil {
-			resp.Diagnostics.AddError("unable to load OCI Registry feed", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load OCI Registry feed", err.Error())
 		}
 		return
 	}
@@ -102,7 +102,7 @@ func (r *ociRegistryFeedTypeResource) Update(ctx context.Context, req resource.U
 	feed, err := createOCIRegistryResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load OCI Registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load OCI Registry feed", err.Error())
 		return
 	}
 
@@ -111,7 +111,7 @@ func (r *ociRegistryFeedTypeResource) Update(ctx context.Context, req resource.U
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update OCI Registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update OCI Registry feed", err.Error())
 		return
 	}
 
@@ -131,7 +131,7 @@ func (r *ociRegistryFeedTypeResource) Delete(ctx context.Context, req resource.D
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete OCI Registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete OCI Registry feed", err.Error())
 		return
 	}
 }

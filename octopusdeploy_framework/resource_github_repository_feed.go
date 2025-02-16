@@ -55,7 +55,7 @@ func (r *githubRepositoryFeedTypeResource) Create(ctx context.Context, req resou
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, githubRepositoryFeed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create github repository feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create github repository feed", err.Error())
 		return
 	}
 
@@ -80,7 +80,7 @@ func (r *githubRepositoryFeedTypeResource) Read(ctx context.Context, req resourc
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "github repository feed"); err != nil {
-			resp.Diagnostics.AddError("unable to load github repository feed", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load github repository feed", err.Error())
 		}
 		return
 	}
@@ -105,7 +105,7 @@ func (r *githubRepositoryFeedTypeResource) Update(ctx context.Context, req resou
 	feed, err := createGitHubRepositoryResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load github repository feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load github repository feed", err.Error())
 		return
 	}
 
@@ -114,7 +114,7 @@ func (r *githubRepositoryFeedTypeResource) Update(ctx context.Context, req resou
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update github repository feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update github repository feed", err.Error())
 		return
 	}
 
@@ -134,7 +134,7 @@ func (r *githubRepositoryFeedTypeResource) Delete(ctx context.Context, req resou
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete github repository feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete github repository feed", err.Error())
 		return
 	}
 }

@@ -62,13 +62,13 @@ func (t *tenantCommonVariableResource) Create(ctx context.Context, req resource.
 
 	tenant, err := tenants.GetByID(t.Client, plan.SpaceID.ValueString(), plan.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant", err.Error())
 		return
 	}
 
 	tenantVariables, err := t.Client.Tenants.GetVariables(tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant variables", err.Error())
 		return
 	}
 
@@ -80,18 +80,18 @@ func (t *tenantCommonVariableResource) Create(ctx context.Context, req resource.
 
 	isSensitive, err := checkIfCommonVariableIsSensitive(tenantVariables, plan)
 	if err != nil {
-		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error checking if variable is sensitive", err.Error())
 		return
 	}
 
 	if err := updateTenantCommonVariable(tenantVariables, plan, isSensitive); err != nil {
-		resp.Diagnostics.AddError("Error updating tenant common variable", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant common variable", err.Error())
 		return
 	}
 
 	_, err = t.Client.Tenants.UpdateVariables(tenant, tenantVariables)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant variables", err.Error())
 		return
 	}
 
@@ -114,19 +114,19 @@ func (t *tenantCommonVariableResource) Read(ctx context.Context, req resource.Re
 
 	tenant, err := tenants.GetByID(t.Client, state.SpaceID.ValueString(), state.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant", err.Error())
 		return
 	}
 
 	tenantVariables, err := t.Client.Tenants.GetVariables(tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant variables", err.Error())
 		return
 	}
 
 	isSensitive, err := checkIfCommonVariableIsSensitive(tenantVariables, state)
 	if err != nil {
-		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error checking if variable is sensitive", err.Error())
 		return
 	}
 
@@ -153,30 +153,30 @@ func (t *tenantCommonVariableResource) Update(ctx context.Context, req resource.
 
 	tenant, err := tenants.GetByID(t.Client, plan.SpaceID.ValueString(), plan.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant", err.Error())
 		return
 	}
 
 	tenantVariables, err := t.Client.Tenants.GetVariables(tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant variables", err.Error())
 		return
 	}
 
 	isSensitive, err := checkIfCommonVariableIsSensitive(tenantVariables, plan)
 	if err != nil {
-		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error checking if variable is sensitive", err.Error())
 		return
 	}
 
 	if err := updateTenantCommonVariable(tenantVariables, plan, isSensitive); err != nil {
-		resp.Diagnostics.AddError("Error updating tenant common variable", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant common variable", err.Error())
 		return
 	}
 
 	_, err = t.Client.Tenants.UpdateVariables(tenant, tenantVariables)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant variables", err.Error())
 		return
 	}
 
@@ -192,19 +192,19 @@ func (t *tenantCommonVariableResource) Delete(ctx context.Context, req resource.
 
 	tenant, err := tenants.GetByID(t.Client, state.SpaceID.ValueString(), state.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant", err.Error())
 		return
 	}
 
 	tenantVariables, err := t.Client.Tenants.GetVariables(tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error retrieving tenant variables", err.Error())
 		return
 	}
 
 	isSensitive, err := checkIfCommonVariableIsSensitive(tenantVariables, state)
 	if err != nil {
-		resp.Diagnostics.AddError("Error checking if variable is sensitive", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error checking if variable is sensitive", err.Error())
 		return
 	}
 
@@ -218,7 +218,7 @@ func (t *tenantCommonVariableResource) Delete(ctx context.Context, req resource.
 
 	_, err = t.Client.Tenants.UpdateVariables(tenant, tenantVariables)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating tenant variables", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "Error updating tenant variables", err.Error())
 		return
 	}
 }

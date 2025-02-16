@@ -51,7 +51,7 @@ func (r *scriptModuleTypeResource) Create(ctx context.Context, req resource.Crea
 
 	createdScriptModule, err := scriptmodules.Add(r.Config.Client, scriptModule)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create script module", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create script module", err.Error())
 		return
 	}
 
@@ -74,7 +74,7 @@ func (r *scriptModuleTypeResource) Read(ctx context.Context, req resource.ReadRe
 	scriptModule, err := scriptmodules.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "Script Module"); err != nil {
-			resp.Diagnostics.AddError("unable to load script module", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load script module", err.Error())
 		}
 		return
 	}
@@ -100,7 +100,7 @@ func (r *scriptModuleTypeResource) Update(ctx context.Context, req resource.Upda
 
 	updatedScriptModule, err := scriptmodules.Update(r.Config.Client, scriptModule)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update script module", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update script module", err.Error())
 		return
 	}
 
@@ -123,7 +123,7 @@ func (r *scriptModuleTypeResource) Delete(ctx context.Context, req resource.Dele
 	}
 
 	if err := scriptmodules.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete script module", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete script module", err.Error())
 		return
 	}
 }

@@ -58,7 +58,10 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 		config.Address = os.Getenv("OCTOPUS_URL")
 	}
 	config.SpaceID = providerData.SpaceID.ValueString()
-	config.TerraformVersion = req.TerraformVersion
+	config.SystemInfo = &util.SystemInfo{
+		TerraformVersion: req.TerraformVersion,
+	}
+
 	if err := config.GetClient(ctx); err != nil {
 		resp.Diagnostics.AddError("failed to load client", err.Error())
 	}
@@ -67,9 +70,9 @@ func (p *octopusDeployFrameworkProvider) Configure(ctx context.Context, req prov
 
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get root resource", err.Error())
+	} else {
+		config.SystemInfo.OctopusVersion = rootResource.Version
 	}
-
-	config.OctopusVersion = rootResource.Version
 
 	resp.DataSourceData = &config
 	resp.ResourceData = &config

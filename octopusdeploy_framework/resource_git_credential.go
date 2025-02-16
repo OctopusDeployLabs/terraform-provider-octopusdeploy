@@ -60,13 +60,13 @@ func (g *gitCredentialResource) Create(ctx context.Context, req resource.CreateR
 	gitCredential := expandGitCredential(&plan)
 	createdResponse, err := credentials.Add(g.Client, gitCredential)
 	if err != nil {
-		resp.Diagnostics.AddError("Error creating Git credential", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, g.Config.SystemInfo, "Error creating Git credential", err.Error())
 		return
 	}
 
 	createdGitCredential, err := credentials.GetByID(g.Client, gitCredential.SpaceID, createdResponse.ID)
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving created Git credential", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, g.Config.SystemInfo, "Error retrieving created Git credential", err.Error())
 		return
 	}
 
@@ -96,7 +96,7 @@ func (g *gitCredentialResource) Read(ctx context.Context, req resource.ReadReque
 	gitCredential, err := credentials.GetByID(g.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "git credential"); err != nil {
-			resp.Diagnostics.AddError("Error reading Git credential", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, g.Config.SystemInfo, "Error reading Git credential", err.Error())
 		}
 		return
 	}
@@ -115,7 +115,7 @@ func (g *gitCredentialResource) Update(ctx context.Context, req resource.UpdateR
 	gitCredential := expandGitCredential(&plan)
 	updatedResource, err := credentials.Update(g.Client, gitCredential)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating Git credential", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, g.Config.SystemInfo, "Error updating Git credential", err.Error())
 		return
 	}
 
@@ -132,7 +132,7 @@ func (g *gitCredentialResource) Delete(ctx context.Context, req resource.DeleteR
 
 	err := credentials.DeleteByID(g.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error deleting Git credential", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, g.Config.SystemInfo, "Error deleting Git credential", err.Error())
 		return
 	}
 }

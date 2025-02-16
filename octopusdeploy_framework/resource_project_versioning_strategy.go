@@ -56,7 +56,7 @@ func (r *projectVersioningStrategyResource) Create(ctx context.Context, req reso
 				resp.State.RemoveResource(ctx)
 			}
 		} else {
-			resp.Diagnostics.AddError("Failed to read associated project", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project", err.Error())
 		}
 		return
 	}
@@ -65,7 +65,7 @@ func (r *projectVersioningStrategyResource) Create(ctx context.Context, req reso
 
 	_, err = projects.Update(r.Client, project)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating associated project", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating associated project", err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (r *projectVersioningStrategyResource) Create(ctx context.Context, req reso
 				resp.State.RemoveResource(ctx)
 			}
 		} else {
-			resp.Diagnostics.AddError("Failed to read associated project", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project", err.Error())
 		}
 		return
 	}
@@ -102,7 +102,7 @@ func (r *projectVersioningStrategyResource) Read(ctx context.Context, req resour
 				resp.State.RemoveResource(ctx)
 			}
 		} else {
-			resp.Diagnostics.AddError("Failed to read associated project", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project", err.Error())
 		}
 		return
 	}
@@ -121,7 +121,7 @@ func (r *projectVersioningStrategyResource) Update(ctx context.Context, req reso
 
 	existingProject, err := projects.GetByID(r.Client, plan.SpaceID.ValueString(), plan.ProjectID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving associated project", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error retrieving associated project", err.Error())
 		return
 	}
 
@@ -130,13 +130,13 @@ func (r *projectVersioningStrategyResource) Update(ctx context.Context, req reso
 
 	_, err = projects.Update(r.Client, existingProject)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating associated project", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating associated project", err.Error())
 		return
 	}
 
 	updatedProject, err := projects.GetByID(r.Client, plan.SpaceID.ValueString(), plan.ProjectID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving associated project", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error retrieving associated project", err.Error())
 		return
 	}
 
@@ -154,14 +154,14 @@ func (r *projectVersioningStrategyResource) Delete(ctx context.Context, req reso
 
 	project, err := projects.GetByID(r.Client, state.SpaceID.ValueString(), state.ProjectID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error retrieving project", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error retrieving project", err.Error())
 		return
 	}
 
 	project.VersioningStrategy = &projects.VersioningStrategy{}
 	_, err = projects.Update(r.Client, project)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating project to remove versioning strategy", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating project to remove versioning strategy", err.Error())
 		return
 	}
 

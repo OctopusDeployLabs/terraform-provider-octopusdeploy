@@ -54,7 +54,7 @@ func (r *azureContainerRegistryFeedTypeResource) Create(ctx context.Context, req
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, dockerContainerRegistryFeed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create Azure Container Registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create Azure Container Registry feed", err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (r *azureContainerRegistryFeedTypeResource) Read(ctx context.Context, req r
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "azure container registry feed"); err != nil {
-			resp.Diagnostics.AddError("unable to load Azure Container Registry feed", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load Azure Container Registry feed", err.Error())
 		}
 		return
 	}
@@ -102,7 +102,7 @@ func (r *azureContainerRegistryFeedTypeResource) Update(ctx context.Context, req
 	feed, err := createDockerContainerRegistryFeedResourceFromAzureData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load Azure Container Registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load Azure Container Registry feed", err.Error())
 		return
 	}
 
@@ -111,7 +111,7 @@ func (r *azureContainerRegistryFeedTypeResource) Update(ctx context.Context, req
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update Azure Container Registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update Azure Container Registry feed", err.Error())
 		return
 	}
 
@@ -131,7 +131,7 @@ func (r *azureContainerRegistryFeedTypeResource) Delete(ctx context.Context, req
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete Azure Container Registry feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete Azure Container Registry feed", err.Error())
 		return
 	}
 }

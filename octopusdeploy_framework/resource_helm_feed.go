@@ -56,7 +56,7 @@ func (r *helmFeedTypeResource) Create(ctx context.Context, req resource.CreateRe
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, helmFeed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create helm feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create helm feed", err.Error())
 		return
 	}
 
@@ -79,7 +79,7 @@ func (r *helmFeedTypeResource) Read(ctx context.Context, req resource.ReadReques
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "helm feed"); err != nil {
-			resp.Diagnostics.AddError("unable to load helm feed", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load helm feed", err.Error())
 		}
 		return
 	}
@@ -105,7 +105,7 @@ func (r *helmFeedTypeResource) Update(ctx context.Context, req resource.UpdateRe
 	feed, err := createHelmResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load helm feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load helm feed", err.Error())
 		return
 	}
 
@@ -114,7 +114,7 @@ func (r *helmFeedTypeResource) Update(ctx context.Context, req resource.UpdateRe
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update helm feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update helm feed", err.Error())
 		return
 	}
 
@@ -134,7 +134,7 @@ func (r *helmFeedTypeResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete helm feed", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete helm feed", err.Error())
 		return
 	}
 }

@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -44,4 +45,14 @@ func Update(ctx context.Context, resource string, v ...any) {
 
 func Updated(ctx context.Context, resource string, v ...any) {
 	tflog.Info(ctx, fmt.Sprintf("updated %s: %#v", resource, v))
+}
+
+// AddDiagnosticError is used to wrap calls to Diagnostics.AddError with additional information about the executable and versions
+func AddDiagnosticError(diagnostics diag.Diagnostics, systemInfo *SystemInfo, message string, err string) {
+	suffix := "\nPlease ensure these details are included in any error report you raise.\n" +
+		"Executable: " + systemInfo.GetExecutableName() + "\n" +
+		"Terraform Version: " + systemInfo.TerraformVersion + "\n" +
+		"Octopus Version: " + systemInfo.OctopusVersion
+
+	diagnostics.AddError(message+suffix, err)
 }

@@ -58,7 +58,7 @@ func (r *stepTemplateTypeResource) Create(ctx context.Context, req resource.Crea
 
 	actionTemplate, err := actiontemplates.Add(r.Config.Client, newActionTemplate)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create step template", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create step template", err.Error())
 		return
 	}
 
@@ -76,7 +76,7 @@ func (r *stepTemplateTypeResource) Read(ctx context.Context, req resource.ReadRe
 	actionTemplate, err := actiontemplates.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "action template"); err != nil {
-			resp.Diagnostics.AddError("unable to load environment", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load environment", err.Error())
 		}
 		return
 	}
@@ -96,7 +96,7 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 
 	at, err := actiontemplates.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load step template", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load step template", err.Error())
 		return
 	}
 
@@ -111,7 +111,7 @@ func (r *stepTemplateTypeResource) Update(ctx context.Context, req resource.Upda
 
 	updatedActionTemplate, err := actiontemplates.Update(r.Config.Client, actionTemplateUpdate)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to update step template", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update step template", err.Error())
 		return
 	}
 
@@ -131,7 +131,7 @@ func (r *stepTemplateTypeResource) Delete(ctx context.Context, req resource.Dele
 	}
 
 	if err := actiontemplates.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		resp.Diagnostics.AddError("unable to delete step template", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete step template", err.Error())
 		return
 	}
 }

@@ -65,7 +65,7 @@ func (e *environmentDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	existingEnvironments, err := environments.Get(e.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load environments", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, e.Config.SystemInfo, "unable to load environments", err.Error())
 		return
 	}
 

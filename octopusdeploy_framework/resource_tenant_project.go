@@ -58,7 +58,7 @@ func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateR
 
 	tenant, err := tenants.GetByID(t.Client, spaceId, plan.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("cannot load tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "cannot load tenant", err.Error())
 		return
 	}
 
@@ -66,7 +66,7 @@ func (t *tenantProjectResource) Create(ctx context.Context, req resource.CreateR
 
 	_, err = tenants.Update(t.Client, tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("cannot update tenant environment", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "cannot update tenant environment", err.Error())
 		return
 	}
 
@@ -93,7 +93,7 @@ func (t *tenantProjectResource) Read(ctx context.Context, req resource.ReadReque
 	tenant, err := tenants.GetByID(t.Client, spaceID, tenantID)
 	if err != nil {
 		if err := internalErrors.ProcessApiErrorV2(ctx, resp, data, err, "tenant"); err != nil {
-			resp.Diagnostics.AddError("unable to load tenant", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "unable to load tenant", err.Error())
 		}
 		return
 	}
@@ -122,7 +122,7 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 
 	tenant, err := tenants.GetByID(t.Client, spaceId, plan.TenantID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("cannot load tenant", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "cannot load tenant", err.Error())
 		return
 	}
 
@@ -130,7 +130,7 @@ func (t *tenantProjectResource) Update(ctx context.Context, req resource.UpdateR
 
 	_, err = tenants.Update(t.Client, tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("cannot update tenant environment", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "cannot update tenant environment", err.Error())
 	}
 
 	plan.ID = types.StringValue(util.BuildCompositeId(spaceId, plan.TenantID.ValueString(), plan.ProjectID.ValueString()))
@@ -170,7 +170,7 @@ func (t *tenantProjectResource) Delete(ctx context.Context, req resource.DeleteR
 				return
 			}
 		} else {
-			resp.Diagnostics.AddError("cannot load tenant", err.Error())
+			util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "cannot load tenant", err.Error())
 			return
 		}
 	}
@@ -178,7 +178,7 @@ func (t *tenantProjectResource) Delete(ctx context.Context, req resource.DeleteR
 	delete(tenant.ProjectEnvironments, data.ProjectID.ValueString())
 	_, err = tenants.Update(t.Client, tenant)
 	if err != nil {
-		resp.Diagnostics.AddError("cannot remove tenant environment", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "cannot remove tenant environment", err.Error())
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("tenant (%s) disconnected from project (%s)", data.TenantID.ValueString(), data.ProjectID.ValueString()))

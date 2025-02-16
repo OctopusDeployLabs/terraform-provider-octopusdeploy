@@ -61,7 +61,7 @@ func (p *machineProxyDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	proxiesData, err := proxies.Get(p.Client, spaceID, query)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to query proxies", err.Error())
+		util.AddDiagnosticError(resp.Diagnostics, p.Config.SystemInfo, "Unable to query proxies", err.Error())
 		return
 	}
 
