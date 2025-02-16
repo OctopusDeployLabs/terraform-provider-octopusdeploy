@@ -51,7 +51,7 @@ func (e *feedsDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	existingFeeds, err := feeds.Get(e.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, e.Config.SystemInfo, "unable to load feeds", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, e.Config.SystemInfo, "unable to load feeds", err.Error())
 		return
 	}
 
@@ -61,7 +61,7 @@ func (e *feedsDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	for _, feed := range existingFeeds.Items {
 		feedResource, err := feeds.ToFeedResource(feed)
 		if err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, e.Config.SystemInfo, "Unable to map to feeds: %s", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, e.Config.SystemInfo, "Unable to map to feeds: %s", err.Error())
 			return
 		}
 

@@ -50,7 +50,7 @@ func (r *usernamePasswordAccountResource) Create(ctx context.Context, req resour
 	account := expandUsernamePasswordAccount(ctx, plan)
 	createdAccount, err := accounts.Add(r.Client, account)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error creating username password account", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error creating username password account", err.Error())
 		return
 	}
 
@@ -68,7 +68,7 @@ func (r *usernamePasswordAccountResource) Read(ctx context.Context, req resource
 	account, err := accounts.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "usernamePasswordAccountResource"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load username password account", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load username password account", err.Error())
 		}
 		return
 	}
@@ -87,7 +87,7 @@ func (r *usernamePasswordAccountResource) Update(ctx context.Context, req resour
 	account := expandUsernamePasswordAccount(ctx, plan)
 	updatedAccount, err := accounts.Update(r.Client, account)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating username password account", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error updating username password account", err.Error())
 		return
 	}
 
@@ -104,7 +104,7 @@ func (r *usernamePasswordAccountResource) Delete(ctx context.Context, req resour
 
 	err := accounts.DeleteByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error deleting username password account", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error deleting username password account", err.Error())
 		return
 	}
 }

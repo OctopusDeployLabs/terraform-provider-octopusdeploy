@@ -71,7 +71,7 @@ func (g *gitCredentialsDataSource) Read(ctx context.Context, req datasource.Read
 
 	existingGitCredentials, err := credentials.Get(g.Client, spaceID, query)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, g.Config.SystemInfo, "Unable to query git credentials", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, g.Config.SystemInfo, "Unable to query git credentials", err.Error())
 		return
 	}
 

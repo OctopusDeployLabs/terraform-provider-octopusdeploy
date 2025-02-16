@@ -56,14 +56,14 @@ func (d *deploymentFreezeProjectResource) Create(ctx context.Context, req resour
 	tflog.Debug(ctx, fmt.Sprintf("adding project (%s) to deployment freeze (%s)", plan.ProjectID.ValueString(), plan.DeploymentFreezeID.ValueString()))
 	freeze, err := deploymentfreezes.GetById(d.Client, plan.DeploymentFreezeID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "cannot load deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "cannot load deployment freeze", err.Error())
 		return
 	}
 	freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()] = util.ExpandStringList(plan.EnvironmentIDs)
 
 	freeze, err = deploymentfreezes.Update(d.Client, freeze)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "error while updating deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "error while updating deployment freeze", err.Error())
 		return
 	}
 
@@ -90,7 +90,7 @@ func (d *deploymentFreezeProjectResource) Read(ctx context.Context, req resource
 	if err != nil {
 		apiError := err.(*core.APIError)
 		if apiError.StatusCode != http.StatusNotFound {
-			util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 			return
 		}
 	}
@@ -121,7 +121,7 @@ func (d *deploymentFreezeProjectResource) Update(ctx context.Context, req resour
 	if err != nil {
 		apiError := err.(*core.APIError)
 		if apiError.StatusCode != http.StatusNotFound {
-			util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 			return
 		}
 	}
@@ -130,7 +130,7 @@ func (d *deploymentFreezeProjectResource) Update(ctx context.Context, req resour
 	freeze.ProjectEnvironmentScope[plan.ProjectID.ValueString()] = util.ExpandStringList(plan.EnvironmentIDs)
 	_, err = deploymentfreezes.Update(d.Client, freeze)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "error while updating deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "error while updating deployment freeze", err.Error())
 		return
 	}
 
@@ -158,7 +158,7 @@ func (d *deploymentFreezeProjectResource) Delete(ctx context.Context, req resour
 	if err != nil {
 		apiError := err.(*core.APIError)
 		if apiError.StatusCode != http.StatusNotFound {
-			util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 			return
 		}
 	}

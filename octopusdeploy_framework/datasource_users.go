@@ -61,7 +61,7 @@ func (u *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	existingUsers, err := users.Get(u.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, u.Config.SystemInfo, "unable to load users", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, u.Config.SystemInfo, "unable to load users", err.Error())
 		return
 	}
 

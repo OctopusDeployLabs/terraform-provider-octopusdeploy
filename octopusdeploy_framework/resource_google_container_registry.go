@@ -54,7 +54,7 @@ func (r *googleContainerRegistryFeedTypeResource) Create(ctx context.Context, re
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, dockerContainerRegistryFeed)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create Google Container Registry feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to create Google Container Registry feed", err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (r *googleContainerRegistryFeedTypeResource) Read(ctx context.Context, req 
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "google container registry feed"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load Google Container Registry feed", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load Google Container Registry feed", err.Error())
 		}
 		return
 	}
@@ -102,7 +102,7 @@ func (r *googleContainerRegistryFeedTypeResource) Update(ctx context.Context, re
 	feed, err := createDockerContainerRegistryFeedResourceFromGoogleData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load Google Container Registry feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load Google Container Registry feed", err.Error())
 		return
 	}
 
@@ -111,7 +111,7 @@ func (r *googleContainerRegistryFeedTypeResource) Update(ctx context.Context, re
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update Google Container Registry feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to update Google Container Registry feed", err.Error())
 		return
 	}
 
@@ -131,7 +131,7 @@ func (r *googleContainerRegistryFeedTypeResource) Delete(ctx context.Context, re
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete Google Container Registry feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete Google Container Registry feed", err.Error())
 		return
 	}
 }

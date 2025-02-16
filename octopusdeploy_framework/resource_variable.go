@@ -67,7 +67,7 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 
 	variableOwnerId, err := getVariableOwnerID(&data)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "invalid resource configuration", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "invalid resource configuration", err.Error())
 		return
 	}
 
@@ -92,13 +92,13 @@ func (r *variableTypeResource) Create(ctx context.Context, req resource.CreateRe
 
 	variableSet, err := variables.AddSingle(r.Config.Client, data.SpaceID.ValueString(), variableOwnerId.ValueString(), newVariable)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "create variable failed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "create variable failed", err.Error())
 		return
 	}
 
 	err = validateVariable(&variableSet, newVariable, variableOwnerId.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "create variable failed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "create variable failed", err.Error())
 		return
 	}
 
@@ -120,7 +120,7 @@ func (r *variableTypeResource) Read(ctx context.Context, req resource.ReadReques
 
 	variableOwnerID, err := getVariableOwnerID(&data)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "invalid resource configuration", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "invalid resource configuration", err.Error())
 		return
 	}
 
@@ -163,7 +163,7 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 
 	variableOwnerId, err := getVariableOwnerID(&plan)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "invalid resource configuration", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "invalid resource configuration", err.Error())
 		return
 	}
 
@@ -188,13 +188,13 @@ func (r *variableTypeResource) Update(ctx context.Context, req resource.UpdateRe
 
 	variableSet, err := variables.UpdateSingle(r.Config.Client, plan.SpaceID.ValueString(), variableOwnerId.ValueString(), updatedVariable)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "update variable failed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "update variable failed", err.Error())
 		return
 	}
 
 	err = validateVariable(&variableSet, updatedVariable, variableOwnerId.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "update variable failed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "update variable failed", err.Error())
 		return
 	}
 
@@ -218,12 +218,12 @@ func (r *variableTypeResource) Delete(ctx context.Context, req resource.DeleteRe
 	tflog.Info(ctx, fmt.Sprintf("deleting variable (%s)", data.ID.ValueString()))
 	variableOwnerID, err := getVariableOwnerID(&data)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "invalid resource configuration", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "invalid resource configuration", err.Error())
 		return
 	}
 
 	if _, err := variables.DeleteSingle(r.Config.Client, data.SpaceID.ValueString(), variableOwnerID.ValueString(), data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete variable", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete variable", err.Error())
 		return
 	}
 

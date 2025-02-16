@@ -55,7 +55,7 @@ func (b *tenantsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	existingTenants, err := tenants.Get(b.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, b.Config.SystemInfo, "unable to load tenants", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, b.Config.SystemInfo, "unable to load tenants", err.Error())
 		return
 	}
 

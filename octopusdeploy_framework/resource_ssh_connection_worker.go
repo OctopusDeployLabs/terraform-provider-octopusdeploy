@@ -50,7 +50,7 @@ func (r *sshConnectionWorkerResource) Create(ctx context.Context, req resource.C
 	client := r.Config.Client
 	createdWorker, err := workers.Add(client, worker)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create SSH connection worker", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to create SSH connection worker", err.Error())
 		return
 	}
 
@@ -73,7 +73,7 @@ func (r *sshConnectionWorkerResource) Read(ctx context.Context, req resource.Rea
 	worker, err := workers.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "SSH connection worker"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load SSH connection worker", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load SSH connection worker", err.Error())
 		}
 		return
 	}
@@ -107,7 +107,7 @@ func (r *sshConnectionWorkerResource) Update(ctx context.Context, req resource.U
 	client := r.Config.Client
 	updatedWorker, err := workers.Update(client, worker)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update SSH connection worker", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to update SSH connection worker", err.Error())
 		return
 	}
 
@@ -127,7 +127,7 @@ func (r *sshConnectionWorkerResource) Delete(ctx context.Context, req resource.D
 	}
 
 	if err := workers.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete SSH connection worker", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete SSH connection worker", err.Error())
 		return
 	}
 }

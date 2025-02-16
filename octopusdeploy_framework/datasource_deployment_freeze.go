@@ -71,7 +71,7 @@ func (d *deploymentFreezeDataSource) Read(ctx context.Context, req datasource.Re
 
 	existingFreezes, err := deploymentfreezes.Get(d.Client, query)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freezes", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freezes", err.Error())
 		return
 	}
 

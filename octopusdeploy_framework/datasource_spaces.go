@@ -58,7 +58,7 @@ func (b *spacesDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	existingSpaces, err := spaces.Get(b.Client, query)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, b.Config.SystemInfo, "unable to load spaces", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, b.Config.SystemInfo, "unable to load spaces", err.Error())
 		return
 	}
 

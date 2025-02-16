@@ -55,7 +55,7 @@ func (r *mavenFeedTypeResource) Create(ctx context.Context, req resource.CreateR
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, mavenFeed)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create maven feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to create maven feed", err.Error())
 		return
 	}
 
@@ -78,7 +78,7 @@ func (r *mavenFeedTypeResource) Read(ctx context.Context, req resource.ReadReque
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "maven feed"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load maven feed", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load maven feed", err.Error())
 		}
 		return
 	}
@@ -103,7 +103,7 @@ func (r *mavenFeedTypeResource) Update(ctx context.Context, req resource.UpdateR
 	feed, err := createMavenResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load maven feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load maven feed", err.Error())
 		return
 	}
 
@@ -112,7 +112,7 @@ func (r *mavenFeedTypeResource) Update(ctx context.Context, req resource.UpdateR
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update maven feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to update maven feed", err.Error())
 		return
 	}
 
@@ -132,7 +132,7 @@ func (r *mavenFeedTypeResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete maven feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete maven feed", err.Error())
 		return
 	}
 }

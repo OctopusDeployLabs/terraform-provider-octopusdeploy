@@ -54,7 +54,7 @@ func (r *userTypeResource) Create(ctx context.Context, req resource.CreateReques
 
 	user, err := users.Add(r.Config.Client, newUser)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Unable to create user", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Unable to create user", err.Error())
 		return
 	}
 
@@ -78,7 +78,7 @@ func (r *userTypeResource) Read(ctx context.Context, req resource.ReadRequest, r
 	user, err := users.GetByID(r.Config.Client, data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "user"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load user", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load user", err.Error())
 		}
 		return
 	}
@@ -98,7 +98,7 @@ func (r *userTypeResource) Update(ctx context.Context, req resource.UpdateReques
 
 	user, err := users.GetByID(r.Config.Client, data.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load user", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load user", err.Error())
 		return
 	}
 
@@ -115,7 +115,7 @@ func (r *userTypeResource) Update(ctx context.Context, req resource.UpdateReques
 
 	updatedUser, err = users.Update(r.Config.Client, updatedUser)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update user", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to update user", err.Error())
 		return
 	}
 
@@ -131,7 +131,7 @@ func (r *userTypeResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 
 	if err := users.DeleteByID(r.Config.Client, data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete user", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete user", err.Error())
 		return
 	}
 }

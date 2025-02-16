@@ -60,7 +60,7 @@ func (r *gitTriggerResource) Create(ctx context.Context, req resource.CreateRequ
 	project, err := projects.GetByID(client, data.SpaceId.ValueString(), data.ProjectId.ValueString())
 
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "error finding project", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "error finding project", err.Error())
 		return
 	}
 
@@ -71,7 +71,7 @@ func (r *gitTriggerResource) Create(ctx context.Context, req resource.CreateRequ
 	createdGitTrigger, err := client.ProjectTriggers.Add(projectTrigger)
 
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create Git trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to create Git trigger", err.Error())
 		return
 	}
 
@@ -100,7 +100,7 @@ func (r *gitTriggerResource) Read(ctx context.Context, req resource.ReadRequest,
 	gitTrigger, err := client.ProjectTriggers.GetByID(data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "error retrieving Git Trigger"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load Git Trigger", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load Git Trigger", err.Error())
 		}
 		return
 	}
@@ -129,7 +129,7 @@ func (r *gitTriggerResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	gitTrigger, err := client.ProjectTriggers.GetByID(data.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load Git Trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load Git Trigger", err.Error())
 		return
 	}
 
@@ -139,7 +139,7 @@ func (r *gitTriggerResource) Update(ctx context.Context, req resource.UpdateRequ
 	project, err := projects.GetByID(client, data.SpaceId.ValueString(), data.ProjectId.ValueString())
 
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "error finding project", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "error finding project", err.Error())
 		return
 	}
 
@@ -163,7 +163,7 @@ func (r *gitTriggerResource) Delete(ctx context.Context, req resource.DeleteRequ
 	client := r.Config.Client
 
 	if err := client.ProjectTriggers.DeleteByID(data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete Git Trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete Git Trigger", err.Error())
 		return
 	}
 }

@@ -52,7 +52,7 @@ func (t *tenantProjectsDataSource) Read(ctx context.Context, req datasource.Read
 
 	tenantData, err := getTenantData(t.Client, tenantIDs, projectIDs, spaceID)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, t.Config.SystemInfo, "unable to load tenant data", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, t.Config.SystemInfo, "unable to load tenant data", err.Error())
 		return
 	}
 

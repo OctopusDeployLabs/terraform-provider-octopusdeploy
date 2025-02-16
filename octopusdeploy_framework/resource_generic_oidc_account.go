@@ -49,7 +49,7 @@ func (r *genericOidcAccountResource) Create(ctx context.Context, req resource.Cr
 	account := expandGenericOidcAccountResource(ctx, plan)
 	createdAccount, err := accounts.Add(r.Client, account)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error creating generic oidc account", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error creating generic oidc account", err.Error())
 		return
 	}
 
@@ -67,7 +67,7 @@ func (r *genericOidcAccountResource) Read(ctx context.Context, req resource.Read
 	account, err := accounts.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "genericOidcAccountResource"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load generic oidc account", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load generic oidc account", err.Error())
 		}
 		return
 	}
@@ -86,7 +86,7 @@ func (r *genericOidcAccountResource) Update(ctx context.Context, req resource.Up
 	account := expandGenericOidcAccountResource(ctx, plan)
 	updatedAccount, err := accounts.Update(r.Client, account)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating generic oidc account", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error updating generic oidc account", err.Error())
 		return
 	}
 
@@ -103,7 +103,7 @@ func (r *genericOidcAccountResource) Delete(ctx context.Context, req resource.De
 
 	err := accounts.DeleteByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error deleting generic oidc account", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error deleting generic oidc account", err.Error())
 		return
 	}
 }

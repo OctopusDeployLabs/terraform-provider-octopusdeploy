@@ -43,7 +43,7 @@ func (r *machineProxyResource) Create(ctx context.Context, req resource.CreateRe
 	machineProxy := mapMachineProxyModelToRequest(&plan)
 	createdProxy, err := proxies.Add(r.Client, machineProxy)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error creating machine proxy", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error creating machine proxy", err.Error())
 		return
 	}
 
@@ -64,7 +64,7 @@ func (r *machineProxyResource) Read(ctx context.Context, req resource.ReadReques
 	machineProxy, err := proxies.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "machine proxy"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error reading machine proxy", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error reading machine proxy", err.Error())
 		}
 		return
 	}
@@ -83,7 +83,7 @@ func (r *machineProxyResource) Update(ctx context.Context, req resource.UpdateRe
 
 	existingProxy, err := proxies.GetByID(r.Client, plan.SpaceID.ValueString(), plan.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error retrieving machine proxy", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error retrieving machine proxy", err.Error())
 		return
 	}
 
@@ -93,7 +93,7 @@ func (r *machineProxyResource) Update(ctx context.Context, req resource.UpdateRe
 
 	updatedProxy, err = proxies.Update(r.Client, updatedProxy)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating machine proxy", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error updating machine proxy", err.Error())
 		return
 	}
 
@@ -112,7 +112,7 @@ func (r *machineProxyResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	err := proxies.DeleteByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error deleting machine proxy", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error deleting machine proxy", err.Error())
 		return
 	}
 

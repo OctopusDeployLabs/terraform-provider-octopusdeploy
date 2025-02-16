@@ -47,7 +47,7 @@ func (r *builtInTriggerResource) Create(ctx context.Context, req resource.Create
 	projectId := data.ProjectID.ValueString()
 	project, err := projects.GetByID(r.Client, data.SpaceID.ValueString(), projectId)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
 		return
 	}
 	releaseStrategy := mapStateToReleaseCreationStrategy(&data)
@@ -56,14 +56,14 @@ func (r *builtInTriggerResource) Create(ctx context.Context, req resource.Create
 
 	_, err = projects.Update(r.Client, project)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating associated project for built-in trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error updating associated project for built-in trigger", err.Error())
 		return
 	}
 
 	// Reload project in case different values were computed for release strategy
 	updatedProject, err := projects.GetByID(r.Client, data.SpaceID.ValueString(), projectId)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
 		return
 	}
 
@@ -82,7 +82,7 @@ func (r *builtInTriggerResource) Read(ctx context.Context, req resource.ReadRequ
 	projectId := state.ProjectID.ValueString()
 	project, err := projects.GetByID(r.Client, state.SpaceID.ValueString(), projectId)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
 		return
 	}
 
@@ -102,7 +102,7 @@ func (r *builtInTriggerResource) Update(ctx context.Context, req resource.Update
 	projectId := data.ProjectID.ValueString()
 	existingProject, err := projects.GetByID(r.Client, data.SpaceID.ValueString(), projectId)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
 		return
 	}
 
@@ -112,13 +112,13 @@ func (r *builtInTriggerResource) Update(ctx context.Context, req resource.Update
 
 	_, err = projects.Update(r.Client, existingProject)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating associated project for built-in trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error updating associated project for built-in trigger", err.Error())
 		return
 	}
 
 	updatedProject, err := projects.GetByID(r.Client, data.SpaceID.ValueString(), projectId)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
 		return
 	}
 
@@ -137,7 +137,7 @@ func (r *builtInTriggerResource) Delete(ctx context.Context, req resource.Delete
 	projectId := state.ProjectID.ValueString()
 	project, err := projects.GetByID(r.Client, state.SpaceID.ValueString(), projectId)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Failed to read associated project for built-in trigger", err.Error())
 		return
 	}
 
@@ -146,7 +146,7 @@ func (r *builtInTriggerResource) Delete(ctx context.Context, req resource.Delete
 
 	_, err = projects.Update(r.Client, project)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating project to remove release creation strategy(built-in trigger)", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error updating project to remove release creation strategy(built-in trigger)", err.Error())
 		return
 	}
 

@@ -81,7 +81,7 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 	deploymentFreeze, err := deploymentfreezes.GetById(f.Config.Client, state.GetID())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "deployment freeze"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, f.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, f.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 		}
 		return
 	}
@@ -114,7 +114,7 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 
 	createdFreeze, err := deploymentfreezes.Add(f.Config.Client, deploymentFreeze)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, f.Config.SystemInfo, "error while creating deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, f.Config.SystemInfo, "error while creating deployment freeze", err.Error())
 		return
 	}
 
@@ -137,7 +137,7 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 
 	existingFreeze, err := deploymentfreezes.GetById(f.Config.Client, plan.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, f.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, f.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 		return
 	}
 
@@ -156,7 +156,7 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 
 	updatedFreeze, err = deploymentfreezes.Update(f.Config.Client, updatedFreeze)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, f.Config.SystemInfo, "error while updating deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, f.Config.SystemInfo, "error while updating deployment freeze", err.Error())
 		return
 	}
 
@@ -181,13 +181,13 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 
 	freeze, err := deploymentfreezes.GetById(f.Config.Client, state.GetID())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, f.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, f.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 		return
 	}
 
 	err = deploymentfreezes.Delete(f.Config.Client, freeze)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, f.Config.SystemInfo, "unable to delete deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, f.Config.SystemInfo, "unable to delete deployment freeze", err.Error())
 	}
 
 	resp.State.RemoveResource(ctx)

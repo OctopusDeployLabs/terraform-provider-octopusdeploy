@@ -54,7 +54,7 @@ func (e *workersDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	existingWorkers, err := workers.Get(e.Client, data.SpaceID.ValueString(), query)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, e.Config.SystemInfo, "unable to load workers", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, e.Config.SystemInfo, "unable to load workers", err.Error())
 		return
 	}
 

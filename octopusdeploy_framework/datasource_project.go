@@ -77,7 +77,7 @@ func (p *projectsDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	existingProjects, err := projects.Get(p.Client, spaceID, query)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, p.Config.SystemInfo, "Unable to query projects", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, p.Config.SystemInfo, "Unable to query projects", err.Error())
 		return
 	}
 

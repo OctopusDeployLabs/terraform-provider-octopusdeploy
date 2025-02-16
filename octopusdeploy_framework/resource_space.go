@@ -74,7 +74,7 @@ func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	createdSpace, err := s.Client.Spaces.Add(newSpace)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "unable to create new space", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "unable to create new space", err.Error())
 		return
 	}
 
@@ -88,7 +88,7 @@ func (s *spaceResource) Create(ctx context.Context, req resource.CreateRequest, 
 		createdSpace.TaskQueueStopped = true
 		_, err = spaces.Update(s.Client, createdSpace)
 		if err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "Error updating space task queue", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "Error updating space task queue", err.Error())
 		}
 		createdSpace, _ = spaces.GetByID(s.Client, createdSpace.ID)
 		tflog.Debug(ctx, fmt.Sprintf("resulting space after setting task queue stopped %#v", createdSpace))
@@ -127,7 +127,7 @@ func (s *spaceResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "space"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "unable to query spaces", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "unable to query spaces", err.Error())
 		}
 		return
 	}
@@ -161,7 +161,7 @@ func (s *spaceResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	// get existing resource from api
 	spaceResult, err := spaces.GetByID(s.Client, state.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "unable to query spaces", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "unable to query spaces", err.Error())
 		return
 	}
 
@@ -190,7 +190,7 @@ func (s *spaceResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	tflog.Debug(ctx, fmt.Sprintf("update: spaceResult before update: %#v", spaceResult))
 	_, err = spaces.Update(s.Client, spaceResult)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "unable to update space", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "unable to update space", err.Error())
 		return
 	}
 
@@ -233,19 +233,19 @@ func (s *spaceResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 
 	space, err := spaces.GetByID(s.Client, data.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "unable to read space", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "unable to read space", err.Error())
 	}
 
 	space.TaskQueueStopped = true
 
 	_, err = spaces.Update(s.Client, space)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "unable to stop task queue", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "unable to stop task queue", err.Error())
 		return
 	}
 
 	if err := s.Client.Spaces.DeleteByID(data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "unable to delete space", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "unable to delete space", err.Error())
 		return
 	}
 

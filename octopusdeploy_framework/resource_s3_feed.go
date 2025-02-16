@@ -54,7 +54,7 @@ func (r *s3FeedTypeResource) Create(ctx context.Context, req resource.CreateRequ
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, feed)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create S3 feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to create S3 feed", err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (r *s3FeedTypeResource) Read(ctx context.Context, req resource.ReadRequest,
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "S3 feed"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load S3 feed", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load S3 feed", err.Error())
 		}
 		return
 	}
@@ -102,7 +102,7 @@ func (r *s3FeedTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 	feed, err := createS3ResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load S3 feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load S3 feed", err.Error())
 		return
 	}
 
@@ -111,7 +111,7 @@ func (r *s3FeedTypeResource) Update(ctx context.Context, req resource.UpdateRequ
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update S3 feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to update S3 feed", err.Error())
 		return
 	}
 
@@ -131,7 +131,7 @@ func (r *s3FeedTypeResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete S3 feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete S3 feed", err.Error())
 		return
 	}
 }

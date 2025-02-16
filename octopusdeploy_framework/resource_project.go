@@ -48,14 +48,14 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	persistenceSettings := project.PersistenceSettings
 	createdProject, err := projects.Add(r.Client, project)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error creating project", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error creating project", err.Error())
 		return
 	}
 
 	if persistenceSettings != nil && persistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
 		_, err := projects.ConvertToVCS(r.Client, createdProject, "Converting project to use VCS", "", persistenceSettings.(projects.GitPersistenceSettings))
 		if err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error converting project to VCS", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error converting project to VCS", err.Error())
 			_ = projects.DeleteByID(r.Client, plan.SpaceID.ValueString(), createdProject.GetID())
 			return
 		}
@@ -95,7 +95,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	project, err := projects.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "project"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error reading project", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error reading project", err.Error())
 		}
 		return
 	}
@@ -127,7 +127,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	existingProject, err := projects.GetByID(r.Client, plan.SpaceID.ValueString(), plan.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error retrieving project", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error retrieving project", err.Error())
 		return
 	}
 
@@ -141,7 +141,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		if existingProject.PersistenceSettings == nil || existingProject.PersistenceSettings.Type() != projects.PersistenceSettingsTypeVersionControlled {
 			vcsProject, err := projects.ConvertToVCS(r.Client, existingProject, "Converting project to use VCS", "", updatedProject.PersistenceSettings.(projects.GitPersistenceSettings))
 			if err != nil {
-				util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error converting project to VCS", err.Error())
+				util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error converting project to VCS", err.Error())
 				return
 			}
 			updatedProject.PersistenceSettings = vcsProject.PersistenceSettings
@@ -150,7 +150,7 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	updatedProject, err = projects.Update(r.Client, updatedProject)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error updating project", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error updating project", err.Error())
 		return
 	}
 
@@ -183,7 +183,7 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	err := projects.DeleteByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "Error deleting project", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "Error deleting project", err.Error())
 		return
 	}
 

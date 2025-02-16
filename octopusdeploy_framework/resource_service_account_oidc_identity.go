@@ -40,12 +40,12 @@ func (s *ServiceAccountOIDCIdentity) Create(ctx context.Context, req resource.Cr
 	identityRequest := mapServiceAccountOIDCModelToRequest(&plan)
 	identityCreateResponse, err := serviceaccounts.AddOIDCIdentity(s.Client, identityRequest)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "Error creating OIDC identity", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "Error creating OIDC identity", err.Error())
 		return
 	}
 	identityResponse, err := serviceaccounts.GetOIDCIdentityByID(s.Client, identityRequest.ServiceAccountID, identityCreateResponse.ID)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "Error creating OIDC identity", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "Error creating OIDC identity", err.Error())
 		return
 	}
 
@@ -63,7 +63,7 @@ func (s *ServiceAccountOIDCIdentity) Read(ctx context.Context, req resource.Read
 	identityResponse, err := serviceaccounts.GetOIDCIdentityByID(s.Client, state.ServiceAccountID.ValueString(), state.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "service account OIDC identity"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "Error reading service account OIDC identity", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "Error reading service account OIDC identity", err.Error())
 		}
 		return
 	}
@@ -83,12 +83,12 @@ func (s *ServiceAccountOIDCIdentity) Update(ctx context.Context, req resource.Up
 
 	err := serviceaccounts.UpdateOIDCIdentity(s.Client, identityRequest)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "Error updating service account OIDC identity", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "Error updating service account OIDC identity", err.Error())
 		return
 	}
 	identityResponse, err := serviceaccounts.GetOIDCIdentityByID(s.Client, identityRequest.ServiceAccountID, identityRequest.ID)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "Error creating OIDC identity", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "Error creating OIDC identity", err.Error())
 		return
 	}
 
@@ -105,7 +105,7 @@ func (s *ServiceAccountOIDCIdentity) Delete(ctx context.Context, req resource.De
 
 	err := serviceaccounts.DeleteOIDCIdentityByID(s.Client, state.ServiceAccountID.ValueString(), state.ID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, s.Config.SystemInfo, "Error deleting service account OIDC identity", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, s.Config.SystemInfo, "Error deleting service account OIDC identity", err.Error())
 		return
 	}
 }

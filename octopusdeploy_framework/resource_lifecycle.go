@@ -70,7 +70,7 @@ func (r *lifecycleTypeResource) Create(ctx context.Context, req resource.CreateR
 	newLifecycle := expandLifecycle(data)
 	lifecycle, err := lifecycles.Add(r.Config.Client, newLifecycle)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create lifecycle", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to create lifecycle", err.Error())
 		return
 	}
 	data = flattenLifecycleResource(lifecycle)
@@ -92,7 +92,7 @@ func (r *lifecycleTypeResource) Read(ctx context.Context, req resource.ReadReque
 	lifecycle, err := lifecycles.GetByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "lifecycle"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load lifecycle", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load lifecycle", err.Error())
 		}
 		return
 	}
@@ -121,7 +121,7 @@ func (r *lifecycleTypeResource) Update(ctx context.Context, req resource.UpdateR
 
 	updatedLifecycle, err := lifecycles.Update(r.Config.Client, lifecycle)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update lifecycle", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to update lifecycle", err.Error())
 		return
 	}
 
@@ -166,7 +166,7 @@ func (r *lifecycleTypeResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	if err := lifecycles.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete lifecycle", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete lifecycle", err.Error())
 		return
 	}
 }

@@ -55,7 +55,7 @@ func (d *deploymentFreezeTenantResource) Create(ctx context.Context, req resourc
 	tflog.Debug(ctx, fmt.Sprintf("adding tenant (%s) to deployment freeze (%s)", plan.TenantID.ValueString(), plan.DeploymentFreezeID.ValueString()))
 	freeze, err := deploymentfreezes.GetById(d.Client, plan.DeploymentFreezeID.ValueString())
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "cannot load deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "cannot load deployment freeze", err.Error())
 		return
 	}
 
@@ -73,7 +73,7 @@ func (d *deploymentFreezeTenantResource) Create(ctx context.Context, req resourc
 
 	freeze, err = deploymentfreezes.Update(d.Client, freeze)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "error while updating deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "error while updating deployment freeze", err.Error())
 		return
 	}
 
@@ -105,7 +105,7 @@ func (d *deploymentFreezeTenantResource) Read(ctx context.Context, req resource.
 	if err != nil {
 		apiError, ok := err.(*core.APIError)
 		if !ok {
-			util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 			return
 		}
 
@@ -152,7 +152,7 @@ func (d *deploymentFreezeTenantResource) Update(ctx context.Context, req resourc
 	if err != nil {
 		apiError := err.(*core.APIError)
 		if apiError.StatusCode != http.StatusNotFound {
-			util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 			return
 		}
 	}
@@ -181,7 +181,7 @@ func (d *deploymentFreezeTenantResource) Update(ctx context.Context, req resourc
 
 	freeze, err = deploymentfreezes.Update(d.Client, freeze)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "error while updating deployment freeze", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "error while updating deployment freeze", err.Error())
 		return
 	}
 
@@ -207,7 +207,7 @@ func (d *deploymentFreezeTenantResource) Delete(ctx context.Context, req resourc
 	if err != nil {
 		apiError := err.(*core.APIError)
 		if apiError.StatusCode != http.StatusNotFound {
-			util.AddDiagnosticError(resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, d.Config.SystemInfo, "unable to load deployment freeze", err.Error())
 			return
 		}
 	}

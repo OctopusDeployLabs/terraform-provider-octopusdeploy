@@ -55,7 +55,7 @@ func (r *nugetFeedTypeResource) Create(ctx context.Context, req resource.CreateR
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, nugetFeed)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to create nuget feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to create nuget feed", err.Error())
 		return
 	}
 
@@ -80,7 +80,7 @@ func (r *nugetFeedTypeResource) Read(ctx context.Context, req resource.ReadReque
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, data, err, "nuget feed"); err != nil {
-			util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load nuget feed", err.Error())
+			util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load nuget feed", err.Error())
 		}
 		return
 	}
@@ -105,7 +105,7 @@ func (r *nugetFeedTypeResource) Update(ctx context.Context, req resource.UpdateR
 	feed, err := createNugetResourceFromData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to load nuget feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to load nuget feed", err.Error())
 		return
 	}
 
@@ -114,7 +114,7 @@ func (r *nugetFeedTypeResource) Update(ctx context.Context, req resource.UpdateR
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to update nuget feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to update nuget feed", err.Error())
 		return
 	}
 
@@ -134,7 +134,7 @@ func (r *nugetFeedTypeResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 
 	if err := feeds.DeleteByID(r.Config.Client, data.SpaceID.ValueString(), data.ID.ValueString()); err != nil {
-		util.AddDiagnosticError(resp.Diagnostics, r.Config.SystemInfo, "unable to delete nuget feed", err.Error())
+		util.AddDiagnosticError(&resp.Diagnostics, r.Config.SystemInfo, "unable to delete nuget feed", err.Error())
 		return
 	}
 }
