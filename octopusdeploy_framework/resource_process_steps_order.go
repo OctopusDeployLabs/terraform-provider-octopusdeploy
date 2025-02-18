@@ -83,7 +83,7 @@ func (r *processStepsOrderResource) ModifyPlan(ctx context.Context, req resource
 	}
 
 	if len(missingSteps) > 0 {
-		message := fmt.Sprintf("Following steps were not included in the steps order: %v", missingSteps)
+		message := fmt.Sprintf("The following steps were not included in the steps order and will be added at the end.\nNote that their order at the end is not guaranteed:\n%v", missingSteps)
 		resp.Diagnostics.AddWarning(
 			"Some process steps were not included in the order",
 			message,
@@ -274,7 +274,7 @@ func mapProcessStepsOrderFromState(state *schemas.ProcessStepsOrderResourceModel
 	}
 
 	if len(missingSteps) > 0 {
-		message := fmt.Sprintf("The following steps were not included in the steps order and will be added at the end. However, their order at the end is not guaranteed: %v", missingSteps)
+		message := fmt.Sprintf("The following steps were not included in the steps order and will be added at the end.\nNote that their order at the end is not guaranteed:\n%v", missingSteps)
 		diags.AddWarning(
 			"Some process steps were not included in the order",
 			message,
@@ -296,9 +296,11 @@ func mapProcessStepsOrderToState(process *deployments.DeploymentProcess, state *
 	state.ProcessID = types.StringValue(process.GetID())
 
 	orderedSteps := len(state.Steps.Elements())
-	var steps = make([]attr.Value, orderedSteps)
-	for i, step := range process.Steps[:orderedSteps] {
-		steps[i] = types.StringValue(step.GetID())
+	var steps []attr.Value
+	for _, step := range process.Steps[:orderedSteps] {
+		if step != nil {
+			steps = append(steps, types.StringValue(step.GetID()))
+		}
 	}
 	state.Steps, _ = types.ListValue(types.StringType, steps)
 }

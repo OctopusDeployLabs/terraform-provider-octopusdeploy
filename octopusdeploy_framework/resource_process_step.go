@@ -6,16 +6,13 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"strconv"
-	"strings"
-
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ resource.Resource = &processStepResource{}
@@ -64,9 +61,9 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 
 	step := deployments.NewDeploymentStep(data.Name.ValueString())
 
-	diagnostics := mapProcessStepFromState(ctx, data, step)
-	if diagnostics.HasError() {
-		resp.Diagnostics.Append(diagnostics...)
+	fromStateDiagnostics := mapProcessStepFromState(ctx, data, step)
+	resp.Diagnostics.Append(fromStateDiagnostics...)
+	if fromStateDiagnostics.HasError() {
 		return
 	}
 
@@ -84,7 +81,11 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	mapProcessStepToState(updatedProcess, createdStep, data)
+	toStateDiagnostics := mapProcessStepToState(updatedProcess, createdStep, data)
+	resp.Diagnostics.Append(toStateDiagnostics...)
+	if toStateDiagnostics.HasError() {
+		return
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("process step created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -112,7 +113,8 @@ func (r *processStepResource) Read(ctx context.Context, req resource.ReadRequest
 
 	step, exists := findStepFromProcessByID(process, stepId)
 	if !exists {
-		resp.Diagnostics.AddError("unable to find process step '%s'", stepId)
+		tflog.Info(ctx, fmt.Sprintf("process step read (id: %s), but not found, removing ...", stepId))
+		resp.State.RemoveResource(ctx)
 		return
 	}
 
@@ -216,23 +218,35 @@ func (r *processStepResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func mapProcessStepFromState(ctx context.Context, state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) diag.Diagnostics {
-	step.Condition = deployments.DeploymentStepConditionType(state.Condition.ValueString())
 	step.StartTrigger = deployments.DeploymentStepStartTrigger(state.StartTrigger.ValueString())
+	step.PackageRequirement = deployments.DeploymentStepPackageRequirement(state.PackageRequirement.ValueString())
+	step.Condition = deployments.DeploymentStepConditionType(state.Condition.ValueString())
 
-	targetRoles, diagnostics := util.SetToStringArray(ctx, state.TargetRoles)
-	if diagnostics.HasError() {
-		return diagnostics
+	if state.StepProperties.IsNull() {
+		step.Properties = make(map[string]core.PropertyValue)
+	} else {
+		stateProperties := make(map[string]types.String, len(state.StepProperties.Elements()))
+		diags := state.StepProperties.ElementsAs(ctx, &stateProperties, false)
+		if diags.HasError() {
+			return diags
+		}
+
+		properties := make(map[string]core.PropertyValue, len(stateProperties))
+		for key, value := range stateProperties {
+			if value.IsNull() {
+				properties[key] = core.NewPropertyValue("", false)
+			} else {
+				properties[key] = core.NewPropertyValue(value.ValueString(), false)
+			}
+		}
+
+		step.Properties = properties
 	}
-	step.Properties["Octopus.Action.TargetRoles"] = core.NewPropertyValue(strings.Join(targetRoles, ","), false)
 
-	step.Properties["Octopus.Action.MaxParallelism"] = core.NewPropertyValue(state.WindowSize.ValueString(), false)
-
-	mapProcessStepEmbeddedActionFromState(state, step)
-
-	return nil
+	return mapProcessStepEmbeddedActionFromState(ctx, state, step)
 }
 
-func mapProcessStepEmbeddedActionFromState(state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) {
+func mapProcessStepEmbeddedActionFromState(ctx context.Context, state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) diag.Diagnostics {
 	actionType := state.ActionType.ValueString()
 	name := state.Name.ValueString()
 
@@ -245,51 +259,170 @@ func mapProcessStepEmbeddedActionFromState(state *schemas.ProcessStepResourceMod
 		step.Actions[0] = deployments.NewDeploymentAction(name, actionType)
 	}
 
-	mapProcessStepActionFromState(state, step.Actions[0])
+	return mapProcessStepActionFromState(ctx, state, step.Actions[0])
 }
 
-func mapProcessStepActionFromState(state *schemas.ProcessStepResourceModel, action *deployments.DeploymentAction) {
+func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessStepResourceModel, action *deployments.DeploymentAction) diag.Diagnostics {
 	action.Name = state.Name.ValueString()
+	action.Slug = state.Slug.ValueString() // update only embedded action slug(step slug remains original), same as UI behaviour
 	action.ActionType = state.ActionType.ValueString()
+	// action.Condition is not updated, replicates UI behaviour where condition of the first action of step always remains as default value (Success)
 
-	runOnServer := "False"
-	if state.RunOnServer.ValueBool() {
-		runOnServer = "True"
+	action.IsRequired = state.IsRequired.ValueBool()
+	action.IsDisabled = state.IsDisabled.ValueBool()
+	action.Notes = state.Notes.ValueString()
+	action.WorkerPool = state.WorkerPoolId.ValueString()
+	action.WorkerPoolVariable = state.WorkerPoolVariable.ValueString()
+	if state.Container == nil {
+		action.Container = nil
+	} else {
+		action.Container = deployments.NewDeploymentActionContainer(state.Container.FeedId.ValueStringPointer(), state.Container.Image.ValueStringPointer())
 	}
-	action.Properties["Octopus.Action.RunOnServer"] = core.NewPropertyValue(runOnServer, false)
 
-	action.Properties["Octopus.Action.Script.Syntax"] = core.NewPropertyValue(state.ScriptSyntax.ValueString(), false)
-	action.Properties["Octopus.Action.Script.ScriptBody"] = core.NewPropertyValue(state.ScriptBody.ValueString(), false)
+	diags := diag.Diagnostics{}
+	if state.TenantTags.IsNull() {
+		action.TenantTags = nil
+	} else {
+		action.TenantTags, diags = util.SetToStringArray(ctx, state.TenantTags)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	if state.Environments.IsNull() {
+		action.Environments = nil
+	} else {
+		action.Environments, diags = util.SetToStringArray(ctx, state.Environments)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	if state.ExcludedEnvironments.IsNull() {
+		action.ExcludedEnvironments = nil
+	} else {
+		action.ExcludedEnvironments, diags = util.SetToStringArray(ctx, state.ExcludedEnvironments)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	if state.Channels.IsNull() {
+		action.Channels = nil
+	} else {
+		action.Channels, diags = util.SetToStringArray(ctx, state.Channels)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
+	if state.ActionProperties.IsNull() {
+		action.Properties = nil
+	} else {
+		stateProperties := make(map[string]types.String, len(state.ActionProperties.Elements()))
+		propertiesDiags := state.ActionProperties.ElementsAs(ctx, &stateProperties, false)
+		if propertiesDiags.HasError() {
+			return propertiesDiags
+		}
+
+		properties := make(map[string]core.PropertyValue, len(stateProperties))
+		for key, value := range stateProperties {
+			if value.IsNull() {
+				properties[key] = core.NewPropertyValue("", false)
+			} else {
+				properties[key] = core.NewPropertyValue(value.ValueString(), false)
+			}
+		}
+
+		action.Properties = properties
+	}
+
+	return diag.Diagnostics{}
 }
 
-func mapProcessStepToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, state *schemas.ProcessStepResourceModel) {
+func mapProcessStepToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, state *schemas.ProcessStepResourceModel) diag.Diagnostics {
 	state.ID = types.StringValue(step.GetID())
 	state.SpaceID = types.StringValue(process.SpaceID)
-
-	state.Condition = types.StringValue(string(step.Condition))
+	state.ProcessID = types.StringValue(process.GetID())
+	state.Name = types.StringValue(step.Name)
 	state.StartTrigger = types.StringValue(string(step.StartTrigger))
+	state.PackageRequirement = types.StringValue(string(step.PackageRequirement))
+	state.Condition = types.StringValue(string(step.Condition))
 
-	parsedTargetRoles := strings.Split(step.Properties["Octopus.Action.TargetRoles"].Value, ",")
-	targetRoles := make([]attr.Value, len(parsedTargetRoles))
-	for i, value := range parsedTargetRoles {
-		targetRoles[i] = types.StringValue(value)
+	stepProperties := make(map[string]attr.Value, len(step.Properties))
+	for key, value := range step.Properties {
+		stepProperties[key] = types.StringValue(value.Value)
 	}
-	state.TargetRoles, _ = types.SetValue(types.StringType, targetRoles)
-	state.WindowSize = types.StringValue(step.Properties["Octopus.Action.MaxParallelism"].Value)
+
+	stateProperties, diags := types.MapValue(types.StringType, stepProperties)
+	if diags.HasError() {
+		return diags
+	}
+
+	state.StepProperties = stateProperties
 
 	if len(step.Actions) > 0 && step.Actions[0] != nil {
-		mapProcessStepActionToState(step.Actions[0], state)
+		return mapProcessStepActionToState(step.Actions[0], state)
 	}
+
+	return diag.Diagnostics{}
 }
 
-func mapProcessStepActionToState(action *deployments.DeploymentAction, state *schemas.ProcessStepResourceModel) {
+func mapProcessStepActionToState(action *deployments.DeploymentAction, state *schemas.ProcessStepResourceModel) diag.Diagnostics {
 	state.ActionType = types.StringValue(action.ActionType)
+	state.Slug = types.StringValue(action.Slug)
+	state.IsRequired = types.BoolValue(action.IsRequired)
+	state.IsDisabled = types.BoolValue(action.IsDisabled)
+	state.Notes = types.StringValue(action.Notes)
+	state.WorkerPoolId = types.StringValue(action.WorkerPool)
+	state.WorkerPoolVariable = types.StringValue(action.WorkerPoolVariable)
 
-	value, _ := strconv.ParseBool(action.Properties["Octopus.Action.RunOnServer"].Value)
-	state.RunOnServer = types.BoolValue(value)
+	if action.Container == nil {
+		state.Container = nil
+	} else {
+		state.Container = &schemas.ProcessStepActionContainerModel{
+			FeedId: types.StringValue(action.Container.FeedID),
+			Image:  types.StringValue(action.Container.Image),
+		}
+	}
 
-	state.ScriptSyntax = types.StringValue(action.Properties["Octopus.Action.Script.Syntax"].Value)
-	state.ScriptBody = types.StringValue(action.Properties["Octopus.Action.Script.ScriptBody"].Value)
+	if action.TenantTags == nil {
+		state.TenantTags = types.SetValueMust(types.StringType, []attr.Value{})
+	} else {
+		state.TenantTags = types.SetValueMust(types.StringType, util.ToValueSlice(action.TenantTags))
+	}
+
+	if action.Environments == nil {
+		state.Environments = types.SetValueMust(types.StringType, []attr.Value{})
+	} else {
+		state.Environments = types.SetValueMust(types.StringType, util.ToValueSlice(action.Environments))
+	}
+
+	if action.ExcludedEnvironments == nil {
+		state.ExcludedEnvironments = types.SetValueMust(types.StringType, []attr.Value{})
+	} else {
+		state.ExcludedEnvironments = types.SetValueMust(types.StringType, util.ToValueSlice(action.ExcludedEnvironments))
+	}
+
+	if action.Channels == nil {
+		state.Channels = types.SetValueMust(types.StringType, []attr.Value{})
+	} else {
+		state.Channels = types.SetValueMust(types.StringType, util.ToValueSlice(action.Channels))
+	}
+
+	actionProperties := make(map[string]attr.Value, len(action.Properties))
+	for key, value := range action.Properties {
+		actionProperties[key] = types.StringValue(value.Value)
+	}
+
+	stateProperties, diags := types.MapValue(types.StringType, actionProperties)
+	if diags.HasError() {
+		return diags
+	}
+
+	state.ActionProperties = stateProperties
+
+	return diag.Diagnostics{}
 }
 
 func findStepFromProcessByID(process *deployments.DeploymentProcess, stepID string) (*deployments.DeploymentStep, bool) {

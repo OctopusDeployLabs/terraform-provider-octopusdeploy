@@ -61,7 +61,7 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 
 	parent, ok := findStepFromProcessByID(process, parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Error creating process child step, unable to find a parent step", err.Error())
+		resp.Diagnostics.AddError("Error creating process child step", fmt.Sprintf("unable to find a parent step with id '%s'", parentId))
 		return
 	}
 
