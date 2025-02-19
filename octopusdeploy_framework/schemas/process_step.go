@@ -6,7 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -49,6 +51,7 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 				Description("A collection of process step properties where the key is the property name and the value is its value.").
 				Optional().
 				Computed().
+				Default(mapdefault.StaticValue(types.MapValueMust(types.StringType, map[string]attr.Value{}))).
 				Build(),
 
 			"action_type": util.ResourceString().
@@ -59,6 +62,7 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 				Description("The human-readable unique identifier for the step.").
 				Optional().
 				Computed().
+				PlanModifiers(stringplanmodifier.UseStateForUnknown()).
 				Build(),
 			"is_disabled": util.ResourceBool().
 				Description("Indicates the disabled status of this step.").
@@ -94,21 +98,25 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 				Description("A set of tenant tags associated with this step.").
 				Optional().
 				Computed().
+				DefaultEmpty().
 				Build(),
 			"environments": util.ResourceSet(types.StringType).
 				Description("A set of environments within which this step will run.").
 				Optional().
 				Computed().
+				DefaultEmpty().
 				Build(),
 			"excluded_environments": util.ResourceSet(types.StringType).
 				Description("A set of environments that this step will be skipped in.").
 				Optional().
 				Computed().
+				DefaultEmpty().
 				Build(),
 			"channels": util.ResourceSet(types.StringType).
 				Description("A set of channels associated with this step.").
 				Optional().
 				Computed().
+				DefaultEmpty().
 				Build(),
 			"container": resourceSchema.SingleNestedAttribute{
 				Description: "When set used to run step inside a container on the Octopus Server. Octopus Server must support container execution.",
@@ -141,6 +149,7 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 				Description("A collection of step action properties where the key is the property name and the value is its value.").
 				Optional().
 				Computed().
+				DefaultEmpty().
 				Build(),
 		},
 	}
