@@ -54,7 +54,7 @@ func TestAccMapProcessStepsOrderFromStateAddMissingStepToTheEnd(t *testing.T) {
 	assert.Equal(t, expectedDiagnostics, diagnostics, "Expects to have warning diagnostics")
 }
 
-func TestAccMapProcessStepsOrderFromStateAddsErrorWhenStepIsNotInProcess(t *testing.T) {
+func TestAccMapProcessStepsOrderFromStateAddsErrorWhenStepIsNotPartOfTheProcess(t *testing.T) {
 	state := schemas.ProcessStepsOrderResourceModel{
 		SpaceID:   types.StringValue("Spaces-1"),
 		ProcessID: types.StringValue("Processes-1"),
