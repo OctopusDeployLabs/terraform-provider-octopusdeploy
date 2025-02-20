@@ -145,6 +145,72 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 					),
 				),
 			},
+			"packages": resourceSchema.MapNestedAttribute{
+				Description: "Package references associated with this process step where key is a name of the package reference (use empty name for primary package)",
+				Optional:    true,
+				Computed:    true,
+				Default:     mapdefault.StaticValue(types.MapValueMust(ProcessStepPackageReferenceObjectType(), map[string]attr.Value{})),
+				NestedObject: resourceSchema.NestedAttributeObject{
+					Attributes: map[string]resourceSchema.Attribute{
+						"id": GetIdResourceSchema(),
+						"package_id": util.ResourceString().
+							Description("Package ID or a variable-expression").
+							Required().
+							Build(),
+						"feed_id": util.ResourceString().
+							Description("The feed ID associated with this package reference").
+							Optional().
+							Computed().
+							Default("Server").
+							Build(),
+						"acquisition_location": util.ResourceString().
+							Description("Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression").
+							Optional().
+							Computed().
+							Default("feeds-builtin").
+							Build(),
+						"properties": util.ResourceMap(types.StringType).
+							Description("A collection of properties associated with this package").
+							Optional().
+							Computed().
+							DefaultEmpty().
+							Build(),
+					},
+				},
+			},
+			"git_dependencies": resourceSchema.MapNestedAttribute{
+				Description: "References of git dependencies of this step where key is a name of the reference (can be empty). Is the Git equivalent of packages",
+				Optional:    true,
+				Computed:    true,
+				Default:     mapdefault.StaticValue(types.MapValueMust(ProcessStepPackageReferenceObjectType(), map[string]attr.Value{})),
+				NestedObject: resourceSchema.NestedAttributeObject{
+					Attributes: map[string]resourceSchema.Attribute{
+						"repository_uri": util.ResourceString().
+							Description("The Git URI for the repository where this resource is sourced from").
+							Required().
+							//Validators(stringvalidator.RegexMatches("")).
+							Build(),
+						"feed_id": util.ResourceString().
+							Description("The feed ID associated with this package reference").
+							Optional().
+							Computed().
+							Default("Server").
+							Build(),
+						"acquisition_location": util.ResourceString().
+							Description("Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression").
+							Optional().
+							Computed().
+							Default("feeds-builtin").
+							Build(),
+						"properties": util.ResourceMap(types.StringType).
+							Description("A collection of properties associated with this package").
+							Optional().
+							Computed().
+							DefaultEmpty().
+							Build(),
+					},
+				},
+			},
 			"action_properties": util.ResourceMap(types.StringType).
 				Description("A collection of step action properties where the key is the property name and the value is its value.").
 				Optional().
@@ -173,19 +239,45 @@ type ProcessStepResourceModel struct {
 	IsDisabled           types.Bool                       `tfsdk:"is_disabled"`
 	IsRequired           types.Bool                       `tfsdk:"is_required"`
 	Notes                types.String                     `tfsdk:"notes"`
-	WorkerPoolId         types.String                     `tfsdk:"worker_pool_id"`
+	WorkerPoolID         types.String                     `tfsdk:"worker_pool_id"`
 	WorkerPoolVariable   types.String                     `tfsdk:"worker_pool_variable"`
 	TenantTags           types.Set                        `tfsdk:"tenant_tags"`
 	Environments         types.Set                        `tfsdk:"environments"`
 	ExcludedEnvironments types.Set                        `tfsdk:"excluded_environments"`
 	Channels             types.Set                        `tfsdk:"channels"`
 	Container            *ProcessStepActionContainerModel `tfsdk:"container"`
+	Packages             types.Map                        `tfsdk:"packages"`
 	ActionProperties     types.Map                        `tfsdk:"action_properties"`
 
 	ResourceModel
 }
 
 type ProcessStepActionContainerModel struct {
-	FeedId types.String `tfsdk:"feed_id"`
+	FeedID types.String `tfsdk:"feed_id"`
 	Image  types.String `tfsdk:"image"`
+}
+
+type ProcessStepPackageReferenceResourceModel struct {
+	PackageID           types.String `tfsdk:"package_id"`
+	FeedID              types.String `tfsdk:"feed_id"`
+	AcquisitionLocation types.String `tfsdk:"acquisition_location"`
+	Properties          types.Map    `tfsdk:"properties"`
+
+	ResourceModel
+}
+
+func ProcessStepPackageReferenceObjectType() types.ObjectType {
+	return types.ObjectType{
+		AttrTypes: ProcessStepPackageReferenceAttributeTypes(),
+	}
+}
+
+func ProcessStepPackageReferenceAttributeTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"id":                   types.StringType,
+		"package_id":           types.StringType,
+		"feed_id":              types.StringType,
+		"acquisition_location": types.StringType,
+		"properties":           types.MapType{ElemType: types.StringType},
+	}
 }

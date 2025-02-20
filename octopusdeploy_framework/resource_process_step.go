@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -271,12 +273,12 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 	action.IsRequired = state.IsRequired.ValueBool()
 	action.IsDisabled = state.IsDisabled.ValueBool()
 	action.Notes = state.Notes.ValueString()
-	action.WorkerPool = state.WorkerPoolId.ValueString()
+	action.WorkerPool = state.WorkerPoolID.ValueString()
 	action.WorkerPoolVariable = state.WorkerPoolVariable.ValueString()
 	if state.Container == nil {
 		action.Container = nil
 	} else {
-		action.Container = deployments.NewDeploymentActionContainer(state.Container.FeedId.ValueStringPointer(), state.Container.Image.ValueStringPointer())
+		action.Container = deployments.NewDeploymentActionContainer(state.Container.FeedID.ValueStringPointer(), state.Container.Image.ValueStringPointer())
 	}
 
 	diags := diag.Diagnostics{}
@@ -314,6 +316,57 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		if diags.HasError() {
 			return diags
 		}
+	}
+
+	if state.Packages.IsNull() {
+		action.Packages = []*packages.PackageReference{}
+	} else {
+		var packagesMap map[string]types.Object
+		diags = state.Packages.ElementsAs(ctx, &packagesMap, false)
+		if diags.HasError() {
+			return diags
+		}
+
+		var packageReferences = make([]*packages.PackageReference, 0)
+		for key, packageObject := range packagesMap {
+			if packageObject.IsNull() {
+				continue
+			}
+
+			var packageState schemas.ProcessStepPackageReferenceResourceModel
+			diags = packageObject.As(ctx, &packageState, basetypes.ObjectAsOptions{})
+			if diags.HasError() {
+				return diags
+			}
+
+			stateProperties := make(map[string]types.String, len(packageState.Properties.Elements()))
+			diags = packageState.Properties.ElementsAs(ctx, &stateProperties, false)
+			if diags.HasError() {
+
+				return diags
+			}
+
+			packageProperties := make(map[string]string, len(stateProperties))
+			for propertyKey, value := range stateProperties {
+				if value.IsNull() {
+					packageProperties[propertyKey] = ""
+				} else {
+					packageProperties[propertyKey] = value.ValueString()
+				}
+			}
+
+			packageReference := &packages.PackageReference{
+				ID:                  packageState.GetID(),
+				Name:                key,
+				PackageID:           packageState.PackageID.ValueString(),
+				FeedID:              packageState.FeedID.ValueString(),
+				AcquisitionLocation: packageState.AcquisitionLocation.ValueString(),
+				Properties:          packageProperties,
+			}
+			packageReferences = append(packageReferences, packageReference)
+		}
+
+		action.Packages = packageReferences
 	}
 
 	if state.ActionProperties.IsNull() {
@@ -374,14 +427,14 @@ func mapProcessStepActionToState(action *deployments.DeploymentAction, state *sc
 	state.IsRequired = types.BoolValue(action.IsRequired)
 	state.IsDisabled = types.BoolValue(action.IsDisabled)
 	state.Notes = types.StringValue(action.Notes)
-	state.WorkerPoolId = types.StringValue(action.WorkerPool)
+	state.WorkerPoolID = types.StringValue(action.WorkerPool)
 	state.WorkerPoolVariable = types.StringValue(action.WorkerPoolVariable)
 
 	if action.Container == nil {
 		state.Container = nil
 	} else {
 		state.Container = &schemas.ProcessStepActionContainerModel{
-			FeedId: types.StringValue(action.Container.FeedID),
+			FeedID: types.StringValue(action.Container.FeedID),
 			Image:  types.StringValue(action.Container.Image),
 		}
 	}
@@ -410,12 +463,30 @@ func mapProcessStepActionToState(action *deployments.DeploymentAction, state *sc
 		state.Channels = types.SetValueMust(types.StringType, util.ToValueSlice(action.Channels))
 	}
 
-	actionProperties := make(map[string]attr.Value, len(action.Properties))
-	for key, value := range action.Properties {
-		actionProperties[key] = types.StringValue(value.Value)
+	if action.Packages == nil {
+		state.Packages = types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{})
+	} else {
+		statePackages := make(map[string]attr.Value, len(action.Packages))
+		for _, packageReference := range action.Packages {
+			packageProperties := util.ConvertMapStringToMapAttrValue(packageReference.Properties)
+			statePackage := types.ObjectValueMust(
+				schemas.ProcessStepPackageReferenceAttributeTypes(),
+				map[string]attr.Value{
+					"id":                   types.StringValue(packageReference.ID),
+					"package_id":           types.StringValue(packageReference.PackageID),
+					"feed_id":              types.StringValue(packageReference.FeedID),
+					"acquisition_location": types.StringValue(packageReference.AcquisitionLocation),
+					"properties":           types.MapValueMust(types.StringType, packageProperties),
+				},
+			)
+
+			statePackages[packageReference.Name] = statePackage
+		}
+
+		state.Packages = types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), statePackages)
 	}
 
-	stateProperties, diags := types.MapValue(types.StringType, actionProperties)
+	stateProperties, diags := util.ConvertPropertiesToAttributeValuesMap(action.Properties)
 	if diags.HasError() {
 		return diags
 	}
