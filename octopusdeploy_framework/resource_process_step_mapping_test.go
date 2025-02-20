@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -30,7 +31,7 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 		IsRequired:         types.BoolValue(true),
 		IsDisabled:         types.BoolValue(false),
 		Notes:              types.StringValue(`Some notes`),
-		WorkerPoolId:       types.StringValue("WorkerPools-1"),
+		WorkerPoolID:       types.StringValue("WorkerPools-1"),
 		WorkerPoolVariable: types.StringValue("#{Environment.WorkerPools.Default}"),
 		TenantTags: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("tag-1"),
@@ -47,9 +48,23 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 			types.StringValue("Channels-1"),
 		}),
 		Container: &schemas.ProcessStepActionContainerModel{
-			FeedId: types.StringValue("Feeds-1"),
+			FeedID: types.StringValue("Feeds-1"),
 			Image:  types.StringValue("docker.io/library/dummy:latest"),
 		},
+		Packages: types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{
+			"script-package": types.ObjectValueMust(
+				schemas.ProcessStepPackageReferenceAttributeTypes(),
+				map[string]attr.Value{
+					"id":                   types.StringValue("00000000-0000-0000-0000-000000000001"),
+					"package_id":           types.StringValue("Package-1"),
+					"feed_id":              types.StringValue("Feeds-2"),
+					"acquisition_location": types.StringValue("#{LocationVariable}"),
+					"properties": types.MapValueMust(types.StringType, map[string]attr.Value{
+						"Octopus.Package.IsPrimary": types.StringValue("True"),
+					}),
+				},
+			),
+		}),
 		ActionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.RunOnServer":       types.StringValue("True"),
 			"Octopus.Action.Script.ScriptBody": types.StringValue("Write-Host \"Step 1, Action 1\""),
@@ -89,6 +104,18 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 					FeedID: "Feeds-1",
 					Image:  "docker.io/library/dummy:latest",
 				},
+				Packages: []*packages.PackageReference{
+					{
+						ID:                  "00000000-0000-0000-0000-000000000001",
+						Name:                "script-package",
+						PackageID:           "Package-1",
+						FeedID:              "Feeds-2",
+						AcquisitionLocation: "#{LocationVariable}",
+						Properties: map[string]string{
+							"Octopus.Package.IsPrimary": "True",
+						},
+					},
+				},
 				Properties: map[string]core.PropertyValue{
 					"Octopus.Action.RunOnServer":       core.NewPropertyValue("True", false),
 					"Octopus.Action.Script.ScriptBody": core.NewPropertyValue("Write-Host \"Step 1, Action 1\"", false),
@@ -113,6 +140,7 @@ func TestAccMapProcessStepFromStateForScriptStep(t *testing.T) {
 		PackageRequirement: types.StringValue("LetOctopusDecide"),
 		Condition:          types.StringValue("Success"),
 		ActionType:         types.StringValue("Octopus.Script"),
+		Packages:           types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{}),
 		ActionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.Script.ScriptBody": types.StringValue("Write-Host \"Minimum attributes\""),
 		}),
@@ -134,6 +162,7 @@ func TestAccMapProcessStepFromStateForScriptStep(t *testing.T) {
 			{
 				Name:       "Run Script",
 				ActionType: "Octopus.Script",
+				Packages:   []*packages.PackageReference{},
 				Properties: map[string]core.PropertyValue{
 					"Octopus.Action.Script.ScriptBody": core.NewPropertyValue("Write-Host \"Minimum attributes\"", false),
 				},
@@ -148,10 +177,26 @@ func TestAccMapProcessStepFromStateForScriptStep(t *testing.T) {
 }
 
 func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
-	//ctx := context.Background()
+	primaryPackage := &packages.PackageReference{
+		ID:                  "00000000-0000-0000-0000-000000000101",
+		Name:                "",
+		PackageID:           "Package-1",
+		FeedID:              "Feeds-1",
+		AcquisitionLocation: "ExecutionTarget",
+		Properties: map[string]string{
+			"Octopus.Package.IsPrimary": "True",
+		},
+	}
+	additionalPackage := &packages.PackageReference{
+		ID:                  "00000000-0000-0000-0000-000000000102",
+		Name:                "unique-name",
+		PackageID:           "Package-2",
+		FeedID:              "feeds-builtin",
+		AcquisitionLocation: "Server",
+	}
 
 	action := deployments.NewDeploymentAction("Step One", "Octopus.Script")
-	action.SetID("12345678-1234-1234-1234-123456789000")
+	action.SetID("00000000-0000-0000-0000-000000000011")
 	action.Name = "Step One"
 	action.Slug = "step-one"
 	action.ActionType = "Octopus.Script"
@@ -168,13 +213,14 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 		FeedID: "Feeds-1",
 		Image:  "docker.io/library/dummy:latest",
 	}
+	action.Packages = []*packages.PackageReference{primaryPackage, additionalPackage}
 	action.Properties = map[string]core.PropertyValue{
 		"Octopus.Action.RunOnServer":       core.NewPropertyValue("True", false),
 		"Octopus.Action.Script.ScriptBody": core.NewPropertyValue("Write-Host \"Step 1, Action 1\"", false),
 	}
 
 	step := deployments.NewDeploymentStep("Step One")
-	step.SetID("12345678-1234-1234-1234-123456789001")
+	step.SetID("00000000-0000-0000-0000-000000000001")
 	step.StartTrigger = "StartAfterPrevious"
 	step.PackageRequirement = "LetOctopusDecide"
 	step.Condition = "Success"
@@ -215,7 +261,7 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 		IsRequired:         types.BoolValue(true),
 		IsDisabled:         types.BoolValue(false),
 		Notes:              types.StringValue(`Some notes`),
-		WorkerPoolId:       types.StringValue("WorkerPools-1"),
+		WorkerPoolID:       types.StringValue("WorkerPools-1"),
 		WorkerPoolVariable: types.StringValue("#{Environment.WorkerPools.Default}"),
 		TenantTags: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("tag-1"),
@@ -232,9 +278,33 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 			types.StringValue("Channels-1"),
 		}),
 		Container: &schemas.ProcessStepActionContainerModel{
-			FeedId: types.StringValue("Feeds-1"),
+			FeedID: types.StringValue("Feeds-1"),
 			Image:  types.StringValue("docker.io/library/dummy:latest"),
 		},
+		Packages: types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{
+			primaryPackage.Name: types.ObjectValueMust(
+				schemas.ProcessStepPackageReferenceAttributeTypes(),
+				map[string]attr.Value{
+					"id":                   types.StringValue(primaryPackage.ID),
+					"package_id":           types.StringValue(primaryPackage.PackageID),
+					"feed_id":              types.StringValue(primaryPackage.FeedID),
+					"acquisition_location": types.StringValue(primaryPackage.AcquisitionLocation),
+					"properties": types.MapValueMust(types.StringType, map[string]attr.Value{
+						"Octopus.Package.IsPrimary": types.StringValue("True"),
+					}),
+				},
+			),
+			additionalPackage.Name: types.ObjectValueMust(
+				schemas.ProcessStepPackageReferenceAttributeTypes(),
+				map[string]attr.Value{
+					"id":                   types.StringValue(additionalPackage.ID),
+					"package_id":           types.StringValue(additionalPackage.PackageID),
+					"feed_id":              types.StringValue(additionalPackage.FeedID),
+					"acquisition_location": types.StringValue(additionalPackage.AcquisitionLocation),
+					"properties":           types.MapValueMust(types.StringType, map[string]attr.Value{}),
+				},
+			),
+		}),
 		ActionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.RunOnServer":       types.StringValue("True"),
 			"Octopus.Action.Script.ScriptBody": types.StringValue("Write-Host \"Step 1, Action 1\""),
