@@ -73,7 +73,7 @@ func (r *runbookTypeResource) Create(ctx context.Context, req resource.CreateReq
 	if !plan.Branch.IsNull() {
 		createdRunbook, err = runbooks.AddGitRunbook(r.Config.Client, runbook, plan.Branch.ValueString())
 	} else {
-		createdRunbook, err = runbooks.Update(r.Config.Client, runbook)
+		createdRunbook, err = runbooks.Add(r.Config.Client, runbook)
 	}
 
 	if err != nil {
