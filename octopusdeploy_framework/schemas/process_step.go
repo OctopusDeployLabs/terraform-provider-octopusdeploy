@@ -145,6 +145,40 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 					),
 				),
 			},
+			"git_dependencies": resourceSchema.MapNestedAttribute{
+				Description: "References of git dependencies for this step where key is a name of the reference (can be empty). Is the Git equivalent of packages",
+				Optional:    true,
+				Computed:    true,
+				Default:     mapdefault.StaticValue(types.MapValueMust(ProcessStepGitDependencyObjectType(), map[string]attr.Value{})),
+				NestedObject: resourceSchema.NestedAttributeObject{
+					Attributes: map[string]resourceSchema.Attribute{
+						"repository_uri": util.ResourceString().
+							Description("The Git URI for the repository where this resource is sourced from").
+							Required().
+							Build(),
+						"default_branch": util.ResourceString().
+							Description("Name of the default branch of the repository.").
+							Required().
+							Build(),
+						"git_credential_type": util.ResourceString().
+							Description("The Git credential authentication type.").
+							Required().
+							Build(),
+						"file_path_filters": util.ResourceSet(types.StringType).
+							Description("List of file path filters used to narrow down the directory where files are to be sourced from. Supports glob patten syntax.").
+							Optional().
+							Computed().
+							DefaultEmpty().
+							Build(),
+						"git_credential_id": util.ResourceString().
+							Description("ID of an existing Git credential.").
+							Optional().
+							Computed().
+							Default("").
+							Build(),
+					},
+				},
+			},
 			"packages": resourceSchema.MapNestedAttribute{
 				Description: "Package references associated with this process step where key is a name of the package reference (use empty name for primary package)",
 				Optional:    true,
@@ -156,39 +190,6 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 						"package_id": util.ResourceString().
 							Description("Package ID or a variable-expression").
 							Required().
-							Build(),
-						"feed_id": util.ResourceString().
-							Description("The feed ID associated with this package reference").
-							Optional().
-							Computed().
-							Default("Server").
-							Build(),
-						"acquisition_location": util.ResourceString().
-							Description("Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression").
-							Optional().
-							Computed().
-							Default("feeds-builtin").
-							Build(),
-						"properties": util.ResourceMap(types.StringType).
-							Description("A collection of properties associated with this package").
-							Optional().
-							Computed().
-							DefaultEmpty().
-							Build(),
-					},
-				},
-			},
-			"git_dependencies": resourceSchema.MapNestedAttribute{
-				Description: "References of git dependencies of this step where key is a name of the reference (can be empty). Is the Git equivalent of packages",
-				Optional:    true,
-				Computed:    true,
-				Default:     mapdefault.StaticValue(types.MapValueMust(ProcessStepPackageReferenceObjectType(), map[string]attr.Value{})),
-				NestedObject: resourceSchema.NestedAttributeObject{
-					Attributes: map[string]resourceSchema.Attribute{
-						"repository_uri": util.ResourceString().
-							Description("The Git URI for the repository where this resource is sourced from").
-							Required().
-							//Validators(stringvalidator.RegexMatches("")).
 							Build(),
 						"feed_id": util.ResourceString().
 							Description("The feed ID associated with this package reference").
@@ -246,6 +247,7 @@ type ProcessStepResourceModel struct {
 	ExcludedEnvironments types.Set                        `tfsdk:"excluded_environments"`
 	Channels             types.Set                        `tfsdk:"channels"`
 	Container            *ProcessStepActionContainerModel `tfsdk:"container"`
+	GitDependencies      types.Map                        `tfsdk:"git_dependencies"`
 	Packages             types.Map                        `tfsdk:"packages"`
 	ActionProperties     types.Map                        `tfsdk:"action_properties"`
 
@@ -266,6 +268,14 @@ type ProcessStepPackageReferenceResourceModel struct {
 	ResourceModel
 }
 
+type ProcessStepGitDependencyResourceModel struct {
+	RepositoryUri     types.String `tfsdk:"repository_uri"`
+	DefaultBranch     types.String `tfsdk:"default_branch"`
+	GitCredentialType types.String `tfsdk:"git_credential_type"`
+	FilePathFilters   types.Set    `tfsdk:"file_path_filters"`
+	GitCredentialID   types.String `tfsdk:"git_credential_id"`
+}
+
 func ProcessStepPackageReferenceObjectType() types.ObjectType {
 	return types.ObjectType{
 		AttrTypes: ProcessStepPackageReferenceAttributeTypes(),
@@ -279,5 +289,21 @@ func ProcessStepPackageReferenceAttributeTypes() map[string]attr.Type {
 		"feed_id":              types.StringType,
 		"acquisition_location": types.StringType,
 		"properties":           types.MapType{ElemType: types.StringType},
+	}
+}
+
+func ProcessStepGitDependencyObjectType() types.ObjectType {
+	return types.ObjectType{
+		AttrTypes: ProcessStepGitDependencyAttributeTypes(),
+	}
+}
+
+func ProcessStepGitDependencyAttributeTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"repository_uri":      types.StringType,
+		"default_branch":      types.StringType,
+		"git_credential_type": types.StringType,
+		"file_path_filters":   types.SetType{ElemType: types.StringType},
+		"git_credential_id":   types.StringType,
 	}
 }
