@@ -196,7 +196,7 @@ func (b *AttributeBuilder[T]) Default(defaultValue interface{}) *AttributeBuilde
 
 // DefaultEmpty sets the default value of an attribute to an empty collection.
 //
-// This method applies only to ListAttribute, SetAttribute, and MapAttribute types.
+// This method applies only to ListAttribute, SetAttribute or MapAttribute types.
 func (b *AttributeBuilder[T]) DefaultEmpty() *AttributeBuilder[T] {
 	switch a := any(&b.attr).(type) {
 	case *schema.ListAttribute:

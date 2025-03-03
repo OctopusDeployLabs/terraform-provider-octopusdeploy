@@ -185,6 +185,15 @@ const sep = ":"
 func BuildCompositeId(keys ...string) string {
 	return strings.Join(keys, sep)
 }
+
 func SplitCompositeId(id string) []string {
 	return strings.Split(id, sep)
+}
+
+func BuildStringSetOrEmpty(values []string) types.Set {
+	if values == nil {
+		return types.SetValueMust(types.StringType, []attr.Value{})
+	} else {
+		return types.SetValueMust(types.StringType, ToValueSlice(values))
+	}
 }

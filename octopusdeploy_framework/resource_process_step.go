@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/gitdependencies"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
@@ -268,7 +269,7 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 	action.Name = state.Name.ValueString()
 	action.Slug = state.Slug.ValueString() // update only embedded action slug(step slug remains original), same as UI behaviour
 	action.ActionType = state.ActionType.ValueString()
-	// action.Condition is not updated, replicates UI behaviour where condition of the first action of step always remains as default value (Success)
+	// action.Condition is not updated: replicates UI behaviour where condition of the first action of step is always a default value (Success)
 
 	action.IsRequired = state.IsRequired.ValueBool()
 	action.IsDisabled = state.IsDisabled.ValueBool()
@@ -282,13 +283,13 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 	}
 
 	diags := diag.Diagnostics{}
-	if state.TenantTags.IsNull() {
-		action.TenantTags = nil
-	} else {
-		action.TenantTags, diags = util.SetToStringArray(ctx, state.TenantTags)
-		if diags.HasError() {
-			return diags
-		}
+	//if state.TenantTags.IsNull() {
+	//	action.TenantTags = nil
+	//} else {
+	//}
+	action.TenantTags, diags = util.SetToStringArray(ctx, state.TenantTags)
+	if diags.HasError() {
+		return diags
 	}
 
 	if state.Environments.IsNull() {
@@ -316,6 +317,50 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		if diags.HasError() {
 			return diags
 		}
+	}
+
+	if state.GitDependencies.IsNull() {
+		action.GitDependencies = []*gitdependencies.GitDependency{}
+	} else {
+		var dependenciesMap map[string]types.Object
+		diags = state.GitDependencies.ElementsAs(ctx, &dependenciesMap, false)
+		if diags.HasError() {
+			return diags
+		}
+
+		var gitDependencies = make([]*gitdependencies.GitDependency, 0)
+		for key, dependencyObject := range dependenciesMap {
+			if dependencyObject.IsNull() {
+				continue
+			}
+
+			var dependencyState schemas.ProcessStepGitDependencyResourceModel
+			diags = dependencyObject.As(ctx, &dependencyState, basetypes.ObjectAsOptions{})
+			if diags.HasError() {
+				return diags
+			}
+
+			gitDependency := &gitdependencies.GitDependency{
+				Name:              key,
+				RepositoryUri:     dependencyState.RepositoryUri.ValueString(),
+				DefaultBranch:     dependencyState.DefaultBranch.ValueString(),
+				GitCredentialType: dependencyState.GitCredentialType.ValueString(),
+				GitCredentialId:   dependencyState.GitCredentialID.ValueString(),
+			}
+
+			if dependencyState.FilePathFilters.IsNull() {
+				gitDependency.FilePathFilters = nil
+			} else {
+				gitDependency.FilePathFilters, diags = util.SetToStringArray(ctx, dependencyState.FilePathFilters)
+				if diags.HasError() {
+					return diags
+				}
+			}
+
+			gitDependencies = append(gitDependencies, gitDependency)
+		}
+
+		action.GitDependencies = gitDependencies
 	}
 
 	if state.Packages.IsNull() {
@@ -439,28 +484,31 @@ func mapProcessStepActionToState(action *deployments.DeploymentAction, state *sc
 		}
 	}
 
-	if action.TenantTags == nil {
-		state.TenantTags = types.SetValueMust(types.StringType, []attr.Value{})
-	} else {
-		state.TenantTags = types.SetValueMust(types.StringType, util.ToValueSlice(action.TenantTags))
-	}
+	state.TenantTags = util.BuildStringSetOrEmpty(action.TenantTags)
+	state.Environments = util.BuildStringSetOrEmpty(action.Environments)
+	state.ExcludedEnvironments = util.BuildStringSetOrEmpty(action.ExcludedEnvironments)
+	state.Channels = util.BuildStringSetOrEmpty(action.Channels)
 
-	if action.Environments == nil {
-		state.Environments = types.SetValueMust(types.StringType, []attr.Value{})
+	if action.GitDependencies == nil {
+		state.GitDependencies = types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), map[string]attr.Value{})
 	} else {
-		state.Environments = types.SetValueMust(types.StringType, util.ToValueSlice(action.Environments))
-	}
+		stateDependencies := make(map[string]attr.Value, len(action.GitDependencies))
+		for _, dependency := range action.GitDependencies {
+			stateDependency := types.ObjectValueMust(
+				schemas.ProcessStepGitDependencyAttributeTypes(),
+				map[string]attr.Value{
+					"repository_uri":      types.StringValue(dependency.RepositoryUri),
+					"default_branch":      types.StringValue(dependency.DefaultBranch),
+					"git_credential_type": types.StringValue(dependency.GitCredentialType),
+					"file_path_filters":   types.SetValueMust(types.StringType, util.ToValueSlice(dependency.FilePathFilters)),
+					"git_credential_id":   types.StringValue(dependency.GitCredentialId),
+				},
+			)
 
-	if action.ExcludedEnvironments == nil {
-		state.ExcludedEnvironments = types.SetValueMust(types.StringType, []attr.Value{})
-	} else {
-		state.ExcludedEnvironments = types.SetValueMust(types.StringType, util.ToValueSlice(action.ExcludedEnvironments))
-	}
+			stateDependencies[dependency.Name] = stateDependency
+		}
 
-	if action.Channels == nil {
-		state.Channels = types.SetValueMust(types.StringType, []attr.Value{})
-	} else {
-		state.Channels = types.SetValueMust(types.StringType, util.ToValueSlice(action.Channels))
+		state.GitDependencies = types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), stateDependencies)
 	}
 
 	if action.Packages == nil {

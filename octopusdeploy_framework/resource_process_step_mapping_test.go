@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/gitdependencies"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
@@ -51,6 +52,20 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 			FeedID: types.StringValue("Feeds-1"),
 			Image:  types.StringValue("docker.io/library/dummy:latest"),
 		},
+		GitDependencies: types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), map[string]attr.Value{
+			"script-folder": types.ObjectValueMust(
+				schemas.ProcessStepGitDependencyAttributeTypes(),
+				map[string]attr.Value{
+					"repository_uri":      types.StringValue("git://test.repository.fi"),
+					"default_branch":      types.StringValue("main"),
+					"git_credential_type": types.StringValue("UsernamePassword"),
+					"file_path_filters": types.SetValueMust(types.StringType, []attr.Value{
+						types.StringValue("directory-a"),
+					}),
+					"git_credential_id": types.StringValue("GitCredentials-1"),
+				},
+			),
+		}),
 		Packages: types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{
 			"script-package": types.ObjectValueMust(
 				schemas.ProcessStepPackageReferenceAttributeTypes(),
@@ -104,6 +119,16 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 					FeedID: "Feeds-1",
 					Image:  "docker.io/library/dummy:latest",
 				},
+				GitDependencies: []*gitdependencies.GitDependency{
+					{
+						Name:              "script-folder",
+						RepositoryUri:     "git://test.repository.fi",
+						DefaultBranch:     "main",
+						GitCredentialType: "UsernamePassword",
+						FilePathFilters:   []string{"directory-a"},
+						GitCredentialId:   "GitCredentials-1",
+					},
+				},
 				Packages: []*packages.PackageReference{
 					{
 						ID:                  "00000000-0000-0000-0000-000000000001",
@@ -140,6 +165,7 @@ func TestAccMapProcessStepFromStateForScriptStep(t *testing.T) {
 		PackageRequirement: types.StringValue("LetOctopusDecide"),
 		Condition:          types.StringValue("Success"),
 		ActionType:         types.StringValue("Octopus.Script"),
+		TenantTags:         types.SetValueMust(types.StringType, []attr.Value{}),
 		Packages:           types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{}),
 		ActionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.Script.ScriptBody": types.StringValue("Write-Host \"Minimum attributes\""),
@@ -160,9 +186,11 @@ func TestAccMapProcessStepFromStateForScriptStep(t *testing.T) {
 		Properties:         map[string]core.PropertyValue{},
 		Actions: []*deployments.DeploymentAction{
 			{
-				Name:       "Run Script",
-				ActionType: "Octopus.Script",
-				Packages:   []*packages.PackageReference{},
+				Name:            "Run Script",
+				ActionType:      "Octopus.Script",
+				TenantTags:      []string{},
+				GitDependencies: []*gitdependencies.GitDependency{},
+				Packages:        []*packages.PackageReference{},
 				Properties: map[string]core.PropertyValue{
 					"Octopus.Action.Script.ScriptBody": core.NewPropertyValue("Write-Host \"Minimum attributes\"", false),
 				},
@@ -194,6 +222,14 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 		FeedID:              "feeds-builtin",
 		AcquisitionLocation: "Server",
 	}
+	gitDependency := &gitdependencies.GitDependency{
+		Name:              "this-dependency",
+		RepositoryUri:     "git://test.repository.co.nz",
+		DefaultBranch:     "default",
+		GitCredentialType: "NotSpecified",
+		FilePathFilters:   []string{"directory-b"},
+		GitCredentialId:   "GitCredential-2",
+	}
 
 	action := deployments.NewDeploymentAction("Step One", "Octopus.Script")
 	action.SetID("00000000-0000-0000-0000-000000000011")
@@ -213,6 +249,7 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 		FeedID: "Feeds-1",
 		Image:  "docker.io/library/dummy:latest",
 	}
+	action.GitDependencies = []*gitdependencies.GitDependency{gitDependency}
 	action.Packages = []*packages.PackageReference{primaryPackage, additionalPackage}
 	action.Properties = map[string]core.PropertyValue{
 		"Octopus.Action.RunOnServer":       core.NewPropertyValue("True", false),
@@ -281,6 +318,20 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 			FeedID: types.StringValue("Feeds-1"),
 			Image:  types.StringValue("docker.io/library/dummy:latest"),
 		},
+		GitDependencies: types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), map[string]attr.Value{
+			gitDependency.Name: types.ObjectValueMust(
+				schemas.ProcessStepGitDependencyAttributeTypes(),
+				map[string]attr.Value{
+					"repository_uri":      types.StringValue(gitDependency.RepositoryUri),
+					"default_branch":      types.StringValue(gitDependency.DefaultBranch),
+					"git_credential_type": types.StringValue(gitDependency.GitCredentialType),
+					"git_credential_id":   types.StringValue(gitDependency.GitCredentialId),
+					"file_path_filters": types.SetValueMust(types.StringType, []attr.Value{
+						types.StringValue("directory-b"),
+					}),
+				},
+			),
+		}),
 		Packages: types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{
 			primaryPackage.Name: types.ObjectValueMust(
 				schemas.ProcessStepPackageReferenceAttributeTypes(),
