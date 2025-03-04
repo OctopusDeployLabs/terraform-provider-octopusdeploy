@@ -283,10 +283,7 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 	}
 
 	diags := diag.Diagnostics{}
-	//if state.TenantTags.IsNull() {
-	//	action.TenantTags = nil
-	//} else {
-	//}
+
 	action.TenantTags, diags = util.SetToStringArray(ctx, state.TenantTags)
 	if diags.HasError() {
 		return diags
