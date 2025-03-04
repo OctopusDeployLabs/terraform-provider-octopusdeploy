@@ -8,6 +8,7 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -64,7 +65,11 @@ func (r *processChildStepsOrderResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	mapProcessChildStepsOrderFromState(data, parent)
+	mapDiagnostics := mapProcessChildStepsOrderFromState(data, parent)
+	resp.Diagnostics.Append(mapDiagnostics...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
 	if err != nil {
@@ -78,7 +83,7 @@ func (r *processChildStepsOrderResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	mapProcessChildStepsOrderToState(updatedParent, updatedProcess, data)
+	mapProcessChildStepsOrderToState(updatedProcess, updatedParent, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process child steps order created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -110,7 +115,7 @@ func (r *processChildStepsOrderResource) Read(ctx context.Context, req resource.
 		return
 	}
 
-	mapProcessChildStepsOrderToState(parent, process, data)
+	mapProcessChildStepsOrderToState(process, parent, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process child steps order read (%s)", parentId))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -145,7 +150,11 @@ func (r *processChildStepsOrderResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	mapProcessChildStepsOrderFromState(data, parent)
+	mapDiagnostics := mapProcessChildStepsOrderFromState(data, parent)
+	resp.Diagnostics.Append(mapDiagnostics...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
 	if err != nil {
@@ -159,7 +168,7 @@ func (r *processChildStepsOrderResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	mapProcessChildStepsOrderToState(updatedParent, updatedProcess, data)
+	mapProcessChildStepsOrderToState(updatedProcess, updatedParent, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process steps order updated (%s)", processId))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -190,45 +199,84 @@ func (r *processChildStepsOrderResource) Delete(ctx context.Context, req resourc
 
 	_, ok := findStepFromProcessByID(process, parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Error deleting process child steps order, unable to find a parent step", err.Error())
+		resp.Diagnostics.AddError("Cannot delete process child steps order", fmt.Sprintf("unable to find a parent step (%s)", parentId))
 		return
 	}
 
-	// Do nothing or delete child actions ?
+	// Do nothing
 
 	resp.State.RemoveResource(ctx)
 }
 
-func mapProcessChildStepsOrderFromState(state *schemas.ProcessChildStepsOrderResourceModel, step *deployments.DeploymentStep) {
-	// Validate that ordering include all steps defined in the process
+func mapProcessChildStepsOrderFromState(state *schemas.ProcessChildStepsOrderResourceModel, step *deployments.DeploymentStep) diag.Diagnostics {
+	diags := diag.Diagnostics{}
+
+	if len(step.Actions) == 0 {
+		diags.AddError("Cannot map child steps ordering", "Parent step is missing embedded execution action")
+		return diags
+	}
+
+	embeddedAction := step.Actions[0]
 
 	lookup := make(map[string]*deployments.DeploymentAction)
-	for _, action := range step.Actions {
+	for _, action := range step.Actions[1:] {
 		lookup[action.GetID()] = action
 	}
 
 	orderedIds := util.GetIds(state.Children)
 
-	// step must have at least one action which we don't want to touch
-	var reorderedActions = []*deployments.DeploymentAction{step.Actions[0]}
+	reorderedActions := []*deployments.DeploymentAction{embeddedAction}
 	for _, id := range orderedIds {
-		action, _ := lookup[id]
+		action, found := lookup[id]
+		if !found {
+			diags.AddError("Ordered child step with id '%s' is not part of the parent step", id)
+			continue
+		}
+
+		delete(lookup, id)
 		reorderedActions = append(reorderedActions, action)
 	}
+
+	// Append unordered actions
+	var missingActions []string
+	for _, action := range lookup {
+		missingActions = append(missingActions, fmt.Sprintf("'%s' (%s)", action.Name, action.GetID()))
+		reorderedActions = append(reorderedActions, action)
+	}
+
+	if len(missingActions) > 0 {
+		message := fmt.Sprintf("The following child steps were not included in the steps order and will be added at the end.\nNote that their order at the end is not guaranteed:\n%v", missingActions)
+		diags.AddWarning(
+			"Some children steps were not included in the order",
+			message,
+		)
+	}
+
+	if diags.HasError() {
+		return diags
+	}
+
 	step.Actions = reorderedActions
+
+	return diags
 }
 
-func mapProcessChildStepsOrderToState(step *deployments.DeploymentStep, process *deployments.DeploymentProcess, state *schemas.ProcessChildStepsOrderResourceModel) {
+func mapProcessChildStepsOrderToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, state *schemas.ProcessChildStepsOrderResourceModel) {
 	state.ID = types.StringValue(step.GetID())
 	state.SpaceID = types.StringValue(process.SpaceID)
 	state.ProcessID = types.StringValue(process.GetID())
 	state.ParentID = types.StringValue(step.GetID())
 
-	// parent step's first action is "embedded" into step resource - we want to keep it always first
+	// parent step's first action is "embedded" into a step resource - we want to keep it always first
 	childActions := step.Actions[1:]
-	var children = make([]attr.Value, len(childActions))
-	for i, action := range childActions {
-		children[i] = types.StringValue(action.GetID())
+
+	configuredActions := len(state.Children.Elements())
+	var actions []attr.Value
+	// Take only "configured" amount of steps to avoid state drifting when practitioner didn't include all steps into the order resource
+	for _, action := range childActions[:configuredActions] {
+		if action != nil {
+			actions = append(actions, types.StringValue(action.GetID()))
+		}
 	}
-	state.Children, _ = types.ListValue(types.StringType, children)
+	state.Children, _ = types.ListValue(types.StringType, actions)
 }

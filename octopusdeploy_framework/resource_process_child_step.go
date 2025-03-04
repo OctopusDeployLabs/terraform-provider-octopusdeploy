@@ -5,13 +5,17 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/gitdependencies"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"strconv"
 )
 
 var _ resource.Resource = &processChildStepResource{}
@@ -65,8 +69,12 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	action := deployments.NewDeploymentAction(data.Name.ValueString(), data.ActionType.ValueString())
-	mapProcessChildStepActionFromState(data, action)
+	action := deployments.NewDeploymentAction(data.Name.ValueString(), data.Type.ValueString())
+	mapDiagnostics := mapProcessChildStepActionFromState(ctx, data, action)
+	resp.Diagnostics.Append(mapDiagnostics...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	parent.Actions = append(parent.Actions, action)
 
@@ -88,7 +96,11 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	mapProcessChildStepActionToState(createdAction, updatedStep, updatedProcess, data)
+	mapDiagnostics = mapProcessChildStepActionToState(updatedProcess, updatedStep, createdAction, data)
+	resp.Diagnostics.Append(mapDiagnostics...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("process child step created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -127,7 +139,11 @@ func (r *processChildStepResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	mapProcessChildStepActionToState(action, parent, process, data)
+	mapDiagnostics := mapProcessChildStepActionToState(process, parent, action, data)
+	resp.Diagnostics.Append(mapDiagnostics...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("process chidl step read (%s)", actionId))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -169,7 +185,11 @@ func (r *processChildStepResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	mapProcessChildStepActionFromState(data, action)
+	mapDiagnostics := mapProcessChildStepActionFromState(ctx, data, action)
+	resp.Diagnostics.Append(mapDiagnostics...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
 	if err != nil {
@@ -189,7 +209,11 @@ func (r *processChildStepResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	mapProcessChildStepActionToState(updatedAction, updatedStep, updatedProcess, data)
+	mapDiagnostics = mapProcessChildStepActionToState(updatedProcess, updatedStep, updatedAction, data)
+	resp.Diagnostics.Append(mapDiagnostics...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("process child step updated (%s)", actionId))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -242,34 +266,233 @@ func (r *processChildStepResource) Delete(ctx context.Context, req resource.Dele
 	resp.State.RemoveResource(ctx)
 }
 
-func mapProcessChildStepActionFromState(state *schemas.ProcessChildStepResourceModel, action *deployments.DeploymentAction) {
+func mapProcessChildStepActionFromState(ctx context.Context, state *schemas.ProcessChildStepResourceModel, action *deployments.DeploymentAction) diag.Diagnostics {
 	action.Name = state.Name.ValueString()
-	action.ActionType = state.ActionType.ValueString()
+	action.Slug = state.Slug.ValueString()
+	action.ActionType = state.Type.ValueString()
+	action.Condition = state.Condition.ValueString()
 
-	runOnServer := "False"
-	if state.RunOnServer.ValueBool() {
-		runOnServer = "True"
+	action.IsRequired = state.IsRequired.ValueBool()
+	action.IsDisabled = state.IsDisabled.ValueBool()
+	action.Notes = state.Notes.ValueString()
+	action.WorkerPool = state.WorkerPoolID.ValueString()
+	action.WorkerPoolVariable = state.WorkerPoolVariable.ValueString()
+	if state.Container == nil {
+		action.Container = nil
+	} else {
+		action.Container = deployments.NewDeploymentActionContainer(state.Container.FeedID.ValueStringPointer(), state.Container.Image.ValueStringPointer())
 	}
-	action.Properties["Octopus.Action.RunOnServer"] = core.NewPropertyValue(runOnServer, false)
 
-	action.Properties["Octopus.Action.Script.Syntax"] = core.NewPropertyValue(state.ScriptSyntax.ValueString(), false)
-	action.Properties["Octopus.Action.Script.ScriptBody"] = core.NewPropertyValue(state.ScriptBody.ValueString(), false)
-	action.Properties["Octopus.Action.MaintainedBy.TerraformProvider"] = core.NewPropertyValue("True", false)
+	diags := diag.Diagnostics{}
+
+	action.TenantTags, diags = util.SetToStringArray(ctx, state.TenantTags)
+	if diags.HasError() {
+		return diags
+	}
+
+	action.Environments, diags = util.SetToStringArray(ctx, state.Environments)
+	if diags.HasError() {
+		return diags
+	}
+
+	action.ExcludedEnvironments, diags = util.SetToStringArray(ctx, state.ExcludedEnvironments)
+	if diags.HasError() {
+		return diags
+	}
+
+	action.Channels, diags = util.SetToStringArray(ctx, state.Channels)
+	if diags.HasError() {
+		return diags
+	}
+
+	// Git Dependencies
+	var dependenciesMap map[string]types.Object
+	diags = state.GitDependencies.ElementsAs(ctx, &dependenciesMap, false)
+	if diags.HasError() {
+		return diags
+	}
+
+	var gitDependencies = make([]*gitdependencies.GitDependency, 0)
+	for key, dependencyObject := range dependenciesMap {
+		if dependencyObject.IsNull() {
+			continue
+		}
+
+		var dependencyState schemas.ProcessStepGitDependencyResourceModel
+		diags = dependencyObject.As(ctx, &dependencyState, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return diags
+		}
+
+		gitDependency := &gitdependencies.GitDependency{
+			Name:              key,
+			RepositoryUri:     dependencyState.RepositoryUri.ValueString(),
+			DefaultBranch:     dependencyState.DefaultBranch.ValueString(),
+			GitCredentialType: dependencyState.GitCredentialType.ValueString(),
+			GitCredentialId:   dependencyState.GitCredentialID.ValueString(),
+		}
+
+		if dependencyState.FilePathFilters.IsNull() {
+			gitDependency.FilePathFilters = nil
+		} else {
+			gitDependency.FilePathFilters, diags = util.SetToStringArray(ctx, dependencyState.FilePathFilters)
+			if diags.HasError() {
+				return diags
+			}
+		}
+
+		gitDependencies = append(gitDependencies, gitDependency)
+	}
+
+	action.GitDependencies = gitDependencies
+
+	// Packages
+	var packagesMap map[string]types.Object
+	diags = state.Packages.ElementsAs(ctx, &packagesMap, false)
+	if diags.HasError() {
+		return diags
+	}
+
+	var packageReferences = make([]*packages.PackageReference, 0)
+	for key, packageObject := range packagesMap {
+		if packageObject.IsNull() {
+			continue
+		}
+
+		var packageState schemas.ProcessStepPackageReferenceResourceModel
+		diags = packageObject.As(ctx, &packageState, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return diags
+		}
+
+		stateProperties := make(map[string]types.String, len(packageState.Properties.Elements()))
+		diags = packageState.Properties.ElementsAs(ctx, &stateProperties, false)
+		if diags.HasError() {
+
+			return diags
+		}
+
+		packageProperties := make(map[string]string, len(stateProperties))
+		for propertyKey, value := range stateProperties {
+			if value.IsNull() {
+				packageProperties[propertyKey] = ""
+			} else {
+				packageProperties[propertyKey] = value.ValueString()
+			}
+		}
+
+		packageReference := &packages.PackageReference{
+			ID:                  packageState.GetID(),
+			Name:                key,
+			PackageID:           packageState.PackageID.ValueString(),
+			FeedID:              packageState.FeedID.ValueString(),
+			AcquisitionLocation: packageState.AcquisitionLocation.ValueString(),
+			Properties:          packageProperties,
+		}
+		packageReferences = append(packageReferences, packageReference)
+	}
+
+	action.Packages = packageReferences
+
+	// Execution Properties
+	stateProperties := make(map[string]types.String, len(state.ExecutionProperties.Elements()))
+	propertiesDiags := state.ExecutionProperties.ElementsAs(ctx, &stateProperties, false)
+	if propertiesDiags.HasError() {
+		return propertiesDiags
+	}
+
+	properties := make(map[string]core.PropertyValue, len(stateProperties))
+	for key, value := range stateProperties {
+		if value.IsNull() {
+			properties[key] = core.NewPropertyValue("", false)
+		} else {
+			properties[key] = core.NewPropertyValue(value.ValueString(), false)
+		}
+	}
+
+	action.Properties = properties
+
+	return diag.Diagnostics{}
 }
 
-func mapProcessChildStepActionToState(action *deployments.DeploymentAction, step *deployments.DeploymentStep, process *deployments.DeploymentProcess, state *schemas.ProcessChildStepResourceModel) {
+func mapProcessChildStepActionToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, action *deployments.DeploymentAction, state *schemas.ProcessChildStepResourceModel) diag.Diagnostics {
 	state.ID = types.StringValue(action.GetID())
 	state.SpaceID = types.StringValue(process.SpaceID)
 	state.ProcessID = types.StringValue(process.GetID())
 	state.ParentID = types.StringValue(step.GetID())
 	state.Name = types.StringValue(action.Name)
-	state.ActionType = types.StringValue(action.ActionType)
 
-	value, _ := strconv.ParseBool(action.Properties["Octopus.Action.RunOnServer"].Value)
-	state.RunOnServer = types.BoolValue(value)
+	state.Type = types.StringValue(action.ActionType)
+	state.Slug = types.StringValue(action.Slug)
+	state.IsRequired = types.BoolValue(action.IsRequired)
+	state.IsDisabled = types.BoolValue(action.IsDisabled)
+	state.Condition = types.StringValue(action.Condition)
+	state.Notes = types.StringValue(action.Notes)
+	state.WorkerPoolID = types.StringValue(action.WorkerPool)
+	state.WorkerPoolVariable = types.StringValue(action.WorkerPoolVariable)
 
-	state.ScriptSyntax = types.StringValue(action.Properties["Octopus.Action.Script.Syntax"].Value)
-	state.ScriptBody = types.StringValue(action.Properties["Octopus.Action.Script.ScriptBody"].Value)
+	if action.Container == nil {
+		state.Container = nil
+	} else {
+		state.Container = &schemas.ProcessStepActionContainerModel{
+			FeedID: types.StringValue(action.Container.FeedID),
+			Image:  types.StringValue(action.Container.Image),
+		}
+	}
+
+	state.TenantTags = util.BuildStringSetOrEmpty(action.TenantTags)
+	state.Environments = util.BuildStringSetOrEmpty(action.Environments)
+	state.ExcludedEnvironments = util.BuildStringSetOrEmpty(action.ExcludedEnvironments)
+	state.Channels = util.BuildStringSetOrEmpty(action.Channels)
+
+	// Git Dependencies
+	stateDependencies := make(map[string]attr.Value, len(action.GitDependencies))
+	for _, dependency := range action.GitDependencies {
+		stateDependency := types.ObjectValueMust(
+			schemas.ProcessStepGitDependencyAttributeTypes(),
+			map[string]attr.Value{
+				"repository_uri":      types.StringValue(dependency.RepositoryUri),
+				"default_branch":      types.StringValue(dependency.DefaultBranch),
+				"git_credential_type": types.StringValue(dependency.GitCredentialType),
+				"file_path_filters":   types.SetValueMust(types.StringType, util.ToValueSlice(dependency.FilePathFilters)),
+				"git_credential_id":   types.StringValue(dependency.GitCredentialId),
+			},
+		)
+
+		stateDependencies[dependency.Name] = stateDependency
+	}
+
+	state.GitDependencies = types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), stateDependencies)
+
+	// Packages
+	statePackages := make(map[string]attr.Value, len(action.Packages))
+	for _, packageReference := range action.Packages {
+		packageProperties := util.ConvertMapStringToMapAttrValue(packageReference.Properties)
+		statePackage := types.ObjectValueMust(
+			schemas.ProcessStepPackageReferenceAttributeTypes(),
+			map[string]attr.Value{
+				"id":                   types.StringValue(packageReference.ID),
+				"package_id":           types.StringValue(packageReference.PackageID),
+				"feed_id":              types.StringValue(packageReference.FeedID),
+				"acquisition_location": types.StringValue(packageReference.AcquisitionLocation),
+				"properties":           types.MapValueMust(types.StringType, packageProperties),
+			},
+		)
+
+		statePackages[packageReference.Name] = statePackage
+	}
+
+	state.Packages = types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), statePackages)
+
+	// Execution Properties
+	stateProperties, diags := util.ConvertPropertiesToAttributeValuesMap(action.Properties)
+	if diags.HasError() {
+		return diags
+	}
+
+	state.ExecutionProperties = stateProperties
+
+	return diag.Diagnostics{}
 }
 
 func findActionFromProcessStepByID(step *deployments.DeploymentStep, actionId string) (*deployments.DeploymentAction, bool) {

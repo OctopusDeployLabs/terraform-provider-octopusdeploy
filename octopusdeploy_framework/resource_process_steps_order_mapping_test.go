@@ -71,7 +71,7 @@ func TestAccMapProcessStepsOrderingFromStateAddsErrorWhenStepIsNotPartOfTheProce
 	step2 := deployments.NewDeploymentStep("Step Two")
 	step2.SetID("step-2")
 
-	step4 := deployments.NewDeploymentStep("Step Four")
+	step4 := deployments.NewDeploymentStep("Step Four (Unordered)")
 	step4.SetID("step-4")
 
 	process := deployments.DeploymentProcess{
@@ -93,4 +93,43 @@ func TestAccMapProcessStepsOrderingFromStateAddsErrorWhenStepIsNotPartOfTheProce
 	}
 	expectedDiagnostics := []diag.Severity{diag.SeverityError, diag.SeverityWarning}
 	assert.Equal(t, expectedDiagnostics, diagnostics, "Expects to have an error about invalid step and warning about not included step")
+}
+
+func TestAccMapProcessStepsOrderingToStateTakesOnlyConfiguredAmountOfSteps(t *testing.T) {
+	step1 := deployments.NewDeploymentStep("Step One")
+	step1.SetID("00000000-0000-0000-0000-000000000001")
+
+	step2 := deployments.NewDeploymentStep("Step Two")
+	step2.SetID("00000000-0000-0000-0000-000000000002")
+
+	step3 := deployments.NewDeploymentStep("Step Three")
+	step3.SetID("00000000-0000-0000-0000-000000000003")
+
+	process := &deployments.DeploymentProcess{
+		SpaceID:   "Spaces-1",
+		ProjectID: "Projects-1",
+		Steps:     []*deployments.DeploymentStep{step1, step2, step3},
+	}
+	process.SetID("Processes-1")
+
+	state := schemas.ProcessStepsOrderResourceModel{
+		Steps: types.ListValueMust(types.StringType, []attr.Value{
+			types.StringValue(step3.ID),
+			types.StringValue(step2.ID),
+		}),
+	}
+
+	mapProcessStepsOrderToState(process, &state)
+
+	expectedState := schemas.ProcessStepsOrderResourceModel{
+		SpaceID:   types.StringValue(process.SpaceID),
+		ProcessID: types.StringValue(process.ID),
+		Steps: types.ListValueMust(types.StringType, []attr.Value{
+			types.StringValue(step1.ID),
+			types.StringValue(step2.ID),
+		}),
+	}
+	expectedState.ID = types.StringValue(process.ID)
+
+	assert.Equal(t, expectedState, state)
 }
