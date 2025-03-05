@@ -266,7 +266,7 @@ func getVariableOwnerID(data *schemas.VariableTypeResourceModel) (*basetypes.Str
 func validateVariable(variableSet *variables.VariableSet, newVariable *variables.Variable, variableOwnerId string) error {
 	for _, v := range variableSet.Variables {
 		if v.Name == newVariable.Name && v.Type == newVariable.Type && (v.IsSensitive || v.Value == newVariable.Value) && v.Description == newVariable.Description && v.IsSensitive == newVariable.IsSensitive {
-			scopeMatches, _, err := variables.MatchesScope(v.Scope, &newVariable.Scope)
+			scopeMatches, err := variables.MatchesScopeStrict(&v.Scope, &newVariable.Scope)
 			if err != nil {
 				return err
 			}
