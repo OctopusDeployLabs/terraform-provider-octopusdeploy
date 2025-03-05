@@ -29,22 +29,22 @@ func TestMain(m *testing.M) {
 		testFramework := test.OctopusContainerTest{}
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer()
 		if err != nil {
-			log.Printf("Failed to arrange containers: (%s)", err.Error())
+			log.Fatalf("Failed to arrange containers: (%s)", err.Error())
 			return
 		}
 		err := os.Setenv("OCTOPUS_URL", octoContainer.URI)
 		if err != nil {
-			log.Printf("Failed to set OCTOPUS_URL env: (%s)", err.Error())
+			log.Fatalf("Failed to set OCTOPUS_URL env: (%s)", err.Error())
 			return
 		}
 		err = os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
 		if err != nil {
-			log.Printf("Failed to set OCTOPUS_APIKEY env: (%s)", err.Error())
+			log.Fatalf("Failed to set OCTOPUS_APIKEY env: (%s)", err.Error())
 			return
 		}
 		err = os.Setenv("TF_ACC", "1")
 		if err != nil {
-			log.Printf("Failed to set TF_ACC env: (%s)", err.Error())
+			log.Fatalf("Failed to set TF_ACC env: (%s)", err.Error())
 			return
 		}
 
