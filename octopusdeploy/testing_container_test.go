@@ -30,10 +30,23 @@ func TestMain(m *testing.M) {
 		octoContainer, octoClient, sqlServerContainer, network, err = testFramework.ArrangeContainer()
 		if err != nil {
 			log.Printf("Failed to arrange containers: (%s)", err.Error())
+			return
 		}
-		os.Setenv("OCTOPUS_URL", octoContainer.URI)
-		os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
-		os.Setenv("TF_ACC", "1")
+		err := os.Setenv("OCTOPUS_URL", octoContainer.URI)
+		if err != nil {
+			log.Printf("Failed to set OCTOPUS_URL env: (%s)", err.Error())
+			return
+		}
+		err = os.Setenv("OCTOPUS_APIKEY", test.ApiKey)
+		if err != nil {
+			log.Printf("Failed to set OCTOPUS_APIKEY env: (%s)", err.Error())
+			return
+		}
+		err = os.Setenv("TF_ACC", "1")
+		if err != nil {
+			log.Printf("Failed to set TF_ACC env: (%s)", err.Error())
+			return
+		}
 
 		code := m.Run()
 		ctx := context.Background()
