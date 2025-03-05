@@ -47,15 +47,15 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 				Default("Success").
 				Validators(stringvalidator.OneOf("Success", "Failure", "Always", "Variable")).
 				Build(),
-			"step_properties": util.ResourceMap(types.StringType).
+			"properties": util.ResourceMap(types.StringType).
 				Description("A collection of process step properties where the key is the property name and the value is its value.").
 				Optional().
 				Computed().
-				Default(mapdefault.StaticValue(types.MapValueMust(types.StringType, map[string]attr.Value{}))).
+				DefaultEmpty().
 				Build(),
 
-			"action_type": util.ResourceString().
-				Description("Type of the step action.").
+			"type": util.ResourceString().
+				Description("Execution type of the step.").
 				Required().
 				Build(),
 			"slug": util.ResourceString().
@@ -121,7 +121,7 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 			"container":        resourceActionContainerAttribute(),
 			"git_dependencies": resourceActionGitDependenciesAttribute(),
 			"packages":         resourceActionPackageReferencesAttribute(),
-			"action_properties": util.ResourceMap(types.StringType).
+			"execution_properties": util.ResourceMap(types.StringType).
 				Description("A collection of step action properties where the key is the property name and the value is its value.").
 				Optional().
 				Computed().
@@ -142,9 +142,9 @@ type ProcessStepResourceModel struct {
 	StartTrigger       types.String `tfsdk:"start_trigger"`
 	PackageRequirement types.String `tfsdk:"package_requirement"`
 	Condition          types.String `tfsdk:"condition"`
-	StepProperties     types.Map    `tfsdk:"step_properties"`
+	Properties         types.Map    `tfsdk:"properties"`
 
-	ActionType           types.String                     `tfsdk:"action_type"`
+	Type                 types.String                     `tfsdk:"type"`
 	Slug                 types.String                     `tfsdk:"slug"`
 	IsDisabled           types.Bool                       `tfsdk:"is_disabled"`
 	IsRequired           types.Bool                       `tfsdk:"is_required"`
@@ -158,7 +158,7 @@ type ProcessStepResourceModel struct {
 	Container            *ProcessStepActionContainerModel `tfsdk:"container"`
 	GitDependencies      types.Map                        `tfsdk:"git_dependencies"`
 	Packages             types.Map                        `tfsdk:"packages"`
-	ActionProperties     types.Map                        `tfsdk:"action_properties"`
+	ExecutionProperties  types.Map                        `tfsdk:"execution_properties"`
 
 	ResourceModel
 }
