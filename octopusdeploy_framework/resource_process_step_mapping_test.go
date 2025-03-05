@@ -23,11 +23,11 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 		StartTrigger:       types.StringValue("StartAfterPrevious"),
 		PackageRequirement: types.StringValue("LetOctopusDecide"),
 		Condition:          types.StringValue("Always"),
-		StepProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
+		Properties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.MaxParallelism": types.StringValue("2"),
 			"Octopus.Action.TargetRoles":    types.StringValue("agent-1,agent-2"),
 		}),
-		ActionType:         types.StringValue("Octopus.Script"),
+		Type:               types.StringValue("Octopus.Script"),
 		Slug:               types.StringValue("step-one"),
 		IsRequired:         types.BoolValue(true),
 		IsDisabled:         types.BoolValue(false),
@@ -80,7 +80,7 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 				},
 			),
 		}),
-		ActionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
+		ExecutionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.RunOnServer":       types.StringValue("True"),
 			"Octopus.Action.Script.ScriptBody": types.StringValue("Write-Host \"Step 1, Action 1\""),
 		}),
@@ -164,10 +164,10 @@ func TestAccMapProcessStepFromStateForScriptStep(t *testing.T) {
 		StartTrigger:       types.StringValue("StartAfterPrevious"),
 		PackageRequirement: types.StringValue("LetOctopusDecide"),
 		Condition:          types.StringValue("Success"),
-		ActionType:         types.StringValue("Octopus.Script"),
+		Type:               types.StringValue("Octopus.Script"),
 		TenantTags:         types.SetValueMust(types.StringType, []attr.Value{}),
 		Packages:           types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{}),
-		ActionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
+		ExecutionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.Script.ScriptBody": types.StringValue("Write-Host \"Minimum attributes\""),
 		}),
 	}
@@ -289,11 +289,11 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 		StartTrigger:       types.StringValue("StartAfterPrevious"),
 		PackageRequirement: types.StringValue("LetOctopusDecide"),
 		Condition:          types.StringValue("Success"),
-		StepProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
+		Properties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.MaxParallelism": types.StringValue("2"),
 			"Octopus.Action.TargetRoles":    types.StringValue("agent-1,agent-2"),
 		}),
-		ActionType:         types.StringValue("Octopus.Script"),
+		Type:               types.StringValue("Octopus.Script"),
 		Slug:               types.StringValue("step-one"),
 		IsRequired:         types.BoolValue(true),
 		IsDisabled:         types.BoolValue(false),
@@ -356,7 +356,7 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 				},
 			),
 		}),
-		ActionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
+		ExecutionProperties: types.MapValueMust(types.StringType, map[string]attr.Value{
 			"Octopus.Action.RunOnServer":       types.StringValue("True"),
 			"Octopus.Action.Script.ScriptBody": types.StringValue("Write-Host \"Step 1, Action 1\""),
 		}),

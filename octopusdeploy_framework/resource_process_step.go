@@ -225,11 +225,11 @@ func mapProcessStepFromState(ctx context.Context, state *schemas.ProcessStepReso
 	step.PackageRequirement = deployments.DeploymentStepPackageRequirement(state.PackageRequirement.ValueString())
 	step.Condition = deployments.DeploymentStepConditionType(state.Condition.ValueString())
 
-	if state.StepProperties.IsNull() {
+	if state.Properties.IsNull() {
 		step.Properties = make(map[string]core.PropertyValue)
 	} else {
-		stateProperties := make(map[string]types.String, len(state.StepProperties.Elements()))
-		diags := state.StepProperties.ElementsAs(ctx, &stateProperties, false)
+		stateProperties := make(map[string]types.String, len(state.Properties.Elements()))
+		diags := state.Properties.ElementsAs(ctx, &stateProperties, false)
 		if diags.HasError() {
 			return diags
 		}
@@ -250,7 +250,7 @@ func mapProcessStepFromState(ctx context.Context, state *schemas.ProcessStepReso
 }
 
 func mapProcessStepEmbeddedActionFromState(ctx context.Context, state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) diag.Diagnostics {
-	actionType := state.ActionType.ValueString()
+	actionType := state.Type.ValueString()
 	name := state.Name.ValueString()
 
 	if step.Actions == nil || len(step.Actions) == 0 {
@@ -268,7 +268,7 @@ func mapProcessStepEmbeddedActionFromState(ctx context.Context, state *schemas.P
 func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessStepResourceModel, action *deployments.DeploymentAction) diag.Diagnostics {
 	action.Name = state.Name.ValueString()
 	action.Slug = state.Slug.ValueString() // update only embedded action slug(step slug remains original), same as UI behaviour
-	action.ActionType = state.ActionType.ValueString()
+	action.ActionType = state.Type.ValueString()
 	// action.Condition is not updated: replicates UI behaviour where condition of the first action of step is always a default value (Success)
 
 	action.IsRequired = state.IsRequired.ValueBool()
@@ -411,11 +411,11 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		action.Packages = packageReferences
 	}
 
-	if state.ActionProperties.IsNull() {
+	if state.ExecutionProperties.IsNull() {
 		action.Properties = nil
 	} else {
-		stateProperties := make(map[string]types.String, len(state.ActionProperties.Elements()))
-		propertiesDiags := state.ActionProperties.ElementsAs(ctx, &stateProperties, false)
+		stateProperties := make(map[string]types.String, len(state.ExecutionProperties.Elements()))
+		propertiesDiags := state.ExecutionProperties.ElementsAs(ctx, &stateProperties, false)
 		if propertiesDiags.HasError() {
 			return propertiesDiags
 		}
@@ -454,7 +454,7 @@ func mapProcessStepToState(process *deployments.DeploymentProcess, step *deploym
 		return diags
 	}
 
-	state.StepProperties = stateProperties
+	state.Properties = stateProperties
 
 	if len(step.Actions) > 0 && step.Actions[0] != nil {
 		return mapProcessStepActionToState(step.Actions[0], state)
@@ -464,7 +464,7 @@ func mapProcessStepToState(process *deployments.DeploymentProcess, step *deploym
 }
 
 func mapProcessStepActionToState(action *deployments.DeploymentAction, state *schemas.ProcessStepResourceModel) diag.Diagnostics {
-	state.ActionType = types.StringValue(action.ActionType)
+	state.Type = types.StringValue(action.ActionType)
 	state.Slug = types.StringValue(action.Slug)
 	state.IsRequired = types.BoolValue(action.IsRequired)
 	state.IsDisabled = types.BoolValue(action.IsDisabled)
@@ -536,7 +536,7 @@ func mapProcessStepActionToState(action *deployments.DeploymentAction, state *sc
 		return diags
 	}
 
-	state.ActionProperties = stateProperties
+	state.ExecutionProperties = stateProperties
 
 	return diag.Diagnostics{}
 }
