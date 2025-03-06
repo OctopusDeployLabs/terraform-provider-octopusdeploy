@@ -111,7 +111,7 @@ func (r *processChildStepsOrderResource) Read(ctx context.Context, req resource.
 
 	parent, ok := findStepFromProcessByID(process, parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Error reading process child steps order, unable to find a parent step", err.Error())
+		resp.Diagnostics.AddError("Error reading process child steps order", fmt.Sprintf("unable to find a parent step (id: %s)", parentId))
 		return
 	}
 
@@ -146,7 +146,7 @@ func (r *processChildStepsOrderResource) Update(ctx context.Context, req resourc
 
 	parent, ok := findStepFromProcessByID(process, parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Error updating process child steps order, unable to find a parent step", err.Error())
+		resp.Diagnostics.AddError("Error updating process child steps order", fmt.Sprintf("unable to find a parent step (id: %s)", parentId))
 		return
 	}
 
@@ -164,7 +164,7 @@ func (r *processChildStepsOrderResource) Update(ctx context.Context, req resourc
 
 	updatedParent, ok := findStepFromProcessByID(updatedProcess, parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Error updating process child steps order, unable to find a parent step", err.Error())
+		resp.Diagnostics.AddError("Error updating process child steps order", fmt.Sprintf("unable to find a parent step (id: %s)", parentId))
 		return
 	}
 
