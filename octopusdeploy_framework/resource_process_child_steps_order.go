@@ -61,7 +61,7 @@ func (r *processChildStepsOrderResource) Create(ctx context.Context, req resourc
 
 	parent, ok := findStepFromProcessByID(process, parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Error creating process child steps order, unable to find a parent step", err.Error())
+		resp.Diagnostics.AddError("Error creating process child steps order", fmt.Sprintf("unable to find a parent step with id '%s'", parentId))
 		return
 	}
 
@@ -79,7 +79,7 @@ func (r *processChildStepsOrderResource) Create(ctx context.Context, req resourc
 
 	updatedParent, ok := findStepFromProcessByID(updatedProcess, parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Error creating process child steps order, unable to find a parent step", err.Error())
+		resp.Diagnostics.AddError("Error creating process child steps order", fmt.Sprintf("unable to find a parent step with id '%s'", parentId))
 		return
 	}
 
@@ -267,10 +267,10 @@ func mapProcessChildStepsOrderToState(process *deployments.DeploymentProcess, st
 	state.ProcessID = types.StringValue(process.GetID())
 	state.ParentID = types.StringValue(step.GetID())
 
-	// parent step's first action is "embedded" into a step resource - we want to keep it always first
+	// parent step's first action is "embedded" into a step resource - we want to exclude it from ordering and keep it always first
 	childActions := step.Actions[1:]
 
-	configuredActions := len(state.Children.Elements())
+	configuredActions := min(len(state.Children.Elements()), len(childActions))
 	var actions []attr.Value
 	// Take only "configured" amount of steps to avoid state drifting when practitioner didn't include all steps into the order resource
 	for _, action := range childActions[:configuredActions] {
