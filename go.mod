@@ -6,7 +6,7 @@ toolchain go1.22.5
 
 require (
 	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.65.0
-	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20250228001047-afcf3dc87660
+	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20250306071547-20d5a2ebfb94
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
