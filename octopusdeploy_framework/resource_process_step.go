@@ -116,7 +116,8 @@ func (r *processStepResource) Read(ctx context.Context, req resource.ReadRequest
 
 	step, exists := findStepFromProcessByID(process, stepId)
 	if !exists {
-		tflog.Info(ctx, fmt.Sprintf("process step read (id: %s), but not found, removing ...", stepId))
+		// Remove from state when not found in the process, so terraform will try to recreate it
+		tflog.Info(ctx, fmt.Sprintf("process step read (id: %s), but not found, removing from state ...", stepId))
 		resp.State.RemoveResource(ctx)
 		return
 	}

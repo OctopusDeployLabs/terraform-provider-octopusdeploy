@@ -295,7 +295,7 @@ func mapProcessStepsOrderToState(process *deployments.DeploymentProcess, state *
 	state.SpaceID = types.StringValue(process.SpaceID)
 	state.ProcessID = types.StringValue(process.GetID())
 
-	configuredSteps := len(state.Steps.Elements())
+	configuredSteps := min(len(state.Steps.Elements()), len(process.Steps))
 	var steps []attr.Value
 	// Take only "configured" amount of steps to avoid state drifting when practitioner didn't include all steps into the order resource
 	for _, step := range process.Steps[:configuredSteps] {

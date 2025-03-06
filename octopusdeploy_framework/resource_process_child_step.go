@@ -133,9 +133,11 @@ func (r *processChildStepResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	action, ok := findActionFromProcessStepByID(parent, actionId)
-	if !ok {
-		resp.Diagnostics.AddError("unable to find process child step", actionId)
+	action, exists := findActionFromProcessStepByID(parent, actionId)
+	if !exists {
+		// Remove from state when action is not found in the step, so terraform will try to recreate it
+		tflog.Info(ctx, fmt.Sprintf("reading process child step (id: %s), but not found, removing from state ...", actionId))
+		resp.State.RemoveResource(ctx)
 		return
 	}
 
