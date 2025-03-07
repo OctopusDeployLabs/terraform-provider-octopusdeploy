@@ -28,6 +28,8 @@ github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-2025
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20250228001047-afcf3dc87660/go.mod h1:g/WBZgtRp3XojqvlI8qh/K1eLeGd2fyUcamDL9o811U=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20250306071547-20d5a2ebfb94 h1:5xcXkt/461jhAazI5HfQHylZ3+6frlMmk9bkhKhH6vA=
 github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20250306071547-20d5a2ebfb94/go.mod h1:UAZ9L//VwW/GcXW89n05pTpPSeLAXDf2A6SF4rz2PFA=
+github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20250307001652-0d83fd2b1e49 h1:yXSNfiTSlnR9dxVQBz6hi911yulxsZME8xD1vDf8l1M=
+github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20250307001652-0d83fd2b1e49/go.mod h1:UAZ9L//VwW/GcXW89n05pTpPSeLAXDf2A6SF4rz2PFA=
 github.com/ProtonMail/go-crypto v1.1.0-alpha.2 h1:bkyFVUP+ROOARdgCiJzNQo2V2kiB97LyUpzH9P6Hrlg=
 github.com/ProtonMail/go-crypto v1.1.0-alpha.2/go.mod h1:rA3QumHc/FZ8pAHreoekgiAbzpNsfQAosU5td4SnOrE=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=

@@ -25,6 +25,8 @@ jobs:
           terraform_wrapper: false
       - name: Set up Go
         uses: actions/setup-go@v2
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
