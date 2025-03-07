@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ resource.Resource = &processChildStepsOrderResource{}
+var _ resource.ResourceWithModifyPlan = &processChildStepsOrderResource{}
 
 type processChildStepsOrderResource struct {
 	*Config
@@ -34,6 +34,94 @@ func (r *processChildStepsOrderResource) Schema(_ context.Context, _ resource.Sc
 
 func (r *processChildStepsOrderResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	r.Config = ResourceConfiguration(req, resp)
+}
+
+func (r *processChildStepsOrderResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		resp.Diagnostics.AddWarning("Deleting child steps order", "Applying this resource destruction will not update child steps and their order")
+		return
+	}
+
+	var state *schemas.ProcessChildStepsOrderResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if state.SpaceID.IsUnknown() {
+		return
+	}
+
+	if state.ProcessID.IsUnknown() {
+		return
+	}
+
+	if state.ParentID.IsUnknown() {
+		return
+	}
+
+	spaceId := state.SpaceID.ValueString()
+	processId := state.ProcessID.ValueString()
+	parentId := state.ParentID.ValueString()
+
+	// Do the validation based on steps stored in Octopus Deploy
+	client := r.Config.Client
+	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
+	if err != nil {
+		resp.Diagnostics.AddError("unable to find process", err.Error())
+		return
+	}
+
+	parent, ok := findStepFromProcessByID(process, parentId)
+	if !ok {
+		resp.Diagnostics.AddError("Error modifying plan for child steps order", fmt.Sprintf("unable to find a parent step with id '%s'", parentId))
+		return
+	}
+
+	configuredActions := util.GetIds(state.Children)
+
+	// Validate that all actions are included in the order resource
+	configuredActionsLookup := make(map[string]bool, len(configuredActions))
+	for _, id := range configuredActions {
+		configuredActionsLookup[id] = true
+	}
+
+	var missingActions []string
+	for _, action := range parent.Actions[1:] {
+		if !configuredActionsLookup[action.GetID()] {
+			missingActions = append(missingActions, fmt.Sprintf("'%s' (%s)", action.Name, action.GetID()))
+		}
+	}
+
+	if len(missingActions) > 0 {
+		message := fmt.Sprintf("The following child steps were not included in the steps order and will be added at the end.\nNote that their order at the end is not guaranteed:\n%v", missingActions)
+		resp.Diagnostics.AddWarning(
+			"Some process child steps were not included in the order",
+			message,
+		)
+	}
+
+	// Validate that included actions belong to the parent step
+	existingActions := make(map[string]*deployments.DeploymentAction)
+	for _, action := range parent.Actions {
+		existingActions[action.GetID()] = action
+	}
+
+	var unknownActions []string
+	for _, id := range configuredActions {
+		_, found := existingActions[id]
+		if !found {
+			unknownActions = append(unknownActions, id)
+		}
+	}
+
+	if len(unknownActions) > 0 {
+		message := fmt.Sprintf("Following steps are not part of the process: %v", unknownActions)
+		resp.Diagnostics.AddWarning(
+			fmt.Sprintf("Some ordered child steps do not belong to the parent step '%s'", parent.ID),
+			message,
+		)
+	}
 }
 
 func (r *processChildStepsOrderResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -229,7 +317,7 @@ func mapProcessChildStepsOrderFromState(state *schemas.ProcessChildStepsOrderRes
 	for _, id := range orderedIds {
 		action, found := lookup[id]
 		if !found {
-			diags.AddError("Ordered child step with id '%s' is not part of the parent step", id)
+			diags.AddError("Error mapping child steps order", fmt.Sprintf("Child step (id: %s) does not belong to the parent step", id))
 			continue
 		}
 
@@ -247,7 +335,7 @@ func mapProcessChildStepsOrderFromState(state *schemas.ProcessChildStepsOrderRes
 	if len(missingActions) > 0 {
 		message := fmt.Sprintf("The following child steps were not included in the steps order and will be added at the end.\nNote that their order at the end is not guaranteed:\n%v", missingActions)
 		diags.AddWarning(
-			"Some children steps were not included in the order",
+			"Some child steps were not included in the order",
 			message,
 		)
 	}
