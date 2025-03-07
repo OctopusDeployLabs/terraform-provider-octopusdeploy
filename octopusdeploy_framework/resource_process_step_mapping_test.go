@@ -86,7 +86,7 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 		}),
 	}
 
-	step := deployments.NewDeploymentStep("Step One")
+	step := deployments.NewDeploymentStep("Should be replaced with name from the state")
 
 	diags := mapProcessStepFromState(ctx, &state, step)
 
