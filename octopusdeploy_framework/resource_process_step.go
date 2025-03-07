@@ -222,6 +222,7 @@ func (r *processStepResource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func mapProcessStepFromState(ctx context.Context, state *schemas.ProcessStepResourceModel, step *deployments.DeploymentStep) diag.Diagnostics {
+	step.Name = state.Name.ValueString()
 	step.StartTrigger = deployments.DeploymentStepStartTrigger(state.StartTrigger.ValueString())
 	step.PackageRequirement = deployments.DeploymentStepPackageRequirement(state.PackageRequirement.ValueString())
 	step.Condition = deployments.DeploymentStepConditionType(state.Condition.ValueString())
