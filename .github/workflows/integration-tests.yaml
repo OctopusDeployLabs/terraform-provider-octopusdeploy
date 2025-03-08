@@ -92,7 +92,7 @@ jobs:
           OCTODISABLEOCTOCONTAINERLOGGING: true
           OCTOTESTSKIPINIT: true
           GOMAXPROCS: 1
-          OCTOTESTVERSION: 2024.4
+          OCTOTESTVERSION: latest
           OCTOTESTIMAGEURL: octopusdeploy/octopusdeploy
           OCTOTESTRETRYCOUNT: 1
       - name: Upload test artifacts
