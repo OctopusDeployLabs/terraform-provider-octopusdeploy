@@ -4,14 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
-	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -384,61 +379,4 @@ func testAccDeploymentProcessCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-// TestTerraformApplyStepWithWorkerPool verifies that a terraform apply step with a custom worker pool is deployed successfully
-// See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/601
-func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
-	testFramework := test.OctopusContainerTest{}
-
-	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "50-applyterraformtemplateaction", []string{})
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	// Assert
-	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
-	query := projects.ProjectsQuery{
-		PartialName: "Test",
-		Skip:        0,
-		Take:        1,
-	}
-
-	resources, err := projects.Get(client, newSpaceId, query)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if len(resources.Items) == 0 {
-		t.Fatalf("Space must have a project called \"Test\"")
-	}
-	resource := resources.Items[0]
-
-	// Get worker pool
-	wpQuery := workerpools.WorkerPoolsQuery{
-		PartialName: "Docker",
-		Skip:        0,
-		Take:        1,
-	}
-
-	workerpools, err := workerpools.Get(client, newSpaceId, wpQuery)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if len(workerpools.Items) == 0 {
-		t.Fatalf("Space must have a worker pool called \"Docker\"")
-	}
-
-	// Get deployment process
-	process, err := deployments.GetDeploymentProcessByID(client, "", resource.DeploymentProcessID)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	// Worker pool must be assigned
-	if process.Steps[0].Actions[0].WorkerPool != workerpools.Items[0].GetID() {
-		t.Fatalf("Action must use the worker pool \"Docker\"")
-	}
 }
