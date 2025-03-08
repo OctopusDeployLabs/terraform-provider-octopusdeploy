@@ -48,7 +48,7 @@ func TestAccTenantBasic(t *testing.T) {
 					testTenantExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
 					resource.TestCheckResourceAttr(resourceName, "description", newDescription),
-					resource.TestCheckResourceAttr(resourceName, "is_disabled", strconv.FormatBool(true)),
+					resource.TestCheckResourceAttr(resourceName, "is_disabled", strconv.FormatBool(false)),
 				),
 				Config: testAccTenantBasic(lifecycleLocalName, lifecycleName, projectGroupLocalName, projectGroupName, projectLocalName, projectName, projectDescription, environmentLocalName, environmentName, localName, name, newDescription, true),
 			},
