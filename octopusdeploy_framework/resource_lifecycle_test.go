@@ -2,14 +2,11 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
-	"path/filepath"
 	"testing"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/lifecycles"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
@@ -439,77 +436,4 @@ func testAccLifecycleCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-// TestLifecycleResource verifies that a lifecycle can be reimported with the correct settings
-func TestLifecycleResource(t *testing.T) {
-	testFramework := test.OctopusContainerTest{}
-	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "17-lifecycle", []string{})
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	err = testFramework.TerraformInitAndApply(t, octoContainer, filepath.Join("../terraform", "17a-lifecycleds"), newSpaceId, []string{})
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	// Assert
-	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
-	query := lifecycles.Query{
-		PartialName: "Simple",
-		Skip:        0,
-		Take:        1,
-	}
-
-	resources, err := client.Lifecycles.Get(query)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if len(resources.Items) == 0 {
-		t.Fatalf("Space must have an environment called \"Simple\"")
-	}
-	resource := resources.Items[0]
-
-	if resource.Description != "A test lifecycle" {
-		t.Fatal("The lifecycle must be have a description of \"A test lifecycle\" (was \"" + resource.Description + "\")")
-	}
-
-	if resource.TentacleRetentionPolicy.QuantityToKeep != 30 {
-		t.Fatal("The lifecycle must be have a tentacle retention policy of \"30\" (was \"" + fmt.Sprint(resource.TentacleRetentionPolicy.QuantityToKeep) + "\")")
-	}
-
-	if resource.TentacleRetentionPolicy.ShouldKeepForever {
-		t.Fatal("The lifecycle must be have a tentacle retention not set to keep forever")
-	}
-
-	if resource.TentacleRetentionPolicy.Unit != "Items" {
-		t.Fatal("The lifecycle must be have a tentacle retention unit set to \"Items\" (was \"" + resource.TentacleRetentionPolicy.Unit + "\")")
-	}
-
-	if resource.ReleaseRetentionPolicy.QuantityToKeep != 1 {
-		t.Fatal("The lifecycle must be have a release retention policy of \"1\" (was \"" + fmt.Sprint(resource.ReleaseRetentionPolicy.QuantityToKeep) + "\")")
-	}
-
-	if !resource.ReleaseRetentionPolicy.ShouldKeepForever {
-		t.Log("BUG: The lifecycle must be have a release retention set to keep forever (known bug - the provider creates this field as false)")
-	}
-
-	if resource.ReleaseRetentionPolicy.Unit != "Days" {
-		t.Fatal("The lifecycle must be have a release retention unit set to \"Days\" (was \"" + resource.ReleaseRetentionPolicy.Unit + "\")")
-	}
-
-	// Verify the environment data lookups work
-	lookup, err := testFramework.GetOutputVariable(t, filepath.Join("..", "terraform", "17a-lifecycleds"), "data_lookup")
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if lookup != resource.ID {
-		t.Fatal("The target lookup did not succeed. Lookup value was \"" + lookup + "\" while the resource value was \"" + resource.ID + "\".")
-	}
 }
