@@ -301,13 +301,13 @@ func resourceActionPackageReferencesAttribute() resourceSchema.MapNestedAttribut
 					Description("The feed ID associated with this package reference").
 					Optional().
 					Computed().
-					Default("Server").
+					Default("feeds-builtin").
 					Build(),
 				"acquisition_location": util.ResourceString().
 					Description("Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression").
 					Optional().
 					Computed().
-					Default("feeds-builtin").
+					Default("Server").
 					Build(),
 				"properties": util.ResourceMap(types.StringType).
 					Description("A collection of properties associated with this package").

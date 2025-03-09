@@ -278,11 +278,7 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 	action.Notes = state.Notes.ValueString()
 	action.WorkerPool = state.WorkerPoolID.ValueString()
 	action.WorkerPoolVariable = state.WorkerPoolVariable.ValueString()
-	if state.Container == nil {
-		action.Container = nil
-	} else {
-		action.Container = deployments.NewDeploymentActionContainer(state.Container.FeedID.ValueStringPointer(), state.Container.Image.ValueStringPointer())
-	}
+	action.Container = deployments.NewDeploymentActionContainer(state.Container.FeedID.ValueStringPointer(), state.Container.Image.ValueStringPointer())
 
 	diags := diag.Diagnostics{}
 
@@ -291,148 +287,126 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		return diags
 	}
 
-	if state.Environments.IsNull() {
-		action.Environments = nil
-	} else {
-		action.Environments, diags = util.SetToStringArray(ctx, state.Environments)
-		if diags.HasError() {
-			return diags
-		}
+	action.Environments, diags = util.SetToStringArray(ctx, state.Environments)
+	if diags.HasError() {
+		return diags
 	}
 
-	if state.ExcludedEnvironments.IsNull() {
-		action.ExcludedEnvironments = nil
-	} else {
-		action.ExcludedEnvironments, diags = util.SetToStringArray(ctx, state.ExcludedEnvironments)
-		if diags.HasError() {
-			return diags
-		}
+	action.ExcludedEnvironments, diags = util.SetToStringArray(ctx, state.ExcludedEnvironments)
+	if diags.HasError() {
+		return diags
 	}
 
-	if state.Channels.IsNull() {
-		action.Channels = nil
-	} else {
-		action.Channels, diags = util.SetToStringArray(ctx, state.Channels)
-		if diags.HasError() {
-			return diags
-		}
+	action.Channels, diags = util.SetToStringArray(ctx, state.Channels)
+	if diags.HasError() {
+		return diags
 	}
 
-	if state.GitDependencies.IsNull() {
-		action.GitDependencies = []*gitdependencies.GitDependency{}
-	} else {
-		var dependenciesMap map[string]types.Object
-		diags = state.GitDependencies.ElementsAs(ctx, &dependenciesMap, false)
+	// Git Dependencies
+	var dependenciesMap map[string]types.Object
+	diags = state.GitDependencies.ElementsAs(ctx, &dependenciesMap, false)
+	if diags.HasError() {
+		return diags
+	}
+
+	var gitDependencies = make([]*gitdependencies.GitDependency, 0)
+	for key, dependencyObject := range dependenciesMap {
+		if dependencyObject.IsNull() {
+			continue
+		}
+
+		var dependencyState schemas.ProcessStepGitDependencyResourceModel
+		diags = dependencyObject.As(ctx, &dependencyState, basetypes.ObjectAsOptions{})
 		if diags.HasError() {
 			return diags
 		}
 
-		var gitDependencies = make([]*gitdependencies.GitDependency, 0)
-		for key, dependencyObject := range dependenciesMap {
-			if dependencyObject.IsNull() {
-				continue
-			}
+		gitDependency := &gitdependencies.GitDependency{
+			Name:              key,
+			RepositoryUri:     dependencyState.RepositoryUri.ValueString(),
+			DefaultBranch:     dependencyState.DefaultBranch.ValueString(),
+			GitCredentialType: dependencyState.GitCredentialType.ValueString(),
+			GitCredentialId:   dependencyState.GitCredentialID.ValueString(),
+		}
 
-			var dependencyState schemas.ProcessStepGitDependencyResourceModel
-			diags = dependencyObject.As(ctx, &dependencyState, basetypes.ObjectAsOptions{})
+		if dependencyState.FilePathFilters.IsNull() {
+			gitDependency.FilePathFilters = nil
+		} else {
+			gitDependency.FilePathFilters, diags = util.SetToStringArray(ctx, dependencyState.FilePathFilters)
 			if diags.HasError() {
 				return diags
 			}
-
-			gitDependency := &gitdependencies.GitDependency{
-				Name:              key,
-				RepositoryUri:     dependencyState.RepositoryUri.ValueString(),
-				DefaultBranch:     dependencyState.DefaultBranch.ValueString(),
-				GitCredentialType: dependencyState.GitCredentialType.ValueString(),
-				GitCredentialId:   dependencyState.GitCredentialID.ValueString(),
-			}
-
-			if dependencyState.FilePathFilters.IsNull() {
-				gitDependency.FilePathFilters = nil
-			} else {
-				gitDependency.FilePathFilters, diags = util.SetToStringArray(ctx, dependencyState.FilePathFilters)
-				if diags.HasError() {
-					return diags
-				}
-			}
-
-			gitDependencies = append(gitDependencies, gitDependency)
 		}
 
-		action.GitDependencies = gitDependencies
+		gitDependencies = append(gitDependencies, gitDependency)
 	}
 
-	if state.Packages.IsNull() {
-		action.Packages = []*packages.PackageReference{}
-	} else {
-		var packagesMap map[string]types.Object
-		diags = state.Packages.ElementsAs(ctx, &packagesMap, false)
+	action.GitDependencies = gitDependencies
+
+	// Packages
+	var packagesMap map[string]types.Object
+	diags = state.Packages.ElementsAs(ctx, &packagesMap, false)
+	if diags.HasError() {
+		return diags
+	}
+
+	packageReferences := make([]*packages.PackageReference, 0)
+	for key, packageObject := range packagesMap {
+		if packageObject.IsNull() {
+			continue
+		}
+
+		var packageState schemas.ProcessStepPackageReferenceResourceModel
+		diags = packageObject.As(ctx, &packageState, basetypes.ObjectAsOptions{})
 		if diags.HasError() {
 			return diags
 		}
 
-		var packageReferences = make([]*packages.PackageReference, 0)
-		for key, packageObject := range packagesMap {
-			if packageObject.IsNull() {
-				continue
-			}
-
-			var packageState schemas.ProcessStepPackageReferenceResourceModel
-			diags = packageObject.As(ctx, &packageState, basetypes.ObjectAsOptions{})
-			if diags.HasError() {
-				return diags
-			}
-
-			stateProperties := make(map[string]types.String, len(packageState.Properties.Elements()))
-			diags = packageState.Properties.ElementsAs(ctx, &stateProperties, false)
-			if diags.HasError() {
-
-				return diags
-			}
-
-			packageProperties := make(map[string]string, len(stateProperties))
-			for propertyKey, value := range stateProperties {
-				if value.IsNull() {
-					packageProperties[propertyKey] = ""
-				} else {
-					packageProperties[propertyKey] = value.ValueString()
-				}
-			}
-
-			packageReference := &packages.PackageReference{
-				ID:                  packageState.GetID(),
-				Name:                key,
-				PackageID:           packageState.PackageID.ValueString(),
-				FeedID:              packageState.FeedID.ValueString(),
-				AcquisitionLocation: packageState.AcquisitionLocation.ValueString(),
-				Properties:          packageProperties,
-			}
-			packageReferences = append(packageReferences, packageReference)
+		stateProperties := make(map[string]types.String, len(packageState.Properties.Elements()))
+		diags = packageState.Properties.ElementsAs(ctx, &stateProperties, false)
+		if diags.HasError() {
+			return diags
 		}
 
-		action.Packages = packageReferences
-	}
-
-	if state.ExecutionProperties.IsNull() {
-		action.Properties = nil
-	} else {
-		stateProperties := make(map[string]types.String, len(state.ExecutionProperties.Elements()))
-		propertiesDiags := state.ExecutionProperties.ElementsAs(ctx, &stateProperties, false)
-		if propertiesDiags.HasError() {
-			return propertiesDiags
-		}
-
-		properties := make(map[string]core.PropertyValue, len(stateProperties))
-		for key, value := range stateProperties {
+		packageProperties := make(map[string]string, len(stateProperties))
+		for propertyKey, value := range stateProperties {
 			if value.IsNull() {
-				properties[key] = core.NewPropertyValue("", false)
+				packageProperties[propertyKey] = ""
 			} else {
-				properties[key] = core.NewPropertyValue(value.ValueString(), false)
+				packageProperties[propertyKey] = value.ValueString()
 			}
 		}
 
-		action.Properties = properties
+		packageReference := &packages.PackageReference{
+			ID:                  packageState.GetID(),
+			Name:                key,
+			PackageID:           packageState.PackageID.ValueString(),
+			FeedID:              packageState.FeedID.ValueString(),
+			AcquisitionLocation: packageState.AcquisitionLocation.ValueString(),
+			Properties:          packageProperties,
+		}
+		packageReferences = append(packageReferences, packageReference)
 	}
+
+	action.Packages = packageReferences
+
+	// Execution Properties
+	stateProperties := make(map[string]types.String, len(state.ExecutionProperties.Elements()))
+	propertiesDiags := state.ExecutionProperties.ElementsAs(ctx, &stateProperties, false)
+	if propertiesDiags.HasError() {
+		return propertiesDiags
+	}
+
+	properties := make(map[string]core.PropertyValue, len(stateProperties))
+	for key, value := range stateProperties {
+		if value.IsNull() {
+			properties[key] = core.NewPropertyValue("", false)
+		} else {
+			properties[key] = core.NewPropertyValue(value.ValueString(), false)
+		}
+	}
+
+	action.Properties = properties
 
 	return diag.Diagnostics{}
 }
