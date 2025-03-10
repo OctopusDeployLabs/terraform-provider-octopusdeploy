@@ -20,11 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_wrapper: false
+        uses: hashicorp/setup-terraform@v3
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -95,7 +93,7 @@ jobs:
           OCTOTESTSKIPINIT: true
           GOMAXPROCS: 1
           OCTOTESTVERSION: latest
-          OCTOTESTIMAGEURL: docker.packages.octopushq.com/octopusdeploy/octopusdeploy
+          OCTOTESTIMAGEURL: octopusdeploy/octopusdeploy
           OCTOTESTRETRYCOUNT: 1
       - name: Upload test artifacts
         if: always()

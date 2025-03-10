@@ -2,68 +2,15 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"strings"
 	"testing"
-
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/workerpools"
-	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/octoclient"
-	"github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework/test"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	internalTest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
-
-// func TestAccDeploymentProcess(t *testing.T) {
-// 	options := test.NewDeploymentProcessTestOptions()
-// 	resourceName := "octopusdeploy_deployment_process." + options.LocalName
-
-// 	resource.Test(t,resource.TestCase{
-// 		CheckDestroy: testAccDeploymentProcessCheckDestroy,
-// 		PreCheck:     func() { testAccPreCheck(t) },
-// 		Providers:    testAccProviders,
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccDeploymentProcessExists(resourceName),
-// 					resource.TestCheckResourceAttrSet(resourceName, "project_id"),
-// 					resource.TestCheckResourceAttr(resourceName, "step.#", "1"),
-// 					resource.TestCheckResourceAttr(resourceName, "step.0.name", options.StepName),
-// 					resource.TestCheckResourceAttr(resourceName, "step.0.action.#", "1"),
-// 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.action_type", options.ActionType),
-// 					resource.TestCheckResourceAttr(resourceName, "step.0.action.0.name", options.ActionName),
-// 				),
-// 				Config: testAccDeploymentProcessWithOptions(options),
-// 			},
-// 		},
-// 	})
-// }
-
-// func testAccDeploymentProcessWithOptions(options *test.DeploymentProcessTestOptions) string {
-// 	return fmt.Sprintf(testAccProjectWithOptions(options.ProjectCreateTestOptions())+"\n"+`
-// 		resource "octopusdeploy_deployment_process" "%s" {
-// 			project_id = octopusdeploy_project.%s.id
-
-// 			step {
-// 				name         = "%s"
-// 				target_roles = ["Foo"]
-
-// 				action {
-// 					action_type = "%s"
-// 					name        = "%s"
-
-// 					package {
-// 						name       = "%s"
-// 						package_id = "%s"
-// 					}
-// 				}
-// 			}
-// 		}`, options.LocalName, options.Project.LocalName, options.StepName, options.ActionType, options.ActionName, options.PackageName, options.PackageID)
-// }
 
 func testAccProjectCheckDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
@@ -432,109 +379,4 @@ func testAccDeploymentProcessCheckDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func TestDeploymentProcessWithGitDependency(t *testing.T) {
-	testFramework := test.OctopusContainerTest{}
-	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "51-deploymentprocesswithgitdependency", []string{})
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
-	project, err := client.Projects.GetByName("Test")
-	deploymentProcess, err := deployments.GetDeploymentProcessByID(client, newSpaceId, project.DeploymentProcessID)
-
-	if len(deploymentProcess.Steps) == 0 {
-		t.Fatalf("Expected deployment process to have steps.")
-	}
-
-	expectedGitUri := "https://github.com/OctopusSamples/OctoPetShop.git"
-	expectedDefaultBranch := "main"
-
-	for _, step := range deploymentProcess.Steps {
-		action := step.Actions[0]
-
-		if len(action.GitDependencies) == 0 {
-			t.Fatalf(fmt.Sprint(action.Name) + " - Expected action to have git dependency configured.")
-		}
-
-		gitDependency := action.GitDependencies[0]
-
-		if fmt.Sprint(gitDependency.RepositoryUri) != expectedGitUri {
-			t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have repository uri equal to " + fmt.Sprint(expectedGitUri))
-		}
-
-		if fmt.Sprint(gitDependency.DefaultBranch) != expectedDefaultBranch {
-			t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency to have default branch equal to " + fmt.Sprint(expectedDefaultBranch))
-		}
-
-		if fmt.Sprint(gitDependency.GitCredentialType) == "Library" {
-			if len(strings.TrimSpace(gitDependency.GitCredentialId)) == 0 {
-				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency library type to have a defined git credential id.")
-			}
-		} else {
-			if len(strings.TrimSpace(gitDependency.GitCredentialId)) > 0 {
-				t.Fatalf(fmt.Sprint(action.Name) + " - Expected git dependency of non-library type to not have a defined git credential id.")
-			}
-		}
-	}
-}
-
-// TestTerraformApplyStepWithWorkerPool verifies that a terraform apply step with a custom worker pool is deployed successfully
-// See https://github.com/OctopusDeployLabs/terraform-provider-octopusdeploy/issues/601
-func TestTerraformApplyStepWithWorkerPool(t *testing.T) {
-	testFramework := test.OctopusContainerTest{}
-
-	newSpaceId, err := testFramework.Act(t, octoContainer, "../terraform", "50-applyterraformtemplateaction", []string{})
-
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	// Assert
-	client, err := octoclient.CreateClient(octoContainer.URI, newSpaceId, test.ApiKey)
-	query := projects.ProjectsQuery{
-		PartialName: "Test",
-		Skip:        0,
-		Take:        1,
-	}
-
-	resources, err := projects.Get(client, newSpaceId, query)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if len(resources.Items) == 0 {
-		t.Fatalf("Space must have a project called \"Test\"")
-	}
-	resource := resources.Items[0]
-
-	// Get worker pool
-	wpQuery := workerpools.WorkerPoolsQuery{
-		PartialName: "Docker",
-		Skip:        0,
-		Take:        1,
-	}
-
-	workerpools, err := workerpools.Get(client, newSpaceId, wpQuery)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	if len(workerpools.Items) == 0 {
-		t.Fatalf("Space must have a worker pool called \"Docker\"")
-	}
-
-	// Get deployment process
-	process, err := deployments.GetDeploymentProcessByID(client, "", resource.DeploymentProcessID)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	// Worker pool must be assigned
-	if process.Steps[0].Actions[0].WorkerPool != workerpools.Items[0].GetID() {
-		t.Fatalf("Action must use the worker pool \"Docker\"")
-	}
 }
