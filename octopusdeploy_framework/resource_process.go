@@ -107,17 +107,11 @@ func (r *processResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	process.ProjectID = data.OwnerID.ValueString()
+	// Nothing to update, when owner_id is changed we want to replace this resource with process from another owner
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to update process", err.Error())
-		return
-	}
+	mapProcessToState(process, data)
 
-	mapProcessToState(updatedProcess, data)
-
-	tflog.Info(ctx, fmt.Sprintf("process updated (%s)", updatedProcess.GetID()))
+	tflog.Info(ctx, fmt.Sprintf("process updated (%s)", process.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
