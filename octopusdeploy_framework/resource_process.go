@@ -61,8 +61,7 @@ func (r *processResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	data.ID = types.StringValue(process.ID)
-	data.SpaceID = types.StringValue(process.SpaceID)
+	mapProcessToState(process, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -85,16 +84,15 @@ func (r *processResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	data.ID = types.StringValue(process.ID)
-	data.SpaceID = types.StringValue(process.SpaceID)
+	mapProcessToState(process, data)
 
-	tflog.Info(ctx, fmt.Sprintf("process read (%s)", process.GetID()))
+	tflog.Info(ctx, fmt.Sprintf("process read (%s)", process.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *processResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *schemas.ProcessResourceModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -117,8 +115,7 @@ func (r *processResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	data.ID = types.StringValue(updatedProcess.ID)
-	data.SpaceID = types.StringValue(updatedProcess.SpaceID)
+	mapProcessToState(updatedProcess, data)
 
 	tflog.Info(ctx, fmt.Sprintf("process updated (%s)", updatedProcess.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -135,21 +132,19 @@ func (r *processResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	client := r.Config.Client
 	spaceId := data.SpaceID.ValueString()
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, data.ID.ValueString())
+	_, err := deployments.GetDeploymentProcessByID(client, spaceId, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load process", err.Error())
 		return
 	}
 
-	process.ProjectID = data.OwnerID.ValueString()
-	process.SpaceID = data.SpaceID.ValueString()
-	process.Steps = []*deployments.DeploymentStep{}
-
-	_, err = deployments.UpdateDeploymentProcess(client, process)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to delete process", err.Error())
-		return
-	}
+	// Do nothing, because process can not be deleted from the project
 
 	resp.State.RemoveResource(ctx)
+}
+
+func mapProcessToState(process *deployments.DeploymentProcess, state *schemas.ProcessResourceModel) {
+	state.ID = types.StringValue(process.ID)
+	state.SpaceID = types.StringValue(process.SpaceID)
+	state.OwnerID = types.StringValue(process.ProjectID)
 }
