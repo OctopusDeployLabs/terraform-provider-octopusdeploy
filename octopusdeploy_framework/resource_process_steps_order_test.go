@@ -16,20 +16,21 @@ func TestAccOctopusDeployProcessStepsOrder(t *testing.T) {
 	order := fmt.Sprintf("order_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	orderedSteps1 := []string{scenario.step1, scenario.step2, scenario.step3}
 	orderedSteps2 := []string{scenario.step3, scenario.step1, scenario.step2}
+
 	resource.Test(t, resource.TestCase{
 		CheckDestroy:             testAccProjectCheckDestroy,
 		PreCheck:                 func() { TestAccPreCheck(t) },
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProcessStepsOrderConfiguration(scenario.config, scenario.process, order, orderedSteps1),
+				Config: testAccProcessStepsOrderConfiguration(scenario, order, orderedSteps1),
 				Check: resource.ComposeTestCheckFunc(
 					testCheckResourceProcessStepsOrderAttributes(scenario, order, orderedSteps1),
 					testCheckResourceProcessStepsOrderExists(t, orderedSteps1),
 				),
 			},
 			{
-				Config: testAccProcessStepsOrderConfiguration(scenario.config, scenario.process, order, orderedSteps2),
+				Config: testAccProcessStepsOrderConfiguration(scenario, order, orderedSteps2),
 				Check: resource.ComposeTestCheckFunc(
 					testCheckResourceProcessStepsOrderAttributes(scenario, order, orderedSteps2),
 					testCheckResourceProcessStepsOrderExists(t, orderedSteps2),
@@ -39,7 +40,7 @@ func TestAccOctopusDeployProcessStepsOrder(t *testing.T) {
 	})
 }
 
-func testAccProcessStepsOrderConfiguration(dependencies string, process string, orderResource string, steps []string) string {
+func testAccProcessStepsOrderConfiguration(scenario processStepsOrderTestDependenciesConfiguration, orderResource string, steps []string) string {
 	stepReferences := make([]string, len(steps))
 	for i, step := range steps {
 		stepReferences[i] = fmt.Sprintf("octopusdeploy_process_step.%s.id,", step)
@@ -55,9 +56,9 @@ func testAccProcessStepsOrderConfiguration(dependencies string, process string, 
 		  ]
 		}
 		`,
-		dependencies,
+		scenario.config,
 		orderResource,
-		process,
+		scenario.process,
 		orderedSteps,
 	)
 }
@@ -70,8 +71,6 @@ func testCheckResourceProcessStepsOrderAttributes(scenario processStepsOrderTest
 		resource.TestCheckResourceAttrPair(order, "id", order, "process_id"),
 		resource.TestCheckResourceAttrPair(order, "id", process, "id"),
 	}
-	assertions = append(assertions, resource.TestCheckResourceAttrPair(order, "id", order, "process_id"))
-	assertions = append(assertions, resource.TestCheckResourceAttrPair(order, "id", order, "process_id"))
 
 	for i, expected := range steps {
 		step := fmt.Sprintf("octopusdeploy_process_step.%s", expected)
