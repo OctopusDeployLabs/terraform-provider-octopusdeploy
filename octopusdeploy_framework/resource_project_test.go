@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	internaltest "github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/test"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -151,7 +152,7 @@ func testAccProjectCheckDestroy(s *terraform.State) error {
 			continue
 		}
 
-		if project, err := octoClient.Projects.GetByID(rs.Primary.ID); err == nil {
+		if project, err := projects.GetByID(octoClient, octoClient.GetSpaceID(), rs.Primary.ID); err == nil {
 			return fmt.Errorf("project (%s) still exists", project.GetID())
 		}
 	}
@@ -164,7 +165,7 @@ func testAccProjectCheckExists() resource.TestCheckFunc {
 
 		for _, r := range s.RootModule().Resources {
 			if r.Type == "octopusdeploy_project" {
-				if _, err := octoClient.Projects.GetByID(r.Primary.ID); err != nil {
+				if _, err := projects.GetByID(octoClient, octoClient.GetSpaceID(), r.Primary.ID); err != nil {
 					return fmt.Errorf("error retrieving project with ID %s: %s", r.Primary.ID, err)
 				}
 			}
