@@ -72,10 +72,9 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 
 	tflog.Info(ctx, fmt.Sprintf("creating process step: %s", data.Name.ValueString()))
 
-	client := r.Config.Client
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating process step, unable to find a process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -89,7 +88,7 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 
 	process.Steps = append(process.Steps, step)
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
+	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to create process step", err.Error())
 		return
@@ -124,12 +123,13 @@ func (r *processStepResource) Read(ctx context.Context, req resource.ReadRequest
 
 	tflog.Info(ctx, fmt.Sprintf("reading process step (%s)", data.ID))
 
-	client := r.Config.Client
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to find process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
+
+	resp.Diagnostics.HasError()
 
 	step, exists := findStepFromProcessByID(process, stepId)
 	if !exists {
@@ -161,10 +161,9 @@ func (r *processStepResource) Update(ctx context.Context, req resource.UpdateReq
 
 	tflog.Info(ctx, fmt.Sprintf("updating process step (%s)", stepId))
 
-	client := r.Config.Client
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to load process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -180,7 +179,7 @@ func (r *processStepResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
+	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to update process step", err.Error())
 		return
@@ -214,10 +213,9 @@ func (r *processStepResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process step (%s)", stepId))
 
-	client := r.Config.Client
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to load process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -229,7 +227,7 @@ func (r *processStepResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 	process.Steps = filteredSteps
 
-	_, err = deployments.UpdateDeploymentProcess(client, process)
+	_, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to delete process step", err.Error())
 		return

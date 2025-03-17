@@ -2,10 +2,16 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"net/http"
+	"strings"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
@@ -58,19 +64,23 @@ func (r *processResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	spaceId := data.SpaceID.ValueString()
-	ownerId := data.OwnerID.ValueString()
+	projectId := data.OwnerID.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("creating process for owner: %s", ownerId))
+	tflog.Info(ctx, fmt.Sprintf("creating process for owner: %s", projectId))
 
-	client := r.Config.Client
 	// Empty process is created as part of project creation
-	project, err := projects.GetByID(client, spaceId, ownerId)
+	project, err := projects.GetByID(r.Config.Client, spaceId, projectId)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating process, unable to find associated project", err.Error())
 		return
 	}
 
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, project.DeploymentProcessID)
+	if project.PersistenceSettings != nil && project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
+		resp.Diagnostics.AddWarning("Cannot create process", "Project persisted under version control system. Process of version controlled project cannot be created")
+		return
+	}
+
+	process, err := deployments.GetDeploymentProcessByID(r.Config.Client, spaceId, project.DeploymentProcessID)
 	if err != nil {
 		resp.Diagnostics.AddError("Error creating process", err.Error())
 		return
@@ -89,13 +99,15 @@ func (r *processResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("reading process (%s)", data.ID))
-
-	client := r.Config.Client
 	spaceId := data.SpaceID.ValueString()
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, data.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("unable to read process", err.Error())
+	projectId := data.OwnerID.ValueString()
+	processId := data.ID.ValueString()
+
+	tflog.Info(ctx, fmt.Sprintf("reading process (%s)", processId))
+
+	process, diags := loadProcess(r.Config.Client, spaceId, projectId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -112,13 +124,15 @@ func (r *processResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	spaceId := data.SpaceID.ValueString()
+	projectId := data.OwnerID.ValueString()
+	processId := data.ID.ValueString()
+
 	tflog.Info(ctx, fmt.Sprintf("updating process (%s)", data.ID))
 
-	client := r.Config.Client
-	spaceId := data.SpaceID.ValueString()
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, data.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("unable to load process", err.Error())
+	process, diags := loadProcess(r.Config.Client, spaceId, projectId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -137,13 +151,15 @@ func (r *processResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
+	spaceId := data.SpaceID.ValueString()
+	projectId := data.OwnerID.ValueString()
+	processId := data.ID.ValueString()
+
 	tflog.Info(ctx, fmt.Sprintf("deleting process (%s)", data.ID))
 
-	client := r.Config.Client
-	spaceId := data.SpaceID.ValueString()
-	_, err := deployments.GetDeploymentProcessByID(client, spaceId, data.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("unable to load process", err.Error())
+	_, diags := loadProcess(r.Config.Client, spaceId, projectId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -157,4 +173,48 @@ func mapProcessToState(process *deployments.DeploymentProcess, state *schemas.Pr
 	state.ID = types.StringValue(process.ID)
 	state.SpaceID = types.StringValue(process.SpaceID)
 	state.OwnerID = types.StringValue(process.ProjectID)
+}
+
+func loadProcess(client *client.Client, spaceId string, projectId string, processId string) (*deployments.DeploymentProcess, diag.Diagnostics) {
+	process, processError := deployments.GetDeploymentProcessByID(client, spaceId, processId)
+	if processError == nil {
+		return process, diag.Diagnostics{}
+	}
+
+	processNotFound := diag.Diagnostics{}
+	processNotFound.AddError("unable to load process", processError.Error())
+
+	var apiError *core.APIError
+	if errors.As(processError, &apiError) && apiError.StatusCode == http.StatusNotFound {
+		// Try to load corresponding project to check if it's version controlled
+		project, err := projects.GetByID(client, spaceId, projectId)
+		if err != nil {
+			return nil, processNotFound // return original error when project cannot be loaded
+		}
+
+		if project.PersistenceSettings == nil {
+			return nil, processNotFound
+		}
+
+		if project.PersistenceSettings.Type() == projects.PersistenceSettingsTypeVersionControlled {
+			versionControlled := diag.Diagnostics{}
+			versionControlled.AddWarning("process persisted under version control system", "Version controlled resources will not be modified via terraform")
+			return nil, versionControlled
+		}
+	}
+
+	return nil, processNotFound
+}
+
+func loadProcessForSteps(client *client.Client, spaceId string, processId string) (*deployments.DeploymentProcess, diag.Diagnostics) {
+	projectId := ""
+
+	// Assumes that project id is part of the process identifier
+	// This approach allows us to avoid dependencies between resources and avoid adding "project_id" to all process resources
+	const prefix = "deploymentprocess-"
+	if strings.HasPrefix(processId, prefix) {
+		projectId = processId[len(prefix):]
+	}
+
+	return loadProcess(client, spaceId, projectId, processId)
 }

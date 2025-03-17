@@ -43,9 +43,9 @@ func (r *processStepsOrderResource) Configure(_ context.Context, req resource.Co
 func (r *processStepsOrderResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	processId := request.ID
 
-	process, err := deployments.GetDeploymentProcessByID(r.Config.Client, r.Config.SpaceID, processId)
-	if err != nil {
-		response.Diagnostics.AddError("unable to find process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, r.Config.SpaceID, processId)
+	if len(diags) > 0 {
+		response.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -87,10 +87,9 @@ func (r *processStepsOrderResource) ModifyPlan(ctx context.Context, req resource
 	processId := state.ProcessID.ValueString()
 
 	// Do the validation based on steps stored in Octopus Deploy
-	client := r.Config.Client
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to find process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -155,20 +154,19 @@ func (r *processStepsOrderResource) Create(ctx context.Context, req resource.Cre
 
 	tflog.Info(ctx, fmt.Sprintf("creating process steps order: %s", processId))
 
-	client := r.Config.Client
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating process steps order, unable to find a process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	diags := mapProcessStepsOrderFromState(data, process)
-	resp.Diagnostics.Append(diags...)
+	mappingDiags := mapProcessStepsOrderFromState(data, process)
+	resp.Diagnostics.Append(mappingDiags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
+	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to create process step", err.Error())
 		return
@@ -189,12 +187,11 @@ func (r *processStepsOrderResource) Read(ctx context.Context, req resource.ReadR
 
 	tflog.Info(ctx, fmt.Sprintf("reading process steps order (%s)", data.ID))
 
-	client := r.Config.Client
 	spaceId := data.SpaceID.ValueString()
 	processId := data.ProcessID.ValueString()
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to find process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -219,20 +216,19 @@ func (r *processStepsOrderResource) Update(ctx context.Context, req resource.Upd
 
 	tflog.Info(ctx, fmt.Sprintf("updating process steps order (%s)", data.ProcessID))
 
-	client := r.Config.Client
-	process, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to load process", err.Error())
+	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	diags := mapProcessStepsOrderFromState(data, process)
-	resp.Diagnostics.Append(diags...)
+	mappingDiags := mapProcessStepsOrderFromState(data, process)
+	resp.Diagnostics.Append(mappingDiags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(client, process)
+	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to update process steps order", err.Error())
 		return
@@ -259,10 +255,9 @@ func (r *processStepsOrderResource) Delete(ctx context.Context, req resource.Del
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process steps order (%s)", processId))
 
-	client := r.Config.Client
-	_, err := deployments.GetDeploymentProcessByID(client, spaceId, processId)
-	if err != nil {
-		resp.Diagnostics.AddError("unable to load process", err.Error())
+	_, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
