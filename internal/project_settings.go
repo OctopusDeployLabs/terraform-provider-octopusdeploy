@@ -5,7 +5,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 )
 
-// Checks the Projects persistence settings to see if the runbook are stored in git
+// CheckRunbookInGit the Projects persistence settings to see if the runbook are stored in git
 // spaceId is not required(can be empty string)
 func CheckRunbookInGit(client newclient.Client, spaceID string, projectID string) (bool, error) {
 	// We need both to be able to check the git runbook setting
