@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"strings"
 
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -157,7 +158,13 @@ func (v VariableSchema) GetResourceSchema() resourceSchema.Schema {
 					stringvalidator.ConflictsWith(path.MatchRelative().AtParent().AtName(VariableSchemaAttributeNames.OwnerID)),
 				},
 			},
-			VariableSchemaAttributeNames.IsEditable:  GetOptionalBooleanResourceAttribute("Indicates whether or not this variable is considered editable.", true),
+			VariableSchemaAttributeNames.IsEditable: resourceSchema.BoolAttribute{
+				Default:            booldefault.StaticBool(true),
+				Description:        "Indicates whether or not this variable is considered editable.",
+				Optional:           true,
+				Computed:           true,
+				DeprecationMessage: "This attribute will change to readonly in the future; please do not manually provide this value as it is not intended to be user managed, any value set will be ignored.",
+			},
 			VariableSchemaAttributeNames.IsSensitive: GetOptionalBooleanResourceAttribute("Indicates whether or not this resource is considered sensitive and should be kept secret.", false),
 			VariableSchemaAttributeNames.SensitiveValue: resourceSchema.StringAttribute{
 				Optional:  true,
