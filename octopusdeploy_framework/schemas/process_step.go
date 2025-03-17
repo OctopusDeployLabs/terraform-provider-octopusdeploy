@@ -22,10 +22,14 @@ func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages single step of execution process in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":         GetIdResourceSchema(),
-			"space_id":   GetSpaceIdResourceSchema(ProcessStepResourceName),
-			"process_id": util.ResourceString().Required().Description("Id of the process this step belongs to.").Build(),
-			"name":       GetNameResourceSchema(true),
+			"id":       GetIdResourceSchema(),
+			"space_id": GetSpaceIdResourceSchema(ProcessStepResourceName),
+			"process_id": util.ResourceString().
+				Description("Id of the process this step belongs to.").
+				Required().
+				PlanModifiers(stringplanmodifier.RequiresReplace()).
+				Build(),
+			"name": GetNameResourceSchema(true),
 			"start_trigger": util.ResourceString().
 				Description("Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious').").
 				Optional().

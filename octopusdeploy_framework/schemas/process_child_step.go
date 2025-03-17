@@ -18,11 +18,19 @@ func (p ProcessChildStepSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages a child step in execution process in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":         GetIdResourceSchema(),
-			"space_id":   GetSpaceIdResourceSchema(ProcessChildStepResourceName),
-			"process_id": util.ResourceString().Required().Description("Id of the process this step belongs to.").Build(),
-			"parent_id":  util.ResourceString().Required().Description("Id of the process step this step belongs to.").Build(),
-			"name":       GetNameResourceSchema(true),
+			"id":       GetIdResourceSchema(),
+			"space_id": GetSpaceIdResourceSchema(ProcessChildStepResourceName),
+			"process_id": util.ResourceString().
+				Description("Id of the process this step belongs to.").
+				Required().
+				PlanModifiers(stringplanmodifier.RequiresReplace()).
+				Build(),
+			"parent_id": util.ResourceString().
+				Description("Id of the process step this step belongs to.").
+				Required().
+				PlanModifiers(stringplanmodifier.RequiresReplace()).
+				Build(),
+			"name": GetNameResourceSchema(true),
 			"type": util.ResourceString().
 				Description("Execution type of the step.").
 				Required().

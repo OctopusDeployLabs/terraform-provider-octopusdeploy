@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -18,10 +19,18 @@ func (p ProcessChildStepsOrderSchema) GetResourceSchema() resourceSchema.Schema 
 	return resourceSchema.Schema{
 		Description: "This resource manages order of steps in the process.",
 		Attributes: map[string]resourceSchema.Attribute{
-			"id":         GetIdResourceSchema(),
-			"space_id":   GetSpaceIdResourceSchema(ProcessChildStepsOrderResourceName),
-			"process_id": util.ResourceString().Required().Description("Id of the process parent step belongs to.").Build(),
-			"parent_id":  util.ResourceString().Required().Description("Id of the process step children belong to.").Build(),
+			"id":       GetIdResourceSchema(),
+			"space_id": GetSpaceIdResourceSchema(ProcessChildStepsOrderResourceName),
+			"process_id": util.ResourceString().
+				Description("Id of the process parent step belongs to.").
+				Required().
+				PlanModifiers(stringplanmodifier.RequiresReplace()).
+				Build(),
+			"parent_id": util.ResourceString().
+				Description("Id of the process step children belong to.").
+				Required().
+				PlanModifiers(stringplanmodifier.RequiresReplace()).
+				Build(),
 			"children": util.ResourceList(types.StringType).
 				Description("Child steps in the order of execution").
 				Required().
