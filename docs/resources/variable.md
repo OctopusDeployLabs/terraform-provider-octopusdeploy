@@ -101,7 +101,7 @@ resource "octopusdeploy_variable" "prompted_variable" {
 ### Optional
 
 - `description` (String) The description of this variable.
-- `is_editable` (Boolean) Indicates whether or not this variable is considered editable.
+- `is_editable` (Boolean, Deprecated) Indicates whether or not this variable is considered editable.
 - `is_sensitive` (Boolean) Indicates whether or not this resource is considered sensitive and should be kept secret.
 - `owner_id` (String)
 - `project_id` (String, Deprecated)
