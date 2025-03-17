@@ -9,12 +9,17 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"strings"
 )
 
-var _ resource.ResourceWithModifyPlan = &processChildStepsOrderResource{}
+var (
+	_ resource.ResourceWithModifyPlan  = &processChildStepsOrderResource{}
+	_ resource.ResourceWithImportState = &processChildStepsOrderResource{}
+)
 
 type processChildStepsOrderResource struct {
 	*Config
@@ -34,6 +39,52 @@ func (r *processChildStepsOrderResource) Schema(_ context.Context, _ resource.Sc
 
 func (r *processChildStepsOrderResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	r.Config = ResourceConfiguration(req, resp)
+}
+
+func (r *processChildStepsOrderResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
+	identifiers := strings.Split(request.ID, ":")
+
+	if len(identifiers) != 2 {
+		response.Diagnostics.AddError(
+			"Incorrect Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: ProcessId:ParentStepId (e.g. deploymentprocess-Projects-123:00000000-0000-0000-0000-000000000010). Got: %q", request.ID),
+		)
+		return
+	}
+
+	processId := identifiers[0]
+	parentStepId := identifiers[1]
+
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), processId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("parent_id"), parentStepId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), parentStepId)...)
+
+	process, err := deployments.GetDeploymentProcessByID(r.Config.Client, r.Config.SpaceID, processId)
+	if err != nil {
+		response.Diagnostics.AddError("unable to find process", err.Error())
+		return
+	}
+
+	parent, ok := findStepFromProcessByID(process, parentStepId)
+	if !ok {
+		response.Diagnostics.AddError("Error importing process child steps order", fmt.Sprintf("unable to find a parent step (id: %s)", parentStepId))
+		return
+	}
+
+	// Import all actions, because Read method relies on configured actions to avoid state drifting (see 'mapProcessChildStepsOrderToState')
+	var actions []attr.Value
+	// Exclude first action, which is embedded into the parent step
+	for _, action := range parent.Actions[1:] {
+		if action != nil {
+			actions = append(actions, types.StringValue(action.GetID()))
+		}
+	}
+	children, _ := types.ListValue(types.StringType, actions)
+
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), processId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("parent_id"), parentStepId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), parentStepId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("children"), children)...)
 }
 
 func (r *processChildStepsOrderResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {

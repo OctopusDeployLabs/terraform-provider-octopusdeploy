@@ -9,12 +9,16 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ resource.ResourceWithModifyPlan = &processStepsOrderResource{}
+var (
+	_ resource.ResourceWithModifyPlan  = &processStepsOrderResource{}
+	_ resource.ResourceWithImportState = &processStepsOrderResource{}
+)
 
 type processStepsOrderResource struct {
 	*Config
@@ -34,6 +38,29 @@ func (r *processStepsOrderResource) Schema(_ context.Context, _ resource.SchemaR
 
 func (r *processStepsOrderResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	r.Config = ResourceConfiguration(req, resp)
+}
+
+func (r *processStepsOrderResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
+	processId := request.ID
+
+	process, err := deployments.GetDeploymentProcessByID(r.Config.Client, r.Config.SpaceID, processId)
+	if err != nil {
+		response.Diagnostics.AddError("unable to find process", err.Error())
+		return
+	}
+
+	// Import all steps, because Read method relies on configured steps to avoid state drifting (see 'mapProcessStepsOrderToState')
+	var steps []attr.Value
+	for _, step := range process.Steps {
+		if step != nil {
+			steps = append(steps, types.StringValue(step.GetID()))
+		}
+	}
+	importedSteps, _ := types.ListValue(types.StringType, steps)
+
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), processId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), processId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("steps"), importedSteps)...)
 }
 
 func (r *processStepsOrderResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
@@ -239,7 +266,7 @@ func (r *processStepsOrderResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	// Do nothing or delete all steps
+	// Do nothing
 
 	resp.State.RemoveResource(ctx)
 }

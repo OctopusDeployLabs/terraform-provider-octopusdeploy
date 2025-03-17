@@ -12,13 +12,15 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"strings"
 )
 
-var _ resource.Resource = &processChildStepResource{}
+var _ resource.ResourceWithImportState = &processChildStepResource{}
 
 type processChildStepResource struct {
 	*Config
@@ -38,6 +40,22 @@ func (r *processChildStepResource) Schema(_ context.Context, _ resource.SchemaRe
 
 func (r *processChildStepResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	r.Config = ResourceConfiguration(req, resp)
+}
+
+func (r *processChildStepResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
+	identifiers := strings.Split(request.ID, ":")
+
+	if len(identifiers) != 3 {
+		response.Diagnostics.AddError(
+			"Incorrect Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: ProcessId:ParentStepId:ChildStepId (e.g. deploymentprocess-Projects-123:00000000-0000-0000-0000-000000000010:00000000-0000-0000-0000-000000000012). Got: %q", request.ID),
+		)
+		return
+	}
+
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), identifiers[0])...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("parent_id"), identifiers[1])...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), identifiers[2])...)
 }
 
 func (r *processChildStepResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
@@ -13,7 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var _ resource.Resource = &processResource{}
+var (
+	_ resource.ResourceWithModifyPlan  = &processResource{}
+	_ resource.ResourceWithImportState = &processResource{}
+)
 
 type processResource struct {
 	*Config
@@ -33,6 +37,17 @@ func (r *processResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 
 func (r *processResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	r.Config = ResourceConfiguration(req, resp)
+}
+
+func (r *processResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), request, response)
+}
+
+func (r *processResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		resp.Diagnostics.AddWarning("Deleting process", "Applying this resource destruction will not delete process and it's steps")
+		return
+	}
 }
 
 func (r *processResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -133,6 +148,7 @@ func (r *processResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 
 	// Do nothing, because process can not be deleted from the project
+	resp.Diagnostics.AddWarning("Deleting process", "Destruction of this resource will not delete process from the project")
 
 	resp.State.RemoveResource(ctx)
 }
