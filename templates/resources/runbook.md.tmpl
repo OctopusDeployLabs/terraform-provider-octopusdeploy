@@ -1,0 +1,14 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+~> **NOTE Runbooks and Runbooks Processes which are stored in CaC cannot be managed via Terraform. If a project is converted to a CaC project, the Runbooks and Runbook Processes will cause warnings in your plan, and will not be updated when applying changes.
+
+{{ .SchemaMarkdown | trimspace }}
