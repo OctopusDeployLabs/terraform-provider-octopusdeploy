@@ -2,11 +2,13 @@ package octopusdeploy
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/client"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbookprocess"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,7 +19,6 @@ func resourceRunbookProcess() *schema.Resource {
 		CreateContext: resourceRunbookProcessCreate,
 		DeleteContext: resourceRunbookProcessDelete,
 		Description:   "This resource manages runbook processes in Octopus Deploy.",
-		Importer:      getImporter(),
 		ReadContext:   resourceRunbookProcessRead,
 		Schema:        getRunbookProcessSchema(),
 		UpdateContext: resourceRunbookProcessUpdate,
@@ -62,6 +63,22 @@ func resourceRunbookProcessCreate(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[INFO] creating runbook process: %#v", runbookProcess)
 
+	runbooksAreInGit, err := internal.CheckRunbookInGit(client, runbookProcess.SpaceID, runbookProcess.ProjectID)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if runbooksAreInGit {
+		diags := AppendGitRunbookWarning("create")
+
+		d.SetId(runbookProcess.RunbookID)
+		if err := setRunbookProcess(ctx, d, runbookProcess); err != nil {
+			return diag.FromErr(err)
+		}
+		return diags
+	}
+
 	runbook, err := runbooks.GetByID(client, d.Get("space_id").(string), runbookProcess.RunbookID)
 	if err != nil {
 		return diag.FromErr(err)
@@ -69,6 +86,9 @@ func resourceRunbookProcessCreate(ctx context.Context, d *schema.ResourceData, m
 
 	var current *runbookprocess.RunbookProcess
 	current, err = runbookprocess.GetByID(client, d.Get("space_id").(string), runbook.RunbookProcessID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	runbookProcess.ID = current.ID
 	runbookProcess.Links = current.Links
@@ -98,6 +118,20 @@ func resourceRunbookProcessDelete(ctx context.Context, d *schema.ResourceData, m
 
 	// "Deleting" a runbook process just means to clear it out
 	client := m.(*client.Client)
+
+	runbooksAreInGit, err := internal.CheckRunbookInGit(client, d.Get("space_id").(string), d.Get("project_id").(string))
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if runbooksAreInGit {
+		diags := AppendGitRunbookWarning("delete")
+
+		d.SetId("")
+		return diags
+	}
+
 	current, err := runbookprocess.GetByID(client, d.Get("space_id").(string), d.Id())
 
 	if err != nil {
@@ -121,7 +155,7 @@ func resourceRunbookProcessDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	d.SetId("")
-	log.Printf("[INFO] deployment process deleted")
+	log.Printf("[INFO] runbook process deleted")
 	return nil
 }
 
@@ -129,6 +163,19 @@ func resourceRunbookProcessRead(ctx context.Context, d *schema.ResourceData, m i
 	log.Printf("[INFO] reading runbook process (%s)", d.Id())
 
 	client := m.(*client.Client)
+
+	runbooksAreInGit, err := internal.CheckRunbookInGit(client, d.Get("space_id").(string), d.Get("project_id").(string))
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if runbooksAreInGit {
+		diags := AppendGitRunbookWarning("read")
+
+		return diags
+	}
+
 	runbookProcess, err := runbookprocess.GetByID(client, d.Get("space_id").(string), d.Id())
 
 	if err != nil {
@@ -148,12 +195,28 @@ func resourceRunbookProcessUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	client := m.(*client.Client)
 	runbookProcess := expandRunbookProcess(ctx, d, client)
-	current, err := runbookprocess.GetByID(client, runbookProcess.SpaceID, d.Id())
+
+	runbooksAreInGit, err := internal.CheckRunbookInGit(client, runbookProcess.SpaceID, runbookProcess.ProjectID)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
+	if runbooksAreInGit {
+		if err := setRunbookProcess(ctx, d, runbookProcess); err != nil {
+			return diag.FromErr(err)
+		}
+
+		diags := AppendGitRunbookWarning("update")
+
+		return diags
+	}
+
+	current, err := runbookprocess.GetByID(client, runbookProcess.SpaceID, d.Id())
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	runbookProcess.Links = current.Links
 	runbookProcess.Version = current.Version
 
@@ -169,4 +232,16 @@ func resourceRunbookProcessUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[INFO] deployment process updated (%s)", d.Id())
 	return nil
+}
+
+func AppendGitRunbookWarning(operationType string) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	diags = append(diags, diag.Diagnostic{
+		Severity: diag.Warning,
+		Summary:  "Unable to manage CaC Runbooks via Terraform",
+		Detail:   fmt.Sprintf("Runbook process is in git, skipping %s", operationType),
+	})
+
+	return diags
 }

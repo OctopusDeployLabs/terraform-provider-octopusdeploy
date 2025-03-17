@@ -6,6 +6,7 @@ import (
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbooks"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -66,6 +67,18 @@ func (r *runbookTypeResource) Create(ctx context.Context, req resource.CreateReq
 
 	util.Create(ctx, schemas.RunbookResourceDescription, plan)
 
+	runbooksAreInGit, err := internal.CheckRunbookInGit(r.Config.Client, runbook.SpaceID, runbook.ProjectID)
+
+	if err != nil {
+		resp.Diagnostics.AddError("failed to check runbook git ref", err.Error())
+	}
+
+	if runbooksAreInGit {
+		resp.Diagnostics.AddWarning("Unable to manage CaC Runbooks via Terraform", "Runbook is in git, skipping create")
+		resp.State.Set(ctx, &plan)
+		return
+	}
+
 	createdRunbook, err := runbooks.Add(r.Config.Client, runbook)
 	if err != nil {
 		resp.Diagnostics.AddError(fmt.Sprintf("failed to create runbook (%s)", runbook.Name), err.Error())
@@ -90,6 +103,19 @@ func (r *runbookTypeResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	util.Reading(ctx, schemas.RunbookResourceDescription, state)
+
+	runbooksAreInGit, err := internal.CheckRunbookInGit(r.Config.Client, state.SpaceID.ValueString(), state.ProjectID.ValueString())
+
+	if err != nil {
+		resp.Diagnostics.AddError("failed to check runbook git ref", err.Error())
+		return
+	}
+
+	if runbooksAreInGit {
+		resp.Diagnostics.AddWarning("Unable to manage CaC Runbooks via Terraform", "Runbook is in git, skipping read")
+		resp.State.Set(ctx, &state)
+		return
+	}
 
 	runbook, err := runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
@@ -118,6 +144,19 @@ func (r *runbookTypeResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	util.Update(ctx, schemas.RunbookResourceDescription, plan)
+
+	runbooksAreInGit, err := internal.CheckRunbookInGit(r.Config.Client, plan.SpaceID.ValueString(), plan.ProjectID.ValueString())
+
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to verify Projects Runbooks persistence settings", err.Error())
+		return
+	}
+
+	if runbooksAreInGit {
+		resp.Diagnostics.AddWarning("Unable to manage CaC Runbooks via Terraform", "Runbook is in git, skipping update")
+		resp.State.Set(ctx, &plan)
+		return
+	}
 
 	runbook, err := runbooks.GetByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString())
 	if err != nil {
@@ -168,6 +207,21 @@ func (r *runbookTypeResource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 
 	util.Delete(ctx, schemas.RunbookResourceDescription, state)
+
+	runbooksAreInGit, err := internal.CheckRunbookInGit(r.Config.Client, state.SpaceID.ValueString(), state.ProjectID.ValueString())
+
+	if err != nil {
+		resp.Diagnostics.AddError("Unable to verify Projects Runbooks persistence settings", err.Error())
+
+		return
+	}
+
+	if runbooksAreInGit {
+		resp.Diagnostics.AddWarning("Unable to manage CaC Runbooks via Terraform", "Runbook is in git, skipping delete")
+
+		resp.State.RemoveResource(ctx)
+		return
+	}
 
 	if err := runbooks.DeleteByID(r.Config.Client, state.SpaceID.ValueString(), state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("failed to delete runbook", err.Error())
