@@ -28,7 +28,7 @@ func NewProcessStepsOrderResource() resource.Resource {
 	return &processStepsOrderResource{}
 }
 
-func (r *processStepsOrderResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *processStepsOrderResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName(schemas.ProcessStepsOrderResourceName)
 }
 
@@ -43,20 +43,22 @@ func (r *processStepsOrderResource) Configure(_ context.Context, req resource.Co
 func (r *processStepsOrderResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	processId := request.ID
 
-	process, diags := loadProcessForSteps(r.Config.Client, r.Config.SpaceID, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, r.Config.SpaceID, processId)
 	if len(diags) > 0 {
 		response.Diagnostics.Append(diags...)
 		return
 	}
 
 	// Import all steps, because Read method relies on configured steps to avoid state drifting (see 'mapProcessStepsOrderToState')
-	var steps []attr.Value
-	for _, step := range process.Steps {
+	var identifiers []attr.Value
+	for _, step := range process.GetSteps() {
 		if step != nil {
-			steps = append(steps, types.StringValue(step.GetID()))
+			identifiers = append(identifiers, types.StringValue(step.GetID()))
 		}
 	}
-	importedSteps, _ := types.ListValue(types.StringType, steps)
+
+	importedSteps, stepDiagnostics := types.ListValue(types.StringType, identifiers)
+	response.Diagnostics.Append(stepDiagnostics...)
 
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), processId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), processId)...)
@@ -87,7 +89,7 @@ func (r *processStepsOrderResource) ModifyPlan(ctx context.Context, req resource
 	processId := state.ProcessID.ValueString()
 
 	// Do the validation based on steps stored in Octopus Deploy
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -102,7 +104,7 @@ func (r *processStepsOrderResource) ModifyPlan(ctx context.Context, req resource
 	}
 
 	var missingSteps []string
-	for _, step := range process.Steps {
+	for _, step := range process.GetSteps() {
 		if !includedStepsLookup[step.GetID()] {
 			missingSteps = append(missingSteps, fmt.Sprintf("'%s' (%s)", step.Name, step.GetID()))
 		}
@@ -118,7 +120,7 @@ func (r *processStepsOrderResource) ModifyPlan(ctx context.Context, req resource
 
 	// Validate that included steps are part of the process
 	lookup := make(map[string]*deployments.DeploymentStep)
-	for _, step := range process.Steps {
+	for _, step := range process.GetSteps() {
 		lookup[step.GetID()] = step
 	}
 
@@ -133,7 +135,7 @@ func (r *processStepsOrderResource) ModifyPlan(ctx context.Context, req resource
 	if len(unknownSteps) > 0 {
 		message := fmt.Sprintf("Following steps are not part of the process: %v", unknownSteps)
 		resp.Diagnostics.AddWarning(
-			fmt.Sprintf("Some ordered steps are not part of the process '%s'", process.ID),
+			fmt.Sprintf("Some ordered steps are not part of the process '%s'", process.GetID()),
 			message,
 		)
 	}
@@ -154,7 +156,7 @@ func (r *processStepsOrderResource) Create(ctx context.Context, req resource.Cre
 
 	tflog.Info(ctx, fmt.Sprintf("creating process steps order: %s", processId))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -166,9 +168,9 @@ func (r *processStepsOrderResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	updatedProcess, err := process.Update(r.Config.Client)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create process step", err.Error())
+		resp.Diagnostics.AddError("Unable to create process step", err.Error())
 		return
 	}
 
@@ -189,7 +191,7 @@ func (r *processStepsOrderResource) Read(ctx context.Context, req resource.ReadR
 
 	spaceId := data.SpaceID.ValueString()
 	processId := data.ProcessID.ValueString()
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -216,7 +218,7 @@ func (r *processStepsOrderResource) Update(ctx context.Context, req resource.Upd
 
 	tflog.Info(ctx, fmt.Sprintf("updating process steps order (%s)", data.ProcessID))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -228,7 +230,7 @@ func (r *processStepsOrderResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	updatedProcess, err := process.Update(r.Config.Client)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to update process steps order", err.Error())
 		return
@@ -255,7 +257,7 @@ func (r *processStepsOrderResource) Delete(ctx context.Context, req resource.Del
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process steps order (%s)", processId))
 
-	_, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	_, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -266,11 +268,11 @@ func (r *processStepsOrderResource) Delete(ctx context.Context, req resource.Del
 	resp.State.RemoveResource(ctx)
 }
 
-func mapProcessStepsOrderFromState(state *schemas.ProcessStepsOrderResourceModel, process *deployments.DeploymentProcess) diag.Diagnostics {
+func mapProcessStepsOrderFromState(state *schemas.ProcessStepsOrderResourceModel, process processWrapper) diag.Diagnostics {
 	diags := diag.Diagnostics{}
 
 	lookup := make(map[string]*deployments.DeploymentStep)
-	for _, step := range process.Steps {
+	for _, step := range process.GetSteps() {
 		lookup[step.GetID()] = step
 	}
 
@@ -307,20 +309,22 @@ func mapProcessStepsOrderFromState(state *schemas.ProcessStepsOrderResourceModel
 		return diags
 	}
 
-	process.Steps = reorderedSteps
+	process.ReplaceSteps(reorderedSteps)
 
 	return diags
 }
 
-func mapProcessStepsOrderToState(process *deployments.DeploymentProcess, state *schemas.ProcessStepsOrderResourceModel) {
+func mapProcessStepsOrderToState(process processWrapper, state *schemas.ProcessStepsOrderResourceModel) {
 	state.ID = types.StringValue(process.GetID())
-	state.SpaceID = types.StringValue(process.SpaceID)
+	state.SpaceID = types.StringValue(process.GetSpaceID())
 	state.ProcessID = types.StringValue(process.GetID())
 
-	configuredSteps := min(len(state.Steps.Elements()), len(process.Steps))
+	processSteps := process.GetSteps()
+	configuredSteps := min(len(state.Steps.Elements()), len(processSteps))
+
 	var steps []attr.Value
 	// Take only "configured" amount of steps to avoid state drifting when practitioner didn't include all steps into the order resource
-	for _, step := range process.Steps[:configuredSteps] {
+	for _, step := range processSteps[:configuredSteps] {
 		if step != nil {
 			steps = append(steps, types.StringValue(step.GetID()))
 		}

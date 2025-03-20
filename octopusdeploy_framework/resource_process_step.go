@@ -30,7 +30,7 @@ func NewProcessStepResource() resource.Resource {
 	return &processStepResource{}
 }
 
-func (r *processStepResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *processStepResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName(schemas.ProcessStepResourceName)
 }
 
@@ -72,7 +72,7 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 
 	tflog.Info(ctx, fmt.Sprintf("creating process step: %s", data.Name.ValueString()))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -86,17 +86,17 @@ func (r *processStepResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	process.Steps = append(process.Steps, step)
+	process.AppendStep(step)
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	updatedProcess, err := process.Update(r.Config.Client)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create process step", err.Error())
+		resp.Diagnostics.AddError("Unable to create process step", err.Error())
 		return
 	}
 
-	createdStep, exists := findStepFromProcessByName(updatedProcess, step.Name)
+	createdStep, exists := updatedProcess.FindStepByName(step.Name)
 	if !exists {
-		resp.Diagnostics.AddError("unable to create process step '%s'", step.Name)
+		resp.Diagnostics.AddError("Unable to create process step '%s'", step.Name)
 		return
 	}
 
@@ -123,7 +123,7 @@ func (r *processStepResource) Read(ctx context.Context, req resource.ReadRequest
 
 	tflog.Info(ctx, fmt.Sprintf("reading process step (%s)", data.ID))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -131,7 +131,7 @@ func (r *processStepResource) Read(ctx context.Context, req resource.ReadRequest
 
 	resp.Diagnostics.HasError()
 
-	step, exists := findStepFromProcessByID(process, stepId)
+	step, exists := process.FindStepByID(stepId)
 	if !exists {
 		// Remove from state when not found in the process, so terraform will try to recreate it
 		tflog.Info(ctx, fmt.Sprintf("process step read (id: %s), but not found, removing from state ...", stepId))
@@ -161,13 +161,13 @@ func (r *processStepResource) Update(ctx context.Context, req resource.UpdateReq
 
 	tflog.Info(ctx, fmt.Sprintf("updating process step (%s)", stepId))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	step, exists := findStepFromProcessByID(process, stepId)
+	step, exists := process.FindStepByID(stepId)
 	if !exists {
 		resp.Diagnostics.AddError("unable to find process step '%s'", stepId)
 		return
@@ -179,14 +179,14 @@ func (r *processStepResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	updatedProcess, err := process.Update(r.Config.Client)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to update process step", err.Error())
 		return
 	}
 
-	updatedStep, exists := findStepFromProcessByID(updatedProcess, stepId)
-	if !exists {
+	updatedStep, updatedExists := updatedProcess.FindStepByID(stepId)
+	if !updatedExists {
 		resp.Diagnostics.AddError("unable to find updated process step '%s'", stepId)
 		return
 	}
@@ -213,21 +213,15 @@ func (r *processStepResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process step (%s)", stepId))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	var filteredSteps []*deployments.DeploymentStep
-	for _, step := range process.Steps {
-		if stepId != step.GetID() {
-			filteredSteps = append(filteredSteps, step)
-		}
-	}
-	process.Steps = filteredSteps
+	process.RemoveStep(stepId)
 
-	_, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	_, err := process.Update(r.Config.Client)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to delete process step", err.Error())
 		return
@@ -426,9 +420,9 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 	return diag.Diagnostics{}
 }
 
-func mapProcessStepToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, state *schemas.ProcessStepResourceModel) diag.Diagnostics {
+func mapProcessStepToState(process processWrapper, step *deployments.DeploymentStep, state *schemas.ProcessStepResourceModel) diag.Diagnostics {
 	state.ID = types.StringValue(step.GetID())
-	state.SpaceID = types.StringValue(process.SpaceID)
+	state.SpaceID = types.StringValue(process.GetSpaceID())
 	state.ProcessID = types.StringValue(process.GetID())
 	state.Name = types.StringValue(step.Name)
 	state.StartTrigger = types.StringValue(string(step.StartTrigger))
@@ -530,22 +524,4 @@ func mapProcessStepActionToState(action *deployments.DeploymentAction, state *sc
 	state.ExecutionProperties = stateProperties
 
 	return diag.Diagnostics{}
-}
-
-func findStepFromProcessByID(process *deployments.DeploymentProcess, stepID string) (*deployments.DeploymentStep, bool) {
-	for _, step := range process.Steps {
-		if step.ID == stepID {
-			return step, true
-		}
-	}
-	return nil, false
-}
-
-func findStepFromProcessByName(process *deployments.DeploymentProcess, name string) (*deployments.DeploymentStep, bool) {
-	for _, step := range process.Steps {
-		if step.Name == name {
-			return step, true
-		}
-	}
-	return nil, false
 }
