@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"context"
+
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deploymentfreezes"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
@@ -12,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"time"
 )
 
 const deploymentFreezeResourceName = "deployment_freeze"
@@ -36,14 +36,6 @@ type deploymentFreezeModel struct {
 	End               timetypes.RFC3339       `tfsdk:"end"`
 	RecurringSchedule *recurringScheduleModel `tfsdk:"recurring_schedule"`
 	schemas.ResourceModel
-}
-
-func getStringPointer(s types.String) *string {
-	if s.IsNull() {
-		return nil
-	}
-	value := s.ValueString()
-	return &value
 }
 
 type deploymentFreezeResource struct {
@@ -225,12 +217,12 @@ func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFr
 			Type:                deploymentfreezes.RecurringScheduleType(state.RecurringSchedule.Type.ValueString()),
 			Unit:                int(state.RecurringSchedule.Unit.ValueInt64()),
 			EndType:             deploymentfreezes.RecurringScheduleEndType(state.RecurringSchedule.EndType.ValueString()),
-			EndAfterOccurrences: getOptionalIntValue(state.RecurringSchedule.EndAfterOccurrences),
-			MonthlyScheduleType: getOptionalString(state.RecurringSchedule.MonthlyScheduleType),
-			DateOfMonth:         getOptionalString(state.RecurringSchedule.DateOfMonth),
-			DayNumberOfMonth:    getOptionalString(state.RecurringSchedule.DayNumberOfMonth),
+			EndAfterOccurrences: util.GetOptionalIntValue(state.RecurringSchedule.EndAfterOccurrences),
+			MonthlyScheduleType: util.GetOptionalString(state.RecurringSchedule.MonthlyScheduleType),
+			DateOfMonth:         util.GetOptionalString(state.RecurringSchedule.DateOfMonth),
+			DayNumberOfMonth:    util.GetOptionalString(state.RecurringSchedule.DayNumberOfMonth),
 			DaysOfWeek:          daysOfWeek,
-			DayOfWeek:           getOptionalString(state.RecurringSchedule.DayOfWeek),
+			DayOfWeek:           util.GetOptionalString(state.RecurringSchedule.DayOfWeek),
 		}
 
 		if !state.RecurringSchedule.EndOnDate.IsNull() {
@@ -250,13 +242,13 @@ func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFre
 	state.ID = types.StringValue(deploymentFreeze.ID)
 	state.Name = types.StringValue(deploymentFreeze.Name)
 
-	updatedStart, diags := calculateStateTime(ctx, state.Start, *deploymentFreeze.Start)
+	updatedStart, diags := util.CalculateStateTime(ctx, state.Start, *deploymentFreeze.Start)
 	if diags.HasError() {
 		return diags
 	}
 	state.Start = updatedStart
 
-	updatedEnd, diags := calculateStateTime(ctx, state.End, *deploymentFreeze.End)
+	updatedEnd, diags := util.CalculateStateTime(ctx, state.End, *deploymentFreeze.End)
 	if diags.HasError() {
 		return diags
 	}
@@ -285,7 +277,7 @@ func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFre
 			Unit:                types.Int64Value(int64(deploymentFreeze.RecurringSchedule.Unit)),
 			EndType:             types.StringValue(string(deploymentFreeze.RecurringSchedule.EndType)),
 			DaysOfWeek:          daysOfWeek,
-			MonthlyScheduleType: mapOptionalStringValue(deploymentFreeze.RecurringSchedule.MonthlyScheduleType),
+			MonthlyScheduleType: util.MapOptionalStringValue(deploymentFreeze.RecurringSchedule.MonthlyScheduleType),
 		}
 
 		if deploymentFreeze.RecurringSchedule.EndOnDate != nil {
@@ -294,66 +286,11 @@ func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFre
 			state.RecurringSchedule.EndOnDate = timetypes.NewRFC3339Null()
 		}
 
-		state.RecurringSchedule.EndAfterOccurrences = mapOptionalIntValue(deploymentFreeze.RecurringSchedule.EndAfterOccurrences)
-		state.RecurringSchedule.DateOfMonth = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DateOfMonth)
-		state.RecurringSchedule.DayNumberOfMonth = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DayNumberOfMonth)
-		state.RecurringSchedule.DayOfWeek = mapOptionalStringValue(deploymentFreeze.RecurringSchedule.DayOfWeek)
+		state.RecurringSchedule.EndAfterOccurrences = util.MapOptionalIntValue(deploymentFreeze.RecurringSchedule.EndAfterOccurrences)
+		state.RecurringSchedule.DateOfMonth = util.MapOptionalStringValue(deploymentFreeze.RecurringSchedule.DateOfMonth)
+		state.RecurringSchedule.DayNumberOfMonth = util.MapOptionalStringValue(deploymentFreeze.RecurringSchedule.DayNumberOfMonth)
+		state.RecurringSchedule.DayOfWeek = util.MapOptionalStringValue(deploymentFreeze.RecurringSchedule.DayOfWeek)
 	}
 
 	return nil
-}
-
-func calculateStateTime(ctx context.Context, stateValue timetypes.RFC3339, updatedValue time.Time) (timetypes.RFC3339, diag.Diagnostics) {
-	stateTime, diags := stateValue.ValueRFC3339Time()
-	if diags.HasError() {
-		return timetypes.RFC3339{}, diags
-	}
-	stateTimeUTC := timetypes.NewRFC3339TimeValue(stateTime.UTC())
-	updatedValueUTC := updatedValue.UTC()
-	valuesAreEqual, diags := stateTimeUTC.StringSemanticEquals(ctx, timetypes.NewRFC3339TimeValue(updatedValueUTC))
-	if diags.HasError() {
-		return timetypes.NewRFC3339Null(), diags
-	}
-
-	if valuesAreEqual {
-		return stateValue, diags
-	}
-
-	location := stateTime.Location()
-	newValue := timetypes.NewRFC3339TimeValue(updatedValueUTC.In(location))
-	return newValue, diags
-}
-
-func getOptionalStringPointer(value types.String) *string {
-	if value.IsNull() {
-		return nil
-	}
-	str := value.ValueString()
-	return &str
-}
-func mapOptionalStringValue(value string) types.String {
-	if value == "" {
-		return types.StringNull()
-	}
-	return types.StringValue(value)
-}
-func getOptionalIntValue(value types.Int64) int {
-	if value.IsNull() {
-		return 0
-	}
-	return int(value.ValueInt64())
-}
-
-func mapOptionalIntValue(value int) types.Int64 {
-	if value == 0 {
-		return types.Int64Null()
-	}
-	return types.Int64Value(int64(value))
-}
-
-func getOptionalString(value types.String) string {
-	if value.IsNull() {
-		return ""
-	}
-	return value.ValueString()
 }
