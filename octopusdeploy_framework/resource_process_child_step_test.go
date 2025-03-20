@@ -116,7 +116,7 @@ func newProcessChildStepTestDependenciesConfiguration(scenario string) processCh
 		}
 
 		resource "octopusdeploy_process" "%s" {
-		  owner_id  = octopusdeploy_project.%s.id
+		  project_id  = octopusdeploy_project.%s.id
 		}
 
 		resource "octopusdeploy_process_step" "%s" {
@@ -165,7 +165,7 @@ func testCheckResourceProcessChildStepExists() resource.TestCheckFunc {
 					return fmt.Errorf("expected process with id '%s' to exist: %s", processId, err)
 				}
 
-				step, stepExists := findStepFromProcessByID(process, stepId)
+				step, stepExists := deploymentProcessWrapper{process}.FindStepByID(stepId)
 				if !stepExists {
 					return fmt.Errorf("expected process (%s) to contain step (%s)", processId, stepId)
 				}

@@ -13,10 +13,17 @@ This resource manages execution processes in Octopus Deploy.
 ## Example Usage
 
 ```terraform
-# Steps moved into separate resources
+# Deployment process
 resource "octopusdeploy_process" "example" {
   space_id = "Spaces-1"
-  owner_id  = "Projects-21"
+  project_id  = "Projects-21"
+}
+
+# Runbook process
+resource "octopusdeploy_process" "example" {
+  space_id = "Spaces-1"
+  project_id  = "Projects-21"
+  runbook_id  = "Runbooks-42"
 }
 ```
 
@@ -25,10 +32,11 @@ resource "octopusdeploy_process" "example" {
 
 ### Required
 
-- `owner_id` (String) Id of the resource this process belongs to.
+- `project_id` (String) Id of the project this process belongs to.
 
 ### Optional
 
+- `runbook_id` (String) Id of the runbook this process belongs to. When not set this resource represents deployment process of the project
 - `space_id` (String) The space ID associated with this process.
 
 ### Read-Only

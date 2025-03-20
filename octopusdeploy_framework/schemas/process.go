@@ -20,8 +20,14 @@ func (p ProcessSchema) GetResourceSchema() resourceSchema.Schema {
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":       GetIdResourceSchema(),
 			"space_id": GetSpaceIdResourceSchema(ProcessResourceName),
-			"owner_id": util.ResourceString().Required().
-				Description("Id of the resource this process belongs to.").
+			"project_id": util.ResourceString().
+				Required().
+				Description("Id of the project this process belongs to.").
+				PlanModifiers(stringplanmodifier.RequiresReplace()).
+				Build(),
+			"runbook_id": util.ResourceString().
+				Optional().
+				Description("Id of the runbook this process belongs to. When not set this resource represents deployment process of the project").
 				PlanModifiers(stringplanmodifier.RequiresReplace()).
 				Build(),
 		},
@@ -33,8 +39,9 @@ func (p ProcessSchema) GetDatasourceSchema() datasourceSchema.Schema {
 }
 
 type ProcessResourceModel struct {
-	SpaceID types.String `tfsdk:"space_id"`
-	OwnerID types.String `tfsdk:"owner_id"`
+	SpaceID   types.String `tfsdk:"space_id"`
+	ProjectID types.String `tfsdk:"project_id"`
+	RunbookID types.String `tfsdk:"runbook_id"`
 
 	ResourceModel
 }

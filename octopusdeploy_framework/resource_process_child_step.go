@@ -30,7 +30,7 @@ func NewProcessChildStepResource() resource.Resource {
 	return &processChildStepResource{}
 }
 
-func (r *processChildStepResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *processChildStepResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName(schemas.ProcessChildStepResourceName)
 }
 
@@ -74,13 +74,13 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 
 	tflog.Info(ctx, fmt.Sprintf("creating process child step: %s", data.Name.ValueString()))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentId)
+	parent, ok := process.FindStepByID(parentId)
 	if !ok {
 		resp.Diagnostics.AddError("Error creating process child step", fmt.Sprintf("unable to find a parent step with id '%s'", parentId))
 		return
@@ -95,14 +95,14 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 
 	parent.Actions = append(parent.Actions, action)
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	updatedProcess, err := process.Update(r.Config.Client)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create process child step", err.Error())
+		resp.Diagnostics.AddError("Unable to create process child step", err.Error())
 		return
 	}
 
-	updatedStep, ok := findStepFromProcessByID(updatedProcess, parentId)
-	if !ok {
+	updatedStep, parentFound := updatedProcess.FindStepByID(parentId)
+	if !parentFound {
 		resp.Diagnostics.AddError("unable to create process child step, unable to find a parent step '%s'", parent.ID)
 		return
 	}
@@ -137,13 +137,13 @@ func (r *processChildStepResource) Read(ctx context.Context, req resource.ReadRe
 	parentId := data.ParentID.ValueString()
 	actionId := data.ID.ValueString()
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentId)
+	parent, ok := process.FindStepByID(parentId)
 	if !ok {
 		resp.Diagnostics.AddError("unable to find parent step '%s'", parentId)
 		return
@@ -184,20 +184,20 @@ func (r *processChildStepResource) Update(ctx context.Context, req resource.Upda
 
 	tflog.Info(ctx, fmt.Sprintf("updating process child step (%s)", actionId))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentId)
-	if !ok {
+	parent, parentFound := process.FindStepByID(parentId)
+	if !parentFound {
 		resp.Diagnostics.AddError("unable to find parent step '%s'", parentId)
 		return
 	}
 
-	action, ok := findActionFromProcessStepByID(parent, actionId)
-	if !ok {
+	action, actionFound := findActionFromProcessStepByID(parent, actionId)
+	if !actionFound {
 		resp.Diagnostics.AddError("unable to find process child step", actionId)
 		return
 	}
@@ -208,20 +208,20 @@ func (r *processChildStepResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	updatedProcess, err := process.Update(r.Config.Client)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to update process child step", err.Error())
 		return
 	}
 
-	updatedStep, ok := findStepFromProcessByID(updatedProcess, parentId)
-	if !ok {
+	updatedStep, updatedParentFound := updatedProcess.FindStepByID(parentId)
+	if !updatedParentFound {
 		resp.Diagnostics.AddError("unable to update process child step, unable to find a parent step '%s'", parent.ID)
 		return
 	}
 
-	updatedAction, ok := findActionFromProcessStepByID(updatedStep, actionId)
-	if !ok {
+	updatedAction, updatedActionFound := findActionFromProcessStepByID(updatedStep, actionId)
+	if !updatedActionFound {
 		resp.Diagnostics.AddError("unable to update process child step", actionId)
 		return
 	}
@@ -253,13 +253,13 @@ func (r *processChildStepResource) Delete(ctx context.Context, req resource.Dele
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process child step (%s)", data.ID))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentId)
+	parent, ok := process.FindStepByID(parentId)
 	if !ok {
 		resp.Diagnostics.AddError("unable to find parent step '%s'", parentId)
 		return
@@ -273,7 +273,7 @@ func (r *processChildStepResource) Delete(ctx context.Context, req resource.Dele
 	}
 	parent.Actions = filteredActions
 
-	_, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	_, err := process.Update(r.Config.Client)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to delete process child step", err.Error())
 		return
@@ -431,9 +431,9 @@ func mapProcessChildStepActionFromState(ctx context.Context, state *schemas.Proc
 	return diag.Diagnostics{}
 }
 
-func mapProcessChildStepActionToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, action *deployments.DeploymentAction, state *schemas.ProcessChildStepResourceModel) diag.Diagnostics {
+func mapProcessChildStepActionToState(process processWrapper, step *deployments.DeploymentStep, action *deployments.DeploymentAction, state *schemas.ProcessChildStepResourceModel) diag.Diagnostics {
 	state.ID = types.StringValue(action.GetID())
-	state.SpaceID = types.StringValue(process.SpaceID)
+	state.SpaceID = types.StringValue(process.GetSpaceID())
 	state.ProcessID = types.StringValue(process.GetID())
 	state.ParentID = types.StringValue(step.GetID())
 	state.Name = types.StringValue(action.Name)

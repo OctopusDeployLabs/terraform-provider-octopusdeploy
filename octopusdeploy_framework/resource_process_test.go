@@ -9,10 +9,9 @@ import (
 	"testing"
 )
 
-func TestAccOctopusDeployProcessBasicReplace(t *testing.T) {
-	scenario := newProcessTestDependenciesConfiguration("basic")
-	processName := fmt.Sprintf("basic_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
-	processQualifiedName := fmt.Sprintf("octopusdeploy_process.%s", processName)
+func TestAccOctopusDeployProcessReplace(t *testing.T) {
+	scenario := newProcessTestDependenciesConfiguration("replace")
+	processName := fmt.Sprintf("replace_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 
 	resource.Test(t, resource.TestCase{
 		CheckDestroy: resource.ComposeTestCheckFunc(
@@ -22,50 +21,73 @@ func TestAccOctopusDeployProcessBasicReplace(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProcessBasicConfiguration(scenario.config, processName, scenario.project1),
+				Config: testAccDeploymentProcessConfiguration(scenario.config, processName, scenario.project1),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(processQualifiedName, "id"),
-					testCheckResourceProcessBelongsToTheProject(processQualifiedName, scenario.project1),
+					testCheckResourceDeploymentProcessAttributes(processName, scenario.project1),
+					testCheckResourceDeploymentProcessBelongsToTheProject(processName, scenario.project1),
 				),
 			},
 			{
-				Config: testAccProcessBasicConfiguration(scenario.config, processName, scenario.project2),
+				Config: testAccDeploymentProcessConfiguration(scenario.config, processName, scenario.project2),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(processQualifiedName, "id"),
-					testCheckResourceProcessBelongsToTheProject(processQualifiedName, scenario.project2),
+					testCheckResourceDeploymentProcessAttributes(processName, scenario.project2),
+					testCheckResourceDeploymentProcessBelongsToTheProject(processName, scenario.project2),
+				),
+			},
+			{
+				Config: testAccRunbookProcessConfiguration(scenario.config, processName, scenario.project1, scenario.runbook),
+				Check: resource.ComposeTestCheckFunc(
+					testCheckResourceRunbookProcessAttributes(processName, scenario.project1, scenario.runbook),
+					testCheckResourceRunbookProcessBelongsToTheRunbook(processName, scenario.runbook),
 				),
 			},
 		},
 	})
 }
 
-func testAccProcessBasicConfiguration(dependencies string, processName string, ownerName string) string {
+func testAccDeploymentProcessConfiguration(dependencies string, process string, project string) string {
 	return fmt.Sprintf(`
 		%s
 		resource "octopusdeploy_process" "%s" {
-		  owner_id  = %s.id
+		  project_id  = octopusdeploy_project.%s.id
 		}
 		`,
 		dependencies,
-		processName,
-		ownerName,
+		process,
+		project,
 	)
 }
 
-func testCheckResourceProcessBelongsToTheProject(process string, project string) resource.TestCheckFunc {
+func testCheckResourceDeploymentProcessAttributes(processName string, projectName string) resource.TestCheckFunc {
+	project := fmt.Sprintf("octopusdeploy_project.%s", projectName)
+	process := fmt.Sprintf("octopusdeploy_process.%s", processName)
+
+	assertions := []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrSet(process, "id"),
+		resource.TestCheckResourceAttrPair(process, "project_id", project, "id"),
+		resource.TestCheckNoResourceAttr(process, "runbook_id"),
+	}
+
+	return resource.ComposeTestCheckFunc(assertions...)
+}
+
+func testCheckResourceDeploymentProcessBelongsToTheProject(processName string, projectName string) resource.TestCheckFunc {
+	project := fmt.Sprintf("octopusdeploy_project.%s", projectName)
+	process := fmt.Sprintf("octopusdeploy_process.%s", processName)
+
 	return func(state *terraform.State) error {
-		processResource, ok := state.RootModule().Resources[process]
+		processStateResource, ok := state.RootModule().Resources[process]
 		if !ok {
 			return fmt.Errorf("unable to find process resource: %s", process)
 		}
 
-		projectResource, ok := state.RootModule().Resources[project]
+		projectStateResource, ok := state.RootModule().Resources[project]
 		if !ok {
-			return fmt.Errorf("unable to find project resource: %s", process)
+			return fmt.Errorf("unable to find project resource: %s", project)
 		}
 
-		processId := processResource.Primary.ID
-		projectId := projectResource.Primary.ID
+		processId := processStateResource.Primary.ID
+		projectId := projectStateResource.Primary.ID
 
 		if strings.HasSuffix(processId, projectId) {
 			return nil
@@ -75,10 +97,66 @@ func testCheckResourceProcessBelongsToTheProject(process string, project string)
 	}
 }
 
+func testAccRunbookProcessConfiguration(dependencies string, process string, project string, runbook string) string {
+	return fmt.Sprintf(`
+		%s
+		resource "octopusdeploy_process" "%s" {
+		  project_id  = octopusdeploy_project.%s.id
+		  runbook_id  = octopusdeploy_runbook.%s.id
+		}
+		`,
+		dependencies,
+		process,
+		project,
+		runbook,
+	)
+}
+
+func testCheckResourceRunbookProcessAttributes(processName string, projectName string, runbookName string) resource.TestCheckFunc {
+	project := fmt.Sprintf("octopusdeploy_project.%s", projectName)
+	runbook := fmt.Sprintf("octopusdeploy_runbook.%s", runbookName)
+	process := fmt.Sprintf("octopusdeploy_process.%s", processName)
+
+	assertions := []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrSet(process, "id"),
+		resource.TestCheckResourceAttrPair(process, "project_id", project, "id"),
+		resource.TestCheckResourceAttrPair(process, "runbook_id", runbook, "id"),
+	}
+
+	return resource.ComposeTestCheckFunc(assertions...)
+}
+
+func testCheckResourceRunbookProcessBelongsToTheRunbook(processName string, runbookName string) resource.TestCheckFunc {
+	runbook := fmt.Sprintf("octopusdeploy_runbook.%s", runbookName)
+	process := fmt.Sprintf("octopusdeploy_process.%s", processName)
+
+	return func(state *terraform.State) error {
+		processStateResource, ok := state.RootModule().Resources[process]
+		if !ok {
+			return fmt.Errorf("unable to find process resource: %s", process)
+		}
+
+		runbookStateResource, ok := state.RootModule().Resources[runbook]
+		if !ok {
+			return fmt.Errorf("unable to find runbook resource: %s", runbook)
+		}
+
+		processId := processStateResource.Primary.ID
+		runbookId := runbookStateResource.Primary.ID
+
+		if strings.HasSuffix(processId, runbookId) {
+			return nil
+		}
+
+		return fmt.Errorf("expected process id '%s' to belong to runbook id '%s'", processId, runbookId)
+	}
+}
+
 type processTestDependenciesConfiguration struct {
 	projectGroup string
 	project1     string
 	project2     string
+	runbook      string
 	config       string
 }
 
@@ -86,6 +164,7 @@ func newProcessTestDependenciesConfiguration(scenario string) processTestDepende
 	projectGroup := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	project1 := fmt.Sprintf("%s_1_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	project2 := fmt.Sprintf("%s_2_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
+	runbook := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	configuration := fmt.Sprintf(`
 		data "octopusdeploy_lifecycles" "default" {
 		  ids          = null
@@ -117,6 +196,11 @@ func newProcessTestDependenciesConfiguration(scenario string) processTestDepende
 		  lifecycle_id                         = data.octopusdeploy_lifecycles.default.lifecycles[0].id
 		  included_library_variable_sets       = []
 		}
+
+		resource "octopusdeploy_runbook" "%s" {
+		  project_id  = octopusdeploy_project.%s.id
+		  name = "%s"
+		}
 		`,
 		projectGroup,
 		projectGroup,
@@ -126,12 +210,16 @@ func newProcessTestDependenciesConfiguration(scenario string) processTestDepende
 		project2,
 		project2,
 		projectGroup,
+		runbook,
+		project1,
+		runbook,
 	)
 
 	return processTestDependenciesConfiguration{
-		projectGroup: fmt.Sprintf("%s.%s", "octopusdeploy_project_group", projectGroup),
-		project1:     fmt.Sprintf("%s.%s", "octopusdeploy_project", project1),
-		project2:     fmt.Sprintf("%s.%s", "octopusdeploy_project", project2),
+		projectGroup: projectGroup,
+		project1:     project1,
+		project2:     project2,
+		runbook:      runbook,
 		config:       configuration,
 	}
 }

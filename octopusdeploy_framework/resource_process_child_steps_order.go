@@ -29,7 +29,7 @@ func NewProcessChildStepsOrderResource() resource.Resource {
 	return &processChildStepsOrderResource{}
 }
 
-func (r *processChildStepsOrderResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *processChildStepsOrderResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName(schemas.ProcessChildStepsOrderResourceName)
 }
 
@@ -59,13 +59,13 @@ func (r *processChildStepsOrderResource) ImportState(ctx context.Context, reques
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("parent_id"), parentStepId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), parentStepId)...)
 
-	process, diags := loadProcessForSteps(r.Config.Client, r.Config.SpaceID, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, r.Config.SpaceID, processId)
 	if len(diags) > 0 {
 		response.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentStepId)
+	parent, ok := process.FindStepByID(parentStepId)
 	if !ok {
 		response.Diagnostics.AddError("Error importing process child steps order", fmt.Sprintf("unable to find a parent step (id: %s)", parentStepId))
 		return
@@ -116,13 +116,13 @@ func (r *processChildStepsOrderResource) ModifyPlan(ctx context.Context, req res
 	parentId := state.ParentID.ValueString()
 
 	// Do the validation based on steps stored in Octopus Deploy
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentId)
+	parent, ok := process.FindStepByID(parentId)
 	if !ok {
 		resp.Diagnostics.AddError("Error modifying plan for child steps order", fmt.Sprintf("unable to find a parent step with id '%s'", parentId))
 		return
@@ -190,15 +190,15 @@ func (r *processChildStepsOrderResource) Create(ctx context.Context, req resourc
 
 	tflog.Info(ctx, fmt.Sprintf("creating process child steps order for parent %s", parentId))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentId)
-	if !ok {
-		resp.Diagnostics.AddError("Error creating process child steps order", fmt.Sprintf("unable to find a parent step with id '%s'", parentId))
+	parent, parentFound := process.FindStepByID(parentId)
+	if !parentFound {
+		resp.Diagnostics.AddError("Error creating process child steps order", fmt.Sprintf("Unable to find a parent step with id '%s'", parentId))
 		return
 	}
 
@@ -208,15 +208,15 @@ func (r *processChildStepsOrderResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	updatedProcess, err := process.Update(r.Config.Client)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to create process step", err.Error())
+		resp.Diagnostics.AddError("Unable to create process step", err.Error())
 		return
 	}
 
-	updatedParent, ok := findStepFromProcessByID(updatedProcess, parentId)
-	if !ok {
-		resp.Diagnostics.AddError("Error creating process child steps order", fmt.Sprintf("unable to find a parent step with id '%s'", parentId))
+	updatedParent, updatedParentFound := updatedProcess.FindStepByID(parentId)
+	if !updatedParentFound {
+		resp.Diagnostics.AddError("Error creating process child steps order", fmt.Sprintf("Unable to find a parent step with id '%s'", parentId))
 		return
 	}
 
@@ -239,15 +239,15 @@ func (r *processChildStepsOrderResource) Read(ctx context.Context, req resource.
 
 	tflog.Info(ctx, fmt.Sprintf("reading process child steps order (%s)", parentId))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentId)
+	parent, ok := process.FindStepByID(parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Error reading process child steps order", fmt.Sprintf("unable to find a parent step (id: %s)", parentId))
+		resp.Diagnostics.AddError("Error reading process child steps order", fmt.Sprintf("Unable to find a parent step (id: %s)", parentId))
 		return
 	}
 
@@ -273,14 +273,14 @@ func (r *processChildStepsOrderResource) Update(ctx context.Context, req resourc
 
 	tflog.Info(ctx, fmt.Sprintf("updating process child steps order (%s)", parentId))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	parent, ok := findStepFromProcessByID(process, parentId)
-	if !ok {
+	parent, parentFound := process.FindStepByID(parentId)
+	if !parentFound {
 		resp.Diagnostics.AddError("Error updating process child steps order", fmt.Sprintf("unable to find a parent step (id: %s)", parentId))
 		return
 	}
@@ -291,14 +291,14 @@ func (r *processChildStepsOrderResource) Update(ctx context.Context, req resourc
 		return
 	}
 
-	updatedProcess, err := deployments.UpdateDeploymentProcess(r.Config.Client, process)
+	updatedProcess, err := process.Update(r.Config.Client)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to update process child steps order", err.Error())
 		return
 	}
 
-	updatedParent, ok := findStepFromProcessByID(updatedProcess, parentId)
-	if !ok {
+	updatedParent, updatedParentFound := updatedProcess.FindStepByID(parentId)
+	if !updatedParentFound {
 		resp.Diagnostics.AddError("Error updating process child steps order", fmt.Sprintf("unable to find a parent step (id: %s)", parentId))
 		return
 	}
@@ -325,15 +325,15 @@ func (r *processChildStepsOrderResource) Delete(ctx context.Context, req resourc
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process steps order (%s)", processId))
 
-	process, diags := loadProcessForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
 	}
 
-	_, ok := findStepFromProcessByID(process, parentId)
+	_, ok := process.FindStepByID(parentId)
 	if !ok {
-		resp.Diagnostics.AddError("Cannot delete process child steps order", fmt.Sprintf("unable to find a parent step (%s)", parentId))
+		resp.Diagnostics.AddError("Cannot delete process child steps order", fmt.Sprintf("Unable to find a parent step (%s)", parentId))
 		return
 	}
 
@@ -395,9 +395,9 @@ func mapProcessChildStepsOrderFromState(state *schemas.ProcessChildStepsOrderRes
 	return diags
 }
 
-func mapProcessChildStepsOrderToState(process *deployments.DeploymentProcess, step *deployments.DeploymentStep, state *schemas.ProcessChildStepsOrderResourceModel) {
+func mapProcessChildStepsOrderToState(process processWrapper, step *deployments.DeploymentStep, state *schemas.ProcessChildStepsOrderResourceModel) {
 	state.ID = types.StringValue(step.GetID())
-	state.SpaceID = types.StringValue(process.SpaceID)
+	state.SpaceID = types.StringValue(process.GetSpaceID())
 	state.ProcessID = types.StringValue(process.GetID())
 	state.ParentID = types.StringValue(step.GetID())
 

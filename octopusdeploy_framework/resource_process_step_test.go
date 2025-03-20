@@ -110,7 +110,7 @@ func newProcessStepTestDependenciesConfiguration(scenario string) processStepTes
 		}
 
 		resource "octopusdeploy_process" "%s" {
-		  owner_id  = octopusdeploy_project.%s.id
+		  project_id  = octopusdeploy_project.%s.id
 		}
 		`,
 		projectGroup,
@@ -134,12 +134,13 @@ func testCheckResourceProcessStepExists() resource.TestCheckFunc {
 			if r.Type == "octopusdeploy_process_step" {
 				stepId := r.Primary.ID
 				processId := r.Primary.Attributes["process_id"]
-				process, err := deployments.GetDeploymentProcessByID(octoClient, octoClient.GetSpaceID(), processId)
-				if err != nil {
-					return fmt.Errorf("expected process with id '%s' to exist: %s", processId, err)
+				process, processError := deployments.GetDeploymentProcessByID(octoClient, octoClient.GetSpaceID(), processId)
+				if processError != nil {
+					return fmt.Errorf("expected process with id '%s' to exist: %s", processId, processError)
 				}
 
-				if _, exists := findStepFromProcessByID(process, stepId); !exists {
+				_, stepExists := deploymentProcessWrapper{process}.FindStepByID(stepId)
+				if !stepExists {
 					return fmt.Errorf("expected process (%s) to contain step (%s)", processId, stepId)
 				}
 			}

@@ -120,7 +120,7 @@ func newProcessStepsOrderTestDependenciesConfiguration(scenario string) processS
 		}
 
 		resource "octopusdeploy_process" "%s" {
-		  owner_id  = octopusdeploy_project.%s.id
+		  project_id  = octopusdeploy_project.%s.id
 		}
 
 		resource "octopusdeploy_process_step" "%s" {
