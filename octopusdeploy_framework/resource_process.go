@@ -83,6 +83,11 @@ func (r *processResource) Create(ctx context.Context, req resource.CreateRequest
 			return
 		}
 
+		if runbook.ProjectID != project.ID {
+			resp.Diagnostics.AddError("Error creating process", "Provided runbook does not belong to the given project")
+			return
+		}
+
 		runbookProcess, processError := runbookprocess.GetByID(r.Config.Client, spaceId, runbook.RunbookProcessID)
 		if processError != nil {
 			resp.Diagnostics.AddError("Error creating runbook process", processError.Error())
