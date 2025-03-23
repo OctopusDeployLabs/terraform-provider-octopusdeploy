@@ -6,6 +6,7 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -181,4 +182,37 @@ func mapReleaseCreationStrategyToState(project *projects.Project, state *schemas
 	state.ReleaseCreationPackage.PackageReference = types.StringValue(releaseStrategy.ReleaseCreationPackage.PackageReference)
 	state.ReleaseCreationPackage.DeploymentAction = types.StringValue(releaseStrategy.ReleaseCreationPackage.DeploymentAction)
 	state.SpaceID = types.StringValue(project.SpaceID)
+}
+
+func mapBuiltInTriggerFromState(state *schemas.BuiltInTriggerResourceModel, project *projects.Project) {
+	var packageStepId string
+	configuredPackageStepId := state.ReleaseCreationPackageStepID.ValueString()
+	if configuredPackageStepId != "" {
+		packageStepId = configuredPackageStepId
+	}
+
+	project.AutoCreateRelease = true
+	project.ReleaseCreationStrategy = &projects.ReleaseCreationStrategy{
+		ReleaseCreationPackageStepID: packageStepId,
+		ChannelID:                    state.ChannelID.ValueString(),
+		ReleaseCreationPackage: &packages.DeploymentActionPackage{
+			DeploymentAction: state.ReleaseCreationPackage.DeploymentAction.ValueString(),
+			PackageReference: state.ReleaseCreationPackage.PackageReference.ValueString(),
+		},
+	}
+}
+
+func mapBuiltInTriggerToState(project *projects.Project, state *schemas.BuiltInTriggerResourceModel) diag.Diagnostics {
+	releaseStrategy := project.ReleaseCreationStrategy
+
+	if releaseStrategy.ReleaseCreationPackageStepID != "" {
+		state.ReleaseCreationPackageStepID = types.StringValue(releaseStrategy.ReleaseCreationPackageStepID)
+	}
+
+	state.ChannelID = types.StringValue(releaseStrategy.ChannelID)
+	state.ReleaseCreationPackage.PackageReference = types.StringValue(releaseStrategy.ReleaseCreationPackage.PackageReference)
+	state.ReleaseCreationPackage.DeploymentAction = types.StringValue(releaseStrategy.ReleaseCreationPackage.DeploymentAction)
+	state.SpaceID = types.StringValue(project.SpaceID)
+
+	return diag.Diagnostics{}
 }

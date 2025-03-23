@@ -148,6 +148,12 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		}
 	}
 
+	if updatedProject.AutoCreateRelease == true && updatedProject.ReleaseCreationStrategy == nil {
+		// This condition is possible when 'built_in_trigger' resource is used to maintain release creation strategy
+		// For this scenario we want to send persisted strategy to the API to avoid an error(missing package for ARC) which practitioner will not be able to escape
+		updatedProject.ReleaseCreationStrategy = existingProject.ReleaseCreationStrategy
+	}
+
 	updatedProject, err = projects.Update(r.Client, updatedProject)
 	if err != nil {
 		resp.Diagnostics.AddError("Error updating project", err.Error())
