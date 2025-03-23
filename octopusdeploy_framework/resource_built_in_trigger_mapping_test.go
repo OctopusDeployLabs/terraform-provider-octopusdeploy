@@ -87,9 +87,9 @@ func TestAccMapBuiltInTriggerToState(t *testing.T) {
 		},
 	}
 
-	diagnostics := mapBuiltInTriggerToState(project, state)
+	exists := mapBuiltInTriggerToState(project, state)
 
-	assert.Equal(t, 0, len(diagnostics), "Expected mapping diagnostics to be empty")
+	assert.True(t, exists, "Expected to be true, because strategy is present in the project")
 	assert.Equal(t, expected, state)
 }
 
@@ -113,19 +113,60 @@ func TestAccMapBuiltInTriggerToStateWithoutStrategy(t *testing.T) {
 		},
 	}
 
-	diagnostics := mapBuiltInTriggerToState(project, state)
+	exists := mapBuiltInTriggerToState(project, state)
 
 	expected := &schemas.BuiltInTriggerResourceModel{
-		SpaceID:                      types.StringValue(project.SpaceID),
-		ProjectID:                    types.StringValue(project.ID),
-		ChannelID:                    types.StringValue("Channels-82"),
-		ReleaseCreationPackageStepID: types.StringValue("10000000-0000-0000-0000-000000000002"),
+		SpaceID:                      state.SpaceID,
+		ProjectID:                    state.ProjectID,
+		ChannelID:                    state.ChannelID,
+		ReleaseCreationPackageStepID: state.ReleaseCreationPackageStepID,
 		ReleaseCreationPackage: schemas.ReleaseCreationPackageModel{
-			DeploymentAction: types.StringValue("Map"),
-			PackageReference: types.StringValue("map-package"),
+			DeploymentAction: state.ReleaseCreationPackage.DeploymentAction,
+			PackageReference: state.ReleaseCreationPackage.PackageReference,
 		},
 	}
 
-	assert.Equal(t, 0, len(diagnostics), "Expected mapping diagnostics to be empty")
-	assert.Equal(t, expected, state)
+	assert.False(t, exists, "Expected to be false, because strategy is missing from the project")
+	assert.Equal(t, expected, state, "Expected state not to be updated when strategy is missing")
+}
+
+func TestAccMapBuiltInTriggerToStateWithoutPackage(t *testing.T) {
+	project := &projects.Project{
+		SpaceID:           "Spaces-2",
+		Name:              "Map to state",
+		AutoCreateRelease: false,
+		ReleaseCreationStrategy: &projects.ReleaseCreationStrategy{
+			ChannelID:                    "Channels-55",
+			ReleaseCreationPackageStepID: "",
+			ReleaseCreationPackage:       nil,
+		},
+	}
+	project.SetID("Projects-41")
+
+	state := &schemas.BuiltInTriggerResourceModel{
+		SpaceID:                      types.StringValue(project.SpaceID),
+		ProjectID:                    types.StringValue(project.ID),
+		ChannelID:                    types.StringValue("Channels-0"),
+		ReleaseCreationPackageStepID: types.StringNull(),
+		ReleaseCreationPackage: schemas.ReleaseCreationPackageModel{
+			DeploymentAction: types.StringValue("Test"),
+			PackageReference: types.StringValue("test-package"),
+		},
+	}
+
+	exists := mapBuiltInTriggerToState(project, state)
+
+	expected := &schemas.BuiltInTriggerResourceModel{
+		SpaceID:                      state.SpaceID,
+		ProjectID:                    state.ProjectID,
+		ChannelID:                    state.ChannelID,
+		ReleaseCreationPackageStepID: state.ReleaseCreationPackageStepID,
+		ReleaseCreationPackage: schemas.ReleaseCreationPackageModel{
+			DeploymentAction: state.ReleaseCreationPackage.DeploymentAction,
+			PackageReference: state.ReleaseCreationPackage.PackageReference,
+		},
+	}
+
+	assert.False(t, exists, "Expected to be false, because package is missing from the release strategy")
+	assert.Equal(t, expected, state, "Expected state not to be updated when package is missing")
 }
