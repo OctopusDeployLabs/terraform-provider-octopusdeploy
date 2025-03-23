@@ -22,11 +22,11 @@ func NewBuiltInTriggerResource() resource.Resource {
 
 var _ resource.ResourceWithImportState = &builtInTriggerResource{}
 
-func (r *builtInTriggerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *builtInTriggerResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("built_in_trigger")
 }
 
-func (r *builtInTriggerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *builtInTriggerResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schemas.BuiltInTriggerSchema{}.GetResourceSchema()
 }
 
