@@ -2,13 +2,14 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type builtInTriggerResource struct {
@@ -21,11 +22,11 @@ func NewBuiltInTriggerResource() resource.Resource {
 
 var _ resource.ResourceWithImportState = &builtInTriggerResource{}
 
-func (r *builtInTriggerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *builtInTriggerResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("built_in_trigger")
 }
 
-func (r *builtInTriggerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *builtInTriggerResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schemas.BuiltInTriggerSchema{}.GetResourceSchema()
 }
 
@@ -34,7 +35,17 @@ func (r *builtInTriggerResource) Configure(_ context.Context, req resource.Confi
 }
 
 func (r *builtInTriggerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	empty := &schemas.BuiltInTriggerResourceModel{
+		SpaceID:                      types.StringValue(""),
+		ProjectID:                    types.StringValue(req.ID),
+		ChannelID:                    types.StringNull(),
+		ReleaseCreationPackageStepID: types.StringNull(),
+		ReleaseCreationPackage: schemas.ReleaseCreationPackageModel{
+			DeploymentAction: types.StringNull(),
+			PackageReference: types.StringNull(),
+		},
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, empty)...)
 }
 
 func (r *builtInTriggerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -50,13 +61,12 @@ func (r *builtInTriggerResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError("Failed to read associated project for built-in trigger", err.Error())
 		return
 	}
-	releaseStrategy := mapStateToReleaseCreationStrategy(&data)
-	project.ReleaseCreationStrategy = releaseStrategy
-	project.AutoCreateRelease = true
+
+	mapBuiltInTriggerFromState(&data, project)
 
 	_, err = projects.Update(r.Client, project)
 	if err != nil {
-		resp.Diagnostics.AddError("Error updating associated project for built-in trigger", err.Error())
+		resp.Diagnostics.AddError("Failed to update associated project for built-in trigger", err.Error())
 		return
 	}
 
@@ -67,7 +77,12 @@ func (r *builtInTriggerResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	mapReleaseCreationStrategyToState(updatedProject, &data)
+	exists := mapBuiltInTriggerToState(updatedProject, &data)
+	if !exists {
+		resp.Diagnostics.AddError("Failed to map built-in trigger from updated project", "Release strategy or package are missing")
+		return
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -86,7 +101,13 @@ func (r *builtInTriggerResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	mapReleaseCreationStrategyToState(project, &state)
+	exists := mapBuiltInTriggerToState(project, &state)
+	if !exists {
+		// Remove from state when release creation strategy or associated package are missing from the project
+		tflog.Info(ctx, fmt.Sprintf("unable to find built-in trigger from project (id: %s), removing from state ...", projectId))
+		resp.State.RemoveResource(ctx)
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -106,9 +127,7 @@ func (r *builtInTriggerResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	releaseStrategy := mapStateToReleaseCreationStrategy(&data)
-	existingProject.ReleaseCreationStrategy = releaseStrategy
-	existingProject.AutoCreateRelease = true
+	mapBuiltInTriggerFromState(&data, existingProject)
 
 	_, err = projects.Update(r.Client, existingProject)
 	if err != nil {
@@ -122,7 +141,12 @@ func (r *builtInTriggerResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	mapReleaseCreationStrategyToState(updatedProject, &data)
+	exists := mapBuiltInTriggerToState(updatedProject, &data)
+	if !exists {
+		resp.Diagnostics.AddError("Failed to map built-in trigger from updated project", "Release strategy or package are missing")
+		return
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -153,15 +177,16 @@ func (r *builtInTriggerResource) Delete(ctx context.Context, req resource.Delete
 	resp.State.RemoveResource(ctx)
 }
 
-func mapStateToReleaseCreationStrategy(state *schemas.BuiltInTriggerResourceModel) *projects.ReleaseCreationStrategy {
-	var releaseCreationPackageStepId string
-	releaseCreationPackageStepIdString := state.ReleaseCreationPackageStepID.ValueString()
-	if releaseCreationPackageStepIdString != "" {
-		releaseCreationPackageStepId = releaseCreationPackageStepIdString
+func mapBuiltInTriggerFromState(state *schemas.BuiltInTriggerResourceModel, project *projects.Project) {
+	var packageStepId string
+	configuredPackageStepId := state.ReleaseCreationPackageStepID.ValueString()
+	if configuredPackageStepId != "" {
+		packageStepId = configuredPackageStepId
 	}
 
-	return &projects.ReleaseCreationStrategy{
-		ReleaseCreationPackageStepID: releaseCreationPackageStepId,
+	project.AutoCreateRelease = true
+	project.ReleaseCreationStrategy = &projects.ReleaseCreationStrategy{
+		ReleaseCreationPackageStepID: packageStepId,
 		ChannelID:                    state.ChannelID.ValueString(),
 		ReleaseCreationPackage: &packages.DeploymentActionPackage{
 			DeploymentAction: state.ReleaseCreationPackage.DeploymentAction.ValueString(),
@@ -170,7 +195,15 @@ func mapStateToReleaseCreationStrategy(state *schemas.BuiltInTriggerResourceMode
 	}
 }
 
-func mapReleaseCreationStrategyToState(project *projects.Project, state *schemas.BuiltInTriggerResourceModel) {
+func mapBuiltInTriggerToState(project *projects.Project, state *schemas.BuiltInTriggerResourceModel) bool {
+	if project.ReleaseCreationStrategy == nil {
+		return false
+	}
+
+	if project.ReleaseCreationStrategy.ReleaseCreationPackage == nil {
+		return false
+	}
+
 	releaseStrategy := project.ReleaseCreationStrategy
 
 	if releaseStrategy.ReleaseCreationPackageStepID != "" {
@@ -181,4 +214,6 @@ func mapReleaseCreationStrategyToState(project *projects.Project, state *schemas
 	state.ReleaseCreationPackage.PackageReference = types.StringValue(releaseStrategy.ReleaseCreationPackage.PackageReference)
 	state.ReleaseCreationPackage.DeploymentAction = types.StringValue(releaseStrategy.ReleaseCreationPackage.DeploymentAction)
 	state.SpaceID = types.StringValue(project.SpaceID)
+
+	return true
 }

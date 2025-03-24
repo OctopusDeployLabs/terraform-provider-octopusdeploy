@@ -23,7 +23,7 @@ func NewProjectResource() resource.Resource {
 	return &projectResource{}
 }
 
-func (r *projectResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *projectResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName(schemas.ProjectResourceName)
 }
 
@@ -146,6 +146,12 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 			}
 			updatedProject.PersistenceSettings = vcsProject.PersistenceSettings
 		}
+	}
+
+	if updatedProject.AutoCreateRelease == true && updatedProject.ReleaseCreationStrategy == nil {
+		// This condition is possible when 'built_in_trigger' resource is used to maintain release creation strategy
+		// For this scenario we want to send persisted strategy to the API to avoid an error(missing package for ARC) which practitioner will not be able to escape
+		updatedProject.ReleaseCreationStrategy = existingProject.ReleaseCreationStrategy
 	}
 
 	updatedProject, err = projects.Update(r.Client, updatedProject)
