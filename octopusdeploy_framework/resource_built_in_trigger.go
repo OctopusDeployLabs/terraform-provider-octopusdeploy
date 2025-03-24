@@ -7,7 +7,6 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -36,7 +35,17 @@ func (r *builtInTriggerResource) Configure(_ context.Context, req resource.Confi
 }
 
 func (r *builtInTriggerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	empty := &schemas.BuiltInTriggerResourceModel{
+		SpaceID:                      types.StringValue(""),
+		ProjectID:                    types.StringValue(req.ID),
+		ChannelID:                    types.StringNull(),
+		ReleaseCreationPackageStepID: types.StringNull(),
+		ReleaseCreationPackage: schemas.ReleaseCreationPackageModel{
+			DeploymentAction: types.StringNull(),
+			PackageReference: types.StringNull(),
+		},
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, empty)...)
 }
 
 func (r *builtInTriggerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
