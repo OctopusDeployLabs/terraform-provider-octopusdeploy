@@ -15,56 +15,41 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const deploymentFreezeResourceName = "deployment_freeze"
+const projectDeploymentFreezeResourceName = "project_deployment_freeze"
 
-type recurringScheduleModel struct {
-	Type                types.String      `tfsdk:"type"`
-	Unit                types.Int64       `tfsdk:"unit"`
-	EndType             types.String      `tfsdk:"end_type"`
-	EndOnDate           timetypes.RFC3339 `tfsdk:"end_on_date"`
-	EndAfterOccurrences types.Int64       `tfsdk:"end_after_occurrences"`
-	MonthlyScheduleType types.String      `tfsdk:"monthly_schedule_type"`
-	DateOfMonth         types.String      `tfsdk:"date_of_month"`
-	DayNumberOfMonth    types.String      `tfsdk:"day_number_of_month"`
-	DaysOfWeek          types.List        `tfsdk:"days_of_week"`
-	DayOfWeek           types.String      `tfsdk:"day_of_week"`
+type projectDeploymentFreezeModel struct {
+	OwnerID        types.String `tfsdk:"owner_id"`
+	EnvironmentIDs types.List   `tfsdk:"environment_ids"`
+	deploymentFreezeModel
 }
 
-type deploymentFreezeModel struct {
-	Name              types.String            `tfsdk:"name"`
-	Start             timetypes.RFC3339       `tfsdk:"start"`
-	End               timetypes.RFC3339       `tfsdk:"end"`
-	RecurringSchedule *recurringScheduleModel `tfsdk:"recurring_schedule"`
-	schemas.ResourceModel
-}
-
-type deploymentFreezeResource struct {
+type projectDeploymentFreezeResource struct {
 	*Config
 }
 
-var _ resource.Resource = &deploymentFreezeResource{}
+var _ resource.Resource = &projectDeploymentFreezeResource{}
 
-func NewDeploymentFreezeResource() resource.Resource {
-	return &deploymentFreezeResource{}
+func NewProjectDeploymentFreezeResource() resource.Resource {
+	return &projectDeploymentFreezeResource{}
 }
 
-func (f *deploymentFreezeResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = util.GetTypeName(deploymentFreezeResourceName)
+func (f *projectDeploymentFreezeResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = util.GetTypeName(projectDeploymentFreezeResourceName)
 }
 
-func (f *deploymentFreezeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.DeploymentFreezeSchema{}.GetResourceSchema()
+func (f *projectDeploymentFreezeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schemas.ProjectDeploymentFreezeSchema{}.GetResourceSchema()
 }
 
-func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (f *projectDeploymentFreezeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	f.Config = ResourceConfiguration(req, resp)
 }
 
-func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (f *projectDeploymentFreezeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
 
-	var state *deploymentFreezeModel
+	var state *projectDeploymentFreezeModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -72,33 +57,29 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 
 	deploymentFreeze, err := deploymentfreezes.GetById(f.Config.Client, state.GetID())
 	if err != nil {
-		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "deployment freeze"); err != nil {
-			resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "project deployment freeze"); err != nil {
+			resp.Diagnostics.AddError("unable to load project deployment freeze", err.Error())
 		}
 		return
 	}
 
-	if deploymentFreeze.Name != state.Name.ValueString() {
-		state.Name = types.StringValue(deploymentFreeze.Name)
-	}
-
-	mapToState(ctx, state, deploymentFreeze)
+	mapFromProjectDeploymentFreezeToState(ctx, state, deploymentFreeze)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (f *projectDeploymentFreezeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
 
-	var plan *deploymentFreezeModel
+	var plan *projectDeploymentFreezeModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	deploymentFreeze, diags := mapFromState(plan)
+	deploymentFreeze, diags := mapFromStateToProjectDeploymentFreeze(plan)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -106,22 +87,22 @@ func (f *deploymentFreezeResource) Create(ctx context.Context, req resource.Crea
 
 	createdFreeze, err := deploymentfreezes.Add(f.Config.Client, deploymentFreeze)
 	if err != nil {
-		resp.Diagnostics.AddError("error while creating deployment freeze", err.Error())
+		resp.Diagnostics.AddError("error while creating project deployment freeze", err.Error())
 		return
 	}
 
-	diags.Append(mapToState(ctx, plan, createdFreeze)...)
+	diags.Append(mapFromProjectDeploymentFreezeToState(ctx, plan, createdFreeze)...)
 	if diags.HasError() {
 		return
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
-func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (f *projectDeploymentFreezeResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
 
-	var plan *deploymentFreezeModel
+	var plan *projectDeploymentFreezeModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -129,11 +110,11 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 
 	existingFreeze, err := deploymentfreezes.GetById(f.Config.Client, plan.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
+		resp.Diagnostics.AddError("unable to load project deployment freeze", err.Error())
 		return
 	}
 
-	updatedFreeze, diags := mapFromState(plan)
+	updatedFreeze, diags := mapFromStateToProjectDeploymentFreeze(plan)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -148,11 +129,11 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 
 	updatedFreeze, err = deploymentfreezes.Update(f.Config.Client, updatedFreeze)
 	if err != nil {
-		resp.Diagnostics.AddError("error while updating deployment freeze", err.Error())
+		resp.Diagnostics.AddError("error while updating project deployment freeze", err.Error())
 		return
 	}
 
-	diags.Append(mapToState(ctx, plan, updatedFreeze)...)
+	diags.Append(mapFromProjectDeploymentFreezeToState(ctx, plan, updatedFreeze)...)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 	}
@@ -160,11 +141,11 @@ func (f *deploymentFreezeResource) Update(ctx context.Context, req resource.Upda
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
-func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (f *projectDeploymentFreezeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
 
-	var state *deploymentFreezeModel
+	var state *projectDeploymentFreezeModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -173,18 +154,18 @@ func (f *deploymentFreezeResource) Delete(ctx context.Context, req resource.Dele
 
 	freeze, err := deploymentfreezes.GetById(f.Config.Client, state.GetID())
 	if err != nil {
-		resp.Diagnostics.AddError("unable to load deployment freeze", err.Error())
+		resp.Diagnostics.AddError("unable to load project deployment freeze", err.Error())
 		return
 	}
 
 	err = deploymentfreezes.Delete(f.Config.Client, freeze)
 	if err != nil {
-		resp.Diagnostics.AddError("unable to delete deployment freeze", err.Error())
+		resp.Diagnostics.AddError("unable to delete project deployment freeze", err.Error())
 	}
 
 	resp.State.RemoveResource(ctx)
 }
-func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, diag.Diagnostics) {
+func mapFromStateToProjectDeploymentFreeze(state *projectDeploymentFreezeModel) (*deploymentfreezes.DeploymentFreeze, diag.Diagnostics) {
 	start, diags := state.Start.ValueRFC3339Time()
 	if diags.HasError() {
 		return nil, diags
@@ -198,9 +179,17 @@ func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFr
 	end = end.UTC()
 
 	freeze := deploymentfreezes.DeploymentFreeze{
-		Name:  state.Name.ValueString(),
-		Start: &start,
-		End:   &end,
+		OwnerId: state.OwnerID.ValueString(),
+		Name:    state.Name.ValueString(),
+		Start:   &start,
+		End:     &end,
+	}
+
+	if !state.EnvironmentIDs.IsNull() && !state.EnvironmentIDs.IsUnknown() {
+		projectEnvironments := map[string][]string{
+			state.OwnerID.ValueString(): util.ExpandStringList(state.EnvironmentIDs),
+		}
+		freeze.ProjectEnvironmentScope = projectEnvironments
 	}
 
 	if state.RecurringSchedule != nil {
@@ -238,8 +227,10 @@ func mapFromState(state *deploymentFreezeModel) (*deploymentfreezes.DeploymentFr
 	freeze.ID = state.ID.String()
 	return &freeze, nil
 }
-func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze) diag.Diagnostics {
+
+func mapFromProjectDeploymentFreezeToState(ctx context.Context, state *projectDeploymentFreezeModel, deploymentFreeze *deploymentfreezes.DeploymentFreeze) diag.Diagnostics {
 	state.ID = types.StringValue(deploymentFreeze.ID)
+	state.OwnerID = types.StringValue(deploymentFreeze.OwnerId)
 	state.Name = types.StringValue(deploymentFreeze.Name)
 
 	updatedStart, diags := util.CalculateStateTime(ctx, state.Start, *deploymentFreeze.Start)
@@ -253,6 +244,10 @@ func mapToState(ctx context.Context, state *deploymentFreezeModel, deploymentFre
 		return diags
 	}
 	state.End = updatedEnd
+
+	if deploymentFreeze.ProjectEnvironmentScope != nil {
+		state.EnvironmentIDs = util.FlattenStringList(deploymentFreeze.ProjectEnvironmentScope[state.OwnerID.ValueString()])
+	}
 
 	if deploymentFreeze.RecurringSchedule != nil {
 		var daysOfWeek types.List
