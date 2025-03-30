@@ -2,7 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"fmt"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/runbookprocess"
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -11,9 +11,9 @@ import (
 	"testing"
 )
 
-func TestAccOctopusDeployProcessChildStepsOrder(t *testing.T) {
-	scenario := newProcessChildStepsOrderTestDependenciesConfiguration("children")
-	order := fmt.Sprintf("children_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
+func TestAccOctopusDeployProcessChildStepsOrderForRunbook(t *testing.T) {
+	scenario := newProcessChildStepsOrderRunbookTestDependenciesConfiguration("runbook_children")
+	order := fmt.Sprintf("runbook_children_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	orderedSteps1 := []string{scenario.child1, scenario.child2, scenario.child3}
 	orderedSteps2 := []string{scenario.child3, scenario.child1, scenario.child2}
 
@@ -23,24 +23,24 @@ func TestAccOctopusDeployProcessChildStepsOrder(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProcessChildStepsOrderConfiguration(scenario, order, orderedSteps1),
+				Config: testAccRunbookProcessChildStepsOrderConfiguration(scenario, order, orderedSteps1),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckResourceProcessChildStepsOrderAttributes(scenario, order, orderedSteps1),
-					testCheckResourceProcessChildStepsOrderExists(t, scenario.parent, orderedSteps1),
+					testCheckResourceRunbookProcessChildStepsOrderAttributes(scenario, order, orderedSteps1),
+					testCheckResourceRunbookProcessChildStepsOrderExists(t, scenario.parent, orderedSteps1),
 				),
 			},
 			{
-				Config: testAccProcessChildStepsOrderConfiguration(scenario, order, orderedSteps2),
+				Config: testAccRunbookProcessChildStepsOrderConfiguration(scenario, order, orderedSteps2),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckResourceProcessChildStepsOrderAttributes(scenario, order, orderedSteps2),
-					testCheckResourceProcessChildStepsOrderExists(t, scenario.parent, orderedSteps2),
+					testCheckResourceRunbookProcessChildStepsOrderAttributes(scenario, order, orderedSteps2),
+					testCheckResourceRunbookProcessChildStepsOrderExists(t, scenario.parent, orderedSteps2),
 				),
 			},
 		},
 	})
 }
 
-func testAccProcessChildStepsOrderConfiguration(scenario processChildStepsOrderTestDependenciesConfiguration, orderResource string, children []string) string {
+func testAccRunbookProcessChildStepsOrderConfiguration(scenario runbookProcessChildStepsOrderTestDependenciesConfiguration, orderResource string, children []string) string {
 	references := make([]string, len(children))
 	for i, step := range children {
 		references[i] = fmt.Sprintf("octopusdeploy_process_child_step.%s.id,", step)
@@ -65,15 +65,17 @@ func testAccProcessChildStepsOrderConfiguration(scenario processChildStepsOrderT
 	)
 }
 
-func testCheckResourceProcessChildStepsOrderAttributes(scenario processChildStepsOrderTestDependenciesConfiguration, name string, children []string) resource.TestCheckFunc {
-	order := fmt.Sprintf("octopusdeploy_process_child_steps_order.%s", name)
+func testCheckResourceRunbookProcessChildStepsOrderAttributes(scenario runbookProcessChildStepsOrderTestDependenciesConfiguration, name string, children []string) resource.TestCheckFunc {
+	runbook := fmt.Sprintf("octopusdeploy_runbook.%s", scenario.runbook)
 	process := fmt.Sprintf("octopusdeploy_process.%s", scenario.process)
 	parent := fmt.Sprintf("octopusdeploy_process_step.%s", scenario.parent)
+	order := fmt.Sprintf("octopusdeploy_process_child_steps_order.%s", name)
 
 	assertions := []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrPair(order, "id", order, "parent_id"),
 		resource.TestCheckResourceAttrPair(order, "process_id", process, "id"),
 		resource.TestCheckResourceAttrPair(order, "parent_id", parent, "id"),
+		resource.TestCheckResourceAttrPair(process, "runbook_id", runbook, "id"),
 	}
 
 	for i, expected := range children {
@@ -85,7 +87,8 @@ func testCheckResourceProcessChildStepsOrderAttributes(scenario processChildStep
 	return resource.ComposeTestCheckFunc(assertions...)
 }
 
-type processChildStepsOrderTestDependenciesConfiguration struct {
+type runbookProcessChildStepsOrderTestDependenciesConfiguration struct {
+	runbook string
 	process string
 	parent  string
 	child1  string
@@ -94,9 +97,10 @@ type processChildStepsOrderTestDependenciesConfiguration struct {
 	config  string
 }
 
-func newProcessChildStepsOrderTestDependenciesConfiguration(scenario string) processChildStepsOrderTestDependenciesConfiguration {
+func newProcessChildStepsOrderRunbookTestDependenciesConfiguration(scenario string) runbookProcessChildStepsOrderTestDependenciesConfiguration {
 	projectGroup := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	project := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
+	runbook := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	process := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	parent := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	child1 := fmt.Sprintf("%s_1_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
@@ -125,8 +129,14 @@ func newProcessChildStepsOrderTestDependenciesConfiguration(scenario string) pro
 		  included_library_variable_sets       = []
 		}
 
+		resource "octopusdeploy_runbook" "%s" {
+		  project_id  = octopusdeploy_project.%s.id
+		  name = "%s"
+		}
+
 		resource "octopusdeploy_process" "%s" {
 		  project_id  = octopusdeploy_project.%s.id
+		  runbook_id = octopusdeploy_runbook.%s.id
 		}
 
 		resource "octopusdeploy_process_step" "%s" {
@@ -176,8 +186,12 @@ func newProcessChildStepsOrderTestDependenciesConfiguration(scenario string) pro
 		project,
 		project,
 		projectGroup,
+		runbook,
+		project,
+		runbook,
 		process,
 		project,
+		runbook,
 		parent,
 		process,
 		parent,
@@ -195,7 +209,8 @@ func newProcessChildStepsOrderTestDependenciesConfiguration(scenario string) pro
 		child3,
 	)
 
-	return processChildStepsOrderTestDependenciesConfiguration{
+	return runbookProcessChildStepsOrderTestDependenciesConfiguration{
+		runbook: runbook,
 		process: process,
 		parent:  parent,
 		child1:  child1,
@@ -205,7 +220,7 @@ func newProcessChildStepsOrderTestDependenciesConfiguration(scenario string) pro
 	}
 }
 
-func testCheckResourceProcessChildStepsOrderExists(t *testing.T, parent string, children []string) resource.TestCheckFunc {
+func testCheckResourceRunbookProcessChildStepsOrderExists(t *testing.T, parent string, children []string) resource.TestCheckFunc {
 	// Based on assumption that first action (embedded within step in configuration) have same name as a parent step
 	expectedActions := append([]string{parent}, children...)
 
@@ -214,12 +229,12 @@ func testCheckResourceProcessChildStepsOrderExists(t *testing.T, parent string, 
 			if r.Type == "octopusdeploy_process_child_steps_order" {
 				stepId := r.Primary.ID
 				processId := r.Primary.Attributes["process_id"]
-				process, processError := deployments.GetDeploymentProcessByID(octoClient, octoClient.GetSpaceID(), processId)
+				process, processError := runbookprocess.GetByID(octoClient, octoClient.GetSpaceID(), processId)
 				if processError != nil {
 					return fmt.Errorf("expected process with id '%s' to exist: %s", processId, processError)
 				}
 
-				step, stepExists := deploymentProcessWrapper{process}.FindStepByID(stepId)
+				step, stepExists := runbookProcessWrapper{process}.FindStepByID(stepId)
 				if !stepExists {
 					return fmt.Errorf("expected process (%s) to contain step (%s)", processId, stepId)
 				}
