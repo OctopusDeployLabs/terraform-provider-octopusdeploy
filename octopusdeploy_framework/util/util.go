@@ -3,6 +3,7 @@ package util
 import (
 	"context"
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -165,11 +166,34 @@ func ConvertMapStringArrayToMapAttrValue(ctx context.Context, m map[string][]str
 	return result, diags
 }
 
+func ConvertPropertiesToAttributeValuesMap(properties map[string]core.PropertyValue) (types.Map, diag.Diagnostics) {
+	attributeValues := make(map[string]attr.Value, len(properties))
+	for key, value := range properties {
+		attributeValues[key] = types.StringValue(value.Value)
+	}
+
+	valuesMap, diags := types.MapValue(types.StringType, attributeValues)
+	if diags.HasError() {
+		return types.MapNull(types.StringType), diags
+	}
+
+	return valuesMap, diags
+}
+
 const sep = ":"
 
 func BuildCompositeId(keys ...string) string {
 	return strings.Join(keys, sep)
 }
+
 func SplitCompositeId(id string) []string {
 	return strings.Split(id, sep)
+}
+
+func BuildStringSetOrEmpty(values []string) types.Set {
+	if values == nil {
+		return types.SetValueMust(types.StringType, []attr.Value{})
+	} else {
+		return types.SetValueMust(types.StringType, ToValueSlice(values))
+	}
 }

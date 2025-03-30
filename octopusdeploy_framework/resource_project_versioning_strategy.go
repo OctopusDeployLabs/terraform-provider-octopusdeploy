@@ -2,6 +2,9 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"log"
 	"net/http"
 
@@ -60,7 +63,12 @@ func (r *projectVersioningStrategyResource) Create(ctx context.Context, req reso
 		}
 		return
 	}
-	versioningStrategy := mapStateToProjectVersioningStrategy(&plan)
+	versioningStrategy, mappingDiags := mapStateToProjectVersioningStrategy(ctx, &plan)
+	if mappingDiags.HasError() {
+		resp.Diagnostics.Append(mappingDiags...)
+		return
+	}
+
 	project.VersioningStrategy = versioningStrategy
 
 	_, err = projects.Update(r.Client, project)
@@ -75,6 +83,8 @@ func (r *projectVersioningStrategyResource) Create(ctx context.Context, req reso
 			if apiError.StatusCode == http.StatusNotFound {
 				log.Printf("[INFO] associated project (%s) not found; deleting version strategy from state", plan.ProjectID.ValueString())
 				resp.State.RemoveResource(ctx)
+			} else {
+				resp.Diagnostics.AddError("Failed to read associated project", err.Error())
 			}
 		} else {
 			resp.Diagnostics.AddError("Failed to read associated project", err.Error())
@@ -125,7 +135,11 @@ func (r *projectVersioningStrategyResource) Update(ctx context.Context, req reso
 		return
 	}
 
-	versioningStrategy := mapStateToProjectVersioningStrategy(&plan)
+	versioningStrategy, mappingDiags := mapStateToProjectVersioningStrategy(ctx, &plan)
+	if mappingDiags.HasError() {
+		resp.Diagnostics.Append(mappingDiags...)
+		return
+	}
 	existingProject.VersioningStrategy = versioningStrategy
 
 	_, err = projects.Update(r.Client, existingProject)
@@ -168,22 +182,31 @@ func (r *projectVersioningStrategyResource) Delete(ctx context.Context, req reso
 	resp.State.RemoveResource(ctx)
 }
 
-func mapStateToProjectVersioningStrategy(state *schemas.ProjectVersioningStrategyModel) *projects.VersioningStrategy {
+func mapStateToProjectVersioningStrategy(ctx context.Context, state *schemas.ProjectVersioningStrategyModel) (*projects.VersioningStrategy, diag.Diagnostics) {
 	projectVersioningStrategy := &projects.VersioningStrategy{}
+	diags := diag.Diagnostics{}
+
 	if !(state.Template.IsNull()) {
 		projectVersioningStrategy.Template = state.Template.ValueString()
 	}
 	if !(state.DonorPackageStepID.IsNull()) {
 		projectVersioningStrategy.DonorPackageStepID = state.DonorPackageStepID.ValueStringPointer()
 	}
-	if !(state.DonorPackage == nil) {
+
+	if !state.DonorPackage.IsNull() && !state.DonorPackage.IsUnknown() {
+		donorPackage := schemas.DonorPackageModel{}
+		diags.Append(state.DonorPackage.As(ctx, &donorPackage, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return projectVersioningStrategy, diags
+		}
+
 		projectVersioningStrategy.DonorPackage = &packages.DeploymentActionPackage{
-			DeploymentAction: state.DonorPackage.DeploymentAction.ValueString(),
-			PackageReference: state.DonorPackage.PackageReference.ValueString(),
+			DeploymentAction: donorPackage.DeploymentAction.ValueString(),
+			PackageReference: donorPackage.PackageReference.ValueString(),
 		}
 	}
 
-	return projectVersioningStrategy
+	return projectVersioningStrategy, diags
 }
 
 func mapProjectVersioningStrategyToState(versioningStrategy *projects.VersioningStrategy, state *schemas.ProjectVersioningStrategyModel) {
@@ -193,8 +216,13 @@ func mapProjectVersioningStrategyToState(versioningStrategy *projects.Versioning
 	// Template and Donor Package are mutually exclusive options. We won't always have DonorPackage information.
 	state.Template = types.StringValue(versioningStrategy.Template)
 
-	if !(versioningStrategy.DonorPackage == nil) {
-		state.DonorPackage.PackageReference = types.StringValue(versioningStrategy.DonorPackage.PackageReference)
-		state.DonorPackage.DeploymentAction = types.StringValue(versioningStrategy.DonorPackage.DeploymentAction)
+	if versioningStrategy.DonorPackage != nil {
+		state.DonorPackage = types.ObjectValueMust(
+			schemas.ProjectVersioningStrategyDonorPackageAttributeTypes(),
+			map[string]attr.Value{
+				"deployment_action": types.StringValue(versioningStrategy.DonorPackage.DeploymentAction),
+				"package_reference": types.StringValue(versioningStrategy.DonorPackage.PackageReference),
+			},
+		)
 	}
 }
