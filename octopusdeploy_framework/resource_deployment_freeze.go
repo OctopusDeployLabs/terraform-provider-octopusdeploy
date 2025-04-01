@@ -20,6 +20,7 @@ const deploymentFreezeResourceName = "deployment_freeze"
 type recurringScheduleModel struct {
 	Type                types.String      `tfsdk:"type"`
 	Unit                types.Int64       `tfsdk:"unit"`
+	UtcOffsetInMinutes  types.Int64       `tfsdk:"utc_offset_in_minutes"`
 	EndType             types.String      `tfsdk:"end_type"`
 	EndOnDate           timetypes.RFC3339 `tfsdk:"end_on_date"`
 	EndAfterOccurrences types.Int64       `tfsdk:"end_after_occurrences"`

@@ -3,6 +3,7 @@ package schemas
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -97,6 +98,7 @@ func (v recurringScheduleValidator) ValidateObject(ctx context.Context, req vali
 	var schedule struct {
 		Type                types.String      `tfsdk:"type"`
 		Unit                types.Int64       `tfsdk:"unit"`
+		UtcOffsetInMinutes  types.Int64       `tfsdk:"utc_offset_in_minutes"`
 		EndType             types.String      `tfsdk:"end_type"`
 		EndOnDate           timetypes.RFC3339 `tfsdk:"end_on_date"`
 		EndAfterOccurrences types.Int64       `tfsdk:"end_after_occurrences"`

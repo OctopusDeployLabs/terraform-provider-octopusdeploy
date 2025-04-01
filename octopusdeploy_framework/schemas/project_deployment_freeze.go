@@ -43,6 +43,11 @@ func (d ProjectDeploymentFreezeSchema) GetResourceSchema() resourceSchema.Schema
 						Description: "The unit value for the schedule",
 						Required:    true,
 					},
+					"utc_offset_in_minutes": resourceSchema.Int64Attribute{
+						Description: "The UTC offset in minutes of the timezone the schedule should run in, will use offset from freeze start date if not specified.",
+						Optional:    true,
+						Computed:    true,
+					},
 					"end_type": resourceSchema.StringAttribute{
 						Description: "When the recurring schedule should end (Never, OnDate, AfterOccurrences)",
 						Required:    true,

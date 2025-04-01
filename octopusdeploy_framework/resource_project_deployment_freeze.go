@@ -201,16 +201,24 @@ func mapFromStateToProjectDeploymentFreeze(state *projectDeploymentFreezeModel) 
 			}
 		}
 
+		utcOffsetInMinutes := state.RecurringSchedule.UtcOffsetInMinutes
+		if utcOffsetInMinutes.IsNull() || utcOffsetInMinutes.IsUnknown() {
+			s, _ := state.Start.ValueRFC3339Time()
+			_, offset := s.Local().Zone()
+			utcOffsetInMinutes = types.Int64Value(int64(offset / 60))
+		}
+
 		freeze.RecurringSchedule = &deploymentfreezes.RecurringSchedule{
-			Type:                deploymentfreezes.RecurringScheduleType(state.RecurringSchedule.Type.ValueString()),
-			Unit:                int(state.RecurringSchedule.Unit.ValueInt64()),
-			EndType:             deploymentfreezes.RecurringScheduleEndType(state.RecurringSchedule.EndType.ValueString()),
-			EndAfterOccurrences: util.GetOptionalIntValue(state.RecurringSchedule.EndAfterOccurrences),
-			MonthlyScheduleType: util.GetOptionalString(state.RecurringSchedule.MonthlyScheduleType),
-			DateOfMonth:         util.GetOptionalString(state.RecurringSchedule.DateOfMonth),
-			DayNumberOfMonth:    util.GetOptionalString(state.RecurringSchedule.DayNumberOfMonth),
-			DaysOfWeek:          daysOfWeek,
-			DayOfWeek:           util.GetOptionalString(state.RecurringSchedule.DayOfWeek),
+			Type:                   deploymentfreezes.RecurringScheduleType(state.RecurringSchedule.Type.ValueString()),
+			Unit:                   int(state.RecurringSchedule.Unit.ValueInt64()),
+			UserUtcOffsetInMinutes: int(utcOffsetInMinutes.ValueInt64()),
+			EndType:                deploymentfreezes.RecurringScheduleEndType(state.RecurringSchedule.EndType.ValueString()),
+			EndAfterOccurrences:    util.GetOptionalIntValue(state.RecurringSchedule.EndAfterOccurrences),
+			MonthlyScheduleType:    util.GetOptionalString(state.RecurringSchedule.MonthlyScheduleType),
+			DateOfMonth:            util.GetOptionalString(state.RecurringSchedule.DateOfMonth),
+			DayNumberOfMonth:       util.GetOptionalString(state.RecurringSchedule.DayNumberOfMonth),
+			DaysOfWeek:             daysOfWeek,
+			DayOfWeek:              util.GetOptionalString(state.RecurringSchedule.DayOfWeek),
 		}
 
 		if !state.RecurringSchedule.EndOnDate.IsNull() {
@@ -269,6 +277,7 @@ func mapFromProjectDeploymentFreezeToState(ctx context.Context, state *projectDe
 		state.RecurringSchedule = &recurringScheduleModel{
 			Type:                types.StringValue(string(deploymentFreeze.RecurringSchedule.Type)),
 			Unit:                types.Int64Value(int64(deploymentFreeze.RecurringSchedule.Unit)),
+			UtcOffsetInMinutes:  types.Int64Value(int64(deploymentFreeze.RecurringSchedule.UserUtcOffsetInMinutes)),
 			EndType:             types.StringValue(string(deploymentFreeze.RecurringSchedule.EndType)),
 			DaysOfWeek:          daysOfWeek,
 			MonthlyScheduleType: util.MapOptionalStringValue(deploymentFreeze.RecurringSchedule.MonthlyScheduleType),
