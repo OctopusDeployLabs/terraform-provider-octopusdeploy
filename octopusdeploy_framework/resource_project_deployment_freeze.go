@@ -120,8 +120,7 @@ func (f *projectDeploymentFreezeResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	// Preserve both project and tenant scopes from the existing freeze
-	updatedFreeze.ProjectEnvironmentScope = existingFreeze.ProjectEnvironmentScope
+	// Preserve both tenant scopes from the existing freeze
 	updatedFreeze.TenantProjectEnvironmentScope = existingFreeze.TenantProjectEnvironmentScope
 
 	updatedFreeze.SetID(existingFreeze.GetID())
