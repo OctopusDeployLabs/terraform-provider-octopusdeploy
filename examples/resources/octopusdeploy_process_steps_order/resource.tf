@@ -1,5 +1,25 @@
+# Deployment Process with explicit Step Order
+resource "octopusdeploy_environment" "development" {
+  name = "Development"
+}
+
+resource "octopusdeploy_environment" "production" {
+  name = "Production"
+}
+
+resource "octopusdeploy_project" "example" {
+  project_group_id = "ProjectGroups-1"
+  lifecycle_id = "Lifecycles-1"
+  name = "Example"
+}
+
+resource "octopusdeploy_channel" "example" {
+  name       = "Example Channel"
+  project_id = octopusdeploy_project.example.id
+}
+
 resource "octopusdeploy_process" "example" {
-  owner_id  = "Projects-12"
+  project_id  = octopusdeploy_project.example.id
 }
 
 resource "octopusdeploy_process_step" "one" {
@@ -11,21 +31,21 @@ resource "octopusdeploy_process_step" "one" {
   }
 }
 
-resource "octopusdeploy_process_step" "two" {
-  process_id  = octopusdeploy_process.example.id
-  name = "Step Two"
-  type = "Octopus.Script"
-  execution_properties = {
-    "Octopus.Action.Script.ScriptBody" = "Write-Host 'Step 2...'"
-  }
-}
-
 resource "octopusdeploy_process_step" "three" {
   process_id  = octopusdeploy_process.example.id
   name = "Step Three"
   type = "Octopus.Script"
   execution_properties = {
     "Octopus.Action.Script.ScriptBody" = "Write-Host 'Step 3...'"
+  }
+}
+
+resource "octopusdeploy_process_step" "two" {
+  process_id  = octopusdeploy_process.example.id
+  name = "Step Two"
+  type = "Octopus.Script"
+  execution_properties = {
+    "Octopus.Action.Script.ScriptBody" = "Write-Host 'Step 2...'"
   }
 }
 

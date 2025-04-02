@@ -1,3 +1,4 @@
+# Deployment Process with a Child Step
 resource "octopusdeploy_environment" "development" {
   name = "Development"
 }
@@ -13,12 +14,12 @@ resource "octopusdeploy_project" "example" {
 }
 
 resource "octopusdeploy_channel" "example" {
-  name       = "Example Channel (OK to Delete)"
+  name       = "Example Channel"
   project_id = octopusdeploy_project.example.id
 }
 
 resource "octopusdeploy_process" "example" {
-    owner_id  = octopusdeploy_project.example.id
+  project_id  = octopusdeploy_project.example.id
 }
 
 resource "octopusdeploy_process_step" "parent" {
