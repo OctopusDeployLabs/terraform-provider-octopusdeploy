@@ -33,7 +33,7 @@ resource "octopusdeploy_channel" "example" {
 }
 
 resource "octopusdeploy_process" "example" {
-    owner_id  = octopusdeploy_project.example.id
+  project_id  = octopusdeploy_project.example.id
 }
 
 # Run script step
