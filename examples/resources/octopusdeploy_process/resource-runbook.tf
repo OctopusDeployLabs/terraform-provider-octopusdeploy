@@ -1,7 +1,9 @@
-# Example of a Deployment Process with three steps and an explicit Step Order
+# Example of a Runbook Process with two steps and an explicit Step Order
+# To manage a Runbook process, specify both the Project and Runbook IDs (usually via Terraform resource references)
 resource "octopusdeploy_process" "example" {
   space_id = "Spaces-1"
   project_id  = "Projects-21"
+  runbook_id  = "Runbooks-42"
 }
 
 resource "octopusdeploy_process_step" "run_script" {
@@ -24,19 +26,6 @@ resource "octopusdeploy_process_step" "run_script" {
     "Octopus.Action.Script.ScriptBody" = <<-EOT
       Write-Host "Executing step..."
     EOT
-  }
-}
-
-resource "octopusdeploy_process_step" "approval" {
-  # Manual intervention
-  process_id  = octopusdeploy_process.example.id
-  name = "Approve deployment"
-  type = "Octopus.Manual"
-  execution_properties = {
-    "Octopus.Action.RunOnServer" = "True"
-    "Octopus.Action.Manual.Instructions" = "Example of manual blocking step"
-    "Octopus.Action.Manual.BlockConcurrentDeployments" = "True"
-    "Octopus.Action.Manual.ResponsibleTeamIds" = "teams-managers"
   }
 }
 
@@ -67,7 +56,6 @@ resource "octopusdeploy_process_steps_order" "example" {
   process_id  = octopusdeploy_process.example.id
   steps = [
     octopusdeploy_process_step.run_script.id,
-    octopusdeploy_process_step.approval.id,
     octopusdeploy_process_step.deploy_package.id,
   ]
 }
