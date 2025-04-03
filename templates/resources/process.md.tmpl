@@ -1,0 +1,45 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Runbook & Deployment Processes"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+~> This resource is the successor to the original `octopusdeploy_deployment_process` resource, which suffered from numerous problems including: state drift, data inconsistency when reordering or inserting steps, and lack of awareness of Version-Controlled projects.
+
+### Remarks
+
+The `octopusdeploy_process` resource is used in conjunction with a series of other building-block resources to form a full process. They are deliberately designed with dependencies between them so that the deployment process will be incrementally "built up" in Octopus with a series of incremental updates. You can use only the building blocks you need for your process (i.e. if your process doesn't involve Child Steps, you don't need to deal with the `octopusdeploy_process_child_step` resource.)
+
+At a minimum, to get a functional deployment process, you will need:
+
+1. A Project (`octopusdeploy_project`)
+1. A Deployment Process referencing the Project (`octopusdeploy_process`)
+1. One or more Steps referencing the Deployment Process (`octopusdeploy_process_step`)
+
+The `octopusdeploy_process_step_order` resource isn't strictly required, but it's highly recommended. If you need to change the order of steps in your process, or insert a new step within an existing process, you'll need the Step Order defined first.
+
+Without a defined Step Order, the Steps will be added to the process in the order they're applied by Terraform. This is usually the order they appear in your HCL, but may not always be deterministic. 
+
+## Example Usage
+~> See the docs for `octopusdeploy_process_step`, `octopusdeploy_process_steps_order`, `octopusdeploy_process_child_step` and `octopusdeploy_process_child_steps_order` for more detailed examples.
+
+### Deployment Process
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+### Runbook Process
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource-runbook.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+{{ if .HasImport -}}
+## Import
+
+Import is supported using the following syntax:
+
+{{ codefile "shell" (printf "%s%s%s" "examples/resources/" .Name "/import.sh") }}
+{{- end }}

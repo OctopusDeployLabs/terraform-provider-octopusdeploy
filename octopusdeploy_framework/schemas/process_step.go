@@ -20,7 +20,7 @@ const ProcessStepResourceName = "process_step"
 
 func (p ProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages single step of execution process in Octopus Deploy.",
+		Description: "This resource manages a single step of a Runbook or Deployment Process in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":       GetIdResourceSchema(),
 			"space_id": GetSpaceIdResourceSchema(ProcessStepResourceName),
