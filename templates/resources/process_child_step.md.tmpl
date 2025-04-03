@@ -1,0 +1,30 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Runbook & Deployment Processes"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+### Remarks
+Child Steps are used to define multiple steps that should run together during a [rolling deployment](https://oc.to/Rolling-Deployments).
+
+Like in the Octopus Server Portal, Child Steps always live within a parent step. You can define multiple Child Steps for a given Parent. The Parent Step's action will always be the first in the group. After that, ordering within the Parent works in the same way as normal steps: they will be in the order in which they're applied by Terraform. Given this is not guaranteed to be deterministic, and to support reordering or inserting new steps as your config evolves, we strongly recommend you also use the `octopusdeploy_process_child_steps_order` resource to explicitly define and pin your order.
+
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+{{ if .HasImport -}}
+## Import
+
+Import is supported using the following syntax:
+
+{{ codefile "shell" (printf "%s%s%s" "examples/resources/" .Name "/import.sh") }}
+{{- end }}
