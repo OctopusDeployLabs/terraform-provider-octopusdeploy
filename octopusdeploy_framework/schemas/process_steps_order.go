@@ -17,7 +17,7 @@ const ProcessStepsOrderResourceName = "process_steps_order"
 
 func (p ProcessStepsOrderSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages order of steps in the process.",
+		Description: "This resource manages order of Steps of a Runbook or Deployment Process in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":       GetIdResourceSchema(),
 			"space_id": GetSpaceIdResourceSchema(ProcessStepsOrderResourceName),
