@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/defaults"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -178,11 +179,32 @@ func (b *AttributeBuilder[T]) Default(defaultValue interface{}) *AttributeBuilde
 			a.Default = float64default.StaticFloat64(floatDefault)
 		}
 	case *schema.ListAttribute:
-		a.Default = listdefault.StaticValue(types.List{})
+		if defaultList, ok := defaultValue.(defaults.List); ok {
+			a.Default = defaultList
+		}
 	case *schema.SetAttribute:
-		a.Default = setdefault.StaticValue(types.Set{})
+		if defaultSet, ok := defaultValue.(defaults.Set); ok {
+			a.Default = defaultSet
+		}
 	case *schema.MapAttribute:
-		a.Default = mapdefault.StaticValue(types.Map{})
+		if defaultMap, ok := defaultValue.(defaults.Map); ok {
+			a.Default = defaultMap
+		}
+	}
+	return b
+}
+
+// DefaultEmpty sets the default value of an attribute to an empty collection.
+//
+// This method applies only to ListAttribute, SetAttribute or MapAttribute types.
+func (b *AttributeBuilder[T]) DefaultEmpty() *AttributeBuilder[T] {
+	switch a := any(&b.attr).(type) {
+	case *schema.ListAttribute:
+		a.Default = listdefault.StaticValue(types.ListValueMust(a.ElementType, []attr.Value{}))
+	case *schema.SetAttribute:
+		a.Default = setdefault.StaticValue(types.SetValueMust(a.ElementType, []attr.Value{}))
+	case *schema.MapAttribute:
+		a.Default = mapdefault.StaticValue(types.MapValueMust(a.ElementType, map[string]attr.Value{}))
 	}
 	return b
 }
