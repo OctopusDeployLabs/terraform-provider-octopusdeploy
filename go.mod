@@ -4,6 +4,10 @@ go 1.22.0
 
 toolchain go1.22.5
 
+replace (
+	github.com/OctopusDeploy/go-octopusdeploy/v2 => ../go-octopusdeploy
+)
+
 require (
 	github.com/OctopusDeploy/go-octopusdeploy/v2 v2.65.3
 	github.com/OctopusSolutionsEngineering/OctopusTerraformTestFramework v0.0.0-20250307001652-0d83fd2b1e49
