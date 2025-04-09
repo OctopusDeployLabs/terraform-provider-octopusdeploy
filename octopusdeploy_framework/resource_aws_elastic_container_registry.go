@@ -20,6 +20,8 @@ type awsElasticContainerRegistryFeedTypeResource struct {
 	*Config
 }
 
+const resourceDescription = "aws elastic container registry"
+
 var _ resource.ResourceWithImportState = &awsElasticContainerRegistryFeedTypeResource{}
 
 func NewAwsElasticContainerRegistryFeedResource() resource.Resource {
@@ -39,7 +41,6 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Configure(_ context.Contex
 }
 
 func (r *awsElasticContainerRegistryFeedTypeResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	tflog.Info(ctx, "creating Aws Elastic Container Registry")
 	var data *schemas.AwsElasticContainerRegistryFeedTypeResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -51,7 +52,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Create(ctx context.Context
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("creating Aws Elastic Container Registry: %s", awsElasticContainerRegistryFeed.GetName()))
+	util.Create(ctx, resourceDescription, data)
 
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, awsElasticContainerRegistryFeed)
@@ -64,7 +65,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Create(ctx context.Context
 
 	data.ID = types.StringValue(createdFeed.GetID())
 
-	tflog.Info(ctx, fmt.Sprintf("Aws Elastic Container Registry feed created (%s)", data.ID))
+	util.Created(ctx, resourceDescription)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -75,7 +76,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Read(ctx context.Context, 
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("reading Aws Elastic Container Registry (%s)", data.ID))
+	util.Reading(ctx, resourceDescription, data.GetID())
 
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
@@ -89,7 +90,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Read(ctx context.Context, 
 	awsElasticContainerRegistryFeed := feed.(*feeds.AwsElasticContainerRegistry)
 	updateDataFromAwsElasticContainerRegistryFeed(data, data.SpaceID.ValueString(), awsElasticContainerRegistryFeed)
 
-	tflog.Info(ctx, fmt.Sprintf("Aws Elastic Container Registry read (%s)", awsElasticContainerRegistryFeed.GetID()))
+	util.Read(ctx, resourceDescription, data.GetID())
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -101,7 +102,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Update(ctx context.Context
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("updating aws elastic container registry feed '%s'", data.ID.ValueString()))
+	util.Update(ctx, resourceDescription, data)
 
 	feed, err := createAwsElasticContainerRegistryResourceFromData(data, ctx)
 	feed.ID = state.ID.ValueString()
@@ -110,10 +111,6 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Update(ctx context.Context
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("updating Aws Elastic Container Registry (%s)", data.ID))
-
-	tflog.Debug(ctx, fmt.Sprintf("updating aws elastic container registry feed (before)'%#v'", feed.OidcAuthentication))
-
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
 	if err != nil {
@@ -121,16 +118,15 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Update(ctx context.Context
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("updating aws elastic container registry feed (after)'%#v'", updatedFeed.(*feeds.AwsElasticContainerRegistry).OidcAuthentication))
 	updateDataFromAwsElasticContainerRegistryFeed(data, state.SpaceID.ValueString(), updatedFeed.(*feeds.AwsElasticContainerRegistry))
-
-	tflog.Info(ctx, fmt.Sprintf("Aws Elastic Container Registry updated (%s)", data.ID))
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	util.Updated(ctx, resourceDescription, updatedFeed.GetID())
 }
 
 func (r *awsElasticContainerRegistryFeedTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data schemas.AwsElasticContainerRegistryFeedTypeResourceModel
+
+	util.Delete(ctx, resourceDescription, data.GetID())
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -141,6 +137,8 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Delete(ctx context.Context
 		resp.Diagnostics.AddError("unable to delete aws elastic container registry feed", err.Error())
 		return
 	}
+
+	util.Deleted(ctx, resourceDescription, data.GetID())
 }
 
 func createAwsElasticContainerRegistryResourceFromData(data *schemas.AwsElasticContainerRegistryFeedTypeResourceModel, ctx context.Context) (*feeds.AwsElasticContainerRegistry, error) {
