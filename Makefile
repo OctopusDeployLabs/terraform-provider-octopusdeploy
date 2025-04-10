@@ -33,7 +33,7 @@ build:
 
 .PHONY: docs
 docs:
-	tfplugindocs
+	go generate main.go
 
 .PHONY: release
 release:
