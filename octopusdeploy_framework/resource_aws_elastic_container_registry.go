@@ -20,6 +20,8 @@ type awsElasticContainerRegistryFeedTypeResource struct {
 	*Config
 }
 
+const resourceDescription = "aws elastic container registry"
+
 var _ resource.ResourceWithImportState = &awsElasticContainerRegistryFeedTypeResource{}
 
 func NewAwsElasticContainerRegistryFeedResource() resource.Resource {
@@ -45,12 +47,12 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Create(ctx context.Context
 		return
 	}
 
-	awsElasticContainerRegistryFeed, err := createAwsElasticContainerRegistryResourceFromData(data)
+	awsElasticContainerRegistryFeed, err := createAwsElasticContainerRegistryResourceFromData(data, ctx)
 	if err != nil {
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("creating Aws Elastic Container Registry: %s", awsElasticContainerRegistryFeed.GetName()))
+	util.Create(ctx, resourceDescription, data)
 
 	client := r.Config.Client
 	createdFeed, err := feeds.Add(client, awsElasticContainerRegistryFeed)
@@ -63,7 +65,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Create(ctx context.Context
 
 	data.ID = types.StringValue(createdFeed.GetID())
 
-	tflog.Info(ctx, fmt.Sprintf("Aws Elastic Container Registry feed created (%s)", data.ID))
+	util.Created(ctx, resourceDescription)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -74,7 +76,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Read(ctx context.Context, 
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("reading Aws Elastic Container Registry (%s)", data.ID))
+	util.Reading(ctx, resourceDescription, data.GetID())
 
 	client := r.Config.Client
 	feed, err := feeds.GetByID(client, data.SpaceID.ValueString(), data.ID.ValueString())
@@ -88,7 +90,7 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Read(ctx context.Context, 
 	awsElasticContainerRegistryFeed := feed.(*feeds.AwsElasticContainerRegistry)
 	updateDataFromAwsElasticContainerRegistryFeed(data, data.SpaceID.ValueString(), awsElasticContainerRegistryFeed)
 
-	tflog.Info(ctx, fmt.Sprintf("Aws Elastic Container Registry read (%s)", awsElasticContainerRegistryFeed.GetID()))
+	util.Read(ctx, resourceDescription, data.GetID())
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -100,16 +102,14 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Update(ctx context.Context
 		return
 	}
 
-	tflog.Debug(ctx, fmt.Sprintf("updating aws elastic container registry feed '%s'", data.ID.ValueString()))
+	util.Update(ctx, resourceDescription, data)
 
-	feed, err := createAwsElasticContainerRegistryResourceFromData(data)
+	feed, err := createAwsElasticContainerRegistryResourceFromData(data, ctx)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load aws elastic container registry feed", err.Error())
 		return
 	}
-
-	tflog.Info(ctx, fmt.Sprintf("updating Aws Elastic Container Registry (%s)", data.ID))
 
 	client := r.Config.Client
 	updatedFeed, err := feeds.Update(client, feed)
@@ -119,14 +119,14 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Update(ctx context.Context
 	}
 
 	updateDataFromAwsElasticContainerRegistryFeed(data, state.SpaceID.ValueString(), updatedFeed.(*feeds.AwsElasticContainerRegistry))
-
-	tflog.Info(ctx, fmt.Sprintf("Aws Elastic Container Registry updated (%s)", data.ID))
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	util.Updated(ctx, resourceDescription, updatedFeed.GetID())
 }
 
 func (r *awsElasticContainerRegistryFeedTypeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data schemas.AwsElasticContainerRegistryFeedTypeResourceModel
+
+	util.Delete(ctx, resourceDescription, data.GetID())
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -137,10 +137,25 @@ func (r *awsElasticContainerRegistryFeedTypeResource) Delete(ctx context.Context
 		resp.Diagnostics.AddError("unable to delete aws elastic container registry feed", err.Error())
 		return
 	}
+
+	util.Deleted(ctx, resourceDescription, data.GetID())
 }
 
-func createAwsElasticContainerRegistryResourceFromData(data *schemas.AwsElasticContainerRegistryFeedTypeResourceModel) (*feeds.AwsElasticContainerRegistry, error) {
-	feed, err := feeds.NewAwsElasticContainerRegistry(data.Name.ValueString(), data.AccessKey.ValueString(), core.NewSensitiveValue(data.SecretKey.ValueString()), data.Region.ValueString())
+func createAwsElasticContainerRegistryResourceFromData(data *schemas.AwsElasticContainerRegistryFeedTypeResourceModel, ctx context.Context) (*feeds.AwsElasticContainerRegistry, error) {
+	var oidc *feeds.AwsElasticContainerRegistryOidcAuthentication
+	if data.OidcAuthentication != nil {
+		oidc = &feeds.AwsElasticContainerRegistryOidcAuthentication{
+			SessionDuration: data.OidcAuthentication.SessionDuration.ValueString(),
+			Audience:        data.OidcAuthentication.Audience.ValueString(),
+			RoleArn:         data.OidcAuthentication.RoleArn.ValueString(),
+			SubjectKeys:     util.ExpandStringList(data.OidcAuthentication.SubjectKey),
+		}
+	}
+
+	tflog.Debug(ctx, "createAwsElasticContainerRegistryResourceFromData")
+	tflog.Debug(ctx, fmt.Sprintf("oidc auth details '%s'", oidc))
+
+	feed, err := feeds.NewAwsElasticContainerRegistry(data.Name.ValueString(), data.AccessKey.ValueString(), core.NewSensitiveValue(data.SecretKey.ValueString()), data.Region.ValueString(), oidc)
 
 	if err != nil {
 		return nil, err
@@ -155,7 +170,6 @@ func createAwsElasticContainerRegistryResourceFromData(data *schemas.AwsElasticC
 
 	feed.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptions
 	feed.SpaceID = data.SpaceID.ValueString()
-
 	return feed, nil
 }
 
@@ -173,6 +187,15 @@ func updateDataFromAwsElasticContainerRegistryFeed(data *schemas.AwsElasticConta
 	var packageAcquisitionLocationOptionsListValue, _ = types.ListValue(types.StringType, packageAcquisitionLocationOptionsList)
 	data.PackageAcquisitionLocationOptions = packageAcquisitionLocationOptionsListValue
 	data.ID = types.StringValue(feed.GetID())
+
+	if feed.OidcAuthentication != nil {
+		data.OidcAuthentication = &schemas.EcrOidcAuthenticationResourceModel{
+			SessionDuration: types.StringValue(feed.OidcAuthentication.SessionDuration),
+			Audience:        types.StringValue(feed.OidcAuthentication.Audience),
+			RoleArn:         types.StringValue(feed.OidcAuthentication.RoleArn),
+			SubjectKey:      util.FlattenStringList(feed.OidcAuthentication.SubjectKeys),
+		}
+	}
 }
 
 func (*awsElasticContainerRegistryFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
