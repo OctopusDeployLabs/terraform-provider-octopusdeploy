@@ -447,3 +447,12 @@ func GetDateTimeResourceSchema(description string, isRequired bool) resourceSche
 		},
 	}
 }
+
+func GetOidcSubjectKeysSchema(description string, isRequired bool) resourceSchema.Attribute {
+	return resourceSchema.ListAttribute{
+		Optional:    !isRequired,
+		Required:    isRequired,
+		Description: description,
+		ElementType: types.StringType,
+	}
+}
