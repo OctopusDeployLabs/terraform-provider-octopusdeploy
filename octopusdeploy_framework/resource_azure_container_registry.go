@@ -3,13 +3,12 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -44,7 +43,7 @@ func (r *azureContainerRegistryFeedTypeResource) Create(ctx context.Context, req
 		return
 	}
 
-	dockerContainerRegistryFeed, err := createDockerContainerRegistryFeedResourceFromAzureData(data)
+	dockerContainerRegistryFeed, err := createContainerRegistryFeedResourceFromAzureData(data)
 	if err != nil {
 		return
 	}
@@ -58,7 +57,7 @@ func (r *azureContainerRegistryFeedTypeResource) Create(ctx context.Context, req
 		return
 	}
 
-	updateAzureDataFromDockerContainerRegistryFeed(data, data.SpaceID.ValueString(), createdFeed.(*feeds.DockerContainerRegistry))
+	updateDataFromAzureContainerRegistryFeed(data, data.SpaceID.ValueString(), createdFeed.(*feeds.AzureContainerRegistry))
 
 	tflog.Info(ctx, fmt.Sprintf("Azure Container Registry feed created (%s)", data.ID))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -82,10 +81,10 @@ func (r *azureContainerRegistryFeedTypeResource) Read(ctx context.Context, req r
 		return
 	}
 
-	dockerContainerRegistry := feed.(*feeds.DockerContainerRegistry)
-	updateAzureDataFromDockerContainerRegistryFeed(data, data.SpaceID.ValueString(), dockerContainerRegistry)
+	azureContainerRegistry := feed.(*feeds.AzureContainerRegistry)
+	updateDataFromAzureContainerRegistryFeed(data, data.SpaceID.ValueString(), azureContainerRegistry)
 
-	tflog.Info(ctx, fmt.Sprintf("Azure Container Registry feed read (%s)", dockerContainerRegistry.GetID()))
+	tflog.Info(ctx, fmt.Sprintf("Azure Container Registry feed read (%s)", azureContainerRegistry.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -99,7 +98,7 @@ func (r *azureContainerRegistryFeedTypeResource) Update(ctx context.Context, req
 
 	tflog.Debug(ctx, fmt.Sprintf("updating Azure Container Registry feed '%s'", data.ID.ValueString()))
 
-	feed, err := createDockerContainerRegistryFeedResourceFromAzureData(data)
+	feed, err := createContainerRegistryFeedResourceFromAzureData(data)
 	feed.ID = state.ID.ValueString()
 	if err != nil {
 		resp.Diagnostics.AddError("unable to load Azure Container Registry feed", err.Error())
@@ -115,7 +114,7 @@ func (r *azureContainerRegistryFeedTypeResource) Update(ctx context.Context, req
 		return
 	}
 
-	updateAzureDataFromDockerContainerRegistryFeed(data, state.SpaceID.ValueString(), updatedFeed.(*feeds.DockerContainerRegistry))
+	updateDataFromAzureContainerRegistryFeed(data, state.SpaceID.ValueString(), updatedFeed.(*feeds.AzureContainerRegistry))
 
 	tflog.Info(ctx, fmt.Sprintf("Azure Container Registry feed updated (%s)", data.ID))
 
@@ -136,8 +135,20 @@ func (r *azureContainerRegistryFeedTypeResource) Delete(ctx context.Context, req
 	}
 }
 
-func createDockerContainerRegistryFeedResourceFromAzureData(data *schemas.AzureContainerRegistryFeedTypeResourceModel) (*feeds.DockerContainerRegistry, error) {
-	feed, err := feeds.NewDockerContainerRegistry(data.Name.ValueString())
+func createContainerRegistryFeedResourceFromAzureData(data *schemas.AzureContainerRegistryFeedTypeResourceModel) (*feeds.AzureContainerRegistry, error) {
+	var oidc *feeds.AzureContainerRegistryOidcAuthentication
+
+	if data.OidcAuthentication != nil {
+		oidc = &feeds.AzureContainerRegistryOidcAuthentication{
+			ClientId:    data.OidcAuthentication.ClientId.ValueString(),
+			TenantId:    data.OidcAuthentication.TenantId.ValueString(),
+			Audience:    data.OidcAuthentication.Audience.ValueString(),
+			SubjectKeys: util.ExpandStringList(data.OidcAuthentication.SubjectKey),
+		}
+	}
+
+	feed, err := feeds.NewAzureContainerRegistry(data.Name.ValueString(), oidc)
+
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +165,7 @@ func createDockerContainerRegistryFeedResourceFromAzureData(data *schemas.AzureC
 	return feed, nil
 }
 
-func updateAzureDataFromDockerContainerRegistryFeed(data *schemas.AzureContainerRegistryFeedTypeResourceModel, spaceId string, feed *feeds.DockerContainerRegistry) {
+func updateDataFromAzureContainerRegistryFeed(data *schemas.AzureContainerRegistryFeedTypeResourceModel, spaceId string, feed *feeds.AzureContainerRegistry) {
 	data.FeedUri = types.StringValue(feed.FeedURI)
 	data.Name = types.StringValue(feed.Name)
 	data.SpaceID = types.StringValue(spaceId)
@@ -169,6 +180,15 @@ func updateAzureDataFromDockerContainerRegistryFeed(data *schemas.AzureContainer
 	}
 
 	data.ID = types.StringValue(feed.ID)
+
+	if feed.OidcAuthentication != nil {
+		data.OidcAuthentication = &schemas.AzureContainerRegistryOidcAuthenticationResourceModel{
+			ClientId:   types.StringValue(feed.OidcAuthentication.ClientId),
+			TenantId:   types.StringValue(feed.OidcAuthentication.TenantId),
+			Audience:   types.StringValue(feed.OidcAuthentication.Audience),
+			SubjectKey: util.FlattenStringList(feed.OidcAuthentication.SubjectKeys),
+		}
+	}
 }
 
 func (*azureContainerRegistryFeedTypeResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
