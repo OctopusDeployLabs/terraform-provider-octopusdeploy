@@ -28,7 +28,7 @@ resource "octopusdeploy_azure_container_registry" "example_with_oidc" {
   oidc_authentication = {
     client_id    = "client_id"
     tenant_id    = "tenant_id"
-    audience     = ""
+    audience     = "audience"
     subject_keys = [ "feed", "space" ]
   }
 }
