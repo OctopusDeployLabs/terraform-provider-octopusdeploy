@@ -147,7 +147,7 @@ func createContainerRegistryFeedResourceFromAzureData(data *schemas.AzureContain
 		}
 	}
 
-	feed, err := feeds.NewAzureContainerRegistry(data.Name.ValueString(), oidc)
+	feed, err := feeds.NewAzureContainerRegistry(data.Name.ValueString(), data.Username.ValueString(), core.NewSensitiveValue(data.Password.ValueString()), oidc)
 
 	if err != nil {
 		return nil, err
