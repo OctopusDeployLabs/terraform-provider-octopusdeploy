@@ -2,6 +2,7 @@ package octopusdeploy
 
 import (
 	"context"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/resources"
 	"time"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
@@ -25,10 +26,38 @@ func dataSourceChannelsRead(ctx context.Context, d *schema.ResourceData, m inter
 		Skip:        d.Get("skip").(int),
 		Take:        d.Get("take").(int),
 	}
+	projectID := d.Get("project_id").(string)
 	spaceID := d.Get("space_id").(string)
 
 	client := m.(*client.Client)
-	existingChannels, err := channels.Get(client, spaceID, query)
+
+	var existingChannels *resources.Resources[*channels.Channel] = nil
+	var err error
+	if projectID != "" {
+		queryByProjectID := channels.QueryByProjectID{
+			ProjectID:   projectID,
+			PartialName: query.PartialName,
+			Skip:        query.Skip,
+			Take:        query.Take,
+		}
+		existingChannels, err = channels.GetByProjectID(client, spaceID, queryByProjectID)
+		if len(query.IDs) > 0 {
+			filteredChannels := make([]*channels.Channel, 0)
+			for _, channel := range existingChannels.Items {
+				for _, id := range query.IDs {
+					if channel.ID == id {
+
+						filteredChannels = append(filteredChannels, channel)
+						break
+					}
+				}
+			}
+			existingChannels.Items = filteredChannels
+		}
+	} else {
+		existingChannels, err = channels.Get(client, spaceID, query)
+	}
+
 	if err != nil {
 		return diag.FromErr(err)
 	}

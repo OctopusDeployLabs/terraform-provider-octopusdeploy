@@ -77,6 +77,7 @@ func getChannelDataSchema() map[string]*schema.Schema {
 			Type:        schema.TypeList,
 		},
 		"ids":          getQueryIDs(),
+		"project_id":   getQueryProjectID(),
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),
 		"take":         getQueryTake(),
