@@ -34,6 +34,7 @@ type StepTemplateTypeResourceModel struct {
 	Name                      types.String `tfsdk:"name"`
 	Description               types.String `tfsdk:"description"`
 	Packages                  types.List   `tfsdk:"packages"`
+	GitDependencies           types.List   `tfsdk:"git_dependencies"`
 	Parameters                types.List   `tfsdk:"parameters"`
 	Properties                types.Map    `tfsdk:"properties"`
 	StepPackageId             types.String `tfsdk:"step_package_id"`
@@ -58,6 +59,14 @@ type StepTemplateParameterType struct {
 	HelpText        types.String `tfsdk:"help_text"`
 	DisplaySettings types.Map    `tfsdk:"display_settings"`
 	DefaultValue    types.String `tfsdk:"default_value"`
+}
+
+type StepTemplateGitDependencyType struct {
+	RepositoryUri     types.String `tfsdk:"repository_uri"`
+	DefaultBranch     types.String `tfsdk:"default_branch"`
+	GitCredentialType types.String `tfsdk:"git_credential_type"`
+	FilePathFilters   types.List   `tfsdk:"file_path_filters"`
+	GitCredentialId   types.String `tfsdk:"git_credential_id"`
 }
 
 type StepTemplateSchema struct{}
@@ -113,8 +122,9 @@ func (s StepTemplateSchema) GetResourceSchema() rs.Schema {
 				Computed:    true,
 				Default:     stringdefault.StaticString(""),
 			},
-			"packages":   GetStepTemplatePackageResourceSchema(),
-			"parameters": GetStepTemplateParameterResourceSchema(),
+			"packages":         GetStepTemplatePackageResourceSchema(),
+			"git_dependencies": GetStepTemplateGitDependencySchema(),
+			"parameters":       GetStepTemplateParameterResourceSchema(),
 			"properties": rs.MapAttribute{
 				Description: "Properties for the step template",
 				Required:    true,
@@ -241,6 +251,38 @@ func GetStepTemplatePackageResourceSchema() rs.ListNestedAttribute {
 	}
 }
 
+func GetStepTemplateGitDependencySchema() rs.ListNestedAttribute {
+	return rs.ListNestedAttribute{
+		Description: "List of Git dependencies for the step template.",
+		Required:    true,
+		NestedObject: rs.NestedAttributeObject{
+			Attributes: map[string]rs.Attribute{
+				"repository_uri": rs.StringAttribute{
+					Description: "The Git URI for the repository where this resource is sourced from.",
+					Required:    true,
+				},
+				"default_branch": rs.StringAttribute{
+					Description: "Name of the default branch of the repository.",
+					Required:    true,
+				},
+				"git_credential_type": rs.StringAttribute{
+					Description: "The Git credential authentication type.",
+					Required:    true,
+				},
+				"file_path_filters": rs.ListAttribute{
+					Description: "List of file path filters used to narrow down the directory where files are to be sourced from.",
+					Optional:    true,
+					ElementType: types.StringType,
+				},
+				"git_credential_id": rs.StringAttribute{
+					Description: "ID of an existing Git credential.",
+					Optional:    true,
+				},
+			},
+		},
+	}
+}
+
 func GetStepTemplateAttributes() map[string]attr.Type {
 	return map[string]attr.Type{
 		"id":                           types.StringType,
@@ -252,6 +294,7 @@ func GetStepTemplateAttributes() map[string]attr.Type {
 		"action_type":                  types.StringType,
 		"community_action_template_id": types.StringType,
 		"packages":                     types.ListType{ElemType: types.ObjectType{AttrTypes: GetStepTemplatePackageTypeAttributes()}},
+		"git_dependencies":             types.ListType{ElemType: types.ObjectType{AttrTypes: GetStepTemplateGitDependencyTypeAttributes()}},
 		"parameters":                   types.ListType{ElemType: types.ObjectType{AttrTypes: GetStepTemplateParameterTypeAttributes()}},
 		"properties":                   types.MapType{ElemType: types.StringType},
 	}
@@ -285,5 +328,15 @@ func GetStepTemplateParameterTypeAttributes() map[string]attr.Type {
 		"help_text":        types.StringType,
 		"display_settings": types.MapType{ElemType: types.StringType},
 		"default_value":    types.StringType,
+	}
+}
+
+func GetStepTemplateGitDependencyTypeAttributes() map[string]attr.Type {
+	return map[string]attr.Type{
+		"repository_uri":      types.StringType,
+		"default_branch":      types.StringType,
+		"git_credential_type": types.StringType,
+		"file_path_filters":   types.ListType{ElemType: types.StringType},
+		"git_credential_id":   types.StringType,
 	}
 }
