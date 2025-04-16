@@ -3,6 +3,7 @@ package schemas
 import (
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -26,6 +27,18 @@ func (d GoogleContainerRegistryFeedSchema) GetResourceSchema() resourceSchema.Sc
 			"registry_path": resourceSchema.StringAttribute{
 				Optional: true,
 			},
+			"oidc_authentication": resourceSchema.SingleNestedAttribute{
+				Optional: true,
+				Attributes: map[string]resourceSchema.Attribute{
+					"audience": resourceSchema.StringAttribute{
+						Description: "Audience representing the intended recipient of the OIDC token",
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString(""),
+					},
+					"subject_keys": GetOidcSubjectKeysSchema("Keys to include in a deployment or runbook. Valid options are `space`, `feed`.", false),
+				},
+			},
 		},
 	}
 }
@@ -35,13 +48,19 @@ func (d GoogleContainerRegistryFeedSchema) GetDatasourceSchema() datasourceSchem
 }
 
 type GoogleContainerRegistryFeedTypeResourceModel struct {
-	APIVersion   types.String `tfsdk:"api_version"`
-	FeedUri      types.String `tfsdk:"feed_uri"`
-	Name         types.String `tfsdk:"name"`
-	Password     types.String `tfsdk:"password"`
-	SpaceID      types.String `tfsdk:"space_id"`
-	Username     types.String `tfsdk:"username"`
-	RegistryPath types.String `tfsdk:"registry_path"`
+	APIVersion         types.String                                            `tfsdk:"api_version"`
+	FeedUri            types.String                                            `tfsdk:"feed_uri"`
+	Name               types.String                                            `tfsdk:"name"`
+	Password           types.String                                            `tfsdk:"password"`
+	SpaceID            types.String                                            `tfsdk:"space_id"`
+	Username           types.String                                            `tfsdk:"username"`
+	RegistryPath       types.String                                            `tfsdk:"registry_path"`
+	OidcAuthentication *GoogleContainerRegistryOidcAuthenticationResourceModel `tfsdk:"oidc_authentication"`
 
 	ResourceModel
+}
+
+type GoogleContainerRegistryOidcAuthenticationResourceModel struct {
+	Audience   types.String `tfsdk:"audience"`
+	SubjectKey types.List   `tfsdk:"subject_keys"`
 }
