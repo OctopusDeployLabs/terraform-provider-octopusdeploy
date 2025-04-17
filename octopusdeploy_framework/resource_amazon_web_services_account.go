@@ -6,10 +6,10 @@ import (
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type amazonWebServicesAccountResource struct {
@@ -35,33 +35,25 @@ func (r *amazonWebServicesAccountResource) Configure(_ context.Context, req reso
 }
 
 func (r *amazonWebServicesAccountResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data schemas.AmazonWebServicesAccountModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	var plan schemas.AmazonWebServicesAccountModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	newAccount, err := accounts.NewAmazonWebServicesAccount(data.Name.ValueString(), data.AccessKey.ValueString(), core.NewSensitiveValue(data.SecretKey.ValueString()))
+	tflog.Debug(ctx, "Creating Amazon Web Services account", map[string]interface{}{
+		"name": plan.Name.ValueString(),
+	})
 
-	createdAccount, err := accounts.Add(r.Config.Client, newAccount)
+	account := expandAmazonWebServicesAccount(ctx, plan)
+	createdAccount, err := accounts.Add(r.Config.Client, account)
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to create Amazon Web Services account", err.Error())
+		resp.Diagnostics.AddError("Error creating Amazon Web Services account", err.Error())
 		return
 	}
 
-	data.ID = types.StringValue(createdAccount.GetID())
-	data.SpaceId = types.StringValue(createdAccount.GetSpaceID())
-
-	tenantsList := make([]attr.Value, len(createdAccount.GetTenantIDs()))
-	for i, tenantId := range createdAccount.GetTenantIDs() {
-		tenantsList[i] = types.StringValue(tenantId)
-	}
-
-	data.Tenants, _ = types.ListValue(types.StringType, tenantsList)
-
-	data.TenantedDeploymentParticipation = types.StringValue(string(createdAccount.GetTenantedDeploymentMode()))
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	state := flattenAmazonWebServicesAccount(ctx, createdAccount.(*accounts.AmazonWebServicesAccount), plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
 func (r *amazonWebServicesAccountResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -78,4 +70,37 @@ func (r *amazonWebServicesAccountResource) Delete(ctx context.Context, req resou
 
 func (*amazonWebServicesAccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func expandAmazonWebServicesAccount(ctx context.Context, model schemas.AmazonWebServicesAccountModel) *accounts.AmazonWebServicesAccount {
+	var accountName = model.Name.ValueString()
+	var accountAccessKey = model.AccessKey.ValueString()
+	var accountSecretKey = core.NewSensitiveValue(model.SecretKey.ValueString())
+
+	account, _ := accounts.NewAmazonWebServicesAccount(accountName, accountAccessKey, accountSecretKey)
+
+	account.SetID(model.ID.ValueString())
+	account.SetDescription(model.Description.ValueString())
+	account.SetEnvironmentIDs(expandStringList(model.Environments))
+	account.SetSpaceID(model.SpaceId.ValueString())
+	account.SetTenantedDeploymentMode(core.TenantedDeploymentMode(model.TenantedDeploymentParticipation.ValueString()))
+	account.SetTenantIDs(expandStringList(model.Tenants))
+	account.SetTenantTags(expandStringList(model.TenantTags))
+
+	return account
+}
+func flattenAmazonWebServicesAccount(ctx context.Context, account *accounts.AmazonWebServicesAccount, model schemas.AmazonWebServicesAccountModel) schemas.AmazonWebServicesAccountModel {
+	model.ID = types.StringValue(account.GetID())
+	model.AccessKey = types.StringValue(account.AccessKey)
+	model.Description = types.StringValue(account.GetDescription())
+	model.Environments = flattenStringList(account.GetEnvironmentIDs(), model.Environments)
+	model.Name = types.StringValue(account.GetName())
+	model.SpaceId = types.StringValue(account.GetSpaceID())
+	model.TenantedDeploymentParticipation = types.StringValue(string(account.GetTenantedDeploymentMode()))
+	model.Tenants = flattenStringList(account.GetTenantIDs(), model.Tenants)
+	model.TenantTags = flattenStringList(account.TenantTags, model.TenantTags)
+
+	// Note: We don't flatten the secret key as it's sensitive and not returned by the API
+
+	return model
 }
