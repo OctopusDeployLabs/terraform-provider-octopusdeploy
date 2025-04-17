@@ -1,4 +1,4 @@
-package schemas
+﻿package schemas
 
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -24,10 +24,11 @@ type AmazonWebServiceAccountModel struct {
 	TenantTags                      types.List   `tfsdk:"tenant_tags"`
 }
 
-func (a AmazonWebServicesAccountSchema) GetAmazonWebServicesAccountResourceSchema() resourceSchema.Schema {
+func (a AmazonWebServicesAccountSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(AmazonWebServicesAccountResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
+			"id": GetIdResourceSchema(),
 			"access_key": resourceSchema.StringAttribute{
 				Description: "The access key associated with this AWS account.",
 				Required:    true,
@@ -36,6 +37,7 @@ func (a AmazonWebServicesAccountSchema) GetAmazonWebServicesAccountResourceSchem
 			"environments": resourceSchema.ListAttribute{
 				Description: "A list of environment IDs associated with this AWS account.",
 				Optional:    true,
+				ElementType: types.StringType,
 			},
 			"name": GetNameResourceSchema(true),
 			"secret_key": resourceSchema.StringAttribute{
@@ -55,10 +57,12 @@ func (a AmazonWebServicesAccountSchema) GetAmazonWebServicesAccountResourceSchem
 				Description: "A list of tenant IDs associated with this AWS account.",
 				Optional:    true,
 				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"tenant_tags": resourceSchema.ListAttribute{
 				Description: "A list of tenant tags associated with this AWS account.",
 				Optional:    true,
+				ElementType: types.StringType,
 			},
 		},
 	}
