@@ -35,6 +35,7 @@ Read-Only:
 - `action_type` (String)
 - `community_action_template_id` (String)
 - `description` (String)
+- `git_dependencies` (List of Object) (see [below for nested schema](#nestedobjatt--step_template--git_dependencies))
 - `id` (String)
 - `name` (String)
 - `packages` (List of Object) (see [below for nested schema](#nestedobjatt--step_template--packages))
@@ -43,6 +44,19 @@ Read-Only:
 - `space_id` (String)
 - `step_package_id` (String)
 - `version` (Number)
+
+<a id="nestedobjatt--step_template--git_dependencies"></a>
+### Nested Schema for `step_template.git_dependencies`
+
+Read-Only:
+
+- `default_branch` (String)
+- `file_path_filters` (List of String)
+- `git_credential_id` (String)
+- `git_credential_type` (String)
+- `name` (String)
+- `repository_uri` (String)
+
 
 <a id="nestedobjatt--step_template--packages"></a>
 ### Nested Schema for `step_template.packages`
