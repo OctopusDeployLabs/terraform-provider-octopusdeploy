@@ -18,7 +18,6 @@ This resource manages step_templates in Octopus Deploy.
 ### Required
 
 - `action_type` (String) The action type of the step template
-- `git_dependencies` (Attributes List) List of Git dependencies for the step template. (see [below for nested schema](#nestedatt--git_dependencies))
 - `name` (String) The name of this resource.
 - `packages` (Attributes List) Package information for the step template (see [below for nested schema](#nestedatt--packages))
 - `parameters` (Attributes List) List of parameters that can be used in Step Template. (see [below for nested schema](#nestedatt--parameters))
@@ -29,27 +28,13 @@ This resource manages step_templates in Octopus Deploy.
 
 - `community_action_template_id` (String) The ID of the community action template
 - `description` (String) The description of this step_template.
+- `git_dependencies` (Attributes List) List of Git dependencies for the step template. (see [below for nested schema](#nestedatt--git_dependencies))
 - `space_id` (String) The space ID associated with this step_template.
 
 ### Read-Only
 
 - `id` (String) The unique ID for this resource.
 - `version` (Number) The version of the step template
-
-<a id="nestedatt--git_dependencies"></a>
-### Nested Schema for `git_dependencies`
-
-Required:
-
-- `default_branch` (String) Name of the default branch of the repository.
-- `git_credential_type` (String) The Git credential authentication type.
-- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
-
-Optional:
-
-- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from.
-- `git_credential_id` (String) ID of an existing Git credential.
-
 
 <a id="nestedatt--packages"></a>
 ### Nested Schema for `packages`
@@ -98,5 +83,21 @@ Optional:
 - `display_settings` (Map of String) The display settings for the parameter.
 - `help_text` (String) The help presented alongside the parameter input.
 - `label` (String) The label shown beside the parameter when presented in the deployment process. Example: `Server name`.
+
+
+<a id="nestedatt--git_dependencies"></a>
+### Nested Schema for `git_dependencies`
+
+Required:
+
+- `default_branch` (String) Name of the default branch of the repository.
+- `git_credential_type` (String) The Git credential authentication type.
+- `repository_uri` (String) The Git URI for the repository where this resource is sourced from.
+
+Optional:
+
+- `file_path_filters` (List of String) List of file path filters used to narrow down the directory where files are to be sourced from.
+- `git_credential_id` (String) ID of an existing Git credential.
+- `name` (String) The name of the Git dependency.
 
 

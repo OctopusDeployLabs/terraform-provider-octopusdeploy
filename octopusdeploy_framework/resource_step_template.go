@@ -265,6 +265,7 @@ func mapStepTemplateResourceModelToActionTemplate(ctx context.Context, data sche
 				return at, resp
 			}
 			at.GitDependencies[i] = gitdependencies.GitDependency{
+				Name:              val.Name.ValueString(),
 				RepositoryUri:     val.RepositoryUri.ValueString(),
 				DefaultBranch:     val.DefaultBranch.ValueString(),
 				GitCredentialType: val.GitCredentialType.ValueString(),
@@ -343,6 +344,7 @@ func convertStepTemplateGitDependencyAttribute(atp gitdependencies.GitDependency
 		return types.ObjectNull(schemas.GetStepTemplateGitDependencyTypeAttributes()), dg
 	}
 	return types.ObjectValue(schemas.GetStepTemplateGitDependencyTypeAttributes(), map[string]attr.Value{
+		"name":                types.StringValue(atp.Name),
 		"repository_uri":      types.StringValue(atp.RepositoryUri),
 		"default_branch":      types.StringValue(atp.DefaultBranch),
 		"git_credential_type": types.StringValue(atp.GitCredentialType),

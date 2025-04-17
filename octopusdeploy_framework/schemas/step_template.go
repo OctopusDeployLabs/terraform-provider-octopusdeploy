@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	ds "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	rs "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -62,6 +63,7 @@ type StepTemplateParameterType struct {
 }
 
 type StepTemplateGitDependencyType struct {
+	Name              types.String `tfsdk:"name"`
 	RepositoryUri     types.String `tfsdk:"repository_uri"`
 	DefaultBranch     types.String `tfsdk:"default_branch"`
 	GitCredentialType types.String `tfsdk:"git_credential_type"`
@@ -254,9 +256,20 @@ func GetStepTemplatePackageResourceSchema() rs.ListNestedAttribute {
 func GetStepTemplateGitDependencySchema() rs.ListNestedAttribute {
 	return rs.ListNestedAttribute{
 		Description: "List of Git dependencies for the step template.",
-		Required:    true,
+		Optional:    true,
+		Computed:    true,
+		Default: listdefault.StaticValue(types.ListValueMust(
+			types.ObjectType{AttrTypes: StepTemplateGitDependencyObjectType().AttrTypes},
+			[]attr.Value{})),
+
 		NestedObject: rs.NestedAttributeObject{
 			Attributes: map[string]rs.Attribute{
+				"name": rs.StringAttribute{
+					Description: "The name of the Git dependency.",
+					Optional:    true,
+					Computed:    true,
+					Default:     stringdefault.StaticString(""),
+				},
 				"repository_uri": rs.StringAttribute{
 					Description: "The Git URI for the repository where this resource is sourced from.",
 					Required:    true,
@@ -272,11 +285,15 @@ func GetStepTemplateGitDependencySchema() rs.ListNestedAttribute {
 				"file_path_filters": rs.ListAttribute{
 					Description: "List of file path filters used to narrow down the directory where files are to be sourced from.",
 					Optional:    true,
+					Computed:    true,
+					Default:     listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
 					ElementType: types.StringType,
 				},
 				"git_credential_id": rs.StringAttribute{
 					Description: "ID of an existing Git credential.",
 					Optional:    true,
+					Computed:    true,
+					Default:     stringdefault.StaticString(""), //need to add default empty string
 				},
 			},
 		},
@@ -331,8 +348,15 @@ func GetStepTemplateParameterTypeAttributes() map[string]attr.Type {
 	}
 }
 
+func StepTemplateGitDependencyObjectType() types.ObjectType {
+	return types.ObjectType{
+		AttrTypes: GetStepTemplateGitDependencyTypeAttributes(),
+	}
+}
+
 func GetStepTemplateGitDependencyTypeAttributes() map[string]attr.Type {
 	return map[string]attr.Type{
+		"name":                types.StringType,
 		"repository_uri":      types.StringType,
 		"default_branch":      types.StringType,
 		"git_credential_type": types.StringType,

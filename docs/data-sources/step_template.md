@@ -54,6 +54,7 @@ Read-Only:
 - `file_path_filters` (List of String)
 - `git_credential_id` (String)
 - `git_credential_type` (String)
+- `name` (String)
 - `repository_uri` (String)
 
 
