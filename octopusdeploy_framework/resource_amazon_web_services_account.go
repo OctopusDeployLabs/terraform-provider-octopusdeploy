@@ -98,7 +98,7 @@ func flattenAmazonWebServicesAccount(ctx context.Context, account *accounts.Amaz
 	model.SpaceId = types.StringValue(account.GetSpaceID())
 	model.TenantedDeploymentParticipation = types.StringValue(string(account.GetTenantedDeploymentMode()))
 	model.Tenants = flattenStringList(account.GetTenantIDs(), model.Tenants)
-	model.TenantTags = flattenStringList(account.TenantTags, model.TenantTags)
+	model.TenantTags = flattenStringList(account.GetTenantTags(), model.TenantTags)
 
 	// Note: We don't flatten the secret key as it's sensitive and not returned by the API
 
