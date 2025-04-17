@@ -43,15 +43,15 @@ func (r *azureContainerRegistryFeedTypeResource) Create(ctx context.Context, req
 		return
 	}
 
-	dockerContainerRegistryFeed, err := createContainerRegistryFeedResourceFromAzureData(data)
+	azureContainerRegistryFeed, err := createContainerRegistryFeedResourceFromAzureData(data)
 	if err != nil {
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("creating Azure Container Registry feed: %s", dockerContainerRegistryFeed.GetName()))
+	tflog.Info(ctx, fmt.Sprintf("creating Azure Container Registry feed: %s", azureContainerRegistryFeed.GetName()))
 
 	client := r.Config.Client
-	createdFeed, err := feeds.Add(client, dockerContainerRegistryFeed)
+	createdFeed, err := feeds.Add(client, azureContainerRegistryFeed)
 	if err != nil {
 		resp.Diagnostics.AddError("unable to create Azure Container Registry feed", err.Error())
 		return
@@ -147,7 +147,11 @@ func createContainerRegistryFeedResourceFromAzureData(data *schemas.AzureContain
 		}
 	}
 
-	feed, err := feeds.NewAzureContainerRegistry(data.Name.ValueString(), oidc)
+	feed, err := feeds.NewAzureContainerRegistry(
+		data.Name.ValueString(),
+		data.Username.ValueString(),
+		core.NewSensitiveValue(data.Password.ValueString()),
+		oidc)
 
 	if err != nil {
 		return nil, err
