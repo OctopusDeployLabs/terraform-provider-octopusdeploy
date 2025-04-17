@@ -1,4 +1,4 @@
-﻿package schemas
+package schemas
 
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -12,7 +12,7 @@ const AmazonWebServicesAccountResourceDescription = "amazon web services account
 
 type AmazonWebServicesAccountSchema struct{}
 
-type AmazonWebServiceAccountModel struct {
+type AmazonWebServicesAccountModel struct {
 	AccessKey                       types.String `tfsdk:"access_key"`
 	Description                     types.String `tfsdk:"description"`
 	Environments                    types.List   `tfsdk:"environments"`
@@ -22,6 +22,8 @@ type AmazonWebServiceAccountModel struct {
 	TenantedDeploymentParticipation types.String `tfsdk:"tenanted_deployment_participation"`
 	Tenants                         types.List   `tfsdk:"tenants"`
 	TenantTags                      types.List   `tfsdk:"tenant_tags"`
+
+	ResourceModel
 }
 
 func (a AmazonWebServicesAccountSchema) GetResourceSchema() resourceSchema.Schema {
