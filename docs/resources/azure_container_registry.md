@@ -61,7 +61,7 @@ resource "octopusdeploy_azure_container_registry" "example_with_oidc" {
 Optional:
 
 - `audience` (String) Audience representing the intended recipient of the OIDC token.
-- `client_id` (String) Unique ID representing the application requesting authentication.
+- `client_id` (String) Unique identifier representing the application requesting authentication.
 - `tenant_id` (String) Unique identifier representing the Azure AD instance hosting the authenticating application.
 - `subject_keys` (List of String) Keys to include in a deployment or runbook. Valid options are `space`, `feed`.
 
