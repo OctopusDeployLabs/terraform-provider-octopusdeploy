@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-const AmazonWebServicesAccountResourceDescription = "amazon web services account"
+const AmazonWebServicesAccountResourceDescription = "AWS account"
 
 type AmazonWebServicesAccountSchema struct{}
 
