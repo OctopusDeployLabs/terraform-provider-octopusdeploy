@@ -197,3 +197,29 @@ func BuildStringSetOrEmpty(values []string) types.Set {
 		return types.SetValueMust(types.StringType, ToValueSlice(values))
 	}
 }
+
+func MergePropertyValues(ctx context.Context, properties map[string]core.PropertyValue, values types.Map) diag.Diagnostics {
+	newValues := make(map[string]types.String, len(values.Elements()))
+	diags := values.ElementsAs(ctx, &newValues, false)
+	if diags.HasError() {
+		return diags
+	}
+
+	for key, value := range newValues {
+		if value.IsNull() {
+			properties[key] = core.NewPropertyValue("", false)
+		} else {
+			properties[key] = core.NewPropertyValue(value.ValueString(), false)
+		}
+	}
+
+	return diag.Diagnostics{}
+}
+
+func ConvertToPropertyValue(value types.String) core.PropertyValue {
+	if value.IsNull() {
+		return core.NewPropertyValue("", false)
+	} else {
+		return core.NewPropertyValue(value.ValueString(), false)
+	}
+}

@@ -457,64 +457,15 @@ func mapProcessStepActionToState(action *deployments.DeploymentAction, state *sc
 	state.WorkerPoolID = types.StringValue(action.WorkerPool)
 	state.WorkerPoolVariable = types.StringValue(action.WorkerPoolVariable)
 
-	if action.Container == nil {
-		state.Container = nil
-	} else {
-		state.Container = &schemas.ProcessStepActionContainerModel{
-			FeedID: types.StringValue(action.Container.FeedID),
-			Image:  types.StringValue(action.Container.Image),
-		}
-	}
+	state.Container = mapDeploymentActionContainerToState(action.Container)
 
 	state.TenantTags = util.BuildStringSetOrEmpty(action.TenantTags)
 	state.Environments = util.BuildStringSetOrEmpty(action.Environments)
 	state.ExcludedEnvironments = util.BuildStringSetOrEmpty(action.ExcludedEnvironments)
 	state.Channels = util.BuildStringSetOrEmpty(action.Channels)
 
-	if action.GitDependencies == nil {
-		state.GitDependencies = types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), map[string]attr.Value{})
-	} else {
-		stateDependencies := make(map[string]attr.Value, len(action.GitDependencies))
-		for _, dependency := range action.GitDependencies {
-			stateDependency := types.ObjectValueMust(
-				schemas.ProcessStepGitDependencyAttributeTypes(),
-				map[string]attr.Value{
-					"repository_uri":      types.StringValue(dependency.RepositoryUri),
-					"default_branch":      types.StringValue(dependency.DefaultBranch),
-					"git_credential_type": types.StringValue(dependency.GitCredentialType),
-					"file_path_filters":   types.SetValueMust(types.StringType, util.ToValueSlice(dependency.FilePathFilters)),
-					"git_credential_id":   types.StringValue(dependency.GitCredentialId),
-				},
-			)
-
-			stateDependencies[dependency.Name] = stateDependency
-		}
-
-		state.GitDependencies = types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), stateDependencies)
-	}
-
-	if action.Packages == nil {
-		state.Packages = types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{})
-	} else {
-		statePackages := make(map[string]attr.Value, len(action.Packages))
-		for _, packageReference := range action.Packages {
-			packageProperties := util.ConvertMapStringToMapAttrValue(packageReference.Properties)
-			statePackage := types.ObjectValueMust(
-				schemas.ProcessStepPackageReferenceAttributeTypes(),
-				map[string]attr.Value{
-					"id":                   types.StringValue(packageReference.ID),
-					"package_id":           types.StringValue(packageReference.PackageID),
-					"feed_id":              types.StringValue(packageReference.FeedID),
-					"acquisition_location": types.StringValue(packageReference.AcquisitionLocation),
-					"properties":           types.MapValueMust(types.StringType, packageProperties),
-				},
-			)
-
-			statePackages[packageReference.Name] = statePackage
-		}
-
-		state.Packages = types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), statePackages)
-	}
+	state.GitDependencies = mapGitDependenciesToState(action.GitDependencies)
+	state.Packages = mapPackageReferencesToState(action.Packages)
 
 	stateProperties, diags := util.ConvertPropertiesToAttributeValuesMap(action.Properties)
 	if diags.HasError() {
@@ -524,4 +475,64 @@ func mapProcessStepActionToState(action *deployments.DeploymentAction, state *sc
 	state.ExecutionProperties = stateProperties
 
 	return diag.Diagnostics{}
+}
+
+func mapGitDependenciesToState(dependencies []*gitdependencies.GitDependency) types.Map {
+	if dependencies == nil {
+		return types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), map[string]attr.Value{})
+	}
+
+	stateDependencies := make(map[string]attr.Value, len(dependencies))
+	for _, dependency := range dependencies {
+		stateDependency := types.ObjectValueMust(
+			schemas.ProcessStepGitDependencyAttributeTypes(),
+			map[string]attr.Value{
+				"repository_uri":      types.StringValue(dependency.RepositoryUri),
+				"default_branch":      types.StringValue(dependency.DefaultBranch),
+				"git_credential_type": types.StringValue(dependency.GitCredentialType),
+				"file_path_filters":   types.SetValueMust(types.StringType, util.ToValueSlice(dependency.FilePathFilters)),
+				"git_credential_id":   types.StringValue(dependency.GitCredentialId),
+			},
+		)
+
+		stateDependencies[dependency.Name] = stateDependency
+	}
+
+	return types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), stateDependencies)
+}
+
+func mapDeploymentActionContainerToState(container *deployments.DeploymentActionContainer) *schemas.ProcessStepActionContainerModel {
+	if container == nil {
+		return nil
+	}
+
+	return &schemas.ProcessStepActionContainerModel{
+		FeedID: types.StringValue(container.FeedID),
+		Image:  types.StringValue(container.Image),
+	}
+}
+
+func mapPackageReferencesToState(references []*packages.PackageReference) types.Map {
+	if references == nil {
+		return types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{})
+	}
+
+	statePackages := make(map[string]attr.Value, len(references))
+	for _, packageReference := range references {
+		packageProperties := util.ConvertMapStringToMapAttrValue(packageReference.Properties)
+		statePackage := types.ObjectValueMust(
+			schemas.ProcessStepPackageReferenceAttributeTypes(),
+			map[string]attr.Value{
+				"id":                   types.StringValue(packageReference.ID),
+				"package_id":           types.StringValue(packageReference.PackageID),
+				"feed_id":              types.StringValue(packageReference.FeedID),
+				"acquisition_location": types.StringValue(packageReference.AcquisitionLocation),
+				"properties":           types.MapValueMust(types.StringType, packageProperties),
+			},
+		)
+
+		statePackages[packageReference.Name] = statePackage
+	}
+
+	return types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), statePackages)
 }
