@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -57,15 +58,56 @@ func (r *amazonWebServicesAccountResource) Create(ctx context.Context, req resou
 }
 
 func (r *amazonWebServicesAccountResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state schemas.AmazonWebServicesAccountModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	account, err := accounts.GetByID(r.Client, state.SpaceId.ValueString(), state.ID.ValueString())
+	if err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "amazonWebServicesAccountResource"); err != nil {
+			resp.Diagnostics.AddError("unable to load Amazon Web Services account", err.Error())
+		}
+		return
+	}
+
+	newState := flattenAmazonWebServicesAccount(ctx, account.(*accounts.AmazonWebServicesAccount), state)
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
 	return
 }
 
 func (r *amazonWebServicesAccountResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan schemas.AmazonWebServicesAccountModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	account := expandAmazonWebServicesAccount(ctx, plan)
+	updatedAccount, err := accounts.Update(r.Client, account)
+	if err != nil {
+		resp.Diagnostics.AddError("Error updating Amazon Web Services account", err.Error())
+		return
+	}
+
+	state := flattenAmazonWebServicesAccount(ctx, updatedAccount.(*accounts.AmazonWebServicesAccount), plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 	return
 }
 
 func (r *amazonWebServicesAccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	return
+	var state schemas.AmazonWebServicesAccountModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	err := accounts.DeleteByID(r.Client, state.SpaceId.ValueString(), state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error deleting Amazon Web Services account", err.Error())
+		return
+	}
 }
 
 func (*amazonWebServicesAccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
