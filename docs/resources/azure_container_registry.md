@@ -19,18 +19,16 @@ resource "octopusdeploy_azure_container_registry" "example" {
   username      = "username"
   password      = "password"
 }
-```
 
-```terraform
-resource "octopusdeploy_azure_container_registry" "example_with_oidc" {
-  name          = "Test Azure Container Registry with OIDC (OK to Delete)"
-  feed_uri      = "https://test-azure.azurecr.io"
-  oidc_authentication = {
-    client_id    = "client_id"
-    tenant_id    = "tenant_id"
-    audience     = "audience"
-    subject_keys = [ "feed", "space" ]
-  }
+resource "octopusdeploy_azure_container_register" "example_with_oidc" {
+    name          = "Test Azure Container Registry (OK to Delete)"
+    feed_uri      = "https://test-azure.azurecr.io"
+    oidc_authentication {
+      client_id     = "client_id"
+      tenant_id     = "tenant_id"
+      audience      = "audience"
+      subject_keys = ["feed", "space"]
+    } 
 }
 ```
 
@@ -56,14 +54,14 @@ resource "octopusdeploy_azure_container_registry" "example_with_oidc" {
 - `id` (String) The unique ID for this resource.
 
 <a id="nestedatt--oidc_authentication"></a>
-### Nested schema for `oidc_authentication`
+### Nested Schema for `oidc_authentication`
 
 Optional:
 
-- `audience` (String) Audience representing the intended recipient of the OIDC token.
-- `client_id` (String) Unique ID representing the application requesting authentication.
-- `tenant_id` (String) Unique identifier representing the Azure AD instance hosting the authenticating application.
+- `audience` (String) Audience representing the intended recipient of the OIDC token
+- `client_id` (String) Unique identifier representing the application requesting authentication
 - `subject_keys` (List of String) Keys to include in a deployment or runbook. Valid options are `space`, `feed`.
+- `tenant_id` (String) Unique identifier representing the Azure AD instance hosting the authenticating application
 
 ## Import
 

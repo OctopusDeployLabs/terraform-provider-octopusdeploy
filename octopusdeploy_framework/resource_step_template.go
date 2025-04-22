@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/gitdependencies"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/actiontemplates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
@@ -166,6 +167,11 @@ func mapStepTemplateToResourceModel(data *schemas.StepTemplateTypeResourceModel,
 	resp.Append(dg...)
 	data.Packages = pkgs
 
+	//GitDependencies
+	gitDepends, dg := convertStepTemplateToGitDependencyAttributes(at.GitDependencies)
+	resp.Append(dg...)
+	data.GitDependencies = gitDepends
+
 	return resp
 }
 
@@ -193,6 +199,12 @@ func mapStepTemplateResourceModelToActionTemplate(ctx context.Context, data sche
 
 	params := make([]schemas.StepTemplateParameterType, 0, len(data.Parameters.Elements()))
 	resp.Append(data.Parameters.ElementsAs(ctx, &params, false)...)
+	if resp.HasError() {
+		return at, resp
+	}
+
+	gitDepends := make([]schemas.StepTemplateGitDependencyType, 0, len(data.GitDependencies.Elements()))
+	resp.Append(data.GitDependencies.ElementsAs(ctx, &gitDepends, false)...)
 	if resp.HasError() {
 		return at, resp
 	}
@@ -244,6 +256,25 @@ func mapStepTemplateResourceModelToActionTemplate(ctx context.Context, data sche
 			at.Parameters[i].ID = val.ID.ValueString()
 		}
 	}
+
+	at.GitDependencies = make([]gitdependencies.GitDependency, len(gitDepends))
+	if len(gitDepends) > 0 {
+		for i, val := range gitDepends {
+			var filePathFilters []string
+			if err := val.FilePathFilters.ElementsAs(context.Background(), &filePathFilters, false); err != nil {
+				return at, resp
+			}
+			at.GitDependencies[i] = gitdependencies.GitDependency{
+				Name:              val.Name.ValueString(),
+				RepositoryUri:     val.RepositoryUri.ValueString(),
+				DefaultBranch:     val.DefaultBranch.ValueString(),
+				GitCredentialType: val.GitCredentialType.ValueString(),
+				FilePathFilters:   filePathFilters,
+				GitCredentialId:   val.GitCredentialId.ValueString(),
+			}
+		}
+	}
+
 	if resp.HasError() {
 		return at, resp
 	}
@@ -286,6 +317,40 @@ func convertStepTemplateToParameterAttributes(atParams []actiontemplates.ActionT
 		return types.ListNull(types.ObjectType{AttrTypes: schemas.GetStepTemplateParameterTypeAttributes()}), resp
 	}
 	return sParams, resp
+}
+
+func convertStepTemplateToGitDependencyAttributes(atParams []gitdependencies.GitDependency) (types.List, diag.Diagnostics) {
+	resp := diag.Diagnostics{}
+	params := make([]attr.Value, len(atParams))
+	for i, val := range atParams {
+		objVal, dg := convertStepTemplateGitDependencyAttribute(val)
+		resp.Append(dg...)
+		if resp.HasError() {
+			return types.ListNull(types.ObjectType{AttrTypes: schemas.GetStepTemplateGitDependencyTypeAttributes()}), resp
+		}
+		params[i] = objVal
+	}
+	sParams, dg := types.ListValue(types.ObjectType{AttrTypes: schemas.GetStepTemplateGitDependencyTypeAttributes()}, params)
+	resp.Append(dg...)
+	if resp.HasError() {
+		return types.ListNull(types.ObjectType{AttrTypes: schemas.GetStepTemplateGitDependencyTypeAttributes()}), resp
+	}
+	return sParams, resp
+}
+
+func convertStepTemplateGitDependencyAttribute(atp gitdependencies.GitDependency) (types.Object, diag.Diagnostics) {
+	filePathFilters, dg := types.ListValue(types.StringType, util.ToValueSlice(atp.FilePathFilters))
+	if dg.HasError() {
+		return types.ObjectNull(schemas.GetStepTemplateGitDependencyTypeAttributes()), dg
+	}
+	return types.ObjectValue(schemas.GetStepTemplateGitDependencyTypeAttributes(), map[string]attr.Value{
+		"name":                types.StringValue(atp.Name),
+		"repository_uri":      types.StringValue(atp.RepositoryUri),
+		"default_branch":      types.StringValue(atp.DefaultBranch),
+		"git_credential_type": types.StringValue(atp.GitCredentialType),
+		"file_path_filters":   filePathFilters,
+		"git_credential_id":   types.StringValue(atp.GitCredentialId),
+	})
 }
 
 func convertStepTemplateParameterAttribute(atp actiontemplates.ActionTemplateParameter) (types.Object, diag.Diagnostics) {
