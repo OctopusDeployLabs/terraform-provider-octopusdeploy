@@ -19,16 +19,14 @@ resource "octopusdeploy_google_container_registry" "example" {
   registry_path = "testing/test-image"
   password      = "google authentication key file contents (json)"
 }
-```
 
-```terraform
 resource "octopusdeploy_google_container_registry" "example_with_oidc" {
   name          = "Test Google Container Registry (OK to Delete)"
   feed_uri      = "https://google.docker.test"
   registry_path = "testing/test-image"
-  oidc_authentication = {
-    audience     = "audience"
-    subject_keys = [ "feed", "space" ]
+  oidc_authentication {
+    audience      = "audience"
+    subject_keys = ["feed", "space"]
   }
 }
 ```
@@ -44,7 +42,7 @@ resource "octopusdeploy_google_container_registry" "example_with_oidc" {
 ### Optional
 
 - `api_version` (String)
-- `oidc_authentication` (Attributes) (see [below for nested schema](#nestedatt--oidc_authentication)) 
+- `oidc_authentication` (Attributes) (see [below for nested schema](#nestedatt--oidc_authentication))
 - `password` (String, Sensitive) The password associated with this resource.
 - `registry_path` (String)
 - `space_id` (String) The space ID associated with this Google container registry feed.
@@ -53,15 +51,15 @@ resource "octopusdeploy_google_container_registry" "example_with_oidc" {
 ### Read-Only
 
 - `id` (String) The unique ID for this resource.
- 
+
 <a id="nestedatt--oidc_authentication"></a>
-### Nested schema for `oidc_authentication`
+### Nested Schema for `oidc_authentication`
 
 Optional:
 
-- `audience` (String) Audience representing the intended recipient of the OIDC token.
+- `audience` (String) Audience representing the intended recipient of the OIDC token
 - `subject_keys` (List of String) Keys to include in a deployment or runbook. Valid options are `space`, `feed`.
- 
+
 ## Import
 
 Import is supported using the following syntax:
