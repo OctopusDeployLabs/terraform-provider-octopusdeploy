@@ -3,6 +3,7 @@ package schemas
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,16 +69,18 @@ func (a AzureSubscriptionAccountSchema) GetResourceSchema() resourceSchema.Schem
 			"management_endpoint": resourceSchema.StringAttribute{
 				Description: "TODO",
 				Optional:    true,
-				// TODO: add equivalent of below RequiredWith
-				// RequiredWith: []string{"azure_environment"}
+				Validators: []validator.String{
+					stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("azure_environment")),
+				},
 			},
 			"name":     GetNameResourceSchema(true),
 			"space_id": GetSpaceIdResourceSchema(AzureSubscriptionAccountDescription),
 			"storage_endpoint_suffix": resourceSchema.StringAttribute{
 				Description: "The storage endpoint suffix associated with this Azure subscription account.",
 				Optional:    true,
-				// TODO: add equivalent of below RequiredWith
-				// RequiredWith: []string{"azure_environment"},
+				Validators: []validator.String{
+					stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("azure_environment")),
+				},
 			},
 			"subscription_id": resourceSchema.StringAttribute{
 				Description: "The subscription ID of this resource.",
