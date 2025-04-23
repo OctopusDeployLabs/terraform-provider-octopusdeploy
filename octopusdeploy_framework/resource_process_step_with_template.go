@@ -113,7 +113,7 @@ func (r *processStepWithTemplateResource) ModifyPlan(ctx context.Context, reques
 
 	spaceId := plan.SpaceID.ValueString()
 	templateId := plan.TemplateID.ValueString()
-	templateVersion := plan.TemplateVersion.ValueString()
+	templateVersion := plan.TemplateVersion.ValueInt32()
 
 	var template *actiontemplates.ActionTemplate
 	template, diags = loadActionTemplate(r.Config.Client, spaceId, templateId, templateVersion)
@@ -192,7 +192,7 @@ func (r *processStepWithTemplateResource) Create(ctx context.Context, req resour
 	spaceId := data.SpaceID.ValueString()
 	processId := data.ProcessID.ValueString()
 	templateId := data.TemplateID.ValueString()
-	templateVersion := data.TemplateVersion.ValueString()
+	templateVersion := data.TemplateVersion.ValueInt32()
 
 	template, templateDiags := loadActionTemplate(r.Config.Client, spaceId, templateId, templateVersion)
 	if templateDiags.HasError() {
@@ -254,7 +254,7 @@ func (r *processStepWithTemplateResource) Read(ctx context.Context, req resource
 	processId := data.ProcessID.ValueString()
 	stepId := data.ID.ValueString()
 	templateId := data.TemplateID.ValueString()
-	templateVersion := data.TemplateVersion.ValueString()
+	templateVersion := data.TemplateVersion.ValueInt32()
 
 	template, templateDiags := loadActionTemplate(r.Config.Client, spaceId, templateId, templateVersion)
 	if templateDiags.HasError() {
@@ -299,7 +299,7 @@ func (r *processStepWithTemplateResource) Update(ctx context.Context, req resour
 	processId := data.ProcessID.ValueString()
 	stepId := data.ID.ValueString()
 	templateId := data.TemplateID.ValueString()
-	templateVersion := data.TemplateVersion.ValueString()
+	templateVersion := data.TemplateVersion.ValueInt32()
 
 	template, templateDiags := loadActionTemplate(r.Config.Client, spaceId, templateId, templateVersion)
 	if templateDiags.HasError() {
@@ -519,12 +519,7 @@ func mapProcessStepActionWithTemplateFromState(ctx context.Context, state *schem
 	}
 
 	properties["Octopus.Action.Template.Id"] = core.NewPropertyValue(template.ID, false)
-	templateVersion := ""
-	if state.TemplateVersion.IsNull() || state.TemplateVersion.IsUnknown() {
-		templateVersion = strconv.Itoa(int(template.Version))
-	} else {
-		templateVersion = state.TemplateVersion.ValueString()
-	}
+	templateVersion := strconv.Itoa(int(state.TemplateVersion.ValueInt32()))
 	properties["Octopus.Action.Template.Version"] = core.NewPropertyValue(templateVersion, false)
 
 	action.Properties = properties
@@ -579,6 +574,7 @@ func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deploy
 	state.GitDependencies = mapGitDependenciesToState(action.GitDependencies)
 	state.Packages = mapPackageReferencesToState(action.Packages)
 
+	diags := diag.Diagnostics{}
 	// Split properties into 3 groups (parameters, template properties and rest of the provided properties)
 	parameterValues := make(map[string]attr.Value)
 	unmanagedParameterValues := make(map[string]attr.Value)
@@ -590,14 +586,16 @@ func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deploy
 		parametersLookup[parameter.Name] = parameter
 	}
 
-	stateParameters, paramDiags := util.ConvertMapToStringMap(ctx, state.Parameters)
-	if paramDiags.HasError() {
-		return paramDiags
+	var stateParameters map[string]types.String
+	stateParameters, diags = util.ConvertMapToStringMap(ctx, state.Parameters)
+	if diags.HasError() {
+		return diags
 	}
 
-	stateExecutionProperties, propDiags := util.ConvertMapToStringMap(ctx, state.ExecutionProperties)
-	if propDiags.HasError() {
-		return propDiags
+	var stateExecutionProperties map[string]types.String
+	stateExecutionProperties, diags = util.ConvertMapToStringMap(ctx, state.ExecutionProperties)
+	if diags.HasError() {
+		return diags
 	}
 
 	for key, property := range action.Properties {
@@ -626,14 +624,13 @@ func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deploy
 		}
 
 		if key == "Octopus.Action.Template.Version" {
-			state.TemplateVersion = value
+			version, _ := strconv.Atoi(property.Value)
+			state.TemplateVersion = types.Int32Value(int32(version))
 			continue
 		}
 
 		executionPropertyValues[key] = value
 	}
-
-	diags := diag.Diagnostics{}
 
 	state.Parameters, diags = types.MapValue(types.StringType, parameterValues)
 	if diags.HasError() {
@@ -658,29 +655,17 @@ func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deploy
 	return diags
 }
 
-func loadActionTemplate(client *client.Client, spaceId string, id string, version string) (*actiontemplates.ActionTemplate, diag.Diagnostics) {
-	load := func() (*actiontemplates.ActionTemplate, error) {
-		if version == "" {
-			return actiontemplates.GetByID(client, spaceId, id)
-		} else {
-			versioned, err := actiontemplates.GetVersionByID(client, spaceId, id, version)
-			if err != nil {
-				return nil, err
-			}
-
-			// Versioned endpoint returns template with id of template version record,
-			// but we want to keep original template id
-			versioned.SetID(id)
-			return versioned, nil
-		}
-	}
-
+func loadActionTemplate(client *client.Client, spaceId string, id string, version int32) (*actiontemplates.ActionTemplate, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
-	template, err := load()
+
+	versioned, err := actiontemplates.GetVersionByID(client, spaceId, id, version)
 	if err != nil {
 		diags.AddError("Unable to load template", err.Error())
 		return nil, diags
 	}
 
-	return template, diags
+	// Versioned endpoint returns template with id of the version record which is different from id of actual template,
+	// but we want to keep original template id
+	versioned.SetID(id)
+	return versioned, diags
 }

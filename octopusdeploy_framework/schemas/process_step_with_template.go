@@ -32,11 +32,9 @@ func (p ProcessStepWithTemplateSchema) GetResourceSchema() resourceSchema.Schema
 				Description("Id of template this step will be based on.").
 				Required().
 				Build(),
-			"template_version": util.ResourceString().
-				Description("Version of the template this step will be based on. Will be set to latest version when omitted").
-				Optional().
-				Computed().
-				PlanModifiers(stringplanmodifier.UseStateForUnknown()).
+			"template_version": util.ResourceInt32().
+				Description("Version of the template this step will be based on.").
+				Required().
 				Build(),
 			"name": GetNameResourceSchema(true),
 			"start_trigger": util.ResourceString().
@@ -181,7 +179,7 @@ type ProcessStepWithTemplateResourceModel struct {
 	SpaceID            types.String `tfsdk:"space_id"`
 	ProcessID          types.String `tfsdk:"process_id"`
 	TemplateID         types.String `tfsdk:"template_id"`
-	TemplateVersion    types.String `tfsdk:"template_version"`
+	TemplateVersion    types.Int32  `tfsdk:"template_version"`
 	Name               types.String `tfsdk:"name"`
 	StartTrigger       types.String `tfsdk:"start_trigger"`
 	PackageRequirement types.String `tfsdk:"package_requirement"`
