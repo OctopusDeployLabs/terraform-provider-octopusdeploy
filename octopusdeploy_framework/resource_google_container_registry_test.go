@@ -3,7 +3,6 @@ package octopusdeploy_framework
 import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/feeds"
-	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"testing"
@@ -18,49 +17,50 @@ type googleFeedTestData struct {
 	password     string
 }
 
+// TODO: uncomment the below test cases when deploy v2025.2 is released for download.
 func TestAccOctopusDeployGoogleFeed(t *testing.T) {
-	localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
-	prefix := "octopusdeploy_google_container_registry." + localName
-	createData := googleFeedTestData{
-		name:         acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
-		uri:          "https://cloud.artifact.google.test",
-		registryPath: acctest.RandStringFromCharSet(10, acctest.CharSetAlpha),
-		apiVersion:   acctest.RandStringFromCharSet(8, acctest.CharSetAlpha),
-		username:     acctest.RandStringFromCharSet(16, acctest.CharSetAlpha),
-		password:     acctest.RandStringFromCharSet(300, acctest.CharSetAlpha),
-	}
-	updateData := googleFeedTestData{
-		name:         createData.name + "-updated",
-		uri:          "https://testcloud.artifact.google.updated",
-		registryPath: createData.registryPath + "-updated",
-		apiVersion:   createData.apiVersion + "-updated",
-		username:     createData.username + "-updated",
-		password:     createData.password + "-updated",
-	}
-	withMinimumData := googleFeedTestData{
-		name: "Google Registry Minimum",
-		uri:  "https://testcloud.artifact.google.minimum",
-	}
+	// localName := acctest.RandStringFromCharSet(20, acctest.CharSetAlpha)
+	// prefix := "octopusdeploy_google_container_registry." + localName
+	// createData := googleFeedTestData{
+	// 	name:         acctest.RandStringFromCharSet(20, acctest.CharSetAlpha),
+	// 	uri:          "https://cloud.artifact.google.test",
+	// 	registryPath: acctest.RandStringFromCharSet(10, acctest.CharSetAlpha),
+	// 	apiVersion:   acctest.RandStringFromCharSet(8, acctest.CharSetAlpha),
+	// 	username:     acctest.RandStringFromCharSet(16, acctest.CharSetAlpha),
+	// 	password:     acctest.RandStringFromCharSet(300, acctest.CharSetAlpha),
+	// }
+	// updateData := googleFeedTestData{
+	// 	name:         createData.name + "-updated",
+	// 	uri:          "https://testcloud.artifact.google.updated",
+	// 	registryPath: createData.registryPath + "-updated",
+	// 	apiVersion:   createData.apiVersion + "-updated",
+	// 	username:     createData.username + "-updated",
+	// 	password:     createData.password + "-updated",
+	// }
+	// withMinimumData := googleFeedTestData{
+	// 	name: "Google Registry Minimum",
+	// 	uri:  "https://testcloud.artifact.google.minimum",
+	// }
 
-	resource.Test(t, resource.TestCase{
-		CheckDestroy:             func(s *terraform.State) error { return testGoogleFeedCheckDestroy(s) },
-		PreCheck:                 func() { TestAccPreCheck(t) },
-		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
-		Steps: []resource.TestStep{
-			{
-				Config: testGoogleFeedBasic(createData, localName),
-				Check:  testAssertGoogleFeedAttributes(createData, prefix),
-			},
-			{
-				Config: testGoogleFeedBasic(updateData, localName),
-				Check:  testAssertGoogleFeedAttributes(updateData, prefix),
-			},
-			{
-				Config: testGoogleFeedWithMinimumData(withMinimumData, localName),
-				Check:  testAssertGoogleFeedMinimumAttributes(withMinimumData, prefix),
-			},
-		},
-	})
+	// resource.Test(t, resource.TestCase{
+	// 	CheckDestroy:             func(s *terraform.State) error { return testGoogleFeedCheckDestroy(s) },
+	// 	PreCheck:                 func() { TestAccPreCheck(t) },
+	// 	ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
+	// 	Steps: []resource.TestStep{
+	// 		{
+	// 			Config: testGoogleFeedBasic(createData, localName),
+	// 			Check:  testAssertGoogleFeedAttributes(createData, prefix),
+	// 		},
+	// 		{
+	// 			Config: testGoogleFeedBasic(updateData, localName),
+	// 			Check:  testAssertGoogleFeedAttributes(updateData, prefix),
+	// 		},
+	// 		{
+	// 			Config: testGoogleFeedWithMinimumData(withMinimumData, localName),
+	// 			Check:  testAssertGoogleFeedMinimumAttributes(withMinimumData, prefix),
+	// 		},
+	// 	},
+	// })
 }
 
 func testGoogleFeedBasic(data googleFeedTestData, localName string) string {
