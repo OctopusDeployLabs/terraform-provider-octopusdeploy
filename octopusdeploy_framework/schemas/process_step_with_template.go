@@ -162,10 +162,9 @@ func (p ProcessStepWithTemplateSchema) GetResourceSchema() resourceSchema.Schema
 			"template_properties": util.ResourceMap(types.StringType).
 				Description("Properties copied from the template").
 				Computed().
-				PlanModifiers(mapplanmodifier.UseStateForUnknown()).
 				Build(),
 			"execution_properties": util.ResourceMap(types.StringType).
-				Description("Properties of the action where the key is the property name and the value is its value.").
+				Description("Action properties where the key is the property name and the value is its value.").
 				Optional().
 				Computed().
 				DefaultEmpty().

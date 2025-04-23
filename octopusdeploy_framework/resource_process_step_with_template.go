@@ -24,6 +24,7 @@ import (
 
 var (
 	_ resource.ResourceWithImportState = &processStepWithTemplateResource{}
+	_ resource.ResourceWithModifyPlan  = &processStepWithTemplateResource{}
 )
 
 type processStepWithTemplateResource struct {
@@ -96,6 +97,89 @@ func (r *processStepWithTemplateResource) ImportState(ctx context.Context, reque
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), processId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_id"), templateId.Value)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_version"), templateVersion.Value)...)
+}
+
+func (r *processStepWithTemplateResource) ModifyPlan(ctx context.Context, request resource.ModifyPlanRequest, response *resource.ModifyPlanResponse) {
+	if request.Plan.Raw.IsNull() {
+		return
+	}
+
+	var plan *schemas.ProcessStepWithTemplateResourceModel
+	diags := request.Plan.Get(ctx, &plan)
+	if diags.HasError() {
+		response.Diagnostics.Append(diags...)
+		return
+	}
+
+	spaceId := plan.SpaceID.ValueString()
+	templateId := plan.TemplateID.ValueString()
+	templateVersion := plan.TemplateVersion.ValueString()
+
+	var template *actiontemplates.ActionTemplate
+	template, diags = loadActionTemplate(r.Config.Client, spaceId, templateId, templateVersion)
+	if diags.HasError() {
+		response.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Set unmanaged parameters
+	unmanagedParameters := make(map[string]attr.Value)
+	var managedParameters map[string]types.String
+	managedParameters, diags = util.ConvertMapToStringMap(ctx, plan.Parameters)
+	if diags.HasError() {
+		response.Diagnostics.Append(diags...)
+		return
+	}
+
+	for _, parameter := range template.Parameters {
+		if _, configured := managedParameters[parameter.Name]; configured {
+			continue
+		}
+
+		// Not configured - add to unmanaged only if default value is not empty
+		if defaultValue := parameter.DefaultValue; defaultValue != nil {
+			if defaultValue.Value != "" {
+				unmanagedParameters[parameter.Name] = types.StringValue(defaultValue.Value)
+				continue
+			}
+
+			if defaultValue.IsSensitive && defaultValue.SensitiveValue.HasValue {
+				unmanagedParameters[parameter.Name] = types.StringValue(defaultValue.Value)
+				continue
+			}
+		}
+	}
+
+	plan.UnmanagedParameters, diags = types.MapValue(types.StringType, unmanagedParameters)
+	if diags.HasError() {
+		response.Diagnostics.Append(diags...)
+		return
+	}
+
+	// Set template properties
+	templateProperties := make(map[string]attr.Value)
+	var executionProperties map[string]types.String
+	executionProperties, diags = util.ConvertMapToStringMap(ctx, plan.ExecutionProperties)
+	if diags.HasError() {
+		response.Diagnostics.Append(diags...)
+		return
+	}
+
+	for key, property := range template.Properties {
+		if _, overridden := executionProperties[key]; overridden {
+			continue
+		}
+
+		templateProperties[key] = types.StringValue(property.Value)
+	}
+
+	plan.TemplateProperties, diags = types.MapValue(types.StringType, templateProperties)
+	if diags.HasError() {
+		response.Diagnostics.Append(diags...)
+		return
+	}
+
+	response.Diagnostics.Append(response.Plan.Set(ctx, &plan)...)
 }
 
 func (r *processStepWithTemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -398,16 +482,15 @@ func mapProcessStepActionWithTemplateFromState(ctx context.Context, state *schem
 	properties := make(map[string]core.PropertyValue)
 
 	// Parameters
-	stateParameters := make(map[string]types.String, len(state.Parameters.Elements()))
-	diags = state.Parameters.ElementsAs(ctx, &stateParameters, false)
-	if diags.HasError() {
-		return diags
+	stateParameters, paramDiags := util.ConvertMapToStringMap(ctx, state.Parameters)
+	if paramDiags.HasError() {
+		return paramDiags
 	}
 
 	for _, parameter := range template.Parameters {
-		value, set := stateParameters[parameter.Name]
-		if set {
-			properties[parameter.Name] = util.ConvertToPropertyValue(value)
+		value, ok := stateParameters[parameter.Name]
+		if ok {
+			properties[parameter.Name] = util.ConvertToPropertyValue(value, false)
 			continue
 		}
 
@@ -507,9 +590,14 @@ func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deploy
 		parametersLookup[parameter.Name] = parameter
 	}
 
-	stateParameters, diags := util.ConvertMapToStringMap(ctx, state.Parameters)
-	if diags.HasError() {
-		return diags
+	stateParameters, paramDiags := util.ConvertMapToStringMap(ctx, state.Parameters)
+	if paramDiags.HasError() {
+		return paramDiags
+	}
+
+	stateExecutionProperties, propDiags := util.ConvertMapToStringMap(ctx, state.ExecutionProperties)
+	if propDiags.HasError() {
+		return propDiags
 	}
 
 	for key, property := range action.Properties {
@@ -526,8 +614,10 @@ func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deploy
 		}
 
 		if _, isTemplateProperty := template.Properties[key]; isTemplateProperty {
-			templatePropertyValues[key] = value
-			continue
+			if _, overridden := stateExecutionProperties[key]; !overridden {
+				templatePropertyValues[key] = value
+				continue
+			}
 		}
 
 		if key == "Octopus.Action.Template.Id" {
@@ -542,6 +632,8 @@ func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deploy
 
 		executionPropertyValues[key] = value
 	}
+
+	diags := diag.Diagnostics{}
 
 	state.Parameters, diags = types.MapValue(types.StringType, parameterValues)
 	if diags.HasError() {
@@ -563,7 +655,7 @@ func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deploy
 		return diags
 	}
 
-	return diag.Diagnostics{}
+	return diags
 }
 
 func loadActionTemplate(client *client.Client, spaceId string, id string, version string) (*actiontemplates.ActionTemplate, diag.Diagnostics) {

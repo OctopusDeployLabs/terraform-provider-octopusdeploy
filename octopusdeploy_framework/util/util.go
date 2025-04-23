@@ -226,10 +226,10 @@ func MergePropertyValues(ctx context.Context, properties map[string]core.Propert
 	return diag.Diagnostics{}
 }
 
-func ConvertToPropertyValue(value types.String) core.PropertyValue {
+func ConvertToPropertyValue(value types.String, sensitive bool) core.PropertyValue {
 	if value.IsNull() {
-		return core.NewPropertyValue("", false)
+		return core.NewPropertyValue("", sensitive)
 	} else {
-		return core.NewPropertyValue(value.ValueString(), false)
+		return core.NewPropertyValue(value.ValueString(), sensitive)
 	}
 }
