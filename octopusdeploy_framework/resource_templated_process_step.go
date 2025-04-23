@@ -101,7 +101,11 @@ func (r *templatedProcessStepResource) ImportState(ctx context.Context, request 
 
 func (r *templatedProcessStepResource) ModifyPlan(ctx context.Context, request resource.ModifyPlanRequest, response *resource.ModifyPlanResponse) {
 	if request.Plan.Raw.IsNull() {
-		return
+		return // When deleting
+	}
+
+	if request.State.Raw.IsNull() {
+		return // When creating
 	}
 
 	var plan *schemas.TemplatedProcessStepResourceModel
@@ -121,6 +125,9 @@ func (r *templatedProcessStepResource) ModifyPlan(ctx context.Context, request r
 		response.Diagnostics.Append(diags...)
 		return
 	}
+
+	// Explicitly set computed attributes to avoid "state drift",
+	// because terraform complains about differences between plan and state after apply
 
 	// Set unmanaged parameters
 	unmanagedParameters := make(map[string]attr.Value)
