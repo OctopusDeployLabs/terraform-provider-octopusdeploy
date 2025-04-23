@@ -155,13 +155,17 @@ func (p ProcessStepWithTemplateSchema) GetResourceSchema() resourceSchema.Schema
 				Computed().
 				DefaultEmpty().
 				Build(),
+			"unmanaged_parameters": util.ResourceMap(types.StringType).
+				Description("Template parameters not configured by the practitioner.").
+				Computed().
+				Build(),
 			"template_properties": util.ResourceMap(types.StringType).
 				Description("Properties copied from the template").
 				Computed().
 				PlanModifiers(mapplanmodifier.UseStateForUnknown()).
 				Build(),
 			"execution_properties": util.ResourceMap(types.StringType).
-				Description("A collection properties where the key is the property name and the value is its value.").
+				Description("Properties of the action where the key is the property name and the value is its value.").
 				Optional().
 				Computed().
 				DefaultEmpty().
@@ -200,6 +204,7 @@ type ProcessStepWithTemplateResourceModel struct {
 	GitDependencies      types.Map                        `tfsdk:"git_dependencies"`
 	Packages             types.Map                        `tfsdk:"packages"`
 	Parameters           types.Map                        `tfsdk:"parameters"`
+	UnmanagedParameters  types.Map                        `tfsdk:"unmanaged_parameters"`
 	TemplateProperties   types.Map                        `tfsdk:"template_properties"`
 	ExecutionProperties  types.Map                        `tfsdk:"execution_properties"`
 

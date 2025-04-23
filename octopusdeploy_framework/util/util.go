@@ -144,6 +144,16 @@ func GetNumber(val types.Int64) int {
 	return v
 }
 
+func ConvertMapToStringMap(ctx context.Context, values types.Map) (map[string]types.String, diag.Diagnostics) {
+	stringValues := make(map[string]types.String, len(values.Elements()))
+	diags := values.ElementsAs(ctx, &stringValues, false)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return stringValues, diag.Diagnostics{}
+}
+
 func ConvertMapStringToMapAttrValue(m map[string]string) map[string]attr.Value {
 	result := make(map[string]attr.Value, len(m))
 	for k, v := range m {

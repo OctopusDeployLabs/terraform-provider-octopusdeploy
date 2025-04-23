@@ -23,7 +23,6 @@ import (
 )
 
 var (
-	_ resource.ResourceWithModifyPlan  = &processStepWithTemplateResource{}
 	_ resource.ResourceWithImportState = &processStepWithTemplateResource{}
 )
 
@@ -58,71 +57,45 @@ func (r *processStepWithTemplateResource) ImportState(ctx context.Context, reque
 		return
 	}
 
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), identifiers[0])...)
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), identifiers[1])...)
-}
+	spaceId := "" // Client's space is used for imported resources
+	processId := identifiers[0]
+	stepId := identifiers[1]
+	tflog.Info(ctx, fmt.Sprintf("importing templated process step (%s) from process (%s)", stepId, processId))
 
-func (r *processStepWithTemplateResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
-	if req.Plan.Raw.IsNull() {
+	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	if len(diags) > 0 {
+		response.Diagnostics.Append(diags...)
 		return
 	}
 
-	if req.State.Raw.IsNull() {
+	step, exists := process.FindStepByID(stepId)
+	if !exists {
+		response.Diagnostics.AddError("Unable to import process step", fmt.Sprintf("Process step (%s) is not found in process (%s)", stepId, processId))
 		return
 	}
 
-	//var plan *schemas.ProcessStepWithTemplateResourceModel
-	//resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
-	//
-	//spaceId := "" // Empty will be replaced by client's spaceId
-	//if !plan.SpaceID.IsUnknown() {
-	//	spaceId = plan.SpaceID.ValueString()
-	//}
-	//
-	//if plan.TemplateID.IsUnknown() {
-	//	return
-	//}
-	//
-	//templateId := plan.TemplateID.ValueString()
-	////templateVersion := plan.TemplateVersion.ValueString()
-	//
-	//template, templateError := actiontemplates.GetByID(r.Config.Client, spaceId, templateId)
-	//if templateError != nil {
-	//	resp.Diagnostics.AddError("Unable to load template", templateError.Error())
-	//	return
-	//}
-	//
-	//diags := diag.Diagnostics{}
-	//// Add missing parameters with their default or empty value
-	//planParameters := make(map[string]types.String)
-	//diags = plan.Parameters.ElementsAs(ctx, &planParameters, false)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
-	//
-	//modifiedParameters := make(map[string]attr.Value)
-	//for key, value := range planParameters {
-	//	modifiedParameters[key] = value
-	//}
-	//
-	//for _, parameter := range template.Parameters {
-	//	if _, isConfigured := modifiedParameters[parameter.Name]; !isConfigured {
-	//		modifiedParameters[parameter.Name] = types.StringValue(parameter.DefaultValue.Value)
-	//	}
-	//}
-	//
-	//plan.Parameters, diags = types.MapValue(types.StringType, modifiedParameters)
-	//if diags.HasError() {
-	//	resp.Diagnostics.Append(diags...)
-	//	return
-	//}
-	//
-	//diags = resp.Plan.Set(ctx, &plan)
-	//resp.Diagnostics.Append(diags...)
+	if len(step.Actions) == 0 || step.Actions[0] == nil {
+		response.Diagnostics.AddError("Unable to import process step", "Process step doesn't have actions")
+		return
+	}
+
+	action := step.Actions[0]
+	templateId, hasTemplateId := action.Properties["Octopus.Action.Template.Id"]
+	if !hasTemplateId {
+		response.Diagnostics.AddError("Unable to import process step", "Process step doesn't have template id")
+		return
+	}
+
+	templateVersion, hasTemplateVersion := action.Properties["Octopus.Action.Template.Version"]
+	if !hasTemplateVersion {
+		response.Diagnostics.AddError("Unable to import process step", "Process step doesn't have template version")
+		return
+	}
+
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), stepId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), processId)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_id"), templateId.Value)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_version"), templateVersion.Value)...)
 }
 
 func (r *processStepWithTemplateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -176,7 +149,7 @@ func (r *processStepWithTemplateResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	toStateDiagnostics := mapProcessStepWithTemplateToState(updatedProcess, createdStep, template, data)
+	toStateDiagnostics := mapProcessStepWithTemplateToState(ctx, updatedProcess, createdStep, template, data)
 	resp.Diagnostics.Append(toStateDiagnostics...)
 	if toStateDiagnostics.HasError() {
 		return
@@ -213,8 +186,6 @@ func (r *processStepWithTemplateResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	resp.Diagnostics.HasError()
-
 	step, exists := process.FindStepByID(stepId)
 	if !exists {
 		// Remove from state when not found in the process, so terraform will try to recreate it
@@ -223,7 +194,11 @@ func (r *processStepWithTemplateResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	mapProcessStepWithTemplateToState(process, step, template, data)
+	diags = mapProcessStepWithTemplateToState(ctx, process, step, template, data)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("process step with template read (step: %s)", step.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -283,7 +258,11 @@ func (r *processStepWithTemplateResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	mapProcessStepWithTemplateToState(updatedProcess, updatedStep, template, data)
+	diags = mapProcessStepWithTemplateToState(ctx, updatedProcess, updatedStep, template, data)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
 
 	tflog.Info(ctx, fmt.Sprintf("process step with template updated (%s)", updatedStep.GetID()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -432,8 +411,16 @@ func mapProcessStepActionWithTemplateFromState(ctx context.Context, state *schem
 			continue
 		}
 
-		if parameter.DefaultValue != nil {
-			properties[parameter.Name] = *parameter.DefaultValue
+		if defaultValue := parameter.DefaultValue; defaultValue != nil {
+			if defaultValue.Value != "" {
+				properties[parameter.Name] = *defaultValue
+				continue
+			}
+
+			if defaultValue.IsSensitive && defaultValue.SensitiveValue.HasValue {
+				properties[parameter.Name] = *defaultValue
+				continue
+			}
 		}
 	}
 
@@ -449,17 +436,20 @@ func mapProcessStepActionWithTemplateFromState(ctx context.Context, state *schem
 	}
 
 	properties["Octopus.Action.Template.Id"] = core.NewPropertyValue(template.ID, false)
+	templateVersion := ""
 	if state.TemplateVersion.IsNull() || state.TemplateVersion.IsUnknown() {
-		properties["Octopus.Action.Template.Version"] = core.NewPropertyValue(strconv.Itoa(int(template.Version)), false)
+		templateVersion = strconv.Itoa(int(template.Version))
+	} else {
+		templateVersion = state.TemplateVersion.ValueString()
 	}
-	properties["Octopus.Action.Template.Version"] = core.NewPropertyValue(state.TemplateVersion.ValueString(), false)
+	properties["Octopus.Action.Template.Version"] = core.NewPropertyValue(templateVersion, false)
 
 	action.Properties = properties
 
 	return diag.Diagnostics{}
 }
 
-func mapProcessStepWithTemplateToState(process processWrapper, step *deployments.DeploymentStep, template *actiontemplates.ActionTemplate, state *schemas.ProcessStepWithTemplateResourceModel) diag.Diagnostics {
+func mapProcessStepWithTemplateToState(ctx context.Context, process processWrapper, step *deployments.DeploymentStep, template *actiontemplates.ActionTemplate, state *schemas.ProcessStepWithTemplateResourceModel) diag.Diagnostics {
 	state.ID = types.StringValue(step.GetID())
 	state.SpaceID = types.StringValue(process.GetSpaceID())
 	state.ProcessID = types.StringValue(process.GetID())
@@ -481,13 +471,13 @@ func mapProcessStepWithTemplateToState(process processWrapper, step *deployments
 	state.Properties = stateProperties
 
 	if len(step.Actions) > 0 && step.Actions[0] != nil {
-		return mapProcessStepActionWithTemplateToState(step.Actions[0], template, state)
+		return mapProcessStepActionWithTemplateToState(ctx, step.Actions[0], template, state)
 	}
 
 	return diag.Diagnostics{}
 }
 
-func mapProcessStepActionWithTemplateToState(action *deployments.DeploymentAction, template *actiontemplates.ActionTemplate, state *schemas.ProcessStepWithTemplateResourceModel) diag.Diagnostics {
+func mapProcessStepActionWithTemplateToState(ctx context.Context, action *deployments.DeploymentAction, template *actiontemplates.ActionTemplate, state *schemas.ProcessStepWithTemplateResourceModel) diag.Diagnostics {
 	state.Type = types.StringValue(action.ActionType)
 	state.Slug = types.StringValue(action.Slug)
 	state.IsRequired = types.BoolValue(action.IsRequired)
@@ -508,6 +498,7 @@ func mapProcessStepActionWithTemplateToState(action *deployments.DeploymentActio
 
 	// Split properties into 3 groups (parameters, template properties and rest of the provided properties)
 	parameterValues := make(map[string]attr.Value)
+	unmanagedParameterValues := make(map[string]attr.Value)
 	templatePropertyValues := make(map[string]attr.Value)
 	executionPropertyValues := make(map[string]attr.Value)
 
@@ -516,11 +507,21 @@ func mapProcessStepActionWithTemplateToState(action *deployments.DeploymentActio
 		parametersLookup[parameter.Name] = parameter
 	}
 
+	stateParameters, diags := util.ConvertMapToStringMap(ctx, state.Parameters)
+	if diags.HasError() {
+		return diags
+	}
+
 	for key, property := range action.Properties {
 		value := types.StringValue(property.Value)
 
 		if _, isParameter := parametersLookup[key]; isParameter {
-			parameterValues[key] = value
+			if _, configured := stateParameters[key]; configured {
+				parameterValues[key] = value
+			} else {
+				unmanagedParameterValues[key] = value
+			}
+
 			continue
 		}
 
@@ -542,8 +543,12 @@ func mapProcessStepActionWithTemplateToState(action *deployments.DeploymentActio
 		executionPropertyValues[key] = value
 	}
 
-	diags := diag.Diagnostics{}
 	state.Parameters, diags = types.MapValue(types.StringType, parameterValues)
+	if diags.HasError() {
+		return diags
+	}
+
+	state.UnmanagedParameters, diags = types.MapValue(types.StringType, unmanagedParameterValues)
 	if diags.HasError() {
 		return diags
 	}
@@ -566,7 +571,15 @@ func loadActionTemplate(client *client.Client, spaceId string, id string, versio
 		if version == "" {
 			return actiontemplates.GetByID(client, spaceId, id)
 		} else {
-			return actiontemplates.GetVersionByID(client, spaceId, id, version)
+			versioned, err := actiontemplates.GetVersionByID(client, spaceId, id, version)
+			if err != nil {
+				return nil, err
+			}
+
+			// Versioned endpoint returns template with id of template version record,
+			// but we want to keep original template id
+			versioned.SetID(id)
+			return versioned, nil
 		}
 	}
 
