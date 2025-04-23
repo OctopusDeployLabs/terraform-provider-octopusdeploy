@@ -11,15 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type ProcessStepWithTemplateSchema struct{}
+type TemplatedProcessStepSchema struct{}
 
-var _ EntitySchema = ProcessStepWithTemplateSchema{}
+var _ EntitySchema = TemplatedProcessStepSchema{}
 
-const ProcessStepWithTemplateResourceName = "process_step_with_template"
+const TemplatedProcessStepResourceName = "templated_process_step"
 
-func (p ProcessStepWithTemplateSchema) GetResourceSchema() resourceSchema.Schema {
+func (p TemplatedProcessStepSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages single step of execution process in Octopus Deploy.",
+		Description: "This resource manages single step of execution process which based on existing custom step template",
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":       GetIdResourceSchema(),
 			"space_id": GetSpaceIdResourceSchema(ProcessStepResourceName),
@@ -171,11 +171,11 @@ func (p ProcessStepWithTemplateSchema) GetResourceSchema() resourceSchema.Schema
 	}
 }
 
-func (p ProcessStepWithTemplateSchema) GetDatasourceSchema() datasourceSchema.Schema {
+func (p TemplatedProcessStepSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{}
 }
 
-type ProcessStepWithTemplateResourceModel struct {
+type TemplatedProcessStepResourceModel struct {
 	SpaceID            types.String `tfsdk:"space_id"`
 	ProcessID          types.String `tfsdk:"process_id"`
 	TemplateID         types.String `tfsdk:"template_id"`
