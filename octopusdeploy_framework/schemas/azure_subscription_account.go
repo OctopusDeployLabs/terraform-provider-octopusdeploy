@@ -67,6 +67,7 @@ func (a AzureSubscriptionAccountSchema) GetResourceSchema() resourceSchema.Schem
 			},
 			"management_endpoint": resourceSchema.StringAttribute{
 				Description: "TODO",
+				Optional:    true,
 				// TODO: add equivalent of below RequiredWith
 				// RequiredWith: []string{"azure_environment"}
 			},
