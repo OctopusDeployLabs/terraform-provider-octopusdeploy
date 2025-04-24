@@ -28,11 +28,11 @@ resource "octopusdeploy_azure_subscription_account" "example" {
 ### Optional
 
 - `azure_environment` (String) The Azure environment associated with this Azure subscription account. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
-- `certificate` (String, Sensitive) TODO
-- `certificate_thumbprint` (String, Sensitive) TODO
+- `certificate` (String, Sensitive) The management certificate associated with this Azure subscription account.
+- `certificate_thumbprint` (String, Sensitive) The thumbprint of the management certificate associated with this Azure subscription account.
 - `description` (String) The description of this Azure subscription account.
 - `environments` (List of String) A list of environment IDs associated with this Azure subscription account.
-- `management_endpoint` (String) TODO
+- `management_endpoint` (String) The management endpoint associated with this Azure subscription account.
 - `space_id` (String) The space ID associated with this Azure subscription account.
 - `storage_endpoint_suffix` (String) The storage endpoint suffix associated with this Azure subscription account.
 - `tenant_tags` (List of String) A list of tenant tags associated with this Azure subscription account.

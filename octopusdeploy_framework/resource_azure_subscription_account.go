@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/accounts"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/google/uuid"
@@ -58,15 +59,57 @@ func (r *azureSubscriptionAccountResource) Create(ctx context.Context, req resou
 }
 
 func (r *azureSubscriptionAccountResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	return
+	var state schemas.AzureSubscriptionAccountModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	account, err := accounts.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	if err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "azureSubscriptionAccountResource"); err != nil {
+			resp.Diagnostics.AddError("unable to load Azure subscription account", err.Error())
+		}
+		return
+	}
+
+	newState := flattenAzureSubscriptionAccount(ctx, account.(*accounts.AzureSubscriptionAccount), state)
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
+
 }
 
 func (r *azureSubscriptionAccountResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	return
+	var plan schemas.AzureSubscriptionAccountModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	account := expandAzureSubscriptionAccount(ctx, plan)
+	updatedAccount, err := accounts.Update(r.Client, account)
+	if err != nil {
+		resp.Diagnostics.AddError("Error updating Azure subscription account", err.Error())
+		return
+	}
+
+	state := flattenAzureSubscriptionAccount(ctx, updatedAccount.(*accounts.AzureSubscriptionAccount), plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+
 }
 
 func (r *azureSubscriptionAccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	return
+	var state schemas.AzureSubscriptionAccountModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	err := accounts.DeleteByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error deleting Azure subscription account", err.Error())
+		return
+	}
+
 }
 
 func (*azureSubscriptionAccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

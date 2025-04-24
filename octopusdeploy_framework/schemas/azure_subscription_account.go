@@ -50,12 +50,12 @@ func (a AzureSubscriptionAccountSchema) GetResourceSchema() resourceSchema.Schem
 				},
 			},
 			"certificate": resourceSchema.StringAttribute{
-				Description: "TODO",
+				Description: "The management certificate associated with this Azure subscription account.",
 				Optional:    true,
 				Sensitive:   true,
 			},
 			"certificate_thumbprint": resourceSchema.StringAttribute{
-				Description: "TODO",
+				Description: "The thumbprint of the management certificate associated with this Azure subscription account.",
 				Optional:    true,
 				Sensitive:   true,
 			},
@@ -67,7 +67,7 @@ func (a AzureSubscriptionAccountSchema) GetResourceSchema() resourceSchema.Schem
 				ElementType: types.StringType,
 			},
 			"management_endpoint": resourceSchema.StringAttribute{
-				Description: "TODO",
+				Description: "The management endpoint associated with this Azure subscription account.",
 				Optional:    true,
 				Validators: []validator.String{
 					stringvalidator.AlsoRequires(path.MatchRelative().AtParent().AtName("azure_environment")),
