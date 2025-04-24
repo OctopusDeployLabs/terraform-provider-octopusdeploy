@@ -154,9 +154,13 @@ func newProcessChildStepTestDependenciesConfiguration(scenario string) processCh
 }
 
 func testCheckResourceProcessChildStepExists() resource.TestCheckFunc {
+	return testCheckResourceProcessChildStepOfTypeExists("octopusdeploy_process_child_step")
+}
+
+func testCheckResourceProcessChildStepOfTypeExists(resourceType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, r := range s.RootModule().Resources {
-			if r.Type == "octopusdeploy_process_child_step" {
+			if r.Type == resourceType {
 				actionId := r.Primary.ID
 				stepId := r.Primary.Attributes["parent_id"]
 				processId := r.Primary.Attributes["process_id"]

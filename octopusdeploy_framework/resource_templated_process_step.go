@@ -31,7 +31,7 @@ type templatedProcessStepResource struct {
 	*Config
 }
 
-func NewProcessStepWithTemplateResource() resource.Resource {
+func NewTemplatedProcessStepResource() resource.Resource {
 	return &templatedProcessStepResource{}
 }
 
@@ -473,63 +473,12 @@ func mapTemplatedProcessStepActionFromState(ctx context.Context, state *schemas.
 		return diags
 	}
 
-	// Git Dependencies
-	// Should be copied from the template, but ActionTemplate type missing GitDependencies attribute
-	action.GitDependencies = make([]*gitdependencies.GitDependency, 0)
-
-	// Packages
-	// Always copied from the template
-	packageReferences := make([]*packages.PackageReference, len(template.Packages))
-	for index := range template.Packages {
-		packageReferences[index] = &template.Packages[index]
-	}
-	action.Packages = packageReferences
-
-	// Properties
-	properties := make(map[string]core.PropertyValue)
-
-	// Parameters
-	stateParameters, paramDiags := util.ConvertMapToStringMap(ctx, state.Parameters)
-	if paramDiags.HasError() {
-		return paramDiags
-	}
-
-	for _, parameter := range template.Parameters {
-		value, ok := stateParameters[parameter.Name]
-		if ok {
-			properties[parameter.Name] = util.ConvertToPropertyValue(value, false)
-			continue
-		}
-
-		if defaultValue := parameter.DefaultValue; defaultValue != nil {
-			if defaultValue.Value != "" {
-				properties[parameter.Name] = *defaultValue
-				continue
-			}
-
-			if defaultValue.IsSensitive && defaultValue.SensitiveValue.HasValue {
-				properties[parameter.Name] = *defaultValue
-				continue
-			}
-		}
-	}
-
-	// Template properties
-	for key, value := range template.Properties {
-		properties[key] = value
-	}
-
-	// Rest of the properties
-	diags.Append(util.MergePropertyValues(ctx, properties, state.ExecutionProperties)...)
+	action.GitDependencies = copyActionTemplateGitDependencies(template)
+	action.Packages = copyActionTemplatePackages(template)
+	action.Properties, diags = mapTemplatedActionPropertiesFromState(ctx, template, state.Parameters, state.ExecutionProperties)
 	if diags.HasError() {
 		return diags
 	}
-
-	properties["Octopus.Action.Template.Id"] = core.NewPropertyValue(template.ID, false)
-	templateVersion := strconv.Itoa(int(state.TemplateVersion.ValueInt32()))
-	properties["Octopus.Action.Template.Version"] = core.NewPropertyValue(templateVersion, false)
-
-	action.Properties = properties
 
 	return diag.Diagnostics{}
 }
@@ -581,8 +530,90 @@ func mapTemplatedProcessStepActionToState(ctx context.Context, action *deploymen
 	state.GitDependencies = mapGitDependenciesToState(action.GitDependencies)
 	state.Packages = mapPackageReferencesToState(action.Packages)
 
+	properties, diags := mapTemplatedActionPropertiesToState(ctx, template, action, state.Parameters, state.ExecutionProperties)
+	if diags.HasError() {
+		return diags
+	}
+	state.TemplateID = properties.TemplateID
+	state.TemplateVersion = properties.TemplateVersion
+	state.Parameters = properties.Parameters
+	state.UnmanagedParameters = properties.UnmanagedParameters
+	state.TemplateProperties = properties.TemplateProperties
+	state.ExecutionProperties = properties.ExecutionProperties
+
+	return diags
+}
+
+func copyActionTemplatePackages(template *actiontemplates.ActionTemplate) []*packages.PackageReference {
+	packageReferences := make([]*packages.PackageReference, len(template.Packages))
+	for index := range template.Packages {
+		packageReferences[index] = &template.Packages[index]
+	}
+	return packageReferences
+}
+
+func copyActionTemplateGitDependencies(template *actiontemplates.ActionTemplate) []*gitdependencies.GitDependency {
+	gitDependencies := make([]*gitdependencies.GitDependency, len(template.GitDependencies))
+	for index := range template.GitDependencies {
+		gitDependencies[index] = &template.GitDependencies[index]
+	}
+	return gitDependencies
+}
+
+func mapTemplatedActionPropertiesFromState(ctx context.Context, template *actiontemplates.ActionTemplate, parameters types.Map, executionProperties types.Map) (map[string]core.PropertyValue, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
-	// Split properties into 3 groups (parameters, template properties and rest of the provided properties)
+	properties := make(map[string]core.PropertyValue)
+
+	// Parameters
+	var stateParameters map[string]types.String
+	stateParameters, diags = util.ConvertMapToStringMap(ctx, parameters)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	for _, parameter := range template.Parameters {
+		value, ok := stateParameters[parameter.Name]
+		if ok {
+			properties[parameter.Name] = util.ConvertToPropertyValue(value, false)
+			continue
+		}
+
+		if defaultValue := parameter.DefaultValue; defaultValue != nil {
+			if defaultValue.Value != "" {
+				properties[parameter.Name] = *defaultValue
+				continue
+			}
+
+			if defaultValue.IsSensitive && defaultValue.SensitiveValue.HasValue {
+				properties[parameter.Name] = *defaultValue
+				continue
+			}
+		}
+	}
+
+	// Template properties
+	for key, value := range template.Properties {
+		properties[key] = value
+	}
+
+	// Rest of the properties
+	diags = util.MergePropertyValues(ctx, properties, executionProperties)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	properties["Octopus.Action.Template.Id"] = core.NewPropertyValue(template.ID, false)
+	templateVersion := strconv.Itoa(int(template.Version))
+	properties["Octopus.Action.Template.Version"] = core.NewPropertyValue(templateVersion, false)
+
+	return properties, diags
+}
+
+func mapTemplatedActionPropertiesToState(ctx context.Context, template *actiontemplates.ActionTemplate, action *deployments.DeploymentAction, parameters types.Map, executionProperties types.Map) (*schemas.TemplatedProcessStepGroupedProperties, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+	state := &schemas.TemplatedProcessStepGroupedProperties{}
+
+	// Split properties into groups defined by the templated step schema
 	parameterValues := make(map[string]attr.Value)
 	unmanagedParameterValues := make(map[string]attr.Value)
 	templatePropertyValues := make(map[string]attr.Value)
@@ -594,15 +625,15 @@ func mapTemplatedProcessStepActionToState(ctx context.Context, action *deploymen
 	}
 
 	var stateParameters map[string]types.String
-	stateParameters, diags = util.ConvertMapToStringMap(ctx, state.Parameters)
+	stateParameters, diags = util.ConvertMapToStringMap(ctx, parameters)
 	if diags.HasError() {
-		return diags
+		return nil, diags
 	}
 
 	var stateExecutionProperties map[string]types.String
-	stateExecutionProperties, diags = util.ConvertMapToStringMap(ctx, state.ExecutionProperties)
+	stateExecutionProperties, diags = util.ConvertMapToStringMap(ctx, executionProperties)
 	if diags.HasError() {
-		return diags
+		return nil, diags
 	}
 
 	for key, property := range action.Properties {
@@ -641,25 +672,25 @@ func mapTemplatedProcessStepActionToState(ctx context.Context, action *deploymen
 
 	state.Parameters, diags = types.MapValue(types.StringType, parameterValues)
 	if diags.HasError() {
-		return diags
+		return nil, diags
 	}
 
 	state.UnmanagedParameters, diags = types.MapValue(types.StringType, unmanagedParameterValues)
 	if diags.HasError() {
-		return diags
+		return nil, diags
 	}
 
 	state.TemplateProperties, diags = types.MapValue(types.StringType, templatePropertyValues)
 	if diags.HasError() {
-		return diags
+		return nil, diags
 	}
 
 	state.ExecutionProperties, diags = types.MapValue(types.StringType, executionPropertyValues)
 	if diags.HasError() {
-		return diags
+		return nil, diags
 	}
 
-	return diags
+	return state, diags
 }
 
 func loadActionTemplate(client *client.Client, spaceId string, id string, version int32) (*actiontemplates.ActionTemplate, diag.Diagnostics) {
@@ -671,8 +702,8 @@ func loadActionTemplate(client *client.Client, spaceId string, id string, versio
 		return nil, diags
 	}
 
-	// Versioned endpoint returns template with id of the version record which is different from id of actual template,
-	// but we want to keep original template id
+	// When version is not latest id of returned template is the id of versioned template record
+	// We want to keep original template id
 	versioned.SetID(id)
 	return versioned, diags
 }

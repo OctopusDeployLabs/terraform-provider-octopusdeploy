@@ -103,7 +103,7 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 
 	updatedStep, parentFound := updatedProcess.FindStepByID(parentId)
 	if !parentFound {
-		resp.Diagnostics.AddError("unable to create process child step, unable to find a parent step '%s'", parent.ID)
+		resp.Diagnostics.AddError("unable to create process child step", fmt.Sprintf("unable to find a parent step '%s'", parent.ID))
 		return
 	}
 
@@ -216,7 +216,7 @@ func (r *processChildStepResource) Update(ctx context.Context, req resource.Upda
 
 	updatedStep, updatedParentFound := updatedProcess.FindStepByID(parentId)
 	if !updatedParentFound {
-		resp.Diagnostics.AddError("unable to update process child step, unable to find a parent step '%s'", parent.ID)
+		resp.Diagnostics.AddError("unable to update process child step", fmt.Sprintf("unable to find a parent step '%s'", parent.ID))
 		return
 	}
 
@@ -261,7 +261,7 @@ func (r *processChildStepResource) Delete(ctx context.Context, req resource.Dele
 
 	parent, ok := process.FindStepByID(parentId)
 	if !ok {
-		resp.Diagnostics.AddError("unable to find parent step '%s'", parentId)
+		resp.Diagnostics.AddError("Unable to delete process step", fmt.Sprintf("unable to find parent step '%s'", parentId))
 		return
 	}
 

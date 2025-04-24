@@ -8,19 +8,19 @@ import (
 	"testing"
 )
 
-func TestAccOctopusDeployTemplatedProcessStep(t *testing.T) {
+func TestAccOctopusDeployTemplatedProcessChildStep(t *testing.T) {
 	paramDefaultValue := acctest.RandStringFromCharSet(4, acctest.CharSetAlpha)
-	scenario := newTemplatedProcessStepTestDependenciesConfiguration("template", paramDefaultValue)
-	step := fmt.Sprintf("template_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
+	scenario := newTemplatedProcessChildStepTestDependenciesConfiguration("template_child", paramDefaultValue)
+	step := fmt.Sprintf("template_child_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	defaultParameters := map[string]string{
-		"Moves.One": paramDefaultValue,
+		"Child.One": paramDefaultValue,
 	}
 	requiredParameters := map[string]string{
-		"Moves.Two": acctest.RandStringFromCharSet(3, acctest.CharSetAlpha),
+		"Child.Two": acctest.RandStringFromCharSet(3, acctest.CharSetAlpha),
 	}
 	allParameters := map[string]string{
-		"Moves.One": acctest.RandStringFromCharSet(3, acctest.CharSetAlpha),
-		"Moves.Two": acctest.RandStringFromCharSet(3, acctest.CharSetAlpha),
+		"Child.One": acctest.RandStringFromCharSet(3, acctest.CharSetAlpha),
+		"Child.Two": acctest.RandStringFromCharSet(3, acctest.CharSetAlpha),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -29,24 +29,24 @@ func TestAccOctopusDeployTemplatedProcessStep(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTemplatedProcessStepConfiguration(scenario, step, requiredParameters),
+				Config: testAccTemplatedProcessChildStepConfiguration(scenario, step, requiredParameters),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckResourceTemplatedProcessStepAttributes(step, requiredParameters, defaultParameters),
-					testCheckResourceProcessStepOfTypeExists("octopusdeploy_templated_process_step"),
+					testCheckResourceTemplatedProcessChildStepAttributes(step, requiredParameters, defaultParameters),
+					testCheckResourceProcessChildStepOfTypeExists("octopusdeploy_templated_process_child_step"),
 				),
 			},
 			{
-				Config: testAccTemplatedProcessStepConfiguration(scenario, step, allParameters),
+				Config: testAccTemplatedProcessChildStepConfiguration(scenario, step, allParameters),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckResourceTemplatedProcessStepAttributes(step, allParameters, make(map[string]string)),
-					testCheckResourceProcessStepOfTypeExists("octopusdeploy_templated_process_step"),
+					testCheckResourceTemplatedProcessChildStepAttributes(step, allParameters, make(map[string]string)),
+					testCheckResourceProcessChildStepOfTypeExists("octopusdeploy_templated_process_child_step"),
 				),
 			},
 		},
 	})
 }
 
-func testAccTemplatedProcessStepConfiguration(dependencies templatedProcessStepTestDependenciesConfiguration, step string, parameters map[string]string) string {
+func testAccTemplatedProcessChildStepConfiguration(dependencies templatedProcessChildStepTestDependenciesConfiguration, step string, parameters map[string]string) string {
 	var configurations []string
 	for key, value := range parameters {
 		configurations = append(configurations, fmt.Sprintf(`"%s" = "%s"`, key, value))
@@ -55,14 +55,12 @@ func testAccTemplatedProcessStepConfiguration(dependencies templatedProcessStepT
 
 	return fmt.Sprintf(`
 		%s
-		resource "octopusdeploy_templated_process_step" "%s" {
+		resource "octopusdeploy_templated_process_child_step" "%s" {
 		  process_id  = octopusdeploy_process.%s.id
+		  parent_id = octopusdeploy_process_step.%s.id
 		  name = "%s"
 		  template_id = octopusdeploy_step_template.%s.id
 		  template_version = octopusdeploy_step_template.%s.version
-		  properties = {
-			"Octopus.Action.TargetRoles" = "role-one"
-		  }
 		  parameters = {
 			%s
 		  }
@@ -74,6 +72,7 @@ func testAccTemplatedProcessStepConfiguration(dependencies templatedProcessStepT
 		dependencies.config,
 		step,
 		dependencies.process,
+		dependencies.parent,
 		step,
 		dependencies.template,
 		dependencies.template,
@@ -81,17 +80,16 @@ func testAccTemplatedProcessStepConfiguration(dependencies templatedProcessStepT
 	)
 }
 
-func testCheckResourceTemplatedProcessStepAttributes(step string, parameters map[string]string, unmanagedParameters map[string]string) resource.TestCheckFunc {
-	qualifiedName := fmt.Sprintf("octopusdeploy_templated_process_step.%s", step)
+func testCheckResourceTemplatedProcessChildStepAttributes(step string, parameters map[string]string, unmanagedParameters map[string]string) resource.TestCheckFunc {
+	qualifiedName := fmt.Sprintf("octopusdeploy_templated_process_child_step.%s", step)
 
 	assertions := []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrSet(qualifiedName, "id"),
 		resource.TestCheckResourceAttr(qualifiedName, "name", step),
 		resource.TestCheckResourceAttr(qualifiedName, "type", "Octopus.Script"),
-		resource.TestCheckResourceAttr(qualifiedName, "properties.Octopus.Action.TargetRoles", "role-one"),
 		resource.TestCheckResourceAttr(qualifiedName, "template_properties.Octopus.Action.Script.ScriptSource", "Inline"),
 		resource.TestCheckResourceAttr(qualifiedName, "template_properties.Octopus.Action.Script.Syntax", "Bash"),
-		resource.TestCheckResourceAttr(qualifiedName, "template_properties.Octopus.Action.Script.ScriptBody", "echo '1.#{Moves.One} ... 2.#{Moves.Two} ... 3.?'"),
+		resource.TestCheckResourceAttr(qualifiedName, "template_properties.Octopus.Action.Script.ScriptBody", "echo 'Children: #{Child.One}, #{Child.Two}'"),
 		resource.TestCheckResourceAttr(qualifiedName, "execution_properties.Octopus.Action.RunOnServer", "True"),
 	}
 	for key, value := range parameters {
@@ -105,17 +103,20 @@ func testCheckResourceTemplatedProcessStepAttributes(step string, parameters map
 	return resource.ComposeTestCheckFunc(assertions...)
 }
 
-type templatedProcessStepTestDependenciesConfiguration struct {
+type templatedProcessChildStepTestDependenciesConfiguration struct {
 	process  string
+	parent   string
 	template string
 	config   string
 }
 
-func newTemplatedProcessStepTestDependenciesConfiguration(scenario string, paramDefaultValue string) templatedProcessStepTestDependenciesConfiguration {
+func newTemplatedProcessChildStepTestDependenciesConfiguration(scenario string, paramDefaultValue string) templatedProcessChildStepTestDependenciesConfiguration {
 	projectGroup := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	project := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	process := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
+	parentStep := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	template := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
+
 	configuration := fmt.Sprintf(`
 		data "octopusdeploy_lifecycles" "default" {
 		  ids          = null
@@ -132,23 +133,23 @@ func newTemplatedProcessStepTestDependenciesConfiguration(scenario string, param
 		  packages = []
 		  parameters = [
 			{
-			  name      = "Moves.One"
-			  id = "10001000-0000-0000-0000-100010001001"
+			  name      = "Child.One"
+			  id = "20001000-0000-0000-0000-100010001001"
 			  default_value = "%s"
 			  display_settings = {
 				"Octopus.ControlType" : "SingleLineText"
 			  }
 			},
 			{
-			  name      = "Moves.Two"
-			  id = "10001000-0000-0000-0000-100010001002"
+			  name      = "Child.Two"
+			  id = "20001000-0000-0000-0000-100010001002"
 			  display_settings = {
 				"Octopus.ControlType" : "SingleLineText"
 			  }
 			},
 		  ]	
 		  properties = {
-			"Octopus.Action.Script.ScriptBody" : "echo '1.#{Moves.One} ... 2.#{Moves.Two} ... 3.?'"
+			"Octopus.Action.Script.ScriptBody" : "echo 'Children: #{Child.One}, #{Child.Two}'"
 			"Octopus.Action.Script.ScriptSource" : "Inline"
 			"Octopus.Action.Script.Syntax" : "Bash"
 		  }
@@ -156,12 +157,12 @@ func newTemplatedProcessStepTestDependenciesConfiguration(scenario string, param
 
 		resource "octopusdeploy_project_group" "%s" {
 		  name        = "%s"
-		  description = "Test process step"
+		  description = "Test process child step based on template"
 		}
 
 		resource "octopusdeploy_project" "%s" {
 		  name                                 = "%s"
-		  description                          = "Test process step"
+		  description                          = "Test process child step based on template"
 		  default_guided_failure_mode          = "EnvironmentDefault"
 		  tenanted_deployment_participation    = "Untenanted"
 		  project_group_id                     = octopusdeploy_project_group.%s.id
@@ -171,6 +172,21 @@ func newTemplatedProcessStepTestDependenciesConfiguration(scenario string, param
 
 		resource "octopusdeploy_process" "%s" {
 		  project_id  = octopusdeploy_project.%s.id
+		}
+
+		resource "octopusdeploy_process_step" "%s" {
+		  process_id  = octopusdeploy_process.%s.id
+		  name = "%s"
+		  properties = {
+			"Octopus.Action.TargetRoles" = "role-one"
+		  }
+		  type = "Octopus.Script"
+		  execution_properties = {
+			"Octopus.Action.RunOnServer" = "True"
+			"Octopus.Action.Script.ScriptSource" = "Inline"
+			"Octopus.Action.Script.Syntax"       = "PowerShell"
+			"Octopus.Action.Script.ScriptBody" = "Write-Host 'step with children'"
+		  }
 		}
 		`,
 		template,
@@ -183,10 +199,14 @@ func newTemplatedProcessStepTestDependenciesConfiguration(scenario string, param
 		projectGroup,
 		process,
 		project,
+		parentStep,
+		process,
+		parentStep,
 	)
 
-	return templatedProcessStepTestDependenciesConfiguration{
+	return templatedProcessChildStepTestDependenciesConfiguration{
 		process:  process,
+		parent:   parentStep,
 		template: template,
 		config:   configuration,
 	}
