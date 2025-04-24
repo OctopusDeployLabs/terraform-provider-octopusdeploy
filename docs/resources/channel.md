@@ -29,6 +29,7 @@ resource "octopusdeploy_channel" "example" {
 
 ### Optional
 
+- `description` (String) The description of this channel.
 - `is_default` (Boolean) Indicates whether this is the default channel for the associated project.
 - `lifecycle_id` (String) The lifecycle ID associated with this channel.
 - `rule` (Attributes List) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--rule))
