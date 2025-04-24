@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/channels"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -58,15 +59,56 @@ func (r *channelResource) Create(ctx context.Context, req resource.CreateRequest
 }
 
 func (r *channelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state schemas.ChannelModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	channel, err := channels.GetByID(r.Client, state.SpaceId.ValueString(), state.ID.ValueString())
+	if err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "channelResource"); err != nil {
+			resp.Diagnostics.AddError("unable to load channel", err.Error())
+		}
+		return
+	}
+
+	newState := flattenChannel(ctx, channel, state)
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
 	return
 }
 
 func (r *channelResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan schemas.ChannelModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	channel := expandChannel(ctx, plan)
+	updatedChannel, err := channels.Update(r.Client, channel)
+	if err != nil {
+		resp.Diagnostics.AddError("Error updating channel", err.Error())
+		return
+	}
+
+	state := flattenChannel(ctx, updatedChannel, plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 	return
 }
 
 func (r *channelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	return
+	var state schemas.ChannelModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	err := channels.DeleteByID(r.Client, state.SpaceId.ValueString(), state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error deleting channel", err.Error())
+		return
+	}
 }
 
 func (*channelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
