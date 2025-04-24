@@ -11,6 +11,7 @@ const ChannelResourceDescription = "channel"
 type ChannelSchema struct{}
 
 type ChannelModel struct {
+	Description types.String `tfsdk:"description"`
 	IsDefault   types.Bool   `tfsdk:"is_default"`
 	LifecycleId types.String `tfsdk:"lifecycle_id"`
 	Name        types.String `tfsdk:"name"`
@@ -26,7 +27,8 @@ func (c ChannelSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: util.GetResourceSchemaDescription(ChannelResourceDescription),
 		Attributes: map[string]resourceSchema.Attribute{
-			"id": GetIdResourceSchema(),
+			"id":          GetIdResourceSchema(),
+			"description": GetDescriptionResourceSchema(ChannelResourceDescription),
 			"is_default": resourceSchema.BoolAttribute{
 				Description: "Indicates whether this is the default channel for the associated project.",
 				Optional:    true,
