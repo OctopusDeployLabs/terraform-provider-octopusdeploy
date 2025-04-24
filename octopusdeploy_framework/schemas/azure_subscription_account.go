@@ -1,7 +1,10 @@
 package schemas
 
 import (
+	"context"
+	"fmt"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -85,7 +88,9 @@ func (a AzureSubscriptionAccountSchema) GetResourceSchema() resourceSchema.Schem
 			"subscription_id": resourceSchema.StringAttribute{
 				Description: "The subscription ID of this resource.",
 				Required:    true,
-				// TODO: add UUID validator
+				Validators: []validator.String{
+					UUIDValidator{},
+				},
 			},
 			"tenanted_deployment_participation": resourceSchema.StringAttribute{
 				Description: "The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.",
@@ -112,4 +117,30 @@ func (a AzureSubscriptionAccountSchema) GetResourceSchema() resourceSchema.Schem
 			},
 		},
 	}
+}
+
+type UUIDValidator struct{}
+
+func (v UUIDValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
+	if request.ConfigValue.IsUnknown() || request.ConfigValue.IsNull() {
+		return
+	}
+
+	uuidString := request.ConfigValue.ValueString()
+
+	if _, err := uuid.Parse(uuidString); err != nil {
+		response.Diagnostics.AddAttributeError(
+			request.Path,
+			"Invalid UUID",
+			fmt.Sprintf("The provided value '%s' is not a valid UUID: %s", uuidString, err.Error()),
+		)
+	}
+}
+
+func (v UUIDValidator) Description(ctx context.Context) string {
+	return "Ensures the value is a valid UUID."
+}
+
+func (v UUIDValidator) MarkdownDescription(ctx context.Context) string {
+	return "Ensures the value is a valid UUID."
 }
