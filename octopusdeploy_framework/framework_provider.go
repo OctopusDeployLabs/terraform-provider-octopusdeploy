@@ -141,8 +141,8 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewProcessStepsOrderResource,
 		NewProcessChildStepResource,
 		NewProcessChildStepsOrderResource,
-		NewTemplatedProcessStepResource,
-		NewTemplatedProcessChildStepResource,
+		NewProcessTemplatedStepResource,
+		NewProcessTemplatedChildStepResource,
 	}
 }
 

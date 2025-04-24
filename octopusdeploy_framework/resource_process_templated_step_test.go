@@ -8,9 +8,9 @@ import (
 	"testing"
 )
 
-func TestAccOctopusDeployTemplatedProcessStep(t *testing.T) {
+func TestAccOctopusDeployProcessTemplatedStep(t *testing.T) {
 	paramDefaultValue := acctest.RandStringFromCharSet(4, acctest.CharSetAlpha)
-	scenario := newTemplatedProcessStepTestDependenciesConfiguration("template", paramDefaultValue)
+	scenario := newProcessTemplatedStepTestDependenciesConfiguration("template", paramDefaultValue)
 	step := fmt.Sprintf("template_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	defaultParameters := map[string]string{
 		"Moves.One": paramDefaultValue,
@@ -29,24 +29,24 @@ func TestAccOctopusDeployTemplatedProcessStep(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTemplatedProcessStepConfiguration(scenario, step, requiredParameters),
+				Config: testAccProcessTemplatedStepConfiguration(scenario, step, requiredParameters),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckResourceTemplatedProcessStepAttributes(step, requiredParameters, defaultParameters),
-					testCheckResourceProcessStepOfTypeExists("octopusdeploy_templated_process_step"),
+					testCheckResourceProcessTemplatedStepAttributes(step, requiredParameters, defaultParameters),
+					testCheckResourceProcessStepOfTypeExists("octopusdeploy_process_templated_step"),
 				),
 			},
 			{
-				Config: testAccTemplatedProcessStepConfiguration(scenario, step, allParameters),
+				Config: testAccProcessTemplatedStepConfiguration(scenario, step, allParameters),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckResourceTemplatedProcessStepAttributes(step, allParameters, make(map[string]string)),
-					testCheckResourceProcessStepOfTypeExists("octopusdeploy_templated_process_step"),
+					testCheckResourceProcessTemplatedStepAttributes(step, allParameters, make(map[string]string)),
+					testCheckResourceProcessStepOfTypeExists("octopusdeploy_process_templated_step"),
 				),
 			},
 		},
 	})
 }
 
-func testAccTemplatedProcessStepConfiguration(dependencies templatedProcessStepTestDependenciesConfiguration, step string, parameters map[string]string) string {
+func testAccProcessTemplatedStepConfiguration(dependencies processTemplatedStepTestDependenciesConfiguration, step string, parameters map[string]string) string {
 	var configurations []string
 	for key, value := range parameters {
 		configurations = append(configurations, fmt.Sprintf(`"%s" = "%s"`, key, value))
@@ -55,7 +55,7 @@ func testAccTemplatedProcessStepConfiguration(dependencies templatedProcessStepT
 
 	return fmt.Sprintf(`
 		%s
-		resource "octopusdeploy_templated_process_step" "%s" {
+		resource "octopusdeploy_process_templated_step" "%s" {
 		  process_id  = octopusdeploy_process.%s.id
 		  name = "%s"
 		  template_id = octopusdeploy_step_template.%s.id
@@ -81,8 +81,8 @@ func testAccTemplatedProcessStepConfiguration(dependencies templatedProcessStepT
 	)
 }
 
-func testCheckResourceTemplatedProcessStepAttributes(step string, parameters map[string]string, unmanagedParameters map[string]string) resource.TestCheckFunc {
-	qualifiedName := fmt.Sprintf("octopusdeploy_templated_process_step.%s", step)
+func testCheckResourceProcessTemplatedStepAttributes(step string, parameters map[string]string, unmanagedParameters map[string]string) resource.TestCheckFunc {
+	qualifiedName := fmt.Sprintf("octopusdeploy_process_templated_step.%s", step)
 
 	assertions := []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrSet(qualifiedName, "id"),
@@ -105,13 +105,13 @@ func testCheckResourceTemplatedProcessStepAttributes(step string, parameters map
 	return resource.ComposeTestCheckFunc(assertions...)
 }
 
-type templatedProcessStepTestDependenciesConfiguration struct {
+type processTemplatedStepTestDependenciesConfiguration struct {
 	process  string
 	template string
 	config   string
 }
 
-func newTemplatedProcessStepTestDependenciesConfiguration(scenario string, paramDefaultValue string) templatedProcessStepTestDependenciesConfiguration {
+func newProcessTemplatedStepTestDependenciesConfiguration(scenario string, paramDefaultValue string) processTemplatedStepTestDependenciesConfiguration {
 	projectGroup := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	project := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	process := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
@@ -185,7 +185,7 @@ func newTemplatedProcessStepTestDependenciesConfiguration(scenario string, param
 		project,
 	)
 
-	return templatedProcessStepTestDependenciesConfiguration{
+	return processTemplatedStepTestDependenciesConfiguration{
 		process:  process,
 		template: template,
 		config:   configuration,

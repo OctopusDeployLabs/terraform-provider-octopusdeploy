@@ -2,6 +2,7 @@ package schemas
 
 import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
@@ -10,25 +11,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type TemplatedProcessChildStepSchema struct{}
+type ProcessTemplatedStepSchema struct{}
 
-var _ EntitySchema = TemplatedProcessChildStepSchema{}
+var _ EntitySchema = ProcessTemplatedStepSchema{}
 
-const TemplatedProcessChildStepResourceName = "templated_process_child_step"
+const ProcessTemplatedStepResourceName = "process_templated_step"
 
-func (p TemplatedProcessChildStepSchema) GetResourceSchema() resourceSchema.Schema {
+func (p ProcessTemplatedStepSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages child step of execution process which based on existing custom step template",
+		Description: "This resource manages a single step of a Runbook or Deployment Process which based on existing custom step template",
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":       GetIdResourceSchema(),
-			"space_id": GetSpaceIdResourceSchema(TemplatedProcessChildStepResourceName),
+			"space_id": GetSpaceIdResourceSchema(ProcessTemplatedStepResourceName),
 			"process_id": util.ResourceString().
 				Description("Id of the process this step belongs to.").
-				Required().
-				PlanModifiers(stringplanmodifier.RequiresReplace()).
-				Build(),
-			"parent_id": util.ResourceString().
-				Description("Id of the process step this step belongs to.").
 				Required().
 				PlanModifiers(stringplanmodifier.RequiresReplace()).
 				Build(),
@@ -41,6 +37,34 @@ func (p TemplatedProcessChildStepSchema) GetResourceSchema() resourceSchema.Sche
 				Required().
 				Build(),
 			"name": GetNameResourceSchema(true),
+			"start_trigger": util.ResourceString().
+				Description("Whether to run this step after the previous step ('StartAfterPrevious') or at the same time as the previous step ('StartWithPrevious').").
+				Optional().
+				Computed().
+				Default("StartAfterPrevious").
+				Validators(stringvalidator.OneOf("StartAfterPrevious", "StartWithPrevious")).
+				Build(),
+			"package_requirement": util.ResourceString().
+				Description("Whether to run this step before or after package acquisition (if possible).").
+				Optional().
+				Computed().
+				Default("LetOctopusDecide").
+				Validators(stringvalidator.OneOf("LetOctopusDecide", "AfterPackageAcquisition", "BeforePackageAcquisition")).
+				Build(),
+			"condition": util.ResourceString().
+				Description("When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'").
+				Optional().
+				Computed().
+				Default("Success").
+				Validators(stringvalidator.OneOf("Success", "Failure", "Always", "Variable")).
+				Build(),
+			"properties": util.ResourceMap(types.StringType).
+				Description("A collection of process step properties where the key is the property name and the value is its value.").
+				Optional().
+				Computed().
+				DefaultEmpty().
+				Build(),
+
 			"type": util.ResourceString().
 				Description("Execution type of the step copied from the template.").
 				Computed().
@@ -63,12 +87,6 @@ func (p TemplatedProcessChildStepSchema) GetResourceSchema() resourceSchema.Sche
 				Optional().
 				Computed().
 				Default(false).
-				Build(),
-			"condition": util.ResourceString().
-				Description("When to run the step, can be 'Success' - run when previous child step succeed or variable expression - run when the expression evaluates to true").
-				Optional().
-				Computed().
-				Default("Success").
 				Build(),
 			"notes": util.ResourceString().
 				Description("The notes associated with this step.").
@@ -140,7 +158,7 @@ func (p TemplatedProcessChildStepSchema) GetResourceSchema() resourceSchema.Sche
 				Computed().
 				Build(),
 			"template_properties": util.ResourceMap(types.StringType).
-				Description("Template properties which will be copied to the step").
+				Description("Properties copied from the template").
 				Computed().
 				Build(),
 			"execution_properties": util.ResourceMap(types.StringType).
@@ -153,23 +171,25 @@ func (p TemplatedProcessChildStepSchema) GetResourceSchema() resourceSchema.Sche
 	}
 }
 
-func (p TemplatedProcessChildStepSchema) GetDatasourceSchema() datasourceSchema.Schema {
+func (p ProcessTemplatedStepSchema) GetDatasourceSchema() datasourceSchema.Schema {
 	return datasourceSchema.Schema{}
 }
 
-type TemplatedProcessChildStepResourceModel struct {
-	SpaceID         types.String `tfsdk:"space_id"`
-	ProcessID       types.String `tfsdk:"process_id"`
-	ParentID        types.String `tfsdk:"parent_id"`
-	TemplateID      types.String `tfsdk:"template_id"`
-	TemplateVersion types.Int32  `tfsdk:"template_version"`
-	Name            types.String `tfsdk:"name"`
+type ProcessTemplatedStepResourceModel struct {
+	SpaceID            types.String `tfsdk:"space_id"`
+	ProcessID          types.String `tfsdk:"process_id"`
+	TemplateID         types.String `tfsdk:"template_id"`
+	TemplateVersion    types.Int32  `tfsdk:"template_version"`
+	Name               types.String `tfsdk:"name"`
+	StartTrigger       types.String `tfsdk:"start_trigger"`
+	PackageRequirement types.String `tfsdk:"package_requirement"`
+	Condition          types.String `tfsdk:"condition"`
+	Properties         types.Map    `tfsdk:"properties"`
 
 	Type                 types.String                     `tfsdk:"type"`
 	Slug                 types.String                     `tfsdk:"slug"`
 	IsDisabled           types.Bool                       `tfsdk:"is_disabled"`
 	IsRequired           types.Bool                       `tfsdk:"is_required"`
-	Condition            types.String                     `tfsdk:"condition"`
 	Notes                types.String                     `tfsdk:"notes"`
 	WorkerPoolID         types.String                     `tfsdk:"worker_pool_id"`
 	WorkerPoolVariable   types.String                     `tfsdk:"worker_pool_variable"`
@@ -186,4 +206,13 @@ type TemplatedProcessChildStepResourceModel struct {
 	ExecutionProperties  types.Map                        `tfsdk:"execution_properties"`
 
 	ResourceModel
+}
+
+type ProcessTemplatedStepGroupedPropertyValues struct {
+	TemplateID          types.String
+	TemplateVersion     types.Int32
+	Parameters          types.Map
+	UnmanagedParameters types.Map
+	TemplateProperties  types.Map
+	ExecutionProperties types.Map
 }

@@ -18,31 +18,31 @@ import (
 )
 
 var (
-	_ resource.ResourceWithImportState = &templatedProcessChildStepResource{}
-	_ resource.ResourceWithModifyPlan  = &templatedProcessChildStepResource{}
+	_ resource.ResourceWithImportState = &processTemplatedChildStepResource{}
+	_ resource.ResourceWithModifyPlan  = &processTemplatedChildStepResource{}
 )
 
-type templatedProcessChildStepResource struct {
+type processTemplatedChildStepResource struct {
 	*Config
 }
 
-func NewTemplatedProcessChildStepResource() resource.Resource {
-	return &templatedProcessChildStepResource{}
+func NewProcessTemplatedChildStepResource() resource.Resource {
+	return &processTemplatedChildStepResource{}
 }
 
-func (r *templatedProcessChildStepResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = util.GetTypeName(schemas.TemplatedProcessChildStepResourceName)
+func (r *processTemplatedChildStepResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = util.GetTypeName(schemas.ProcessTemplatedChildStepResourceName)
 }
 
-func (r *templatedProcessChildStepResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = schemas.TemplatedProcessChildStepSchema{}.GetResourceSchema()
+func (r *processTemplatedChildStepResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schemas.ProcessTemplatedChildStepSchema{}.GetResourceSchema()
 }
 
-func (r *templatedProcessChildStepResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *processTemplatedChildStepResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	r.Config = ResourceConfiguration(req, resp)
 }
 
-func (r *templatedProcessChildStepResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
+func (r *processTemplatedChildStepResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	identifiers := strings.Split(request.ID, ":")
 
 	if len(identifiers) != 3 {
@@ -96,7 +96,7 @@ func (r *templatedProcessChildStepResource) ImportState(ctx context.Context, req
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_version"), templateVersion.Value)...)
 }
 
-func (r *templatedProcessChildStepResource) ModifyPlan(ctx context.Context, request resource.ModifyPlanRequest, response *resource.ModifyPlanResponse) {
+func (r *processTemplatedChildStepResource) ModifyPlan(ctx context.Context, request resource.ModifyPlanRequest, response *resource.ModifyPlanResponse) {
 	if request.Plan.Raw.IsNull() {
 		return // When deleting
 	}
@@ -105,7 +105,7 @@ func (r *templatedProcessChildStepResource) ModifyPlan(ctx context.Context, requ
 		return // When creating
 	}
 
-	var plan *schemas.TemplatedProcessChildStepResourceModel
+	var plan *schemas.ProcessTemplatedChildStepResourceModel
 	diags := request.Plan.Get(ctx, &plan)
 	if diags.HasError() {
 		response.Diagnostics.Append(diags...)
@@ -186,8 +186,8 @@ func (r *templatedProcessChildStepResource) ModifyPlan(ctx context.Context, requ
 	response.Diagnostics.Append(response.Plan.Set(ctx, &plan)...)
 }
 
-func (r *templatedProcessChildStepResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *schemas.TemplatedProcessChildStepResourceModel
+func (r *processTemplatedChildStepResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *schemas.ProcessTemplatedChildStepResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -224,7 +224,7 @@ func (r *templatedProcessChildStepResource) Create(ctx context.Context, req reso
 
 	action := deployments.NewDeploymentAction(data.Name.ValueString(), template.ActionType)
 
-	diags = mapTemplatedProcessChildStepActionFromState(ctx, data, template, action)
+	diags = mapProcessTemplatedChildStepActionFromState(ctx, data, template, action)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -250,7 +250,7 @@ func (r *templatedProcessChildStepResource) Create(ctx context.Context, req reso
 		return
 	}
 
-	diags = mapTemplatedProcessChildStepActionToState(ctx, updatedProcess, updatedParent, createdAction, template, data)
+	diags = mapProcessTemplatedChildStepActionToState(ctx, updatedProcess, updatedParent, createdAction, template, data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -260,8 +260,8 @@ func (r *templatedProcessChildStepResource) Create(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *templatedProcessChildStepResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *schemas.TemplatedProcessChildStepResourceModel
+func (r *processTemplatedChildStepResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *schemas.ProcessTemplatedChildStepResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -302,7 +302,7 @@ func (r *templatedProcessChildStepResource) Read(ctx context.Context, req resour
 		return
 	}
 
-	diags = mapTemplatedProcessChildStepActionToState(ctx, process, parent, action, template, data)
+	diags = mapProcessTemplatedChildStepActionToState(ctx, process, parent, action, template, data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -312,8 +312,8 @@ func (r *templatedProcessChildStepResource) Read(ctx context.Context, req resour
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *templatedProcessChildStepResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *schemas.TemplatedProcessChildStepResourceModel
+func (r *processTemplatedChildStepResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *schemas.ProcessTemplatedChildStepResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -355,7 +355,7 @@ func (r *templatedProcessChildStepResource) Update(ctx context.Context, req reso
 		return
 	}
 
-	diags = mapTemplatedProcessChildStepActionFromState(ctx, data, template, action)
+	diags = mapProcessTemplatedChildStepActionFromState(ctx, data, template, action)
 	if diags.HasError() {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -379,7 +379,7 @@ func (r *templatedProcessChildStepResource) Update(ctx context.Context, req reso
 		return
 	}
 
-	diags = mapTemplatedProcessChildStepActionToState(ctx, updatedProcess, updatedParent, updatedAction, template, data)
+	diags = mapProcessTemplatedChildStepActionToState(ctx, updatedProcess, updatedParent, updatedAction, template, data)
 	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
@@ -389,8 +389,8 @@ func (r *templatedProcessChildStepResource) Update(ctx context.Context, req reso
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *templatedProcessChildStepResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *schemas.TemplatedProcessChildStepResourceModel
+func (r *processTemplatedChildStepResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *schemas.ProcessTemplatedChildStepResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -435,7 +435,7 @@ func (r *templatedProcessChildStepResource) Delete(ctx context.Context, req reso
 	resp.State.RemoveResource(ctx)
 }
 
-func mapTemplatedProcessChildStepActionFromState(ctx context.Context, state *schemas.TemplatedProcessChildStepResourceModel, template *actiontemplates.ActionTemplate, action *deployments.DeploymentAction) diag.Diagnostics {
+func mapProcessTemplatedChildStepActionFromState(ctx context.Context, state *schemas.ProcessTemplatedChildStepResourceModel, template *actiontemplates.ActionTemplate, action *deployments.DeploymentAction) diag.Diagnostics {
 	action.Name = state.Name.ValueString()
 	action.Slug = state.Slug.ValueString()
 	action.ActionType = template.ActionType
@@ -480,7 +480,7 @@ func mapTemplatedProcessChildStepActionFromState(ctx context.Context, state *sch
 	return diag.Diagnostics{}
 }
 
-func mapTemplatedProcessChildStepActionToState(ctx context.Context, process processWrapper, parent *deployments.DeploymentStep, action *deployments.DeploymentAction, template *actiontemplates.ActionTemplate, state *schemas.TemplatedProcessChildStepResourceModel) diag.Diagnostics {
+func mapProcessTemplatedChildStepActionToState(ctx context.Context, process processWrapper, parent *deployments.DeploymentStep, action *deployments.DeploymentAction, template *actiontemplates.ActionTemplate, state *schemas.ProcessTemplatedChildStepResourceModel) diag.Diagnostics {
 	state.ID = types.StringValue(action.GetID())
 	state.SpaceID = types.StringValue(process.GetSpaceID())
 	state.ProcessID = types.StringValue(process.GetID())

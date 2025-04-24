@@ -8,9 +8,9 @@ import (
 	"testing"
 )
 
-func TestAccOctopusDeployTemplatedProcessChildStep(t *testing.T) {
+func TestAccOctopusDeployProcessTemplatedChildStep(t *testing.T) {
 	paramDefaultValue := acctest.RandStringFromCharSet(4, acctest.CharSetAlpha)
-	scenario := newTemplatedProcessChildStepTestDependenciesConfiguration("template_child", paramDefaultValue)
+	scenario := newProcessTemplatedChildStepTestDependenciesConfiguration("template_child", paramDefaultValue)
 	step := fmt.Sprintf("template_child_%s", acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	defaultParameters := map[string]string{
 		"Child.One": paramDefaultValue,
@@ -29,24 +29,24 @@ func TestAccOctopusDeployTemplatedProcessChildStep(t *testing.T) {
 		ProtoV6ProviderFactories: ProtoV6ProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccTemplatedProcessChildStepConfiguration(scenario, step, requiredParameters),
+				Config: testAccProcessTemplatedChildStepConfiguration(scenario, step, requiredParameters),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckResourceTemplatedProcessChildStepAttributes(step, requiredParameters, defaultParameters),
-					testCheckResourceProcessChildStepOfTypeExists("octopusdeploy_templated_process_child_step"),
+					testCheckResourceProcessTemplatedChildStepAttributes(step, requiredParameters, defaultParameters),
+					testCheckResourceProcessChildStepOfTypeExists("octopusdeploy_process_templated_child_step"),
 				),
 			},
 			{
-				Config: testAccTemplatedProcessChildStepConfiguration(scenario, step, allParameters),
+				Config: testAccProcessTemplatedChildStepConfiguration(scenario, step, allParameters),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckResourceTemplatedProcessChildStepAttributes(step, allParameters, make(map[string]string)),
-					testCheckResourceProcessChildStepOfTypeExists("octopusdeploy_templated_process_child_step"),
+					testCheckResourceProcessTemplatedChildStepAttributes(step, allParameters, make(map[string]string)),
+					testCheckResourceProcessChildStepOfTypeExists("octopusdeploy_process_templated_child_step"),
 				),
 			},
 		},
 	})
 }
 
-func testAccTemplatedProcessChildStepConfiguration(dependencies templatedProcessChildStepTestDependenciesConfiguration, step string, parameters map[string]string) string {
+func testAccProcessTemplatedChildStepConfiguration(dependencies processTemplatedChildStepTestDependenciesConfiguration, step string, parameters map[string]string) string {
 	var configurations []string
 	for key, value := range parameters {
 		configurations = append(configurations, fmt.Sprintf(`"%s" = "%s"`, key, value))
@@ -55,7 +55,7 @@ func testAccTemplatedProcessChildStepConfiguration(dependencies templatedProcess
 
 	return fmt.Sprintf(`
 		%s
-		resource "octopusdeploy_templated_process_child_step" "%s" {
+		resource "octopusdeploy_process_templated_child_step" "%s" {
 		  process_id  = octopusdeploy_process.%s.id
 		  parent_id = octopusdeploy_process_step.%s.id
 		  name = "%s"
@@ -80,8 +80,8 @@ func testAccTemplatedProcessChildStepConfiguration(dependencies templatedProcess
 	)
 }
 
-func testCheckResourceTemplatedProcessChildStepAttributes(step string, parameters map[string]string, unmanagedParameters map[string]string) resource.TestCheckFunc {
-	qualifiedName := fmt.Sprintf("octopusdeploy_templated_process_child_step.%s", step)
+func testCheckResourceProcessTemplatedChildStepAttributes(step string, parameters map[string]string, unmanagedParameters map[string]string) resource.TestCheckFunc {
+	qualifiedName := fmt.Sprintf("octopusdeploy_process_templated_child_step.%s", step)
 
 	assertions := []resource.TestCheckFunc{
 		resource.TestCheckResourceAttrSet(qualifiedName, "id"),
@@ -103,14 +103,14 @@ func testCheckResourceTemplatedProcessChildStepAttributes(step string, parameter
 	return resource.ComposeTestCheckFunc(assertions...)
 }
 
-type templatedProcessChildStepTestDependenciesConfiguration struct {
+type processTemplatedChildStepTestDependenciesConfiguration struct {
 	process  string
 	parent   string
 	template string
 	config   string
 }
 
-func newTemplatedProcessChildStepTestDependenciesConfiguration(scenario string, paramDefaultValue string) templatedProcessChildStepTestDependenciesConfiguration {
+func newProcessTemplatedChildStepTestDependenciesConfiguration(scenario string, paramDefaultValue string) processTemplatedChildStepTestDependenciesConfiguration {
 	projectGroup := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	project := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
 	process := fmt.Sprintf("%s_%s", scenario, acctest.RandStringFromCharSet(8, acctest.CharSetAlpha))
@@ -204,7 +204,7 @@ func newTemplatedProcessChildStepTestDependenciesConfiguration(scenario string, 
 		parentStep,
 	)
 
-	return templatedProcessChildStepTestDependenciesConfiguration{
+	return processTemplatedChildStepTestDependenciesConfiguration{
 		process:  process,
 		parent:   parentStep,
 		template: template,
