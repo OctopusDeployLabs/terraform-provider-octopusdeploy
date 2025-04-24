@@ -702,7 +702,7 @@ func loadActionTemplate(client *client.Client, spaceId string, id string, versio
 		return nil, diags
 	}
 
-	// When version is not latest id of returned template is the id of versioned template record
+	// When version is not latest, id of returned template is the id of versioned template record
 	// We want to keep original template id
 	versioned.SetID(id)
 	return versioned, diags
