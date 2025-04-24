@@ -147,5 +147,3 @@ require (
 	google.golang.org/protobuf v1.34.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/OctopusDeploy/go-octopusdeploy/v2 => "../go-octopusdeploy" 
