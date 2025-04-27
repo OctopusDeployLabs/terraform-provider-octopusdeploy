@@ -133,6 +133,10 @@ func expandChannel(ctx context.Context, model schemas.ChannelModel) *channels.Ch
 }
 
 func expandChannelRules(rules types.List) []channels.ChannelRule {
+	if rules.IsNull() || rules.IsUnknown() {
+		return nil
+	}
+
 	var rulesMap []map[string]interface{}
 	rules.ElementsAs(context.Background(), &rulesMap, false)
 
@@ -177,18 +181,43 @@ func expandChannelRuleDeploymentActionPackage(actionPackageMap map[string]interf
 func flattenChannel(ctx context.Context, channel *channels.Channel, model schemas.ChannelModel) schemas.ChannelModel {
 	model.ID = types.StringValue(channel.GetID())
 	model.Description = types.StringValue(channel.Description)
-	model.IsDefault = types.BoolValue(channel.IsDefault)
-	model.LifecycleId = types.StringValue(channel.LifecycleID)
+
+	if !channel.IsDefault && model.IsDefault.IsNull() {
+		model.IsDefault = types.BoolNull()
+	} else {
+		model.IsDefault = types.BoolValue(channel.IsDefault)
+	}
+
+	if channel.LifecycleID == "" && model.LifecycleId.IsNull() {
+		model.LifecycleId = types.StringNull()
+	} else {
+		model.LifecycleId = types.StringValue(channel.LifecycleID)
+	}
+
 	model.Name = types.StringValue(channel.Name)
 	model.ProjectId = types.StringValue(channel.ProjectID)
-	model.Rule = flattenChannelRules(channel.Rules)
-	model.SpaceId = types.StringValue(channel.SpaceID)
+
+	model.Rule = flattenChannelRules(channel.Rules, model.Rule)
+
+	if channel.SpaceID == "" && model.SpaceId.IsNull() {
+		model.SpaceId = types.StringNull()
+	} else {
+		model.SpaceId = types.StringValue(channel.SpaceID)
+	}
+
 	model.TenantTags = flattenStringList(channel.TenantTags, model.TenantTags)
 
 	return model
 }
 
-func flattenChannelRules(rules []channels.ChannelRule) types.List {
+func flattenChannelRules(rules []channels.ChannelRule, currentRules types.List) types.List {
+	if len(rules) == 0 && currentRules.IsNull() {
+		return types.ListNull(types.ObjectType{AttrTypes: getChannelRuleAttrTypes()})
+	}
+	if rules == nil {
+		return types.ListNull(types.ObjectType{AttrTypes: getChannelRuleAttrTypes()})
+	}
+
 	var flattenedRules = make([]attr.Value, len(rules))
 	for _, rule := range rules {
 		obj := flattenChannelRule(&rule)
