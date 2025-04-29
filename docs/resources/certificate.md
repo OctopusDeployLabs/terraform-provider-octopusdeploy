@@ -51,7 +51,7 @@ resource "octopusdeploy_certificate" "example" {
 - `subject_common_name` (String)
 - `subject_distinguished_name` (String)
 - `subject_organization` (String)
-- `tenant_tags` (Set of String) A list of tenant tags associated with this certificate.
+- `tenant_tags` (List of String) A list of tenant tags associated with this certificate.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
 - `tenants` (List of String) A list of tenant IDs associated with this certificate.
 - `thumbprint` (String)

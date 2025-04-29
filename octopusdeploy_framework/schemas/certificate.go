@@ -35,7 +35,7 @@ type CertificateModel struct {
 	SubjectOrganization      types.String `tfsdk:"subject_organization"`
 	TenantedDeploymentMode   types.String `tfsdk:"tenanted_deployment_participation"`
 	TenantIDs                types.List   `tfsdk:"tenants"`
-	TenantTags               types.Set    `tfsdk:"tenant_tags"`
+	TenantTags               types.List   `tfsdk:"tenant_tags"`
 	Thumbprint               types.String `tfsdk:"thumbprint"`
 	Version                  types.Int64  `tfsdk:"version"`
 
@@ -146,7 +146,7 @@ func (c CertificateSchema) GetResourceSchema() resourceSchema.Schema {
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"tenant_tags": resourceSchema.SetAttribute{
+			"tenant_tags": resourceSchema.ListAttribute{
 				Description: "A list of tenant tags associated with this certificate.",
 				Optional:    true,
 				ElementType: types.StringType,
