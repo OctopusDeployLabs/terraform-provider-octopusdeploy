@@ -2,7 +2,6 @@ package octopusdeploy_framework
 
 import (
 	"context"
-	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
@@ -11,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -147,13 +145,7 @@ func expandCertificate(ctx context.Context, model schemas.CertificateModel) *cer
 	certificate.SubjectOrganization = model.SubjectOrganization.ValueString()
 	certificate.TenantedDeploymentMode = core.TenantedDeploymentMode(model.TenantedDeploymentMode.ValueString())
 	certificate.TenantIDs = expandStringList(model.TenantIDs)
-
-	convertedTenantTags, diags := util.SetToStringArray(ctx, model.TenantTags)
-	if diags.HasError() {
-		tflog.Error(ctx, fmt.Sprintf("Error converting tenant tags: %v\n", diags))
-	}
-
-	certificate.TenantTags = convertedTenantTags
+	certificate.TenantTags = expandStringSet(model.TenantTags)
 	certificate.Thumbprint = model.Thumbprint.ValueString()
 	certificate.Version = int(model.Version.ValueInt64())
 
@@ -184,15 +176,9 @@ func flattenCertificate(ctx context.Context, certificate *certificates.Certifica
 	model.SubjectOrganization = types.StringValue(certificate.SubjectOrganization)
 	model.TenantedDeploymentMode = types.StringValue(string(certificate.TenantedDeploymentMode))
 	model.TenantIDs = flattenStringList(certificate.TenantIDs, model.TenantIDs)
+	model.TenantTags = flattenStringSet(certificate.TenantTags, model.TenantTags)
 	model.Thumbprint = types.StringValue(certificate.Thumbprint)
 	model.Version = types.Int64Value(int64(certificate.Version))
-
-	convertedTenantTags, diags := util.SetToStringArray(ctx, model.TenantTags)
-	if diags.HasError() {
-		tflog.Error(ctx, fmt.Sprintf("Error converting tenant tags: %v\n", diags))
-	}
-
-	model.TenantTags = basetypes.SetValue(util.FlattenStringList(convertedTenantTags))
 
 	// Note: We don't flatten the password or certificate data as these values are sensitive and not returned by the API
 
