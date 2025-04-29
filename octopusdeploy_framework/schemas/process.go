@@ -16,7 +16,7 @@ const ProcessResourceName = "process"
 
 func (p ProcessSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages execution processes in Octopus Deploy.",
+		Description: "This resource manages Runbook and Deployment Processes in Octopus Deploy. It's used in collaboration with `octopusdeploy_process_step` and `octopusdeploy_process_step_order`.",
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":       GetIdResourceSchema(),
 			"space_id": GetSpaceIdResourceSchema(ProcessResourceName),

@@ -16,7 +16,7 @@ const ProcessChildStepResourceName = "process_child_step"
 
 func (p ProcessChildStepSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
-		Description: "This resource manages a child step in execution process in Octopus Deploy.",
+		Description: "This resource manages a child step of a Runbook or Deployment Process in Octopus Deploy.",
 		Attributes: map[string]resourceSchema.Attribute{
 			"id":       GetIdResourceSchema(),
 			"space_id": GetSpaceIdResourceSchema(ProcessChildStepResourceName),

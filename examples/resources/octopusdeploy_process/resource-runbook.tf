@@ -1,29 +1,14 @@
-resource "octopusdeploy_environment" "development" {
-  name = "Development"
-}
-
-resource "octopusdeploy_environment" "production" {
-  name = "Production"
-}
-
-resource "octopusdeploy_project" "example" {
-  project_group_id = "ProjectGroups-1"
-  lifecycle_id = "Lifecycles-1"
-  name = "Example"
-}
-
-resource "octopusdeploy_channel" "example" {
-  name       = "Example Channel (OK to Delete)"
-  project_id = octopusdeploy_project.example.id
-}
-
+# Example of a Runbook Process with two steps and an explicit Step Order
+# To manage a Runbook process, specify both the Project and Runbook IDs (usually via Terraform resource references)
 resource "octopusdeploy_process" "example" {
-  project_id  = octopusdeploy_project.example.id
+  space_id = "Spaces-1"
+  project_id  = "Projects-21"
+  runbook_id  = "Runbooks-42"
 }
 
-# Run script step
 resource "octopusdeploy_process_step" "run_script" {
-  process_id  = octopusdeploy_process.example.id
+  # Run script step
+  process_id  = octopusdeploy_process.example.id  
   name = "Run My Script"
   properties = {
     "Octopus.Action.MaxParallelism" = "2"
@@ -44,21 +29,8 @@ resource "octopusdeploy_process_step" "run_script" {
   }
 }
 
-# Manual intervention
-resource "octopusdeploy_process_step" "approval" {
-  process_id  = octopusdeploy_process.example.id
-  name = "Approve deployment"
-  type = "Octopus.Manual"
-  execution_properties = {
-    "Octopus.Action.RunOnServer" = "True"
-    "Octopus.Action.Manual.Instructions" = "Example of manual blocking step"
-    "Octopus.Action.Manual.BlockConcurrentDeployments" = "True"
-    "Octopus.Action.Manual.ResponsibleTeamIds" = "teams-managers"
-  }
-}
-
-# Package deployment with primary package
 resource "octopusdeploy_process_step" "deploy_package" {
+  # Package deployment with primary package
   process_id  = octopusdeploy_process.example.id
   name = "Package deployment"
   properties = {
@@ -78,4 +50,12 @@ resource "octopusdeploy_process_step" "deploy_package" {
     "Octopus.Action.Package.FeedId" = "Feeds-1"
     "Octopus.Action.Package.PackageId" = "my.package"
   }
+}
+
+resource "octopusdeploy_process_steps_order" "example" {
+  process_id  = octopusdeploy_process.example.id
+  steps = [
+    octopusdeploy_process_step.run_script.id,
+    octopusdeploy_process_step.deploy_package.id,
+  ]
 }
