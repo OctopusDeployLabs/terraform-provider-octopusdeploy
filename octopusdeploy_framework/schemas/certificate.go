@@ -9,6 +9,40 @@ import (
 
 type CertificateSchema struct{}
 
+type CertificateModel struct {
+	ID                       types.String `tfsdk:"id"`
+	Name                     types.String `tfsdk:"name"`
+	Archived                 types.String `tfsdk:"archived"`
+	CertificateData          types.String `tfsdk:"certificate_data"`
+	CertificateDataFormat    types.String `tfsdk:"certificate_data_format"`
+	EnvironmentIDs           types.List   `tfsdk:"environments"`
+	HasPrivateKey            types.Bool   `tfsdk:"has_private_key"`
+	IsExpired                types.Bool   `tfsdk:"is_expired"`
+	IssuerCommonName         types.String `tfsdk:"issuer_common_name"`
+	IssuerDistinguishedName  types.String `tfsdk:"issuer_distinguished_name"`
+	IssuerOrganization       types.String `tfsdk:"issuer_organization"`
+	NotAfter                 types.String `tfsdk:"not_after"`
+	NotBefore                types.String `tfsdk:"not_before"`
+	Notes                    types.String `tfsdk:"notes"`
+	Password                 types.String `tfsdk:"password"`
+	ReplacedBy               types.String `tfsdk:"replaced_by"`
+	SelfSigned               types.Bool   `tfsdk:"self_signed"`
+	SerialNumber             types.String `tfsdk:"serial_number"`
+	SignatureAlgorithmName   types.String `tfsdk:"signature_algorithm_name"`
+	SpaceID                  types.String `tfsdk:"space_id"`
+	SubjectAlternativeNames  types.List   `tfsdk:"subject_alternative_names"`
+	SubjectCommonName        types.String `tfsdk:"subject_common_name"`
+	SubjectDistinguishedName types.String `tfsdk:"subject_distinguished_name"`
+	SubjectOrganization      types.String `tfsdk:"subject_organization"`
+	TenantedDeploymentMode   types.String `tfsdk:"tenanted_deployment_participation"`
+	TenantIDs                types.List   `tfsdk:"tenants"`
+	TenantTags               types.Set    `tfsdk:"tenant_tags"`
+	Thumbprint               types.String `tfsdk:"thumbprint"`
+	Version                  types.Int64  `tfsdk:"version"`
+
+	ResourceModel
+}
+
 func (c CertificateSchema) GetResourceSchema() resourceSchema.Schema {
 	return resourceSchema.Schema{
 		Description: "This resource manages certificates in Octopus Deploy.",
