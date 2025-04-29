@@ -113,7 +113,7 @@ func expandCertificate(ctx context.Context, model schemas.CertificateModel) *cer
 	certificate.Thumbprint = model.Thumbprint.ValueString()
 	certificate.Version = int(model.Version.ValueInt64())
 
-	return nil
+	return certificate
 }
 
 func flattenCertificate(ctx context.Context, certificate *certificates.CertificateResource, model schemas.CertificateModel) schemas.CertificateModel {
