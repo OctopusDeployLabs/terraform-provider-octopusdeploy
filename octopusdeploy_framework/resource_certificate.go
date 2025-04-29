@@ -123,6 +123,8 @@ func expandCertificate(ctx context.Context, model schemas.CertificateModel) *cer
 
 	certificate := certificates.NewCertificateResource(name, certificateData, password)
 
+	certificate.SetID(model.ID.ValueString())
+
 	certificate.Archived = model.Archived.ValueString()
 	certificate.CertificateDataFormat = model.CertificateDataFormat.ValueString()
 	certificate.EnvironmentIDs = expandStringList(model.EnvironmentIDs)
@@ -159,7 +161,7 @@ func expandCertificate(ctx context.Context, model schemas.CertificateModel) *cer
 }
 
 func flattenCertificate(ctx context.Context, certificate *certificates.CertificateResource, model schemas.CertificateModel) schemas.CertificateModel {
-	model.ID = types.StringValue(certificate.ID)
+	model.ID = types.StringValue(certificate.GetID())
 	model.Archived = types.StringValue(certificate.Archived)
 	model.CertificateDataFormat = types.StringValue(certificate.CertificateDataFormat)
 	model.EnvironmentIDs = flattenStringList(certificate.EnvironmentIDs, model.EnvironmentIDs)
