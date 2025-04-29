@@ -10,7 +10,6 @@ import (
 type CertificateSchema struct{}
 
 type CertificateModel struct {
-	ID                       types.String `tfsdk:"id"`
 	Name                     types.String `tfsdk:"name"`
 	Archived                 types.String `tfsdk:"archived"`
 	CertificateData          types.String `tfsdk:"certificate_data"`
