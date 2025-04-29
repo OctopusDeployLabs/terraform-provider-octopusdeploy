@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/certificates"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
+	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -59,15 +60,56 @@ func (r *certificateResource) Create(ctx context.Context, req resource.CreateReq
 }
 
 func (r *certificateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state schemas.CertificateModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	certificate, err := certificates.GetByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	if err != nil {
+		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "certificateResource"); err != nil {
+			resp.Diagnostics.AddError("unable to load certificate", err.Error())
+		}
+		return
+	}
+
+	newState := flattenCertificate(ctx, certificate, state)
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
 	return
 }
 
 func (r *certificateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan schemas.CertificateModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	certificate := expandCertificate(ctx, plan)
+	updatedCertificate, err := certificates.Update(r.Client, certificate)
+	if err != nil {
+		resp.Diagnostics.AddError("Error updating certificate", err.Error())
+		return
+	}
+
+	state := flattenCertificate(ctx, updatedCertificate, plan)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 	return
 }
 
 func (r *certificateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	return
+	var state schemas.CertificateModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	err := certificates.DeleteByID(r.Client, state.SpaceID.ValueString(), state.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Error deleting certificate", err.Error())
+		return
+	}
 }
 
 func (*certificateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
