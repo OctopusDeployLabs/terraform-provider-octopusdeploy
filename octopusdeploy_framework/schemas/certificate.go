@@ -146,7 +146,7 @@ func (c CertificateSchema) GetResourceSchema() resourceSchema.Schema {
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"tenant_tags": resourceSchema.ListAttribute{
+			"tenant_tags": resourceSchema.SetAttribute{
 				Description: "A list of tenant tags associated with this certificate.",
 				Optional:    true,
 				ElementType: types.StringType,
