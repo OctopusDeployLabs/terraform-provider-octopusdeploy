@@ -456,3 +456,95 @@ func GetOidcSubjectKeysSchema(description string, isRequired bool) resourceSchem
 		ElementType: types.StringType,
 	}
 }
+
+func GetStatusResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
+		Computed:    true,
+		Description: "The status of this resource. Valid statuses are `CalamariNeedsUpgrade`, `Disabled`, `NeedsUpgrade`, `Offline`, `Online`, or `Unknown`.",
+		Optional:    true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"CalamariNeedsUpgrade",
+				"Disabled",
+				"NeedsUpgrade",
+				"Offline",
+				"Online",
+				"Unknown",
+			),
+		},
+	}
+}
+
+func GetStatusSummaryResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
+		Computed:    true,
+		Description: "A summary elaborating on the status of this resource.",
+		Optional:    true,
+	}
+}
+
+func GetHealthStatusResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
+		Computed:    true,
+		Description: "Represents the health status of this deployment target. Valid health statuses are `HasWarnings`, `Healthy`, `Unavailable`, `Unhealthy`, or `Unknown`.",
+		Optional:    true,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				"HasWarnings",
+				"Healthy",
+				"Unavailable",
+				"Unhealthy",
+				"Unknown",
+			),
+		},
+	}
+}
+
+func GetDeploymentActionContainerResourceSchema() resourceSchema.NestedAttributeObject {
+	return resourceSchema.NestedAttributeObject{
+		Attributes: map[string]resourceSchema.Attribute{
+			"feed_id": resourceSchema.StringAttribute{
+				Optional: true,
+			},
+			"image": resourceSchema.StringAttribute{
+				Optional: true,
+			},
+		},
+	}
+}
+
+func GetOfflinePackageDropDestinationResourceSchema() resourceSchema.NestedAttributeObject {
+	return resourceSchema.NestedAttributeObject{
+		Attributes: map[string]resourceSchema.Attribute{
+			"destination_type": resourceSchema.StringAttribute{
+				Optional: true,
+			},
+			"drop_folder_path": resourceSchema.StringAttribute{
+				Optional: true,
+			},
+		},
+	}
+}
+
+func GetTentacleVersionDetailsResourceSchema() resourceSchema.NestedAttributeObject {
+	return resourceSchema.NestedAttributeObject{
+		Attributes: map[string]resourceSchema.Attribute{
+			"upgrade_locked": resourceSchema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+			},
+			"upgrade_required": resourceSchema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+			},
+			"upgrade_suggested": resourceSchema.BoolAttribute{
+				Computed: true,
+				Optional: true,
+			},
+			"version": resourceSchema.StringAttribute{
+				Computed: true,
+				Optional: true,
+			},
+		},
+	}
+}
