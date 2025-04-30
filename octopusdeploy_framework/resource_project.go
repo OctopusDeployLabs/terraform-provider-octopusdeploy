@@ -15,6 +15,7 @@ import (
 )
 
 var _ resource.Resource = &projectResource{}
+var _ resource.ResourceWithImportState = &projectResource{}
 
 type projectResource struct {
 	*Config
