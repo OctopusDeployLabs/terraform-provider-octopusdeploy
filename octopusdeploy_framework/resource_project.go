@@ -3,6 +3,7 @@ package octopusdeploy_framework
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/projects"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal/errors"
@@ -14,6 +15,7 @@ import (
 )
 
 var _ resource.Resource = &projectResource{}
+var _ resource.ResourceWithImportState = &projectResource{}
 
 type projectResource struct {
 	*Config
@@ -194,6 +196,10 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 
 	resp.State.RemoveResource(ctx)
+}
+
+func (*projectResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
 func (r *projectResource) updateStateWithDeploymentSettings(project *projects.Project, newState *projectResourceModel, originalState *projectResourceModel) diag.Diagnostics {
