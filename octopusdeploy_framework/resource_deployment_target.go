@@ -91,7 +91,7 @@ func expandAzureWebAppDeploymentEndpoint(_ context.Context, model schemas.Deploy
 	endpoint.WebAppName = endpointAttributes["web_app_name"].String()
 	endpoint.WebAppSlotName = endpointAttributes["web_app_slot_name"].String()
 
-	return nil
+	return endpoint
 }
 
 func flattenDeploymentTarget(ctx context.Context, deploymentTarget machines.DeploymentTarget, model schemas.DeploymentTargetModel) schemas.DeploymentTargetModel {
