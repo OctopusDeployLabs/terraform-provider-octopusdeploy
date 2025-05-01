@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"strconv"
 	"strings"
 )
 
@@ -89,11 +90,17 @@ func (r *processTemplatedChildStepResource) ImportState(ctx context.Context, req
 		return
 	}
 
+	version, err := strconv.ParseInt(templateVersion.Value, 10, 32)
+	if err != nil {
+		response.Diagnostics.AddError("Unable to import process step", "Process step's template version is invalid")
+		return
+	}
+
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), actionId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), processId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("parent_id"), parentId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_id"), templateId.Value)...)
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_version"), templateVersion.Value)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_version"), version)...)
 }
 
 func (r *processTemplatedChildStepResource) ModifyPlan(ctx context.Context, request resource.ModifyPlanRequest, response *resource.ModifyPlanResponse) {

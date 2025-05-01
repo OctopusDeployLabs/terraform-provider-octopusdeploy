@@ -93,10 +93,16 @@ func (r *processTemplatedStepResource) ImportState(ctx context.Context, request 
 		return
 	}
 
+	version, err := strconv.ParseInt(templateVersion.Value, 10, 32)
+	if err != nil {
+		response.Diagnostics.AddError("Unable to import process step", "Process step's template version is invalid")
+		return
+	}
+
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), stepId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("process_id"), processId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_id"), templateId.Value)...)
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_version"), templateVersion.Value)...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("template_version"), version)...)
 }
 
 func (r *processTemplatedStepResource) ModifyPlan(ctx context.Context, request resource.ModifyPlanRequest, response *resource.ModifyPlanResponse) {
@@ -662,7 +668,11 @@ func mapTemplatedActionPropertiesToState(ctx context.Context, template *actionte
 		}
 
 		if key == "Octopus.Action.Template.Version" {
-			version, _ := strconv.Atoi(property.Value)
+			version, parsingError := strconv.ParseInt(property.Value, 10, 32)
+			if parsingError != nil {
+				diags.AddError("Cannot map template version into the configuration", fmt.Sprintf("Value '%s' is not valid version number(int)", property.Value))
+				return nil, diags
+			}
 			state.TemplateVersion = types.Int32Value(int32(version))
 			continue
 		}
