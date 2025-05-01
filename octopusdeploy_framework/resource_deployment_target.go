@@ -33,7 +33,6 @@ func (r *deploymentTargetResource) Configure(_ context.Context, req resource.Con
 }
 
 func (r *deploymentTargetResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	return
 }
 
 func (r *deploymentTargetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -81,7 +80,17 @@ func expandDeploymentTarget(ctx context.Context, model schemas.DeploymentTargetM
 	return deploymentTarget
 }
 
-func expandAzureWebAppDeploymentEndpoint(ctx context.Context, model schemas.DeploymentTargetModel) *machines.AzureWebAppEndpoint {
+func expandAzureWebAppDeploymentEndpoint(_ context.Context, model schemas.DeploymentTargetModel) *machines.AzureWebAppEndpoint {
+	endpoint := machines.NewAzureWebAppEndpoint()
+
+	endpointAttributes := model.Endpoint.Attributes()
+
+	endpoint.AccountID = endpointAttributes["account_id"].String()
+	endpoint.ID = endpointAttributes["id"].String()
+	endpoint.ResourceGroupName = endpointAttributes["resource_group_name"].String()
+	endpoint.WebAppName = endpointAttributes["web_app_name"].String()
+	endpoint.WebAppSlotName = endpointAttributes["web_app_slot_name"].String()
+
 	return nil
 }
 
