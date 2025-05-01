@@ -456,3 +456,23 @@ func GetOidcSubjectKeysSchema(description string, isRequired bool) resourceSchem
 		ElementType: types.StringType,
 	}
 }
+
+func getCertificateDataFormatResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.StringAttribute{
+		Description: "Specifies the archive file format used for storing cryptography objects in the certificate. Valid formats are `Der`, `Pem`, `Pkcs12`, or `Unknown`.",
+		Computed:    true,
+		Optional:    true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("Der", "Pem", "Pkcs12", "Unknown"),
+		},
+	}
+}
+
+func getEnvironmentsResourceSchema() resourceSchema.Attribute {
+	return resourceSchema.ListAttribute{
+		Description: "A list of environment IDs associated with this resource.",
+		Computed:    true,
+		Optional:    true,
+		ElementType: types.StringType,
+	}
+}

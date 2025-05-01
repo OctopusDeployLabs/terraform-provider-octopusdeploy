@@ -34,7 +34,6 @@ resource "octopusdeploy_certificate" "example" {
 - `certificate_data_format` (String) Specifies the archive file format used for storing cryptography objects in the certificate. Valid formats are `Der`, `Pem`, `Pkcs12`, or `Unknown`.
 - `environments` (List of String) A list of environment IDs associated with this resource.
 - `has_private_key` (Boolean) Indicates if the certificate has a private key.
-- `id` (String) The unique ID for this resource.
 - `is_expired` (Boolean) Indicates if the certificate has expired.
 - `issuer_common_name` (String)
 - `issuer_distinguished_name` (String)
@@ -52,11 +51,15 @@ resource "octopusdeploy_certificate" "example" {
 - `subject_common_name` (String)
 - `subject_distinguished_name` (String)
 - `subject_organization` (String)
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this certificate.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `tenants` (List of String) A list of tenant IDs associated with this certificate.
 - `thumbprint` (String)
 - `version` (Number)
+
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
 
 ## Import
 

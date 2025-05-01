@@ -41,6 +41,7 @@ func Provider() *schema.Provider {
 			"octopusdeploy_azure_subscription_account":                     resourceAzureSubscriptionAccount(),
 			"octopusdeploy_azure_web_app_deployment_target":                resourceAzureWebAppDeploymentTarget(),
 			"octopusdeploy_certificate":                                    resourceCertificate(),
+			"octopusdeploy_channel":                                        resourceChannel(),
 			"octopusdeploy_cloud_region_deployment_target":                 resourceCloudRegionDeploymentTarget(),
 			"octopusdeploy_deployment_process":                             resourceDeploymentProcess(),
 			"octopusdeploy_dynamic_worker_pool":                            resourceDynamicWorkerPool(),

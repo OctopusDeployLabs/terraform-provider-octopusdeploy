@@ -208,3 +208,33 @@ func flattenStringList(slice []string, currentList types.List) types.List {
 
 	return types.ListValueMust(types.StringType, valueSlice)
 }
+
+func expandStringSet(set types.Set) []string {
+	if set.IsNull() || set.IsUnknown() {
+		return nil
+	}
+
+	var result []string
+	set.ElementsAs(context.Background(), &result, false)
+	if len(result) == 0 {
+		return nil
+	}
+
+	return result
+}
+
+func flattenStringSet(slice []string, currentSet types.Set) types.Set {
+	if len(slice) == 0 && currentSet.IsNull() {
+		return types.SetNull(types.StringType)
+	}
+	if slice == nil {
+		return types.SetNull(types.StringType)
+	}
+
+	valueSlice := make([]attr.Value, len(slice))
+	for i, s := range slice {
+		valueSlice[i] = types.StringValue(s)
+	}
+
+	return types.SetValueMust(types.StringType, valueSlice)
+}
