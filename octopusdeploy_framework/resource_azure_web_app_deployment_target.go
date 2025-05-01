@@ -21,11 +21,11 @@ func NewAzureWebAppDeploymentTargetResource() resource.Resource {
 
 var _ resource.ResourceWithImportState = &azureWebAppDeploymentTargetResource{}
 
-func (r *azureWebAppDeploymentTargetResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *azureWebAppDeploymentTargetResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = util.GetTypeName("azure_web_app_deployment_target")
 }
 
-func (r *azureWebAppDeploymentTargetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *azureWebAppDeploymentTargetResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schemas.AzureWebAppDeploymentTargetSchema{}.GetResourceSchema()
 }
 
@@ -55,15 +55,15 @@ func (r *azureWebAppDeploymentTargetResource) Create(ctx context.Context, req re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *azureWebAppDeploymentTargetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *azureWebAppDeploymentTargetResource) Read(_ context.Context, _ resource.ReadRequest, _ *resource.ReadResponse) {
 	return
 }
 
-func (r *azureWebAppDeploymentTargetResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *azureWebAppDeploymentTargetResource) Update(_ context.Context, _ resource.UpdateRequest, _ *resource.UpdateResponse) {
 	return
 }
 
-func (r *azureWebAppDeploymentTargetResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *azureWebAppDeploymentTargetResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
 	return
 }
 
