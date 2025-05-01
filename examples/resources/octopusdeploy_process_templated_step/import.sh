@@ -1,0 +1,1 @@
+terraform import [options] octopusdeploy_process_templated_child_step.<name> "<process-id>:<parent-step-id>:<child-step-id>"

@@ -1,0 +1,34 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: "Runbook & Deployment Processes"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+### Remarks
+A Step is the building block of a Deployment or Runbook Process. 
+
+When there are multiple Steps in a Process, we strongly recommend adding a `octopusdeploy_process_step_order` resource to pin the step order. If you later need to change the order of steps in your process, or insert a new step within an existing process, you'll need the Step Order defined first. Without an explicit Step Order, Steps will be added to the process in the order they're applied by Terraform - this is usually the order they appear in your HCL, but is not guaranteed to be deterministic. 
+
+This resource also contains a concept that doesn't exist in the Octopus Deploy domain model: `properties` vs `execution_properties`:
+
+* `properties` are the inputs to control behaviour of the step within the process as whole
+* `execution_properties` are the controls for how and what will be executed when step runs
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+{{ if .HasImport -}}
+## Import
+
+Import is supported using the following syntax:
+
+{{ codefile "shell" (printf "%s%s%s" "examples/resources/" .Name "/import.sh") }}
+{{- end }}
