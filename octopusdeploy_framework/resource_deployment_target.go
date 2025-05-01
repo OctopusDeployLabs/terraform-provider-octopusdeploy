@@ -2,6 +2,7 @@ package octopusdeploy_framework
 
 import (
 	"context"
+	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/machines"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
@@ -52,6 +53,35 @@ func (*deploymentTargetResource) ImportState(ctx context.Context, req resource.I
 }
 
 func expandDeploymentTarget(ctx context.Context, model schemas.DeploymentTargetModel) *machines.DeploymentTarget {
+	name := model.Name.ValueString()
+	endpoint := expandAzureWebAppDeploymentEndpoint(ctx, model)
+	environments := expandStringList(model.Environments)
+	roles := expandStringList(model.Roles)
+
+	deploymentTarget := machines.NewDeploymentTarget(name, endpoint, environments, roles)
+
+	deploymentTarget.ID = model.ID.ValueString()
+	deploymentTarget.HasLatestCalamari = model.HasLatestCalamari.ValueBool()
+	deploymentTarget.HealthStatus = model.HealthStatus.ValueString()
+	deploymentTarget.IsDisabled = model.IsDisabled.ValueBool()
+	deploymentTarget.IsInProcess = model.IsInProcess.ValueBool()
+	deploymentTarget.MachinePolicyID = model.MachinePolicyId.ValueString()
+	deploymentTarget.OperatingSystem = model.OperatingSystem.ValueString()
+	deploymentTarget.ShellName = model.ShellName.ValueString()
+	deploymentTarget.ShellVersion = model.ShellVersion.ValueString()
+	deploymentTarget.SpaceID = model.SpaceId.ValueString()
+	deploymentTarget.Status = model.Status.ValueString()
+	deploymentTarget.StatusSummary = model.StatusSummary.ValueString()
+	deploymentTarget.TenantedDeploymentMode = core.TenantedDeploymentMode(model.TenantedDeploymentParticipation.ValueString())
+	deploymentTarget.TenantIDs = expandStringList(model.Tenants)
+	deploymentTarget.TenantTags = expandStringList(model.TenantTags)
+	deploymentTarget.Thumbprint = model.Thumbprint.ValueString()
+	deploymentTarget.URI = model.Uri.ValueString()
+
+	return deploymentTarget
+}
+
+func expandAzureWebAppDeploymentEndpoint(ctx context.Context, model schemas.DeploymentTargetModel) *machines.AzureWebAppEndpoint {
 	return nil
 }
 
