@@ -25,7 +25,7 @@ resource "octopusdeploy_aws_account" "example" {
 
 - `access_key` (String) The access key associated with this AWS account.
 - `name` (String) The name of this resource.
-- `secret_key` (String) The secret key associated with this AWS account.
+- `secret_key` (String, Sensitive) The secret key associated with this AWS account.
 
 ### Optional
 

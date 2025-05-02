@@ -44,6 +44,7 @@ func (a AmazonWebServicesAccountSchema) GetResourceSchema() resourceSchema.Schem
 			"name": GetNameResourceSchema(true),
 			"secret_key": resourceSchema.StringAttribute{
 				Description: "The secret key associated with this AWS account.",
+				Sensitive:   true,
 				Required:    true,
 			},
 			"space_id": GetSpaceIdResourceSchema(AmazonWebServicesAccountResourceDescription),
