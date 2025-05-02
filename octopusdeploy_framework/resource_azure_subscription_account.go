@@ -143,6 +143,7 @@ func expandAzureSubscriptionAccount(ctx context.Context, model schemas.AzureSubs
 func flattenAzureSubscriptionAccount(ctx context.Context, account *accounts.AzureSubscriptionAccount, model schemas.AzureSubscriptionAccountModel) schemas.AzureSubscriptionAccountModel {
 	model.ID = types.StringValue(account.GetID())
 	model.AzureEnvironment = types.StringValue(account.AzureEnvironment)
+	model.CertificateThumbprint = types.StringValue(account.CertificateThumbprint)
 	model.Description = types.StringValue(account.GetDescription())
 	model.Environments = flattenStringList(account.GetEnvironmentIDs(), model.Environments)
 	model.ManagementEndpoint = types.StringValue(account.ManagementEndpoint)
