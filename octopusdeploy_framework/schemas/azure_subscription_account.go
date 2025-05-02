@@ -54,11 +54,13 @@ func (a AzureSubscriptionAccountSchema) GetResourceSchema() resourceSchema.Schem
 			},
 			"certificate": resourceSchema.StringAttribute{
 				Description: "The management certificate associated with this Azure subscription account.",
+				Computed:    true,
 				Optional:    true,
 				Sensitive:   true,
 			},
 			"certificate_thumbprint": resourceSchema.StringAttribute{
 				Description: "The thumbprint of the management certificate associated with this Azure subscription account.",
+				Computed:    true,
 				Optional:    true,
 				Sensitive:   true,
 			},
@@ -113,6 +115,7 @@ func (a AzureSubscriptionAccountSchema) GetResourceSchema() resourceSchema.Schem
 			"tenant_tags": resourceSchema.ListAttribute{
 				Description: "A list of tenant tags associated with this Azure subscription account.",
 				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
 			},
 		},
