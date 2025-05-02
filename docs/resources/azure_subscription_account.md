@@ -27,21 +27,21 @@ resource "octopusdeploy_azure_subscription_account" "example" {
 
 ### Optional
 
-- `azure_environment` (String) The Azure environment associated with this resource. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
-- `certificate` (String, Sensitive)
-- `certificate_thumbprint` (String, Sensitive)
+- `azure_environment` (String) The Azure environment associated with this Azure subscription account. Valid Azure environments are `AzureCloud`, `AzureChinaCloud`, `AzureGermanCloud`, or `AzureUSGovernment`.
+- `certificate` (String, Sensitive) The management certificate associated with this Azure subscription account.
+- `certificate_thumbprint` (String, Sensitive) The thumbprint of the management certificate associated with this Azure subscription account.
 - `description` (String) The description of this Azure subscription account.
-- `environments` (List of String) A list of environment IDs associated with this resource.
-- `management_endpoint` (String)
-- `space_id` (String) The space ID associated with this resource.
+- `environments` (List of String) A list of environment IDs associated with this Azure subscription account.
+- `management_endpoint` (String) The management endpoint associated with this Azure subscription account.
+- `space_id` (String) The space ID associated with this Azure subscription account.
 - `storage_endpoint_suffix` (String) The storage endpoint suffix associated with this Azure subscription account.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `tenant_tags` (List of String) A list of tenant tags associated with this Azure subscription account.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `tenants` (List of String) A list of tenant IDs associated with this Azure subscription account.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The unique ID for this resource.
 
 ## Import
 
