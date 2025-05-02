@@ -65,6 +65,7 @@ func (a AmazonWebServicesAccountSchema) GetResourceSchema() resourceSchema.Schem
 			"tenant_tags": resourceSchema.ListAttribute{
 				Description: "A list of tenant tags associated with this AWS account.",
 				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
 			},
 		},
