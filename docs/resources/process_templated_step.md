@@ -140,7 +140,7 @@ resource "octopusdeploy_templated_process_step" "script" {
 - `packages` (Attributes Map) Package references copied from the template (see [below for nested schema](#nestedatt--packages))
 - `template_properties` (Map of String) Properties copied from the template
 - `type` (String) Execution type of the step copied from the template.
-- `unmanaged_parameters` (Map of String) Template parameters not configured by the practitioner.
+- `unmanaged_parameters` (Map of String) Template parameters not configured by the practitioner (usually parameters with default value).
 
 <a id="nestedatt--container"></a>
 ### Nested Schema for `container`
