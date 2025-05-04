@@ -58,26 +58,20 @@ resource "octopusdeploy_project" "example" {
   name = "Example"
 }
 
-resource "octopusdeploy_channel" "example" {
-  name       = "Example Channel (OK to Delete)"
-  project_id = octopusdeploy_project.example.id
-}
-
 resource "octopusdeploy_process" "example" {
   project_id  = octopusdeploy_project.example.id
 }
 
-
-# Run templated script step
+# Templated script step
 resource "octopusdeploy_templated_process_step" "script" {
   process_id  = octopusdeploy_process.example.id
-  name = "Step 3"
+  name = "Templated Step"
   template_id = octopusdeploy_step_template.my_script.id
   template_version = octopusdeploy_step_template.my_script.version
 
   # Parameter's default value is used when not provided in configuration
   parameters = {
-    "Parameter.Two" = "my-second-value"
+    "Parameter.Two" = "my-example-value"
   }
 
   execution_properties = {

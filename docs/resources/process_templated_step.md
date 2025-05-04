@@ -10,14 +10,11 @@ description: |-
 This resource manages a single step of a Runbook or Deployment Process which based on existing custom step template
 
 ### Remarks
-A Step is the building block of a Deployment or Runbook Process. 
+A Templated Step is the step of a Deployment or Runbook Process which based on existing custom step template
 
-When there are multiple Steps in a Process, we strongly recommend adding a `octopusdeploy_process_step_order` resource to pin the step order. If you later need to change the order of steps in your process, or insert a new step within an existing process, you'll need the Step Order defined first. Without an explicit Step Order, Steps will be added to the process in the order they're applied by Terraform - this is usually the order they appear in your HCL, but is not guaranteed to be deterministic. 
-
-This resource also contains a concept that doesn't exist in the Octopus Deploy domain model: `properties` vs `execution_properties`:
-
-* `properties` are the inputs to control behaviour of the step within the process as whole
-* `execution_properties` are the controls for how and what will be executed when step runs
+This resource expose only attributes which can be controlled by the consumer of a template. To avoid 'state drift' templated step divide template parameters into two attributes 'parameters' and 'unmanaged_parameters':
+* `parameters` are template parameters configured by the practitioner
+* `unmanaged_parameters` is readonly collection of template parameters not configured by the practitioner (usually parameters with default value)
 
 ## Example Usage
 
@@ -82,26 +79,20 @@ resource "octopusdeploy_project" "example" {
   name = "Example"
 }
 
-resource "octopusdeploy_channel" "example" {
-  name       = "Example Channel (OK to Delete)"
-  project_id = octopusdeploy_project.example.id
-}
-
 resource "octopusdeploy_process" "example" {
   project_id  = octopusdeploy_project.example.id
 }
 
-
-# Run templated script step
+# Templated script step
 resource "octopusdeploy_templated_process_step" "script" {
   process_id  = octopusdeploy_process.example.id
-  name = "Step 3"
+  name = "Templated Step"
   template_id = octopusdeploy_step_template.my_script.id
   template_version = octopusdeploy_step_template.my_script.version
 
   # Parameter's default value is used when not provided in configuration
   parameters = {
-    "Parameter.Two" = "my-second-value"
+    "Parameter.Two" = "my-example-value"
   }
 
   execution_properties = {
@@ -197,5 +188,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import [options] octopusdeploy_process_templated_child_step.<name> "<process-id>:<parent-step-id>:<child-step-id>"
+terraform import [options] octopusdeploy_process_templated_step.<name> "<process-id>:<step-id>"
 ```

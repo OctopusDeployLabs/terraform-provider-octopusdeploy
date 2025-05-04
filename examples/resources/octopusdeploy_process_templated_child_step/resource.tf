@@ -27,28 +27,28 @@ resource "octopusdeploy_step_template" "my_script" {
 
   parameters = [
     {
-      name      = "Parameter.One"
+      name = "Parameter.One"
       id = "10001000-0000-0000-0000-100010001001"
-      label     = "First Parameter"
+      label = "First Parameter"
       default_value = "default-value-one"
       display_settings = {
         "Octopus.ControlType" : "SingleLineText"
       }
     },
     {
-      name      = "Parameter.Two"
+      name = "Parameter.Two"
       id = "10001000-0000-0000-0000-100010001002"
-      label     = "Second Parameter"
+      label = "Second Parameter"
       display_settings = {
-        "Octopus.ControlType" : "SingleLineText"
+        "Octopus.ControlType": "SingleLineText"
       }
     },
   ]
     
   properties = {
-    "Octopus.Action.Script.ScriptBody" : "echo '1.#{Parameter.One} ... 2.#{Parameter.Two} ...'"
-    "Octopus.Action.Script.ScriptSource" : "Inline"
-    "Octopus.Action.Script.Syntax" : "Bash"
+    "Octopus.Action.Script.ScriptBody": "echo '1.#{Parameter.One} ... 2.#{Parameter.Two} ...'"
+    "Octopus.Action.Script.ScriptSource": "Inline"
+    "Octopus.Action.Script.Syntax": "Bash"
   }
 }
 
@@ -67,11 +67,29 @@ resource "octopusdeploy_process" "example" {
   project_id  = octopusdeploy_project.example.id
 }
 
+resource "octopusdeploy_process_step" "parent" {
+  process_id  = octopusdeploy_process.app.id
+  name = "Parent Step"
+  properties = {
+    "Octopus.Action.MaxParallelism" = "2"
+    "Octopus.Action.TargetRoles" = "azure-one"
+  }
+  type = "Octopus.Script"
+  execution_properties = {
+    "Octopus.Action.RunOnServer" = "True"
+    "Octopus.Action.Script.ScriptSource" = "Inline"
+    "Octopus.Action.Script.Syntax"       = "PowerShell"
+    "Octopus.Action.Script.ScriptBody" = <<-EOT
+      Write-Host "Parent Step:  #{My.Variable}"
+    EOT
+  }
+}
 
-# Run templated script step
-resource "octopusdeploy_templated_process_step" "script" {
+# Templated script child step
+resource "octopusdeploy_process_templated_child_step" "script" {
   process_id  = octopusdeploy_process.example.id
-  name = "Step 3"
+  parent_id = octopusdeploy_process_step.parent.id
+  name = "Templated Child Step"
   template_id = octopusdeploy_step_template.my_script.id
   template_version = octopusdeploy_step_template.my_script.version
 

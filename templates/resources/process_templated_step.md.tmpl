@@ -10,14 +10,11 @@ description: |-
 {{ .Description | trimspace }}
 
 ### Remarks
-A Step is the building block of a Deployment or Runbook Process. 
+A Templated Step is the step of a Deployment or Runbook Process which based on existing custom step template
 
-When there are multiple Steps in a Process, we strongly recommend adding a `octopusdeploy_process_step_order` resource to pin the step order. If you later need to change the order of steps in your process, or insert a new step within an existing process, you'll need the Step Order defined first. Without an explicit Step Order, Steps will be added to the process in the order they're applied by Terraform - this is usually the order they appear in your HCL, but is not guaranteed to be deterministic. 
-
-This resource also contains a concept that doesn't exist in the Octopus Deploy domain model: `properties` vs `execution_properties`:
-
-* `properties` are the inputs to control behaviour of the step within the process as whole
-* `execution_properties` are the controls for how and what will be executed when step runs
+This resource expose only attributes which can be controlled by the consumer of a template. To avoid 'state drift' templated step divide template parameters into two attributes 'parameters' and 'unmanaged_parameters':
+* `parameters` are template parameters configured by the practitioner
+* `unmanaged_parameters` is readonly collection of template parameters not configured by the practitioner (usually parameters with default value)
 
 ## Example Usage
 

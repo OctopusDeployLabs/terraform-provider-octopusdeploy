@@ -154,7 +154,7 @@ func (p ProcessTemplatedStepSchema) GetResourceSchema() resourceSchema.Schema {
 				DefaultEmpty().
 				Build(),
 			"unmanaged_parameters": util.ResourceMap(types.StringType).
-				Description("Template parameters not configured by the practitioner.").
+				Description("Template parameters not configured by the practitioner (usually parameters with default value).").
 				Computed().
 				Build(),
 			"template_properties": util.ResourceMap(types.StringType).
