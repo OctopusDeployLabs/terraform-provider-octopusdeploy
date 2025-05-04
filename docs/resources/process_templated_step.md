@@ -10,9 +10,10 @@ description: |-
 This resource manages a single step of a Runbook or Deployment Process which based on existing custom step template
 
 ### Remarks
-A Templated Step is the step of a Deployment or Runbook Process which based on existing custom step template
+This resource expose only attributes which can be controlled by the consumer of a template. 
 
-This resource expose only attributes which can be controlled by the consumer of a template. To avoid 'state drift' templated step divide template parameters into two attributes 'parameters' and 'unmanaged_parameters':
+To avoid 'state drift' templated step divide template parameters into two attributes 'parameters' and 'unmanaged_parameters':
+
 * `parameters` are template parameters configured by the practitioner
 * `unmanaged_parameters` is readonly collection of template parameters not configured by the practitioner (usually parameters with default value)
 
