@@ -60,7 +60,7 @@ func (r *processTemplatedChildStepResource) ImportState(ctx context.Context, req
 	actionId := identifiers[2]
 	tflog.Info(ctx, fmt.Sprintf("importing templated process child step (%s) from parent (%s) and process (%s)", actionId, parentId, processId))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		response.Diagnostics.Append(diags...)
 		return
@@ -217,7 +217,7 @@ func (r *processTemplatedChildStepResource) Create(ctx context.Context, req reso
 
 	tflog.Info(ctx, fmt.Sprintf("creating process step with template: %s", data.Name.ValueString()))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -289,7 +289,7 @@ func (r *processTemplatedChildStepResource) Read(ctx context.Context, req resour
 
 	tflog.Info(ctx, fmt.Sprintf("reading process step with template (%s)", data.ID))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -344,7 +344,7 @@ func (r *processTemplatedChildStepResource) Update(ctx context.Context, req reso
 
 	tflog.Info(ctx, fmt.Sprintf("updating process step with template (step: %s)", actionId))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -413,7 +413,7 @@ func (r *processTemplatedChildStepResource) Delete(ctx context.Context, req reso
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process step (%s)", actionId))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
