@@ -129,9 +129,13 @@ func newProcessStepTestDependenciesConfiguration(scenario string) processStepTes
 }
 
 func testCheckResourceProcessStepExists() resource.TestCheckFunc {
+	return testCheckResourceProcessStepOfTypeExists("octopusdeploy_process_step")
+}
+
+func testCheckResourceProcessStepOfTypeExists(resourceType string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, r := range s.RootModule().Resources {
-			if r.Type == "octopusdeploy_process_step" {
+			if r.Type == resourceType {
 				stepId := r.Primary.ID
 				processId := r.Primary.Attributes["process_id"]
 				process, processError := deployments.GetDeploymentProcessByID(octoClient, octoClient.GetSpaceID(), processId)
