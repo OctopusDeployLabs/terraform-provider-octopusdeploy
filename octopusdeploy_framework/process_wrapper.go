@@ -19,6 +19,7 @@ import (
 type processWrapper interface { // Better name?
 	GetID() string
 	GetSpaceID() string
+	GetProjectID() string
 	PopulateState(state *schemas.ProcessResourceModel)
 	AppendStep(step *deployments.DeploymentStep)
 	RemoveStep(stepId string)
@@ -50,10 +51,10 @@ func findDeploymentStepByName(steps []*deployments.DeploymentStep, name string) 
 	return nil, false
 }
 
-// loadProcessWrapperForSteps determines projectId before loading deployment or runbook process.
+// loadProcessWrapperByProcessId determines projectId before loading deployment or runbook process.
 //
 // Returns wrapper of the process or error when process is not found or warning when corresponding project is version controlled.
-func loadProcessWrapperForSteps(client *client.Client, spaceId string, processId string) (processWrapper, diag.Diagnostics) {
+func loadProcessWrapperByProcessId(client *client.Client, spaceId string, processId string) (processWrapper, diag.Diagnostics) {
 	switch kind, ownerId := deconstructProcessIdentifier(processId); kind {
 	case "deployment":
 		return loadProcessWrapper(client, spaceId, ownerId, processId)
@@ -145,6 +146,10 @@ func (w deploymentProcessWrapper) GetSpaceID() string {
 	return w.process.SpaceID
 }
 
+func (w deploymentProcessWrapper) GetProjectID() string {
+	return w.process.ProjectID
+}
+
 func (w deploymentProcessWrapper) PopulateState(state *schemas.ProcessResourceModel) {
 	state.ID = types.StringValue(w.process.ID)
 	state.SpaceID = types.StringValue(w.process.SpaceID)
@@ -201,6 +206,10 @@ func (w runbookProcessWrapper) GetID() string {
 
 func (w runbookProcessWrapper) GetSpaceID() string {
 	return w.process.SpaceID
+}
+
+func (w runbookProcessWrapper) GetProjectID() string {
+	return w.process.ProjectID
 }
 
 func (w runbookProcessWrapper) PopulateState(state *schemas.ProcessResourceModel) {

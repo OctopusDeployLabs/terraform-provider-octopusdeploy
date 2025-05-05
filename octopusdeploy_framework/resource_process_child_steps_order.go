@@ -59,7 +59,7 @@ func (r *processChildStepsOrderResource) ImportState(ctx context.Context, reques
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("parent_id"), parentStepId)...)
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), parentStepId)...)
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, r.Config.SpaceID, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, r.Config.SpaceID, processId)
 	if len(diags) > 0 {
 		response.Diagnostics.Append(diags...)
 		return
@@ -116,7 +116,7 @@ func (r *processChildStepsOrderResource) ModifyPlan(ctx context.Context, req res
 	parentId := state.ParentID.ValueString()
 
 	// Do the validation based on steps stored in Octopus Deploy
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -190,7 +190,7 @@ func (r *processChildStepsOrderResource) Create(ctx context.Context, req resourc
 
 	tflog.Info(ctx, fmt.Sprintf("creating process child steps order for parent %s", parentId))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -239,7 +239,7 @@ func (r *processChildStepsOrderResource) Read(ctx context.Context, req resource.
 
 	tflog.Info(ctx, fmt.Sprintf("reading process child steps order (%s)", parentId))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -273,7 +273,7 @@ func (r *processChildStepsOrderResource) Update(ctx context.Context, req resourc
 
 	tflog.Info(ctx, fmt.Sprintf("updating process child steps order (%s)", parentId))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -325,7 +325,7 @@ func (r *processChildStepsOrderResource) Delete(ctx context.Context, req resourc
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process steps order (%s)", processId))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return

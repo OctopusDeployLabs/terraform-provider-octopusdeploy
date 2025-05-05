@@ -40,7 +40,14 @@ func (r *processResource) Configure(_ context.Context, req resource.ConfigureReq
 }
 
 func (r *processResource) ImportState(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), request, response)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, r.Config.SpaceID, request.ID)
+	if len(diags) > 0 {
+		response.Diagnostics.Append(diags...)
+		return
+	}
+
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("project_id"), process.GetProjectID())...)
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("id"), process.GetID())...)
 }
 
 func (r *processResource) ModifyPlan(_ context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
