@@ -74,7 +74,7 @@ func (r *processChildStepResource) Create(ctx context.Context, req resource.Crea
 
 	tflog.Info(ctx, fmt.Sprintf("creating process child step: %s", data.Name.ValueString()))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -137,7 +137,7 @@ func (r *processChildStepResource) Read(ctx context.Context, req resource.ReadRe
 	parentId := data.ParentID.ValueString()
 	actionId := data.ID.ValueString()
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -184,7 +184,7 @@ func (r *processChildStepResource) Update(ctx context.Context, req resource.Upda
 
 	tflog.Info(ctx, fmt.Sprintf("updating process child step (%s)", actionId))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
@@ -253,7 +253,7 @@ func (r *processChildStepResource) Delete(ctx context.Context, req resource.Dele
 
 	tflog.Info(ctx, fmt.Sprintf("deleting process child step (%s)", data.ID))
 
-	process, diags := loadProcessWrapperForSteps(r.Config.Client, spaceId, processId)
+	process, diags := loadProcessWrapperByProcessId(r.Config.Client, spaceId, processId)
 	if len(diags) > 0 {
 		resp.Diagnostics.Append(diags...)
 		return
