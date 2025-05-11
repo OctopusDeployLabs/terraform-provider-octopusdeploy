@@ -24,7 +24,11 @@ func resourceAmazonWebServicesAccount() *schema.Resource {
 }
 
 func resourceAmazonWebServicesAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	account := expandAmazonWebServicesAccount(d)
+	account, err := expandAmazonWebServicesAccount(d)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] creating AWS account")
 
@@ -78,7 +82,11 @@ func resourceAmazonWebServicesAccountRead(ctx context.Context, d *schema.Resourc
 }
 
 func resourceAmazonWebServicesAccountUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	account := expandAmazonWebServicesAccount(d)
+	account, err := expandAmazonWebServicesAccount(d)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] updating AWS account: %#v", account)
 

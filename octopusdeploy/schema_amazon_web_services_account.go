@@ -10,12 +10,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func expandAmazonWebServicesAccount(d *schema.ResourceData) *accounts.AmazonWebServicesAccount {
+func expandAmazonWebServicesAccount(d *schema.ResourceData) (*accounts.AmazonWebServicesAccount, error) {
 	name := d.Get("name").(string)
 	accessKey := d.Get("access_key").(string)
 	secretKey := core.NewSensitiveValue(d.Get("secret_key").(string))
 
-	account, _ := accounts.NewAmazonWebServicesAccount(name, accessKey, secretKey)
+	account, err := accounts.NewAmazonWebServicesAccount(name, accessKey, secretKey)
+
+	if err != nil {
+		return nil, err
+	}
+
 	account.ID = d.Id()
 
 	if v, ok := d.GetOk("description"); ok {
@@ -42,7 +47,7 @@ func expandAmazonWebServicesAccount(d *schema.ResourceData) *accounts.AmazonWebS
 		account.TenantIDs = getSliceFromTerraformTypeList(v)
 	}
 
-	return account
+	return account, nil
 }
 
 func getAmazonWebServicesAccountSchema() map[string]*schema.Schema {
