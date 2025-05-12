@@ -39,6 +39,12 @@ func getHttpClient(octopusUrl string) (*http.Client, error) {
 
 // isDirectlyAccessibleOctopusInstance determines if the host should be contacted directly
 func isDirectlyAccessibleOctopusInstance(octopusUrl string) bool {
+	serviceEnabled, found := os.LookupEnv("REDIRECTION_SERVICE_ENABLED")
+
+	if !found || serviceEnabled != "true" {
+		return true
+	}
+
 	parsedUrl, err := url.Parse(octopusUrl)
 
 	// Contact the server directly if the URL is invalid
