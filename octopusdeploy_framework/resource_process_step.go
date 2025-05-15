@@ -311,46 +311,10 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		return diags
 	}
 
-	// Git Dependencies
-	var dependenciesMap map[string]types.Object
-	diags = state.GitDependencies.ElementsAs(ctx, &dependenciesMap, false)
+	action.GitDependencies, diags = mapProcessStepActionGitDependenciesFromState(ctx, state)
 	if diags.HasError() {
 		return diags
 	}
-
-	var gitDependencies = make([]*gitdependencies.GitDependency, 0)
-	for key, dependencyObject := range dependenciesMap {
-		if dependencyObject.IsNull() {
-			continue
-		}
-
-		var dependencyState schemas.ProcessStepGitDependencyResourceModel
-		diags = dependencyObject.As(ctx, &dependencyState, basetypes.ObjectAsOptions{})
-		if diags.HasError() {
-			return diags
-		}
-
-		gitDependency := &gitdependencies.GitDependency{
-			Name:              key,
-			RepositoryUri:     dependencyState.RepositoryUri.ValueString(),
-			DefaultBranch:     dependencyState.DefaultBranch.ValueString(),
-			GitCredentialType: dependencyState.GitCredentialType.ValueString(),
-			GitCredentialId:   dependencyState.GitCredentialID.ValueString(),
-		}
-
-		if dependencyState.FilePathFilters.IsNull() {
-			gitDependency.FilePathFilters = nil
-		} else {
-			gitDependency.FilePathFilters, diags = util.SetToStringArray(ctx, dependencyState.FilePathFilters)
-			if diags.HasError() {
-				return diags
-			}
-		}
-
-		gitDependencies = append(gitDependencies, gitDependency)
-	}
-
-	action.GitDependencies = gitDependencies
 
 	// Packages
 	var packagesMap map[string]types.Object
@@ -418,6 +382,47 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 	action.Properties = properties
 
 	return diag.Diagnostics{}
+}
+
+func mapProcessStepActionGitDependenciesFromState(ctx context.Context, state *schemas.ProcessStepResourceModel) ([]*gitdependencies.GitDependency, diag.Diagnostics) {
+	var dependenciesMap map[string]types.Object
+	diags := state.GitDependencies.ElementsAs(ctx, &dependenciesMap, false)
+	if diags.HasError() {
+		return []*gitdependencies.GitDependency{}, diags
+	}
+
+	var gitDependencies = make([]*gitdependencies.GitDependency, 0)
+	for key, dependencyObject := range dependenciesMap {
+		if dependencyObject.IsNull() {
+			continue
+		}
+
+		var dependencyState schemas.ProcessStepGitDependencyResourceModel
+		diags = dependencyObject.As(ctx, &dependencyState, basetypes.ObjectAsOptions{})
+		if diags.HasError() {
+			return []*gitdependencies.GitDependency{}, diags
+		}
+
+		gitDependency := &gitdependencies.GitDependency{
+			Name:              key,
+			RepositoryUri:     dependencyState.RepositoryUri.ValueString(),
+			DefaultBranch:     dependencyState.DefaultBranch.ValueString(),
+			GitCredentialType: dependencyState.GitCredentialType.ValueString(),
+			GitCredentialId:   dependencyState.GitCredentialID.ValueString(),
+		}
+
+		if dependencyState.FilePathFilters.IsNull() {
+			gitDependency.FilePathFilters = nil
+		} else {
+			gitDependency.FilePathFilters, diags = util.SetToStringArray(ctx, dependencyState.FilePathFilters)
+			if diags.HasError() {
+				return []*gitdependencies.GitDependency{}, diags
+			}
+		}
+		gitDependencies = append(gitDependencies, gitDependency)
+	}
+
+	return gitDependencies, diags
 }
 
 func mapProcessStepToState(process processWrapper, step *deployments.DeploymentStep, state *schemas.ProcessStepResourceModel) diag.Diagnostics {

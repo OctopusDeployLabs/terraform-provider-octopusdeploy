@@ -17,6 +17,15 @@ import (
 
 func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 	ctx := context.Background()
+	primaryPackage := &schemas.ProcessStepPackageReferenceResourceModel{
+		PackageID:           types.StringValue("Packages-0"),
+		FeedID:              types.StringValue("Feeds-0"),
+		AcquisitionLocation: types.StringValue("ExecutionTarget"),
+		Properties: types.MapValueMust(types.StringType, map[string]attr.Value{
+			"Extract": types.StringValue("True"),
+		}),
+	}
+	primaryPackage.ID = types.StringValue("00000000-0000-0000-0000-000000000022")
 	state := schemas.ProcessStepResourceModel{
 		SpaceID:            types.StringValue("Spaces-1"),
 		ProcessID:          types.StringValue("Processes-1"),
@@ -67,6 +76,7 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 				},
 			),
 		}),
+		PrimaryPackage: primaryPackage,
 		Packages: types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{
 			"script-package": types.ObjectValueMust(
 				schemas.ProcessStepPackageReferenceAttributeTypes(),
@@ -132,6 +142,16 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 				},
 				Packages: []*packages.PackageReference{
 					{
+						ID:                  "00000000-0000-0000-0000-000000000022",
+						Name:                "", // Empty for primary package
+						PackageID:           "Package-0",
+						FeedID:              "Feeds-0",
+						AcquisitionLocation: "ExecutionTarget",
+						Properties: map[string]string{
+							"Extract": "True",
+						},
+					},
+					{
 						ID:                  "00000000-0000-0000-0000-000000000001",
 						Name:                "script-package",
 						PackageID:           "Package-1",
@@ -143,8 +163,11 @@ func TestAccMapProcessStepFromStateWithAllAttributes(t *testing.T) {
 					},
 				},
 				Properties: map[string]core.PropertyValue{
-					"Octopus.Action.RunOnServer":       core.NewPropertyValue("True", false),
-					"Octopus.Action.Script.ScriptBody": core.NewPropertyValue("Write-Host \"Step 1, Action 1\"", false),
+					"Octopus.Action.RunOnServer":                core.NewPropertyValue("True", false),
+					"Octopus.Action.Script.ScriptBody":          core.NewPropertyValue("Write-Host \"Step 1, Action 1\"", false),
+					"Octopus.Action.Package.FeedId":             core.NewPropertyValue("Feeds-0", false),
+					"Octopus.Action.Package.PackageId":          core.NewPropertyValue("Package-0", false),
+					"Octopus.Action.Package.DownloadOnTentacle": core.NewPropertyValue("ExecutionTarget", false),
 				},
 				Resource: *resources.NewResource(),
 			},
@@ -262,8 +285,11 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 	action.GitDependencies = []*gitdependencies.GitDependency{gitDependency}
 	action.Packages = []*packages.PackageReference{primaryPackage, additionalPackage}
 	action.Properties = map[string]core.PropertyValue{
-		"Octopus.Action.RunOnServer":       core.NewPropertyValue("True", false),
-		"Octopus.Action.Script.ScriptBody": core.NewPropertyValue("Write-Host \"Step 1, Action 1\"", false),
+		"Octopus.Action.RunOnServer":                core.NewPropertyValue("True", false),
+		"Octopus.Action.Script.ScriptBody":          core.NewPropertyValue("Write-Host \"Step 1, Action 1\"", false),
+		"Octopus.Action.Package.FeedId":             core.NewPropertyValue("ignored-by-primary-package", false),
+		"Octopus.Action.Package.PackageId":          core.NewPropertyValue("ignored-by-primary-package", false),
+		"Octopus.Action.Package.DownloadOnTentacle": core.NewPropertyValue("ignored-by-primary-package", false),
 	}
 
 	step := deployments.NewDeploymentStep("Step One")
@@ -291,6 +317,16 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 	diags := mapProcessStepToState(deploymentProcessWrapper{process}, step, &state)
 
 	assert.False(t, diags.HasError(), "Expected no errors in diagnostics")
+
+	expectedPrimaryPackage := &schemas.ProcessStepPackageReferenceResourceModel{
+		PackageID:           types.StringValue(primaryPackage.PackageID),
+		FeedID:              types.StringValue(primaryPackage.FeedID),
+		AcquisitionLocation: types.StringValue(primaryPackage.AcquisitionLocation),
+		Properties: types.MapValueMust(types.StringType, map[string]attr.Value{
+			"Octopus.Package.IsPrimary": types.StringValue("True"),
+		}),
+	}
+	expectedPrimaryPackage.ID = types.StringValue(primaryPackage.ID)
 
 	expectedState := schemas.ProcessStepResourceModel{
 		SpaceID:            types.StringValue("Spaces-1"),
@@ -342,6 +378,7 @@ func TestAccMapProcessStepToStateWithAllAttributes(t *testing.T) {
 				},
 			),
 		}),
+		PrimaryPackage: expectedPrimaryPackage,
 		Packages: types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{
 			primaryPackage.Name: types.ObjectValueMust(
 				schemas.ProcessStepPackageReferenceAttributeTypes(),
