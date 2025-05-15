@@ -60,7 +60,11 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 		Description: "Defines a phase in the lifecycle.",
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
-				"id":   util.ResourceString().Optional().Computed().Description("The unique ID for this resource.").Build(),
+				"id": util.ResourceString().
+					Optional().Computed().
+					Description("The unique ID for this resource.").
+					PlanModifiers(stringplanmodifier.UseStateForUnknown()).
+					Build(),
 				"name": util.ResourceString().Required().Description("The name of this resource.").Build(),
 				"automatic_deployment_targets": util.ResourceList(types.StringType).
 					Optional().Computed().
