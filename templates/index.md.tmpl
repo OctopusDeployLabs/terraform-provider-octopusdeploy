@@ -9,7 +9,7 @@ description: |-
 
 ## Warning
 
-This provider is under active development. Its functionalty can and will change; it is a `v0.*` product until its robustness can be assured. Please be aware that types like resources can and will be modified over time. It is strongly recommended to `validate` and `plan` configuration prior to committing changes via `apply`.
+This provider is under active development. Its functionality can and will change; it is a `v0.*` product until its robustness can be assured. Please be aware that types like resources can and will be modified over time. It is strongly recommended to `validate` and `plan` configuration prior to committing changes via `apply`.
 
 ## Overview
 
