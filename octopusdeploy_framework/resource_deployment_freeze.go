@@ -72,12 +72,16 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
 
+	versionDiags := internal.AssertServerVersionIsGreater(f.Config.Client.Root, "2025.1")
+	resp.Diagnostics.Append(versionDiags...)
+
 	var state *deploymentFreezeModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	f.Config.Client.Root.Get()
 	deploymentFreeze, err := deploymentfreezes.GetById(f.Config.Client, state.GetID())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "deployment freeze"); err != nil {
