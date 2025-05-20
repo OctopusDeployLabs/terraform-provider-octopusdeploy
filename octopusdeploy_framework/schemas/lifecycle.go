@@ -7,7 +7,10 @@ import (
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -57,30 +60,39 @@ func getResourcePhaseBlockSchema() resourceSchema.ListNestedBlock {
 		Description: "Defines a phase in the lifecycle.",
 		NestedObject: resourceSchema.NestedBlockObject{
 			Attributes: map[string]resourceSchema.Attribute{
-				"id":   util.ResourceString().Optional().Computed().Description("The unique ID for this resource.").Build(),
+				"id": util.ResourceString().
+					Optional().Computed().
+					Description("The unique ID for this resource.").
+					PlanModifiers(stringplanmodifier.UseStateForUnknown()).
+					Build(),
 				"name": util.ResourceString().Required().Description("The name of this resource.").Build(),
 				"automatic_deployment_targets": util.ResourceList(types.StringType).
 					Optional().Computed().
 					Description("Environment IDs in this phase that a release is automatically deployed to when it is eligible for this phase").
+					PlanModifiers(listplanmodifier.UseStateForUnknown()).
 					Build(),
 				"optional_deployment_targets": util.ResourceList(types.StringType).
 					Optional().Computed().
 					Description("Environment IDs in this phase that a release can be deployed to, but is not automatically deployed to").
+					PlanModifiers(listplanmodifier.UseStateForUnknown()).
 					Build(),
 				"minimum_environments_before_promotion": util.ResourceInt64().
 					Optional().Computed().
 					Default(int64default.StaticInt64(0)).
 					Description("The number of units required before a release can enter the next phase. If 0, all environments are required.").
+					PlanModifiers(int64planmodifier.UseStateForUnknown()).
 					Build(),
 				"is_optional_phase": util.ResourceBool().
 					Optional().Computed().
-					Default(booldefault.StaticBool(false)).
 					Description("If false a release must be deployed to this phase before it can be deployed to the next phase.").
+					Default(booldefault.StaticBool(false)).
+					PlanModifiers(boolplanmodifier.UseStateForUnknown()).
 					Build(),
 				"is_priority_phase": util.ResourceBool().
 					Optional().Computed().
 					Default(booldefault.StaticBool(false)).
 					Description("Deployments will be prioritized in this phase").
+					PlanModifiers(boolplanmodifier.UseStateForUnknown()).
 					Build(),
 			},
 			Blocks: map[string]resourceSchema.Block{
