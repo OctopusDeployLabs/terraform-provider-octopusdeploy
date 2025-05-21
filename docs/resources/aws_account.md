@@ -24,21 +24,21 @@ resource "octopusdeploy_aws_account" "example" {
 ### Required
 
 - `access_key` (String) The access key associated with this AWS account.
-- `name` (String) The name of this AWS account.
-- `secret_key` (String, Sensitive) The secret key associated with this resource.
+- `name` (String) The name of this resource.
+- `secret_key` (String, Sensitive) The secret key associated with this AWS account.
 
 ### Optional
 
-- `description` (String) A user-friendly description of this AWS account.
-- `environments` (List of String) A list of environment IDs associated with this resource.
-- `space_id` (String) The space ID associated with this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `description` (String) The description of this AWS account.
+- `environments` (List of String) A list of environment IDs associated with this AWS account.
+- `space_id` (String) The space ID associated with this AWS account.
+- `tenant_tags` (List of String) A list of tenant tags associated with this AWS account.
 - `tenanted_deployment_participation` (String) The tenanted deployment mode of the resource. Valid account types are `Untenanted`, `TenantedOrUntenanted`, or `Tenanted`.
-- `tenants` (List of String) A list of tenant IDs associated with this resource.
+- `tenants` (List of String) A list of tenant IDs associated with this AWS account.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The unique ID for this resource.
 
 ## Import
 
