@@ -66,14 +66,24 @@ func (f *deploymentFreezeResource) Schema(_ context.Context, _ resource.SchemaRe
 
 func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	f.Config = ResourceConfiguration(req, resp)
+
+	if f.Config != nil {
+		diags := f.Config.AssertResourceCompatibilityByVersion(deploymentFreezeResourceName, "2025.1")
+		resp.Diagnostics.Append(diags...)
+	}
+
+	if f.Config != nil {
+		diags := f.Config.AssertResourceCompatibilityByFeature(deploymentFreezeResourceName, "kubernetes-manifest-inspection-diffs-v3")
+		resp.Diagnostics.Append(diags...)
+	}
 }
 
 func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
 
-	versionDiags := internal.AssertServerVersionIsGreater(f.Config.Client.Root, "2025.1")
-	resp.Diagnostics.Append(versionDiags...)
+	//versionDiags := internal.AssertResourceCompatibilityWithServer(f.Config.Client, deploymentFreezeResourceName, "2025.1")
+	//resp.Diagnostics.Append(versionDiags...)
 
 	var state *deploymentFreezeModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -81,7 +91,6 @@ func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	f.Config.Client.Root.Get()
 	deploymentFreeze, err := deploymentfreezes.GetById(f.Config.Client, state.GetID())
 	if err != nil {
 		if err := errors.ProcessApiErrorV2(ctx, resp, state, err, "deployment freeze"); err != nil {
