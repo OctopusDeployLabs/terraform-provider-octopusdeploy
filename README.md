@@ -102,7 +102,7 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
   f.Config = ResourceConfiguration(req, resp)
 
   if f.Config != nil {
-    diags := f.Config.AssertResourceCompatibilityByVersion(deploymentFreezeResourceName, "2025.1")
+    diags := f.Config.EnsureResourceCompatibilityByVersion(deploymentFreezeResourceName, "2025.1")
 	resp.Diagnostics.Append(diags...)
   }
 }
@@ -114,7 +114,7 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
   f.Config = ResourceConfiguration(req, resp)
 	
   if f.Config != nil {
-	diags := f.Config.AssertResourceCompatibilityByFeature(deploymentFreezeResourceName, "ProjectDeploymentFreezesFeatureToggle")
+	diags := f.Config.EnsureResourceCompatibilityByFeature(deploymentFreezeResourceName, "ProjectDeploymentFreezesFeatureToggle")
 	resp.Diagnostics.Append(diags...)
   }
 }

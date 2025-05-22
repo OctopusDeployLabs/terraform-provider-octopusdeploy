@@ -201,9 +201,9 @@ func (c *Config) FeatureToggleEnabled(toggle string) bool {
 	return false
 }
 
-// AssertResourceCompatibilityByFeature Reports whether resource is compatible with current instance of Octopus Server by .
+// EnsureResourceCompatibilityByFeature Reports whether resource is compatible with current instance of Octopus Server by .
 // Returns diagnostics with error when resource is incompatible and empty diagnostics for compatible resources
-func (c *Config) AssertResourceCompatibilityByFeature(resourceName string, toggle string) diag.Diagnostics {
+func (c *Config) EnsureResourceCompatibilityByFeature(resourceName string, toggle string) diag.Diagnostics {
 	diags := diag.Diagnostics{}
 
 	if c.FeatureToggleEnabled(toggle) {
@@ -217,15 +217,14 @@ func (c *Config) AssertResourceCompatibilityByFeature(resourceName string, toggl
 	return diags
 }
 
-// AssertResourceCompatibilityByVersion Reports whether resource is compatible with current version of Octopus Server.
+// EnsureResourceCompatibilityByVersion Reports whether resource is compatible with current version of Octopus Server.
 // Returns diagnostics with error when resource is incompatible and empty diagnostics for compatible resources
 //
 // Example: '2025.1' - first version where resource can be used
-func (c *Config) AssertResourceCompatibilityByVersion(resourceName string, version string) diag.Diagnostics {
+func (c *Config) EnsureResourceCompatibilityByVersion(resourceName string, version string) diag.Diagnostics {
 	diags := diag.Diagnostics{}
 
-	compatible := isCurrentVersionSameOrGreater(c.OctopusVersion, version)
-	if compatible {
+	if c.IsVersionSameOrGreaterThan(version) {
 		return diags
 	}
 
@@ -236,12 +235,12 @@ func (c *Config) AssertResourceCompatibilityByVersion(resourceName string, versi
 	return diags
 }
 
-func isCurrentVersionSameOrGreater(current string, limit string) bool {
-	if current == "0.0.0-local" {
+func (c *Config) IsVersionSameOrGreaterThan(minVersion string) bool {
+	if c.OctopusVersion == "0.0.0-local" {
 		return true // Always true for local instance
 	}
 
-	diff := version.Compare(fmt.Sprintf("go%s", current), fmt.Sprintf("go%s", limit))
+	diff := version.Compare(fmt.Sprintf("go%s", c.OctopusVersion), fmt.Sprintf("go%s", minVersion))
 
 	return diff == 1 || diff == 0
 }

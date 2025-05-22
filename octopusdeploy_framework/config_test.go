@@ -36,14 +36,14 @@ func TestAssertResourceCompatibilityWithServerIgnoresBranches(t *testing.T) {
 
 func testServerVersionShouldPass(t *testing.T, limit string, current string) {
 	configuration := Config{OctopusVersion: current}
-	diags := configuration.AssertResourceCompatibilityByVersion("compatible_resource_name", limit)
+	diags := configuration.EnsureResourceCompatibilityByVersion("compatible_resource_name", limit)
 
 	assert.False(t, diags.HasError(), "Expected %s to pass limit %s", current, limit)
 }
 
 func testServerVersionShouldFail(t *testing.T, limit string, current string) {
 	configuration := Config{OctopusVersion: current}
-	diags := configuration.AssertResourceCompatibilityByVersion("incompatible_resource_name", limit)
+	diags := configuration.EnsureResourceCompatibilityByVersion("incompatible_resource_name", limit)
 
 	assert.True(t, diags.HasError(), "Expected %s to fail limit %s", current, limit)
 }

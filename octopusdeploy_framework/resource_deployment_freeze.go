@@ -68,7 +68,7 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
 	f.Config = ResourceConfiguration(req, resp)
 
 	if f.Config != nil {
-		diags := f.Config.AssertResourceCompatibilityByVersion(deploymentFreezeResourceName, "2025.1")
+		diags := f.Config.EnsureResourceCompatibilityByVersion(deploymentFreezeResourceName, "2025.1")
 		resp.Diagnostics.Append(diags...)
 	}
 }
@@ -76,9 +76,6 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
 func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	internal.Mutex.Lock()
 	defer internal.Mutex.Unlock()
-
-	//versionDiags := internal.AssertResourceCompatibilityWithServer(f.Config.Client, deploymentFreezeResourceName, "2025.1")
-	//resp.Diagnostics.Append(versionDiags...)
 
 	var state *deploymentFreezeModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
