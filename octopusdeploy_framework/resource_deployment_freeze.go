@@ -71,11 +71,6 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
 		diags := f.Config.AssertResourceCompatibilityByVersion(deploymentFreezeResourceName, "2025.1")
 		resp.Diagnostics.Append(diags...)
 	}
-
-	if f.Config != nil {
-		diags := f.Config.AssertResourceCompatibilityByFeature(deploymentFreezeResourceName, "kubernetes-manifest-inspection-diffs-v3")
-		resp.Diagnostics.Append(diags...)
-	}
 }
 
 func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

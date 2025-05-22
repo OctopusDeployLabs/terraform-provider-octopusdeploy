@@ -85,12 +85,43 @@ Terraform will scan the local plugins folder directory structure (first) to qual
 > We're currently migrating all resources and data sources from Terraform SDK to Terraform Plugin Framework.
 > 
 > All new resources should be created using Framework, in the `octopusdeploy-framework` directory. [A GitHub action](.github/workflows/prevent-new-sdk-additions.yml) will detect and prevent any new additions to the old `octopusdeploy` SDK directory.
-> 
-> When modifying an existing SDK resource, we strongly recommend migrating it to Framework first - but this might not always be feasible. We'll judge it on a case-by-case basis.
 
+### Acceptance tests
 All new resources need an acceptance test that will ensure the lifecycle of the resource works correctly this includes Create, Read, Update and Delete.
 
-Please avoid using [blocks](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/blocks): these are mainly used for backwards compatability of resources migrated from SDK. Use [nested attributes](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes#nested-attribute-types) instead.
+### Blocks
+> [!WARNING]
+> Please avoid using [blocks](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/blocks): these are mainly used for backwards compatability of resources migrated from SDK. Use [nested attributes](https://developer.hashicorp.com/terraform/plugin/framework/handling-data/attributes#nested-attribute-types) instead.
+
+### Compatibility with Server
+If a resource is not compatible with older versions of the Octopus Deploy server or requires specific feature flags to be enabled, ensure that these requirements are clearly enforced with appropriate validation and descriptive error messaging.
+
+For example to prevent resource usage in versions earlier than 2025.1:
+```go
+func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+  f.Config = ResourceConfiguration(req, resp)
+
+  if f.Config != nil {
+    diags := f.Config.AssertResourceCompatibilityByVersion(deploymentFreezeResourceName, "2025.1")
+	resp.Diagnostics.Append(diags...)
+  }
+}
+```
+
+To prevent resource usage based on a feature flag 
+```go
+func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+  f.Config = ResourceConfiguration(req, resp)
+	
+  if f.Config != nil {
+	diags := f.Config.AssertResourceCompatibilityByFeature(deploymentFreezeResourceName, "ProjectDeploymentFreezesFeatureToggle")
+	resp.Diagnostics.Append(diags...)
+  }
+}
+```
+
+## Existing Resource
+When modifying an existing SDK resource, we strongly recommend migrating it to Framework first - but this might not always be feasible. We'll judge it on a case-by-case basis.
 
 ## Debugging 
 If you want to debug the provider follow these steps!
