@@ -121,7 +121,8 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
 ```
 
 ## Existing Resource
-When modifying an existing SDK resource, we strongly recommend migrating it to Framework first - but this might not always be feasible. We'll judge it on a case-by-case basis.
+When modifying an existing SDK resource, we strongly recommend migrating it to Framework first - but this might not always be feasible. We'll judge it on a case-by-case basis.  
+The reason to not migrate is sometimes the resource is not compatible with framework without breaking changes. In this case a new resources needs to be created to replace the old one and the old one should become deprecated
 
 ## Debugging 
 If you want to debug the provider follow these steps!
