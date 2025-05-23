@@ -66,6 +66,11 @@ func (f *deploymentFreezeResource) Schema(_ context.Context, _ resource.SchemaRe
 
 func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	f.Config = ResourceConfiguration(req, resp)
+
+	if f.Config != nil {
+		diags := f.Config.EnsureResourceCompatibilityByVersion(deploymentFreezeResourceName, "2025.1")
+		resp.Diagnostics.Append(diags...)
+	}
 }
 
 func (f *deploymentFreezeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
