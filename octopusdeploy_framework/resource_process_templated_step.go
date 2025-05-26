@@ -534,7 +534,7 @@ func mapProcessTemplatedStepActionToState(ctx context.Context, action *deploymen
 	state.Channels = util.BuildStringSetOrEmpty(action.Channels)
 
 	state.GitDependencies = mapGitDependenciesToState(action.GitDependencies)
-	state.Packages = mapPackageReferencesToState(action.Packages)
+	_, state.Packages = mapPackageReferencesToState(action.Packages)
 
 	properties, diags := mapTemplatedActionPropertiesToState(ctx, template, action, state.Parameters, state.ExecutionProperties)
 	if diags.HasError() {
