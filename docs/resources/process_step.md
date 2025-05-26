@@ -91,18 +91,12 @@ resource "octopusdeploy_process_step" "deploy_package" {
     "Octopus.Action.TargetRoles" = "role-one"
   }
   type = "Octopus.TentaclePackage"
-  packages = {
-    "": {
-      package_id: "my.package"
-      feed_id: "Feeds-1"
-    }
+  primary_package = {
+    package_id: "my.package"
+    feed_id: "Feeds-1"
   }
   execution_properties = {
     "Octopus.Action.RunOnServer" = "True"    
-    # Reference primary package in execution properties for legacy purposes
-    "Octopus.Action.Package.DownloadOnTentacle" = "False"
-    "Octopus.Action.Package.FeedId" = "Feeds-1"
-    "Octopus.Action.Package.PackageId" = "my.package"
   }
 }
 ```
@@ -120,7 +114,7 @@ resource "octopusdeploy_process_step" "deploy_package" {
 
 - `channels` (Set of String) A set of channels associated with this step.
 - `condition` (String) When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'
-- `container` (Attributes) When set used to run step inside a container on the Octopus Server. Octopus Server must support container execution. (see [below for nested schema](#nestedatt--container))
+- `container` (Attributes) When set, used to run step inside a container on the Octopus Server. Octopus Server must support container execution. (see [below for nested schema](#nestedatt--container))
 - `environments` (Set of String) A set of environments within which this step will run.
 - `excluded_environments` (Set of String) A set of environments that this step will be skipped in.
 - `execution_properties` (Map of String) A collection of step action properties where the key is the property name and the value is its value.
@@ -130,6 +124,7 @@ resource "octopusdeploy_process_step" "deploy_package" {
 - `notes` (String) The notes associated with this step.
 - `package_requirement` (String) Whether to run this step before or after package acquisition (if possible).
 - `packages` (Attributes Map) Package references associated with this step where key is a name of the package reference (use empty name for primary package) (see [below for nested schema](#nestedatt--packages))
+- `primary_package` (Attributes) Primary package of the step (see [below for nested schema](#nestedatt--primary_package))
 - `properties` (Map of String) A collection of process step properties where the key is the property name and the value is its value.
 - `slug` (String) The human-readable unique identifier for the step.
 - `space_id` (String) The space ID associated with this process_step.
@@ -168,6 +163,24 @@ Optional:
 
 <a id="nestedatt--packages"></a>
 ### Nested Schema for `packages`
+
+Required:
+
+- `package_id` (String) Package ID or a variable-expression
+
+Optional:
+
+- `acquisition_location` (String) Whether to acquire this package on the server ('Server'), target ('ExecutionTarget') or not at all ('NotAcquired'). Can be an expression
+- `feed_id` (String) The feed ID associated with this package reference
+- `properties` (Map of String) A collection of properties associated with this package
+
+Read-Only:
+
+- `id` (String) The unique ID for this resource.
+
+
+<a id="nestedatt--primary_package"></a>
+### Nested Schema for `primary_package`
 
 Required:
 

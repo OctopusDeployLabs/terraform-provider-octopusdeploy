@@ -117,7 +117,7 @@ resource "octopusdeploy_templated_process_step" "script" {
 
 - `channels` (Set of String) A set of channels associated with this step.
 - `condition` (String) When to run the step, one of 'Success', 'Failure', 'Always' or 'Variable'
-- `container` (Attributes) When set used to run step inside a container on the Octopus Server. Octopus Server must support container execution. (see [below for nested schema](#nestedatt--container))
+- `container` (Attributes) When set, used to run step inside a container on the Octopus Server. Octopus Server must support container execution. (see [below for nested schema](#nestedatt--container))
 - `environments` (Set of String) A set of environments within which this step will run.
 - `excluded_environments` (Set of String) A set of environments that this step will be skipped in.
 - `execution_properties` (Map of String) Action properties where the key is the property name and the value is its value.
