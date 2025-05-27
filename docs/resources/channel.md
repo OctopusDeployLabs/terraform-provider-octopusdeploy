@@ -30,27 +30,30 @@ resource "octopusdeploy_channel" "example" {
 ### Optional
 
 - `description` (String) The description of this channel.
-- `id` (String) The unique ID for this resource.
-- `is_default` (Boolean) Indicates if this is the default channel for the associated project.
+- `is_default` (Boolean) Indicates whether this is the default channel for the associated project.
 - `lifecycle_id` (String) The lifecycle ID associated with this channel.
-- `rule` (Block List) A list of rules associated with this channel. (see [below for nested schema](#nestedblock--rule))
-- `space_id` (String) The space ID associated with this resource.
-- `tenant_tags` (List of String) A list of tenant tags associated with this resource.
+- `rule` (Attributes List) A list of rules associated with this channel. (see [below for nested schema](#nestedatt--rule))
+- `space_id` (String) The space ID associated with this channel.
+- `tenant_tags` (List of String) A list of tenant tags associated with this channel.
 
-<a id="nestedblock--rule"></a>
+### Read-Only
+
+- `id` (String) The unique ID for this resource.
+
+<a id="nestedatt--rule"></a>
 ### Nested Schema for `rule`
 
 Required:
 
-- `action_package` (Block List, Min: 1) (see [below for nested schema](#nestedblock--rule--action_package))
+- `action_package` (Attributes List) (see [below for nested schema](#nestedatt--rule--action_package))
 
 Optional:
 
-- `id` (String) The unique ID for this resource.
+- `id` (String) The ID associated with this channel rule.
 - `tag` (String)
 - `version_range` (String)
 
-<a id="nestedblock--rule--action_package"></a>
+<a id="nestedatt--rule--action_package"></a>
 ### Nested Schema for `rule.action_package`
 
 Optional:
