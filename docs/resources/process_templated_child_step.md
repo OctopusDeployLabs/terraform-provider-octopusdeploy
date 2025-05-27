@@ -10,7 +10,9 @@ description: |-
 This resource manages a child step of a Runbook or Deployment process which based on existing custom step template
 
 ### Remarks
-This resource exposes only attributes which can be controlled by the consumer of a template. 
+This resource exposes only attributes which can be controlled by the consumer of a template.
+
+For more information on how to discover step properties read the *How to Find Step Properties* under the guides section of the documentation.
 
 ## Example Usage
 

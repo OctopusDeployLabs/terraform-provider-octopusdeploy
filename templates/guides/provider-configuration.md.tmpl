@@ -1,9 +1,9 @@
 ---
-page_title: "2. Octopus Deploy Provider Configuration"
+page_title: "Octopus Deploy Provider Configuration"
 subcategory: "Guides"
 ---
 
-# 2. Octopus Deploy Provider Configuration
+# Octopus Deploy Provider Configuration
 
 ## Example usage
 
