@@ -311,11 +311,30 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		return diags
 	}
 
-	// Git Dependencies
-	var dependenciesMap map[string]types.Object
-	diags = state.GitDependencies.ElementsAs(ctx, &dependenciesMap, false)
+	action.GitDependencies, diags = mapProcessStepActionGitDependenciesFromState(ctx, state.GitDependencies)
 	if diags.HasError() {
 		return diags
+	}
+
+	var primaryPackageProperties = map[string]core.PropertyValue{}
+	action.Packages, primaryPackageProperties, diags = mapProcessStepActionPackagesFromState(ctx, state.Packages, state.PrimaryPackage)
+	if diags.HasError() {
+		return diags
+	}
+
+	action.Properties, diags = mapActionExecutionPropertiesFromState(ctx, state.ExecutionProperties, primaryPackageProperties)
+	if diags.HasError() {
+		return diags
+	}
+
+	return diag.Diagnostics{}
+}
+
+func mapProcessStepActionGitDependenciesFromState(ctx context.Context, dependencies types.Map) ([]*gitdependencies.GitDependency, diag.Diagnostics) {
+	var dependenciesMap map[string]types.Object
+	diags := dependencies.ElementsAs(ctx, &dependenciesMap, false)
+	if diags.HasError() {
+		return []*gitdependencies.GitDependency{}, diags
 	}
 
 	var gitDependencies = make([]*gitdependencies.GitDependency, 0)
@@ -327,7 +346,7 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		var dependencyState schemas.ProcessStepGitDependencyResourceModel
 		diags = dependencyObject.As(ctx, &dependencyState, basetypes.ObjectAsOptions{})
 		if diags.HasError() {
-			return diags
+			return []*gitdependencies.GitDependency{}, diags
 		}
 
 		gitDependency := &gitdependencies.GitDependency{
@@ -343,23 +362,41 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		} else {
 			gitDependency.FilePathFilters, diags = util.SetToStringArray(ctx, dependencyState.FilePathFilters)
 			if diags.HasError() {
-				return diags
+				return []*gitdependencies.GitDependency{}, diags
 			}
 		}
-
 		gitDependencies = append(gitDependencies, gitDependency)
 	}
 
-	action.GitDependencies = gitDependencies
+	return gitDependencies, diags
+}
 
-	// Packages
+func mapProcessStepActionPackagesFromState(ctx context.Context, statePackages types.Map, primaryPackage *schemas.ProcessStepPackageReferenceResourceModel) ([]*packages.PackageReference, map[string]core.PropertyValue, diag.Diagnostics) {
 	var packagesMap map[string]types.Object
-	diags = state.Packages.ElementsAs(ctx, &packagesMap, false)
+	diags := statePackages.ElementsAs(ctx, &packagesMap, false)
 	if diags.HasError() {
-		return diags
+		return []*packages.PackageReference{}, map[string]core.PropertyValue{}, diags
 	}
 
 	packageReferences := make([]*packages.PackageReference, 0)
+	primaryPackageProperties := make(map[string]core.PropertyValue)
+	if primaryPackage != nil {
+		primary, primaryDiags := mapPackageReferenceFromState(ctx, primaryPackage, "")
+		if primaryDiags.HasError() {
+			return []*packages.PackageReference{}, map[string]core.PropertyValue{}, primaryDiags
+		}
+
+		primaryPackageProperties["Octopus.Action.Package.PackageId"] = core.NewPropertyValue(primary.PackageID, false)
+		primaryPackageProperties["Octopus.Action.Package.FeedId"] = core.NewPropertyValue(primary.FeedID, false)
+		downloadOnTentacle := "False"
+		if primary.AcquisitionLocation == "ExecutionTarget" {
+			downloadOnTentacle = "True"
+		}
+		primaryPackageProperties["Octopus.Action.Package.DownloadOnTentacle"] = core.NewPropertyValue(downloadOnTentacle, false)
+
+		packageReferences = append(packageReferences, primary)
+	}
+
 	for key, packageObject := range packagesMap {
 		if packageObject.IsNull() {
 			continue
@@ -368,56 +405,75 @@ func mapProcessStepActionFromState(ctx context.Context, state *schemas.ProcessSt
 		var packageState schemas.ProcessStepPackageReferenceResourceModel
 		diags = packageObject.As(ctx, &packageState, basetypes.ObjectAsOptions{})
 		if diags.HasError() {
-			return diags
+			return []*packages.PackageReference{}, map[string]core.PropertyValue{}, diags
 		}
 
-		stateProperties := make(map[string]types.String, len(packageState.Properties.Elements()))
-		diags = packageState.Properties.ElementsAs(ctx, &stateProperties, false)
+		var packageReference *packages.PackageReference
+		packageReference, diags = mapPackageReferenceFromState(ctx, &packageState, key)
 		if diags.HasError() {
-			return diags
+			return []*packages.PackageReference{}, map[string]core.PropertyValue{}, diags
 		}
 
-		packageProperties := make(map[string]string, len(stateProperties))
-		for propertyKey, value := range stateProperties {
-			if value.IsNull() {
-				packageProperties[propertyKey] = ""
-			} else {
-				packageProperties[propertyKey] = value.ValueString()
-			}
-		}
-
-		packageReference := &packages.PackageReference{
-			ID:                  packageState.GetID(),
-			Name:                key,
-			PackageID:           packageState.PackageID.ValueString(),
-			FeedID:              packageState.FeedID.ValueString(),
-			AcquisitionLocation: packageState.AcquisitionLocation.ValueString(),
-			Properties:          packageProperties,
-		}
 		packageReferences = append(packageReferences, packageReference)
 	}
 
-	action.Packages = packageReferences
+	return packageReferences, primaryPackageProperties, diag.Diagnostics{}
+}
 
-	// Execution Properties
-	stateProperties := make(map[string]types.String, len(state.ExecutionProperties.Elements()))
-	propertiesDiags := state.ExecutionProperties.ElementsAs(ctx, &stateProperties, false)
-	if propertiesDiags.HasError() {
-		return propertiesDiags
+func mapPackageReferenceFromState(ctx context.Context, state *schemas.ProcessStepPackageReferenceResourceModel, key string) (*packages.PackageReference, diag.Diagnostics) {
+	packageProperties, diags := mapPackagePropertiesFromState(ctx, state)
+	if diags.HasError() {
+		return nil, diags
 	}
 
-	properties := make(map[string]core.PropertyValue, len(stateProperties))
-	for key, value := range stateProperties {
+	reference := &packages.PackageReference{
+		ID:                  state.GetID(),
+		Name:                key,
+		PackageID:           state.PackageID.ValueString(),
+		FeedID:              state.FeedID.ValueString(),
+		AcquisitionLocation: state.AcquisitionLocation.ValueString(),
+		Properties:          packageProperties,
+	}
+
+	return reference, diags
+}
+
+func mapPackagePropertiesFromState(ctx context.Context, state *schemas.ProcessStepPackageReferenceResourceModel) (map[string]string, diag.Diagnostics) {
+	stateProperties := make(map[string]types.String, len(state.Properties.Elements()))
+	diags := state.Properties.ElementsAs(ctx, &stateProperties, false)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	packageProperties := make(map[string]string, len(stateProperties))
+	for propertyKey, value := range stateProperties {
 		if value.IsNull() {
-			properties[key] = core.NewPropertyValue("", false)
+			packageProperties[propertyKey] = ""
 		} else {
-			properties[key] = core.NewPropertyValue(value.ValueString(), false)
+			packageProperties[propertyKey] = value.ValueString()
 		}
 	}
 
-	action.Properties = properties
+	return packageProperties, diags
+}
 
-	return diag.Diagnostics{}
+func mapActionExecutionPropertiesFromState(ctx context.Context, executionProperties types.Map, computedProperties map[string]core.PropertyValue) (map[string]core.PropertyValue, diag.Diagnostics) {
+	stateProperties := make(map[string]types.String, len(executionProperties.Elements()))
+	diags := executionProperties.ElementsAs(ctx, &stateProperties, false)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	properties := make(map[string]core.PropertyValue)
+	for key, value := range computedProperties {
+		properties[key] = value
+	}
+
+	for key, value := range stateProperties {
+		properties[key] = util.ConvertToPropertyValue(value, false)
+	}
+
+	return properties, diags
 }
 
 func mapProcessStepToState(process processWrapper, step *deployments.DeploymentStep, state *schemas.ProcessStepResourceModel) diag.Diagnostics {
@@ -465,16 +521,12 @@ func mapProcessStepActionToState(action *deployments.DeploymentAction, state *sc
 	state.Channels = util.BuildStringSetOrEmpty(action.Channels)
 
 	state.GitDependencies = mapGitDependenciesToState(action.GitDependencies)
-	state.Packages = mapPackageReferencesToState(action.Packages)
+	state.PrimaryPackage, state.Packages = mapPackageReferencesToState(action.Packages)
 
-	stateProperties, diags := util.ConvertPropertiesToAttributeValuesMap(action.Properties)
-	if diags.HasError() {
-		return diags
-	}
+	diags := diag.Diagnostics{}
+	state.ExecutionProperties, diags = mapActionExecutionPropertiesToState(action.Properties)
 
-	state.ExecutionProperties = stateProperties
-
-	return diag.Diagnostics{}
+	return diags
 }
 
 func mapGitDependenciesToState(dependencies []*gitdependencies.GitDependency) types.Map {
@@ -512,14 +564,28 @@ func mapDeploymentActionContainerToState(container *deployments.DeploymentAction
 	}
 }
 
-func mapPackageReferencesToState(references []*packages.PackageReference) types.Map {
+func mapPackageReferencesToState(references []*packages.PackageReference) (*schemas.ProcessStepPackageReferenceResourceModel, types.Map) {
+	var primaryPackage *schemas.ProcessStepPackageReferenceResourceModel = nil
 	if references == nil {
-		return types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{})
+		return primaryPackage, types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), map[string]attr.Value{})
 	}
 
 	statePackages := make(map[string]attr.Value, len(references))
 	for _, packageReference := range references {
 		packageProperties := util.ConvertMapStringToMapAttrValue(packageReference.Properties)
+
+		// Primary package
+		if packageReference.Name == "" {
+			primaryPackage = &schemas.ProcessStepPackageReferenceResourceModel{
+				PackageID:           types.StringValue(packageReference.PackageID),
+				FeedID:              types.StringValue(packageReference.FeedID),
+				AcquisitionLocation: types.StringValue(packageReference.AcquisitionLocation),
+				Properties:          types.MapValueMust(types.StringType, packageProperties),
+			}
+			primaryPackage.ID = types.StringValue(packageReference.ID)
+			continue
+		}
+
 		statePackage := types.ObjectValueMust(
 			schemas.ProcessStepPackageReferenceAttributeTypes(),
 			map[string]attr.Value{
@@ -534,5 +600,22 @@ func mapPackageReferencesToState(references []*packages.PackageReference) types.
 		statePackages[packageReference.Name] = statePackage
 	}
 
-	return types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), statePackages)
+	return primaryPackage, types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), statePackages)
+}
+
+func mapActionExecutionPropertiesToState(properties map[string]core.PropertyValue) (types.Map, diag.Diagnostics) {
+	attributeValues := make(map[string]attr.Value)
+	for key, value := range properties {
+		if schemas.IsReservedExecutionProperty(key) {
+			continue
+		}
+		attributeValues[key] = types.StringValue(value.Value)
+	}
+
+	valuesMap, diags := types.MapValue(types.StringType, attributeValues)
+	if diags.HasError() {
+		return types.MapNull(types.StringType), diags
+	}
+
+	return valuesMap, diags
 }

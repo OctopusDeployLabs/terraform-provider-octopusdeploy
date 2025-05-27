@@ -148,6 +148,7 @@ func (p ProcessTemplatedChildStepSchema) GetResourceSchema() resourceSchema.Sche
 				Optional().
 				Computed().
 				DefaultEmpty().
+				Validators(warnAboutReservedExecutionProperties()).
 				Build(),
 		},
 	}

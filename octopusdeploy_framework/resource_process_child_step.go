@@ -5,17 +5,13 @@ import (
 	"fmt"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/core"
 	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/deployments"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/gitdependencies"
-	"github.com/OctopusDeploy/go-octopusdeploy/v2/pkg/packages"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/internal"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/schemas"
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 )
@@ -293,11 +289,7 @@ func mapProcessChildStepActionFromState(ctx context.Context, state *schemas.Proc
 	action.Notes = state.Notes.ValueString()
 	action.WorkerPool = state.WorkerPoolID.ValueString()
 	action.WorkerPoolVariable = state.WorkerPoolVariable.ValueString()
-	if state.Container == nil {
-		action.Container = nil
-	} else {
-		action.Container = deployments.NewDeploymentActionContainer(state.Container.FeedID.ValueStringPointer(), state.Container.Image.ValueStringPointer())
-	}
+	action.Container = deployments.NewDeploymentActionContainer(state.Container.FeedID.ValueStringPointer(), state.Container.Image.ValueStringPointer())
 
 	diags := diag.Diagnostics{}
 
@@ -321,112 +313,21 @@ func mapProcessChildStepActionFromState(ctx context.Context, state *schemas.Proc
 		return diags
 	}
 
-	// Git Dependencies
-	var dependenciesMap map[string]types.Object
-	diags = state.GitDependencies.ElementsAs(ctx, &dependenciesMap, false)
+	action.GitDependencies, diags = mapProcessStepActionGitDependenciesFromState(ctx, state.GitDependencies)
 	if diags.HasError() {
 		return diags
 	}
 
-	var gitDependencies = make([]*gitdependencies.GitDependency, 0)
-	for key, dependencyObject := range dependenciesMap {
-		if dependencyObject.IsNull() {
-			continue
-		}
-
-		var dependencyState schemas.ProcessStepGitDependencyResourceModel
-		diags = dependencyObject.As(ctx, &dependencyState, basetypes.ObjectAsOptions{})
-		if diags.HasError() {
-			return diags
-		}
-
-		gitDependency := &gitdependencies.GitDependency{
-			Name:              key,
-			RepositoryUri:     dependencyState.RepositoryUri.ValueString(),
-			DefaultBranch:     dependencyState.DefaultBranch.ValueString(),
-			GitCredentialType: dependencyState.GitCredentialType.ValueString(),
-			GitCredentialId:   dependencyState.GitCredentialID.ValueString(),
-		}
-
-		if dependencyState.FilePathFilters.IsNull() {
-			gitDependency.FilePathFilters = nil
-		} else {
-			gitDependency.FilePathFilters, diags = util.SetToStringArray(ctx, dependencyState.FilePathFilters)
-			if diags.HasError() {
-				return diags
-			}
-		}
-
-		gitDependencies = append(gitDependencies, gitDependency)
-	}
-
-	action.GitDependencies = gitDependencies
-
-	// Packages
-	var packagesMap map[string]types.Object
-	diags = state.Packages.ElementsAs(ctx, &packagesMap, false)
+	var primaryPackageProperties = map[string]core.PropertyValue{}
+	action.Packages, primaryPackageProperties, diags = mapProcessStepActionPackagesFromState(ctx, state.Packages, state.PrimaryPackage)
 	if diags.HasError() {
 		return diags
 	}
 
-	var packageReferences = make([]*packages.PackageReference, 0)
-	for key, packageObject := range packagesMap {
-		if packageObject.IsNull() {
-			continue
-		}
-
-		var packageState schemas.ProcessStepPackageReferenceResourceModel
-		diags = packageObject.As(ctx, &packageState, basetypes.ObjectAsOptions{})
-		if diags.HasError() {
-			return diags
-		}
-
-		stateProperties := make(map[string]types.String, len(packageState.Properties.Elements()))
-		diags = packageState.Properties.ElementsAs(ctx, &stateProperties, false)
-		if diags.HasError() {
-
-			return diags
-		}
-
-		packageProperties := make(map[string]string, len(stateProperties))
-		for propertyKey, value := range stateProperties {
-			if value.IsNull() {
-				packageProperties[propertyKey] = ""
-			} else {
-				packageProperties[propertyKey] = value.ValueString()
-			}
-		}
-
-		packageReference := &packages.PackageReference{
-			ID:                  packageState.GetID(),
-			Name:                key,
-			PackageID:           packageState.PackageID.ValueString(),
-			FeedID:              packageState.FeedID.ValueString(),
-			AcquisitionLocation: packageState.AcquisitionLocation.ValueString(),
-			Properties:          packageProperties,
-		}
-		packageReferences = append(packageReferences, packageReference)
+	action.Properties, diags = mapActionExecutionPropertiesFromState(ctx, state.ExecutionProperties, primaryPackageProperties)
+	if diags.HasError() {
+		return diags
 	}
-
-	action.Packages = packageReferences
-
-	// Execution Properties
-	stateProperties := make(map[string]types.String, len(state.ExecutionProperties.Elements()))
-	propertiesDiags := state.ExecutionProperties.ElementsAs(ctx, &stateProperties, false)
-	if propertiesDiags.HasError() {
-		return propertiesDiags
-	}
-
-	properties := make(map[string]core.PropertyValue, len(stateProperties))
-	for key, value := range stateProperties {
-		if value.IsNull() {
-			properties[key] = core.NewPropertyValue("", false)
-		} else {
-			properties[key] = core.NewPropertyValue(value.ValueString(), false)
-		}
-	}
-
-	action.Properties = properties
 
 	return diag.Diagnostics{}
 }
@@ -447,68 +348,20 @@ func mapProcessChildStepActionToState(process processWrapper, step *deployments.
 	state.WorkerPoolID = types.StringValue(action.WorkerPool)
 	state.WorkerPoolVariable = types.StringValue(action.WorkerPoolVariable)
 
-	if action.Container == nil {
-		state.Container = nil
-	} else {
-		state.Container = &schemas.ProcessStepActionContainerModel{
-			FeedID: types.StringValue(action.Container.FeedID),
-			Image:  types.StringValue(action.Container.Image),
-		}
-	}
+	state.Container = mapDeploymentActionContainerToState(action.Container)
 
 	state.TenantTags = util.BuildStringSetOrEmpty(action.TenantTags)
 	state.Environments = util.BuildStringSetOrEmpty(action.Environments)
 	state.ExcludedEnvironments = util.BuildStringSetOrEmpty(action.ExcludedEnvironments)
 	state.Channels = util.BuildStringSetOrEmpty(action.Channels)
 
-	// Git Dependencies
-	stateDependencies := make(map[string]attr.Value, len(action.GitDependencies))
-	for _, dependency := range action.GitDependencies {
-		stateDependency := types.ObjectValueMust(
-			schemas.ProcessStepGitDependencyAttributeTypes(),
-			map[string]attr.Value{
-				"repository_uri":      types.StringValue(dependency.RepositoryUri),
-				"default_branch":      types.StringValue(dependency.DefaultBranch),
-				"git_credential_type": types.StringValue(dependency.GitCredentialType),
-				"file_path_filters":   types.SetValueMust(types.StringType, util.ToValueSlice(dependency.FilePathFilters)),
-				"git_credential_id":   types.StringValue(dependency.GitCredentialId),
-			},
-		)
+	state.GitDependencies = mapGitDependenciesToState(action.GitDependencies)
+	state.PrimaryPackage, state.Packages = mapPackageReferencesToState(action.Packages)
 
-		stateDependencies[dependency.Name] = stateDependency
-	}
+	diags := diag.Diagnostics{}
+	state.ExecutionProperties, diags = mapActionExecutionPropertiesToState(action.Properties)
 
-	state.GitDependencies = types.MapValueMust(schemas.ProcessStepGitDependencyObjectType(), stateDependencies)
-
-	// Packages
-	statePackages := make(map[string]attr.Value, len(action.Packages))
-	for _, packageReference := range action.Packages {
-		packageProperties := util.ConvertMapStringToMapAttrValue(packageReference.Properties)
-		statePackage := types.ObjectValueMust(
-			schemas.ProcessStepPackageReferenceAttributeTypes(),
-			map[string]attr.Value{
-				"id":                   types.StringValue(packageReference.ID),
-				"package_id":           types.StringValue(packageReference.PackageID),
-				"feed_id":              types.StringValue(packageReference.FeedID),
-				"acquisition_location": types.StringValue(packageReference.AcquisitionLocation),
-				"properties":           types.MapValueMust(types.StringType, packageProperties),
-			},
-		)
-
-		statePackages[packageReference.Name] = statePackage
-	}
-
-	state.Packages = types.MapValueMust(schemas.ProcessStepPackageReferenceObjectType(), statePackages)
-
-	// Execution Properties
-	stateProperties, diags := util.ConvertPropertiesToAttributeValuesMap(action.Properties)
-	if diags.HasError() {
-		return diags
-	}
-
-	state.ExecutionProperties = stateProperties
-
-	return diag.Diagnostics{}
+	return diags
 }
 
 func findActionFromProcessStepByID(step *deployments.DeploymentStep, actionId string) (*deployments.DeploymentAction, bool) {

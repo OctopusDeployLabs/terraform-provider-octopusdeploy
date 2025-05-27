@@ -103,12 +103,14 @@ func (p ProcessChildStepSchema) GetResourceSchema() resourceSchema.Schema {
 				Build(),
 			"container":        resourceActionContainerAttribute(),
 			"git_dependencies": resourceActionGitDependenciesAttribute(),
+			"primary_package":  resourceActionPrimaryPackageAttribute(),
 			"packages":         resourceActionPackageReferencesAttribute(),
 			"execution_properties": util.ResourceMap(types.StringType).
 				Description("A collection of step execution properties where the key is the property name and the value is its value.").
 				Optional().
 				Computed().
 				DefaultEmpty().
+				Validators(warnAboutReservedExecutionProperties()).
 				Build(),
 		},
 	}
@@ -124,22 +126,23 @@ type ProcessChildStepResourceModel struct {
 	ParentID  types.String `tfsdk:"parent_id"`
 	Name      types.String `tfsdk:"name"`
 
-	Type                 types.String                     `tfsdk:"type"`
-	Slug                 types.String                     `tfsdk:"slug"`
-	IsDisabled           types.Bool                       `tfsdk:"is_disabled"`
-	IsRequired           types.Bool                       `tfsdk:"is_required"`
-	Condition            types.String                     `tfsdk:"condition"`
-	Notes                types.String                     `tfsdk:"notes"`
-	WorkerPoolID         types.String                     `tfsdk:"worker_pool_id"`
-	WorkerPoolVariable   types.String                     `tfsdk:"worker_pool_variable"`
-	TenantTags           types.Set                        `tfsdk:"tenant_tags"`
-	Environments         types.Set                        `tfsdk:"environments"`
-	ExcludedEnvironments types.Set                        `tfsdk:"excluded_environments"`
-	Channels             types.Set                        `tfsdk:"channels"`
-	Container            *ProcessStepActionContainerModel `tfsdk:"container"`
-	GitDependencies      types.Map                        `tfsdk:"git_dependencies"`
-	Packages             types.Map                        `tfsdk:"packages"`
-	ExecutionProperties  types.Map                        `tfsdk:"execution_properties"`
+	Type                 types.String                              `tfsdk:"type"`
+	Slug                 types.String                              `tfsdk:"slug"`
+	IsDisabled           types.Bool                                `tfsdk:"is_disabled"`
+	IsRequired           types.Bool                                `tfsdk:"is_required"`
+	Condition            types.String                              `tfsdk:"condition"`
+	Notes                types.String                              `tfsdk:"notes"`
+	WorkerPoolID         types.String                              `tfsdk:"worker_pool_id"`
+	WorkerPoolVariable   types.String                              `tfsdk:"worker_pool_variable"`
+	TenantTags           types.Set                                 `tfsdk:"tenant_tags"`
+	Environments         types.Set                                 `tfsdk:"environments"`
+	ExcludedEnvironments types.Set                                 `tfsdk:"excluded_environments"`
+	Channels             types.Set                                 `tfsdk:"channels"`
+	Container            *ProcessStepActionContainerModel          `tfsdk:"container"`
+	GitDependencies      types.Map                                 `tfsdk:"git_dependencies"`
+	PrimaryPackage       *ProcessStepPackageReferenceResourceModel `tfsdk:"primary_package"`
+	Packages             types.Map                                 `tfsdk:"packages"`
+	ExecutionProperties  types.Map                                 `tfsdk:"execution_properties"`
 
 	ResourceModel
 }
