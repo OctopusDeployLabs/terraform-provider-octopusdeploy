@@ -606,7 +606,7 @@ func mapPackageReferencesToState(references []*packages.PackageReference) (*sche
 func mapActionExecutionPropertiesToState(properties map[string]core.PropertyValue) (types.Map, diag.Diagnostics) {
 	attributeValues := make(map[string]attr.Value)
 	for key, value := range properties {
-		if isReservedProperty(key) {
+		if schemas.IsReservedExecutionProperty(key) {
 			continue
 		}
 		attributeValues[key] = types.StringValue(value.Value)
@@ -618,16 +618,4 @@ func mapActionExecutionPropertiesToState(properties map[string]core.PropertyValu
 	}
 
 	return valuesMap, diags
-}
-
-// Properties which managed by other attributes
-var reservedExecutionProperties = map[string]struct{}{
-	"Octopus.Action.Package.FeedId":             {},
-	"Octopus.Action.Package.PackageId":          {},
-	"Octopus.Action.Package.DownloadOnTentacle": {},
-}
-
-func isReservedProperty(name string) bool {
-	_, exists := reservedExecutionProperties[name]
-	return exists
 }

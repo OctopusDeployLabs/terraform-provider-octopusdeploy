@@ -110,6 +110,7 @@ func (p ProcessChildStepSchema) GetResourceSchema() resourceSchema.Schema {
 				Optional().
 				Computed().
 				DefaultEmpty().
+				Validators(warnAboutReservedExecutionProperties()).
 				Build(),
 		},
 	}
