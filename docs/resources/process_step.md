@@ -21,6 +21,8 @@ This resource also contains a concept that doesn't exist in the Octopus Deploy d
 * `properties` are the inputs to the step itself
 * `execution_properties` are the controls for _how_ the step runs, particularly relevant in parent/child step situations
 
+For more information on how to discover step properties read the *How to Find Step Properties* under the guides section of the documentation.
+
 ## Example Usage
 
 ```terraform

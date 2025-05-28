@@ -1,9 +1,9 @@
 ---
-page_title: "3. Creating a Resource"
+page_title: "Creating a Resource"
 subcategory: "Guides"
 ---
 
-# 3. Creating your first Octopus Deploy resource
+# Creating your first Octopus Deploy resource
 
 ## Provider Setup
 

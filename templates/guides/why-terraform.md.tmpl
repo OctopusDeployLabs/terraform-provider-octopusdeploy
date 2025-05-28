@@ -1,9 +1,9 @@
 ---
-page_title: "1. Why Terraform?"
+page_title: "Why Terraform?"
 subcategory: "Guides"
 ---
 
-# 1. Why Terraform?
+# Why Terraform?
 
 If you're new to Terraform in general, it may be in your best interest to start with some Terraform Getting Started Docs. 
 

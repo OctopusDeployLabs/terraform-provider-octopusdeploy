@@ -1,11 +1,11 @@
 ---
-page_title: "4. Creating Multiple Resources"
+page_title: "Creating Multiple Resources"
 subcategory: "Guides"
 ---
 
-# 4. Creating multiple Octopus Deploy resources
+# Creating multiple Octopus Deploy resources
 
-In step 3, you learned about creating one resource. In this step we will create multiple resources with the same Terraform config file.
+In Creating a Resource guide, you learned about creating one resource. In this guide we will create multiple resources with the same Terraform config file.
 
 The below Terraform configuration will create the following Octopus Deploy resources:
 * Environment
