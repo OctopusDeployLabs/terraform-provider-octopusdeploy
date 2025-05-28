@@ -86,8 +86,6 @@ jobs:
         shell: bash
         env:
           LICENSE: ${{ secrets.OCTOPUS_SERVER_BASE64_LICENSE }}
-          ECR_ACCESS_KEY: ${{ secrets.ECR_ACCESS_KEY }}
-          ECR_SECRET_KEY: ${{ secrets.ECR_SECRET_KEY }}
           GIT_USERNAME: x-access-token
           OCTODISABLEOCTOCONTAINERLOGGING: true
           OCTOTESTSKIPINIT: true
