@@ -9,8 +9,8 @@ description: |-
 
 ## Warning
 
-This provider has been moved under the namespace OctopusDeploy, the provider under OctopusDeployLabs is no longer maintained.
-Please read *0. Moving to Octopus Deploy Namespace* under the guides subcategory to learn how to upgrade your provider while maintaining state.
+> This provider has been moved under the namespace OctopusDeploy, the provider under OctopusDeployLabs is no longer maintained.
+> Please read *0. Moving to Octopus Deploy Namespace* under the guides subcategory to learn how to upgrade your provider while maintaining state.
 
 ## Overview
 

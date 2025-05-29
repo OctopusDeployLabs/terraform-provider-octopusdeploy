@@ -6,7 +6,8 @@ subcategory: "Guides"
 # 0. Moving to Octopus Deploy Namespace
 
 The aim of this guide is to help move your pre-existing *OctopusDeployLabs* provider configuration to the *OctopusDeploy* namespace while maintaining state.
-Keep in mind, it's important to finish all steps within guide before running `terraform apply`.
+
+> Keep in mind, it's important to finish all steps within guide before running `terraform apply`.
 
 ## 1. Update the Provider Block
 
