@@ -7,29 +7,14 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+On 1 June 2025, the Octopus Deploy Terraform Provider was promoted from a `Labs` project to a fully-supported, first-class Octopus Deploy integration.
 
-**Steps to reproduce**
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+As part of this promotion, we released [v1.0 of the provider](https://registry.terraform.io/providers/OctopusDeploy/octopusdeploy/1.0.0), and migrated the codebase from the `OctopusDeployLabs` GitHub organization to the `OctopusDeploy` organization. The provider also moved in the Hashicorp Terraform Registry.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+* New Repository: https://github.com/OctopusDeploy/
+* New Provider Registry Page: https://registry.terraform.io/providers/OctopusDeploy/octopusdeploy/latest/docs
+* Migration Guide: https://registry.terraform.io/providers/OctopusDeploy/octopusdeploy/1.0.0/docs/guides/moving-from-octopus-deploy-labs-namespace
 
-**Logs and other supporting information**
-Add the output of running `tf plan` or `tf apply` along with any errors in the Octopus Server logs.
+We are no longer accepting contributions or issues in this repo, and we plan to archive it.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Environment and versions:**
-- OS: [e.g. `Windows`, `Linux`, `OSX`]
-- Octopus Server Version: [e.g. `2019.6.1`]
-- Terraform Version: [e.g. `0.12.4`]
-- Octopus Terraform Provider Version: [e.g. `0.2.0`]
-
-**Additional context**
-Add any other context about the problem here.
+Please head over to the new repository for continued support, updates and contributions.
