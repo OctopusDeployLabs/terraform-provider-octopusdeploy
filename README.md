@@ -1,13 +1,13 @@
 # `OctopusDeployLabs/terraform-plugin-octopusdeploy` archived repository
-On 1 June 2025, the Octopus Deploy Terraform Provider was promoted from a `Labs` project to a fully-supported, first-class Octopus Deploy integration. 
+On 1 June 2025, the Octopus Deploy Terraform Provider was promoted from a `Labs` project to a fully-supported, first-class Octopus Deploy integration.
 
 As part of this promotion, we released [v1.0 of the provider](https://registry.terraform.io/providers/OctopusDeploy/octopusdeploy/1.0.0), and migrated the codebase from the `OctopusDeployLabs` GitHub organization to the `OctopusDeploy` organization. The provider also moved in the Hashicorp Terraform Registry.
 
-* New Repository: https://github.com/OctopusDeploy/
+* New Repository: https://github.com/OctopusDeploy/terraform-provider-octopusdeploy
 * New Provider Registry Page: https://registry.terraform.io/providers/OctopusDeploy/octopusdeploy/latest/docs
 * Migration Guide: https://registry.terraform.io/providers/OctopusDeploy/octopusdeploy/1.0.0/docs/guides/moving-from-octopus-deploy-labs-namespace
 
-We are no longer accepting contributions or issues in this repo, and we plan to archive it. 
+We are no longer accepting contributions or issues in this repo, and we plan to archive it.
 
 Please head over to the new repository for continued support, updates and contributions.
 
@@ -103,7 +103,7 @@ Terraform will scan the local plugins folder directory structure (first) to qual
 
 > [!IMPORTANT]
 > We're currently migrating all resources and data sources from Terraform SDK to Terraform Plugin Framework.
-> 
+>
 > All new resources should be created using Framework, in the `octopusdeploy-framework` directory. [A GitHub action](.github/workflows/prevent-new-sdk-additions.yml) will detect and prevent any new additions to the old `octopusdeploy` SDK directory.
 
 ### Acceptance tests
@@ -128,11 +128,11 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
 }
 ```
 
-To prevent resource usage based on a feature flag 
+To prevent resource usage based on a feature flag
 ```go
 func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
   f.Config = ResourceConfiguration(req, resp)
-	
+
   if f.Config != nil {
 	diags := f.Config.EnsureResourceCompatibilityByFeature(deploymentFreezeResourceName, "ProjectDeploymentFreezesFeatureToggle")
 	resp.Diagnostics.Append(diags...)
@@ -141,10 +141,10 @@ func (f *deploymentFreezeResource) Configure(_ context.Context, req resource.Con
 ```
 
 ## Existing Resource
-When modifying an existing SDK resource, we strongly recommend migrating it to Framework first - but this might not always be feasible. We'll judge it on a case-by-case basis.  
+When modifying an existing SDK resource, we strongly recommend migrating it to Framework first - but this might not always be feasible. We'll judge it on a case-by-case basis.
 The reason to not migrate is sometimes the resource is not compatible with framework without breaking changes. In this case a new resources needs to be created to replace the old one and the old one should become deprecated
 
-## Debugging 
+## Debugging
 If you want to debug the provider follow these steps!
 
 ### Prerequisites
