@@ -44,7 +44,6 @@ func (r *projectAutoCreateReleaseResource) ImportState(ctx context.Context, req 
 		ProjectID:                    types.StringValue(projectID),
 		SpaceID:                      types.StringNull(),
 		ChannelID:                    types.StringNull(),
-		Enabled:                      types.BoolValue(true),
 		ReleaseCreationPackageStepID: types.StringNull(),
 		ReleaseCreationPackage:       []schemas.ProjectAutoCreateReleaseCreationPackage{},
 	}
@@ -215,8 +214,7 @@ func (r *projectAutoCreateReleaseResource) Delete(ctx context.Context, req resou
 }
 
 func (r *projectAutoCreateReleaseResource) mapDataToProject(ctx context.Context, data *schemas.ProjectAutoCreateReleaseResourceModel, project *projects.Project) {
-	enabled := data.Enabled.ValueBool()
-	project.AutoCreateRelease = enabled
+	project.AutoCreateRelease = true
 	project.ReleaseCreationStrategy = expand(ctx, data)
 }
 

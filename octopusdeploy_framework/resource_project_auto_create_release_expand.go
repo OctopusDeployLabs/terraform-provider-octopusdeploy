@@ -10,10 +10,6 @@ import (
 )
 
 func expand(ctx context.Context, data *schemas.ProjectAutoCreateReleaseResourceModel) *projects.ReleaseCreationStrategy {
-	if !data.Enabled.ValueBool() {
-		return &projects.ReleaseCreationStrategy{}
-	}
-
 	if len(data.ReleaseCreationPackage) == 0 {
 		return &projects.ReleaseCreationStrategy{}
 	}
@@ -33,14 +29,12 @@ func expand(ctx context.Context, data *schemas.ProjectAutoCreateReleaseResourceM
 
 func flatten(ctx context.Context, strategy *projects.ReleaseCreationStrategy, data *schemas.ProjectAutoCreateReleaseResourceModel) {
 	if strategy == nil || strategy.ReleaseCreationPackage == nil {
-		data.Enabled = types.BoolValue(false)
 		data.ChannelID = types.StringNull()
 		data.ReleaseCreationPackageStepID = types.StringNull()
 		data.ReleaseCreationPackage = []schemas.ProjectAutoCreateReleaseCreationPackage{}
 		return
 	}
 
-	data.Enabled = types.BoolValue(true)
 	data.ChannelID = types.StringValue(strategy.ChannelID)
 	data.ReleaseCreationPackageStepID = types.StringValue(strategy.ReleaseCreationPackageStepID)
 	data.ReleaseCreationPackage = []schemas.ProjectAutoCreateReleaseCreationPackage{
@@ -50,4 +44,3 @@ func flatten(ctx context.Context, strategy *projects.ReleaseCreationStrategy, da
 		},
 	}
 }
-

@@ -4,7 +4,6 @@ import (
 	"github.com/OctopusDeploy/terraform-provider-octopusdeploy/octopusdeploy_framework/util"
 	datasourceSchema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resourceSchema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -34,12 +33,6 @@ func (r ProjectAutoCreateReleaseSchema) GetResourceSchema() resourceSchema.Schem
 			"channel_id": util.ResourceString().
 				Description("The ID of the channel in which triggered releases will be created.").
 				Required().
-				Build(),
-			"enabled": util.ResourceBool().
-				Description("Whether automatic release creation is enabled. Defaults to true.").
-				Optional().
-				Computed().
-				Default(booldefault.StaticBool(true)).
 				Build(),
 			"release_creation_package_step_id": util.ResourceString().
 				Description("The ID of the deployment step containing the package for release creation.").
@@ -73,13 +66,12 @@ func (r ProjectAutoCreateReleaseSchema) GetDatasourceSchema() datasourceSchema.S
 }
 
 type ProjectAutoCreateReleaseResourceModel struct {
-	ID                              types.String                                       `tfsdk:"id"`
-	ProjectID                       types.String                                       `tfsdk:"project_id"`
-	SpaceID                         types.String                                       `tfsdk:"space_id"`
-	ChannelID                       types.String                                       `tfsdk:"channel_id"`
-	Enabled                         types.Bool                                         `tfsdk:"enabled"`
-	ReleaseCreationPackageStepID    types.String                                       `tfsdk:"release_creation_package_step_id"`
-	ReleaseCreationPackage          []ProjectAutoCreateReleaseCreationPackage         `tfsdk:"release_creation_package"`
+	ID                           types.String                              `tfsdk:"id"`
+	ProjectID                    types.String                              `tfsdk:"project_id"`
+	SpaceID                      types.String                              `tfsdk:"space_id"`
+	ChannelID                    types.String                              `tfsdk:"channel_id"`
+	ReleaseCreationPackageStepID types.String                              `tfsdk:"release_creation_package_step_id"`
+	ReleaseCreationPackage       []ProjectAutoCreateReleaseCreationPackage `tfsdk:"release_creation_package"`
 }
 
 type ProjectAutoCreateReleaseCreationPackage struct {

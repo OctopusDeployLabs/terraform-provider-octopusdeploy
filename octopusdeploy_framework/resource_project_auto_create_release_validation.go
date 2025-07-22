@@ -40,12 +40,8 @@ func (r *projectAutoCreateReleaseResource) validateChannelExists(ctx context.Con
 }
 
 func (r *projectAutoCreateReleaseResource) validateReleaseCreationPackageConfiguration(ctx context.Context, project *projects.Project, data *schemas.ProjectAutoCreateReleaseResourceModel) error {
-	if !data.Enabled.ValueBool() {
-		return nil // No validation needed if disabled
-	}
-
 	if len(data.ReleaseCreationPackage) == 0 {
-		return fmt.Errorf("release_creation_package block is required when enabled is true")
+		return fmt.Errorf("release_creation_package block is required")
 	}
 
 	if len(data.ReleaseCreationPackage) > 1 {
