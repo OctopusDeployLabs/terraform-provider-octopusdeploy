@@ -73,7 +73,7 @@ resource "octopusdeploy_project" "example" {
 ### Optional
 
 - `allow_deployments_to_no_targets` (Boolean, Deprecated)
-- `auto_create_release` (Boolean)
+- `auto_create_release` (Boolean, Deprecated)
 - `auto_deploy_release_overrides` (Block List) (see [below for nested schema](#nestedblock--auto_deploy_release_overrides))
 - `cloned_from_project_id` (String) The ID of the project this project was cloned from.
 - `connectivity_policy` (Block List) (see [below for nested schema](#nestedblock--connectivity_policy))
@@ -90,7 +90,7 @@ resource "octopusdeploy_project" "example" {
 - `is_discrete_channel_release` (Boolean) Treats releases of different channels to the same environment as a separate deployment dimension
 - `is_version_controlled` (Boolean)
 - `jira_service_management_extension_settings` (Block List) Provides extension settings for the Jira Service Management (JSM) integration for this project. (see [below for nested schema](#nestedblock--jira_service_management_extension_settings))
-- `release_creation_strategy` (Block List) (see [below for nested schema](#nestedblock--release_creation_strategy))
+- `release_creation_strategy` (Block List, Deprecated) (see [below for nested schema](#nestedblock--release_creation_strategy))
 - `release_notes_template` (String)
 - `servicenow_extension_settings` (Block List) Provides extension settings for the ServiceNow integration for this project. (see [below for nested schema](#nestedblock--servicenow_extension_settings))
 - `slug` (String) A human-readable, unique identifier, used to identify a project.
