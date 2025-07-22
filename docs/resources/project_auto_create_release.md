@@ -3,60 +3,104 @@
 page_title: "octopusdeploy_project_auto_create_release Resource - terraform-provider-octopusdeploy"
 subcategory: ""
 description: |-
-  This resource manages automatic release creation for a project using built-in package repository feeds.
+  This resource manages automatic release creation for a project. When enabled, new releases will be automatically created when new versions of the specified packages are available. The referenced packages must use built-in package repository feeds.
 ---
 
 # octopusdeploy_project_auto_create_release (Resource)
 
-This resource manages automatic release creation for a project using built-in package repository feeds. When enabled, new releases will be automatically created when new versions of the specified packages are available.
+This resource manages automatic release creation for a project. When enabled, new releases will be automatically created when new versions of the specified packages are available. The referenced packages must use built-in package repository feeds.
 
 ## Example Usage
 
 ```terraform
+# Example configuration for octopusdeploy_project_auto_create_release resource
+
+# Basic project setup
+resource "octopusdeploy_project_group" "example" {
+  description = "Example project group for auto create release demo"
+  name        = "Example Project Group"
+}
+
+resource "octopusdeploy_lifecycle" "example" {
+  description = "Example lifecycle"
+  name        = "Example Lifecycle"
+  
+  release_retention_policy {
+    quantity_to_keep    = 30
+    should_keep_forever = false
+    unit                = "Days"
+  }
+}
+
+resource "octopusdeploy_environment" "development" {
+  description = "Development environment"
+  name        = "Development"
+}
+
+resource "octopusdeploy_project" "example" {
+  description      = "Example project with auto create release"
+  lifecycle_id     = octopusdeploy_lifecycle.example.id
+  name             = "Example Project with Auto Create Release"
+  project_group_id = octopusdeploy_project_group.example.id
+  
+  # Note: auto_create_release is NOT set here - it will be managed by the separate resource
+}
+
 # Get the built-in feed
 data "octopusdeploy_feeds" "built_in" {
   feed_type = "BuiltIn"
   take      = 1
 }
 
-# Project with deployment process
-resource "octopusdeploy_project" "example" {
-  description      = "Example project"
-  lifecycle_id     = octopusdeploy_lifecycle.example.id
-  name             = "Example Project"
-  project_group_id = octopusdeploy_project_group.example.id
-}
-
+# Channel for the project
 resource "octopusdeploy_channel" "default" {
-  description  = "Default channel"
+  description = "Default channel"
   lifecycle_id = octopusdeploy_lifecycle.example.id
   name         = "Default"
   project_id   = octopusdeploy_project.example.id
 }
 
-# Deployment process with built-in package
+# Deployment process with a package step that uses built-in feed
 resource "octopusdeploy_deployment_process" "example" {
   project_id = octopusdeploy_project.example.id
 
   step {
+    condition           = "Success"
     name                = "Deploy Package"
     package_requirement = "LetOctopusDecide"
+    start_trigger       = "StartAfterPrevious"
     
     action {
-      action_type = "Octopus.TentaclePackage"
-      name        = "Deploy Package Action"
+      action_type                        = "Octopus.TentaclePackage"
+      name                              = "Deploy Package Action"
+      condition                         = "Success"
+      run_on_server                     = false
+      is_disabled                       = false
+      can_be_used_for_project_versioning = false
+      is_required                       = false
+      worker_pool_id                    = ""
+      
+      environments                      = [octopusdeploy_environment.development.id]
+      excluded_environments             = []
+      channels                          = []
+      tenant_tags                       = []
       
       package {
-        name             = "MyApp"
-        package_id       = "MyApp"
-        feed_id          = data.octopusdeploy_feeds.built_in.feeds[0].id
-        acquisition_location = "Server"
+        name                      = "MyApp"
+        package_id                = "MyApp"
+        acquisition_location      = "Server"
+        extract_during_deployment = false
+        feed_id                   = data.octopusdeploy_feeds.built_in.feeds[0].id
+      }
+      
+      properties = {
+        "Octopus.Action.EnabledFeatures" = ""
       }
     }
   }
 }
 
-# Configure auto create release
+# Auto create release configuration
 resource "octopusdeploy_project_auto_create_release" "example" {
   project_id = octopusdeploy_project.example.id
   channel_id = octopusdeploy_channel.default.id
@@ -65,20 +109,23 @@ resource "octopusdeploy_project_auto_create_release" "example" {
     deployment_action = octopusdeploy_deployment_process.example.step[0].action[0].name
     package_reference = octopusdeploy_deployment_process.example.step[0].action[0].package[0].name
   }
+  
+  # release_creation_package_step_id is computed automatically if not provided
 }
 ```
 
+<!-- schema generated by tfplugindocs -->
 ## Schema
 
 ### Required
 
 - `channel_id` (String) The ID of the channel in which triggered releases will be created.
 - `project_id` (String) The ID of the project for which to enable automatic release creation.
-- `release_creation_package` (Block List) Configuration for the package that will trigger automatic release creation. The package must use a built-in package repository feed. (see [below for nested schema](#nestedblock--release_creation_package))
 
 ### Optional
 
-- `release_creation_package_step_id` (String) The ID of the deployment step containing the package for release creation. If not specified, it will be automatically determined from the deployment process.
+- `release_creation_package` (Block List) Configuration for the package that will trigger automatic release creation. The referenced package must use a built-in package repository feed. (see [below for nested schema](#nestedblock--release_creation_package))
+- `release_creation_package_step_id` (String) The ID of the deployment step containing the package for release creation.
 - `space_id` (String) The space ID where the project is located. If not specified, the default space will be used.
 
 ### Read-Only
@@ -88,22 +135,9 @@ resource "octopusdeploy_project_auto_create_release" "example" {
 <a id="nestedblock--release_creation_package"></a>
 ### Nested Schema for `release_creation_package`
 
-#### Required:
+Required:
 
 - `deployment_action` (String) The name of the deployment action that contains the package reference.
 - `package_reference` (String) The name of the package reference within the deployment action.
 
-## Import
 
-Import is supported using the following syntax:
-
-```shell
-terraform import octopusdeploy_project_auto_create_release.example project_id
-```
-
-## Notes
-
-- This resource manages project `auto_create_release` settings that were previously managed by the deprecated `auto_create_release` and `release_creation_strategy` attributes on the `octopusdeploy_project` resource. It must not be used together with these attributes.
-- The specified package must use a built-in package repository feed (`feeds-builtin`). Other feed types are not supported by this resource.
-- The deployment action and package reference must exist in the project's deployment process before creating this resource.
-- When this resource is destroyed, automatic release creation will be disabled for the project.
