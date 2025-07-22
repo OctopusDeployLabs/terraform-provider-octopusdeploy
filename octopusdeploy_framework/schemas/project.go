@@ -29,7 +29,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 			"name":                                 GetNameResourceSchema(true),
 			"description":                          GetDescriptionResourceSchema(ProjectResourceName),
 			"allow_deployments_to_no_targets":      util.ResourceBool().Optional().Deprecated("This value is only valid for an associated connectivity policy and should not be specified here.").Build(),
-			"auto_create_release":                  util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
+			"auto_create_release":                  util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Deprecated("This attribute is deprecated in favor of resource octopusdeploy_project_auto_create_release.").Build(),
 			"cloned_from_project_id":               util.ResourceString().Optional().Description("The ID of the project this project was cloned from.").Build(),
 			"default_guided_failure_mode":          util.ResourceString().Optional().Computed().PlanModifiers(stringplanmodifier.UseStateForUnknown()).Build(),
 			"default_to_skip_if_already_installed": util.ResourceBool().Optional().Computed().PlanModifiers(boolplanmodifier.UseStateForUnknown()).Build(),
@@ -167,6 +167,7 @@ func (p ProjectSchema) GetResourceSchema() resourceSchema.Schema {
 				},
 			},
 			"release_creation_strategy": resourceSchema.ListNestedBlock{
+				DeprecationMessage: "octopusdeploy_project.release_creation_strategy is deprecated in favor of resource octopusdeploy_project_auto_create_release. See https://oc.to/deprecation-tfp-project-auto-create-release for more info and migration guidance.",
 				NestedObject: resourceSchema.NestedBlockObject{
 					Attributes: map[string]resourceSchema.Attribute{
 						"channel_id":                       util.ResourceString().Optional().Build(),

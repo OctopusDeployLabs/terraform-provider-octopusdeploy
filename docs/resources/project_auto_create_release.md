@@ -103,7 +103,7 @@ terraform import octopusdeploy_project_auto_create_release.example project_id
 
 ## Notes
 
+- This resource manages project `auto_create_release` settings that were previously managed by the deprecated `auto_create_release` and `release_creation_strategy` attributes on the `octopusdeploy_project` resource. It must not be used together with these attributes.
 - The specified package must use a built-in package repository feed (`feeds-builtin`). Other feed types are not supported by this resource.
 - The deployment action and package reference must exist in the project's deployment process before creating this resource.
-- This resource manages the `auto_create_release` setting on the project. Do not use the `auto_create_release` or `release_creation_strategy` attributes on the `octopusdeploy_project` resource when using this resource.
 - When this resource is destroyed, automatic release creation will be disabled for the project.
