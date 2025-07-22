@@ -60,14 +60,11 @@ resource "octopusdeploy_deployment_process" "example" {
 resource "octopusdeploy_project_auto_create_release" "example" {
   project_id = octopusdeploy_project.example.id
   channel_id = octopusdeploy_channel.default.id
-  enabled    = true
   
   release_creation_package {
-    deployment_action = "Deploy Package Action"
-    package_reference = "MyApp"
+    deployment_action = octopusdeploy_deployment_process.example.step[0].action[0].name
+    package_reference = octopusdeploy_deployment_process.example.step[0].action[0].package[0].name
   }
-  
-  depends_on = [octopusdeploy_deployment_process.example]
 }
 ```
 
@@ -81,7 +78,6 @@ resource "octopusdeploy_project_auto_create_release" "example" {
 
 ### Optional
 
-- `enabled` (Boolean) Whether automatic release creation is enabled. Defaults to true.
 - `release_creation_package_step_id` (String) The ID of the deployment step containing the package for release creation. If not specified, it will be automatically determined from the deployment process.
 - `space_id` (String) The space ID where the project is located. If not specified, the default space will be used.
 

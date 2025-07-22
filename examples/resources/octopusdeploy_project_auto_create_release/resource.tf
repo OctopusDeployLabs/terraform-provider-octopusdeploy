@@ -89,14 +89,11 @@ resource "octopusdeploy_deployment_process" "example" {
 resource "octopusdeploy_project_auto_create_release" "example" {
   project_id = octopusdeploy_project.example.id
   channel_id = octopusdeploy_channel.default.id
-  enabled    = true
   
   release_creation_package {
-    deployment_action = "Deploy Package Action"  # Must match the action name above
-    package_reference = "MyApp"                  # Must match the package name above
+    deployment_action = octopusdeploy_deployment_process.example.step[0].action[0].name
+    package_reference = octopusdeploy_deployment_process.example.step[0].action[0].package[0].name
   }
   
   # release_creation_package_step_id is computed automatically if not provided
-  
-  depends_on = [octopusdeploy_deployment_process.example]
 }
