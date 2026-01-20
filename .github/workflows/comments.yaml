@@ -1,0 +1,81 @@
+on: issue_comment
+
+jobs:
+  commented:
+    name: Comment Posted
+    runs-on: ubuntu-latest
+    #if: ${{ github.event.issue.pull_request && github.event.pull_request.author_association != 'MEMBER' }}
+    steps:
+      - run: echo '${{ toJSON(github) }}'
+      - run: echo '${{ github.event.comment.author_association }}'
+      - name: Calculate some required properties
+        run: |
+          DAYS_OLD=$(( ($(date -d "${{ github.event.comment.created_at }}" +%s) - $(date -d "${{ github.event.issue.created_at }}" +%s)) / 86400 ))
+          echo "DAYS_OLD=$DAYS_OLD" >> $GITHUB_ENV
+          echo "TYPE=${{ github.event.issue.pull_request  && 'PR' || 'Issue' }}" >> $GITHUB_ENV
+      - name: Post to a Slack channel
+        id: slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          # Slack channel id, channel name, or user id to post message.
+          # See also: https://api.slack.com/methods/chat.postMessage#channels
+          channel-id: ${{ vars.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+                "blocks": [
+              		{
+              			"type": "header",
+              			"text": {
+              				"type": "plain_text",
+              				"text": ":comment: Comment Added by Non Octopus user to ${{ env.TYPE }} #${{ github.event.issue.number }} - ${{ github.event.issue.title }}",
+              				"emoji": true
+              			}
+              		},
+                {
+              			"type": "section",
+              			"fields": [
+                      {
+              					"type": "mrkdwn",
+              					"text": "*Repo:* <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+              				},                 
+                      {
+              					"type": "mrkdwn",
+              					"text": "*${{ env.TYPE }}:* <${{ github.event.comment.html_url }}|#${{ github.event.issue.number }} - ${{ github.event.issue.title }}> _(${{ env.DAYS_OLD }} days old)_"
+              				}
+              			]
+              		},
+                  {
+                    "type": "context",
+                    "elements": [
+                      {
+                        "type": "image",
+                        "image_url": "${{ github.event.sender.avatar_url }}",
+                        "alt_text": "${{ github.event.sender.login }}"
+                      },{
+                        "type": "mrkdwn",
+                        "text": "<${{ github.event.sender.html_url }}|${{ github.event.sender.login }}>"
+                      }
+                    ]
+                    },
+                		{
+                			"type": "section",
+                			"text": {
+                				"type": "mrkdwn",
+                				"text": ${{ toJSON(github.event.comment.body) }}
+                			}
+                		},
+                    {
+                			"type": "divider"
+                		},
+                		{
+                			"type": "section",
+                			"text": {
+                				"type": "mrkdwn",
+                				"text": "<${{github.event.comment.html_url}}|View comment>"
+                			}
+              		  }
+                ]
+            }
+
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
