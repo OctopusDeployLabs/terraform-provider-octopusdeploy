@@ -79,7 +79,6 @@ func getUserRoleDataSchema() map[string]*schema.Schema {
 		"partial_name": getQueryPartialName(),
 		"skip":         getQuerySkip(),
 		"take":         getQueryTake(),
-		"space_id":     getQuerySpaceID(),
 		"user_roles": {
 			Computed:    true,
 			Description: "A list of user roles that match the filter(s).",
