@@ -136,6 +136,7 @@ func (p *octopusDeployFrameworkProvider) Resources(ctx context.Context) []func()
 		NewDeploymentFreezeTenantResource,
 		NewGitTriggerResource,
 		NewBuiltInTriggerResource,
+		NewProjectAutoCreateReleaseResource,
 	}
 }
 
